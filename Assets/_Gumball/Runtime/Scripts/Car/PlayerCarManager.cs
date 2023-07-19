@@ -25,7 +25,7 @@ namespace Gumball
                 currentVehicle.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
                 
                 currentVehicle.customisation.ApplyVehicleChanges(defaultCarData);
-                //CameraControllerWorld.activeController?.Setup(vehicleInstance);
+                CameraController.Instance.SetTarget(currentVehicle.transform);
 
                 onComplete?.Invoke();
             };
