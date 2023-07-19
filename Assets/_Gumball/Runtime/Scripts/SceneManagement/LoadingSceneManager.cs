@@ -23,7 +23,7 @@ namespace Gumball
             LOADING_VEHICLE,
         }
         
-        [Scene, SerializeField] private string sceneToLoad = "MainScene";
+        [SerializeField] private AssetReference sceneToLoad;
         [SerializeField] private TextMeshProUGUI debugLabel;
 
         private Stage currentStage;
@@ -37,8 +37,9 @@ namespace Gumball
             yield return mainSceneHandle;
 
             currentStage = Stage.LOADING_VEHICLE;
-            //TODO: load vehicle with addressables
-
+            AsyncOperationHandle<GameObject> carLoadHandle = PlayerCarManager.Instance.SpawnCar();
+            yield return carLoadHandle;
+            
             OnLoadingComplete();
         }
 

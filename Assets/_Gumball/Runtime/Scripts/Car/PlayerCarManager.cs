@@ -7,21 +7,16 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Gumball
 {
-    public class PlayerCarManager : MonoBehaviour
+    public class PlayerCarManager : Singleton<PlayerCarManager>
     {
         
         [SerializeField] private CarData defaultCarData; //TODO: use save data - for now just using some preset data
 
         private CarController currentCar;
 
-        private void Awake()
+        public AsyncOperationHandle<GameObject> SpawnCar(Action onComplete = null)
         {
-            LoadCar(defaultCarData);
-        }
-
-        public void LoadCar(CarData data, Action onComplete = null)
-        {
-            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.assetReference);
+            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(defaultCarData.assetReference);
             handle.Completed += _ =>
             {
                 CarController currentVehicle = Instantiate(handle.Result, transform, false).GetComponent<CarController>();
@@ -29,11 +24,13 @@ namespace Gumball
                 currentVehicle.transform.rotation = Quaternion.identity; //TODO: use some spawn point
                 currentVehicle.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
                 
-                currentVehicle.customisation.ApplyVehicleChanges(data);
+                currentVehicle.customisation.ApplyVehicleChanges(defaultCarData);
                 //CameraControllerWorld.activeController?.Setup(vehicleInstance);
 
                 onComplete?.Invoke();
             };
+
+            return handle;
         }
 
     }

@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Gumball
 {
@@ -16,11 +18,11 @@ namespace Gumball
         private Material bodyColorInstance;
         private Material carTrimInstance;
         public float defaultWheelScale = 1;
-
+        
         [Space]
         [Header("Part Locations")] public Transform frontBars;
         public Transform rearBars;
-        public Transform gaurds;
+        public Transform guards;
         public Transform bonnets;
         public Transform spoilers;
         public Transform sideSkirts;
@@ -29,14 +31,19 @@ namespace Gumball
 
         public Transform engineSpawn;
 
-        [Space] [Header("Wheel Hub Refrences")]
+        [Space]
+        [Header("Wheel Hub Refrences")]
         public Transform wheelFL;
 
         public Transform wheelFR;
         public Transform wheelRL;
         public Transform wheelRR;
-        public Wheel[] wheelRoots;
-        private string currentWheelType = "";
+        public List<Wheel> wheelRoots = new();
+
+        [SerializeField] private AssetReferenceGameObject wheelAssetReference; //TODO: allow for customisation
+        [SerializeField] private AssetReferenceGameObject tyreLeftAssetReference; //TODO: allow for customisation
+        [SerializeField] private AssetReferenceGameObject tyreRightAssetReference; //TODO: allow for customisation
+
         [HideInInspector] public EngineCustomisation spawnedEngine;
         List<GameObject> spawnedWheels = new List<GameObject>();
         List<TireModification> spawnedTires = new List<TireModification>();
@@ -90,91 +97,105 @@ namespace Gumball
             }
 
 
-            GameObject newEngine = (GameObject)Instantiate(Resources.Load("Engines/" + targetEngine), engineSpawn);
-            spawnedEngine = newEngine.GetComponent<EngineCustomisation>();
-            spawnedEngine.ApplyEngineCustomisation(targetData);
+            //TODO: Engine customisation
+            // GameObject newEngine = (GameObject)Instantiate(Resources.Load("Engines/" + targetEngine), engineSpawn);
+            // spawnedEngine = newEngine.GetComponent<EngineCustomisation>();
+            // spawnedEngine.ApplyEngineCustomisation(targetData);
         }
 
         void ApplyCosmeticParts()
         {
             SetParts(frontBars, targetData.frontBars);
             SetParts(rearBars, targetData.rearBars);
-            SetParts(gaurds, targetData.gaurds);
+            SetParts(guards, targetData.gaurds);
             SetParts(bonnets, targetData.bonnets);
             SetParts(spoilers, targetData.spoilers);
             SetParts(sideSkirts, targetData.sideSkirts);
         }
 
-//wheel setup
+        //wheel setup
         void ApplyWheelSetup()
         {
-            if (targetData.wheelType != currentWheelType) //create new wheels
+            //TODO: cancel check if the desired wheels are already applied
+
+            RemoveWheels();
+            
+            //spawn the wheel model using addressables
+            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(wheelAssetReference);
+            handle.Completed += _ =>
             {
-                if (spawnedWheels.Count > 0)
-                {
-                    for (int i = 0; i < spawnedWheels.Count; i++)
-                    {
-                        Destroy(spawnedWheels[i]);
-                    }
+                   GameObject targetWheelModel = handle.Result;
 
-                }
-
-                spawnedTires.Clear();
-                spawnedWheels.Clear();
-
-                GameObject targetWheelModel =
-                    (GameObject)Resources.Load("Wheels/" +
-                                               targetData.wheelType); //this can be changed to support front/rear
-                CreateWheel(wheelFL, targetWheelModel, false, false);
-                CreateWheel(wheelFR, targetWheelModel, true, false);
-                CreateWheel(wheelRL, targetWheelModel, false, true);
-                CreateWheel(wheelRR, targetWheelModel, true, true);
-            }
-
-
-            for (int i = 0; i < wheelRoots.Length; i++)
-            {
-                wheelRoots[i].offset = targetData.wheelOffset;
-                Vector3 pos = wheelRoots[i].transform.localPosition;
-                float scaleVal = (wheelRoots[i].isRear ? targetData.wheelSizeRear : targetData.wheelSize);
-                Vector3 scale = new Vector3(defaultWheelScale + scaleVal, defaultWheelScale + scaleVal,
-                    defaultWheelScale + scaleVal);
-                pos.y = wheelRoots[i].initialSusOffset - targetData.suspensionHeight;
-                float offsetVal = wheelRoots[i].isLeft ? 1 : -1;
-                pos.x = wheelRoots[i].initialXOffset -
-                        (offsetVal * (wheelRoots[i].isRear ? targetData.wheelOffsetRear : targetData.wheelOffset));
-                //wheelRoots[i].offset = (wheelRoots[i].isRear ? targetData.wheelOffsetRear : targetData.wheelOffset);
-
-                SetTire(spawnedTires[i], wheelRoots[i].isRear);
-                //tire.SetSize(tWidth, tSize);
-                float radius = 0.33f;
-                radius += wheelRoots[i].isRear ? (targetData.tireSizeRear / 3.14f) : (targetData.tireSize / 3.14f);
-                radius += wheelRoots[i].isRear ? (targetData.wheelSizeRear / 3.14f) : (targetData.wheelSize / 3.14f);
-                radius -= (1 - defaultWheelScale) / 3.14f;
-                wheelRoots[i].radius = radius;
-                wheelRoots[i].transform.localPosition = pos;
-                wheelRoots[i].camber = wheelRoots[i].isRear ? targetData.wheelCamberRear : targetData.wheelCamber;
-                wheelRoots[i].transform.localScale = scale;
-            }
+                CreateWheel(wheelFL, targetWheelModel, false, false).GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+                CreateWheel(wheelFR, targetWheelModel, true, false).GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+                CreateWheel(wheelRL, targetWheelModel, false, true).GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+                CreateWheel(wheelRR, targetWheelModel, true, true).GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            };
         }
 
-        void CreateWheel(Transform target, GameObject model, bool isRight, bool isRear)
+        void RemoveWheels()
         {
-            GameObject newWheel = Instantiate(model, target);
-            string targetTirePath = "Wheels/" + (isRight ? "_Tire_R" : "_Tire_L");
-            GameObject newTire = (GameObject)Instantiate(Resources.Load(targetTirePath), newWheel.transform);
-            spawnedTires.Add(newTire.GetComponent<TireModification>());
-            //SetTire(tire, isRear);
-            //Debug.Log("Width " + tWidth);
-            //Debug.Log("Height " + tSize);
-
-            if (isRight)
+            foreach (GameObject wheel in spawnedWheels)
             {
-                newWheel.transform.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
+                Destroy(wheel);
             }
 
+            spawnedTires.Clear();
+            spawnedWheels.Clear();
+        }
 
-            spawnedWheels.Add(newWheel);
+        GameObject CreateWheel(Transform target, GameObject model, bool isRight, bool isRear)
+        {
+            GameObject wheel = Instantiate(model, target, false);
+            int wheelIndex = spawnedWheels.Count;
+            spawnedWheels.Add(wheel);
+            
+            CreateTyre(wheel.transform, isRight, isRear);
+            SetupWheel(wheelRoots[wheelIndex]);
+            
+            if (isRight)
+            {
+                wheel.transform.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
+            }
+            
+            return wheel;
+        }
+
+        void SetupWheel(Wheel wheel)
+        {
+            wheel.offset = targetData.wheelOffset;
+            Vector3 pos = wheel.transform.localPosition;
+            float scaleVal = (wheel.isRear ? targetData.wheelSizeRear : targetData.wheelSize);
+            Vector3 scale = new Vector3(defaultWheelScale + scaleVal, defaultWheelScale + scaleVal,
+                defaultWheelScale + scaleVal);
+            pos.y = wheel.initialSusOffset - targetData.suspensionHeight;
+            float offsetVal = wheel.isLeft ? 1 : -1;
+            pos.x = wheel.initialXOffset -
+                    (offsetVal * (wheel.isRear ? targetData.wheelOffsetRear : targetData.wheelOffset));
+
+            float radius = 0.33f;
+            radius += wheel.isRear ? (targetData.tireSizeRear / 3.14f) : (targetData.tireSize / 3.14f);
+            radius += wheel.isRear ? (targetData.wheelSizeRear / 3.14f) : (targetData.wheelSize / 3.14f);
+            radius -= (1 - defaultWheelScale) / 3.14f;
+            wheel.radius = radius;
+            wheel.transform.localPosition = pos;
+            wheel.camber = wheel.isRear ? targetData.wheelCamberRear : targetData.wheelCamber;
+            wheel.transform.localScale = scale;
+        }
+        
+        void CreateTyre(Transform wheel, bool isRight, bool isRear)
+        {
+            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(isRight ? tyreRightAssetReference : tyreLeftAssetReference);
+            handle.Completed += _ =>
+            {
+                GameObject tyre = Instantiate(handle.Result, wheel, false);
+                tyre.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+
+                TireModification tyreModification = tyre.GetComponent<TireModification>();
+                spawnedTires.Add(tyreModification);
+                
+                SetTire(tyreModification, isRear);
+            };
         }
 
         void SetTire(TireModification tire, bool isRear)
@@ -185,7 +206,7 @@ namespace Gumball
             tire.height = 1 + tSize;
             tire.ApplyChanges(tWidth, tSize);
         }
-// end wheel setup
+        // end wheel setup
 
         private MeshRenderer[] paintPanels;
 

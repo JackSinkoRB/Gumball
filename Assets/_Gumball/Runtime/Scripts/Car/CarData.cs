@@ -10,7 +10,7 @@ namespace Gumball
     public class CarData
     {
 
-        public AssetReference assetReference;
+        public AssetReferenceGameObject assetReference;
         public string vehicleType = "";
         public string engineType = "";
         public int vehicleLevel = 0;
