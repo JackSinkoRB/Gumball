@@ -86,10 +86,13 @@ namespace Gumball
         public bool backFireEnabled;
         private float backfireTracker = 0f;
         private float lastEngFricTorq = 0f;
-        public float launchPower = 1;
+        public float launchPower = 100;
+        public float reverseLaunchPower = 50;
         public float launchCutoff = 2500;
-
         public float launchAssist = 0;
+
+        private bool inReverse => gear == 0;
+        
         // Calculate engine torque for current rpm and throttle values.
         /*
         float CalcEngineTorque() {
@@ -172,17 +175,18 @@ namespace Gumball
             float inertia = engineInertia * Sqr(ratio);
             float engineFrictionTorque = engineBaseFriction + rpm * engineRPMFriction;
             float engineTorque = (CalcEngineTorque() + Mathf.Abs(engineFrictionTorque)) * throttle;
-            float lap = (launchCutoff + 800 - rpm) /
+            float lap = (launchCutoff + minRPM - rpm) /
                         launchCutoff; //value 1 to 0 up to the launch cutoff. Add 800 to offset idle rpm
 
-            if (throttle > 0 && gear == 2) //in first gear
+            if (throttle > 0 && (inReverse || gear == 2)) //in first gear
             {
                 if (rpm > launchCutoff)
                 {
                     lap = 0;
                 }
 
-                launchAssist = maxTorque * (_rb.mass / 100) * launchPower * lap * Time.deltaTime;
+                float desiredLaunchPower = inReverse ? -Mathf.Abs(reverseLaunchPower) : launchPower;
+                launchAssist = maxTorque * (_rb.mass / 100) * desiredLaunchPower * lap * Time.deltaTime;
             }
             else
             {

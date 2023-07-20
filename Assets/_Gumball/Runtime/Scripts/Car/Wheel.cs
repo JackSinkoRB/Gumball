@@ -316,10 +316,11 @@ namespace Gumball
                 Vector3 worldForce = transform.TransformDirection(localRotation * force);
                 angularVelocity -= (force.z * radius * Time.deltaTime) / totalInertia;
                 angularVelocity += driveAngularDelta;
-
-                //only apply friction when angularVelocity is positive (normal forces will be applied otherwise)
-                if (angularVelocity > 0 && Mathf.Abs(angularVelocity) > frictionAngularDelta)
-                    angularVelocity -= frictionAngularDelta;
+                
+                if (Mathf.Abs(angularVelocity) > frictionAngularDelta)
+                    angularVelocity -= frictionAngularDelta * Mathf.Sign(angularVelocity);
+                else
+                    angularVelocity = 0;
                 
                 wheelVelo += worldForce * (1 / body.mass) * Time.deltaTime * invSlipRes;
                 totalForce += worldForce;
