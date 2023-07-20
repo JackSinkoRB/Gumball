@@ -311,18 +311,16 @@ namespace Gumball
 
                 slipRatio = SlipRatio();
                 slipAngle = SlipAngle();
-
+                
                 Vector3 force = invSlipRes * grip * CombinedForce(normalForce, slipRatio, slipAngle);
                 Vector3 worldForce = transform.TransformDirection(localRotation * force);
                 angularVelocity -= (force.z * radius * Time.deltaTime) / totalInertia;
                 angularVelocity += driveAngularDelta;
 
-                if (Mathf.Abs(angularVelocity) > frictionAngularDelta)
-                    angularVelocity -= frictionAngularDelta * Mathf.Sign(angularVelocity);
-                else
-                    angularVelocity = 0;
-
-
+                //only apply friction when angularVelocity is positive (normal forces will be applied otherwise)
+                if (angularVelocity > 0 && Mathf.Abs(angularVelocity) > frictionAngularDelta)
+                    angularVelocity -= frictionAngularDelta;
+                
                 wheelVelo += worldForce * (1 / body.mass) * Time.deltaTime * invSlipRes;
                 totalForce += worldForce;
             }
