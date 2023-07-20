@@ -381,7 +381,7 @@ public class CarController : MonoBehaviour {
             debugAbs = Mathf.Abs(w.slipRatio);
             w.brake = (Input.GetKey(KeyCode.DownArrow)  || brakes ||brake>0) ? brake : 0;
             w.handbrake = handbrake;
-            w.steering = (rbSpeed*3.6f) < 30?steering*1.5f: steering;
+            w.steering = steering;
             if (w.slipRatio < -1) { w.angularVelocity = 0; }
         }
 
