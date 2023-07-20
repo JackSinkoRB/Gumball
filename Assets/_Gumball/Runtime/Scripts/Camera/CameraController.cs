@@ -38,19 +38,19 @@ namespace Gumball
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
+            
+            if (targetRigidbody == null)
+                targetRigidbody = target.GetComponent<Rigidbody>();
+            
+            if (targetRigidbody != null)
+                targetRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
         }
 
         private void SmoothFollow()
         {
-            if (!target)
+            if (target == null)
                 return;
 
-            if (targetRigidbody == null)
-                targetRigidbody = target.GetComponent<Rigidbody>();
-            
-            if (targetRigidbody == null)
-                return;
-            
             desiredHeight = target.position.y + height;
             currentHeight = transform.position.y;
 
