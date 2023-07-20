@@ -288,19 +288,15 @@ namespace Gumball
             // update state
             slipRatio *= Mathf.Sign(ratio);
             rpm = engineAngularVelo * (60.0f / (2 * Mathf.PI));
-            rpm = Mathf.Clamp(rpm, 0f, maxRPM + minRPM); //limit excess rpm
+            rpm = Mathf.Clamp(rpm, minRPM, maxRPM + minRPM); //limit excess rpm
 
             // very simple simulation of clutch - just pretend we are at a higher rpm.
-
-            if (rpm < minRPM)
-                rpm = minRPM;
-
-
+            
             // Automatic gear shifting. Bases shift points on throttle input and rpm.
-
+            
             if (Input.GetKeyDown(KeyCode.X))
             {
-                automatic = automatic ? false : true;
+                automatic = !automatic;
             }
 
             if (automatic)
@@ -322,11 +318,12 @@ namespace Gumball
                         }
                     }
                 }
-
-                if (throttleInput < 0 && rpm <= minRPM)
-                {
-                    gear = (gear == 0 ? 2 : 0);
-                }
+            }
+            
+            //automatically set into reverse (even for manual)
+            if (throttleInput < 0 && rpm <= minRPM && gear >= 2)
+            {
+                gear = 0; 
             }
         }
 

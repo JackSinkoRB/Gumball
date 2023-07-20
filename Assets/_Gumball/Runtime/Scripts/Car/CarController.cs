@@ -288,7 +288,7 @@ public class CarController : MonoBehaviour {
 
         if (drivetrain.gear <= 2 && rbSpeed <= 0)
         {
-            if (throttleInput < -0.1f)
+            if (throttleInput < 0)
             {
                 if (!reversing)
                 {
