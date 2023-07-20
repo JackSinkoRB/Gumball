@@ -382,7 +382,6 @@ public class CarController : MonoBehaviour {
             w.brake = (Input.GetKey(KeyCode.DownArrow)  || brakes ||brake>0) ? brake : 0;
             w.handbrake = handbrake;
             w.steering = steering;
-            if (w.slipRatio < -1) { w.angularVelocity = 0; }
         }
 
         // Reset Car position and rotation in case it rolls over
