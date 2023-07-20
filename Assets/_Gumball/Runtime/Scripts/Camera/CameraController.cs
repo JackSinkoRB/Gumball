@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,26 +9,69 @@ namespace Gumball
     {
         
         [SerializeField] private Transform target;
-
-        [SerializeField] private float moveSpeed = 5;
-        [SerializeField] private float rotateSpeed = 5;
+        [SerializeField] private float distance = 1;
+        [SerializeField] private float height = 0.1f;
+        [SerializeField] private float heightDamping = 2;
+        [SerializeField] private float lookAtHeight;
+        [SerializeField] private float rotationSnapTime = 0.1f;
+        [SerializeField] private float distanceSnapTime;
+        [SerializeField] private float distanceMultiplier;
+        
+        private Rigidbody targetRigidbody;
+        private float usedDistance;
+        private float desiredRotationAngle;
+        private float desiredHeight;
+        private float currentRotationAngle;
+        private float currentHeight;
+        private Quaternion currentRotation;
+        private Vector3 desiredPosition;
+        private float yVelocity;
+        private float zVelocity;
 
         public Transform Target => target;
-        
+
+        private void LateUpdate()
+        {
+            SmoothFollow();
+        }
+
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
         }
-        
-        private void LateUpdate()
+
+        private void SmoothFollow()
         {
-            if (target == null) return;
+            if (!target)
+                return;
 
-            transform.position = Vector3.Lerp(transform.position, target.position, moveSpeed * Time.deltaTime);
+            if (targetRigidbody == null)
+                targetRigidbody = target.GetComponent<Rigidbody>();
+            
+            if (targetRigidbody == null)
+                return;
+            
+            desiredHeight = target.position.y + height;
+            currentHeight = transform.position.y;
 
-            Quaternion targetRotation = Quaternion.LookRotation(target.position + target.forward - transform.position);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotateSpeed * Time.deltaTime);
+            desiredRotationAngle = target.eulerAngles.y;
+            currentRotationAngle = transform.eulerAngles.y;
+
+            currentRotationAngle = Mathf.SmoothDampAngle(currentRotationAngle, desiredRotationAngle, ref yVelocity, rotationSnapTime);
+
+            currentHeight = Mathf.Lerp(currentHeight, desiredHeight, heightDamping * Time.deltaTime);
+
+            desiredPosition = target.position;
+            desiredPosition.y = currentHeight;
+
+            usedDistance = Mathf.SmoothDampAngle(usedDistance, distance + (targetRigidbody.velocity.magnitude * distanceMultiplier), ref zVelocity, distanceSnapTime);
+
+            desiredPosition += Quaternion.Euler(0, currentRotationAngle, 0) * new Vector3(0, 0, -usedDistance);
+
+            transform.position = desiredPosition;
+
+            transform.LookAt(target.position + new Vector3(0, lookAtHeight, 0));
         }
-
+        
     }
 }
