@@ -35,7 +35,7 @@ namespace Gumball
             SmoothFollow();
         }
 
-        public void SetTarget(Transform newTarget)
+        public void SetTarget(Transform newTarget, bool snap = true)
         {
             target = newTarget;
             
@@ -44,6 +44,21 @@ namespace Gumball
             
             if (targetRigidbody != null)
                 targetRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+
+            if (snap)
+                SnapToTarget();
+        }
+
+        private void SnapToTarget()
+        {
+            desiredHeight = target.position.y + height;
+            desiredRotationAngle = target.eulerAngles.y;
+            desiredPosition = target.position;
+            usedDistance = distance + (targetRigidbody.velocity.magnitude * distanceMultiplier);
+            desiredPosition += Quaternion.Euler(0, desiredRotationAngle, 0) * new Vector3(0, 0, -usedDistance);
+
+            transform.position = desiredPosition;
+            transform.LookAt(target.position + new Vector3(0, lookAtHeight, 0));
         }
 
         private void SmoothFollow()
@@ -69,7 +84,6 @@ namespace Gumball
             desiredPosition += Quaternion.Euler(0, currentRotationAngle, 0) * new Vector3(0, 0, -usedDistance);
 
             transform.position = desiredPosition;
-
             transform.LookAt(target.position + new Vector3(0, lookAtHeight, 0));
         }
         

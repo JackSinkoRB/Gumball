@@ -24,7 +24,10 @@ namespace Gumball
                 currentVehicle.transform.rotation = Quaternion.identity; //TODO: use some spawn point
                 currentVehicle.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
                 
+                //TODO: wait for vehicle changes to be complete (eg. wheels and tyres to spawn)
                 currentVehicle.customisation.ApplyVehicleChanges(defaultCarData);
+                
+                //todo: wait here
                 CameraController.Instance.SetTarget(currentVehicle.transform);
 
                 onComplete?.Invoke();
