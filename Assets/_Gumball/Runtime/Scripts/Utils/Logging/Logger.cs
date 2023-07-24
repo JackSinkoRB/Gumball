@@ -29,7 +29,7 @@ public class Logger : ScriptableObject
         {
             Debug.Log("[" + name + "] " + message);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             Debug.LogWarning("Error while logging.");
         }

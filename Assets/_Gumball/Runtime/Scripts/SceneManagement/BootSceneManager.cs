@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
@@ -10,11 +11,15 @@ namespace Gumball
     public class BootSceneManager : MonoBehaviour
     {
 
-        [Scene, SerializeField] private string loadingScene = "LoadingScene";
+        public static float BootDurationSeconds { get; private set; }
 
+        [Scene, SerializeField] private string loadingScene = "LoadingScene";
+        
         private void Start()
         {
-            GlobalLoggers.LoadingLogger.Log($"Loading {loadingScene}");
+            BootDurationSeconds = Time.realtimeSinceStartup;
+            GlobalLoggers.LoadingLogger.Log($"Boot loading complete in {TimeSpan.FromSeconds(BootDurationSeconds).ToPrettyString(true)}");
+            
             Addressables.LoadSceneAsync(loadingScene, LoadSceneMode.Additive, true);
         }
 

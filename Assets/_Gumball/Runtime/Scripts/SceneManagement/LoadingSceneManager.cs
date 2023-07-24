@@ -28,13 +28,13 @@ namespace Gumball
 
         private Stage currentStage;
         private AsyncOperationHandle<SceneInstance> mainSceneHandle;
-        private float syncLoadingDurationSeconds;
+        private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
             
         private IEnumerator Start()
         {
-            syncLoadingDurationSeconds = Time.realtimeSinceStartup;
-            GlobalLoggers.LoadingLogger.Log($"Sync loading complete in {TimeSpan.FromSeconds(syncLoadingDurationSeconds).ToPrettyString(true)}");
+            loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
+            GlobalLoggers.LoadingLogger.Log($"Loading scene initialisation complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
 
             currentStage = Stage.LOADING_MAINSCENE;
             mainSceneHandle = Addressables.LoadSceneAsync(sceneToLoad, LoadSceneMode.Single, false);
@@ -44,6 +44,9 @@ namespace Gumball
             AsyncOperationHandle<GameObject> carLoadHandle = PlayerCarManager.Instance.SpawnCar();
             yield return carLoadHandle;
             
+            asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
+            GlobalLoggers.LoadingLogger.Log($"Async loading complete in {TimeSpan.FromSeconds(asyncLoadingDurationSeconds).ToPrettyString(true)}");
+
             OnLoadingComplete();
         }
 
@@ -51,9 +54,8 @@ namespace Gumball
         {
             //activate the main scene
             mainSceneHandle.Result.ActivateAsync();
-
-            asyncLoadingDurationSeconds = Time.realtimeSinceStartup - syncLoadingDurationSeconds;
-            GlobalLoggers.LoadingLogger.Log($"Async loading complete in {TimeSpan.FromSeconds(asyncLoadingDurationSeconds).ToPrettyString(true)} (total boot time = {TimeSpan.FromSeconds(Time.realtimeSinceStartup).ToPrettyString(true)})");
+            
+            GlobalLoggers.LoadingLogger.Log($"Total boot time = {TimeSpan.FromSeconds(Time.realtimeSinceStartup).ToPrettyString(true)}");
         }
         
         private void Update()
