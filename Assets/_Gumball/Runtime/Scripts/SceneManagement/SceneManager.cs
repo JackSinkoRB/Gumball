@@ -9,8 +9,10 @@ namespace Gumball
     public class SceneManager : Singleton<SceneManager>
     {
 
-        private const string bootScene = "BootScene";
-        
+        public const string BootSceneName = "BootScene";
+        public const string LoadingSceneName = "LoadingScene";
+        public const string InitialSceneName = "MainScene";
+
         protected override void Initialise()
         {
             base.Initialise();
@@ -28,7 +30,7 @@ namespace Gumball
             if (alreadyInBootScene)
                 return;
             
-            Addressables.LoadSceneAsync(bootScene, LoadSceneMode.Additive, true);
+            Addressables.LoadSceneAsync(BootSceneName, LoadSceneMode.Additive, true);
 #endif
         }
     }

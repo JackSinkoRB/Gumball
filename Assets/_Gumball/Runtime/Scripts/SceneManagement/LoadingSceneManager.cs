@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MyBox;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -22,12 +21,12 @@ namespace Gumball
             LOADING_MAINSCENE,
             LOADING_VEHICLE,
         }
-        
-        [SerializeField] private AssetReference sceneToLoad;
+
         [SerializeField] private TextMeshProUGUI debugLabel;
 
         private Stage currentStage;
         private AsyncOperationHandle<SceneInstance> mainSceneHandle;
+        private AsyncOperationHandle<GameObject> carLoadHandle;
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
             
@@ -37,23 +36,27 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Loading scene initialisation complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
 
             currentStage = Stage.LOADING_MAINSCENE;
-            mainSceneHandle = Addressables.LoadSceneAsync(sceneToLoad, LoadSceneMode.Single, false);
+            mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.InitialSceneName, LoadSceneMode.Additive, true);
             yield return mainSceneHandle;
 
             currentStage = Stage.LOADING_VEHICLE;
-            AsyncOperationHandle<GameObject> carLoadHandle = PlayerCarManager.Instance.SpawnCar();
+            carLoadHandle = PlayerCarManager.Instance.SpawnCar();
             yield return carLoadHandle;
             
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
             GlobalLoggers.LoadingLogger.Log($"Async loading complete in {TimeSpan.FromSeconds(asyncLoadingDurationSeconds).ToPrettyString(true)}");
 
+            //activate the main scene
+            yield return mainSceneHandle.Result.ActivateAsync();
+            
             OnLoadingComplete();
         }
-
+        
         private void OnLoadingComplete()
         {
-            //activate the main scene
-            mainSceneHandle.Result.ActivateAsync();
+            //unload the loading scenes
+            UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(SceneManager.BootSceneName);
+            Addressables.UnloadSceneAsync(BootSceneManager.LoadingSceneInstance);
             
             GlobalLoggers.LoadingLogger.Log($"Total boot time = {TimeSpan.FromSeconds(Time.realtimeSinceStartup).ToPrettyString(true)}");
         }
@@ -71,8 +74,8 @@ namespace Gumball
 #endif
             debugLabel.text = currentStage switch
             {
-                Stage.LOADING_MAINSCENE => "Loading MainScene... (" + (int)(mainSceneHandle.PercentComplete*100f) + "%)",
-                Stage.LOADING_VEHICLE => "Loading Vehicle...",
+                Stage.LOADING_MAINSCENE => $"Loading MainScene... ({(int)(mainSceneHandle.PercentComplete*100f)}%)",
+                Stage.LOADING_VEHICLE => $"Loading Vehicle... ({(int)(carLoadHandle.PercentComplete*100f)}%)",
                 _ => "Loading..."
             };
         }

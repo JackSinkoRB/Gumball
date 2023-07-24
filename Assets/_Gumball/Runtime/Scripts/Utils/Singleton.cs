@@ -18,7 +18,7 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
             {
                 instance = FindObjectOfType<T>();
                 if (instance == null)
-                    Debug.LogWarning($"Tried lazilly accessing {typeof(T)}, but it couldn't be found.");
+                    throw new NullReferenceException($"Tried lazilly accessing {typeof(T)}, but it couldn't be found in the scene.");
                 if (Application.isPlaying)
                     Debug.LogWarning($"Lazilly accessing {instance.name} singleton, as it is not yet initialised.");
             }

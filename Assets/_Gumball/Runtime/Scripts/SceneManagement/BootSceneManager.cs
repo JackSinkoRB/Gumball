@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.ResourceProviders;
 using UnityEngine.SceneManagement;
 
 namespace Gumball
@@ -12,15 +13,16 @@ namespace Gumball
     {
 
         public static float BootDurationSeconds { get; private set; }
-
-        [Scene, SerializeField] private string loadingScene = "LoadingScene";
+        public static SceneInstance LoadingSceneInstance;
         
-        private void Start()
+        private IEnumerator Start()
         {
             BootDurationSeconds = Time.realtimeSinceStartup;
             GlobalLoggers.LoadingLogger.Log($"Boot loading complete in {TimeSpan.FromSeconds(BootDurationSeconds).ToPrettyString(true)}");
             
-            Addressables.LoadSceneAsync(loadingScene, LoadSceneMode.Additive, true);
+            var handle = Addressables.LoadSceneAsync(SceneManager.LoadingSceneName, LoadSceneMode.Additive, true);
+            yield return handle;
+            LoadingSceneInstance = handle.Result;
         }
 
     }
