@@ -12,29 +12,23 @@ namespace Gumball
         
         [SerializeField] private CarData defaultCarData; //TODO: use save data - for now just using some preset data
 
-        private CarController currentCar;
+        public CarController CurrentCar { get; private set; }
 
-        public AsyncOperationHandle<GameObject> SpawnCar(Action onComplete = null)
+        public IEnumerator SpawnCar(Action onComplete = null)
         {
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(defaultCarData.assetReference);
-            handle.Completed += _ =>
-            {
-                CarController currentVehicle = Instantiate(handle.Result, transform, false).GetComponent<CarController>();
-                currentVehicle.transform.position = Vector3.zero; //TODO: use some spawn point
-                currentVehicle.transform.rotation = Quaternion.identity; //TODO: use some spawn point
-                currentVehicle.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            yield return handle;
+            
+            CurrentCar = Instantiate(handle.Result, transform, false).GetComponent<CarController>();
+            CurrentCar.transform.position = Vector3.zero; //TODO: use some spawn point
+            CurrentCar.transform.rotation = Quaternion.identity; //TODO: use some spawn point
+            CurrentCar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
                 
-                //TODO: wait for vehicle changes to be complete (eg. wheels and tyres to spawn)
-                currentVehicle.customisation.ApplyVehicleChanges(defaultCarData);
-                
-                //todo: wait here
-                CameraController.Instance.SetTarget(currentVehicle.transform);
+            yield return CurrentCar.customisation.ApplyVehicleChanges(defaultCarData);
 
-                onComplete?.Invoke();
-            };
+            CameraController.Instance.SetTarget(CurrentCar.transform);
 
-            return handle;
+            onComplete?.Invoke();
         }
-
     }
 }

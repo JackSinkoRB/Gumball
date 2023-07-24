@@ -26,7 +26,7 @@ namespace Gumball
 
         private Stage currentStage;
         private AsyncOperationHandle<SceneInstance> mainSceneHandle;
-        private AsyncOperationHandle<GameObject> carLoadHandle;
+        private Coroutine carLoadCoroutine;
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
             
@@ -36,19 +36,25 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Loading scene initialisation complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
 
             currentStage = Stage.LOADING_MAINSCENE;
-            mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.InitialSceneName, LoadSceneMode.Additive, true);
-            yield return mainSceneHandle;
+            if (!BootSceneManager.LoadedFromAnotherScene)
+            {
+                mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.InitialSceneName, LoadSceneMode.Additive, true);
+                yield return mainSceneHandle;
+            }
 
             currentStage = Stage.LOADING_VEHICLE;
-            carLoadHandle = PlayerCarManager.Instance.SpawnCar();
-            yield return carLoadHandle;
+            carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar());
+            yield return carLoadCoroutine;
             
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
             GlobalLoggers.LoadingLogger.Log($"Async loading complete in {TimeSpan.FromSeconds(asyncLoadingDurationSeconds).ToPrettyString(true)}");
 
-            //activate the main scene
-            yield return mainSceneHandle.Result.ActivateAsync();
-            
+            if (!BootSceneManager.LoadedFromAnotherScene)
+            {
+                //activate the main scene
+                yield return mainSceneHandle.Result.ActivateAsync();
+            }
+
             OnLoadingComplete();
         }
         
@@ -75,7 +81,7 @@ namespace Gumball
             debugLabel.text = currentStage switch
             {
                 Stage.LOADING_MAINSCENE => $"Loading MainScene... ({(int)(mainSceneHandle.PercentComplete*100f)}%)",
-                Stage.LOADING_VEHICLE => $"Loading Vehicle... ({(int)(carLoadHandle.PercentComplete*100f)}%)",
+                Stage.LOADING_VEHICLE => $"Loading Vehicle...",
                 _ => "Loading..."
             };
         }

@@ -45,8 +45,8 @@ namespace Gumball
         [SerializeField] private AssetReferenceGameObject tyreRightAssetReference; //TODO: allow for customisation
 
         [HideInInspector] public EngineCustomisation spawnedEngine;
-        List<GameObject> spawnedWheels = new List<GameObject>();
-        List<TireModification> spawnedTires = new List<TireModification>();
+        private readonly List<GameObject> spawnedWheels = new();
+        private readonly List<TireModification> spawnedTires = new();
         public static string currentVehicleClass;
         public string vehicleClass;
         private CarData targetData; //set private after testing
@@ -56,24 +56,24 @@ namespace Gumball
             return targetData;
         }
 
-        public void ApplyVehicleChanges(CarData newData, bool updateEngine = true, bool updateCosmetic = true)
+        public IEnumerator ApplyVehicleChanges(CarData newData, bool updateEngine = true, bool updateCosmetic = true)
         {
             targetData = newData;
             if (updateCosmetic)
             {
-                ApplyCosmeticParts();
-                ApplyWheelSetup();
+                ApplyCosmeticParts(); //TODO: make async
+                yield return ApplyWheelSetup();
                 ApplyPaint();
             }
 
             if (updateEngine)
             {
-                ApplyEngineChanges();
+                ApplyEngineChanges(); //TODO: make async
             }
 
         }
 
-        void ApplyEngineChanges()
+        private void ApplyEngineChanges()
         {
             string targetEngine = null;
             if (targetData.engineType == null || targetData.engineType == "")
@@ -103,7 +103,7 @@ namespace Gumball
             // spawnedEngine.ApplyEngineCustomisation(targetData);
         }
 
-        void ApplyCosmeticParts()
+        private void ApplyCosmeticParts()
         {
             SetParts(frontBars, targetData.frontBars);
             SetParts(rearBars, targetData.rearBars);
@@ -113,8 +113,7 @@ namespace Gumball
             SetParts(sideSkirts, targetData.sideSkirts);
         }
 
-        //wheel setup
-        void ApplyWheelSetup()
+        private IEnumerator ApplyWheelSetup()
         {
             //TODO: cancel check if the desired wheels are already applied
 
@@ -122,18 +121,15 @@ namespace Gumball
             
             //spawn the wheel model using addressables
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(wheelAssetReference);
-            handle.Completed += _ =>
-            {
-                   GameObject targetWheelModel = handle.Result;
+            yield return handle;
 
-                CreateWheel(wheelFL, targetWheelModel, false, false).GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-                CreateWheel(wheelFR, targetWheelModel, true, false).GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-                CreateWheel(wheelRL, targetWheelModel, false, true).GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-                CreateWheel(wheelRR, targetWheelModel, true, true).GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-            };
+            yield return CreateWheel(wheelFL, handle, false, false);
+            yield return CreateWheel(wheelFR, handle, true, false);
+            yield return CreateWheel(wheelRL, handle, false, true);
+            yield return CreateWheel(wheelRR, handle, true, true);
         }
 
-        void RemoveWheels()
+        private void RemoveWheels()
         {
             foreach (GameObject wheel in spawnedWheels)
             {
@@ -144,24 +140,24 @@ namespace Gumball
             spawnedWheels.Clear();
         }
 
-        GameObject CreateWheel(Transform target, GameObject model, bool isRight, bool isRear)
+        private IEnumerator CreateWheel(Transform target, AsyncOperationHandle<GameObject> handle, bool isRight, bool isRear)
         {
+            GameObject model = handle.Result;
             GameObject wheel = Instantiate(model, target, false);
+            wheel.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            
             int wheelIndex = spawnedWheels.Count;
             spawnedWheels.Add(wheel);
             
-            CreateTyre(wheel.transform, isRight, isRear);
+            yield return CreateTyre(wheel.transform, isRight, isRear);
+            
             SetupWheel(wheelRoots[wheelIndex]);
             
             if (isRight)
-            {
                 wheel.transform.localRotation = Quaternion.Euler(new Vector3(0, 180, 0));
-            }
-            
-            return wheel;
         }
 
-        void SetupWheel(Wheel wheel)
+        private void SetupWheel(Wheel wheel)
         {
             wheel.offset = targetData.wheelOffset;
             Vector3 pos = wheel.transform.localPosition;
@@ -183,22 +179,21 @@ namespace Gumball
             wheel.transform.localScale = scale;
         }
         
-        void CreateTyre(Transform wheel, bool isRight, bool isRear)
+        private IEnumerator CreateTyre(Transform wheel, bool isRight, bool isRear)
         {
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(isRight ? tyreRightAssetReference : tyreLeftAssetReference);
-            handle.Completed += _ =>
-            {
-                GameObject tyre = Instantiate(handle.Result, wheel, false);
-                tyre.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            yield return handle;
+            
+            GameObject tyre = Instantiate(handle.Result, wheel, false);
+            tyre.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
 
-                TireModification tyreModification = tyre.GetComponent<TireModification>();
-                spawnedTires.Add(tyreModification);
+            TireModification tyreModification = tyre.GetComponent<TireModification>();
+            spawnedTires.Add(tyreModification);
                 
-                SetTire(tyreModification, isRear);
-            };
+            SetTire(tyreModification, isRear);
         }
 
-        void SetTire(TireModification tire, bool isRear)
+        private void SetTire(TireModification tire, bool isRear)
         {
             float tSize = isRear ? targetData.tireSizeRear : targetData.tireSize;
             float tWidth = isRear ? targetData.tireWidthRear : targetData.tireWidth;
@@ -206,11 +201,10 @@ namespace Gumball
             tire.height = 1 + tSize;
             tire.ApplyChanges(tWidth, tSize);
         }
-        // end wheel setup
 
         private MeshRenderer[] paintPanels;
 
-        void ApplyPaint()
+        private void ApplyPaint()
         {
             if (bodyColorInstance == null)
             {
@@ -264,7 +258,7 @@ namespace Gumball
 
 
 
-        void SetParts(Transform parent, int targetActive)
+        private void SetParts(Transform parent, int targetActive)
         {
             PartDetails[] parts = parent.GetComponentsInChildren<PartDetails>(true);
             for (int i = 0; i < parts.Length; i++)

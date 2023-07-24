@@ -54,9 +54,11 @@ namespace Gumball
             desiredHeight = target.position.y + height;
             desiredRotationAngle = target.eulerAngles.y;
             desiredPosition = target.position;
+            desiredPosition.y = desiredHeight;
+
             usedDistance = distance + (targetRigidbody.velocity.magnitude * distanceMultiplier);
             desiredPosition += Quaternion.Euler(0, desiredRotationAngle, 0) * new Vector3(0, 0, -usedDistance);
-
+            
             transform.position = desiredPosition;
             transform.LookAt(target.position + new Vector3(0, lookAtHeight, 0));
         }

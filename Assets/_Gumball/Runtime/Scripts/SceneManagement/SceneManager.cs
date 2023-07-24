@@ -31,6 +31,7 @@ namespace Gumball
                 return;
             
             Addressables.LoadSceneAsync(BootSceneName, LoadSceneMode.Additive, true);
+            BootSceneManager.LoadedFromAnotherScene = true;
 #endif
         }
     }
