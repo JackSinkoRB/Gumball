@@ -14,7 +14,7 @@ namespace Gumball
 
         private void Start()
         {
-            Debug.Log($"Loading {loadingScene}");
+            GlobalLoggers.LoadingLogger.Log($"Loading {loadingScene}");
             Addressables.LoadSceneAsync(loadingScene, LoadSceneMode.Additive, true);
         }
 
