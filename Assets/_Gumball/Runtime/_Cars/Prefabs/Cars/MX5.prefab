@@ -568,7 +568,7 @@ MonoBehaviour:
   inertia: 2
   grip: 2
   brakeFrictionTorque: 2000
-  handbrakeFrictionTorque: 7000
+  handbrakeFrictionTorque: 3000
   frictionTorque: 0
   maxSteeringAngle: 0
   model: {fileID: 6830829083374940646}
@@ -616,7 +616,7 @@ MonoBehaviour:
   slipRatio: 0
   slipVelo: 0
   compression: 0
-  controller: {fileID: 0}
+  manager: {fileID: 0}
   Smoke: {fileID: 0}
   onGround: 0
 --- !u!1 &6829804874751175336
@@ -1103,7 +1103,7 @@ MonoBehaviour:
   slipRatio: 0
   slipVelo: 0
   compression: 0
-  controller: {fileID: 0}
+  manager: {fileID: 0}
   Smoke: {fileID: 0}
   onGround: 0
 --- !u!1 &6830272080298800554
@@ -1322,7 +1322,7 @@ MonoBehaviour:
   inertia: 2
   grip: 2
   brakeFrictionTorque: 2000
-  handbrakeFrictionTorque: 7000
+  handbrakeFrictionTorque: 3000
   frictionTorque: 0
   maxSteeringAngle: 0
   model: {fileID: 6830456384950990968}
@@ -1370,7 +1370,7 @@ MonoBehaviour:
   slipRatio: 0
   slipVelo: 0
   compression: 0
-  controller: {fileID: 0}
+  manager: {fileID: 0}
   Smoke: {fileID: 0}
   onGround: 0
 --- !u!1 &6830320533599541442
@@ -1731,6 +1731,9 @@ GameObject:
   - component: {fileID: 4388641744904310924}
   - component: {fileID: 3905819446578577832}
   - component: {fileID: 4536678163101830946}
+  - component: {fileID: 6733144111617170122}
+  - component: {fileID: 4711586723907975251}
+  - component: {fileID: 2606598928209658564}
   m_Layer: 0
   m_Name: MX5
   m_TagString: Player
@@ -1861,9 +1864,9 @@ MonoBehaviour:
   finalDriveRatio: 4.3
   minRPM: 800
   maxRPM: 8000
-  maxTorque: 130
+  maxTorque: 200
   torqueRPM: 5500
-  maxPower: 330
+  maxPower: 400
   powerRPM: 7000
   engineInertia: 0.5
   engineBaseFriction: 30
@@ -1890,9 +1893,9 @@ MonoBehaviour:
     isSteeringWheelNo2: 0
   enableTurbo: 0
   backFireEnabled: 1
-  launchPower: 50
+  launchPower: 400
   reverseLaunchPower: 50
-  launchCutoff: 2000
+  launchCutoff: 4000
   launchAssist: 0
   sampleRpm: 0
 --- !u!114 &4536678163101830946
@@ -1912,42 +1915,72 @@ MonoBehaviour:
   - {fileID: 8331419407024093505}
   - {fileID: 6992387900074670784}
   - {fileID: 8758190813413608229}
-  CarEnabled: 1
+  customisation: {fileID: 4388641744904310924}
   centerOfMass: {fileID: 6836209331330445120}
   tyreCompound: 2
-  customisation: {fileID: 4388641744904310924}
-  Offtrack: 0
   inertiaFactor: 1.5
   brake: 0
-  steering: 0
-  handbrake: 0
+  currentSteering: 0
   drivetrain: {fileID: 3905819446578577832}
   shiftSpeed: 1
   throttleTime: 0.5
   throttleTimeTraction: 0.1
   throttleReleaseTime: 0.1
   throttleReleaseTimeTraction: 0.1
-  tractionControl: 0
-  absControl: 0
-  steerTime: 1.2
-  veloSteerTime: 0.5
-  veloHighSteerTime: 0.25
-  steerReleaseTime: 10
-  veloSteerReleaseTime: 15
-  steerCorrectionFactor: 2
-  rb: {fileID: 6777725669087683204}
-  rbSpeed: 0
-  controllerThrottle: 0
-  controllerBrake: 0
-  controllerSteer: 0
-  debugAbs: 0
-  debugBrk: 0
-  left: 0
-  right: 0
-  accel: 0
-  brakes: 0
-  handbrakes: 0
-  clutchin: 0
+  tractionControl: 1
+  absControl: 1
+  maxSteerSpeed: 2.5
+  minSteerSpeed: 1
+  speedForMinSteerSpeed: 150
+  steerReleaseSpeed: 10
+  rigidBody: {fileID: 0}
+  speed: 0
+--- !u!114 &6733144111617170122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6830464531487253684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7eefcad14ed4284587ded0be3fa547c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  front:
+  - {fileID: 6288161639319367344}
+  - {fileID: 8331419407024093505}
+  compensationFactor: 0.1
+--- !u!114 &4711586723907975251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6830464531487253684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7f79f8e745f2174cb1d4cf5866ca894, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wheel1: {fileID: 6288161639319367344}
+  wheel2: {fileID: 8331419407024093505}
+  coefficient: 5000
+--- !u!114 &2606598928209658564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6830464531487253684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7f79f8e745f2174cb1d4cf5866ca894, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wheel1: {fileID: 6992387900074670784}
+  wheel2: {fileID: 8758190813413608229}
+  coefficient: 5000
 --- !u!1 &6830546841464558580
 GameObject:
   m_ObjectHideFlags: 0
@@ -2133,7 +2166,7 @@ MonoBehaviour:
   slipRatio: 0
   slipVelo: 0
   compression: 0
-  controller: {fileID: 0}
+  manager: {fileID: 0}
   Smoke: {fileID: 0}
   onGround: 0
 --- !u!1 &6830634467071576876

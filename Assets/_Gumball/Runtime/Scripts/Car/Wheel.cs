@@ -136,7 +136,7 @@ namespace Gumball
         string groundName = "";
 
         float counterForce;
-        public CarController controller;
+        public CarManager manager;
         public ParticleSystem Smoke;
 
         float CalcLongitudinalForce(float Fz, float slip)
@@ -431,7 +431,7 @@ namespace Gumball
 
                 if (Mathf.Abs(slipRatio) > 0.5f)
                 {
-                    if (controller)
+                    if (manager)
                     {
                         //TODO: 
                         //controller.status.particleController.Trigger_TireSmoke(skidPoint);
@@ -440,7 +440,7 @@ namespace Gumball
                 }
                 else
                 {
-                    if (controller)
+                    if (manager)
                     {
                         //controller.status.sfxController.SetSkid(false);
                     }
