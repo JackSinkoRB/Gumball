@@ -566,7 +566,7 @@ MonoBehaviour:
   suspensionTravel: 0.15
   damping: 3500
   inertia: 2
-  grip: 2
+  grip: 3
   brakeFrictionTorque: 2000
   handbrakeFrictionTorque: 3000
   frictionTorque: 0
@@ -1053,7 +1053,7 @@ MonoBehaviour:
   suspensionTravel: 0.15
   damping: 4500
   inertia: 2
-  grip: 2
+  grip: 3
   brakeFrictionTorque: 4500
   handbrakeFrictionTorque: 0
   frictionTorque: 0
@@ -1320,7 +1320,7 @@ MonoBehaviour:
   suspensionTravel: 0.15
   damping: 3500
   inertia: 2
-  grip: 2
+  grip: 3
   brakeFrictionTorque: 2000
   handbrakeFrictionTorque: 3000
   frictionTorque: 0
@@ -1731,7 +1731,6 @@ GameObject:
   - component: {fileID: 4388641744904310924}
   - component: {fileID: 3905819446578577832}
   - component: {fileID: 4536678163101830946}
-  - component: {fileID: 6733144111617170122}
   - component: {fileID: 4711586723907975251}
   - component: {fileID: 2606598928209658564}
   m_Layer: 0
@@ -1864,7 +1863,7 @@ MonoBehaviour:
   finalDriveRatio: 4.3
   minRPM: 800
   maxRPM: 8000
-  maxTorque: 200
+  maxTorque: 400
   torqueRPM: 5500
   maxPower: 400
   powerRPM: 7000
@@ -1893,7 +1892,7 @@ MonoBehaviour:
     isSteeringWheelNo2: 0
   enableTurbo: 0
   backFireEnabled: 1
-  launchPower: 400
+  launchPower: 600
   reverseLaunchPower: 50
   launchCutoff: 4000
   launchAssist: 0
@@ -1920,37 +1919,20 @@ MonoBehaviour:
   tyreCompound: 2
   inertiaFactor: 1.5
   brake: 0
-  currentSteering: 0
   drivetrain: {fileID: 3905819446578577832}
   shiftSpeed: 1
   throttleTime: 0.5
-  throttleTimeTraction: 0.1
+  throttleTimeNoTraction: 0.1
   throttleReleaseTime: 0.1
-  throttleReleaseTimeTraction: 0.1
-  tractionControl: 1
-  absControl: 1
+  throttleReleaseTimeNoTraction: 0.1
+  hasTractionControl: 1
+  hasAbsControl: 1
   maxSteerSpeed: 2.5
-  minSteerSpeed: 1
-  speedForMinSteerSpeed: 150
-  steerReleaseSpeed: 10
+  minSteerSpeed: 0.2
+  maxSteerReleaseSpeed: 10
+  minSteerReleaseSpeed: 20
+  speedForMinSteerSpeed: 300
   rigidBody: {fileID: 0}
-  speed: 0
---- !u!114 &6733144111617170122
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6830464531487253684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7eefcad14ed4284587ded0be3fa547c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  front:
-  - {fileID: 6288161639319367344}
-  - {fileID: 8331419407024093505}
-  compensationFactor: 0.1
 --- !u!114 &4711586723907975251
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2116,7 +2098,7 @@ MonoBehaviour:
   suspensionTravel: 0.15
   damping: 4500
   inertia: 2
-  grip: 2
+  grip: 3
   brakeFrictionTorque: 4500
   handbrakeFrictionTorque: 0
   frictionTorque: 0

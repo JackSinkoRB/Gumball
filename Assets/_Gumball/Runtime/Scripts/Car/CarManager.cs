@@ -39,7 +39,7 @@ namespace Gumball
         [HideInInspector] private float throttle;
         private float throttleInput;
 
-        public float currentSteering;
+        public float CurrentSteering { get; private set; }
         private float lastShiftTime = -1;
         
         // cached Drivetrain reference
@@ -47,53 +47,65 @@ namespace Gumball
 
         // How long the car takes to shift gears
         public float shiftSpeed = 0.8f;
+        
+        [Header("Throttle")]
+        [Tooltip("How long it takes to fully engage the throttle")]
+        [SerializeField] private float throttleTime = 0.5f;
+        
+        [Tooltip("How long it takes to fully engage the throttle when the wheels are spinning (and traction control is disabled) (should be quicker than normal).")]
+        [ConditionalField(nameof(hasTractionControl))]
+        [SerializeField] private float throttleTimeNoTraction = 0.1f;
+        
+        [Tooltip("How long it takes to fully engage the throttle")]
+        [SerializeField] private float throttleReleaseTime = 0.5f;
 
+        [Tooltip("How long it takes to fully release the throttle when the wheels are spinning.")]
+        [SerializeField] private float throttleReleaseTimeNoTraction = 0.1f;
 
-        // These values determine how fast throttle value is changed when the accelerate keys are pressed or released.
-        // Getting these right is important to make the car controllable, as keyboard input does not allow analogue input.
-        // There are different values for when the wheels have full traction and when there are spinning, to implement 
-        // traction control schemes.
+        [Tooltip("Prevents the powered wheels from applying more torque if they are slipping.")]
+        [SerializeField] private bool hasTractionControl = true;
 
-        // How long it takes to fully engage the throttle
-        public float throttleTime = 1.0f;
-
-        // How long it takes to fully engage the throttle 
-        // when the wheels are spinning (and traction control is disabled)
-        public float throttleTimeTraction = 10.0f;
-
-        // How long it takes to fully release the throttle
-        public float throttleReleaseTime = 0.5f;
-
-        // How long it takes to fully release the throttle 
-        // when the wheels are spinning.
-        public float throttleReleaseTimeTraction = 0.1f;
-
-        // Turn traction control on or off
-        public bool tractionControl;
-
-        // Turn ABS control on or off
-        public bool absControl;
+        [Tooltip("Prevents the wheels from locking up when braking which can prevent turning while braking.")]
+        [SerializeField] private bool hasAbsControl = true;
+        
+        //TODO:
+        [Tooltip("Detects oversteer and understeer, and applies the brakes to the opposite corner wheel to correct it.")]
+        [SerializeField] private bool hasStabilityControl = true;
+        
+        /// <summary>
+        /// The amount of slip required to trigger traction control.
+        /// </summary>
+        private const float tractionControlSlipTrigger = 0.2f;
 
         // These values determine how fast steering value is changed when the steering keys are pressed or released.
         // Getting these right is important to make the car controllable, as keyboard input does not allow analogue input.
 
-        // How long it takes to fully turn the steering wheel from center to full lock
-        public float maxSteerSpeed = 2f;
-        public float minSteerSpeed = 0.5f;
-        [Tooltip("Using Km/h")]
-        public float speedForMinSteerSpeed = 150;
-
-        // How long it takes to fully turn the steering wheel from full lock to center
-        public float steerReleaseSpeed = 2f;
+        [Header("Steering")]
+        [Tooltip("Higher value means it's faster to turn the steering wheel.")]
+        [SerializeField] private float maxSteerSpeed = 2.5f;
+        [Tooltip("Higher value means it's faster to turn the steering wheel.")]
+        [SerializeField] private float minSteerSpeed = 0.5f;
+        [Tooltip("Higher value means it's faster to turn the steering wheel.")]
+        [SerializeField] private float maxSteerReleaseSpeed = 10f;
+        [Tooltip("Higher value means it's faster to turn the steering wheel.")]
+        [SerializeField] private float minSteerReleaseSpeed = 3f;
+        [Tooltip("The speed (in km/h) that the car must be going to be at minSteerSpeed.")]
+        [SerializeField] private float speedForMinSteerSpeed = 200;
 
         [ReadOnly, SerializeField] private Rigidbody rigidBody;
         private bool reversing;
         private bool clutchIn;
-        [Tooltip("The speed that the rigidbody is moving (in m/s)")]
-        [ReadOnly, SerializeField] private float speed;
+        /// <summary>
+        /// The speed that the rigidbody is moving (in m/s).
+        /// </summary>
+        public float Speed { get; private set; }
 
+        public bool HasTractionControl => hasTractionControl;
+        public float TractionControlSlipTrigger => tractionControlSlipTrigger;
+        public bool IsBraking => brake > 0 && !reversing; 
         public CarCustomisation Customisation => customisation;
-
+        public Wheel[] Wheels => wheels;
+        
         // Used by SoundController to get average slip velo of all wheels for skid sounds.
         public float slipVelo
         {
@@ -122,7 +134,7 @@ namespace Gumball
 
         private void CalculateSpeed()
         {
-            speed = transform.InverseTransformDirection(rigidBody.velocity).z;
+            Speed = transform.InverseTransformDirection(rigidBody.velocity).z;
         }
 
         private void CalculateThrottle()
@@ -145,12 +157,13 @@ namespace Gumball
 
             if (InputManager.Accelerate.IsPressed())
             {
-                if (drivetrain.slipRatio < 0.10f)
+                //if car is slipping, and there's no traction control, increase the throttle response time
+                if (drivetrain.slipRatio < tractionControlSlipTrigger)
                     throttle += Time.deltaTime / throttleTime;
-                else if (!tractionControl)
-                    throttle += Time.deltaTime / throttleTimeTraction;
-                else
+                else if (hasTractionControl)
                     throttle -= Time.deltaTime / throttleReleaseTime;
+                else
+                    throttle += Time.deltaTime / throttleTimeNoTraction;
 
                 if (throttleInput < 0)
                     throttleInput = 0;
@@ -158,29 +171,29 @@ namespace Gumball
             }
             else
             {
-                if (drivetrain.slipRatio < 0.2f)
+                if (drivetrain.slipRatio < tractionControlSlipTrigger)
                     throttle -= Time.deltaTime / throttleReleaseTime;
                 else
-                    throttle -= Time.deltaTime / throttleReleaseTimeTraction;
+                    throttle -= Time.deltaTime / throttleReleaseTimeNoTraction;
             }
 
             throttle = Mathf.Clamp01(throttle);
 
             if (InputManager.Decelerate.IsPressed())
             {
-                if (drivetrain.slipRatio < 0.2f)
+                if (drivetrain.slipRatio < tractionControlSlipTrigger)
                     brake += Time.deltaTime / throttleTime;
                 else
-                    brake += Time.deltaTime / throttleTimeTraction;
+                    brake += Time.deltaTime / throttleTimeNoTraction;
                 throttle = 0;
                 throttleInput -= Time.deltaTime / throttleTime;
             }
             else
             {
-                if (drivetrain.slipRatio < 0.2f)
+                if (drivetrain.slipRatio < tractionControlSlipTrigger)
                     brake -= Time.deltaTime / throttleReleaseTime;
                 else
-                    brake -= Time.deltaTime / throttleReleaseTimeTraction;
+                    brake -= Time.deltaTime / throttleReleaseTimeNoTraction;
             }
 
             if (!InputManager.Decelerate.IsPressed() && !InputManager.Accelerate.IsPressed())
@@ -209,7 +222,7 @@ namespace Gumball
             //auto reverse
             //rbSpeed
 
-            if (drivetrain.gear <= 2 && speed <= 0)
+            if (drivetrain.gear <= 2 && Speed <= 0)
             {
                 if (throttleInput < -0.1f)
                 {
@@ -219,7 +232,7 @@ namespace Gumball
                         drivetrain.gear = 0;
                     }
 
-                    if (speed > 0)
+                    if (Speed > 0)
                     {
                         brake = 1;
                         throttle = 0;
@@ -248,7 +261,7 @@ namespace Gumball
             {
                 if (reversing)
                 {
-                    if (speed < -0.5f)
+                    if (Speed < -0.5f)
                     {
                         brake = 1;
                         throttle = 0;
@@ -310,17 +323,17 @@ namespace Gumball
                 float brakeToApply = brake;
                 
                 float slipRatio = Mathf.Abs(wheel.slipRatio);
-                if (absControl)
+                if (hasAbsControl)
                 {
                     brakeToApply *= 1 - (slipRatio / highestSlipRatio);
                 }
                 
                 wheel.brake = brakeToApply;
                 wheel.handbrake = InputManager.Handbrake.IsPressed() ? 1 : 0;
-                wheel.steering = currentSteering;
+                wheel.steering = CurrentSteering;
                 
                 if (brake != 0)
-                    Debug.Log("Braking: " + brakeToApply + " - steer: " + currentSteering + " - slip: " + slipRatio);
+                    Debug.Log("Braking: " + brakeToApply + " - steer: " + CurrentSteering + " - slip: " + slipRatio);
             }
         }
         
@@ -341,20 +354,33 @@ namespace Gumball
             drivetrain.ShiftDown();
         }
 
+        public float CurrentSteerSpeed { get; private set; }
+
         private void CalculateSteering()
         {
-            float finalSteerSpeed = 0;
+            float speedPercent = Mathf.Clamp01(rigidBody.velocity.magnitude / SpeedUtils.FromKmh(speedForMinSteerSpeed));
+            float desiredSteering = InputManager.SteeringInput;
+            
             if (InputManager.SteeringInput == 0)
-                finalSteerSpeed = steerReleaseSpeed;
+            {
+                float difference = maxSteerReleaseSpeed - minSteerReleaseSpeed;
+                CurrentSteerSpeed = minSteerReleaseSpeed + ((1-speedPercent) * difference);;
+            } else if (InputManager.SteeringInput > 0.01f && CurrentSteering < -0.01f
+                       || InputManager.SteeringInput < -0.01f && CurrentSteering > 0.01f)
+            {
+                float maxCorrection = (maxSteerSpeed + maxSteerReleaseSpeed) / 2;
+                float minCorrection = (minSteerSpeed + minSteerReleaseSpeed) / 2;
+
+                float difference = maxCorrection - minCorrection;
+                CurrentSteerSpeed = minCorrection + ((1-speedPercent) * difference);;
+            }
             else
             {
-                float speedPercent = Mathf.Clamp01(rigidBody.velocity.magnitude / SpeedUtils.FromKmh(speedForMinSteerSpeed));
                 float difference = maxSteerSpeed - minSteerSpeed;
-                finalSteerSpeed = minSteerSpeed + ((1-speedPercent) * difference);
+                CurrentSteerSpeed = minSteerSpeed + ((1-speedPercent) * difference);
             }
             
-            currentSteering = Mathf.Lerp(currentSteering, InputManager.SteeringInput, Time.deltaTime * finalSteerSpeed);
-            Debug.Log("Steering input = " + InputManager.SteeringInput + " - Speed = " + SpeedUtils.ToKmh(rigidBody.velocity.magnitude) + "km/h - Actual steer speed = " + finalSteerSpeed);
+            CurrentSteering = Mathf.Lerp(CurrentSteering, desiredSteering, Time.deltaTime * CurrentSteerSpeed);
         }
     }
 }

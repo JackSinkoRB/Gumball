@@ -44,12 +44,16 @@ namespace Gumball
 
             angularVelo = _rb.angularVelocity.y;
 
-            foreach (Wheel w in front)
+            foreach (Wheel wheel in front)
             {
-                if (angle * w.steering < 0)
-                    w.grip = oldGrip * (1.2f - Mathf.Clamp01(compensationFactor * Mathf.Abs(angularVelo)));
+                if (angle * wheel.steering < 0)
+                {
+                    wheel.grip = oldGrip * (1.2f - Mathf.Clamp01(compensationFactor * Mathf.Abs(angularVelo)));
+                }
                 else
-                    w.grip = oldGrip;
+                {
+                    wheel.grip = oldGrip;
+                }
             }
         }
     }

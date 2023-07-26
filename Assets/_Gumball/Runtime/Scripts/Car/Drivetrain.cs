@@ -92,6 +92,8 @@ namespace Gumball
         public float launchAssist = 0;
 
         private bool inReverse => gear == 0;
+
+        public bool TractionControlOn => Mathf.Abs(slipRatio) > PlayerCarManager.Instance.CurrentCar.TractionControlSlipTrigger;
         
         // Calculate engine torque for current rpm and throttle values.
         /*
@@ -266,22 +268,20 @@ namespace Gumball
             {
                 float drivetrainFraction = 1.0f / poweredWheels.Length;
                 float averageAngularVelo = 0;
-                foreach (Wheel w in poweredWheels)
-                    averageAngularVelo += w.angularVelocity * drivetrainFraction;
-
+                foreach (Wheel wheel in poweredWheels)
+                    averageAngularVelo += wheel.angularVelocity * drivetrainFraction;
 
                 float engineAngularAcceleration = (engineTorque - engineFrictionTorque) / engineInertia;
                 // Apply torque to wheels
-                foreach (Wheel w in poweredWheels)
+                foreach (Wheel wheel in poweredWheels)
                 {
-                    float lockingTorque = (averageAngularVelo - w.angularVelocity) * differentialLockCoefficient;
-                    w.drivetrainInertia = inertia * drivetrainFraction;
-                    w.driveFrictionTorque = engineFrictionTorque * Mathf.Abs(ratio) * drivetrainFraction;
-                    w.driveTorque = (launchAssist + engineTorque * ratio * drivetrainFraction + lockingTorque) *
+                    float lockingTorque = (averageAngularVelo - wheel.angularVelocity) * differentialLockCoefficient;
+                    wheel.drivetrainInertia = inertia * drivetrainFraction;
+                    wheel.driveFrictionTorque = engineFrictionTorque * Mathf.Abs(ratio) * drivetrainFraction;
+                    wheel.driveTorque = (launchAssist + engineTorque * ratio * drivetrainFraction + lockingTorque) *
                                     Mathf.Clamp(clutchshock * ratio * 10, 1, 50); //We need to limit this somehow
-                    slipRatio += w.slipRatio * drivetrainFraction;
+                    slipRatio += wheel.slipRatio * drivetrainFraction;
                 }
-
 
                 engineAngularVelo = averageAngularVelo * ratio;
                 clutchshock = 0;
@@ -291,6 +291,20 @@ namespace Gumball
 
             // update state
             slipRatio *= Mathf.Sign(ratio);
+            
+            if (PlayerCarManager.Instance.CurrentCar.HasTractionControl)
+            {
+                if (TractionControlOn)
+                {
+                    float highestSlipRatio = GetHighestSlipRatio();
+                    foreach (Wheel wheel in poweredWheels)
+                    {
+                        //limit the power depending on which wheel is slipping the most
+                        wheel.driveTorque *= 1 - (slipRatio / highestSlipRatio);
+                    }
+                }
+            }
+            
             rpm = engineAngularVelo * (60.0f / (2 * Mathf.PI));
             rpm = Mathf.Clamp(rpm, minRPM, maxRPM + minRPM); //limit excess rpm
 
@@ -331,6 +345,21 @@ namespace Gumball
             }
         }
 
+        /// <summary>
+        /// Get the slip ratio of the wheel with the highest slip ratio.
+        /// </summary>
+        private float GetHighestSlipRatio()
+        {
+            float highest = 0;
+            foreach (Wheel wheel in poweredWheels)
+            {
+                float ratio = Mathf.Abs(wheel.slipRatio);
+                if (ratio > highest)
+                    highest = ratio;
+            }
+            return highest;
+        }
+        
         public float sampleRpm;
 
         public void ShiftUp()
