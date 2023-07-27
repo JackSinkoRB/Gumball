@@ -9,6 +9,8 @@ namespace Gumball
 {
     public class PlayerCarManager : Singleton<PlayerCarManager>
     {
+
+        public Action OnCurrentCarChanged;
         
         [SerializeField] private CarData defaultCarData; //TODO: use save data - for now just using some preset data
 
@@ -29,6 +31,7 @@ namespace Gumball
             CameraController.Instance.SetTarget(CurrentCar.transform);
 
             onComplete?.Invoke();
+            OnCurrentCarChanged?.Invoke();
         }
     }
 }

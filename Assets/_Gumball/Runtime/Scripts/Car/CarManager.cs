@@ -93,7 +93,7 @@ namespace Gumball
         [SerializeField] private float speedForMinSteerSpeed = 200;
 
         [ReadOnly, SerializeField] private Rigidbody rigidBody;
-        private bool reversing;
+        private bool isReversing;
         private bool clutchIn;
         /// <summary>
         /// The speed that the rigidbody is moving (in m/s).
@@ -101,8 +101,9 @@ namespace Gumball
         public float Speed { get; private set; }
 
         public bool HasTractionControl => hasTractionControl;
+        public bool HasStabilityControl => hasStabilityControl;
         public float TractionControlSlipTrigger => tractionControlSlipTrigger;
-        public bool IsBraking => brake > 0 && !reversing; 
+        public bool IsBraking => brake > 0 && !isReversing; 
         public CarCustomisation Customisation => customisation;
         public Wheel[] Wheels => wheels;
         
@@ -226,9 +227,9 @@ namespace Gumball
             {
                 if (throttleInput < -0.1f)
                 {
-                    if (!reversing)
+                    if (!isReversing)
                     {
-                        reversing = true;
+                        isReversing = true;
                         drivetrain.gear = 0;
                     }
 
@@ -250,7 +251,7 @@ namespace Gumball
                 }
                 else
                 {
-                    reversing = false;
+                    isReversing = false;
                     drivetrain.gear = 2;
                     throttle = throttleInput;
                     brake = 0;
@@ -259,7 +260,7 @@ namespace Gumball
 
             if (drivetrain.gear == 0 && throttleInput >= 0.1f)
             {
-                if (reversing)
+                if (isReversing)
                 {
                     if (Speed < -0.5f)
                     {
@@ -268,7 +269,7 @@ namespace Gumball
                     }
                     else
                     {
-                        reversing = false;
+                        isReversing = false;
                         drivetrain.gear = 2;
                         throttle = throttleInput;
                         brake = 0;
@@ -360,6 +361,7 @@ namespace Gumball
         {
             float speedPercent = Mathf.Clamp01(rigidBody.velocity.magnitude / SpeedUtils.FromKmh(speedForMinSteerSpeed));
             float desiredSteering = InputManager.SteeringInput;
+            bool isCorrecting = false;
             
             if (InputManager.SteeringInput == 0)
             {
@@ -372,7 +374,9 @@ namespace Gumball
                 float minCorrection = (minSteerSpeed + minSteerReleaseSpeed) / 2;
 
                 float difference = maxCorrection - minCorrection;
-                CurrentSteerSpeed = minCorrection + ((1-speedPercent) * difference);;
+                CurrentSteerSpeed = minCorrection + ((1-speedPercent) * difference);
+
+                isCorrecting = true;
             }
             else
             {
@@ -380,7 +384,10 @@ namespace Gumball
                 CurrentSteerSpeed = minSteerSpeed + ((1-speedPercent) * difference);
             }
             
+            
             CurrentSteering = Mathf.Lerp(CurrentSteering, desiredSteering, Time.deltaTime * CurrentSteerSpeed);
+            if (isCorrecting)
+                CurrentSteering = Mathf.Clamp(CurrentSteering, 0, -Mathf.Sign(InputManager.SteeringInput) * 1);
         }
     }
 }

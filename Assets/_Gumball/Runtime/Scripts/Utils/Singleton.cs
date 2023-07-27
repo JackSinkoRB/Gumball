@@ -8,6 +8,11 @@ using MyBox;
 /// <remarks>You can add [ExecuteInEditMode] if you need the instance in edit mode (eg. for edit mode tests).</remarks>
 public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
+
+    /// <summary>
+    /// Whether the instance exists at runtime.
+    /// </summary>
+    public static bool ExistsRuntime { get; private set; }
     
     private static T instance;
     public static T Instance
@@ -52,6 +57,9 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
             transform.parent = null; //can't be a child
             DontDestroyOnLoad(gameObject);
         }
+
+        if (Application.isPlaying)
+            ExistsRuntime = true;
     }
     
 }

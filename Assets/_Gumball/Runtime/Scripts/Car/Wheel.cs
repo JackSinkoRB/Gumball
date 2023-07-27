@@ -124,7 +124,8 @@ namespace Gumball
         Vector3 up, right, forward;
         Quaternion localRotation = Quaternion.identity;
         Quaternion inverseLocalRotation = Quaternion.identity;
-        float slipAngle;
+        public float SlipAngle { get; private set; }
+        public bool IsSliding { get; private set; }
         int lastSkid = -1;
 
         // cached values
@@ -268,7 +269,7 @@ namespace Gumball
             return (wheelTireVelo - wheelRoadVelo) / absRoadVelo * damping;
         }
 
-        float SlipAngle()
+        private float GetSlipAngle()
         {
             const float fullAngleVelo = 2.0f;
 
@@ -310,9 +311,9 @@ namespace Gumball
                 right = transform.TransformDirection(localRotation * Vector3.right);
 
                 slipRatio = SlipRatio();
-                slipAngle = SlipAngle();
+                SlipAngle = GetSlipAngle();
                 
-                Vector3 force = invSlipRes * grip * CombinedForce(normalForce, slipRatio, slipAngle);
+                Vector3 force = invSlipRes * grip * CombinedForce(normalForce, slipRatio, SlipAngle);
                 Vector3 worldForce = transform.TransformDirection(localRotation * force);
                 angularVelocity -= (force.z * radius * Time.deltaTime) / totalInertia;
                 angularVelocity += driveAngularDelta;
