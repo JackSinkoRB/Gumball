@@ -17,6 +17,7 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI slipRatioLabel;
         [SerializeField] private TextMeshProUGUI slipAngleLabel;
         [SerializeField] private TextMeshProUGUI slipVeloLabel;
+        [SerializeField] private TextMeshProUGUI brakingLabel;
         [SerializeField] private TextMeshProUGUI isSlidingLabel;
 
         private Wheel wheel;
@@ -58,6 +59,7 @@ namespace Gumball
             slipRatioLabel.text = $"Slip ({Mathf.RoundToInt(wheel.slipRatio * 100f)}%)";
             slipAngleLabel.text = $"Slip angle ({Mathf.RoundToInt(wheel.SlipAngle * 100f)})";
             slipVeloLabel.text = $"Slip velo ({Mathf.RoundToInt(wheel.slipVelo)})";
+            brakingLabel.text = $"Braking ({Mathf.RoundToInt(wheel.brake * 100f)}%)";
             isSlidingLabel.gameObject.SetActive(wheel.IsSliding);
         }
     }
