@@ -231,13 +231,13 @@ namespace Gumball
 
             if (InputManager.Accelerate.IsPressed())
             {
-                //if car is slipping, and there's no traction control, increase the throttle response time
+                
                 if (drivetrain.slipRatio < tractionControlSlipTrigger)
                     throttle += Time.deltaTime / throttleTime;
-                else if (hasTractionControl)
-                    throttle -= Time.deltaTime / throttleReleaseTime;
+                else if (drivetrain.TractionControlOn || StabilityControlOn)
+                    throttle -= Time.deltaTime / throttleReleaseTime; //if car is slipping, and there is traction control, release the throttle 
                 else
-                    throttle += Time.deltaTime / throttleTimeNoTraction;
+                    throttle += Time.deltaTime / throttleTimeNoTraction; //if car is slipping, and there's no traction control, increase the throttle response time
 
                 if (throttleInput < 0)
                     throttleInput = 0;
