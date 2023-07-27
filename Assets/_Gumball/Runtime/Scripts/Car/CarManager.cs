@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MyBox;
 using UnityEngine;
 
@@ -102,10 +103,16 @@ namespace Gumball
 
         public bool HasTractionControl => hasTractionControl;
         public bool HasStabilityControl => hasStabilityControl;
+        public bool StabilityControlOn { get; private set; }
         public float TractionControlSlipTrigger => tractionControlSlipTrigger;
         public bool IsBraking => brake > 0 && !isReversing; 
         public CarCustomisation Customisation => customisation;
+        
         public Wheel[] Wheels => wheels;
+        public Wheel FrontLeftWheel => wheels.First(w => !w.isRear && w.isLeft);
+        public Wheel FrontRightWheel => wheels.First(w => !w.isRear && !w.isLeft);
+        public Wheel RearLeftWheel => wheels.First(w => w.isRear && w.isLeft);
+        public Wheel RearRightWheel => wheels.First(w => w.isRear && !w.isLeft);
         
         // Used by SoundController to get average slip velo of all wheels for skid sounds.
         public float slipVelo
@@ -132,6 +139,72 @@ namespace Gumball
             }
         }
 
+        public void StabilityControlCheck()
+        {
+            //reset values:
+            StabilityControlOn = false;
+            FrontLeftWheel.stabilityControlBraking = 0;
+            FrontRightWheel.stabilityControlBraking = 0;
+            RearLeftWheel.stabilityControlBraking = 0;
+            RearRightWheel.stabilityControlBraking = 0;
+            
+            if (!PlayerCarManager.Instance.CurrentCar.HasStabilityControl)
+                return;
+            
+            //get the averages:
+            float frontSlipAngleAverage = 0;
+            float rearSlipAngleAverage = 0;
+            foreach (Wheel wheel in wheels)
+            {
+                if (wheel.isRear)
+                {
+                    rearSlipAngleAverage += wheel.SlipAngle;
+                }
+                else
+                {
+                    frontSlipAngleAverage += wheel.SlipAngle;
+                }
+            }
+            frontSlipAngleAverage /= 2;
+            rearSlipAngleAverage /= 2;
+            
+            bool hasUndersteer = Mathf.Abs(frontSlipAngleAverage) > 0.1f && Mathf.Abs(frontSlipAngleAverage) > Mathf.Abs(rearSlipAngleAverage);
+            bool hasOversteer = Mathf.Abs(rearSlipAngleAverage) > 0.1f && Mathf.Abs(rearSlipAngleAverage) > Mathf.Abs(frontSlipAngleAverage);
+
+            if (hasUndersteer)
+            {
+                StabilityControlOn = true;
+                
+                //get the slip ratios of the front 2 wheels
+                //apply brakes to rear wheels depending on the percentage
+                float leftSlipRatio = Mathf.Abs(FrontLeftWheel.slipRatio);
+                float rightSlipRatio = Mathf.Abs(FrontRightWheel.slipRatio);
+                float combined = leftSlipRatio + rightSlipRatio;
+                
+                float leftPercent = leftSlipRatio / combined;
+                float rightPercent = rightSlipRatio / combined;
+
+                RearLeftWheel.stabilityControlBraking = leftPercent;
+                RearRightWheel.stabilityControlBraking = rightPercent;
+            }
+            
+            if (hasOversteer)
+            {
+                StabilityControlOn = true;
+                
+                //get the slip ratios of the rear 2 wheels
+                //apply brakes to front wheels depending on the percentage
+                float leftSlipRatio = Mathf.Abs(RearLeftWheel.slipRatio);
+                float rightSlipRatio = Mathf.Abs(RearRightWheel.slipRatio);
+                float combined = leftSlipRatio + rightSlipRatio;
+                
+                float leftPercent = leftSlipRatio / combined;
+                float rightPercent = rightSlipRatio / combined;
+
+                FrontLeftWheel.stabilityControlBraking = rightPercent;
+                FrontRightWheel.stabilityControlBraking = leftPercent;
+            }
+        }
 
         private void CalculateSpeed()
         {
@@ -329,7 +402,7 @@ namespace Gumball
                     brakeToApply *= 1 - (slipRatio / highestSlipRatio);
                 }
                 
-                wheel.brake = brakeToApply;
+                wheel.brakePedal = brakeToApply;
                 wheel.handbrake = InputManager.Handbrake.IsPressed() ? 1 : 0;
                 wheel.steering = CurrentSteering;
                 

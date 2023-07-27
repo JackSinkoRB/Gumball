@@ -563,7 +563,7 @@ MonoBehaviour:
   isLeft: 0
   isRear: 1
   radius: 0.33
-  suspensionTravel: 0.15
+  suspensionTravel: 0.1
   damping: 3500
   inertia: 2
   grip: 3
@@ -604,7 +604,8 @@ MonoBehaviour:
   - 0
   driveTorque: 0
   driveFrictionTorque: 0
-  brake: 0
+  brakePedal: 0
+  stabilityControlBraking: 0
   handbrake: 0
   steering: 0
   drivetrainInertia: 0
@@ -1050,7 +1051,7 @@ MonoBehaviour:
   isLeft: 0
   isRear: 0
   radius: 0.33
-  suspensionTravel: 0.15
+  suspensionTravel: 0.1
   damping: 4500
   inertia: 2
   grip: 3
@@ -1091,7 +1092,8 @@ MonoBehaviour:
   - 0
   driveTorque: 0
   driveFrictionTorque: 0
-  brake: 0
+  brakePedal: 0
+  stabilityControlBraking: 0
   handbrake: 0
   steering: 0
   drivetrainInertia: 0
@@ -1317,7 +1319,7 @@ MonoBehaviour:
   isLeft: 1
   isRear: 1
   radius: 0.33
-  suspensionTravel: 0.15
+  suspensionTravel: 0.1
   damping: 3500
   inertia: 2
   grip: 3
@@ -1358,7 +1360,8 @@ MonoBehaviour:
   - 0
   driveTorque: 0
   driveFrictionTorque: 0
-  brake: 0
+  brakePedal: 0
+  stabilityControlBraking: 0
   handbrake: 0
   steering: 0
   drivetrainInertia: 0
@@ -1731,8 +1734,6 @@ GameObject:
   - component: {fileID: 4388641744904310924}
   - component: {fileID: 3905819446578577832}
   - component: {fileID: 4536678163101830946}
-  - component: {fileID: 4711586723907975251}
-  - component: {fileID: 2606598928209658564}
   m_Layer: 0
   m_Name: MX5
   m_TagString: Player
@@ -1934,36 +1935,6 @@ MonoBehaviour:
   minSteerReleaseSpeed: 25
   speedForMinSteerSpeed: 300
   rigidBody: {fileID: 0}
---- !u!114 &4711586723907975251
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6830464531487253684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7f79f8e745f2174cb1d4cf5866ca894, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  wheel1: {fileID: 6288161639319367344}
-  wheel2: {fileID: 8331419407024093505}
-  coefficient: 5000
---- !u!114 &2606598928209658564
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6830464531487253684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7f79f8e745f2174cb1d4cf5866ca894, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  wheel1: {fileID: 6992387900074670784}
-  wheel2: {fileID: 8758190813413608229}
-  coefficient: 5000
 --- !u!1 &6830546841464558580
 GameObject:
   m_ObjectHideFlags: 0
@@ -2096,7 +2067,7 @@ MonoBehaviour:
   isLeft: 1
   isRear: 0
   radius: 0.33
-  suspensionTravel: 0.15
+  suspensionTravel: 0.1
   damping: 4500
   inertia: 2
   grip: 3
@@ -2137,7 +2108,8 @@ MonoBehaviour:
   - 0
   driveTorque: 0
   driveFrictionTorque: 0
-  brake: 0
+  brakePedal: 0
+  stabilityControlBraking: 0
   handbrake: 0
   steering: 0
   drivetrainInertia: 0

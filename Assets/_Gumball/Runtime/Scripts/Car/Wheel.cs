@@ -63,8 +63,12 @@ namespace Gumball
         public float driveFrictionTorque = 0;
 
         // brake input
-        public float brake = 0;
+        public float brakePedal = 0;
 
+        public float stabilityControlBraking = 0;
+        
+        public float braking { get; private set; }
+        
         // handbrake input
         public float handbrake = 0;
 
@@ -125,7 +129,7 @@ namespace Gumball
         Quaternion localRotation = Quaternion.identity;
         Quaternion inverseLocalRotation = Quaternion.identity;
         public float SlipAngle { get; private set; }
-        public bool IsSliding { get; private set; }
+        public bool IsSliding => Mathf.Abs(SlipAngle) > 0.1f;
         int lastSkid = -1;
 
         // cached values
@@ -294,9 +298,10 @@ namespace Gumball
                 slipRes = 1;
             float invSlipRes = (1.0f / (float)slipRes);
 
+            braking = brakePedal + stabilityControlBraking;
             float totalInertia = inertia + drivetrainInertia;
             float driveAngularDelta = driveTorque * Time.deltaTime * invSlipRes / totalInertia;
-            float totalFrictionTorque = brakeFrictionTorque * brake + handbrakeFrictionTorque * handbrake +
+            float totalFrictionTorque = brakeFrictionTorque * braking + handbrakeFrictionTorque * handbrake +
                                         frictionTorque + driveFrictionTorque;
             float frictionAngularDelta = totalFrictionTorque * Time.deltaTime * invSlipRes / totalInertia;
 
@@ -381,8 +386,7 @@ namespace Gumball
                 }
 
                 roadForce = RoadForce();
-
-
+                
                 body.AddForceAtPosition(suspensionForce + roadForce, pos);
                 //Debug.DrawRay(pos, suspensionForce + roadForce);
             }
@@ -391,9 +395,10 @@ namespace Gumball
                 compression = 0.0f;
                 suspensionForce = Vector3.zero;
                 roadForce = Vector3.zero;
+                braking = brakePedal + stabilityControlBraking;
                 float totalInertia = inertia + drivetrainInertia;
                 float driveAngularDelta = driveTorque * Time.deltaTime / totalInertia;
-                float totalFrictionTorque = brakeFrictionTorque * brake + handbrakeFrictionTorque * handbrake +
+                float totalFrictionTorque = brakeFrictionTorque * braking + handbrakeFrictionTorque * handbrake +
                                             frictionTorque + driveFrictionTorque;
                 float frictionAngularDelta = totalFrictionTorque * Time.deltaTime / totalInertia;
                 angularVelocity += driveAngularDelta;

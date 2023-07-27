@@ -19,6 +19,7 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI brakingLabel;
         [SerializeField] private TextMeshProUGUI slipRatioLabel;
         [SerializeField] private TextMeshProUGUI tractionControlLabel;
+        [SerializeField] private TextMeshProUGUI stabilityControlLabel;
 
         private CarManager currentCar => PlayerCarManager.Instance.CurrentCar;
         
@@ -36,6 +37,7 @@ namespace Gumball
             brakingLabel.text = $"Braking ({Mathf.Abs(Mathf.RoundToInt(currentCar.brake * 100f))}%)";
             slipRatioLabel.text = $"Slip ({Mathf.Abs(Mathf.RoundToInt(currentCar.drivetrain.slipRatio * 100f))}%)";
             tractionControlLabel.gameObject.SetActive(currentCar.drivetrain.TractionControlOn);
+            stabilityControlLabel.gameObject.SetActive(currentCar.StabilityControlOn);
         }
     }
 }
