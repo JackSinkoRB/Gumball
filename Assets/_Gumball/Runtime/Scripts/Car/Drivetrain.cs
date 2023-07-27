@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Gumball
@@ -93,8 +94,8 @@ namespace Gumball
 
         private bool inReverse => gear == 0;
 
-        public bool TractionControlOn => Mathf.Abs(slipRatio) > PlayerCarManager.Instance.CurrentCar.TractionControlSlipTrigger;
-        
+        public bool TractionControlOn => Mathf.Abs(slipRatio) > PlayerCarManager.Instance.CurrentCar.TractionControlSlipTrigger || poweredWheels.Any(wheel => wheel.IsSliding);
+
         // Calculate engine torque for current rpm and throttle values.
         /*
         float CalcEngineTorque() {
@@ -304,7 +305,7 @@ namespace Gumball
                     }
                 }
             }
-            
+
             rpm = engineAngularVelo * (60.0f / (2 * Mathf.PI));
             rpm = Mathf.Clamp(rpm, minRPM, maxRPM + minRPM); //limit excess rpm
 
