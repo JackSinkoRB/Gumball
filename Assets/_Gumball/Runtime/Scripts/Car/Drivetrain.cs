@@ -94,7 +94,8 @@ namespace Gumball
 
         private bool inReverse => gear == 0;
 
-        public bool TractionControlOn => Mathf.Abs(slipRatio) > PlayerCarManager.Instance.CurrentCar.TractionControlSlipTrigger || poweredWheels.Any(wheel => wheel.IsSliding);
+        public bool TractionControlOn => PlayerCarManager.Instance.CurrentCar.HasTractionControl && 
+            (Mathf.Abs(slipRatio) > PlayerCarManager.Instance.CurrentCar.TractionControlSlipTrigger || poweredWheels.Any(wheel => wheel.IsSliding));
 
         // Calculate engine torque for current rpm and throttle values.
         /*
@@ -292,20 +293,17 @@ namespace Gumball
 
             // update state
             slipRatio *= Mathf.Sign(ratio);
-            
-            if (PlayerCarManager.Instance.CurrentCar.HasTractionControl)
+
+            if (TractionControlOn)
             {
-                if (TractionControlOn)
+                float highestSlipRatio = GetHighestSlipRatio();
+                foreach (Wheel wheel in poweredWheels)
                 {
-                    float highestSlipRatio = GetHighestSlipRatio();
-                    foreach (Wheel wheel in poweredWheels)
-                    {
-                        //limit the power depending on which wheel is slipping the most
-                        wheel.driveTorque *= 1 - (slipRatio / highestSlipRatio);
-                    }
+                    //limit the power depending on which wheel is slipping the most
+                    wheel.driveTorque *= 1 - (slipRatio / highestSlipRatio);
                 }
             }
-
+            
             rpm = engineAngularVelo * (60.0f / (2 * Mathf.PI));
             rpm = Mathf.Clamp(rpm, minRPM, maxRPM + minRPM); //limit excess rpm
 
