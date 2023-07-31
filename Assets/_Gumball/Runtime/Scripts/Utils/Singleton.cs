@@ -47,7 +47,13 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         
         Initialise();
     }
-    
+
+    private void OnDestroy()
+    {
+        if (instance == this)
+            ExistsRuntime = false;
+    }
+
     protected virtual void Initialise()
     {
         instance = this as T;
