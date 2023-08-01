@@ -36,7 +36,7 @@ namespace Gumball
         /// </summary>
         public void Connect(Chunk chunkToAppendTo)
         {
-            ChunkManager.ConnectChunks(chunkToAppendTo, this);
+            ChunkUtils.ConnectChunks(chunkToAppendTo, this);
         }
 
         private Node CreateConnector()

@@ -24,7 +24,7 @@ namespace Gumball
             if (chunkToConnectWith == null)
                 throw new NullReferenceException($"There is no '{nameof(chunkToConnectWith)}' value set in the inspector.");
             
-            ChunkManager.ConnectChunks(chunkToConnectWith, chunk, true);
+            ChunkUtils.ConnectChunks(chunkToConnectWith, chunk, true);
         }
         #endregion
         
