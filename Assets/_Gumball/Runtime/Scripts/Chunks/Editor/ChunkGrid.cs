@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Dreamteck.Splines;
 using UnityEngine;
 
@@ -9,25 +10,26 @@ namespace Gumball
     public class ChunkGrid
     {
         
-        private const float debugLineDuration = 15;
+        private const float debugLineDuration = 6;
 
         private readonly Chunk chunk;
         private readonly float resolution;
-        private readonly float widthAroundSpline;
+        private readonly float widthAroundRoad;
         private readonly List<List<int>> verticesAsGrid = new();
+        private readonly List<Vector3> vertices = new();
 
-        public List<Vector3> Vertices { get; private set; } = new();
+        public ReadOnlyCollection<Vector3> Vertices => vertices.AsReadOnly();
         public Vector3 GridCenter { get; private set; }
         /// <summary>
         /// The width/height of the grid.
         /// </summary>
         public float GridLength { get; private set; }
             
-        public ChunkGrid(Chunk chunk, float resolution, float widthAroundSpline, bool showDebugLines = false)
+        public ChunkGrid(Chunk chunk, float resolution, float widthAroundRoad, bool showDebugLines = false)
         {
             this.chunk = chunk;
             this.resolution = resolution;
-            this.widthAroundSpline = widthAroundSpline;
+            this.widthAroundRoad = widthAroundRoad;
             
             CreateGrid(showDebugLines);
         }
@@ -87,7 +89,7 @@ namespace Gumball
         {
             //TODO: while generating the grid, the spline should be flattened
             GridCenter = chunk.GetCenterOfSpline();
-            GridLength = chunk.SplineComputer.CalculateLength();
+            GridLength = chunk.SplineComputer.CalculateLength() + widthAroundRoad;
             float distanceBetweenVertices = GridLength / resolution;
             
             SampleCollection sampleCollection = new SampleCollection();
@@ -110,7 +112,7 @@ namespace Gumball
             }
 
             int vertexCount = 0;
-            Vertices.Clear();
+            vertices.Clear();
             verticesAsGrid.Clear();
             for (int column = 0; column <= resolution; column++)
             {
@@ -138,14 +140,14 @@ namespace Gumball
                         continue;
                     }
                     
-                    if (Vector3.Distance(chunk.GetClosestPointOnSpline(vertexPosition).position, vertexPosition) > widthAroundSpline)
+                    if (Vector3.Distance(chunk.GetClosestPointOnSpline(vertexPosition).position, vertexPosition) > widthAroundRoad)
                     {
                         if (showDebugLines)
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.cyan, debugLineDuration);
                         continue;
                     }
                     
-                    Vertices.Add(vertexPosition);
+                    vertices.Add(vertexPosition - GridCenter.Flatten()); //minus the starting point so that the positions are around the origin (0,0,0)
                     //add to [column] as [row]
                     verticesAsGrid[column][row] = vertexCount;
                     

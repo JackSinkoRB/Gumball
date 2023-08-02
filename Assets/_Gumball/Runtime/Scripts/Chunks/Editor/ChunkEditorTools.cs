@@ -5,6 +5,7 @@ using System.Text;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Gumball
 {
@@ -39,11 +40,10 @@ namespace Gumball
         }
         
         [ButtonMethod]
-        public void GenerateTerrain()
+        public void CreateTerrain()
         {
-            terrainData.GenerateTerrain(chunk);
+            terrainData.Create(chunk);
         }
         #endregion
-        
     }
 }

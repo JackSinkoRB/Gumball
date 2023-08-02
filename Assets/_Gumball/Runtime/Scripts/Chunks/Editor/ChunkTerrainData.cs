@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
+using UnityEditor;
 using UnityEngine;
 
 namespace Gumball
@@ -9,19 +11,26 @@ namespace Gumball
     public class ChunkTerrainData
     {
         
+        [Serializable]
+        private class PerlinData
+        {
+            [SerializeField] public Vector2 MountainWidth = new(100,100);
+            [SerializeField] public float MountainHeight = 20;
+            [SerializeField] public Vector2 Seed = new(100,100);
+        }
+        
         [SerializeField] private float widthAroundRoad = 100;
         [SerializeField] private float resolution = 100;
         
-        //TODO: height stuff
-        [SerializeField] private float height;
+        [SerializeField] private PerlinData heightData;
 
         public float WidthAroundRoad => widthAroundRoad;
         public float Resolution => resolution;
-
+        
         private Chunk chunk;
         private ChunkGrid grid;
 
-        public void GenerateTerrain(Chunk chunkToUse)
+        public void Create(Chunk chunkToUse)
         {
             chunk = chunkToUse;
             UpdateGrid();
@@ -38,21 +47,27 @@ namespace Gumball
             //create the mesh object
             GameObject terrain = new GameObject("Terrain");
             terrain.transform.SetParent(chunk.transform);
-            terrain.AddComponent<MeshRenderer>();
+            terrain.transform.position = grid.GridCenter;
+            MeshRenderer meshRenderer = terrain.AddComponent<MeshRenderer>();
+            meshRenderer.material = new Material(Shader.Find("Diffuse")); //set a material with the default shader
             MeshFilter meshFilter = terrain.AddComponent<MeshFilter>();
             Mesh mesh = new Mesh();
 
-            //setup the mesh
-            mesh.SetVertices(grid.Vertices);
-            mesh.SetTriangles(CreateTrianglesFromGrid(), 0);
-            
             //apply height data
-            
+            List<Vector3> verticesWithHeightData = ApplyHeightDataToVertices();
+
+            //setup the mesh
+            mesh.SetVertices(verticesWithHeightData);
+            mesh.SetTriangles(CreateTrianglesFromGrid(), 0);
             
             //apply the changes to the mesh
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
             meshFilter.sharedMesh = mesh;
+
+            //editor things
+            Undo.RegisterCreatedObjectUndo(terrain, "Create Terrain");
+            Selection.SetActiveObjectWithContext(terrain, chunk);
             
             return terrain;
         }
@@ -118,5 +133,25 @@ namespace Gumball
 
             return triangleIndexes;
         }
+
+        private List<Vector3> ApplyHeightDataToVertices()
+        {
+            if (heightData.MountainHeight.Approximately(0))
+                return new List<Vector3>(grid.Vertices); //is flat, so don't apply height data
+
+            List<Vector3> verticesWithHeightData = new List<Vector3>();
+
+            foreach (Vector3 vertex in grid.Vertices)
+            {
+                float perlinX = vertex.x / heightData.MountainWidth.x + heightData.Seed.x;
+                float perlinY = vertex.z / heightData.MountainWidth.y + heightData.Seed.y;
+
+                float y = Mathf.PerlinNoise(perlinX, perlinY) * heightData.MountainHeight;
+                verticesWithHeightData.Add(new Vector3(vertex.x, y, vertex.z));
+            }
+
+            return verticesWithHeightData;
+        }
+        
     }
 }
