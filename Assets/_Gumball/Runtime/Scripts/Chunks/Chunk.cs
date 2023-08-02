@@ -39,7 +39,7 @@ namespace Gumball
             ChunkUtils.ConnectChunks(chunkToAppendTo, this);
         }
         
-        public Vector3 GetMiddleOfSpline()
+        public Vector3 GetCenterOfSpline()
         {
             float splineLength = splineComputer.CalculateLength();
             double travel = splineComputer.Travel(0.0, splineLength / 2f, Spline.Direction.Forward);
