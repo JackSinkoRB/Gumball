@@ -9,7 +9,7 @@ namespace Gumball
     public class ChunkGrid
     {
         
-        private const float debugLineDuration = 60;
+        private const float debugLineDuration = 15;
 
         private readonly Chunk chunk;
         private readonly float resolution;

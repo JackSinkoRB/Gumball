@@ -30,23 +30,19 @@ namespace Gumball
         #endregion
 
         #region Generate terrain
-        [SerializeField] private float terrainWidth = 100;
-        [SerializeField] private float terrainResolution = 100;
+        [SerializeField] private ChunkTerrainData terrainData = new();
         
         [ButtonMethod]
         public void ShowTerrainGrid()
         {
-            new ChunkGrid(chunk, terrainResolution, terrainWidth, true);
+            new ChunkGrid(chunk, terrainData.Resolution, terrainData.WidthAroundRoad, true);
         }
         
         [ButtonMethod]
         public void GenerateTerrain()
         {
-            ChunkGrid grid = new ChunkGrid(chunk, terrainResolution, terrainWidth);
-            GameObject terrain = ChunkUtils.GenerateTerrainMeshFromGrid(grid);
-            terrain.transform.SetParent(transform);
+            terrainData.GenerateTerrain(chunk);
         }
-
         #endregion
         
     }

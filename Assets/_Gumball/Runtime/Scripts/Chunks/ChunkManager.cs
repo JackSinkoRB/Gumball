@@ -8,7 +8,7 @@ namespace Gumball
     public class ChunkManager : MonoBehaviour
     {
 
-        
+        //TODO: handle things like loading chunks in/out based on distance
 
     }
 }
