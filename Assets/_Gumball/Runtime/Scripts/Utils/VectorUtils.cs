@@ -11,6 +11,11 @@ namespace Gumball
         {
             return new Vector3(vector3.x, 0, vector3.z);
         }
+
+        public static Vector2 FlattenAsVector2(this Vector3 vector3)
+        {
+            return new Vector2(vector3.x, vector3.z);
+        }
         
         public static bool AreLinesIntersecting(Vector3 line1Start, Vector3 line1End, Vector3 line2Start, Vector3 line2End)
         {

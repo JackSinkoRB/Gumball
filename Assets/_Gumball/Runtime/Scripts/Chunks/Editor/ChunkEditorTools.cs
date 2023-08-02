@@ -30,101 +30,89 @@ namespace Gumball
         #endregion
 
         #region Generate terrain
-        private static List<Vector3> terrainPoints = new();
-        [SerializeField] private float terrainWidth = 50;
+        private const float debugLineDuration = 5; 
+        [SerializeField] private float terrainWidth = 100;
+        [SerializeField] private float terrainResolution = 100;
 
         [ButtonMethod]
         public void GenerateTerrain()
         {
-            CalculateTerrainPoints();
+            CreateGrid();
         }
 
-        private void CalculateTerrainPoints()
+        private void CreateGrid()
         {
-            terrainPoints.Clear();
+            Vector3 splineCenter = chunk.GetMiddleOfSpline();
+            float gridSize = chunk.SplineComputer.CalculateLength();
+            float cellSize = gridSize / terrainResolution;
             
             SampleCollection sampleCollection = new SampleCollection();
             chunk.SplineComputer.GetSamples(sampleCollection);
             
-            Debug.Log("Samples: " + sampleCollection.length);
+            SplineSample firstPoint = sampleCollection.samples[0];
+            Vector3 firstTangent = firstPoint.right.Flatten();
+            //debugging:
+            Debug.DrawLine(firstPoint.position.Flatten(), firstPoint.position.Flatten() + firstTangent * gridSize, Color.magenta, debugLineDuration);
+            Debug.DrawLine(firstPoint.position.Flatten(), firstPoint.position.Flatten() + -firstTangent * gridSize, Color.magenta, debugLineDuration);
 
-            CalculateTerrainPoints(sampleCollection.samples, true);
-            CalculateTerrainPoints(sampleCollection.samples, false);
-
-            //CreateMeshFromTerrainPoints();
-        }
-
-        private void CreateMeshFromTerrainPoints()
-        {
-            GameObject terrain = new GameObject("Terrain");
-            terrain.transform.SetParent(transform);
-            MeshRenderer meshRenderer = terrain.AddComponent<MeshRenderer>();
-            MeshFilter meshFilter = terrain.AddComponent<MeshFilter>();
-            Mesh mesh = new Mesh();
-
-            //TODO HERE! Calculate triangles
-
-            mesh.SetVertices(terrainPoints);
-
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-
-            meshFilter.mesh = mesh;
-        }
-
-        private void CalculateTerrainPoints(SplineSample[] samples, bool isRightSide)
-        {
-            //then do the left side:
-            for (var count = 0; count < samples.Length; count++)
-            {
-                SplineSample sample = samples[count];
-                Vector3 startPoint = sample.position.Flatten();
-                Vector3 direction = isRightSide ? sample.right.Flatten() : -sample.right.Flatten();
-                Vector3 endPoint = startPoint + (direction * terrainWidth);
-
-                //ignore if it is intersecting with any of the other lines
-                if (count > 0 //don't ever ignore the first one
-                    && count != samples.Length - 1 //don't ever ignore if the last one
-                    && IsIntersectingWithAnotherSample(samples, sample, isRightSide))
-                    continue;
-
-                terrainPoints.Add(endPoint);
-
-                //debugging:
-                const float duration = 10;
-                Debug.DrawLine(startPoint, endPoint, Color.blue, duration);
-            }
-        }
-        
-        private bool IsIntersectingWithAnotherSample(SplineSample[] otherSamples, SplineSample sample, bool isRightSide)
-        {
-            Vector3 startPoint = sample.position.Flatten();
-            Vector3 direction = isRightSide ? sample.right.Flatten() : -sample.right.Flatten();
-            Vector3 endPoint = startPoint + (direction * terrainWidth);
+            SplineSample lastPoint = sampleCollection.samples[sampleCollection.length-1];
+            Vector3 lastTangent = lastPoint.right.Flatten();
+            //debugging:
+            Debug.DrawLine(lastPoint.position.Flatten(), lastPoint.position.Flatten() + lastTangent * gridSize, Color.magenta, debugLineDuration);
+            Debug.DrawLine(lastPoint.position.Flatten(), lastPoint.position.Flatten() + -lastTangent * gridSize, Color.magenta, debugLineDuration);
             
-            foreach (SplineSample otherSample in otherSamples)
+            for (int x = 0; x <= terrainResolution; x++)
             {
-                Vector3 otherStartPoint = otherSample.position.Flatten();
-                Vector3 otherDirection = isRightSide ? otherSample.right.Flatten() : -otherSample.right.Flatten();
-                Vector3 otherEndPoint = otherStartPoint + (otherDirection * terrainWidth);
-             
-                if (startPoint.Approximately(otherStartPoint))
-                    continue;
-                
-                //skip if the line is intersecting with any other lines
-                if (VectorUtils.AreLinesIntersecting(startPoint, endPoint,
-                        otherStartPoint, otherEndPoint))
+                for (int z = 0; z <= terrainResolution; z++)
                 {
-                    //debugging:
-                    const float duration = 10;
-                    Debug.DrawLine(startPoint, endPoint, Color.red, duration);
-                    return true;
+                    //start at top left (center of spline - gridSize)
+                    Vector3 topLeft = splineCenter.Flatten() - new Vector3(gridSize/2f, 0, gridSize/2f); //TODO: determine lowest point instead of 0
+                    Vector3 position = topLeft + new Vector3(x * cellSize, 0, z * cellSize);
+
+                    if (IsBelowTangent(firstPoint.position.Flatten() - firstTangent, firstPoint.position.Flatten() + firstTangent, position))
+                    {
+                        Debug.DrawLine(position, position + Vector3.up * 10, Color.red, debugLineDuration);
+                        continue;
+                    }
+                    
+                    if (IsAboveTangent(lastPoint.position.Flatten() - lastTangent, lastPoint.position.Flatten() + lastTangent, position))
+                    {
+                        Debug.DrawLine(position, position + Vector3.up * 10, Color.red, debugLineDuration);
+                        continue;
+                    }
+                    
+                    if (Vector3.Distance(chunk.GetClosestPointOnSpline(position).position, position) > terrainWidth)
+                    {
+                        Debug.DrawLine(position, position + Vector3.up * 10, Color.cyan, debugLineDuration);
+                        continue;
+                    }
+                    
+                    Debug.DrawLine(position, position + Vector3.up * 20, Color.blue, debugLineDuration);
                 }
             }
-
-            return false;
         }
 
+        private bool IsBelowTangent(Vector3 tangentStartPoint, Vector3 tangentEndPoint, Vector3 point)
+        {
+            float crossProduct = GetCrossProductOfTangentAndPoint(tangentStartPoint, tangentEndPoint, point);
+            return crossProduct > 0;
+        }
+
+        private bool IsAboveTangent(Vector3 tangentStartPoint, Vector3 tangentEndPoint, Vector3 point)
+        {
+            float crossProduct = GetCrossProductOfTangentAndPoint(tangentStartPoint, tangentEndPoint, point);
+            return crossProduct < 0;
+        }
+
+        private float GetCrossProductOfTangentAndPoint(Vector3 tangentStartPoint, Vector3 tangentEndPoint, Vector3 point)
+        {
+            //convert to vector2 since we are dealing with a grid
+            Vector2 dirVector1 = point.FlattenAsVector2() - tangentStartPoint.FlattenAsVector2();
+            Vector2 dirVector2 = tangentEndPoint.FlattenAsVector2() - tangentStartPoint.FlattenAsVector2();
+            
+            return Vector3.Cross(dirVector1, dirVector2).z;
+        }
+        
         #endregion
         
     }

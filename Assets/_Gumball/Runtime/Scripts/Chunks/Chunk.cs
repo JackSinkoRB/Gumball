@@ -38,6 +38,21 @@ namespace Gumball
         {
             ChunkUtils.ConnectChunks(chunkToAppendTo, this);
         }
+        
+        public Vector3 GetMiddleOfSpline()
+        {
+            float splineLength = splineComputer.CalculateLength();
+            double travel = splineComputer.Travel(0.0, splineLength / 2f, Spline.Direction.Forward);
+            Vector3 middle = splineComputer.EvaluatePosition(travel);
+            return middle;
+        }
+
+        public SplineSample GetClosestPointOnSpline(Vector3 fromPoint)
+        {
+            SplineSample sample = new SplineSample();
+            splineComputer.Project(fromPoint, ref sample);
+            return sample;
+        }
 
         private Node CreateConnector()
         {
