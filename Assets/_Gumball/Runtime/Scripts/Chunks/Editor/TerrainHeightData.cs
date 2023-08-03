@@ -23,9 +23,12 @@ namespace Gumball
         [Tooltip("Controls the decrease in amplitude of octaves. Higher value = bigger mountains/")] [SerializeField]
         public float ElevationAmount = 3;
 
-        [Tooltip("How much is the terrain elevating above ground versus below ground.")] [Range(-1, 1), SerializeField]
+        [Tooltip("How much is the terrain raised above ground versus lowered below ground.")] [Range(-1, 1), SerializeField]
         public float ElevationPercent = 0.5f;
 
+        [Tooltip("An additional modifier to the elevation settings.")]
+        public AnimationCurve ElevationModifier = AnimationCurve.Linear(0, 0, 1, 1);
+        
         [SerializeField] public float Scale = 100;
 
         public bool IsFlat => ElevationAmount.Approximately(0);
