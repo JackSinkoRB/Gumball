@@ -82,8 +82,10 @@ namespace Gumball
             {
                 if (currentTerrain == null || EditorApplication.isPlayingOrWillChangePlaymode)
                     return;
+
+                Material[] previousMaterials = currentTerrain.GetComponent<MeshRenderer>().sharedMaterials;
                 DestroyImmediate(currentTerrain);
-                currentTerrain = terrainData.Create(chunk);
+                currentTerrain = terrainData.Create(chunk, previousMaterials);
             };
         }
 

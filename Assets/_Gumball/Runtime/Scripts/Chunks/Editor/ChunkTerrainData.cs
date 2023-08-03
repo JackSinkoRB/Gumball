@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Dreamteck.Splines;
 using MyBox;
-using UnityEditor;
 using UnityEngine;
 using Random = System.Random;
 
@@ -12,70 +11,12 @@ namespace Gumball
     [Serializable]
     public class ChunkTerrainData
     {
-        
-        [Serializable]
-        private class PerlinData
-        {
-            [SerializeField] public int Seed = 100;
 
-            [Tooltip("How many layers of perlin noise is combined? This can add more detail to the terrain.")]
-            [SerializeField] public int LayersOfDetail = 3;
-            
-            [Tooltip("Controls the increase in frequency of octaves.")]
-            [SerializeField] public float MountainFrequency = 1;
-            
-            [Tooltip("Controls the decrease in amplitude of octaves. Higher value = bigger mountains/")]
-            [SerializeField] public float ElevationAmount = 3;
-
-            [Tooltip("How much is the terrain elevating above ground versus below ground.")]
-            [Range(-1,1), SerializeField] public float ElevationPercent = 0.5f;
-
-            [SerializeField] public float Scale = 100;
-
-            public bool IsFlat => ElevationAmount.Approximately(0);
-
-            public Octave[] GetOctaves()
-            {
-                Octave[] octaves = new Octave[LayersOfDetail];
-                for (int octave = 0; octave < LayersOfDetail; octave++)
-                    octaves[octave] = GetOctave(octave);
-                
-                return octaves;
-            }
-
-            public Octave GetOctave(int index)
-            {
-                return new Octave(Mathf.Pow(MountainFrequency, index), Mathf.Pow(ElevationAmount, index));
-            }
-            
-            public Vector2 GetRandomPerlinOffset()
-            {
-                const int maxPerlinValue = 100000; //any values above this seems to break the perlin function
-                
-                Random random = new Random(Seed);
-                return new Vector2(
-                    random.Next(-maxPerlinValue, maxPerlinValue), 
-                    random.Next(-maxPerlinValue, maxPerlinValue));
-            }
-            
-            public struct Octave
-            {
-                public readonly float Frequency;
-                public readonly float Amplitude;
-                
-                public Octave(float frequency, float amplitude)
-                {
-                    Frequency = frequency;
-                    Amplitude = amplitude;
-                }
-            }
-        }
-        
         [SerializeField] private float widthAroundRoad = 100;
         [SerializeField] private float resolution = 100;
         [SerializeField] private float distanceToFlattenAroundSpline = 10;
         
-        [SerializeField] private PerlinData heightData;
+        [SerializeField] private TerrainHeightData heightData;
 
         public float WidthAroundRoad => widthAroundRoad;
         public float Resolution => resolution;
@@ -83,11 +24,11 @@ namespace Gumball
         private Chunk chunk;
         private ChunkGrid grid;
 
-        public GameObject Create(Chunk chunkToUse)
+        public GameObject Create(Chunk chunkToUse, Material[] materialsToUse = null)
         {
             chunk = chunkToUse;
             UpdateGrid();
-            return GenerateTerrainMeshFromGrid();
+            return GenerateTerrainMeshFromGrid(materialsToUse);
         }
 
         private void UpdateGrid()
@@ -95,16 +36,21 @@ namespace Gumball
             grid = new ChunkGrid(chunk, resolution, widthAroundRoad);
         }
         
-        private GameObject GenerateTerrainMeshFromGrid()
+        private GameObject GenerateTerrainMeshFromGrid(Material[] materialsToAssign = null)
         {
-            //create the mesh object
+            //create the gameobject
             GameObject terrain = new GameObject("Terrain");
             terrain.transform.SetParent(chunk.transform);
             terrain.transform.position = grid.GridCenter;
             terrain.tag = ChunkUtils.TerrainTag;
+            
+            //apply materials
             MeshRenderer meshRenderer = terrain.AddComponent<MeshRenderer>();
-            if (meshRenderer.sharedMaterial == null)
-                meshRenderer.sharedMaterial = new Material(Shader.Find("Diffuse")); //set a material with the default shader
+            meshRenderer.sharedMaterials = materialsToAssign.HasValidMaterials()
+                ? materialsToAssign
+                : new[] { new Material(Shader.Find("Diffuse")) }; //set a material with the default shader if none
+
+            //apply mesh
             MeshFilter meshFilter = terrain.AddComponent<MeshFilter>();
             Mesh mesh = new Mesh();
 
@@ -255,7 +201,7 @@ namespace Gumball
         private float GetDesiredHeightForVertexUsingHeightData(Vector3 vertex)
         {
             float combinedOctaves = 0;
-            foreach (PerlinData.Octave octave in heightData.GetOctaves())
+            foreach (TerrainHeightData.Octave octave in heightData.GetOctaves())
             {
                 float perlinX = vertex.x / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().x;
                 float perlinY = vertex.z / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().y;
