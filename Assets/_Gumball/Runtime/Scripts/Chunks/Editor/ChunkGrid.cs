@@ -147,7 +147,7 @@ namespace Gumball
                         continue;
                     }
                     
-                    vertices.Add(vertexPosition - GridCenter.Flatten()); //minus the starting point so that the positions are around the origin (0,0,0)
+                    vertices.Add(vertexPosition);
                     //add to [column] as [row]
                     verticesAsGrid[column][row] = vertexCount;
                     
