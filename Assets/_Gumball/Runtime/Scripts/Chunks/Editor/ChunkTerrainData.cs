@@ -5,6 +5,7 @@ using Dreamteck.Splines;
 using MyBox;
 using UnityEditor;
 using UnityEngine;
+using Random = System.Random;
 
 namespace Gumball
 {
@@ -15,11 +16,59 @@ namespace Gumball
         [Serializable]
         private class PerlinData
         {
-            [SerializeField] public Vector2 MountainWidth = new(100,100);
-            [SerializeField] public float MountainHeight = 20;
-            [SerializeField] public Vector2 Seed = new(100,100);
+            [SerializeField] public int Seed = 100;
 
-            public bool IsFlat => MountainHeight.Approximately(0);
+            [Tooltip("How many layers of perlin noise is combined? This can add more detail to the terrain.")]
+            [SerializeField] public int LayersOfDetail = 3;
+            
+            [Tooltip("Controls the increase in frequency of octaves.")]
+            [SerializeField] public float MountainFrequency = 1;
+            
+            [Tooltip("Controls the decrease in amplitude of octaves. Higher value = bigger mountains/")]
+            [SerializeField] public float ElevationAmount = 3;
+
+            [Tooltip("How much is the terrain elevating above ground versus below ground.")]
+            [Range(-1,1), SerializeField] public float ElevationPercent = 0.5f;
+
+            [SerializeField] public float Scale = 100;
+
+            public bool IsFlat => ElevationAmount.Approximately(0);
+
+            public Octave[] GetOctaves()
+            {
+                Octave[] octaves = new Octave[LayersOfDetail];
+                for (int octave = 0; octave < LayersOfDetail; octave++)
+                    octaves[octave] = GetOctave(octave);
+                
+                return octaves;
+            }
+
+            public Octave GetOctave(int index)
+            {
+                return new Octave(Mathf.Pow(MountainFrequency, index), Mathf.Pow(ElevationAmount, index));
+            }
+            
+            public Vector2 GetRandomPerlinOffset()
+            {
+                const int maxPerlinValue = 100000; //any values above this seems to break the perlin function
+                
+                Random random = new Random(Seed);
+                return new Vector2(
+                    random.Next(-maxPerlinValue, maxPerlinValue), 
+                    random.Next(-maxPerlinValue, maxPerlinValue));
+            }
+            
+            public struct Octave
+            {
+                public readonly float Frequency;
+                public readonly float Amplitude;
+                
+                public Octave(float frequency, float amplitude)
+                {
+                    Frequency = frequency;
+                    Amplitude = amplitude;
+                }
+            }
         }
         
         [SerializeField] private float widthAroundRoad = 100;
@@ -34,11 +83,11 @@ namespace Gumball
         private Chunk chunk;
         private ChunkGrid grid;
 
-        public void Create(Chunk chunkToUse)
+        public GameObject Create(Chunk chunkToUse)
         {
             chunk = chunkToUse;
             UpdateGrid();
-            GenerateTerrainMeshFromGrid();
+            return GenerateTerrainMeshFromGrid();
         }
 
         private void UpdateGrid()
@@ -75,7 +124,6 @@ namespace Gumball
 
             //editor things
             Undo.RegisterCreatedObjectUndo(terrain, "Create Terrain");
-            Selection.SetActiveObjectWithContext(terrain, chunk);
             
             return terrain;
         }
@@ -162,27 +210,43 @@ namespace Gumball
             float desiredHeight = vertex.y;
             SplineSample closestSplineSample = chunk.GetClosestPointOnSpline(vertex);
 
-            if (!heightData.IsFlat)
-            {
-                //check to blend with road:
-                bool canFlatten = Vector3.Distance(closestSplineSample.position.Flatten(), vertex.Flatten()) < distanceToFlattenAroundSpline;
-                if (canFlatten)
-                    return closestSplineSample.position.y - 0.01f; //let it sit just under the road, so it doesn't clip
+            //check to blend with road:
+            bool canFlatten = Vector3.Distance(closestSplineSample.position.Flatten(), vertex.Flatten()) < distanceToFlattenAroundSpline;
+            if (canFlatten)
+                return closestSplineSample.position.y - 0.01f; //let it sit just under the road, so it doesn't clip
+            
+            //check to blend with other chunks:
 
-                //check to blend with other chunks:
-
+            if (!heightData.ElevationAmount.Approximately(0))
                 //use perlin:
-                float perlinX = vertex.x / heightData.MountainWidth.x + heightData.Seed.x;
-                float perlinY = vertex.z / heightData.MountainWidth.y + heightData.Seed.y;
-
-                desiredHeight = Mathf.PerlinNoise(perlinX, perlinY) * heightData.MountainHeight;
-            }
+                desiredHeight = GetDesiredHeightForVertexUsingHeightData(vertex);
 
             //minus the height difference from road
             float heightDifferenceFromRoad = vertex.y - closestSplineSample.position.y;
             desiredHeight -= heightDifferenceFromRoad;
 
             return desiredHeight;
+        }
+
+        private float GetDesiredHeightForVertexUsingHeightData(Vector3 vertex)
+        {
+            float combinedOctaves = 0;
+            foreach (PerlinData.Octave octave in heightData.GetOctaves())
+            {
+                float perlinX = vertex.x / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().x;
+                float perlinY = vertex.z / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().y;
+                
+                float perlinValue = Mathf.PerlinNoise(perlinX, perlinY);
+                
+                //formula:
+                //if ElevationPercent = 1, it should = perlinValue (between 0 and 1)
+                //if ElevationPercent = -1, it should = -perlinValue (between 0 and -1)
+                //if ElevationPercent = 0, it should = perlinValue * 2 - 1 (between -1 and 1)
+                float elevationPerlinValue = (heightData.ElevationPercent * perlinValue) + (1 - Mathf.Abs(heightData.ElevationPercent)) * (perlinValue * 2 - 1);
+                combinedOctaves += elevationPerlinValue * octave.Amplitude;
+            }
+
+            return combinedOctaves;
         }
         
     }

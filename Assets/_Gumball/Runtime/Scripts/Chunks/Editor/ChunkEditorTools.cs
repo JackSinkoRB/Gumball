@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Dreamteck.Splines;
 using MyBox;
+using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -32,7 +33,11 @@ namespace Gumball
 
         #region Generate terrain
         [SerializeField] private ChunkTerrainData terrainData = new();
+        [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
+        [SerializeField] private bool updateImmediately = true;
         
+        private GameObject currentTerrain;
+
         [ButtonMethod]
         public void ShowTerrainGrid()
         {
@@ -42,8 +47,29 @@ namespace Gumball
         [ButtonMethod]
         public void CreateTerrain()
         {
-            terrainData.Create(chunk);
+            currentTerrain = terrainData.Create(chunk);
+            Selection.SetActiveObjectWithContext(currentTerrain, chunk);
+        }
+
+        private void CheckToUpdateTerrainImmediately()
+        {
+            if (!updateImmediately || Application.isPlaying)
+                return;
+            
+            if (currentTerrain == null)
+                return;
+            
+            EditorApplication.delayCall+=()=>
+            {
+                DestroyImmediate(currentTerrain);
+                currentTerrain = terrainData.Create(chunk);
+            };
         }
         #endregion
+        
+        private void OnValidate()
+        {
+            CheckToUpdateTerrainImmediately();
+        }
     }
 }
