@@ -101,8 +101,10 @@ namespace Gumball
             GameObject terrain = new GameObject("Terrain");
             terrain.transform.SetParent(chunk.transform);
             terrain.transform.position = grid.GridCenter;
+            terrain.tag = ChunkUtils.TerrainTag;
             MeshRenderer meshRenderer = terrain.AddComponent<MeshRenderer>();
-            meshRenderer.material = new Material(Shader.Find("Diffuse")); //set a material with the default shader
+            if (meshRenderer.sharedMaterial == null)
+                meshRenderer.sharedMaterial = new Material(Shader.Find("Diffuse")); //set a material with the default shader
             MeshFilter meshFilter = terrain.AddComponent<MeshFilter>();
             Mesh mesh = new Mesh();
 
@@ -123,9 +125,6 @@ namespace Gumball
             mesh.RecalculateBounds();
             meshFilter.sharedMesh = mesh;
 
-            //editor things
-            Undo.RegisterCreatedObjectUndo(terrain, "Create Terrain");
-            
             return terrain;
         }
 

@@ -11,6 +11,8 @@ namespace Gumball
     public static class ChunkUtils
     {
 
+        public const string TerrainTag = "Terrain";
+        
         /// <summary>
         /// Puts chunk2 at the end of chunk1, and aligns the splines.
         /// </summary>

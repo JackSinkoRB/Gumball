@@ -1,12 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-using Dreamteck.Splines;
 using MyBox;
 using UnityEditor;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Gumball
 {
@@ -32,12 +29,14 @@ namespace Gumball
         #endregion
 
         #region Generate terrain
+        [ReadOnly, SerializeField] private GameObject currentTerrain;
         [SerializeField] private ChunkTerrainData terrainData = new();
         [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
         [SerializeField] private bool updateImmediately = true;
-        
-        private GameObject currentTerrain;
 
+        private static bool subscribedToPlayModeStateChanged;
+        private static bool isExitingPlaymode;
+        
         [ButtonMethod]
         public void ShowTerrainGrid()
         {
@@ -49,21 +48,58 @@ namespace Gumball
         {
             currentTerrain = terrainData.Create(chunk);
             Selection.SetActiveObjectWithContext(currentTerrain, chunk);
+            Undo.RegisterCreatedObjectUndo(currentTerrain, "Create Terrain");
         }
-
+        
+        [InitializeOnLoadMethod]
+        private static void SubscribeToPlayModeStateChanged()
+        {
+            if (!subscribedToPlayModeStateChanged)
+            {
+                EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+                subscribedToPlayModeStateChanged = true;
+            }
+        }
+        
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            isExitingPlaymode = state == PlayModeStateChange.ExitingPlayMode;
+        }
+        
         private void CheckToUpdateTerrainImmediately()
         {
-            if (!updateImmediately || Application.isPlaying)
+            if (!updateImmediately)
                 return;
             
+            if (isExitingPlaymode || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isUpdating)
+                return;
+
+            TryFindExistingTerrain();
             if (currentTerrain == null)
                 return;
-            
+
             EditorApplication.delayCall+=()=>
             {
+                if (currentTerrain == null || EditorApplication.isPlayingOrWillChangePlaymode)
+                    return;
                 DestroyImmediate(currentTerrain);
                 currentTerrain = terrainData.Create(chunk);
             };
+        }
+
+        private void TryFindExistingTerrain()
+        {
+            if (currentTerrain != null)
+                return; //already exists
+
+            foreach (Transform child in transform)
+            {
+                if (child.tag.Equals(ChunkUtils.TerrainTag))
+                {
+                    currentTerrain = child.gameObject;
+                    return;
+                }
+            }
         }
         #endregion
         
