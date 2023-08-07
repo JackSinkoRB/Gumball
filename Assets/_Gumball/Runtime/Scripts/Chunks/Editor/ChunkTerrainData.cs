@@ -15,7 +15,7 @@ namespace Gumball
         [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
         [PositiveValueOnly, SerializeField] private float resolution = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
-        [PositiveValueOnly, SerializeField] private float roadBlendDistance = 25;
+        [PositiveValueOnly, SerializeField] private float roadBlendDistance = 20;
         
         [SerializeField] private TerrainHeightData heightData;
 
@@ -189,31 +189,31 @@ namespace Gumball
             
             List<Vector3> verticesWithHeightData = new List<Vector3>();
 
-            for (int i = 0; i < grid.Vertices.Count; i++)
+            for (int vertexIndex = 0; vertexIndex < Grid.Vertices.Count; vertexIndex++)
             {
-                Vector3 vertex = grid.Vertices[i];
-                float desiredHeight = GetDesiredHeightForVertex(vertex);
+                Vector3 vertex = Grid.Vertices[vertexIndex];
+                float desiredHeight = GetDesiredHeightForVertex(vertexIndex);
                 
                 verticesWithHeightData.Add(new Vector3(vertex.x, desiredHeight, vertex.z));
             }
 
             return verticesWithHeightData;
         }
-
-        private float GetDesiredHeightForVertex(Vector3 vertex)
+        
+        private float GetDesiredHeightForVertex(int vertexIndex)
         {
+            Vector3 vertex = Grid.Vertices[vertexIndex];
+            
             float desiredHeight = vertex.y;
-            SplineSample closestSplineSample = chunk.GetClosestPointOnSpline(vertex);
+            SplineSample closestSplineSample = chunk.GetClosestPointOnSpline(vertex.Flatten());
+            float distanceToSpline = Vector3.Distance(closestSplineSample.position.Flatten(), vertex.Flatten());
 
             //check to flatten under road
-            bool canFlattenUnderRoad = Vector3.Distance(closestSplineSample.position.Flatten(), vertex.Flatten()) < distanceToFlattenAroundSpline;
+            bool canFlattenUnderRoad = distanceToSpline < roadFlattenDistance;
             if (canFlattenUnderRoad)
                 return closestSplineSample.position.y - 0.01f; //let it sit just under the road, so it doesn't clip
-            
-            //TODO: check to blend with road
-            
-            //TODO: check to blend with other chunks
 
+            //check to apply height data
             if (!heightData.ElevationAmount.Approximately(0))
             {
                 //use perlin:
@@ -224,10 +224,21 @@ namespace Gumball
                 float heightPercent = desiredHeight / difference;
                 desiredHeight *= heightData.ElevationModifier.Evaluate(heightPercent);
             }
-
+            
+            //check to blend with the road
+            bool canBlendWithRoad = roadBlendDistance > 0 && distanceToSpline < (roadFlattenDistance + roadBlendDistance);
+            if (canBlendWithRoad)
+            {
+                float blendPercent = Mathf.Clamp01((distanceToSpline - roadFlattenDistance) / roadBlendDistance);
+                float desiredHeightDifference = vertex.y + desiredHeight;
+                desiredHeight = vertex.y + (desiredHeightDifference * blendPercent);
+            }
+            
             //minus the height difference from road
             float heightDifferenceFromRoad = vertex.y - closestSplineSample.position.y;
             desiredHeight -= heightDifferenceFromRoad;
+
+            //TODO: check to blend with other chunks
 
             return desiredHeight;
         }

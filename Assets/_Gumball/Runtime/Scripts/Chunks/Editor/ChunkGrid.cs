@@ -22,6 +22,7 @@ namespace Gumball
         private readonly List<List<int>> verticesAsGrid = new();
         private readonly List<Vector3> vertices = new();
         private readonly float timeToStopShowingDebug;
+        private readonly bool showDebugLines;
 
         public ReadOnlyCollection<Vector3> Vertices => vertices.AsReadOnly();
         public Vector3 GridCenter { get; private set; }
@@ -29,29 +30,22 @@ namespace Gumball
         /// The width/height of the grid.
         /// </summary>
         public float GridLength { get; private set; }
-            
+
         public ChunkGrid(Chunk chunk, float resolution, float widthAroundRoad, bool showDebugLines = false)
         {
             this.chunk = chunk;
             this.resolution = resolution;
             this.widthAroundRoad = widthAroundRoad;
+            this.showDebugLines = showDebugLines;
 
             timeToStopShowingDebug = Time.realtimeSinceStartup + debugLineDuration;
             
-            CreateGrid(showDebugLines);
+            CreateGrid();
         }
         
         public void OnDrawGizmos()
         {
-            float timeLeft = timeToStopShowingDebug - Time.realtimeSinceStartup;
-            if (timeLeft < 0)
-                return;
-            
-            for (int vertexIndex = 0; vertexIndex < Vertices.Count; vertexIndex++)
-            {
-                Vector3 vertex = Vertices[vertexIndex];
-                Handles.Label(vertex, vertexIndex.ToString());
-            }
+            ShowDebugLabels();
         }
 
         public int GetVertexIndexAt(int column, int row)
@@ -105,7 +99,7 @@ namespace Gumball
             return verticesAsGrid[column - 1][row];
         }
 
-        private void CreateGrid(bool showDebugLines = false)
+        private void CreateGrid()
         {
             //TODO: while generating the grid, the spline should be flattened
             GridCenter = chunk.GetCenterOfSpline();
@@ -200,5 +194,21 @@ namespace Gumball
             return Vector3.Cross(dirVector1, dirVector2).z;
         }
 
+        private void ShowDebugLabels()
+        {
+            if (!showDebugLines)
+                return;
+            
+            float timeLeft = timeToStopShowingDebug - Time.realtimeSinceStartup;
+            if (timeLeft < 0)
+                return;
+            
+            for (int vertexIndex = 0; vertexIndex < Vertices.Count; vertexIndex++)
+            {
+                Vector3 vertex = Vertices[vertexIndex];
+                Handles.Label(vertex, vertexIndex.ToString());
+            }
+        }
+        
     }
 }
