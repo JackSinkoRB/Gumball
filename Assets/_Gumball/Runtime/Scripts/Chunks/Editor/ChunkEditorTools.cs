@@ -12,7 +12,8 @@ namespace Gumball
     {
 
         private Chunk chunk => GetComponent<Chunk>();
-
+        private GameObject previousSelection;
+        
         private void OnEnable()
         {
             chunk.SplineComputer.onRebuild += CheckToUpdateTerrainImmediately;
@@ -21,6 +22,17 @@ namespace Gumball
         private void OnDisable()
         {
             chunk.SplineComputer.onRebuild -= CheckToUpdateTerrainImmediately;
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (terrainData != null && terrainData.Grid != null)
+                terrainData.Grid.OnDrawGizmos();
+        }
+
+        private void Update()
+        {
+            previousSelection = Selection.activeGameObject;
         }
 
         #region Connect to a chunk

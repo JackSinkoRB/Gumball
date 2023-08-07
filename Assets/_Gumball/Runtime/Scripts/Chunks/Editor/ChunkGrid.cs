@@ -3,10 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Dreamteck.Splines;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
 {
+    [ExecuteAlways]
     public class ChunkGrid
     {
         
@@ -17,6 +21,7 @@ namespace Gumball
         private readonly float widthAroundRoad;
         private readonly List<List<int>> verticesAsGrid = new();
         private readonly List<Vector3> vertices = new();
+        private readonly float timeToStopShowingDebug;
 
         public ReadOnlyCollection<Vector3> Vertices => vertices.AsReadOnly();
         public Vector3 GridCenter { get; private set; }
@@ -30,8 +35,23 @@ namespace Gumball
             this.chunk = chunk;
             this.resolution = resolution;
             this.widthAroundRoad = widthAroundRoad;
+
+            timeToStopShowingDebug = Time.realtimeSinceStartup + debugLineDuration;
             
             CreateGrid(showDebugLines);
+        }
+        
+        public void OnDrawGizmos()
+        {
+            float timeLeft = timeToStopShowingDebug - Time.realtimeSinceStartup;
+            if (timeLeft < 0)
+                return;
+            
+            for (int vertexIndex = 0; vertexIndex < Vertices.Count; vertexIndex++)
+            {
+                Vector3 vertex = Vertices[vertexIndex];
+                Handles.Label(vertex, vertexIndex.ToString());
+            }
         }
 
         public int GetVertexIndexAt(int column, int row)

@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Dreamteck.Splines;
 using MyBox;
+using UnityEditor;
 using UnityEngine;
-using Random = System.Random;
 
 namespace Gumball
 {
@@ -15,15 +15,15 @@ namespace Gumball
         [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
         [PositiveValueOnly, SerializeField] private float resolution = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
-        [PositiveValueOnly, SerializeField] private float roadBlendDistance = 5;
+        [PositiveValueOnly, SerializeField] private float roadBlendDistance = 25;
         
         [SerializeField] private TerrainHeightData heightData;
 
         public float WidthAroundRoad => widthAroundRoad;
         public float Resolution => resolution;
+        public ChunkGrid Grid { get; private set; }
         
         private Chunk chunk;
-        private ChunkGrid grid;
 
         private float maxPerlinHeight;
         private float minPerlinHeight;
@@ -37,7 +37,7 @@ namespace Gumball
 
         private void UpdateGrid()
         {
-            grid = new ChunkGrid(chunk, resolution, widthAroundRoad);
+            Grid = new ChunkGrid(chunk, resolution, widthAroundRoad);
         }
         
         private GameObject GenerateTerrainMeshFromGrid(Material[] materialsToAssign = null)
@@ -45,7 +45,7 @@ namespace Gumball
             //create the gameobject
             GameObject terrain = new GameObject("Terrain");
             terrain.transform.SetParent(chunk.transform);
-            terrain.transform.position = grid.GridCenter;
+            terrain.transform.position = Grid.GridCenter;
             terrain.tag = ChunkUtils.TerrainTag;
             
             //apply materials
@@ -63,7 +63,7 @@ namespace Gumball
 
             //offset the vertices so the origin is (0,0,0)
             for (int i = 0; i < verticesWithHeightData.Count; i++)
-                verticesWithHeightData[i] -= grid.GridCenter;
+                verticesWithHeightData[i] -= Grid.GridCenter;
 
             //setup the mesh
             mesh.SetVertices(verticesWithHeightData);
@@ -80,14 +80,14 @@ namespace Gumball
 
         private Vector2[] GetUVs()
         {
-            Vector2[] uvs = new Vector2[grid.Vertices.Count];
+            Vector2[] uvs = new Vector2[Grid.Vertices.Count];
 
             int vertexIndex = 0;
-            for (int column = 0; column < grid.GetNumberOfColumns(); column++)
+            for (int column = 0; column < Grid.GetNumberOfColumns(); column++)
             {
-                for (int row = 0; row < grid.GetNumberOfRowsInColumn(column); row++)
+                for (int row = 0; row < Grid.GetNumberOfRowsInColumn(column); row++)
                 {
-                    if (grid.GetVertexIndexAt(column, row) == -1)
+                    if (Grid.GetVertexIndexAt(column, row) == -1)
                         continue;
                     
                     //use the grid position
@@ -108,17 +108,17 @@ namespace Gumball
             
             //iterate over all the columns
             int vertexIndex = 0;
-            for (int column = 0; column < grid.GetNumberOfColumns(); column++)
+            for (int column = 0; column < Grid.GetNumberOfColumns(); column++)
             {
-                for (int row = 0; row < grid.GetNumberOfRowsInColumn(column); row++)
+                for (int row = 0; row < Grid.GetNumberOfRowsInColumn(column); row++)
                 {
-                    if (grid.GetVertexIndexAt(column, row) == -1)
+                    if (Grid.GetVertexIndexAt(column, row) == -1)
                         continue;
                     
-                    int vertexIndexAbove = grid.GetVertexAbove(column, row);
-                    int vertexIndexBelow = grid.GetVertexBelow(column, row);
-                    int vertexIndexOnRight = grid.GetVertexOnRight(column, row);
-                    int vertexIndexOnLeft = grid.GetVertexOnLeft(column, row);
+                    int vertexIndexAbove = Grid.GetVertexAbove(column, row);
+                    int vertexIndexBelow = Grid.GetVertexBelow(column, row);
+                    int vertexIndexOnRight = Grid.GetVertexOnRight(column, row);
+                    int vertexIndexOnLeft = Grid.GetVertexOnLeft(column, row);
 
                     bool hasVertexAbove = vertexIndexAbove != -1;
                     bool hasVertexBelow = vertexIndexBelow != -1;
@@ -169,11 +169,9 @@ namespace Gumball
             maxPerlinHeight = Mathf.NegativeInfinity;
             minPerlinHeight = Mathf.Infinity;
             
-            foreach (Vector3 vertex in grid.Vertices)
+            foreach (Vector3 vertex in Grid.Vertices)
             {
                 float perlinHeight = GetPerlinHeightForVertex(vertex);
-                
-                //TODO: do we care about vertices that don't use perlin?
                 
                 //check if it is highest or lowest
                 if (perlinHeight > maxPerlinHeight)
