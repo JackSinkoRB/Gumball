@@ -29,8 +29,7 @@ namespace Gumball
 
         private void OnDrawGizmos()
         {
-            if (terrainData != null && terrainData.Grid != null)
-                terrainData.Grid.OnDrawGizmos();
+            currentGrid?.OnDrawGizmos();
         }
 
         private void Update()
@@ -62,19 +61,23 @@ namespace Gumball
         [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
         [SerializeField] private bool updateImmediately = true;
 
+        private ChunkGrid currentGrid;
+        
         private static bool subscribedToPlayModeStateChanged;
         private static PlayModeStateChange playModeState;
         
         [ButtonMethod]
         public void ShowTerrainGrid()
         {
-            new ChunkGrid(chunk, terrainData.Resolution, terrainData.WidthAroundRoad, true);
+            currentGrid = new ChunkGrid(chunk, terrainData.Resolution, terrainData.WidthAroundRoad, true);
         }
         
         [ButtonMethod]
         public void CreateTerrain()
         {
             currentTerrain = terrainData.Create(chunk);
+            currentGrid = terrainData.Grid;
+            
             Selection.SetActiveObjectWithContext(currentTerrain, chunk);
             Undo.RegisterCreatedObjectUndo(currentTerrain, "Create Terrain");
         }
