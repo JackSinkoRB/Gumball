@@ -7,10 +7,21 @@ using UnityEngine;
 
 namespace Gumball
 {
+    [ExecuteAlways]
     public class ChunkEditorTools : MonoBehaviour
     {
 
         private Chunk chunk => GetComponent<Chunk>();
+
+        private void OnEnable()
+        {
+            chunk.SplineComputer.onRebuild += CheckToUpdateTerrainImmediately;
+        }
+
+        private void OnDisable()
+        {
+            chunk.SplineComputer.onRebuild -= CheckToUpdateTerrainImmediately;
+        }
 
         #region Connect to a chunk
         [SerializeField] private Chunk chunkToConnectWith;
