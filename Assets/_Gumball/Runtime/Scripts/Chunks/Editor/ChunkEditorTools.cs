@@ -13,6 +13,9 @@ namespace Gumball
 
         private Chunk chunk => GetComponent<Chunk>();
         private GameObject previousSelection;
+        private float timeWhenUnityLastUpdated = 0;
+
+        private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
         
         private void OnEnable()
         {
@@ -33,8 +36,10 @@ namespace Gumball
         private void Update()
         {
             previousSelection = Selection.activeGameObject;
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+                timeWhenUnityLastUpdated = Time.realtimeSinceStartup;
         }
-
+        
         #region Connect to a chunk
         [SerializeField] private Chunk chunkToConnectWith;
         
@@ -94,6 +99,12 @@ namespace Gumball
             if (!updateImmediately)
                 return;
             
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+                timeWhenUnityLastUpdated = Time.realtimeSinceStartup;
+            
+            if (timeSinceUnityUpdated < 1) //likely recompiling
+                return;
+            
             bool justSelected = previousSelection != gameObject && Selection.activeGameObject == gameObject;
             if (justSelected)
                 return;
@@ -101,9 +112,12 @@ namespace Gumball
             bool justDeselected = previousSelection == gameObject && Selection.activeGameObject != gameObject;
             if (justDeselected)
                 return;
+
+            bool isSelected = Selection.activeGameObject == gameObject;
+            if (!isSelected)
+                return;
             
             if (playModeState is PlayModeStateChange.ExitingEditMode or PlayModeStateChange.ExitingPlayMode
-                || EditorApplication.isUpdating
                 || (Application.isPlaying && !LoadingSceneManager.HasLoaded))
                 return;
 
@@ -114,8 +128,7 @@ namespace Gumball
             EditorApplication.delayCall+=()=>
             {
                 if (currentTerrain == null
-                    || playModeState == PlayModeStateChange.ExitingEditMode || playModeState == PlayModeStateChange.ExitingPlayMode
-                    || EditorApplication.isUpdating)
+                    || playModeState == PlayModeStateChange.ExitingEditMode || playModeState == PlayModeStateChange.ExitingPlayMode)
                     return;
 
                 GlobalLoggers.TerrainLogger.Log($"Recreating terrain for '{chunk.name}'");
