@@ -30,6 +30,8 @@ namespace Gumball
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
             
+        public static bool HasLoaded { get; private set; }
+        
         private IEnumerator Start()
         {
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
@@ -65,6 +67,8 @@ namespace Gumball
             Addressables.UnloadSceneAsync(BootSceneManager.LoadingSceneInstance);
             
             GlobalLoggers.LoadingLogger.Log($"Total boot time = {TimeSpan.FromSeconds(Time.realtimeSinceStartup).ToPrettyString(true)}");
+
+            HasLoaded = true;
         }
         
         private void Update()

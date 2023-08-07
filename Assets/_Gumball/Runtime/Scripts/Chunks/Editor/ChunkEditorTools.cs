@@ -58,7 +58,7 @@ namespace Gumball
         [SerializeField] private bool updateImmediately = true;
 
         private static bool subscribedToPlayModeStateChanged;
-        private static bool isExitingPlaymode;
+        private static PlayModeStateChange playModeState;
         
         [ButtonMethod]
         public void ShowTerrainGrid()
@@ -86,7 +86,7 @@ namespace Gumball
         
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            isExitingPlaymode = state == PlayModeStateChange.ExitingPlayMode;
+            playModeState = state;
         }
         
         private void CheckToUpdateTerrainImmediately()
@@ -94,7 +94,17 @@ namespace Gumball
             if (!updateImmediately)
                 return;
             
-            if (isExitingPlaymode || EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isUpdating)
+            bool justSelected = previousSelection != gameObject && Selection.activeGameObject == gameObject;
+            if (justSelected)
+                return;
+
+            bool justDeselected = previousSelection == gameObject && Selection.activeGameObject != gameObject;
+            if (justDeselected)
+                return;
+            
+            if (playModeState is PlayModeStateChange.ExitingEditMode or PlayModeStateChange.ExitingPlayMode
+                || EditorApplication.isUpdating
+                || (Application.isPlaying && !LoadingSceneManager.HasLoaded))
                 return;
 
             TryFindExistingTerrain();
@@ -103,9 +113,12 @@ namespace Gumball
 
             EditorApplication.delayCall+=()=>
             {
-                if (currentTerrain == null || EditorApplication.isPlayingOrWillChangePlaymode)
+                if (currentTerrain == null
+                    || playModeState == PlayModeStateChange.ExitingEditMode || playModeState == PlayModeStateChange.ExitingPlayMode
+                    || EditorApplication.isUpdating)
                     return;
 
+                GlobalLoggers.TerrainLogger.Log($"Recreating terrain for '{chunk.name}'");
                 Material[] previousMaterials = currentTerrain.GetComponent<MeshRenderer>().sharedMaterials;
                 DestroyImmediate(currentTerrain);
                 currentTerrain = terrainData.Create(chunk, previousMaterials);
