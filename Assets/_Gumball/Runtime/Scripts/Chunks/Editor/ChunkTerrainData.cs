@@ -12,9 +12,10 @@ namespace Gumball
     public class ChunkTerrainData
     {
 
-        [SerializeField] private float widthAroundRoad = 100;
-        [SerializeField] private float resolution = 100;
-        [SerializeField] private float distanceToFlattenAroundSpline = 15;
+        [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
+        [PositiveValueOnly, SerializeField] private float resolution = 100;
+        [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
+        [PositiveValueOnly, SerializeField] private float roadBlendDistance = 5;
         
         [SerializeField] private TerrainHeightData heightData;
 

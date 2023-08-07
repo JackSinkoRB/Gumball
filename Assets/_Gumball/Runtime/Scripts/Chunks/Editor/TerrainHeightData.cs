@@ -14,22 +14,22 @@ namespace Gumball
         [SerializeField] public int Seed = 100;
 
         [Tooltip("How many layers of perlin noise is combined? This can add more detail to the terrain.")]
-        [SerializeField]
+        [MinValue(1)]
         public int LayersOfDetail = 3;
 
-        [Tooltip("Controls the increase in frequency of octaves.")] [SerializeField]
-        public float MountainFrequency = 1;
+        [Tooltip("Controls the increase in frequency of octaves.")]
+        [PositiveValueOnly] public float MountainFrequency = 1;
 
-        [Tooltip("Controls the decrease in amplitude of octaves. Higher value = bigger mountains/")] [SerializeField]
-        public float ElevationAmount = 3;
+        [Tooltip("Controls the decrease in amplitude of octaves. Higher value = bigger mountains/")]
+        [PositiveValueOnly] public float ElevationAmount = 3;
 
-        [Tooltip("How much is the terrain raised above ground versus lowered below ground.")] [Range(-1, 1), SerializeField]
-        public float ElevationPercent = 0.5f;
+        [Tooltip("How much is the terrain raised above ground versus lowered below ground.")]
+        [Range(-1, 1)] public float ElevationPercent = 0.5f;
 
         [Tooltip("An additional modifier to the elevation settings.")]
         public AnimationCurve ElevationModifier = AnimationCurve.Linear(0, 0, 1, 1);
         
-        [SerializeField] public float Scale = 100;
+        public float Scale = 100;
 
         public bool IsFlat => ElevationAmount.Approximately(0);
 
