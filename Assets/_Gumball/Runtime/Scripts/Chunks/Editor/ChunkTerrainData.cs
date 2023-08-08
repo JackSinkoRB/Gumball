@@ -209,7 +209,10 @@ namespace Gumball
             //check to flatten under road
             bool canFlattenUnderRoad = distanceToSpline < roadFlattenDistance;
             if (canFlattenUnderRoad)
-                return closestSplineSample.position.y - 0.1f; //let it sit just under the road, so it doesn't clip
+            {
+                const float amountToSitUnderRoad = 0.5f; //let it sit just under the road, so it doesn't clip
+                return closestSplineSample.position.y - amountToSitUnderRoad;
+            }
 
             //check to apply height data
             if (!heightData.ElevationAmount.Approximately(0))
