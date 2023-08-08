@@ -55,7 +55,7 @@ namespace Gumball
         private static void RotateChunkToAlign(Chunk chunkToAlign, Chunk chunkToAlignWith)
         {
             SplinePoint chunkToAlignPoint = chunkToAlign.SplineComputer.GetPoint(0);
-            SplinePoint chunkToAlignWithPoint = chunkToAlignWith.SplineComputer.GetPoint(chunkToAlign.LastPointIndex);
+            SplinePoint chunkToAlignWithPoint = chunkToAlignWith.SplineComputer.GetPoint(chunkToAlignWith.LastPointIndex);
             
             //get the tangent vector for each point
             Vector3 chunkToAlignTangentVector = GetTangentVectorFromPoint(chunkToAlignPoint);
