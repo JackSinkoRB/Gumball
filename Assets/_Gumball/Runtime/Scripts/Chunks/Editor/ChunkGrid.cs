@@ -25,6 +25,8 @@ namespace Gumball
         private readonly bool showDebugLines;
         
         private int vertexCount;
+        private float distanceBetweenVertices;
+        private Vector3 startVertexPosition;
         private SplineSample firstSample;
         private Vector3 firstTangent;
         private SplineSample lastSample;
@@ -46,6 +48,7 @@ namespace Gumball
 
             timeToStopShowingDebug = Time.realtimeSinceStartup + debugLineDuration;
 
+            UpdateGridData();
             UpdateSplineSampleData();
             CreateGrid();
         }
@@ -62,17 +65,17 @@ namespace Gumball
         
         public int GetNumberOfColumns()
         {
-            return verticesAsGrid.Count;
+            return resolution + 1;
         }
         
-        public int GetNumberOfRowsInColumn(int column)
+        public int GetNumberOfRows()
         {
-            return verticesAsGrid[column].Count;
+            return resolution + 1;
         }
         
         public int GetVertexAbove(int column, int row)
         {
-            if (row + 1 >= GetNumberOfRowsInColumn(column))
+            if (row + 1 >= GetNumberOfRows())
                 return -1;
             if (column < 0 || column >= GetNumberOfColumns())
                 return -1;
@@ -92,7 +95,7 @@ namespace Gumball
         {
             if (column + 1 >= GetNumberOfColumns())
                 return -1;
-            if (row < 0 || row >= GetNumberOfRowsInColumn(column+1))
+            if (row < 0 || row >= GetNumberOfRows())
                 return -1;
             return verticesAsGrid[column + 1][row];
         }
@@ -101,9 +104,17 @@ namespace Gumball
         {
             if (column <= 0)
                 return -1;
-            if (row < 0 || row >= GetNumberOfRowsInColumn(column-1))
+            if (row < 0 || row >= GetNumberOfRows())
                 return -1;
             return verticesAsGrid[column - 1][row];
+        }
+
+        private void UpdateGridData()
+        {
+            GridCenter = chunk.GetCenterOfSpline();
+            GridLength = chunk.SplineComputer.CalculateLength() + (widthAroundRoad);
+            distanceBetweenVertices = GridLength / resolution;
+            startVertexPosition = GridCenter.Flatten() - new Vector3(GridLength/2f, 0, GridLength/2f);
         }
 
         private void UpdateSplineSampleData()
@@ -120,37 +131,21 @@ namespace Gumball
 
         private void CreateGrid()
         {
-            GridCenter = chunk.GetCenterOfSpline();
-            GridLength = chunk.SplineComputer.CalculateLength() + (widthAroundRoad);
-            float distanceBetweenVertices = GridLength / resolution;
-            Vector3 startVertexPosition = GridCenter.Flatten() - new Vector3(GridLength/2f, 0, GridLength/2f);
-            
-            Vector3 firstTangentStart = firstSample.position.Flatten() - firstTangent;
-            Vector3 firstTangentEnd = firstSample.position.Flatten() + firstTangent;
-            Vector3 lastTangentStart = lastSample.position.Flatten() - lastTangent;
-            Vector3 lastTangentEnd = lastSample.position.Flatten() + lastTangent;
-            
             if (showDebugLines)
             {
                 Debug.DrawLine(firstSample.position.Flatten(), firstSample.position.Flatten() + firstTangent * GridLength, Color.magenta, debugLineDuration);
-                Debug.DrawLine(firstSample.position.Flatten(), firstSample.position.Flatten() + -firstTangent * GridLength, Color.magenta, debugLineDuration);
+                Debug.DrawLine(firstSample.position.Flatten(), firstSample.position.Flatten() - firstTangent * GridLength, Color.magenta, debugLineDuration);
+                
+                Debug.DrawLine(lastSample.position.Flatten(), lastSample.position.Flatten() + lastTangent * GridLength, Color.magenta, debugLineDuration);
+                Debug.DrawLine(lastSample.position.Flatten(), lastSample.position.Flatten() - lastTangent * GridLength, Color.magenta, debugLineDuration);
             }
             
-            if (showDebugLines)
-            {
-                Debug.DrawLine(lastSample.position.Flatten(), lastSample.position.Flatten() + lastTangent * GridLength, Color.magenta, debugLineDuration);
-                Debug.DrawLine(lastSample.position.Flatten(), lastSample.position.Flatten() + -lastTangent * GridLength, Color.magenta, debugLineDuration);
-            }
-
             vertexCount = 0;
             vertices.Clear();
             verticesAsGrid.Clear();
             for (int column = 0; column <= resolution; column++)
             {
                 verticesAsGrid.Add(new List<int>()); //add each column, even if no vertex is found
-
-                int firstValidVertexColumn = -1;
-                int lastValidVertexInColumn = -1;
 
                 for (int row = 0; row <= resolution; row++)
                 {
@@ -181,37 +176,14 @@ namespace Gumball
                     }
 
                     AddVertex(vertexPosition, column, row);
-
-                    if (firstValidVertexColumn == -1)
-                        firstValidVertexColumn = vertexCount - 1;
-                    lastValidVertexInColumn = vertexCount - 1;
-                }
-                
-                //move the last vertices to the tangents to bring the terrain all the way to the spline edge:
-                
-                if (firstValidVertexColumn != -1)
-                {
-                    //check to move vertex on the first tangent
-                    float firstTangentX = startVertexPosition.x + column * distanceBetweenVertices;
-                    Vector3 pointOnFirstTangent = GetPointOnTangent(firstTangentX, firstTangentStart, firstTangentEnd);
-                    float distance = Vector2.Distance(pointOnFirstTangent.FlattenAsVector2(), vertices[firstValidVertexColumn].FlattenAsVector2());
-                    if (distance < distanceBetweenVertices)
-                        vertices[firstValidVertexColumn] = pointOnFirstTangent;
-                }
-                
-                if (lastValidVertexInColumn != -1)
-                {
-                    //check to move vertex on the last tangent
-                    float lastTangentX = startVertexPosition.x + column * distanceBetweenVertices;
-                    Vector3 pointOnLastTangent = GetPointOnTangent(lastTangentX, lastTangentStart, lastTangentEnd);
-                    float distance = Vector2.Distance(pointOnLastTangent.FlattenAsVector2(), vertices[lastValidVertexInColumn].FlattenAsVector2());
-                    if (distance < distanceBetweenVertices)
-                        vertices[lastValidVertexInColumn] = pointOnLastTangent;
                 }
             }
 
+            //move the last vertices to the tangents to bring the terrain all the way to the spline edge
+            AlignEdges();
         }
-
+        
+        
         private void AddVertex(Vector3 vertexPosition, int column, int row)
         {
             bool containsIndex = column < verticesAsGrid.Count;
@@ -220,21 +192,161 @@ namespace Gumball
             
             vertices.Add(vertexPosition);
 
-            //add to [column] as [row]
-            verticesAsGrid[column].Insert(row, vertexCount);
+            if (row < verticesAsGrid[column].Count)
+                //replace
+                verticesAsGrid[column][row] = vertexCount;
+            
+            //add to [column] as [row]]
+            else verticesAsGrid[column].Insert(row, vertexCount);
 
             vertexCount++;
-            
-            if (showDebugLines)
-                Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 20, Color.blue, debugLineDuration);
+        }
+
+        private void AlignEdges()
+        {
+            AlignEdges(true); //align first
+            AlignEdges(false); //align last
         }
         
-        private Vector3 GetPointOnTangent(float xPos, Vector3 tangentStartPoint, Vector3 tangentEndPoint)
+        /// <summary>
+        /// Moves the edges to the first or last tangent.
+        /// </summary>
+        private void AlignEdges(bool useFirstTangent)
+        {
+            SplineSample sample = useFirstTangent ? firstSample : lastSample;
+            Vector3 tangent = useFirstTangent ? firstTangent : lastTangent;
+
+            Vector3 tangentStart = sample.position.Flatten() - tangent;
+            Vector3 tangentEnd = sample.position.Flatten() + tangent;
+
+            //angle between -180 and 180
+            float tangentAngle = Vector2.SignedAngle(tangent.FlattenAsVector2(), Vector2.right);
+
+            //angles when using the last tangent - first tangent should be opposite
+            bool movingRight = tangentAngle >= 45 && tangentAngle <= 135;
+            bool movingLeft = tangentAngle <= -45 && tangentAngle >= -135;
+            bool movingUp = tangentAngle > -45 && tangentAngle < 45;
+            bool movingDown = tangentAngle > 135 || tangentAngle < -135;
+
+            if (useFirstTangent)
+            {
+                //flip
+                movingRight = !movingRight;
+                movingLeft = !movingLeft;
+                movingUp = !movingUp;
+                movingDown = !movingDown;
+            }
+            
+            if (showDebugLines)
+            {
+                Debug.DrawLine(sample.position.Flatten(), sample.position.Flatten() + tangent * GridLength, Color.yellow, debugLineDuration);
+                Debug.DrawLine(sample.position.Flatten(), sample.position.Flatten() + Vector3.right * GridLength, Color.yellow, debugLineDuration);
+                GlobalLoggers.TerrainLogger.Log(Vector2.SignedAngle(tangent.FlattenAsVector2(), Vector2.right) + " - " + movingRight + ", " + movingLeft + ", " + movingUp + ", " + movingDown);
+            }
+            
+            if (movingRight || movingLeft)
+            {
+                //using rows
+                for (int row = 0; row < GetNumberOfRows(); row++)
+                {
+                    var (firstValidVertexInRow, lastValidVertexInRow) = GetValidVertexBoundsInRow(row);
+                 
+                    //moving right? move the end rows to the tangent
+                    //moving left? move the first rows to the tangent
+                    int vertexToUse = movingLeft ? firstValidVertexInRow : lastValidVertexInRow;
+                    if (vertexToUse != -1)
+                    {
+                        float z = startVertexPosition.z + row * distanceBetweenVertices;
+                        Vector3 pointOnLastTangent = GetPointOnTangentUsingZ(z, tangentStart, tangentEnd);
+                        float distance = Vector2.Distance(pointOnLastTangent.FlattenAsVector2(), vertices[vertexToUse].FlattenAsVector2());
+                        if (distance < distanceBetweenVertices) 
+                            vertices[vertexToUse] = pointOnLastTangent;
+                    }
+                }
+            }
+            
+            if (movingUp || movingDown)
+            {
+                //using columns
+                for (int column = 0; column < GetNumberOfColumns(); column++)
+                {
+                    var (firstValidVertexInColumn, lastValidVertexInColumn) = GetValidVertexBoundsInColumn(column);
+
+                    //moving up? move the end columns to the tangent
+                    //moving down? move the first columns to the tangent
+                    int vertexToUse = movingUp ? lastValidVertexInColumn : firstValidVertexInColumn;
+                    if (vertexToUse != -1)
+                    {
+                        float x = startVertexPosition.x + column * distanceBetweenVertices;
+                        Vector3 pointOnLastTangent = GetPointOnTangentUsingX(x, tangentStart, tangentEnd);
+                        float distance = Vector2.Distance(pointOnLastTangent.FlattenAsVector2(), vertices[vertexToUse].FlattenAsVector2());
+                        if (distance < distanceBetweenVertices) 
+                            vertices[vertexToUse] = pointOnLastTangent;
+                    }
+                }
+            }
+        }
+        
+        /// <returns>
+        /// Item 1: the index of the first valid vertex in the column<br></br>
+        /// Item 2: the index of the last valid vertex in the column
+        /// </returns>
+        private (int, int) GetValidVertexBoundsInColumn(int column)
+        {
+            int firstValidVertexInColumn = -1;
+            int lastValidVertexInColumn = -1;
+
+            for (int row = 0; row < GetNumberOfRows(); row++)
+            {
+                int vertexIndex = GetVertexIndexAt(column, row);
+                if (vertexIndex == -1)
+                    continue;
+                
+                if (firstValidVertexInColumn == -1)
+                    firstValidVertexInColumn = vertexIndex;
+                lastValidVertexInColumn = vertexIndex;
+            }
+                
+            return (firstValidVertexInColumn, lastValidVertexInColumn);
+        }
+        
+        /// <returns>
+        /// Item 1: the index of the first valid vertex in the column<br></br>
+        /// Item 2: the index of the last valid vertex in the column
+        /// </returns>
+        private (int, int) GetValidVertexBoundsInRow(int row)
+        {
+            int firstValidVertexInRow = -1;
+            int lastValidVertexInRow = -1;
+
+            for (int column = 0; column < GetNumberOfColumns(); column++)
+            {
+                int vertexIndex = GetVertexIndexAt(column, row);
+                if (vertexIndex == -1)
+                    continue;
+                
+                if (firstValidVertexInRow == -1)
+                    firstValidVertexInRow = vertexIndex;
+                lastValidVertexInRow = vertexIndex;
+            }
+                
+            return (firstValidVertexInRow, lastValidVertexInRow);
+        }
+
+        private Vector3 GetPointOnTangentUsingX(float xPos, Vector3 tangentStartPoint, Vector3 tangentEndPoint)
         {
             Vector3 direction = (tangentEndPoint - tangentStartPoint).normalized;
             float distance = xPos - tangentStartPoint.x;
             float z = tangentStartPoint.z + distance * direction.z / direction.x;
             return new Vector3(xPos, 0, z);
+        }
+        
+        private Vector3 GetPointOnTangentUsingZ(float zPos, Vector3 tangentStartPoint, Vector3 tangentEndPoint)
+        {
+            Vector3 direction = (tangentEndPoint - tangentStartPoint).normalized;
+            float distance = (zPos - tangentStartPoint.z) * (direction.x / direction.z);
+            float x = tangentStartPoint.x + distance;
+            return new Vector3(x, 0, zPos);
         }
 
         private bool IsBelowTangent(Vector3 tangentStartPoint, Vector3 tangentEndPoint, Vector3 point)
@@ -269,8 +381,10 @@ namespace Gumball
             
             for (int vertexIndex = 0; vertexIndex < Vertices.Count; vertexIndex++)
             {
-                Vector3 vertex = Vertices[vertexIndex];
-                Handles.Label(vertex, vertexIndex.ToString());
+                Vector3 vertexPosition = Vertices[vertexIndex];
+                
+                Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 20, Color.blue);
+                Handles.Label(vertexPosition, vertexIndex.ToString());
             }
         }
         

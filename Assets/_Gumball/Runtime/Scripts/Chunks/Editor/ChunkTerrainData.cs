@@ -85,7 +85,7 @@ namespace Gumball
             int vertexIndex = 0;
             for (int column = 0; column < Grid.GetNumberOfColumns(); column++)
             {
-                for (int row = 0; row < Grid.GetNumberOfRowsInColumn(column); row++)
+                for (int row = 0; row < Grid.GetNumberOfRows(); row++)
                 {
                     if (Grid.GetVertexIndexAt(column, row) == -1)
                         continue;
@@ -109,7 +109,7 @@ namespace Gumball
             //iterate over all the columns
             for (int column = 0; column < Grid.GetNumberOfColumns(); column++)
             {
-                for (int row = 0; row < Grid.GetNumberOfRowsInColumn(column); row++)
+                for (int row = 0; row < Grid.GetNumberOfRows(); row++)
                 {
                     int vertexIndex = Grid.GetVertexIndexAt(column, row);
                     if (vertexIndex == -1)
