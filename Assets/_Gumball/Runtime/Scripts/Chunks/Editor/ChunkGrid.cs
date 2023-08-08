@@ -17,12 +17,18 @@ namespace Gumball
         private const float debugLineDuration = 6;
 
         private readonly Chunk chunk;
-        private readonly float resolution;
+        private readonly int resolution;
         private readonly float widthAroundRoad;
         private readonly List<List<int>> verticesAsGrid = new();
         private readonly List<Vector3> vertices = new();
         private readonly float timeToStopShowingDebug;
         private readonly bool showDebugLines;
+        
+        private int vertexCount;
+        private SplineSample firstSample;
+        private Vector3 firstTangent;
+        private SplineSample lastSample;
+        private Vector3 lastTangent;
 
         public ReadOnlyCollection<Vector3> Vertices => vertices.AsReadOnly();
         public Vector3 GridCenter { get; private set; }
@@ -31,7 +37,7 @@ namespace Gumball
         /// </summary>
         public float GridLength { get; private set; }
 
-        public ChunkGrid(Chunk chunk, float resolution, float widthAroundRoad, bool showDebugLines = false)
+        public ChunkGrid(Chunk chunk, int resolution, float widthAroundRoad, bool showDebugLines = false)
         {
             this.chunk = chunk;
             this.resolution = resolution;
@@ -39,7 +45,8 @@ namespace Gumball
             this.showDebugLines = showDebugLines;
 
             timeToStopShowingDebug = Time.realtimeSinceStartup + debugLineDuration;
-            
+
+            UpdateSplineSampleData();
             CreateGrid();
         }
         
@@ -99,45 +106,57 @@ namespace Gumball
             return verticesAsGrid[column - 1][row];
         }
 
-        private void CreateGrid()
+        private void UpdateSplineSampleData()
         {
-            //TODO: while generating the grid, the spline should be flattened
-            GridCenter = chunk.GetCenterOfSpline();
-            GridLength = chunk.SplineComputer.CalculateLength() + widthAroundRoad;
-            float distanceBetweenVertices = GridLength / resolution;
-            
             SampleCollection sampleCollection = new SampleCollection();
             chunk.SplineComputer.GetSamples(sampleCollection);
             
-            SplineSample firstSample = sampleCollection.samples[0];
-            Vector3 firstTangent = firstSample.right.Flatten();
+            firstSample = sampleCollection.samples[0];
+            firstTangent = firstSample.right.Flatten();
+            
+            lastSample = sampleCollection.samples[sampleCollection.length-1];
+            lastTangent = lastSample.right.Flatten();
+        }
+
+        private void CreateGrid()
+        {
+            GridCenter = chunk.GetCenterOfSpline();
+            GridLength = chunk.SplineComputer.CalculateLength() + (widthAroundRoad);
+            float distanceBetweenVertices = GridLength / resolution;
+            Vector3 startVertexPosition = GridCenter.Flatten() - new Vector3(GridLength/2f, 0, GridLength/2f);
+            
+            Vector3 firstTangentStart = firstSample.position.Flatten() - firstTangent;
+            Vector3 firstTangentEnd = firstSample.position.Flatten() + firstTangent;
+            Vector3 lastTangentStart = lastSample.position.Flatten() - lastTangent;
+            Vector3 lastTangentEnd = lastSample.position.Flatten() + lastTangent;
+            
             if (showDebugLines)
             {
                 Debug.DrawLine(firstSample.position.Flatten(), firstSample.position.Flatten() + firstTangent * GridLength, Color.magenta, debugLineDuration);
                 Debug.DrawLine(firstSample.position.Flatten(), firstSample.position.Flatten() + -firstTangent * GridLength, Color.magenta, debugLineDuration);
             }
-
-            SplineSample lastSample = sampleCollection.samples[sampleCollection.length-1];
-            Vector3 lastTangent = lastSample.right.Flatten();
+            
             if (showDebugLines)
             {
                 Debug.DrawLine(lastSample.position.Flatten(), lastSample.position.Flatten() + lastTangent * GridLength, Color.magenta, debugLineDuration);
                 Debug.DrawLine(lastSample.position.Flatten(), lastSample.position.Flatten() + -lastTangent * GridLength, Color.magenta, debugLineDuration);
             }
 
-            int vertexCount = 0;
+            vertexCount = 0;
             vertices.Clear();
             verticesAsGrid.Clear();
             for (int column = 0; column <= resolution; column++)
             {
-                verticesAsGrid.Add(new List<int>());
+                verticesAsGrid.Add(new List<int>()); //add each column, even if no vertex is found
+
+                int firstValidVertexColumn = -1;
+                int lastValidVertexInColumn = -1;
+
                 for (int row = 0; row <= resolution; row++)
                 {
-                    //add empty to [column] as [row]
-                    verticesAsGrid[column].Add(-1);
+                    verticesAsGrid[column].Add(-1); //add each row, even if no vertex is found
                     
                     //start at top left (center of spline - gridSize)
-                    Vector3 startVertexPosition = GridCenter.Flatten() - new Vector3(GridLength/2f, 0, GridLength/2f); //TODO: determine lowest point instead of 0
                     Vector3 vertexPosition = startVertexPosition + new Vector3(column * distanceBetweenVertices, 0, row * distanceBetweenVertices);
 
                     if (IsBelowTangent(firstSample.position.Flatten() - firstTangent, firstSample.position.Flatten() + firstTangent, vertexPosition))
@@ -146,7 +165,7 @@ namespace Gumball
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.red, debugLineDuration);
                         continue;
                     }
-                    
+
                     if (IsAboveTangent(lastSample.position.Flatten() - lastTangent, lastSample.position.Flatten() + lastTangent, vertexPosition))
                     {
                         if (showDebugLines)
@@ -160,17 +179,62 @@ namespace Gumball
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.cyan, debugLineDuration);
                         continue;
                     }
-                    
-                    vertices.Add(vertexPosition);
-                    //add to [column] as [row]
-                    verticesAsGrid[column][row] = vertexCount;
-                    
-                    vertexCount++;
 
-                    if (showDebugLines)
-                        Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 20, Color.blue, debugLineDuration);
+                    AddVertex(vertexPosition, column, row);
+
+                    if (firstValidVertexColumn == -1)
+                        firstValidVertexColumn = vertexCount - 1;
+                    lastValidVertexInColumn = vertexCount - 1;
+                }
+                
+                //move the last vertices to the tangents to bring the terrain all the way to the spline edge:
+                
+                if (firstValidVertexColumn != -1)
+                {
+                    //check to move vertex on the first tangent
+                    float firstTangentX = startVertexPosition.x + column * distanceBetweenVertices;
+                    Vector3 pointOnFirstTangent = GetPointOnTangent(firstTangentX, firstTangentStart, firstTangentEnd);
+                    float distance = Vector2.Distance(pointOnFirstTangent.FlattenAsVector2(), vertices[firstValidVertexColumn].FlattenAsVector2());
+                    if (distance < distanceBetweenVertices)
+                        vertices[firstValidVertexColumn] = pointOnFirstTangent;
+                }
+                
+                if (lastValidVertexInColumn != -1)
+                {
+                    //check to move vertex on the last tangent
+                    float lastTangentX = startVertexPosition.x + column * distanceBetweenVertices;
+                    Vector3 pointOnLastTangent = GetPointOnTangent(lastTangentX, lastTangentStart, lastTangentEnd);
+                    float distance = Vector2.Distance(pointOnLastTangent.FlattenAsVector2(), vertices[lastValidVertexInColumn].FlattenAsVector2());
+                    if (distance < distanceBetweenVertices)
+                        vertices[lastValidVertexInColumn] = pointOnLastTangent;
                 }
             }
+
+        }
+
+        private void AddVertex(Vector3 vertexPosition, int column, int row)
+        {
+            bool containsIndex = column < verticesAsGrid.Count;
+            if (!containsIndex)
+                verticesAsGrid[column] = new List<int>();
+            
+            vertices.Add(vertexPosition);
+
+            //add to [column] as [row]
+            verticesAsGrid[column].Insert(row, vertexCount);
+
+            vertexCount++;
+            
+            if (showDebugLines)
+                Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 20, Color.blue, debugLineDuration);
+        }
+        
+        private Vector3 GetPointOnTangent(float xPos, Vector3 tangentStartPoint, Vector3 tangentEndPoint)
+        {
+            Vector3 direction = (tangentEndPoint - tangentStartPoint).normalized;
+            float distance = xPos - tangentStartPoint.x;
+            float z = tangentStartPoint.z + distance * direction.z / direction.x;
+            return new Vector3(xPos, 0, z);
         }
 
         private bool IsBelowTangent(Vector3 tangentStartPoint, Vector3 tangentEndPoint, Vector3 point)

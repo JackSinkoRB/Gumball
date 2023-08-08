@@ -61,13 +61,44 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkToConnectWith: {fileID: 0}
+  currentTerrain: {fileID: 0}
   terrainData:
     widthAroundRoad: 100
     resolution: 100
+    roadFlattenDistance: 15
+    roadBlendDistance: 25
     heightData:
-      MountainWidth: {x: 100, y: 100}
-      MountainHeight: 20
-      Seed: {x: 100, y: 100}
+      Seed: 100
+      LayersOfDetail: 5
+      MountainFrequency: 1.4
+      ElevationAmount: 2.5
+      ElevationPercent: 0.75
+      ElevationModifier:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 1
+          outSlope: 1
+          tangentMode: 34
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 1
+          outSlope: 1
+          tangentMode: 34
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      Scale: 150
+  updateImmediately: 1
 --- !u!114 &281317726593344272
 MonoBehaviour:
   m_ObjectHideFlags: 0
