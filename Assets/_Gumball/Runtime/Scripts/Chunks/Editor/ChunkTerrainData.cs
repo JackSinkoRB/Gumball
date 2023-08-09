@@ -200,25 +200,24 @@ namespace Gumball
         
         private float GetDesiredHeightForVertex(int vertexIndex)
         {
-            Vector3 vertex = Grid.Vertices[vertexIndex];
-            
-            float desiredHeight = vertex.y;
-            SplineSample closestSplineSample = chunk.GetClosestPointOnSpline(vertex.Flatten());
-            float distanceToSpline = Vector3.Distance(closestSplineSample.position.Flatten(), vertex.Flatten());
+            Vector3 vertexPosition = Grid.Vertices[vertexIndex];
+
+            float desiredHeight = vertexPosition.y;
+            var (closestSample, distanceToSpline) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
 
             //check to flatten under road
             bool canFlattenUnderRoad = distanceToSpline < roadFlattenDistance;
             if (canFlattenUnderRoad)
             {
                 const float amountToSitUnderRoad = 0.5f; //let it sit just under the road, so it doesn't clip
-                return closestSplineSample.position.y - amountToSitUnderRoad;
+                return closestSample.position.y - amountToSitUnderRoad;
             }
 
             //check to apply height data
             if (!heightData.ElevationAmount.Approximately(0))
             {
                 //use perlin:
-                desiredHeight = GetPerlinHeightForVertex(vertex);
+                desiredHeight = GetPerlinHeightForVertex(vertexPosition);
                 
                 //multiply by the modifier, depending on the height percent
                 float difference = desiredHeight < 0 ? minPerlinHeight : maxPerlinHeight;
@@ -231,15 +230,15 @@ namespace Gumball
             if (canBlendWithRoad)
             {
                 float blendPercent = Mathf.Clamp01((distanceToSpline - roadFlattenDistance) / roadBlendDistance);
-                float desiredHeightDifference = vertex.y + desiredHeight;
-                desiredHeight = vertex.y + (desiredHeightDifference * blendPercent);
+                float desiredHeightDifference = vertexPosition.y + desiredHeight;
+                desiredHeight = vertexPosition.y + (desiredHeightDifference * blendPercent);
             }
             
             //TODO: check to blend with the connected chunks
             
             
             //minus the height difference from road
-            float heightDifferenceFromRoad = vertex.y - closestSplineSample.position.y;
+            float heightDifferenceFromRoad = vertexPosition.y - closestSample.position.y;
             desiredHeight -= heightDifferenceFromRoad;
             
             return desiredHeight;

@@ -17,6 +17,8 @@ namespace Gumball
 
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
+        
+        private readonly SampleCollection distanceCheckSampleCollection = new();
 
         /// <summary>
         /// Get or create a connection node at the last point of the spline.
@@ -47,11 +49,23 @@ namespace Gumball
             return middle;
         }
 
-        public SplineSample GetClosestPointOnSpline(Vector3 fromPoint)
+        public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
         {
-            SplineSample sample = new SplineSample();
-            splineComputer.Project(fromPoint, ref sample);
-            return sample;
+            splineComputer.GetSamples(distanceCheckSampleCollection);
+            float closestDistance = Mathf.Infinity;
+            SplineSample closestSample = default;
+            foreach (SplineSample sample in distanceCheckSampleCollection.samples)
+            {
+                float distance = flattenTheSpline
+                        ? Vector2.SqrMagnitude(fromPoint.FlattenAsVector2() - sample.position.FlattenAsVector2())
+                        : Vector3.SqrMagnitude(fromPoint - sample.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestSample = sample;
+                }
+            }
+            return (closestSample, Mathf.Sqrt(closestDistance));
         }
 
         private Node CreateConnector()

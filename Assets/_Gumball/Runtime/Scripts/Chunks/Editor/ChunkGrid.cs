@@ -167,8 +167,9 @@ namespace Gumball
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.red, debugLineDuration);
                         continue;
                     }
-                    
-                    if (Vector3.Distance(chunk.GetClosestPointOnSpline(vertexPosition).position, vertexPosition) > widthAroundRoad)
+
+                    var (closestSample, distanceToSpline) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
+                    if (distanceToSpline > widthAroundRoad)
                     {
                         if (showDebugLines)
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.cyan, debugLineDuration);
