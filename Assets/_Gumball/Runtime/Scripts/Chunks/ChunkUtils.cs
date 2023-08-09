@@ -28,20 +28,15 @@ namespace Gumball
                 Undo.CollapseUndoOperations(currentGroup+1);
             }
 #endif
-            
-            //get (or create) the connection
-            chunk1.Connector.ClearConnections();
-            //set the connection position to the end of chunk 1
-            chunk1.Connector.transform.position = chunk1.SplineComputer.GetPoint(chunk1.LastPointIndex).position;
-
-            //set the position of chunk 2 to the end of chunk 1
-            chunk2.transform.position = chunk1.SplineComputer.GetPoint(chunk1.LastPointIndex).position;
 
             RotateChunkToAlign(chunk2, chunk1);
-
-            //add the connections
-            chunk1.Connector.AddConnection(chunk1.SplineComputer, chunk1.LastPointIndex);
-            chunk1.Connector.AddConnection(chunk2.SplineComputer, 0);
+            
+            //set the position of chunk 2 to the end of chunk 1
+            Vector3 differenceFromChunkCenter = chunk2.SplineComputer.GetPoint(0).position - chunk2.transform.position;
+            chunk2.transform.position = chunk1.SplineComputer.GetPoint(chunk1.LastPointIndex).position - differenceFromChunkCenter;
+            
+            chunk1.OnConnectChunkAfter(chunk2);
+            chunk1.OnConnectChunkBefore(chunk1);
             
 #if UNITY_EDITOR
             if (canUndo)
@@ -61,20 +56,11 @@ namespace Gumball
             Vector3 chunkToAlignTangentVector = GetTangentVectorFromPoint(chunkToAlignPoint);
             Vector3 chunkToAlignWithTangentVector = GetTangentVectorFromPoint(chunkToAlignWithPoint);
 
-            //normalise the vectors
-            Vector3 chunkToAlignTangentVectorNormalised = Vector3.Normalize(chunkToAlignTangentVector);
-            Vector3 chunkToAlignWithTangentVectorNormalised = Vector3.Normalize(chunkToAlignWithTangentVector);
-            
-            //get the axis to rotate around (cross product)
-            Vector3 axisToRotateAround = Vector3.Cross(chunkToAlignTangentVectorNormalised, chunkToAlignWithTangentVectorNormalised);
+            //calculate the relative rotation between the initial and target tangents
+            Quaternion rotationToAlign = Quaternion.FromToRotation(chunkToAlignTangentVector, chunkToAlignWithTangentVector);
 
-            //get the angle at which to rotate
-            float dotProduct = Vector3.Dot(chunkToAlignTangentVectorNormalised, chunkToAlignWithTangentVectorNormalised);
-            float angle = Mathf.Acos(dotProduct) * Mathf.Rad2Deg;
-
-            Vector3 pointToRotateAround = chunkToAlignPoint.position;
-            
-            chunkToAlign.transform.RotateAround(pointToRotateAround, axisToRotateAround, angle);
+            //apply the relative rotation while preserving the existing rotation
+            chunkToAlign.transform.rotation = rotationToAlign * chunkToAlign.transform.rotation;
         }
 
         private static Vector3 GetTangentVectorFromPoint(SplinePoint point)
