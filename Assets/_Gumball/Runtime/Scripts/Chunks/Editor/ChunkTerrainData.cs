@@ -244,13 +244,16 @@ namespace Gumball
             return desiredHeight;
         }
 
-        private float GetPerlinHeightForVertex(Vector3 vertex)
+        private float GetPerlinHeightForVertex(Vector3 vertexPosition)
         {
             float noiseHeight = 0;
             foreach (TerrainHeightData.Octave octave in heightData.GetOctaves())
             {
-                float perlinX = vertex.x / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().x;
-                float perlinY = vertex.z / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().y;
+                //use the vertex LOCAL position instead of global
+                Vector3 localVertexPosition = chunk.transform.InverseTransformPoint(vertexPosition);
+                
+                float perlinX = localVertexPosition.x / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().x;
+                float perlinY = localVertexPosition.z / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().y;
                 
                 float perlinValue = Mathf.PerlinNoise(perlinX, perlinY);
                 
