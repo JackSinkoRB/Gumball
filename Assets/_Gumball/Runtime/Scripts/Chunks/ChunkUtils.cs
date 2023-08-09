@@ -20,13 +20,7 @@ namespace Gumball
         {
 #if UNITY_EDITOR
             if (canUndo)
-            {
-                Undo.IncrementCurrentGroup();
-                Undo.RegisterFullObjectHierarchyUndo(chunk2.gameObject, "Connect Chunk");
-                int currentGroup = Undo.GetCurrentGroup();
-                Undo.RegisterFullObjectHierarchyUndo(chunk1.gameObject, "Connect Chunk");
-                Undo.CollapseUndoOperations(currentGroup+1);
-            }
+                Undo.RecordObjects(new Object[]{chunk1, chunk2, chunk2.transform}, "Connect Chunk");
 #endif
 
             RotateChunkToAlign(chunk2, chunk1);
@@ -36,15 +30,7 @@ namespace Gumball
             chunk2.transform.position = chunk1.SplineComputer.GetPoint(chunk1.LastPointIndex).position - differenceFromChunkCenter;
             
             chunk1.OnConnectChunkAfter(chunk2);
-            chunk1.OnConnectChunkBefore(chunk1);
-            
-#if UNITY_EDITOR
-            if (canUndo)
-            {
-                EditorUtility.SetDirty(chunk2.gameObject);
-                EditorUtility.SetDirty(chunk1.gameObject);
-            }
-#endif
+            chunk2.OnConnectChunkBefore(chunk1);
         }
 
         private static void RotateChunkToAlign(Chunk chunkToAlign, Chunk chunkToAlignWith)

@@ -34,13 +34,26 @@ namespace Gumball
 
         private void Update()
         {
+            CheckIfJustDeselected();
+            
             previousSelection = Selection.activeGameObject;
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
                 timeWhenUnityLastUpdated = Time.realtimeSinceStartup;
         }
         
+        private void LateUpdate()
+        {
+            CheckToDisableTools();
+        }
+        
         #region Connect to a chunk
         [SerializeField] private Chunk chunkToConnectWith;
+
+        [ButtonMethod]
+        public void Disconnect()
+        {
+            chunk.DisconnectAll(true);
+        }
         
         /// <summary>
         /// Connect the chunk with the specified chunk.
@@ -53,6 +66,22 @@ namespace Gumball
             
             ChunkUtils.ConnectChunks(chunkToConnectWith, chunk, true);
         }
+
+        private void CheckIfJustDeselected()
+        {
+            bool justDeselected = previousSelection == gameObject && Selection.activeGameObject != gameObject;
+            if (justDeselected)
+                Tools.hidden = false;
+        }
+
+        private void CheckToDisableTools()
+        {
+            if (Selection.activeGameObject != gameObject)
+                return;
+            
+            Tools.hidden = chunk.HasChunkConnected;
+        }
+        
         #endregion
 
         #region Generate terrain

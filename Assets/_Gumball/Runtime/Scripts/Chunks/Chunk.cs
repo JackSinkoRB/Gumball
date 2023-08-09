@@ -1,37 +1,33 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Dreamteck.Splines;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Gumball
 {
     [RequireComponent(typeof(ChunkEditorTools))]
     public class Chunk : MonoBehaviour
     {
-
+        
         [SerializeField] private SplineComputer splineComputer;
 
-        private Node firstConnector;
-        private Node lastConnector;
-
+        [ReadOnly, SerializeField] private Chunk chunkBefore;
+        [ReadOnly, SerializeField] private Chunk chunkAfter;
+        
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
-        
-        private readonly SampleCollection distanceCheckSampleCollection = new();
 
-        /// <summary>
-        /// Get or create a connection node at the last point of the spline.
-        /// </summary>
-        public Node Connector
-        {
-            get
-            {
-                if (firstConnector == null)
-                    firstConnector = CreateConnector();
-                return firstConnector;
-            }
-        }
+        public Chunk ChunkBefore => chunkBefore;
+        public Chunk ChunkAfter => chunkAfter;
+        public bool HasChunkConnected => chunkBefore != null || chunkAfter != null;
+
+        private readonly SampleCollection distanceCheckSampleCollection = new();
 
         /// <summary>
         /// Puts the chunk at the end of an existing chunk.
@@ -40,7 +36,61 @@ namespace Gumball
         {
             ChunkUtils.ConnectChunks(chunkToAppendTo, this);
         }
+
+        public void OnConnectChunkBefore(Chunk chunk)
+        {
+            chunkBefore = chunk;
+        }
         
+        public void OnConnectChunkAfter(Chunk chunk)
+        {
+            chunkAfter = chunk;
+        }
+        
+        public void DisconnectAll(bool canUndo = false)
+        {
+#if UNITY_EDITOR
+            if (canUndo)
+            {
+                List<Object> objectsToRecord = new List<Object>();
+                
+                if (chunkAfter != null)
+                {
+                    objectsToRecord.Add(chunkAfter);
+                    if (chunkAfter.chunkBefore != null)
+                        objectsToRecord.Add(chunkAfter.chunkBefore);
+                }
+
+                if (chunkBefore != null)
+                {
+                    objectsToRecord.Add(chunkBefore);
+                    if (chunkBefore.chunkAfter != null)
+                        objectsToRecord.Add(chunkBefore.chunkAfter);
+                }
+                
+                Undo.RecordObjects(objectsToRecord.ToArray(), "Disconnect Chunk");
+            }
+#endif
+            
+            if (chunkAfter != null)
+                chunkAfter.OnDisconnectChunkBefore();
+            if (chunkBefore != null)
+                chunkBefore.OnDisconnectChunkAfter();
+            
+            OnDisconnectChunkBefore();
+            OnDisconnectChunkAfter();
+        }
+
+        public void OnDisconnectChunkBefore()
+        {
+            chunkBefore = null;
+        }
+
+        public void OnDisconnectChunkAfter()
+        {
+            chunkAfter = null;
+        }
+
         public Vector3 GetCenterOfSpline()
         {
             float splineLength = splineComputer.CalculateLength();
@@ -66,15 +116,6 @@ namespace Gumball
                 }
             }
             return (closestSample, Mathf.Sqrt(closestDistance));
-        }
-
-        private Node CreateConnector()
-        {
-            GameObject connector = new GameObject("Chunk Connector");
-            connector.transform.SetParent(transform);
-            Node node = connector.AddComponent<Node>();
-            node.type = Node.Type.Free;
-            return node;
         }
         
     }
