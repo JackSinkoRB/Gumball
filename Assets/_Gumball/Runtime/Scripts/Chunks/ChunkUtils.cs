@@ -30,12 +30,16 @@ namespace Gumball
                 }, "Connect Chunk");
             }
 #endif
-
-            RotateChunkToAlign(chunk2, chunk1);
             
+            RotateChunkToAlign(chunk2, chunk1);
+
             //set the position of chunk 2 to the end of chunk 1
-            Vector3 differenceFromChunkCenter = chunk2.SplineComputer.GetPoint(0).position - chunk2.transform.position;
-            chunk2.transform.position = chunk1.SplineComputer.GetPoint(chunk1.LastPointIndex).position - differenceFromChunkCenter;
+            Vector3 differenceFromChunkCenter = chunk2.FirstSample.position - chunk2.transform.position;
+            chunk2.transform.position = chunk1.LastSample.position - differenceFromChunkCenter;
+            
+            //update immediately
+            chunk2.SplineComputer.RebuildImmediate();
+            chunk2.UpdateSplineSampleData();
             
             chunk1.OnConnectChunkAfter(chunk2);
             chunk2.OnConnectChunkBefore(chunk1);
@@ -64,6 +68,10 @@ namespace Gumball
 
             //apply the relative rotation while preserving the existing rotation
             chunkToAlign.transform.rotation = rotationToAlign * chunkToAlign.transform.rotation;
+            
+            //update immediately
+            chunkToAlign.SplineComputer.RebuildImmediate();
+            chunkToAlign.UpdateSplineSampleData();
         }
 
     }

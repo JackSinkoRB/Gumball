@@ -16,7 +16,11 @@ namespace Gumball
     {
         
         [SerializeField] private SplineComputer splineComputer;
+        
+        [Header("Modify")]
+        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
 
+        [Header("Debugging")]
         [ReadOnly, SerializeField] private Chunk chunkBefore;
         [ReadOnly, SerializeField] private Chunk chunkAfter;
         
@@ -31,6 +35,7 @@ namespace Gumball
         public SplineSample LastSample { get; private set; }
         public Vector3 FirstTangent { get; private set; }
         public Vector3 LastTangent { get; private set; }
+        public float TerrainBlendDistance => terrainBlendDistance;
 
         public GameObject CurrentTerrain
         {
@@ -134,7 +139,6 @@ namespace Gumball
 
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
         {
-            UpdateSplineSampleData();
             float closestDistance = Mathf.Infinity;
             SplineSample closestSample = default;
             foreach (SplineSample sample in splineSampleCollection.samples)

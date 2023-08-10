@@ -16,7 +16,6 @@ namespace Gumball
         [PositiveValueOnly, SerializeField] private int resolution = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
         [PositiveValueOnly, SerializeField] private float roadBlendDistance = 20;
-        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 20;
 
         [SerializeField] private TerrainHeightData heightData;
 
