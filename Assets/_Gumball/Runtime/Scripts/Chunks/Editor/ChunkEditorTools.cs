@@ -85,7 +85,6 @@ namespace Gumball
         #endregion
 
         #region Generate terrain
-        [ReadOnly, SerializeField] private GameObject currentTerrain;
         [SerializeField] private ChunkTerrainData terrainData = new();
         [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
         [SerializeField] private bool updateImmediately = true;
@@ -104,11 +103,12 @@ namespace Gumball
         [ButtonMethod]
         public void CreateTerrain()
         {
-            currentTerrain = terrainData.Create(chunk);
+            GameObject newTerrain = terrainData.Create(chunk);
+            chunk.SetTerrain(newTerrain);
             currentGrid = terrainData.Grid;
             
-            Selection.SetActiveObjectWithContext(currentTerrain, chunk);
-            Undo.RegisterCreatedObjectUndo(currentTerrain, "Create Terrain");
+            Selection.SetActiveObjectWithContext(newTerrain, chunk);
+            Undo.RegisterCreatedObjectUndo(newTerrain, "Create Terrain");
         }
         
         [InitializeOnLoadMethod]
@@ -153,37 +153,22 @@ namespace Gumball
                 || (Application.isPlaying && !LoadingSceneManager.HasLoaded))
                 return;
 
-            TryFindExistingTerrain();
-            if (currentTerrain == null)
+            if (chunk.CurrentTerrain == null)
                 return;
 
             EditorApplication.delayCall+=()=>
             {
-                if (currentTerrain == null
+                if (chunk.CurrentTerrain == null
                     || playModeState == PlayModeStateChange.ExitingEditMode || playModeState == PlayModeStateChange.ExitingPlayMode)
                     return;
 
                 GlobalLoggers.TerrainLogger.Log($"Recreating terrain for '{chunk.name}'");
-                Material[] previousMaterials = currentTerrain.GetComponent<MeshRenderer>().sharedMaterials;
-                DestroyImmediate(currentTerrain);
-                currentTerrain = terrainData.Create(chunk, previousMaterials);
+                Material[] previousMaterials = chunk.CurrentTerrain.GetComponent<MeshRenderer>().sharedMaterials;
+                DestroyImmediate(chunk.CurrentTerrain);
+                chunk.SetTerrain(terrainData.Create(chunk, previousMaterials));
             };
         }
-
-        private void TryFindExistingTerrain()
-        {
-            if (currentTerrain != null)
-                return; //already exists
-
-            foreach (Transform child in transform)
-            {
-                if (child.tag.Equals(ChunkUtils.TerrainTag))
-                {
-                    currentTerrain = child.gameObject;
-                    return;
-                }
-            }
-        }
+        
         #endregion
         
         private void OnValidate()

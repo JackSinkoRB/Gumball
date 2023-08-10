@@ -26,9 +26,42 @@ namespace Gumball
         public Chunk ChunkBefore => chunkBefore;
         public Chunk ChunkAfter => chunkAfter;
         public bool HasChunkConnected => chunkBefore != null || chunkAfter != null;
+        
+        public SplineSample FirstSample { get; private set; }
+        public SplineSample LastSample { get; private set; }
+        public Vector3 FirstTangent { get; private set; }
+        public Vector3 LastTangent { get; private set; }
 
-        private readonly SampleCollection distanceCheckSampleCollection = new();
+        public GameObject CurrentTerrain
+        {
+            get
+            {
+                if (currentTerrain != null)
+                    return currentTerrain;
+                TryFindExistingTerrain();
+                return currentTerrain;
+            }
+        }
+        
+        private GameObject currentTerrain;
+        private readonly SampleCollection splineSampleCollection = new();
 
+        public void SetTerrain(GameObject terrain)
+        {
+            currentTerrain = terrain;
+        }
+
+        public void UpdateSplineSampleData()
+        {
+            splineComputer.GetSamples(splineSampleCollection);
+            
+            FirstSample = splineSampleCollection.samples[0];
+            FirstTangent = FirstSample.right.Flatten();
+            
+            LastSample = splineSampleCollection.samples[splineSampleCollection.length-1];
+            LastTangent = LastSample.right.Flatten();
+        }
+        
         /// <summary>
         /// Puts the chunk at the end of an existing chunk.
         /// </summary>
@@ -101,10 +134,10 @@ namespace Gumball
 
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
         {
-            splineComputer.GetSamples(distanceCheckSampleCollection);
+            UpdateSplineSampleData();
             float closestDistance = Mathf.Infinity;
             SplineSample closestSample = default;
-            foreach (SplineSample sample in distanceCheckSampleCollection.samples)
+            foreach (SplineSample sample in splineSampleCollection.samples)
             {
                 float distance = flattenTheSpline
                         ? Vector2.SqrMagnitude(fromPoint.FlattenAsVector2() - sample.position.FlattenAsVector2())
@@ -117,6 +150,21 @@ namespace Gumball
             }
             return (closestSample, Mathf.Sqrt(closestDistance));
         }
-        
+
+        private void TryFindExistingTerrain()
+        {
+            if (currentTerrain != null)
+                return; //already exists
+
+            foreach (Transform child in transform)
+            {
+                if (child.tag.Equals(ChunkUtils.TerrainTag))
+                {
+                    currentTerrain = child.gameObject;
+                    return;
+                }
+            }
+        }
+
     }
 }

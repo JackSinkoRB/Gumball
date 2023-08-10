@@ -27,10 +27,6 @@ namespace Gumball
         private int vertexCount;
         private float distanceBetweenVertices;
         private Vector3 startVertexPosition;
-        private SplineSample firstSample;
-        private Vector3 firstTangent;
-        private SplineSample lastSample;
-        private Vector3 lastTangent;
 
         public ReadOnlyCollection<Vector3> Vertices => vertices.AsReadOnly();
         public Vector3 GridCenter { get; private set; }
@@ -38,7 +34,9 @@ namespace Gumball
         /// The width/height of the grid.
         /// </summary>
         public float GridLength { get; private set; }
-
+        public readonly HashSet<int> VerticesAlongFirstTangent = new();
+        public readonly HashSet<int> VerticesAlongLastTangent = new();
+        
         public ChunkGrid(Chunk chunk, int resolution, float widthAroundRoad, bool showDebugLines = false)
         {
             this.chunk = chunk;
@@ -49,7 +47,6 @@ namespace Gumball
             timeToStopShowingDebug = Time.realtimeSinceStartup + debugLineDuration;
 
             UpdateGridData();
-            UpdateSplineSampleData();
             CreateGrid();
         }
         
@@ -117,27 +114,17 @@ namespace Gumball
             startVertexPosition = GridCenter.Flatten() - new Vector3(GridLength/2f, 0, GridLength/2f);
         }
 
-        private void UpdateSplineSampleData()
-        {
-            SampleCollection sampleCollection = new SampleCollection();
-            chunk.SplineComputer.GetSamples(sampleCollection);
-            
-            firstSample = sampleCollection.samples[0];
-            firstTangent = firstSample.right.Flatten();
-            
-            lastSample = sampleCollection.samples[sampleCollection.length-1];
-            lastTangent = lastSample.right.Flatten();
-        }
-
         private void CreateGrid()
         {
+            chunk.UpdateSplineSampleData();
+            
             if (showDebugLines)
             {
-                Debug.DrawLine(firstSample.position.Flatten(), firstSample.position.Flatten() + firstTangent * GridLength, Color.magenta, debugLineDuration);
-                Debug.DrawLine(firstSample.position.Flatten(), firstSample.position.Flatten() - firstTangent * GridLength, Color.magenta, debugLineDuration);
+                Debug.DrawLine(chunk.FirstSample.position.Flatten(), chunk.FirstSample.position.Flatten() + chunk.FirstTangent * GridLength, Color.magenta, debugLineDuration);
+                Debug.DrawLine(chunk.FirstSample.position.Flatten(), chunk.FirstSample.position.Flatten() - chunk.FirstTangent * GridLength, Color.magenta, debugLineDuration);
                 
-                Debug.DrawLine(lastSample.position.Flatten(), lastSample.position.Flatten() + lastTangent * GridLength, Color.magenta, debugLineDuration);
-                Debug.DrawLine(lastSample.position.Flatten(), lastSample.position.Flatten() - lastTangent * GridLength, Color.magenta, debugLineDuration);
+                Debug.DrawLine(chunk.LastSample.position.Flatten(), chunk.LastSample.position.Flatten() + chunk.LastTangent * GridLength, Color.magenta, debugLineDuration);
+                Debug.DrawLine(chunk.LastSample.position.Flatten(), chunk.LastSample.position.Flatten() - chunk.LastTangent * GridLength, Color.magenta, debugLineDuration);
             }
             
             vertexCount = 0;
@@ -154,14 +141,14 @@ namespace Gumball
                     //start at top left (center of spline - gridSize)
                     Vector3 vertexPosition = startVertexPosition + new Vector3(column * distanceBetweenVertices, 0, row * distanceBetweenVertices);
 
-                    if (IsBelowTangent(firstSample.position.Flatten() - firstTangent, firstSample.position.Flatten() + firstTangent, vertexPosition))
+                    if (IsBelowTangent(chunk.FirstSample.position.Flatten() - chunk.FirstTangent, chunk.FirstSample.position.Flatten() + chunk.FirstTangent, vertexPosition))
                     {
                         if (showDebugLines)
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.red, debugLineDuration);
                         continue;
                     }
 
-                    if (IsAboveTangent(lastSample.position.Flatten() - lastTangent, lastSample.position.Flatten() + lastTangent, vertexPosition))
+                    if (IsAboveTangent(chunk.LastSample.position.Flatten() - chunk.LastTangent, chunk.LastSample.position.Flatten() + chunk.LastTangent, vertexPosition))
                     {
                         if (showDebugLines)
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.red, debugLineDuration);
@@ -208,14 +195,14 @@ namespace Gumball
             AlignEdges(true); //align first
             AlignEdges(false); //align last
         }
-        
+
         /// <summary>
         /// Moves the edges to the first or last tangent.
         /// </summary>
         private void AlignEdges(bool useFirstTangent)
         {
-            SplineSample sample = useFirstTangent ? firstSample : lastSample;
-            Vector3 tangent = useFirstTangent ? firstTangent : lastTangent;
+            SplineSample sample = useFirstTangent ? chunk.FirstSample : chunk.LastSample;
+            Vector3 tangent = useFirstTangent ? chunk.FirstTangent : chunk.LastTangent;
 
             Vector3 tangentStart = sample.position.Flatten() - tangent;
             Vector3 tangentEnd = sample.position.Flatten() + tangent;
@@ -260,8 +247,13 @@ namespace Gumball
                         float z = startVertexPosition.z + row * distanceBetweenVertices;
                         Vector3 pointOnLastTangent = GetPointOnTangentUsingZ(z, tangentStart, tangentEnd);
                         float distance = Vector2.Distance(pointOnLastTangent.FlattenAsVector2(), vertices[vertexToUse].FlattenAsVector2());
-                        if (distance < distanceBetweenVertices) 
+                        if (distance < distanceBetweenVertices)
+                        {
                             vertices[vertexToUse] = pointOnLastTangent;
+                            if (useFirstTangent)
+                                VerticesAlongFirstTangent.Add(vertexToUse);
+                            else VerticesAlongLastTangent.Add(vertexToUse);
+                        }
                     }
                 }
             }
@@ -281,8 +273,13 @@ namespace Gumball
                         float x = startVertexPosition.x + column * distanceBetweenVertices;
                         Vector3 pointOnLastTangent = GetPointOnTangentUsingX(x, tangentStart, tangentEnd);
                         float distance = Vector2.Distance(pointOnLastTangent.FlattenAsVector2(), vertices[vertexToUse].FlattenAsVector2());
-                        if (distance < distanceBetweenVertices) 
+                        if (distance < distanceBetweenVertices)
+                        {
                             vertices[vertexToUse] = pointOnLastTangent;
+                            if (useFirstTangent)
+                                VerticesAlongFirstTangent.Add(vertexToUse);
+                            else VerticesAlongLastTangent.Add(vertexToUse);
+                        }
                     }
                 }
             }

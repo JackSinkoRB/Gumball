@@ -16,7 +16,8 @@ namespace Gumball
         [PositiveValueOnly, SerializeField] private int resolution = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
         [PositiveValueOnly, SerializeField] private float roadBlendDistance = 20;
-        
+        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 20;
+
         [SerializeField] private TerrainHeightData heightData;
 
         public float WidthAroundRoad => widthAroundRoad;
@@ -233,10 +234,7 @@ namespace Gumball
                 float desiredHeightDifference = vertexPosition.y + desiredHeight;
                 desiredHeight = vertexPosition.y + (desiredHeightDifference * blendPercent);
             }
-            
-            //TODO: check to blend with the connected chunks
-            
-            
+
             //minus the height difference from road
             float heightDifferenceFromRoad = vertexPosition.y - closestSample.position.y;
             desiredHeight -= heightDifferenceFromRoad;

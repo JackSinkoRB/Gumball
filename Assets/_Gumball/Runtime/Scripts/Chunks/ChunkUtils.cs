@@ -20,7 +20,15 @@ namespace Gumball
         {
 #if UNITY_EDITOR
             if (canUndo)
-                Undo.RecordObjects(new Object[]{chunk1, chunk2, chunk2.transform}, "Connect Chunk");
+            {
+                Undo.RecordObjects(new Object[]
+                {
+                    chunk1, chunk2,
+                    chunk2.transform,
+                    chunk1.CurrentTerrain.GetComponent<MeshFilter>(),
+                    chunk2.CurrentTerrain.GetComponent<MeshFilter>()
+                }, "Connect Chunk");
+            }
 #endif
 
             RotateChunkToAlign(chunk2, chunk1);
@@ -31,6 +39,15 @@ namespace Gumball
             
             chunk1.OnConnectChunkAfter(chunk2);
             chunk2.OnConnectChunkBefore(chunk1);
+
+            ChunkTerrainBlend terrainBlend = new ChunkTerrainBlend(chunk1, chunk2);
+            terrainBlend.TryBlendTerrains();
+        }
+        
+        public static Vector3 GetTangentVectorFromPoint(SplinePoint point)
+        {
+            //vector = tangent 2 - tangent 1 
+            return point.tangent2 - point.tangent;
         }
 
         private static void RotateChunkToAlign(Chunk chunkToAlign, Chunk chunkToAlignWith)
@@ -49,11 +66,5 @@ namespace Gumball
             chunkToAlign.transform.rotation = rotationToAlign * chunkToAlign.transform.rotation;
         }
 
-        private static Vector3 GetTangentVectorFromPoint(SplinePoint point)
-        {
-            //vector = tangent 2 - tangent 1 
-            return point.tangent2 - point.tangent;
-        }
-        
     }
 }
