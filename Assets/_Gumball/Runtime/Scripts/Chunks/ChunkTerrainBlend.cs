@@ -217,7 +217,7 @@ namespace Gumball
                 if (IsPointOnTangent(vertexPositionWorld, tangentStart, tangentEnd))
                 {
                     verticesOnTangent.Add(new Vertex(vertexIndex, vertexPositionWorld, chunk == chunk1 ? chunk1MeshData : chunk2MeshData));
-                    Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 10, Color.magenta, 15);
+                    Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 10, chunk == chunk1 ? Color.magenta : Color.yellow, 15);
                 }
             }
 
@@ -239,14 +239,20 @@ namespace Gumball
         
         private void FindVerticesOnTangents()
         {
+            Quaternion previousRotation = chunk2.transform.rotation;
+            chunk2.transform.rotation = Quaternion.Euler(new Vector3(0, chunk2.transform.rotation.eulerAngles.y, 0));
+            
             //get the vertices on each chunks tangent
             Vector3 endPoint = chunk1.LastSample.position;
             chunk1EndVertices = GetVerticesOnTangent(chunk1, endPoint - chunk1.LastTangent, endPoint + chunk1.LastTangent);
             Vector3 oppositeEndPoint = chunk2.FirstSample.position;
             chunk2EndVertices = GetVerticesOnTangent(chunk2, oppositeEndPoint - chunk2.FirstTangent, oppositeEndPoint + chunk2.FirstTangent);
 
-            Debug.DrawLine(endPoint, endPoint + Vector3.up * 15, Color.yellow, 15);
-            Debug.DrawLine(oppositeEndPoint, oppositeEndPoint + Vector3.up * 15, Color.yellow, 15);
+            chunk2.transform.rotation = previousRotation;
+
+            //draw the tangents
+            Debug.DrawLine(endPoint - chunk1.LastTangent * 250, endPoint + chunk1.LastTangent * 250, Color.magenta, 15);
+            Debug.DrawLine(oppositeEndPoint - chunk2.FirstTangent * 200, oppositeEndPoint + chunk2.FirstTangent * 200, Color.yellow, 15);
 
             GlobalLoggers.TerrainLogger.Log($"Found {chunk1EndVertices.Count} vertices at the end of chunk1 ({chunk1.name}) - position = {endPoint}.");
             GlobalLoggers.TerrainLogger.Log($"Found {chunk2EndVertices.Count} vertices at the end of chunk2 ({chunk2.name}) - position = {oppositeEndPoint}.");

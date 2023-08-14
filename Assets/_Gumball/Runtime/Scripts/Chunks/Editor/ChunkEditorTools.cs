@@ -49,10 +49,14 @@ namespace Gumball
         }
 
         #region Generate terrain
+
         [Header("Create terrain")]
-        [SerializeField] private ChunkTerrainData terrainData = new();
+        [ReadOnly(nameof(HasConnection)), SerializeField]
+        private ChunkTerrainData terrainData = new();
         [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
         [SerializeField] private bool updateImmediately = true;
+
+        [HideInInspector] public bool HasConnection; 
 
         private ChunkGrid currentGrid;
         
@@ -102,7 +106,7 @@ namespace Gumball
             if (timeSinceUnityUpdated < 1) //likely recompiling
                 return;
 
-            if (chunk.IsConnecting)
+            if (chunk.IsConnecting || chunk.HasChunkConnected)
                 return;
             
             bool justSelected = previousSelection != gameObject && Selection.activeGameObject == gameObject;
@@ -140,7 +144,11 @@ namespace Gumball
             GlobalLoggers.TerrainLogger.Log($"Recreating terrain for '{chunk.name}'");
             Material[] previousMaterials = chunk.CurrentTerrain.GetComponent<MeshRenderer>().sharedMaterials;
             DestroyImmediate(chunk.CurrentTerrain);
-            chunk.SetTerrain(terrainData.Create(chunk, previousMaterials));
+
+            chunk.SplineComputer.RebuildImmediate();
+            
+            GameObject newTerrain = terrainData.Create(chunk, previousMaterials);
+            chunk.SetTerrain(newTerrain);
             
             if (connectedBefore != null)
                 ChunkUtils.ConnectChunks(connectedBefore, chunk);
@@ -164,7 +172,7 @@ namespace Gumball
                 throw new NullReferenceException($"There is no '{nameof(chunkToConnectWith)}' value set in the inspector.");
             
             if (chunk.HasChunkConnected)
-                throw new NullReferenceException("This chunk is already connected. Disconnect the chunk first.");
+                throw new InvalidOperationException("This chunk is already connected. Disconnect the chunk first.");
 
             ChunkUtils.ConnectChunks(chunkToConnectWith, chunk, true);
         }

@@ -83,21 +83,37 @@ namespace Gumball
 
         public void OnConnectChunkBefore(Chunk chunk)
         {
+            OnConnectChunk();
             chunkBefore = chunk;
         }
         
         public void OnConnectChunkAfter(Chunk chunk)
         {
+            OnConnectChunk();
             chunkAfter = chunk;
         }
-        
+
+        private void OnConnectChunk()
+        {
+            
+        }
+
+        private void OnDisconnectChunk()
+        {
+            if (!HasChunkConnected)
+                transform.rotation = Quaternion.Euler(Vector3.zero); //reset rotation
+        }
+
         public void DisconnectAll(bool canUndo = false)
         {
 #if UNITY_EDITOR
             if (canUndo)
             {
                 List<Object> objectsToRecord = new List<Object>();
-                
+
+                objectsToRecord.Add(transform);
+                objectsToRecord.Add(currentTerrain.GetComponent<MeshFilter>());
+
                 if (chunkAfter != null)
                 {
                     objectsToRecord.Add(chunkAfter);
@@ -116,23 +132,30 @@ namespace Gumball
             }
 #endif
             
-            if (chunkAfter != null)
-                chunkAfter.OnDisconnectChunkBefore();
-            if (chunkBefore != null)
-                chunkBefore.OnDisconnectChunkAfter();
-            
-            OnDisconnectChunkBefore();
             OnDisconnectChunkAfter();
+            OnDisconnectChunkBefore();
         }
 
         public void OnDisconnectChunkBefore()
         {
+            if (chunkBefore == null)
+                return;
+
+            Chunk previousChunk = chunkBefore;
             chunkBefore = null;
+            previousChunk.OnDisconnectChunkAfter();
+            OnDisconnectChunk();
         }
 
         public void OnDisconnectChunkAfter()
         {
+            if (chunkAfter == null)
+                return;
+            
+            Chunk previousChunk = chunkAfter;
             chunkAfter = null;
+            previousChunk.OnDisconnectChunkBefore();
+            OnDisconnectChunk();
         }
 
         public Vector3 GetCenterOfSpline()

@@ -43,12 +43,12 @@ namespace Gumball
             //update immediately
             chunk2.SplineComputer.RebuildImmediate();
             chunk2.UpdateSplineSampleData();
-            
-            chunk1.OnConnectChunkAfter(chunk2);
-            chunk2.OnConnectChunkBefore(chunk1);
 
             ChunkTerrainBlend terrainBlend = new ChunkTerrainBlend(chunk1, chunk2);
             terrainBlend.TryBlendTerrains();
+            
+            chunk1.OnConnectChunkAfter(chunk2);
+            chunk2.OnConnectChunkBefore(chunk1);
             
             chunk1.SetConnecting(false);
             chunk2.SetConnecting(false);
