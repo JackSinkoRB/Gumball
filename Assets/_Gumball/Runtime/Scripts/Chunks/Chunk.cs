@@ -31,6 +31,7 @@ namespace Gumball
         public Chunk ChunkAfter => chunkAfter;
         public bool HasChunkConnected => chunkBefore != null || chunkAfter != null;
         
+        public bool IsConnecting { get; private set; }
         public SplineSample FirstSample { get; private set; }
         public SplineSample LastSample { get; private set; }
         public Vector3 FirstTangent { get; private set; }
@@ -54,6 +55,11 @@ namespace Gumball
         public void SetTerrain(GameObject terrain)
         {
             currentTerrain = terrain;
+        }
+
+        public void SetConnecting(bool isConnecting)
+        {
+            IsConnecting = isConnecting;
         }
 
         public void UpdateSplineSampleData()

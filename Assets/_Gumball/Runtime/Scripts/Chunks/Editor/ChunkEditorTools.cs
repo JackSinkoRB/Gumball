@@ -25,6 +25,8 @@ namespace Gumball
         private void OnDisable()
         {
             chunk.SplineComputer.onRebuild -= CheckToUpdateTerrainImmediately;
+
+            Tools.hidden = false;
         }
 
         private void OnDrawGizmos()
@@ -40,14 +42,14 @@ namespace Gumball
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
                 timeWhenUnityLastUpdated = Time.realtimeSinceStartup;
         }
-
+        
         private void LateUpdate()
         {
             CheckToDisableTools();
-            CheckToRecreateTerrain();
         }
 
         #region Generate terrain
+        [Header("Create terrain")]
         [SerializeField] private ChunkTerrainData terrainData = new();
         [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
         [SerializeField] private bool updateImmediately = true;
@@ -88,33 +90,19 @@ namespace Gumball
         {
             playModeState = state;
         }
-        
-        private float timeWhenLastRecreatedTerrain;
-        private float timeSinceLastTerrainRecreation => Time.realtimeSinceStartup - timeWhenLastRecreatedTerrain;
-        private bool recreateTerrain;
-        
-        private void CheckToRecreateTerrain()
-        {
-            if (!recreateTerrain)
-                return;
 
-            const float minTimeBetween = 1;
-            if (timeSinceLastTerrainRecreation < minTimeBetween)
-                return;
-
-            RecreateTerrain();
-            recreateTerrain = false;
-        }
-        
         private void CheckToUpdateTerrainImmediately()
         {
             if (!updateImmediately)
                 return;
-            
+
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
                 timeWhenUnityLastUpdated = Time.realtimeSinceStartup;
-            
+
             if (timeSinceUnityUpdated < 1) //likely recompiling
+                return;
+
+            if (chunk.IsConnecting)
                 return;
             
             bool justSelected = previousSelection != gameObject && Selection.activeGameObject == gameObject;
@@ -135,25 +123,11 @@ namespace Gumball
 
             if (chunk.CurrentTerrain == null)
                 return;
-
-            EditorApplication.delayCall += ApplyRecreateTerrain;
+            
+            EditorApplication.delayCall -= RecreateTerrain;
+            EditorApplication.delayCall += RecreateTerrain;
         }
-
-        private void ApplyRecreateTerrain()
-        {
-            EditorApplication.delayCall -= ApplyRecreateTerrain;
-
-            const float minTimeBetweenRecreationChecks = 0.5f;
-            if (timeSinceLastTerrainRecreation < minTimeBetweenRecreationChecks)
-                return;
-
-            if (chunk.CurrentTerrain == null
-                || playModeState == PlayModeStateChange.ExitingEditMode || playModeState == PlayModeStateChange.ExitingPlayMode)
-                return;
-
-            recreateTerrain = true;
-        }
-
+        
         /// <summary>
         /// Force the terrain to be recreated.
         /// </summary>
@@ -172,13 +146,12 @@ namespace Gumball
                 ChunkUtils.ConnectChunks(connectedBefore, chunk);
             if (connectedAfter != null)
                 ChunkUtils.ConnectChunks(chunk, connectedAfter);
-
-            timeWhenLastRecreatedTerrain = Time.realtimeSinceStartup;
         }
         
         #endregion
         
         #region Connect to a chunk
+        [Header("Connect")]
         [SerializeField] private Chunk chunkToConnectWith;
 
         /// <summary>

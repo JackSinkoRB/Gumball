@@ -30,7 +30,10 @@ namespace Gumball
                 }, "Connect Chunk");
             }
 #endif
-            
+
+            chunk1.SetConnecting(true);
+            chunk2.SetConnecting(true);
+
             RotateChunkToAlign(chunk2, chunk1);
 
             //set the position of chunk 2 to the end of chunk 1
@@ -46,6 +49,9 @@ namespace Gumball
 
             ChunkTerrainBlend terrainBlend = new ChunkTerrainBlend(chunk1, chunk2);
             terrainBlend.TryBlendTerrains();
+            
+            chunk1.SetConnecting(false);
+            chunk2.SetConnecting(false);
         }
         
         public static Vector3 GetTangentVectorFromPoint(SplinePoint point)
