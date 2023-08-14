@@ -112,7 +112,7 @@ namespace Gumball
                 List<Object> objectsToRecord = new List<Object>();
 
                 objectsToRecord.Add(transform);
-                objectsToRecord.Add(currentTerrain.GetComponent<MeshFilter>());
+                objectsToRecord.Add(CurrentTerrain.GetComponent<MeshFilter>());
 
                 if (chunkAfter != null)
                 {
