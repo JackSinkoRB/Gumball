@@ -113,18 +113,23 @@ namespace Gumball
 
         private void AlignEdges()
         {
-            foreach (Vertex chunk1Vertex in chunk1EndVertices)
+            //whichever chunk has more vertices on the end (ie chunk 1 (20) vs chunk 2 (13)), move the vertices to the same position
+            if (chunk1EndVertices.Count > chunk2EndVertices.Count)
             {
-                var (chunk2Vertex, distanceBetweenVertices) = GetClosestVertex(chunk1Vertex.WorldPosition, chunk2EndVertices);
-
-                //whichever chunk has more vertices on the end (ie chunk 1 (20) vs chunk 2 (13)), move the vertices to the same position
-                if (chunk1EndVertices.Count > chunk2EndVertices.Count)
+                foreach (Vertex chunk1Vertex in chunk1EndVertices)
                 {
+                    var (chunk2Vertex, distanceBetweenVertices) = GetClosestVertex(chunk1Vertex.WorldPosition, chunk2EndVertices);
+
                     //move chunk1 vertices to chunk 2 vertices
                     MoveVertexToMatchAnother(chunk1Vertex, chunk2Vertex);
                 }
-                else
+            }
+            else
+            {
+                foreach (Vertex chunk2Vertex in chunk2EndVertices)
                 {
+                    var (chunk1Vertex, distanceBetweenVertices) = GetClosestVertex(chunk2Vertex.WorldPosition, chunk1EndVertices);
+
                     //move chunk2 vertices to chunk 1 vertices
                     MoveVertexToMatchAnother(chunk2Vertex, chunk1Vertex);
                 }
