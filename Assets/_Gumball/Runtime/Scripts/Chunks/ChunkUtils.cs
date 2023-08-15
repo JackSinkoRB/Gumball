@@ -63,25 +63,26 @@ namespace Gumball
         /// <summary>
         /// Gets the UV coordinates from the vertex positions in world space (triplanar mapping).
         /// </summary>
-        public static Vector2[] GetTriplanarUVs(List<Vector3> vertexPositions)
+        public static Vector2[] GetTriplanarUVs(List<Vector3> vertexPositions, Transform terrain)
         {
-            return GetTriplanarUVs(vertexPositions.ToArray());
+            return GetTriplanarUVs(vertexPositions.ToArray(), terrain);
         }
         
         /// <summary>
         /// Gets the UV coordinates from the vertex positions in world space (triplanar mapping).
         /// </summary>
-        public static Vector2[] GetTriplanarUVs(Vector3[] vertexPositions)
+        public static Vector2[] GetTriplanarUVs(Vector3[] vertexPositions, Transform terrain)
         {
             Vector2[] uvs = new Vector2[vertexPositions.Length];
 
             for (int vertexIndex = 0; vertexIndex < vertexPositions.Length; vertexIndex++)
             {
                 Vector3 vertexPosition = vertexPositions[vertexIndex];
+                Vector3 vertexPositionWorld = terrain.TransformPoint(vertexPosition);
 
-                Vector2 uvX = new Vector2(vertexPosition.z, vertexPosition.y);
-                Vector2 uvY = new Vector2(vertexPosition.x, vertexPosition.z);
-                Vector2 uvZ = new Vector2(vertexPosition.x, vertexPosition.y);
+                Vector2 uvX = new Vector2(vertexPositionWorld.z, vertexPositionWorld.y);
+                Vector2 uvY = new Vector2(vertexPositionWorld.x, vertexPositionWorld.z);
+                Vector2 uvZ = new Vector2(vertexPositionWorld.x, vertexPositionWorld.y);
 
                 Vector2 finalUV = uvX + uvY + uvZ;
                 uvs[vertexIndex] = finalUV;

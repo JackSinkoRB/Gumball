@@ -68,7 +68,7 @@ namespace Gumball
             //setup the mesh
             mesh.SetVertices(verticesWithHeightData);
             mesh.SetTriangles(CreateTrianglesFromGrid(), 0);
-            mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(verticesWithHeightData));
+            mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(verticesWithHeightData, terrain.transform));
             
             //apply the changes to the mesh
             mesh.RecalculateNormals();

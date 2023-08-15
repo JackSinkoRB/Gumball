@@ -27,6 +27,7 @@ namespace Gumball
         
         private class ChunkMeshData
         {
+            private readonly Chunk chunk;
             private readonly Mesh mesh;
             
             public Vector3[] Vertices { get; }
@@ -34,6 +35,8 @@ namespace Gumball
 
             public ChunkMeshData(Chunk chunk)
             {
+                this.chunk = chunk;
+                
                 MeshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
                 mesh = MeshFilter.sharedMesh;
                 Vertices = mesh.vertices;
@@ -52,18 +55,30 @@ namespace Gumball
                     meshToUse = Object.Instantiate(mesh); //use a mesh copy so that the MeshFilter can be undone
 #endif
                 
-                meshToUse.vertices = Vertices;
+                meshToUse.SetVertices(Vertices);
                 
                 //recalculate UVs
-                mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(Vertices));
+                meshToUse.SetUVs(0, ChunkUtils.GetTriplanarUVs(Vertices, MeshFilter.transform));
                 
+                meshToUse.RecalculateTangents();
                 meshToUse.RecalculateNormals();
+                //meshToUse.SetNormals(CalculateNormals());
                 meshToUse.RecalculateBounds();
 
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
                     MeshFilter.sharedMesh = meshToUse; //set the mesh copy so that the MeshFilter can be undone       
 #endif
+            }
+            
+            private Vector3[] CalculateNormals()
+            {
+                //1. recalculate the normals like normal (up to 6:40), but if the vertex is an end vertex, get the opposite end vertex
+                //2. could calculate normals based on the vertex height
+                //3. allow for 1 extra row of vertices after the tangent, but don't let them be seen
+                
+                Vector3[] vertexNormals = new Vector3[Vertices.Length];
+                return vertexNormals;
             }
         }
 
