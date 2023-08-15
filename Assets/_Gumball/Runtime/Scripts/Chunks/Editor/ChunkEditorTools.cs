@@ -32,6 +32,7 @@ namespace Gumball
         private void OnDrawGizmos()
         {
             currentGrid?.OnDrawGizmos();
+            CheckToShowVertices();
         }
 
         private void Update()
@@ -48,6 +49,37 @@ namespace Gumball
             CheckToDisableTools();
         }
 
+        #region Show terrain vertices
+        private const float timeToShowVertices = 15;
+        
+        private float timeLastClickedShowTerrainVertices;
+        
+        private float timeSinceClickedShowTerrainVertices => Time.realtimeSinceStartup - timeLastClickedShowTerrainVertices;
+        
+        [ButtonMethod]
+        public void ShowTerrainVertices()
+        {
+            timeLastClickedShowTerrainVertices = Time.realtimeSinceStartup;
+        }
+        
+        private void CheckToShowVertices()
+        {
+            if (timeSinceClickedShowTerrainVertices > timeToShowVertices)
+                return;
+
+            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
+            Vector3[] vertices = meshFilter.sharedMesh.vertices;
+            for (int vertexIndex = 0; vertexIndex < vertices.Length; vertexIndex++)
+            {
+                Vector3 vertexPosition = vertices[vertexIndex];
+                Vector3 vertexPositionWorld = meshFilter.transform.TransformPoint(vertexPosition);
+                
+                Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 20, Color.blue);
+                Handles.Label(vertexPositionWorld, vertexIndex.ToString());
+            }
+        }
+        #endregion
+        
         #region Generate terrain
 
         [Header("Create terrain")]
