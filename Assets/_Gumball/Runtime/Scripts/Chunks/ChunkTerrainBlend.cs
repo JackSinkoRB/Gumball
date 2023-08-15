@@ -53,9 +53,13 @@ namespace Gumball
 #endif
                 
                 meshToUse.vertices = Vertices;
-                meshToUse.RecalculateBounds();
-                meshToUse.RecalculateNormals();
                 
+                //recalculate UVs
+                mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(Vertices));
+                
+                meshToUse.RecalculateNormals();
+                meshToUse.RecalculateBounds();
+
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
                     MeshFilter.sharedMesh = meshToUse; //set the mesh copy so that the MeshFilter can be undone       

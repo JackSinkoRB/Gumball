@@ -68,7 +68,7 @@ namespace Gumball
             //setup the mesh
             mesh.SetVertices(verticesWithHeightData);
             mesh.SetTriangles(CreateTrianglesFromGrid(), 0);
-            mesh.SetUVs(0, GetUVs());
+            mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(verticesWithHeightData));
             
             //apply the changes to the mesh
             mesh.RecalculateNormals();
@@ -78,30 +78,6 @@ namespace Gumball
             return terrain;
         }
 
-        private Vector2[] GetUVs()
-        {
-            Vector2[] uvs = new Vector2[Grid.Vertices.Count];
-
-            int vertexIndex = 0;
-            for (int column = 0; column < Grid.GetNumberOfColumns(); column++)
-            {
-                for (int row = 0; row < Grid.GetNumberOfRows(); row++)
-                {
-                    if (Grid.GetVertexIndexAt(column, row) == -1)
-                        continue;
-                    
-                    //use the grid position
-                    float u = row;
-                    float v = column;
-                    uvs[vertexIndex] = new Vector2(u, v);
-
-                    vertexIndex++;
-                }
-            }
-
-            return uvs;
-        }
-        
         private List<int> CreateTrianglesFromGrid()
         {
             List<int> triangleIndexes = new List<int>();
