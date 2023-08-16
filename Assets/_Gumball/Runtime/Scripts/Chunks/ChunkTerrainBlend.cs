@@ -11,43 +11,88 @@ namespace Gumball
     public class ChunkTerrainBlend
     {
 
-        private struct Vertex
+        #region Vertex
+        private readonly struct Vertex : IEquatable<Vertex>
         {
-            public readonly int Index;
-            public readonly Vector3 WorldPosition;
-            public readonly ChunkMeshData MeshBelongsTo;
+            internal readonly int Index;
+            internal readonly Vector3 LocalPosition;
+            internal readonly Vector3 WorldPosition => MeshBelongsTo.MeshFilter.transform.TransformPoint(LocalPosition);
+            internal readonly ChunkMeshData MeshBelongsTo;
 
-            public Vertex(int index, Vector3 worldPosition, ChunkMeshData meshBelongsTo)
+            internal Vertex(int index, Vector3 localPosition, ChunkMeshData meshBelongsTo)
             {
                 Index = index;
-                WorldPosition = worldPosition;
+                LocalPosition = localPosition;
                 MeshBelongsTo = meshBelongsTo;
             }
+
+            /// <summary>
+            /// Because the mesh can be updated but not yet applied, use this to get the current (but not applied) value instead.
+            /// </summary>
+            public Vector3 GetCurrentWorldPosition()
+            {
+                Vector3 previousPositionLocal = MeshBelongsTo.Vertices[Index];
+                Vector3 previousPositionWorld = MeshBelongsTo.MeshFilter.transform.TransformPoint(previousPositionLocal);
+                return previousPositionWorld;
+            }
+
+            public bool Equals(Vertex other)
+            {
+                return Index == other.Index && Equals(MeshBelongsTo, other.MeshBelongsTo);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is Vertex other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine(Index, MeshBelongsTo);
+            }
         }
+        #endregion
         
+        #region ChunkMeshData
         private class ChunkMeshData
         {
-            private readonly Chunk chunk;
-            private readonly Mesh mesh;
-            
-            public Vector3[] Vertices { get; }
-            public MeshFilter MeshFilter { get; }
+            private readonly bool isFirstChunk;
 
-            public ChunkMeshData(Chunk chunk)
+            internal readonly Chunk Chunk;
+            internal readonly Vector3[] Vertices;
+            internal readonly MeshFilter MeshFilter;
+            internal readonly Mesh mesh;
+            
+            internal List<Vertex> EndVertices;
+
+            internal ChunkMeshData(Chunk chunk, bool isFirstChunk)
             {
-                this.chunk = chunk;
+                this.Chunk = chunk;
+                this.isFirstChunk = isFirstChunk;
                 
                 MeshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
                 mesh = MeshFilter.sharedMesh;
                 Vertices = mesh.vertices;
+
+                FindVerticesOnTangent();
             }
 
-            public void SetVertexWorldPosition(int index, Vector3 worldPosition)
+            internal void SetVertexWorldPosition(int index, Vector3 worldPosition)
             {
                 Vertices[index] = MeshFilter.transform.InverseTransformPoint(worldPosition);
             }
+            
+            /// <summary>
+            /// Because the mesh can be updated but not yet applied, use this to get the current (but not applied) value instead.
+            /// </summary>
+            public Vector3 GetCurrentVertexWorldPosition(int index)
+            {
+                Vector3 previousPositionLocal = Vertices[index];
+                Vector3 previousPositionWorld = MeshFilter.transform.TransformPoint(previousPositionLocal);
+                return previousPositionWorld;
+            }
 
-            public void ApplyChanges()
+            internal void ApplyChanges()
             {
                 Mesh meshToUse = mesh;
 #if UNITY_EDITOR
@@ -70,6 +115,24 @@ namespace Gumball
                     MeshFilter.sharedMesh = meshToUse; //set the mesh copy so that the MeshFilter can be undone       
 #endif
             }
+
+            private void FindVerticesOnTangent()
+            {
+                Quaternion previousRotation = Chunk.transform.rotation;
+                Chunk.transform.rotation = Quaternion.Euler(new Vector3(0, Chunk.transform.rotation.eulerAngles.y, 0));
+            
+                //get the vertices on each chunks tangent
+                Vector3 endPoint = isFirstChunk ? Chunk.LastSample.position : Chunk.FirstSample.position;
+                Vector3 tangent = isFirstChunk ? Chunk.LastTangent : Chunk.FirstTangent;
+                EndVertices = GetVerticesOnTangent(this, endPoint - tangent, endPoint + tangent);
+
+                Chunk.transform.rotation = previousRotation;
+
+                //draw the tangents
+                Debug.DrawLine(endPoint - tangent * 200, endPoint + tangent * 200, Color.magenta, 15);
+
+                GlobalLoggers.TerrainLogger.Log($"Found {EndVertices.Count} vertices at the end of ({Chunk.gameObject.name}) ({(isFirstChunk ? "is first chunk" : "is last chunk")}) - position = {endPoint}.");
+            }
             
             private Vector3[] CalculateNormals()
             {
@@ -81,32 +144,56 @@ namespace Gumball
                 return vertexNormals;
             }
         }
+        #endregion
 
-        private readonly Chunk chunk1;
-        private readonly Chunk chunk2;
-        
-        private ChunkMeshData chunk1MeshData;
-        private ChunkMeshData chunk2MeshData;
-        private List<Vertex> chunk1EndVertices;
-        private List<Vertex> chunk2EndVertices;
-        
-        private readonly HashSet<Vertex> closestVerticesUsed = new();
-
-        public ChunkTerrainBlend(Chunk chunk1, Chunk chunk2)
+        #region Connections
+        private struct Connection
         {
-            this.chunk1 = chunk1;
-            this.chunk2 = chunk2;
+            internal Vertex vertex1;
+            internal Vertex vertex2;
+
+            internal Connection(Vertex vertex1, Vertex vertex2)
+            {
+                this.vertex1 = vertex1;
+                this.vertex2 = vertex2;
+            }
+        }
+
+        private List<Connection> connections = new();
+        
+        private bool VertexHasConnection(Vertex vertex)
+        {
+            foreach (Connection connection in connections)
+            {
+                if (connection.vertex1.Equals(vertex))
+                    return true;
+                if (connection.vertex2.Equals(vertex))
+                    return true;
+            }
+
+            return false;
+        }
+        #endregion
+        
+        private readonly Chunk firstChunk;
+        private readonly Chunk lastChunk;
+        
+        private ChunkMeshData firstChunkMeshData;
+        private ChunkMeshData lastChunkMeshData;
+
+        public ChunkTerrainBlend(Chunk firstChunk, Chunk lastChunk)
+        {
+            this.firstChunk = firstChunk;
+            this.lastChunk = lastChunk;
         }
 
         private void InitialiseBlendData()
         {
-            chunk1.UpdateSplineSampleData();
-            chunk2.UpdateSplineSampleData();
+            firstChunk.UpdateSplineSampleData();
+            lastChunk.UpdateSplineSampleData();
             
-            chunk1MeshData = new ChunkMeshData(chunk1);
-            chunk2MeshData = new ChunkMeshData(chunk2);
-
-            FindVerticesOnTangents();
+            firstChunkMeshData = new ChunkMeshData(firstChunk, true);
+            lastChunkMeshData = new ChunkMeshData(lastChunk, false);
         }
 
         /// <summary>
@@ -114,59 +201,77 @@ namespace Gumball
         /// </summary>
         public void TryBlendTerrains()
         {
-            if (chunk1.CurrentTerrain == null || chunk2.CurrentTerrain == null)
+            if (firstChunk.CurrentTerrain == null || lastChunk.CurrentTerrain == null)
                 return; //cannot blend if terrain doesn't exist
 
             InitialiseBlendData();
-            AlignEdges();
+            
+            //align
+            // - we move the chunk with more end vertices to the chunk with less end vertices
+            // - then, we do the opposite, in case there's any vertices in the other chunk that didn't have a connection
+            ChunkMeshData chunkWithMoreEndVertices = firstChunkMeshData.EndVertices.Count > lastChunkMeshData.EndVertices.Count ? firstChunkMeshData : lastChunkMeshData;
+            ChunkMeshData chunkWithLessEndVertices = chunkWithMoreEndVertices == firstChunkMeshData ? lastChunkMeshData : firstChunkMeshData;
+            AlignEdges(chunkWithMoreEndVertices, chunkWithLessEndVertices);
+            AlignEdges(chunkWithLessEndVertices, chunkWithMoreEndVertices);
+
+            //blend
             BlendWithEdges(true);
             BlendWithEdges(false);
             
-            chunk1MeshData.ApplyChanges();
-            chunk2MeshData.ApplyChanges();
+            //TODO: only need to do this if chunk is rotated on X or Z
+            FixOverlappingVertices(true);
+            FixOverlappingVertices(false);
+            
+            firstChunkMeshData.ApplyChanges();
+            lastChunkMeshData.ApplyChanges();
         }
 
-        private void AlignEdges()
+        private void AlignEdges(ChunkMeshData chunkToMove, ChunkMeshData chunkToMatch)
         {
-            //whichever chunk has more vertices on the end (ie chunk 1 (20) vs chunk 2 (13)), move the vertices to the same position
-            if (chunk1EndVertices.Count > chunk2EndVertices.Count)
+            GlobalLoggers.TerrainLogger.Log($"Moving {chunkToMove.Chunk.gameObject.name} vertices to {chunkToMatch.Chunk.gameObject.name}");
+            foreach (Vertex chunkToMoveVertex in chunkToMove.EndVertices)
             {
-                foreach (Vertex chunk1Vertex in chunk1EndVertices)
-                {
-                    var (chunk2Vertex, distanceBetweenVertices) = GetClosestVertex(chunk1Vertex.WorldPosition, chunk2EndVertices);
-
-                    //move chunk1 vertices to chunk 2 vertices
-                    MoveVertexToMatchAnother(chunk1Vertex, chunk2Vertex);
-                }
+                var (chunkToMatchVertex, distanceBetweenVertices) = GetClosestVertex(chunkToMoveVertex.WorldPosition, chunkToMatch.EndVertices);
+                MoveVertexToMatchAnother(chunkToMoveVertex, chunkToMatchVertex);
             }
-            else
+        }
+        
+        private void MoveVertexToMatchAnother(Vertex vertexToMove, Vertex vertexToMatch)
+        {
+            //set the same world Y position - the average of both
+            float desiredY = (vertexToMove.WorldPosition.y + vertexToMatch.WorldPosition.y) / 2;
+            Vector3 desiredPosition = vertexToMatch.WorldPosition.SetY(desiredY);
+
+            //if a vertex is already matched with an opposite vertex, use the other vertices Y
+            if (VertexHasConnection(vertexToMatch))
             {
-                foreach (Vertex chunk2Vertex in chunk2EndVertices)
-                {
-                    var (chunk1Vertex, distanceBetweenVertices) = GetClosestVertex(chunk2Vertex.WorldPosition, chunk1EndVertices);
-
-                    //move chunk2 vertices to chunk 1 vertices
-                    MoveVertexToMatchAnother(chunk2Vertex, chunk1Vertex);
-                }
+                Vector3 previousPosition = vertexToMatch.GetCurrentWorldPosition();
+                desiredPosition = previousPosition;
             }
+            
+            connections.Add(new Connection(vertexToMove, vertexToMatch));
+            
+            Debug.DrawLine(vertexToMove.WorldPosition, desiredPosition, Color.white, 15);
+            vertexToMove.MeshBelongsTo.SetVertexWorldPosition(vertexToMove.Index, desiredPosition);
+            vertexToMatch.MeshBelongsTo.SetVertexWorldPosition(vertexToMatch.Index, desiredPosition);
         }
 
         private void BlendWithEdges(bool useFirstChunk)
         {
-            Chunk chunkToUse = useFirstChunk ? chunk1 : chunk2;
-            ChunkMeshData meshData = useFirstChunk ? chunk1MeshData : chunk2MeshData;
-            ChunkMeshData otherChunkMeshData = useFirstChunk ? chunk2MeshData : chunk1MeshData;
-            List<Vertex> otherChunksEndVertices = useFirstChunk ? chunk2EndVertices : chunk1EndVertices;
+            Chunk chunkToUse = useFirstChunk ? firstChunk : lastChunk;
             
             if (chunkToUse.TerrainBlendDistance.Approximately(0))
                 return; //not blending
             
+            ChunkMeshData meshData = useFirstChunk ? firstChunkMeshData : lastChunkMeshData;
+            ChunkMeshData otherChunkMeshData = useFirstChunk ? lastChunkMeshData : firstChunkMeshData;
+            List<Vertex> otherChunksEndVertices = useFirstChunk ? lastChunkMeshData.EndVertices : firstChunkMeshData.EndVertices;
+
             //check all the vertices if they're within distance to blend with the new middle heights
             for (int vertexIndex = 0; vertexIndex < meshData.Vertices.Length; vertexIndex++)
             {
-                Vector3 vertexPosition = meshData.Vertices[vertexIndex];
-                Vector3 vertexPositionWorld = meshData.MeshFilter.transform.TransformPoint(vertexPosition);
-                
+                Vector3 vertexPositionWorld = meshData.GetCurrentVertexWorldPosition(vertexIndex);
+
                 var (closestVertex, distanceToClosestVertex) = GetClosestVertex(vertexPositionWorld, otherChunksEndVertices);
 
                 if (distanceToClosestVertex <= chunkToUse.TerrainBlendDistance)
@@ -174,10 +279,9 @@ namespace Gumball
                     float differencePercent = 1 - Mathf.Clamp01(distanceToClosestVertex / chunkToUse.TerrainBlendDistance);
 
                     float currentHeight = vertexPositionWorld.y;
-
-                    Vector3 closestVertexPosition = otherChunkMeshData.Vertices[closestVertex.Index];
-                    Vector3 closestVertexPositionLocal = otherChunkMeshData.MeshFilter.transform.TransformPoint(closestVertexPosition);
-                    float closestVertexHeight = closestVertexPositionLocal.y;
+                    
+                    Vector3 closestVertexPositionWorld = closestVertex.GetCurrentWorldPosition();
+                    float closestVertexHeight = closestVertexPositionWorld.y;
 
                     float heightDifference = closestVertexHeight - currentHeight;
                     float desiredHeight = currentHeight + (heightDifference * differencePercent);
@@ -186,26 +290,6 @@ namespace Gumball
                     meshData.SetVertexWorldPosition(vertexIndex, desiredPosition);
                 }
             }
-        }
-
-        private void MoveVertexToMatchAnother(Vertex vertexToMove, Vertex vertexToMatch)
-        {
-            //set the same world Y position - the average of both
-            float desiredY = (vertexToMove.WorldPosition.y + vertexToMatch.WorldPosition.y) / 2;
-            Vector3 desiredPosition = vertexToMatch.WorldPosition.SetY(desiredY);
-                    
-            //if a vertex is already matched with an opposite vertex, use the other vertices Y
-            bool alreadyMatched = closestVerticesUsed.Contains(vertexToMatch);
-            closestVerticesUsed.Add(vertexToMatch);
-            if (alreadyMatched)
-            {
-                Vector3 previousPositionLocal = vertexToMatch.MeshBelongsTo.Vertices[vertexToMatch.Index];
-                Vector3 previousPositionWorld = vertexToMatch.MeshBelongsTo.MeshFilter.transform.TransformPoint(previousPositionLocal);
-                desiredPosition = previousPositionWorld;
-            }
-            
-            vertexToMove.MeshBelongsTo.SetVertexWorldPosition(vertexToMove.Index, desiredPosition);
-            vertexToMatch.MeshBelongsTo.SetVertexWorldPosition(vertexToMatch.Index, desiredPosition);
         }
 
         private (Vertex, float) GetClosestVertex(Vector3 worldPosition, List<Vertex> verticesToCheck)
@@ -226,31 +310,68 @@ namespace Gumball
 
             return (closestVertex, Mathf.Sqrt(minDistanceSquared));
         }
+
+        private void FixOverlappingVertices(bool useFirstChunk)
+        {
+            ChunkMeshData chunkMeshData = useFirstChunk ? firstChunkMeshData : lastChunkMeshData;
+            ChunkMeshData otherChunkMeshData = useFirstChunk ? lastChunkMeshData : firstChunkMeshData;
+
+            for (var vertexIndex = 0; vertexIndex < chunkMeshData.mesh.vertices.Length; vertexIndex++)
+            {
+                Vertex vertex = new Vertex(vertexIndex, chunkMeshData.mesh.vertices[vertexIndex], chunkMeshData);
+                
+                if (VertexHasConnection(vertex))
+                    continue; //don't do for end vertices
+                
+                //get the end point tangent direction
+                SplinePoint endPoint = useFirstChunk ? firstChunk.SplineComputer.GetPoint(0) : lastChunk.SplineComputer.GetPoint(0);
+                Vector3 tangentDirection = endPoint.tangent;
+                Debug.DrawLine(endPoint.position, endPoint.position + tangentDirection * 100, Color.green, 15);
+                
+                //get the closest end vertex on the other chunk
+                var (closestEndVertex, closestEndVertexDistance) = GetClosestVertex(vertex.WorldPosition, otherChunkMeshData.EndVertices);
+
+                //check which point is further in the tangent direction
+                bool isOverlapping = IsPointFurtherInDirection(vertex.WorldPosition, closestEndVertex.WorldPosition, tangentDirection);
+                if (isOverlapping)
+                {
+                    //move the vertex to the closest end vertex to stop overlapping
+                    Vector3 closestEndVertexPositionWorld = closestEndVertex.GetCurrentWorldPosition();
+                    chunkMeshData.SetVertexWorldPosition(vertexIndex, closestEndVertexPositionWorld);
+                }
+            }
+        }
+
+        private bool IsPointFurtherInDirection(Vector3 point1, Vector3 point2, Vector3 direction)
+        {
+            float distanceToA = Vector3.Dot(point1, direction.normalized);
+            float distanceToB = Vector3.Dot(point2, direction.normalized);
+
+            return distanceToA < distanceToB;
+        }
         
-        private List<Vertex> GetVerticesOnTangent(Chunk chunk, Vector3 tangentStart, Vector3 tangentEnd)
+        private static List<Vertex> GetVerticesOnTangent(ChunkMeshData chunkMeshData, Vector3 tangentStart, Vector3 tangentEnd)
         {
             List<Vertex> verticesOnTangent = new();
-            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
-            Mesh mesh = meshFilter.sharedMesh;
 
-            for (var vertexIndex = 0; vertexIndex < mesh.vertices.Length; vertexIndex++)
+            for (var vertexIndex = 0; vertexIndex < chunkMeshData.mesh.vertices.Length; vertexIndex++)
             {
-                Vector3 vertexPosition = mesh.vertices[vertexIndex];
-                Vector3 vertexPositionWorld = meshFilter.transform.TransformPoint(vertexPosition);
+                Vector3 vertexPosition = chunkMeshData.mesh.vertices[vertexIndex];
+                Vector3 vertexPositionWorld = chunkMeshData.MeshFilter.transform.TransformPoint(vertexPosition);
 
                 if (IsPointOnTangent(vertexPositionWorld, tangentStart, tangentEnd))
                 {
-                    verticesOnTangent.Add(new Vertex(vertexIndex, vertexPositionWorld, chunk == chunk1 ? chunk1MeshData : chunk2MeshData));
-                    Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 10, chunk == chunk1 ? Color.magenta : Color.yellow, 15);
+                    verticesOnTangent.Add(new Vertex(vertexIndex, vertexPosition, chunkMeshData));
+                    Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 10, Color.magenta, 15);
                 }
             }
 
             return verticesOnTangent;
         }
 
-        private bool IsPointOnTangent(Vector3 point, Vector3 tangentStart, Vector3 tangentEnd)
+        private static bool IsPointOnTangent(Vector3 point, Vector3 tangentStart, Vector3 tangentEnd)
         {
-            const float tolerance = 0.1f;
+            const float tolerance = 0.5f;
             
             Vector2 tangentDirection = (tangentEnd.FlattenAsVector2() - tangentStart.FlattenAsVector2()).normalized;
             Vector2 perpendicularDirection = new Vector2(-tangentDirection.y, tangentDirection.x);
@@ -260,27 +381,6 @@ namespace Gumball
 
             return Mathf.Abs(dotProduct) < tolerance;
         }
-        
-        private void FindVerticesOnTangents()
-        {
-            Quaternion previousRotation = chunk2.transform.rotation;
-            chunk2.transform.rotation = Quaternion.Euler(new Vector3(0, chunk2.transform.rotation.eulerAngles.y, 0));
-            
-            //get the vertices on each chunks tangent
-            Vector3 endPoint = chunk1.LastSample.position;
-            chunk1EndVertices = GetVerticesOnTangent(chunk1, endPoint - chunk1.LastTangent, endPoint + chunk1.LastTangent);
-            Vector3 oppositeEndPoint = chunk2.FirstSample.position;
-            chunk2EndVertices = GetVerticesOnTangent(chunk2, oppositeEndPoint - chunk2.FirstTangent, oppositeEndPoint + chunk2.FirstTangent);
 
-            chunk2.transform.rotation = previousRotation;
-
-            //draw the tangents
-            Debug.DrawLine(endPoint - chunk1.LastTangent * 250, endPoint + chunk1.LastTangent * 250, Color.magenta, 15);
-            Debug.DrawLine(oppositeEndPoint - chunk2.FirstTangent * 200, oppositeEndPoint + chunk2.FirstTangent * 200, Color.yellow, 15);
-
-            GlobalLoggers.TerrainLogger.Log($"Found {chunk1EndVertices.Count} vertices at the end of chunk1 ({chunk1.name}) - position = {endPoint}.");
-            GlobalLoggers.TerrainLogger.Log($"Found {chunk2EndVertices.Count} vertices at the end of chunk2 ({chunk2.name}) - position = {oppositeEndPoint}.");
-        }
-        
     }
 }
