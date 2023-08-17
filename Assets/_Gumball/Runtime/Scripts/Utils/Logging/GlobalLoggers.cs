@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    [CreateAssetMenu(menuName = "GlobalLoggers")]
+    [CreateAssetMenu(menuName = "Logging/GlobalLoggers")]
     public class GlobalLoggers : SingletonScriptable<GlobalLoggers>
     {
         

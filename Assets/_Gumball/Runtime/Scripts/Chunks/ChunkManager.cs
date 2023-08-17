@@ -10,5 +10,7 @@ namespace Gumball
 
         //TODO: handle things like loading chunks in/out based on distance
 
+        [SerializeField] private MapData currentMap;
+
     }
 }

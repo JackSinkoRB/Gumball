@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,10 +13,10 @@ namespace Gumball
     {
 
         private Chunk chunk => GetComponent<Chunk>();
+        private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
+
         private GameObject previousSelection;
         private float timeWhenUnityLastUpdated = 0;
-
-        private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
         
         private void OnEnable()
         {
@@ -47,6 +48,11 @@ namespace Gumball
         private void LateUpdate()
         {
             CheckToDisableTools();
+        }
+        
+        private void OnValidate()
+        {
+            CheckToUpdateTerrainImmediately();
         }
 
         #region Show terrain vertices
@@ -243,10 +249,7 @@ namespace Gumball
         }
         
         #endregion
-        
-        private void OnValidate()
-        {
-            CheckToUpdateTerrainImmediately();
-        }
+
     }
 }
+#endif

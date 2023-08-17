@@ -5,7 +5,7 @@ using System.Diagnostics;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-[CreateAssetMenu(fileName = "Logger")]
+[CreateAssetMenu(menuName = "Logging/Logger")]
 public class Logger : ScriptableObject
 {
 

@@ -11,7 +11,6 @@ using Object = UnityEngine.Object;
 
 namespace Gumball
 {
-    [RequireComponent(typeof(ChunkEditorTools))]
     public class Chunk : MonoBehaviour
     {
         
