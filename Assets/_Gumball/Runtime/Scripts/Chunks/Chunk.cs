@@ -3,14 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using Dreamteck.Splines;
 using MyBox;
+using UnityEngine;
+using Object = UnityEngine.Object;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Gumball
 {
+#if UNITY_EDITOR
+    [RequireComponent(typeof(ChunkEditorTools))]    
+#endif
     public class Chunk : MonoBehaviour
     {
         

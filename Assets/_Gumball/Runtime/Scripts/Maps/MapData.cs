@@ -9,7 +9,20 @@ namespace Gumball
     public class MapData : ScriptableObject
     {
 
-        [SerializeField] private AssetReferenceT<Chunk>[] chunks;
+        [SerializeField] private AssetReferenceGameObject[] chunks;
 
+        public List<AssetReferenceGameObject> GetChunksAroundPosition(Vector3 position, float radius)
+        {
+            List<AssetReferenceGameObject> chunksAroundPosition = new();
+
+            foreach (AssetReferenceGameObject chunk in chunks)
+            {
+                //TODO: distance check
+                chunksAroundPosition.Add(chunk);
+            }
+
+            return chunksAroundPosition;
+        }
+        
     }
 }
