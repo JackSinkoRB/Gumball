@@ -51,7 +51,7 @@ namespace Gumball
             }
         }
         
-        private GameObject currentTerrain;
+        [ReadOnly, SerializeField] private GameObject currentTerrain;
         private readonly SampleCollection splineSampleCollection = new();
 
         public void SetTerrain(GameObject terrain)

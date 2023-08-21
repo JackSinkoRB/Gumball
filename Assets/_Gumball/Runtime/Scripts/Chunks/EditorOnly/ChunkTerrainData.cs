@@ -13,6 +13,9 @@ namespace Gumball
     public class ChunkTerrainData
     {
 
+        private const string meshAssetFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks/Meshes";
+        private const string defaultTerrainPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
+        
         [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
         [PositiveValueOnly, SerializeField] private int resolution = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
@@ -53,7 +56,7 @@ namespace Gumball
             MeshRenderer meshRenderer = terrain.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterials = materialsToAssign.HasValidMaterials()
                 ? materialsToAssign
-                : new[] { new Material(Shader.Find("Diffuse")) }; //set a material with the default shader if none
+                : new[] { GetDefaultMaterial() }; //set a material with the default shader if none
 
             //apply mesh
             MeshFilter meshFilter = terrain.AddComponent<MeshFilter>();
@@ -74,11 +77,23 @@ namespace Gumball
             //apply the changes to the mesh
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
+            
+            //save the mesh asset
+            AssetDatabase.CreateAsset(mesh, $"{meshAssetFolderPath}/TerrainMesh_{chunk.name}.asset");
+            AssetDatabase.SaveAssets();
             meshFilter.sharedMesh = mesh;
+            
+            PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
 
             return terrain;
         }
 
+        private Material GetDefaultMaterial()
+        {
+            Material material = AssetDatabase.LoadAssetAtPath<Material>(defaultTerrainPath);
+            return material;
+        }
+        
         private List<int> CreateTrianglesFromGrid()
         {
             List<int> triangleIndexes = new List<int>();
