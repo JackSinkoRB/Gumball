@@ -15,6 +15,12 @@ namespace Gumball
         public static float BootDurationSeconds { get; private set; }
         public static SceneInstance LoadingSceneInstance;
         public static bool LoadedFromAnotherScene;
+
+        [RuntimeInitializeOnLoadMethod]
+        private static void StaticStart()
+        {
+            LoadedFromAnotherScene = false;
+        }
         
         private IEnumerator Start()
         {

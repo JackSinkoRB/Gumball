@@ -34,6 +34,12 @@ namespace Gumball
         private float asyncLoadingDurationSeconds;
             
         public static bool HasLoaded { get; private set; }
+
+        [RuntimeInitializeOnLoadMethod]
+        private static void StaticStart()
+        {
+            HasLoaded = false;
+        }
         
         private IEnumerator Start()
         {
