@@ -13,8 +13,9 @@ namespace Gumball
     public class ChunkTerrainData
     {
 
-        private const string meshAssetFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks/Meshes";
-        private const string defaultTerrainPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
+        private const string meshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
+        private const string chunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
+        private const string defaultTerrainMaterialPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
         
         [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
         [PositiveValueOnly, SerializeField] private int resolution = 100;
@@ -79,19 +80,60 @@ namespace Gumball
             mesh.RecalculateBounds();
             
             //save the mesh asset
-            AssetDatabase.CreateAsset(mesh, $"{meshAssetFolderPath}/TerrainMesh_{chunk.name}.asset");
+            AssetDatabase.CreateAsset(mesh, $"{meshAssetFolderPath}/ProceduralTerrain_{chunk.UniqueID}.asset");
             AssetDatabase.SaveAssets();
             meshFilter.sharedMesh = mesh;
-            
             PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
+
+            CleanupUnusedMeshes();
+            AssetDatabase.SaveAssets();
+
 
             return terrain;
         }
 
-        private Material GetDefaultMaterial()
+        private void CleanupUnusedMeshes()
         {
-            Material material = AssetDatabase.LoadAssetAtPath<Material>(defaultTerrainPath);
-            return material;
+            //find all the used meshes
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { chunkFolderPath });
+            HashSet<Mesh> usedMeshes = new HashSet<Mesh>();
+            foreach (string prefabGuid in prefabGuids)
+            {
+                string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
+                Chunk chunkPrefab = AssetDatabase.LoadAssetAtPath<Chunk>(prefabPath);
+                if (chunkPrefab == null)
+                    continue; 
+                if (chunkPrefab.CurrentTerrain == null)
+                    continue;
+                
+                MeshFilter meshFilter = chunkPrefab.CurrentTerrain.GetComponent<MeshFilter>();
+                if (meshFilter.sharedMesh != null)
+                    usedMeshes.Add(meshFilter.sharedMesh);
+            }
+
+            //find all the terrain meshes
+            string[] meshGuids = AssetDatabase.FindAssets("t:Mesh", new[] { meshAssetFolderPath });
+            List<Mesh> allMeshes = new List<Mesh>();
+            foreach (string meshGuid in meshGuids)
+            {
+                string meshPath = AssetDatabase.GUIDToAssetPath(meshGuid);
+                Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
+                allMeshes.Add(mesh);
+            }
+
+            //delete the assets that aren't used
+            foreach (Mesh mesh in allMeshes)
+            {
+                if (mesh == chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh)
+                    continue;
+                
+                if (!usedMeshes.Contains(mesh))
+                {
+                    string path = AssetDatabase.GetAssetPath(mesh);
+                    AssetDatabase.DeleteAsset(path);
+                    Debug.Log($"Removed unused terrain mesh asset: {path}");
+                }
+            }
         }
         
         private List<int> CreateTrianglesFromGrid()
@@ -255,6 +297,11 @@ namespace Gumball
             }
 
             return noiseHeight;
+        }
+        
+        private static Material GetDefaultMaterial()
+        {
+            return AssetDatabase.LoadAssetAtPath<Material>(defaultTerrainMaterialPath);
         }
         
     }

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6459624903785862660}
   - component: {fileID: 7154103392751957605}
   - component: {fileID: 281317726593344272}
+  - component: {fileID: 6095840978861501082}
   m_Layer: 0
   m_Name: ChunkTemplate
   m_TagString: Untagged
@@ -48,6 +49,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 281317726593344272}
+  terrainBlendDistance: 50
+  chunkBefore: {fileID: 0}
+  chunkAfter: {fileID: 0}
+  currentTerrain: {fileID: 0}
 --- !u!114 &7154103392751957605
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,8 +65,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 930d203b93acfac48ac377e5145c5d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkToConnectWith: {fileID: 0}
-  currentTerrain: {fileID: 0}
   terrainData:
     widthAroundRoad: 100
     resolution: 100
@@ -99,6 +102,8 @@ MonoBehaviour:
         m_RotationOrder: 4
       Scale: 150
   updateImmediately: 1
+  HasConnection: 0
+  chunkToConnectWith: {fileID: 0}
 --- !u!114 &281317726593344272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -864,6 +869,19 @@ MonoBehaviour:
     size: 1
     percent: 1
   _nodes: []
+--- !u!114 &6095840978861501082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6512260167617406093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5641bbc11a427a46bf4e3278bd3dd9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueID: Prefab_651b2fab-8f3d-4912-9803-e54f9752ddf9
 --- !u!1 &8623244286810635614
 GameObject:
   m_ObjectHideFlags: 0
@@ -982,14 +1000,14 @@ MonoBehaviour:
     useClippedPercent: 0
     keys: []
   _clipFromSample:
-    position: {x: 212.1449, y: 0, z: 326.20453}
+    position: {x: 0, y: 0, z: 0}
     up: {x: 0, y: 1, z: 0}
     forward: {x: 0, y: 0, z: 1}
     color: {r: 1, g: 1, b: 1, a: 1}
     size: 1
     percent: 0
   _clipToSample:
-    position: {x: 212.1449, y: 0, z: 826.2045}
+    position: {x: 0, y: 0, z: 500}
     up: {x: 0, y: 1, z: 0}
     forward: {x: 0, y: 0, z: 1}
     color: {r: 1, g: 1, b: 1, a: 1}

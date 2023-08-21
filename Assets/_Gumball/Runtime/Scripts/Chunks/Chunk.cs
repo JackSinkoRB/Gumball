@@ -12,8 +12,9 @@ using UnityEditor;
 namespace Gumball
 {
 #if UNITY_EDITOR
-    [RequireComponent(typeof(ChunkEditorTools))]    
+    [RequireComponent(typeof(ChunkEditorTools))]
 #endif
+    [RequireComponent(typeof(UniqueIDAssigner))]
     public class Chunk : MonoBehaviour
     {
         
@@ -25,7 +26,10 @@ namespace Gumball
         [Header("Debugging")]
         [ReadOnly, SerializeField] private Chunk chunkBefore;
         [ReadOnly, SerializeField] private Chunk chunkAfter;
-        
+        [ReadOnly, SerializeField] private GameObject currentTerrain;
+
+        public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
+
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
 
@@ -51,7 +55,6 @@ namespace Gumball
             }
         }
         
-        [ReadOnly, SerializeField] private GameObject currentTerrain;
         private readonly SampleCollection splineSampleCollection = new();
 
         public void SetTerrain(GameObject terrain)
