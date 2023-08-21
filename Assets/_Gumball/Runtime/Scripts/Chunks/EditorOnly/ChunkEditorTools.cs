@@ -74,6 +74,12 @@ namespace Gumball
                 return;
 
             MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
+            if (meshFilter == null)
+                return;
+
+            if (meshFilter.sharedMesh == null)
+                return;
+            
             Vector3[] vertices = meshFilter.sharedMesh.vertices;
             for (int vertexIndex = 0; vertexIndex < vertices.Length; vertexIndex++)
             {
