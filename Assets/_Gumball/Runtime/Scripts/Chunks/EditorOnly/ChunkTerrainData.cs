@@ -13,7 +13,7 @@ namespace Gumball
     public class ChunkTerrainData
     {
 
-        private const string meshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
+        public const string meshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
         private const string chunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
         private const string defaultTerrainMaterialPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
         
@@ -87,7 +87,6 @@ namespace Gumball
 
             CleanupUnusedMeshes();
             AssetDatabase.SaveAssets();
-
 
             return terrain;
         }

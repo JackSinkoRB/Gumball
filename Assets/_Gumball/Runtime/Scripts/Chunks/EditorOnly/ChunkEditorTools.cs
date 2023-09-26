@@ -55,6 +55,53 @@ namespace Gumball
             CheckToUpdateTerrainImmediately();
         }
 
+        [InitializeOnLoadMethod]
+        private static void Initialise()
+        {
+            UniqueIDAssigner.OnAssignID += OnAssignID;
+        }
+        
+        private static void OnAssignID(UniqueIDAssigner uniqueIDAssigner, string previousID, string newID)
+        {
+            Chunk chunk = uniqueIDAssigner.GetComponent<Chunk>();
+            if (chunk == null)
+                return;
+            
+            TryDuplicateMeshWithNewID(chunk, previousID, newID);
+        }
+
+        private static void TryDuplicateMeshWithNewID(Chunk chunk, string previousID, string newID)
+        {
+            if (chunk.CurrentTerrain == null)
+                return;
+
+            Mesh mesh = chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh;
+            if (mesh == null)
+                return;
+            
+            //save the mesh asset
+            string oldPath = $"{ChunkTerrainData.meshAssetFolderPath}/ProceduralTerrain_{previousID}.asset";
+            string newPath = $"{ChunkTerrainData.meshAssetFolderPath}/ProceduralTerrain_{newID}.asset";
+            AssetDatabase.CopyAsset(oldPath, newPath);
+            AssetDatabase.SaveAssets();
+            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
+
+            Mesh duplicatedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(newPath);
+            meshFilter.sharedMesh = duplicatedMesh;
+            
+            PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
+            AssetDatabase.SaveAssets();
+        }
+
+        [ButtonMethod]
+        public void Test()
+        {
+            string newPath = $"{ChunkTerrainData.meshAssetFolderPath}/ProceduralTerrain_{chunk.GetComponent<UniqueIDAssigner>().UniqueID}.asset";
+            Mesh duplicatedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(newPath);
+            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
+            meshFilter.sharedMesh = duplicatedMesh;
+        }
+        
         #region Show terrain vertices
         private const float timeToShowVertices = 15;
         
@@ -104,6 +151,8 @@ namespace Gumball
 
         private ChunkGrid currentGrid;
         
+        public ChunkTerrainData TerrainData => terrainData;
+
         private static bool subscribedToPlayModeStateChanged;
         private static PlayModeStateChange playModeState;
         
