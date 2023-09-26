@@ -17,6 +17,7 @@ namespace Gumball
         [SerializeField] private MapData testingMap;
         [ReadOnly, SerializeField] private MapData currentMap;
         [ReadOnly, SerializeField] private MapData currentMapLoading;
+        [ReadOnly, SerializeField] private List<Chunk> currentChunks = new();
         
         private readonly List<TrackedCoroutine> chunkLoadingTasks = new();
 
@@ -62,12 +63,24 @@ namespace Gumball
             }
         }
 
-        private IEnumerator LoadChunkAsync(AssetReferenceGameObject chunk)
+        private IEnumerator LoadChunkAsync(AssetReferenceGameObject chunkAssetReference)
         {
-            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunk);
+            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunkAssetReference);
             yield return handle;
-            //TODO: positioning
-            Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), transform);
+            
+            GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), transform);
+            Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
+            
+            //should create a copy of the mesh so it doesn't directly edit the saved mesh in runtime
+            chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = Instantiate(chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh);
+            
+            currentChunks.Add(chunk);
+
+            if (currentChunks.Count > 1)
+            {
+                //connect the chunk
+                chunk.Connect(currentChunks[^2]);
+            }
         }
 
     }

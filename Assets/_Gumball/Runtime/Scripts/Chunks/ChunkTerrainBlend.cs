@@ -16,7 +16,7 @@ namespace Gumball
         {
             internal readonly int Index;
             internal readonly Vector3 LocalPosition;
-            internal readonly Vector3 WorldPosition => MeshBelongsTo.MeshFilter.transform.TransformPoint(LocalPosition);
+            internal Vector3 WorldPosition => MeshBelongsTo.MeshFilter.transform.TransformPoint(LocalPosition);
             internal readonly ChunkMeshData MeshBelongsTo;
 
             internal Vertex(int index, Vector3 localPosition, ChunkMeshData meshBelongsTo)
@@ -264,7 +264,6 @@ namespace Gumball
                 return; //not blending
             
             ChunkMeshData meshData = useFirstChunk ? firstChunkMeshData : lastChunkMeshData;
-            ChunkMeshData otherChunkMeshData = useFirstChunk ? lastChunkMeshData : firstChunkMeshData;
             List<Vertex> otherChunksEndVertices = useFirstChunk ? lastChunkMeshData.EndVertices : firstChunkMeshData.EndVertices;
 
             //check all the vertices if they're within distance to blend with the new middle heights
