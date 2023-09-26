@@ -65,7 +65,9 @@ namespace Gumball
             stopwatch.Restart();
             
             currentStage = Stage.LOADING_VEHICLE;
-            carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar());
+            Vector3 startingPosition = ChunkManager.Instance.CurrentMap.VehicleStartingPosition;
+            Vector3 startingRotation = ChunkManager.Instance.CurrentMap.VehicleStartingRotation;
+            carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(startingPosition, startingRotation));
             yield return carLoadCoroutine;
             GlobalLoggers.LoadingLogger.Log($"Vehicle loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             stopwatch.Restart();

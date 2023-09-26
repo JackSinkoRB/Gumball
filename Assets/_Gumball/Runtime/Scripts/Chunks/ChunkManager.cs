@@ -23,6 +23,7 @@ namespace Gumball
 
         [Obsolete("To be removed - for testing only")]
         public MapData TestingMap => testingMap;
+        public MapData CurrentMap => currentMap;
         private bool isLoading => currentMapLoading != null;
 
         public IEnumerator LoadMap(MapData map)

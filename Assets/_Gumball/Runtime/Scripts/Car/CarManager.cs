@@ -69,7 +69,6 @@ namespace Gumball
         [Tooltip("Prevents the wheels from locking up when braking which can prevent turning while braking.")]
         [SerializeField] private bool hasAbsControl = true;
         
-        //TODO:
         [Tooltip("Detects oversteer and understeer, and applies the brakes to the opposite corner wheel to correct it.")]
         [SerializeField] private bool hasStabilityControl = true;
         

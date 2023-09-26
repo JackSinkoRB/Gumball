@@ -9,7 +9,12 @@ namespace Gumball
     public class MapData : ScriptableObject
     {
 
+        [SerializeField] private Vector3 vehicleStartingPosition;
+        [SerializeField] private Vector3 vehicleStartingRotation;
         [SerializeField] private AssetReferenceGameObject[] chunks;
+
+        public Vector3 VehicleStartingPosition => vehicleStartingPosition;
+        public Vector3 VehicleStartingRotation => vehicleStartingRotation;
 
         public List<AssetReferenceGameObject> GetChunksAroundPosition(Vector3 position, float radius)
         {
