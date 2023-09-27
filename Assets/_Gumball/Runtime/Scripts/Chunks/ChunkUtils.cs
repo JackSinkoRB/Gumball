@@ -30,6 +30,8 @@ namespace Gumball
                 }, "Connect Chunk");
             }
 #endif
+            
+            GlobalLoggers.TerrainLogger.Log($"Appending {chunk2.name} to the end of {chunk1.name}");
 
             chunk1.SetConnecting(true);
             chunk2.SetConnecting(true);
@@ -53,6 +55,10 @@ namespace Gumball
             chunk1.OnConnectChunkAfter(chunk2);
             chunk2.OnConnectChunkBefore(chunk1);
             
+            //update immediately as the position has changed
+            UpdateSplineImmediately(chunk1);
+            UpdateSplineImmediately(chunk2);
+
             chunk1.SetConnecting(false);
             chunk2.SetConnecting(false);
         }
@@ -110,7 +116,7 @@ namespace Gumball
             chunkToAlign.transform.rotation = rotationToAlign * chunkToAlign.transform.rotation;
         }
         
-        private static void UpdateSplineImmediately(Chunk chunk)
+        public static void UpdateSplineImmediately(Chunk chunk)
         {
             chunk.SplineComputer.RebuildImmediate();
             chunk.UpdateSplineSampleData();

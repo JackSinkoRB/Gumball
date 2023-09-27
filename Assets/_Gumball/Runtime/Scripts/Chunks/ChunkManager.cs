@@ -33,7 +33,8 @@ namespace Gumball
             LoadChunksAroundPosition(Vector3.zero);
 
             yield return new WaitUntil(IsChunkLoadingComplete);
-
+            ConnectChunks();
+            
             currentMap = map;
             currentMapLoading = null;
         }
@@ -73,16 +74,21 @@ namespace Gumball
             Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
             
             //should create a copy of the mesh so it doesn't directly edit the saved mesh in runtime
-            chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = Instantiate(chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh);
+            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
+            Mesh meshCopy = Instantiate(meshFilter.sharedMesh);
+            chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = meshCopy;
             
             currentChunks.Add(chunk);
-
-            if (currentChunks.Count > 1)
-            {
-                //connect the chunk
-                chunk.Connect(currentChunks[^2]);
-            }
         }
 
+        private void ConnectChunks()
+        {
+            for (int count = 1; count < currentChunks.Count; count++)
+            {
+                Chunk chunk = currentChunks[count];
+                Chunk previousChunk = currentChunks[count - 1];
+                chunk.Connect(previousChunk);
+            }
+        }
     }
 }

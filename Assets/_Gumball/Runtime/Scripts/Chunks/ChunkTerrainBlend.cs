@@ -323,9 +323,9 @@ namespace Gumball
                     continue; //don't do for end vertices
                 
                 //get the end point tangent direction
-                SplinePoint endPoint = useFirstChunk ? firstChunk.SplineComputer.GetPoint(0) : lastChunk.SplineComputer.GetPoint(0);
-                Vector3 tangentDirection = endPoint.tangent;
-                Debug.DrawLine(endPoint.position, endPoint.position + tangentDirection * 100, Color.green, 15);
+                SplineSample endPoint = useFirstChunk ? firstChunk.LastSample : lastChunk.FirstSample;
+                Vector3 tangentDirection = useFirstChunk ? -endPoint.forward : endPoint.forward;
+                Debug.DrawLine(endPoint.position, endPoint.position + tangentDirection * 100, useFirstChunk ? Color.red : Color.green, 15);
                 
                 //get the closest end vertex on the other chunk
                 var (closestEndVertex, closestEndVertexDistance) = GetClosestVertex(vertex.WorldPosition, otherChunkMeshData.EndVertices);
@@ -336,6 +336,9 @@ namespace Gumball
                 {
                     //move the vertex to the closest end vertex to stop overlapping
                     Vector3 closestEndVertexPositionWorld = closestEndVertex.GetCurrentWorldPosition();
+                    
+                    Debug.DrawLine(closestEndVertexPositionWorld, vertex.WorldPosition, Color.black, 15);
+
                     chunkMeshData.SetVertexWorldPosition(vertexIndex, closestEndVertexPositionWorld);
                 }
             }
@@ -358,10 +361,12 @@ namespace Gumball
                 Vector3 vertexPosition = chunkMeshData.mesh.vertices[vertexIndex];
                 Vector3 vertexPositionWorld = chunkMeshData.MeshFilter.transform.TransformPoint(vertexPosition);
 
+                Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 10, Color.yellow, 15);
+
                 if (IsPointOnTangent(vertexPositionWorld, tangentStart, tangentEnd))
                 {
                     verticesOnTangent.Add(new Vertex(vertexIndex, vertexPosition, chunkMeshData));
-                    Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 10, Color.magenta, 15);
+                    Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 20, Color.magenta, 15);
                 }
             }
 
@@ -370,7 +375,7 @@ namespace Gumball
 
         private static bool IsPointOnTangent(Vector3 point, Vector3 tangentStart, Vector3 tangentEnd)
         {
-            const float tolerance = 0.5f;
+            const float tolerance = 2f;
             
             Vector2 tangentDirection = (tangentEnd.FlattenAsVector2() - tangentStart.FlattenAsVector2()).normalized;
             Vector2 perpendicularDirection = new Vector2(-tangentDirection.y, tangentDirection.x);
