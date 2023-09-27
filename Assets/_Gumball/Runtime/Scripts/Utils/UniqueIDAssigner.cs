@@ -16,7 +16,9 @@ public class UniqueIDAssigner : MonoBehaviour
 #if UNITY_EDITOR
     private static readonly Dictionary<string, UniqueIDAssigner> allIDs = new();
 #endif
-    
+
+    [Tooltip("Whether the object is unique per scene, or whether it is just unique on a global scale.")]
+    [SerializeField] private bool perSceneUniqueness;
     [ReadOnly, SerializeField] private string uniqueID;
 
     public string UniqueID
@@ -55,7 +57,7 @@ public class UniqueIDAssigner : MonoBehaviour
                                        uniqueID.Length > sceneName.Length && 
                                        uniqueID.Substring(0, sceneName.Length).Equals(sceneName);
 
-        bool needToGenerateNewID = !hasSceneNameAtBeginning || anotherComponentAlreadyHasThisID;
+        bool needToGenerateNewID = (perSceneUniqueness && !hasSceneNameAtBeginning) || anotherComponentAlreadyHasThisID;
         if (needToGenerateNewID)
         {
             GenerateNewID();
@@ -65,12 +67,14 @@ public class UniqueIDAssigner : MonoBehaviour
             allIDs[uniqueID] = this;
     }
     
-    private void GenerateNewID()
+    [ButtonMethod]
+    public void GenerateNewID()
     {
         string sceneName = GetSceneName();
-        string prefix = $"{sceneName}_";
+        string scenePrefix = perSceneUniqueness ? $"{sceneName}_" : "";
+        
         string previousId = uniqueID;
-        uniqueID = prefix + Guid.NewGuid();
+        uniqueID = scenePrefix + Guid.NewGuid();
         EditorUtility.SetDirty(this);
         EditorSceneManager.MarkSceneDirty(gameObject.scene);
         Debug.Log($"Generating new ID for {gameObject.name}");
