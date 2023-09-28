@@ -121,6 +121,8 @@ namespace Gumball
                 Quaternion previousRotation = Chunk.transform.rotation;
                 Chunk.transform.rotation = Quaternion.Euler(new Vector3(0, Chunk.transform.rotation.eulerAngles.y, 0));
             
+                ChunkUtils.UpdateSplineImmediately(Chunk); //this is required as the chunk is rotated
+                
                 //get the vertices on each chunks tangent
                 Vector3 endPoint = isFirstChunk ? Chunk.LastSample.position : Chunk.FirstSample.position;
                 Vector3 tangent = isFirstChunk ? Chunk.LastTangent : Chunk.FirstTangent;
@@ -159,7 +161,7 @@ namespace Gumball
             }
         }
 
-        private List<Connection> connections = new();
+        private readonly List<Connection> connections = new();
         
         private bool VertexHasConnection(Vertex vertex)
         {
@@ -375,7 +377,7 @@ namespace Gumball
 
         private static bool IsPointOnTangent(Vector3 point, Vector3 tangentStart, Vector3 tangentEnd)
         {
-            const float tolerance = 2f;
+            const float tolerance = 0.5f;
             
             Vector2 tangentDirection = (tangentEnd.FlattenAsVector2() - tangentStart.FlattenAsVector2()).normalized;
             Vector2 perpendicularDirection = new Vector2(-tangentDirection.y, tangentDirection.x);
