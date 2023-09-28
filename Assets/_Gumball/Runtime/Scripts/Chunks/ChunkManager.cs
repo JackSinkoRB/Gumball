@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -11,84 +12,127 @@ namespace Gumball
     public class ChunkManager : Singleton<ChunkManager>
     {
         
-        private const float chunkLoadDistance = 100;
-
+        [Header("Settings")]
         [Obsolete("To be removed - for testing only")]
         [SerializeField] private MapData testingMap;
-        [ReadOnly, SerializeField] private MapData currentMap;
-        [ReadOnly, SerializeField] private MapData currentMapLoading;
-        [ReadOnly, SerializeField] private List<Chunk> currentChunks = new();
         
-        private readonly List<TrackedCoroutine> chunkLoadingTasks = new();
+        [SerializeField] private float chunkLoadDistance = 50;
+
+        [Header("Debugging")]
+        [ReadOnly, SerializeField] private MapData currentMap;
+        [ReadOnly, SerializeField] private List<Chunk> currentChunks = new();
 
         [Obsolete("To be removed - for testing only")]
         public MapData TestingMap => testingMap;
         public MapData CurrentMap => currentMap;
-        private bool isLoading => currentMapLoading != null;
+        private bool isLoading;
+        private MinMaxInt loadedChunksIndices;
+        private TrackedCoroutine distanceLoadingCoroutine;
 
         public IEnumerator LoadMap(MapData map)
         {
             GlobalLoggers.LoadingLogger.Log($"Loading map '{map.name}'");
-            currentMapLoading = map;
-            LoadChunksAroundPosition(Vector3.zero);
-
-            yield return new WaitUntil(IsChunkLoadingComplete);
-            ConnectChunks();
-            
+            isLoading = true;
             currentMap = map;
-            currentMapLoading = null;
+
+            //load the first chunk since none are loaded
+            loadedChunksIndices = new MinMaxInt(map.StartingChunkIndex, map.StartingChunkIndex);
+            yield return LoadChunkAsync(map.ChunkReferences[map.StartingChunkIndex]);
+            
+            //load the rest of the chunks in range
+            yield return LoadChunksAroundPosition(map.VehicleStartingPosition);
+            
+            isLoading = false;
         }
 
-        private bool IsChunkLoadingComplete()
+        private void LateUpdate()
         {
-            foreach (TrackedCoroutine task in chunkLoadingTasks)
+            if (distanceLoadingCoroutine == null || !distanceLoadingCoroutine.IsPlaying)
+                distanceLoadingCoroutine = new TrackedCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
+        }
+
+        private IEnumerator LoadChunksAroundPosition(Vector3 position)
+        {
+            //TODO: check to unload chunks
+            
+            //check to load chunks ahead
+            Chunk lastChunk = currentChunks[^1];
+            SplinePoint lastPoint = lastChunk.SplineComputer.GetPoint(lastChunk.LastPointIndex);
+            float distanceToEndOfChunk = Vector3.Distance(position, lastPoint.position);
+            while (distanceToEndOfChunk < chunkLoadDistance)
             {
-                if (task.IsPlaying)
-                    return false;
+                //load next chunk
+                int indexToLoad = loadedChunksIndices.Max + 1;
+                if (indexToLoad >= currentMap.ChunkReferences.Length)
+                {
+                    //end of map - no more chunks to load
+                    break;
+                }
+
+                loadedChunksIndices.Max = indexToLoad;
+                AssetReferenceGameObject nextChunk = currentMap.ChunkReferences[indexToLoad];
+                
+                yield return LoadChunkAsync(nextChunk);
+                
+                //update the distance
+                SplinePoint nextChunkLastPoint = currentChunks[^1].SplineComputer.GetPoint(lastChunk.LastPointIndex);
+                distanceToEndOfChunk = Vector3.Distance(position, nextChunkLastPoint.position);
             }
-
-            return true;
-        }
-
-        private void LoadChunksAroundPosition(Vector3 position)
-        {
-            chunkLoadingTasks.Clear();
-
-            List<AssetReferenceGameObject> chunksAroundPosition = currentMapLoading.GetChunksAroundPosition(position, chunkLoadDistance);
-            foreach (AssetReferenceGameObject chunk in chunksAroundPosition) //TODO: get all the chunks within distance from position to position + chunkLoadDistance radius
+            
+            //check to load chunks behind
+            Chunk firstChunk = currentChunks[0];
+            SplinePoint firstPoint = firstChunk.SplineComputer.GetPoint(0);
+            float distanceToStartOfChunk = Vector3.Distance(position, firstPoint.position);
+            while (distanceToStartOfChunk < chunkLoadDistance)
             {
-#if UNITY_EDITOR
-                GlobalLoggers.LoadingLogger.Log($"Loading chunk '{chunk.editorAsset.name}'");
-#endif
-                TrackedCoroutine loadingTask = new TrackedCoroutine(LoadChunkAsync(chunk));
-                chunkLoadingTasks.Add(loadingTask);
+                //load next chunk
+                int indexToLoad = loadedChunksIndices.Min - 1;
+                if (indexToLoad < 0)
+                {
+                    //start of map - no more chunks to load
+                    break;
+                }
+            
+                loadedChunksIndices.Min = indexToLoad;
+                AssetReferenceGameObject nextChunk = currentMap.ChunkReferences[indexToLoad];
+            
+                yield return LoadChunkAsync(nextChunk);
+                
+                //update the distance
+                SplinePoint nextChunkFirstPoint = currentChunks[0].SplineComputer.GetPoint(0);
+                distanceToStartOfChunk = Vector3.Distance(position, nextChunkFirstPoint.position);
             }
         }
 
         private IEnumerator LoadChunkAsync(AssetReferenceGameObject chunkAssetReference)
         {
+#if UNITY_EDITOR
+            GlobalLoggers.LoadingLogger.Log($"Loading chunk '{chunkAssetReference.editorAsset.name}'...");
+#endif
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunkAssetReference);
             yield return handle;
             
             GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), transform);
             Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
+
+            currentChunks.Add(chunk);
+
+            //connect to the previous chunk (if there is one)
+            if (currentChunks.Count > 1)
+            {
+                Chunk previousChunk = currentChunks[^2];
+                chunk.Connect(previousChunk);
+            }
             
+#if UNITY_EDITOR
             //should create a copy of the mesh so it doesn't directly edit the saved mesh in runtime
             MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
             Mesh meshCopy = Instantiate(meshFilter.sharedMesh);
             chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = meshCopy;
-            
-            currentChunks.Add(chunk);
-        }
 
-        private void ConnectChunks()
-        {
-            for (int count = 1; count < currentChunks.Count; count++)
-            {
-                Chunk chunk = currentChunks[count];
-                Chunk previousChunk = currentChunks[count - 1];
-                chunk.Connect(previousChunk);
-            }
+            GlobalLoggers.LoadingLogger.Log($"Chunk loading '{chunkAssetReference.editorAsset.name}' complete.");
+#endif
         }
+        
     }
 }

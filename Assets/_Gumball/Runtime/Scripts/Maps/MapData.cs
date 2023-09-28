@@ -9,25 +9,17 @@ namespace Gumball
     public class MapData : ScriptableObject
     {
 
+        [SerializeField] private int startingChunkIndex;
         [SerializeField] private Vector3 vehicleStartingPosition;
         [SerializeField] private Vector3 vehicleStartingRotation;
+        
+        [Space(5)]
         [SerializeField] private AssetReferenceGameObject[] chunks;
 
+        public int StartingChunkIndex => startingChunkIndex;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public Vector3 VehicleStartingRotation => vehicleStartingRotation;
-
-        public List<AssetReferenceGameObject> GetChunksAroundPosition(Vector3 position, float radius)
-        {
-            List<AssetReferenceGameObject> chunksAroundPosition = new();
-
-            foreach (AssetReferenceGameObject chunk in chunks)
-            {
-                //TODO: distance check
-                chunksAroundPosition.Add(chunk);
-            }
-
-            return chunksAroundPosition;
-        }
+        public AssetReferenceGameObject[] ChunkReferences => chunks;
         
     }
 }

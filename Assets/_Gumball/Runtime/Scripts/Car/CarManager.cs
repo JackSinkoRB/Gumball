@@ -404,9 +404,6 @@ namespace Gumball
                 wheel.brakePedal = brakeToApply;
                 wheel.handbrake = InputManager.Handbrake.IsPressed() ? 1 : 0;
                 wheel.steering = CurrentSteering;
-                
-                if (brake != 0)
-                    Debug.Log("Braking: " + brakeToApply + " - steer: " + CurrentSteering + " - slip: " + slipRatio);
             }
         }
         

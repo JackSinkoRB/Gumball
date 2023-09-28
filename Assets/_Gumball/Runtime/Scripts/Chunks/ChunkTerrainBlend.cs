@@ -96,8 +96,7 @@ namespace Gumball
             {
                 Mesh meshToUse = mesh;
 #if UNITY_EDITOR
-                if (!Application.isPlaying)
-                    meshToUse = Object.Instantiate(mesh); //use a mesh copy so that the MeshFilter can be undone
+                meshToUse = Object.Instantiate(mesh); //use a mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
 #endif
                 
                 meshToUse.SetVertices(Vertices);
@@ -111,8 +110,7 @@ namespace Gumball
                 meshToUse.RecalculateBounds();
 
 #if UNITY_EDITOR
-                if (!Application.isPlaying)
-                    MeshFilter.sharedMesh = meshToUse; //set the mesh copy so that the MeshFilter can be undone       
+                MeshFilter.sharedMesh = meshToUse; //set the mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
 #endif
             }
 
