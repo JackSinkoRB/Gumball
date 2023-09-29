@@ -93,15 +93,6 @@ namespace Gumball
             AssetDatabase.SaveAssets();
         }
 
-        [ButtonMethod]
-        public void Test()
-        {
-            string newPath = $"{ChunkTerrainData.meshAssetFolderPath}/ProceduralTerrain_{chunk.GetComponent<UniqueIDAssigner>().UniqueID}.asset";
-            Mesh duplicatedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(newPath);
-            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
-            meshFilter.sharedMesh = duplicatedMesh;
-        }
-        
         #region Show terrain vertices
         private const float timeToShowVertices = 15;
         
@@ -151,8 +142,6 @@ namespace Gumball
 
         private ChunkGrid currentGrid;
         
-        public ChunkTerrainData TerrainData => terrainData;
-
         private static bool subscribedToPlayModeStateChanged;
         private static PlayModeStateChange playModeState;
         
@@ -199,7 +188,7 @@ namespace Gumball
             if (timeSinceUnityUpdated < 1) //likely recompiling
                 return;
 
-            if (chunk.IsConnecting || chunk.HasChunkConnected)
+            if (chunk.IsAutomaticTerrainRecreationDisabled || chunk.HasChunkConnected)
                 return;
             
             bool justSelected = previousSelection != gameObject && Selection.activeGameObject == gameObject;
@@ -244,9 +233,9 @@ namespace Gumball
             chunk.SetTerrain(newTerrain);
             
             if (connectedBefore != null)
-                ChunkUtils.ConnectChunks(connectedBefore, chunk);
+                ChunkUtils.ConnectChunks(connectedBefore, chunk, new ChunkBlendData(connectedBefore, chunk));
             if (connectedAfter != null)
-                ChunkUtils.ConnectChunks(chunk, connectedAfter);
+                ChunkUtils.ConnectChunks(chunk, connectedAfter, new ChunkBlendData(chunk, connectedAfter));
         }
         
         #endregion
@@ -267,7 +256,7 @@ namespace Gumball
             if (chunk.HasChunkConnected)
                 throw new InvalidOperationException("This chunk is already connected. Disconnect the chunk first.");
 
-            ChunkUtils.ConnectChunks(chunkToConnectWith, chunk, true);
+            ChunkUtils.CreateBlendData(chunkToConnectWith, chunk, true);
         }
         
         [ButtonMethod]

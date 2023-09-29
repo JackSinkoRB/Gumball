@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
@@ -36,8 +37,9 @@ namespace Gumball
         public Chunk ChunkBefore => chunkBefore;
         public Chunk ChunkAfter => chunkAfter;
         public bool HasChunkConnected => chunkBefore != null || chunkAfter != null;
-        
-        public bool IsConnecting { get; private set; }
+
+        public ChunkMeshData ChunkMeshData;
+        public bool IsAutomaticTerrainRecreationDisabled { get; private set; }
         public SplineSample FirstSample { get; private set; }
         public SplineSample LastSample { get; private set; }
         public Vector3 FirstTangent { get; private set; }
@@ -60,11 +62,29 @@ namespace Gumball
         public void SetTerrain(GameObject terrain)
         {
             currentTerrain = terrain;
+            UpdateChunkMeshData();
+        }
+        
+        public void UpdateChunkMeshData()
+        {
+            DisableAutomaticTerrainRecreation(true);
+            if (CurrentTerrain == null)
+            {
+                ChunkMeshData = null;
+                return;
+            }
+
+            ChunkMeshData = new ChunkMeshData(this);
+            DisableAutomaticTerrainRecreation(false);
         }
 
-        public void SetConnecting(bool isConnecting)
+        /// <summary>
+        /// If the chunk is selected and has been updated in the editor, it will recreate the terrain. Use this to disable it while values need to be updated, but the terrain not updated.
+        /// </summary>
+        /// <param name="isAutomaticTerrainRecreationDisabled"></param>
+        public void DisableAutomaticTerrainRecreation(bool isAutomaticTerrainRecreationDisabled)
         {
-            IsConnecting = isConnecting;
+            IsAutomaticTerrainRecreationDisabled = isAutomaticTerrainRecreationDisabled;
         }
 
         public void UpdateSplineSampleData()
@@ -76,14 +96,6 @@ namespace Gumball
             
             LastSample = splineSampleCollection.samples[splineSampleCollection.length-1];
             LastTangent = LastSample.right.Flatten();
-        }
-        
-        /// <summary>
-        /// Puts the chunk at the end of an existing chunk.
-        /// </summary>
-        public void Connect(Chunk chunkToAppendTo)
-        {
-            ChunkUtils.ConnectChunks(chunkToAppendTo, this);
         }
 
         public void OnConnectChunkBefore(Chunk chunk)
@@ -203,6 +215,5 @@ namespace Gumball
                 }
             }
         }
-
     }
 }

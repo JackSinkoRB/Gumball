@@ -217,8 +217,7 @@ namespace Gumball
 
         private void CalculateHandbrake()
         {
-            if (InputManager.Handbrake.IsPressed())
-                Debug.Log("Handbrake on!");
+            
         }
         
         private void Update()
