@@ -199,7 +199,7 @@ namespace Gumball
             if (timeSinceUnityUpdated < 1) //likely recompiling
                 return;
 
-            if (chunk.IsConnecting || chunk.HasChunkConnected)
+            if (chunk.IsAutomaticTerrainRecreationDisabled || chunk.HasChunkConnected)
                 return;
             
             bool justSelected = previousSelection != gameObject && Selection.activeGameObject == gameObject;
