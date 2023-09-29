@@ -97,14 +97,6 @@ namespace Gumball
             LastSample = splineSampleCollection.samples[splineSampleCollection.length-1];
             LastTangent = LastSample.right.Flatten();
         }
-        
-        /// <summary>
-        /// Puts the chunk at the end of an existing chunk.
-        /// </summary>
-        public void Connect(Chunk chunkToAppendTo)
-        {
-            ChunkUtils.ConnectChunks(chunkToAppendTo, this);
-        }
 
         public void OnConnectChunkBefore(Chunk chunk)
         {

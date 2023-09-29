@@ -16,18 +16,18 @@ namespace Gumball
         {
             [SerializeField, ReadOnly] private int index;
             [SerializeField, ReadOnly] private Vector3 localPosition;
-            private ChunkMeshData meshBelongsTo;
+            [SerializeField, ReadOnly] private Chunk chunkBelongsTo;
             
             public int Index => index;
             public Vector3 LocalPosition => localPosition;
-            public Vector3 WorldPosition => MeshBelongsTo.meshFilter.transform.TransformPoint(LocalPosition);
-            public ChunkMeshData MeshBelongsTo => meshBelongsTo;
+            public Vector3 WorldPosition => MeshBelongsTo.MeshFilter.transform.TransformPoint(LocalPosition);
+            public ChunkMeshData MeshBelongsTo => chunkBelongsTo.ChunkMeshData;
 
-            public Vertex(int index, Vector3 localPosition, ChunkMeshData meshBelongsTo)
+            public Vertex(int index, Vector3 localPosition, Chunk chunkBelongsTo)
             {
                 this.index = index;
                 this.localPosition = localPosition;
-                this.meshBelongsTo = meshBelongsTo;
+                this.chunkBelongsTo = chunkBelongsTo;
             }
 
             /// <summary>
@@ -36,7 +36,7 @@ namespace Gumball
             public Vector3 GetCurrentWorldPosition()
             {
                 Vector3 previousPositionLocal = MeshBelongsTo.vertices[Index];
-                Vector3 previousPositionWorld = MeshBelongsTo.meshFilter.transform.TransformPoint(previousPositionLocal);
+                Vector3 previousPositionWorld = MeshBelongsTo.MeshFilter.transform.TransformPoint(previousPositionLocal);
                 return previousPositionWorld;
             }
 
@@ -57,33 +57,24 @@ namespace Gumball
         }
         
         [SerializeField, ReadOnly] private Chunk chunk;
-        [SerializeField, ReadOnly] private MeshFilter meshFilter;
-        [SerializeField, ReadOnly] private Mesh mesh;
         [SerializeField, ReadOnly] private Vector3[] vertices;
         [SerializeField, ReadOnly] private List<Vertex> lastEndVertices;
         [SerializeField, ReadOnly] private List<Vertex> firstEndVertices;
 
         public Chunk Chunk => chunk;
-        public MeshFilter MeshFilter => meshFilter;
-        public Mesh Mesh => mesh;
+        public MeshFilter MeshFilter => chunk.CurrentTerrain.GetComponent<MeshFilter>();
+        public Mesh Mesh => MeshFilter.sharedMesh;
         public Vector3[] Vertices => vertices;
         public ReadOnlyCollection<Vertex> LastEndVertices => lastEndVertices.AsReadOnly();
         public ReadOnlyCollection<Vertex> FirstEndVertices => firstEndVertices.AsReadOnly();
         
-        internal ChunkMeshData(Chunk chunk)
+        public ChunkMeshData(Chunk chunk)
         {
             this.chunk = chunk;
 
-            meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
-            mesh = meshFilter.sharedMesh;
-            vertices = mesh.vertices;
+            vertices = Mesh.vertices;
 
             FindVerticesOnTangents();
-        }
-
-        internal void SetVertexWorldPosition(int index, Vector3 worldPosition)
-        {
-            vertices[index] = meshFilter.transform.InverseTransformPoint(worldPosition);
         }
 
         /// <summary>
@@ -92,23 +83,31 @@ namespace Gumball
         public Vector3 GetCurrentVertexWorldPosition(int index)
         {
             Vector3 previousPositionLocal = vertices[index];
-            Vector3 previousPositionWorld = meshFilter.transform.TransformPoint(previousPositionLocal);
+            Vector3 previousPositionWorld = MeshFilter.transform.TransformPoint(previousPositionLocal);
             return previousPositionWorld;
         }
 
-        internal void ApplyChanges()
+        public void SetVertexWorldPosition(int index, Vector3 worldPosition)
         {
-            Mesh meshToUse = mesh;
+            vertices[index] = MeshFilter.transform.InverseTransformPoint(worldPosition);
+        }
+
+        public void SetVertices(Vector3[] vertices)
+        {
+            this.vertices = vertices;
+        }
+        
+        public void ApplyChanges()
+        {
+            Mesh meshToUse = Mesh;
 #if UNITY_EDITOR
-            meshToUse = Object
-                .Instantiate(
-                    mesh); //use a mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
+            meshToUse = Object.Instantiate(Mesh); //use a mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
 #endif
 
             meshToUse.SetVertices(vertices);
 
             //recalculate UVs
-            meshToUse.SetUVs(0, ChunkUtils.GetTriplanarUVs(vertices, meshFilter.transform));
+            meshToUse.SetUVs(0, ChunkUtils.GetTriplanarUVs(vertices, MeshFilter.transform));
 
             meshToUse.RecalculateTangents();
             meshToUse.RecalculateNormals();
@@ -116,8 +115,7 @@ namespace Gumball
             meshToUse.RecalculateBounds();
 
 #if UNITY_EDITOR
-            meshFilter.sharedMesh =
-                meshToUse; //set the mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
+            MeshFilter.sharedMesh = meshToUse; //set the mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
 #endif
         }
 
@@ -141,32 +139,32 @@ namespace Gumball
                 
             //get the vertices on each chunks tangent
             Vector3 lastPoint = chunk.LastSample.position;
-            lastEndVertices = GetVerticesOnTangent(this, lastPoint - chunk.LastTangent, lastPoint + chunk.LastTangent);
+            lastEndVertices = GetVerticesOnTangent(lastPoint - chunk.LastTangent, lastPoint + chunk.LastTangent);
             Debug.DrawLine(lastPoint - chunk.LastTangent * 200, lastPoint + chunk.LastTangent * 200, Color.magenta, 15);
             GlobalLoggers.TerrainLogger.Log($"Found {lastEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
 
             Vector3 firstPoint = chunk.FirstSample.position;
-            firstEndVertices = GetVerticesOnTangent(this, firstPoint - chunk.FirstTangent, firstPoint + chunk.FirstTangent);
+            firstEndVertices = GetVerticesOnTangent(firstPoint - chunk.FirstTangent, firstPoint + chunk.FirstTangent);
             Debug.DrawLine(firstPoint - chunk.FirstTangent * 200, firstPoint + chunk.FirstTangent * 200, Color.magenta, 15);
             GlobalLoggers.TerrainLogger.Log($"Found {firstEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
 
             chunk.transform.rotation = previousRotation;
         }
         
-        private static List<Vertex> GetVerticesOnTangent(ChunkMeshData chunkMeshData, Vector3 tangentStart, Vector3 tangentEnd)
+        private List<Vertex> GetVerticesOnTangent(Vector3 tangentStart, Vector3 tangentEnd)
         {
             List<Vertex> verticesOnTangent = new();
 
-            for (var vertexIndex = 0; vertexIndex < chunkMeshData.mesh.vertices.Length; vertexIndex++)
+            for (var vertexIndex = 0; vertexIndex < Mesh.vertices.Length; vertexIndex++)
             {
-                Vector3 vertexPosition = chunkMeshData.mesh.vertices[vertexIndex];
-                Vector3 vertexPositionWorld = chunkMeshData.meshFilter.transform.TransformPoint(vertexPosition);
+                Vector3 vertexPosition = Mesh.vertices[vertexIndex];
+                Vector3 vertexPositionWorld = MeshFilter.transform.TransformPoint(vertexPosition);
 
                 Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 10, Color.yellow, 15);
 
                 if (IsPointOnTangent(vertexPositionWorld, tangentStart, tangentEnd))
                 {
-                    verticesOnTangent.Add(new Vertex(vertexIndex, vertexPosition, chunkMeshData));
+                    verticesOnTangent.Add(new Vertex(vertexIndex, vertexPosition, chunk));
                     Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 20, Color.magenta, 15);
                 }
             }
@@ -174,7 +172,7 @@ namespace Gumball
             return verticesOnTangent;
         }
 
-        private static bool IsPointOnTangent(Vector3 point, Vector3 tangentStart, Vector3 tangentEnd)
+        private bool IsPointOnTangent(Vector3 point, Vector3 tangentStart, Vector3 tangentEnd)
         {
             const float tolerance = 0.5f;
             

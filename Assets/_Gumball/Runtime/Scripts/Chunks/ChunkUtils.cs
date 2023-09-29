@@ -14,9 +14,11 @@ namespace Gumball
         public const string TerrainTag = "Terrain";
         
         /// <summary>
+        /// Connects the chunks with NEW blend data.
         /// Puts chunk2 at the end of chunk1, and aligns the splines.
+        /// <remarks>Should only be used at edit-time. Use pre-generated blend data at runtime.</remarks>
         /// </summary>
-        public static void ConnectChunks(Chunk chunk1, Chunk chunk2, bool canUndo = false)
+        public static ChunkBlendData CreateBlendData(Chunk chunk1, Chunk chunk2, bool canUndo = false)
         {
 #if UNITY_EDITOR
             if (canUndo)
@@ -33,8 +35,8 @@ namespace Gumball
             
             GlobalLoggers.TerrainLogger.Log($"Appending {chunk2.name} to the end of {chunk1.name}");
 
-            chunk1.SetConnecting(true);
-            chunk2.SetConnecting(true);
+            chunk1.DisableAutomaticTerrainRecreation(true);
+            chunk2.DisableAutomaticTerrainRecreation(true);
 
             RotateChunkToAlign(chunk2, chunk1);
 
@@ -49,18 +51,64 @@ namespace Gumball
             //update immediately as the position has changed
             UpdateSplineImmediately(chunk2);
 
-            ChunkTerrainBlend terrainBlend = new ChunkTerrainBlend(chunk1, chunk2);
-            terrainBlend.TryBlendTerrains();
+            ChunkBlendData blendData = new ChunkBlendData(chunk1, chunk2);
+
+            //update immediately as the position has changed
+            UpdateSplineImmediately(chunk1);
+            UpdateSplineImmediately(chunk2);
+            
+            chunk1.OnConnectChunkAfter(chunk2);
+            chunk2.OnConnectChunkBefore(chunk1);
+
+            chunk1.DisableAutomaticTerrainRecreation(false);
+            chunk2.DisableAutomaticTerrainRecreation(false);
+
+            return blendData;
+        }
+
+        /// <summary>
+        /// Connects the chunks using EXISTING blend data.
+        /// Puts chunk2 at the end of chunk1, and aligns the splines.
+        /// </summary>
+        public static void ConnectChunks(Chunk chunk1, Chunk chunk2, ChunkBlendData blendData, bool canUndo = false)
+        {
+#if UNITY_EDITOR
+            if (canUndo)
+            {
+                Undo.RecordObjects(new Object[]
+                {
+                    chunk1, chunk2,
+                    chunk2.transform,
+                    chunk1.CurrentTerrain.GetComponent<MeshFilter>(),
+                    chunk2.CurrentTerrain.GetComponent<MeshFilter>()
+                }, "Connect Chunk");
+            }
+#endif
+            
+            GlobalLoggers.TerrainLogger.Log($"Appending {chunk2.name} to the end of {chunk1.name}");
+            
+            chunk1.DisableAutomaticTerrainRecreation(true);
+            chunk2.DisableAutomaticTerrainRecreation(true);
+            
+            RotateChunkToAlign(chunk2, chunk1);
+
+            chunk1.UpdateSplineSampleData();
+            chunk2.UpdateSplineSampleData();
+
+            //set the position of chunk 2 to the end of chunk 1
+            Vector3 differenceFromChunkCenter = chunk2.FirstSample.position - chunk2.transform.position;
+            chunk2.transform.position = chunk1.LastSample.position - differenceFromChunkCenter;
+            
+            blendData.ApplyToChunks(chunk1, chunk2);
             
             chunk1.OnConnectChunkAfter(chunk2);
             chunk2.OnConnectChunkBefore(chunk1);
             
             //update immediately as the position has changed
-            UpdateSplineImmediately(chunk1);
             UpdateSplineImmediately(chunk2);
-
-            chunk1.SetConnecting(false);
-            chunk2.SetConnecting(false);
+            
+            chunk1.DisableAutomaticTerrainRecreation(false);
+            chunk2.DisableAutomaticTerrainRecreation(false);
         }
         
         public static Vector3 GetTangentVectorFromPoint(SplinePoint point)

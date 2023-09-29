@@ -47,6 +47,14 @@ namespace Gumball
 
         private void LateUpdate()
         {
+            DoLoadingCheck();
+        }
+
+        private void DoLoadingCheck()
+        {
+            if (PlayerCarManager.Instance.CurrentCar == null)
+                return;
+            
             if (distanceLoadingCoroutine == null || !distanceLoadingCoroutine.IsPlaying)
                 distanceLoadingCoroutine = new TrackedCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
         }
@@ -113,6 +121,7 @@ namespace Gumball
             yield return handle;
             
             GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), transform);
+            instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
 
             currentChunks.Add(chunk);
@@ -121,7 +130,7 @@ namespace Gumball
             if (currentChunks.Count > 1)
             {
                 Chunk previousChunk = currentChunks[^2];
-                chunk.Connect(previousChunk);
+                ChunkUtils.ConnectChunks(previousChunk, chunk, currentMap.BlendData);
             }
             
 #if UNITY_EDITOR
