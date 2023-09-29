@@ -46,18 +46,12 @@ public class UniqueIDAssigner : MonoBehaviour
     private void TryGenerateNewID()
     {
         string sceneName = GetSceneName();
-        
-        //check if another object has the same ID and set null
-        bool anotherComponentAlreadyHasThisID = uniqueID != null && 
-                                                allIDs.ContainsKey(uniqueID) &&
-                                                allIDs[uniqueID] != null &&
-                                                allIDs[uniqueID] != this;
 
         bool hasSceneNameAtBeginning = uniqueID != null && 
                                        uniqueID.Length > sceneName.Length && 
                                        uniqueID.Substring(0, sceneName.Length).Equals(sceneName);
 
-        bool needToGenerateNewID = (perSceneUniqueness && !hasSceneNameAtBeginning) || anotherComponentAlreadyHasThisID;
+        bool needToGenerateNewID = perSceneUniqueness && !hasSceneNameAtBeginning;
         if (needToGenerateNewID)
         {
             GenerateNewID();

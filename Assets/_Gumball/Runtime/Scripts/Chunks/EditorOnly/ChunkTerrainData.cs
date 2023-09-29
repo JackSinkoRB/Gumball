@@ -126,10 +126,40 @@ namespace Gumball
                 foreach (string whitelistedId in whitelistedIds)
                 {
                     if (assetPath.Contains(whitelistedId))
+                    {
                         isWhitelisted = true;
+                        break;
+                    }
                 }
 
-                if (!isWhitelisted && !assetPath.Contains(chunk.UniqueID))
+                if (assetPath.Contains(chunk.UniqueID))
+                    isWhitelisted = true;
+                
+                //only delete scene instance if scene is loaded
+                bool isApartOfScene = assetPath.Replace("ProceduralTerrain_", "").Contains("_") && !assetPath.Contains("Prefab");
+                bool isApartOfCurrentScene = assetPath.Contains(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+                if (isApartOfScene)
+                {
+                    if (isApartOfCurrentScene)
+                    {
+                        //search all gameobjects for chunk components
+                        List<Chunk> chunksInScene = SceneUtils.GetAllComponentsInActiveScene<Chunk>();
+                        foreach (Chunk chunkInScene in chunksInScene)
+                        {
+                            if (assetPath.Contains(chunkInScene.UniqueID))
+                            {
+                                isWhitelisted = true;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        isWhitelisted = true;
+                    }
+                }
+
+                if (!isWhitelisted)
                 {
                     //remove it
                     string path = AssetDatabase.GetAssetPath(mesh);
