@@ -16,7 +16,7 @@ namespace Gumball
         public static SceneInstance LoadingSceneInstance;
         public static bool LoadedFromAnotherScene;
 
-        [RuntimeInitializeOnLoadMethod]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void StaticStart()
         {
             LoadedFromAnotherScene = false;
