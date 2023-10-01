@@ -72,13 +72,15 @@ namespace Gumball
 
         private IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
+            float chunkLoadDistanceSqr = chunkLoadDistance * chunkLoadDistance;
+            
             //TODO: check to unload chunks
             
             //check to load chunks ahead
             Chunk lastChunk = currentChunks[^1];
             SplinePoint lastPoint = lastChunk.SplineComputer.GetPoint(lastChunk.LastPointIndex);
-            float distanceToEndOfChunk = Vector3.Distance(position, lastPoint.position);
-            while (distanceToEndOfChunk < chunkLoadDistance)
+            float distanceToEndOfChunk = Vector3.SqrMagnitude(position - lastPoint.position);
+            while (distanceToEndOfChunk < chunkLoadDistanceSqr)
             {
                 //load next chunk
                 int indexToLoad = loadedChunksIndices.Max + 1;
@@ -95,14 +97,14 @@ namespace Gumball
                 
                 //update the distance
                 SplinePoint nextChunkLastPoint = currentChunks[^1].SplineComputer.GetPoint(lastChunk.LastPointIndex);
-                distanceToEndOfChunk = Vector3.Distance(position, nextChunkLastPoint.position);
+                distanceToEndOfChunk = Vector3.SqrMagnitude(position - nextChunkLastPoint.position);
             }
             
             //check to load chunks behind
             Chunk firstChunk = currentChunks[0];
             SplinePoint firstPoint = firstChunk.SplineComputer.GetPoint(0);
-            float distanceToStartOfChunk = Vector3.Distance(position, firstPoint.position);
-            while (distanceToStartOfChunk < chunkLoadDistance)
+            float distanceToStartOfChunk = Vector3.SqrMagnitude(position - firstPoint.position);
+            while (distanceToStartOfChunk < chunkLoadDistanceSqr)
             {
                 //load next chunk
                 int indexToLoad = loadedChunksIndices.Min - 1;
@@ -119,7 +121,7 @@ namespace Gumball
                 
                 //update the distance
                 SplinePoint nextChunkFirstPoint = currentChunks[0].SplineComputer.GetPoint(0);
-                distanceToStartOfChunk = Vector3.Distance(position, nextChunkFirstPoint.position);
+                distanceToStartOfChunk = Vector3.SqrMagnitude(position - nextChunkFirstPoint.position);
             }
         }
 
