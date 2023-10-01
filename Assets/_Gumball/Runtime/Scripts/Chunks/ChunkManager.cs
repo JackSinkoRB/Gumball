@@ -12,10 +12,11 @@ namespace Gumball
     public class ChunkManager : Singleton<ChunkManager>
     {
         
+        private const float timeBetweenLoadingChecks = 0.5f;
+
         [Header("Settings")]
         [Obsolete("To be removed - for testing only")]
         [SerializeField] private MapData testingMap;
-        
         [SerializeField] private float chunkLoadDistance = 50;
 
         [Header("Debugging")]
@@ -25,10 +26,12 @@ namespace Gumball
         [Obsolete("To be removed - for testing only")]
         public MapData TestingMap => testingMap;
         public MapData CurrentMap => currentMap;
+        
         private bool isLoading;
         private MinMaxInt loadedChunksIndices;
         private readonly TrackedCoroutine distanceLoadingCoroutine = new();
-
+        private float timeSinceLastLoadCheck;
+        
         public IEnumerator LoadMap(MapData map)
         {
             GlobalLoggers.LoadingLogger.Log($"Loading map '{map.name}'");
@@ -57,7 +60,13 @@ namespace Gumball
 
             if (distanceLoadingCoroutine.IsPlaying)
                 return;
-            
+
+            timeSinceLastLoadCheck += Time.deltaTime;
+            if (timeSinceLastLoadCheck < timeBetweenLoadingChecks)
+                return;
+
+            //can perform loading check
+            timeSinceLastLoadCheck = 0;
             distanceLoadingCoroutine.Set(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
         }
 
