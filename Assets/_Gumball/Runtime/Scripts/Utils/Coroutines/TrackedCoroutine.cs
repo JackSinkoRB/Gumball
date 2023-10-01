@@ -17,9 +17,14 @@ namespace Gumball
 
         public TrackedCoroutine(IEnumerator action)
         {
-            Coroutine = CoroutineHelper.Instance.StartCoroutine(Start(action));
+            Set(Start(action));
         }
-        
+
+        public TrackedCoroutine()
+        {
+            
+        }
+
         private IEnumerator Start(IEnumerator action)
         {
             yield return action;
@@ -28,8 +33,19 @@ namespace Gumball
 
         public void Stop()
         {
+            if (Coroutine == null)
+                return;
+            
             CoroutineHelper.Instance.StopCoroutine(Coroutine);
             Coroutine = null;
+        }
+
+        public void Set(IEnumerator action)
+        {
+            if (Coroutine != null)
+                Stop();
+            
+            Coroutine = CoroutineHelper.Instance.StartCoroutine(Start(action));
         }
         
     }

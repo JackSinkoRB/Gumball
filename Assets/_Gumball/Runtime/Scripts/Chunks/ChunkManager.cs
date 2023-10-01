@@ -27,7 +27,7 @@ namespace Gumball
         public MapData CurrentMap => currentMap;
         private bool isLoading;
         private MinMaxInt loadedChunksIndices;
-        private TrackedCoroutine distanceLoadingCoroutine;
+        private readonly TrackedCoroutine distanceLoadingCoroutine = new();
 
         public IEnumerator LoadMap(MapData map)
         {
@@ -52,11 +52,13 @@ namespace Gumball
 
         private void DoLoadingCheck()
         {
-            if (PlayerCarManager.Instance.CurrentCar == null)
+            if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
+                return;
+
+            if (distanceLoadingCoroutine.IsPlaying)
                 return;
             
-            if (distanceLoadingCoroutine == null || !distanceLoadingCoroutine.IsPlaying)
-                distanceLoadingCoroutine = new TrackedCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
+            distanceLoadingCoroutine.Set(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
         }
 
         private IEnumerator LoadChunksAroundPosition(Vector3 position)
