@@ -15,9 +15,15 @@ namespace Gumball
         private readonly Chunk firstChunk;
         private readonly Chunk lastChunk;
 
+        [SerializeField, ReadOnly] private string firstChunkID; 
+        [SerializeField, ReadOnly] private string lastChunkID;
+
         [SerializeField, ReadOnly] private ChunkMeshData blendedFirstChunkMeshData;
         [SerializeField, ReadOnly] private ChunkMeshData blendedLastChunkMeshData;
 
+        public string FirstChunkID => firstChunkID;
+        public string LastChunkID => lastChunkID;
+        
         public void ApplyToChunks(Chunk firstChunk, Chunk lastChunk)
         {
             firstChunk.ChunkMeshData.SetVertices(blendedFirstChunkMeshData.Vertices);
@@ -31,6 +37,9 @@ namespace Gumball
         {
             this.firstChunk = firstChunk;
             this.lastChunk = lastChunk;
+
+            firstChunkID = firstChunk.UniqueID;
+            lastChunkID = lastChunk.UniqueID;
             
             //align
             // - we move the chunk with more end vertices to the chunk with less end vertices

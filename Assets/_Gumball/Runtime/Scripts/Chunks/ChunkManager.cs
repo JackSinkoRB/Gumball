@@ -21,7 +21,7 @@ namespace Gumball
 
         [Header("Debugging")]
         [ReadOnly, SerializeField] private MapData currentMap;
-        [ReadOnly, SerializeField] private List<Chunk> currentChunks = new();
+        [ReadOnly, SerializeField] private List<LoadedChunkData> currentChunks = new();
 
         [Obsolete("To be removed - for testing only")]
         public MapData TestingMap => testingMap;
@@ -31,12 +31,29 @@ namespace Gumball
         private MinMaxInt loadedChunksIndices;
         private readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private float timeSinceLastLoadCheck;
+
+        [Serializable]
+        public struct LoadedChunkData
+        {
+            private readonly Chunk chunk;
+            private readonly AssetReferenceGameObject assetReference;
+
+            public Chunk Chunk => chunk;
+            public AssetReferenceGameObject AssetReference => assetReference;
+
+            public LoadedChunkData(Chunk chunk, AssetReferenceGameObject assetReference)
+            {
+                this.chunk = chunk;
+                this.assetReference = assetReference;
+            }
+        }
         
         public IEnumerator LoadMap(MapData map)
         {
             GlobalLoggers.LoadingLogger.Log($"Loading map '{map.name}'");
             isLoading = true;
             currentMap = map;
+            currentChunks.Clear();
 
             //load the first chunk since none are loaded
             loadedChunksIndices = new MinMaxInt(map.StartingChunkIndex, map.StartingChunkIndex);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -27,15 +28,32 @@ namespace Gumball
         public Vector3 VehicleStartingRotation => vehicleStartingRotation;
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
 
-        [SerializeField, ReadOnly] private ChunkBlendData blendData;
+        #if UNITY_EDITOR
+        [SerializeField] private ChunkBlendData[] blendDataEditorOnly;
+        #endif
+        private readonly Dictionary<ChunkPair, ChunkBlendData> blendData = new();
 
-        public ChunkBlendData BlendData => blendData;
-        
+        public ChunkBlendData GetBlendData(AssetReferenceGameObject firstChunk, AssetReferenceGameObject lastChunk)
+        {
+            ChunkPair chunkPair = new ChunkPair(firstChunk, lastChunk);
+            
+            if (!blendData.ContainsKey(chunkPair))
+#if UNITY_EDITOR
+                throw new KeyNotFoundException($"Could not find blend data for chunks {firstChunk.editorAsset.name} and {lastChunk.editorAsset.name}.");
+#else
+                throw new KeyNotFoundException($"Could not find blend data for chunks.");
+#endif
+            
+            return blendData[chunkPair];
+        }
+
 #if UNITY_EDITOR
         [ButtonMethod]
         public void RebuildBlendData()
         {
+            blendData.Clear();
             Chunk previousChunk = null;
+            AssetReferenceGameObject previousChunkAsset = null;
             
             //you need to spawn every single chunk one after the other 
             foreach (AssetReferenceGameObject chunkReference in chunkReferences)
@@ -52,21 +70,26 @@ namespace Gumball
                 //connect to the previous chunk (if there is one)
                 if (previousChunk != null)
                 {
-                    GlobalLoggers.TerrainLogger.Log($"Connecting {chunk.gameObject.name} and {previousChunk.gameObject.name}");
+                    GlobalLoggers.TerrainLogger.Log($"Connecting {chunk.name} and {previousChunk.name}");
                     
                     //create the blend data
-                    blendData = ChunkUtils.CreateBlendData(previousChunk, chunk);
+                    ChunkBlendData newBlendData = ChunkUtils.ConnectChunksWithNewBlendData(previousChunk, chunk, ChunkUtils.LoadDirection.AFTER);
+                    blendData[new ChunkPair(previousChunkAsset, chunkReference)] = newBlendData;
+#if UNITY_EDITOR
+                    blendDataEditorOnly = blendData.Values.ToArray();
+#endif                    
                     
-                    GlobalLoggers.TerrainLogger.Log($"Destroying {previousChunk.gameObject.name}");
+                    GlobalLoggers.TerrainLogger.Log($"Destroying {previousChunk.name}");
                     DestroyImmediate(previousChunk.gameObject);
                 }
 
                 previousChunk = chunk;
+                previousChunkAsset = chunkReference;
             }
 
             if (previousChunk != null)
             {
-                GlobalLoggers.TerrainLogger.Log($"Destroying {previousChunk.gameObject.name}");
+                GlobalLoggers.TerrainLogger.Log($"Destroying {previousChunk.name}");
                 DestroyImmediate(previousChunk.gameObject);
             }
             
