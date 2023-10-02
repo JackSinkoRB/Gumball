@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
@@ -76,6 +75,12 @@ namespace Gumball
 
             ChunkMeshData = new ChunkMeshData(this);
             DisableAutomaticTerrainRecreation(false);
+        }
+
+        public void UpdateSplineImmediately()
+        {
+            splineComputer.RebuildImmediate();
+            UpdateSplineSampleData();
         }
 
         /// <summary>

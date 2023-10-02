@@ -151,6 +151,19 @@ namespace Gumball
             currentGrid = new ChunkGrid(chunk, terrainData.Resolution, terrainData.WidthAroundRoad, true);
         }
         
+        public void ShowEndsOfSpline()
+        {
+            chunk.SplineComputer.RebuildImmediate();
+            chunk.UpdateSplineSampleData();
+            Debug.DrawRay(chunk.FirstSample.position, chunk.FirstSample.forward * 15, Color.blue, 15);
+            Debug.DrawRay(chunk.FirstSample.position, chunk.FirstSample.up * 15, Color.green, 15);
+            Debug.DrawRay(chunk.FirstSample.position, chunk.FirstSample.right * 15, Color.red, 15);
+            
+            Debug.DrawRay(chunk.LastSample.position, chunk.LastSample.forward * 15, Color.blue, 15);
+            Debug.DrawRay(chunk.LastSample.position, chunk.LastSample.up * 15, Color.green, 15);
+            Debug.DrawRay(chunk.LastSample.position, chunk.LastSample.right * 15, Color.red, 15);
+        }
+        
         [ButtonMethod]
         public void CreateTerrain()
         {
@@ -233,9 +246,9 @@ namespace Gumball
             chunk.SetTerrain(newTerrain);
             
             if (connectedBefore != null)
-                ChunkUtils.ConnectChunks(connectedBefore, chunk, new ChunkBlendData(connectedBefore, chunk));
+                ChunkUtils.ConnectChunks(connectedBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(connectedBefore, chunk));
             if (connectedAfter != null)
-                ChunkUtils.ConnectChunks(chunk, connectedAfter, new ChunkBlendData(chunk, connectedAfter));
+                ChunkUtils.ConnectChunks(chunk, connectedAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, connectedAfter));
         }
         
         #endregion
@@ -256,7 +269,7 @@ namespace Gumball
             if (chunk.HasChunkConnected)
                 throw new InvalidOperationException("This chunk is already connected. Disconnect the chunk first.");
 
-            ChunkUtils.CreateBlendData(chunkToConnectWith, chunk, true);
+            ChunkUtils.ConnectChunksWithNewBlendData(chunkToConnectWith, chunk, ChunkUtils.LoadDirection.AFTER, true);
         }
         
         [ButtonMethod]

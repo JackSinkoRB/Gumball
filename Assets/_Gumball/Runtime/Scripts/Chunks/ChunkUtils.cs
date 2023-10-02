@@ -10,15 +10,21 @@ namespace Gumball
 {
     public static class ChunkUtils
     {
+        
+        public enum LoadDirection
+        {
+            BEFORE,
+            AFTER
+        }
 
         public const string TerrainTag = "Terrain";
         
         /// <summary>
         /// Connects the chunks with NEW blend data.
-        /// Puts chunk2 at the end of chunk1, and aligns the splines.
+        /// Puts chunk2 at the start or end of chunk1 (depending on direction), and aligns the splines.
         /// <remarks>Should only be used at edit-time. Use pre-generated blend data at runtime.</remarks>
         /// </summary>
-        public static ChunkBlendData CreateBlendData(Chunk chunk1, Chunk chunk2, bool canUndo = false)
+        public static ChunkBlendData ConnectChunksWithNewBlendData(Chunk chunk1, Chunk chunk2, LoadDirection direction, bool canUndo = false)
         {
 #if UNITY_EDITOR
             if (canUndo)
@@ -38,24 +44,20 @@ namespace Gumball
             chunk1.DisableAutomaticTerrainRecreation(true);
             chunk2.DisableAutomaticTerrainRecreation(true);
 
-            RotateChunkToAlign(chunk2, chunk1);
-
             //update immediately
-            UpdateSplineImmediately(chunk1);
-            UpdateSplineImmediately(chunk2);
+            chunk1.UpdateSplineImmediately();
+            chunk2.UpdateSplineImmediately();
 
-            //set the position of chunk 2 to the end of chunk 1
-            Vector3 differenceFromChunkCenter = chunk2.FirstSample.position - chunk2.transform.position;
-            chunk2.transform.position = chunk1.LastSample.position - differenceFromChunkCenter;
+            MoveChunkToOther(chunk1, chunk2, direction);
             
             //update immediately as the position has changed
-            UpdateSplineImmediately(chunk2);
+            chunk2.UpdateSplineImmediately();
 
             ChunkBlendData blendData = new ChunkBlendData(chunk1, chunk2);
 
             //update immediately as the position has changed
-            UpdateSplineImmediately(chunk1);
-            UpdateSplineImmediately(chunk2);
+            chunk1.UpdateSplineImmediately();
+            chunk2.UpdateSplineImmediately();
             
             chunk1.OnConnectChunkAfter(chunk2);
             chunk2.OnConnectChunkBefore(chunk1);
@@ -68,9 +70,9 @@ namespace Gumball
 
         /// <summary>
         /// Connects the chunks using EXISTING blend data.
-        /// Puts chunk2 at the end of chunk1, and aligns the splines.
+        /// Puts chunk2 at the start or end of chunk1 (depending on direction), and aligns the splines.
         /// </summary>
-        public static void ConnectChunks(Chunk chunk1, Chunk chunk2, ChunkBlendData blendData, bool canUndo = false)
+        public static void ConnectChunks(Chunk chunk1, Chunk chunk2, LoadDirection direction, ChunkBlendData blendData, bool canUndo = false)
         {
 #if UNITY_EDITOR
             if (canUndo)
@@ -89,32 +91,41 @@ namespace Gumball
             
             chunk1.DisableAutomaticTerrainRecreation(true);
             chunk2.DisableAutomaticTerrainRecreation(true);
-            
-            RotateChunkToAlign(chunk2, chunk1);
 
             chunk1.UpdateSplineSampleData();
             chunk2.UpdateSplineSampleData();
 
-            //set the position of chunk 2 to the end of chunk 1
-            Vector3 differenceFromChunkCenter = chunk2.FirstSample.position - chunk2.transform.position;
-            chunk2.transform.position = chunk1.LastSample.position - differenceFromChunkCenter;
-            
-            blendData.ApplyToChunks(chunk1, chunk2);
+            MoveChunkToOther(chunk1, chunk2, direction);
+
+            Chunk firstChunk = chunk1.UniqueID.Equals(blendData.FirstChunkID) ? chunk1 : chunk2;
+            Chunk lastChunk = chunk2.UniqueID.Equals(blendData.LastChunkID) ? chunk2 : chunk1;
+            blendData.ApplyToChunks(firstChunk, lastChunk);
             
             chunk1.OnConnectChunkAfter(chunk2);
             chunk2.OnConnectChunkBefore(chunk1);
             
             //update immediately as the position has changed
-            UpdateSplineImmediately(chunk2);
+            chunk2.UpdateSplineImmediately();
             
             chunk1.DisableAutomaticTerrainRecreation(false);
             chunk2.DisableAutomaticTerrainRecreation(false);
         }
         
-        public static Vector3 GetTangentVectorFromPoint(SplinePoint point)
+        private static void MoveChunkToOther(Chunk chunk1, Chunk chunk2, LoadDirection direction)
         {
-            //vector = tangent 2 - tangent 1 
-            return point.tangent2 - point.tangent;
+            //align the rotation of chunk2 to match chunk1
+            Quaternion firstSplineEndRotation = direction == LoadDirection.AFTER ? chunk1.LastSample.rotation : chunk1.FirstSample.rotation;
+            Quaternion secondSplineStartRotation = direction == LoadDirection.AFTER ? chunk2.FirstSample.rotation : chunk2.LastSample.rotation;
+            Quaternion rotationDifference = firstSplineEndRotation * Quaternion.Inverse(secondSplineStartRotation);
+            chunk2.transform.rotation *= rotationDifference;
+            
+            //update immediately
+            chunk2.UpdateSplineImmediately();
+
+            //set the position of chunk 2 to the end of chunk 1
+            SplineSample chunk2ConnectionPoint = direction == LoadDirection.AFTER ? chunk2.FirstSample : chunk2.LastSample;
+            SplineSample chunk1ConnectionPoint = direction == LoadDirection.AFTER ? chunk1.LastSample : chunk1.FirstSample;
+            chunk2.transform.position += chunk1ConnectionPoint.position - chunk2ConnectionPoint.position;
         }
         
         /// <summary>
@@ -146,28 +157,6 @@ namespace Gumball
             }
 
             return uvs;
-        }
-
-        private static void RotateChunkToAlign(Chunk chunkToAlign, Chunk chunkToAlignWith)
-        {
-            SplinePoint chunkToAlignPoint = chunkToAlign.SplineComputer.GetPoint(0);
-            SplinePoint chunkToAlignWithPoint = chunkToAlignWith.SplineComputer.GetPoint(chunkToAlignWith.LastPointIndex);
-            
-            //get the tangent vector for each point
-            Vector3 chunkToAlignTangentVector = GetTangentVectorFromPoint(chunkToAlignPoint);
-            Vector3 chunkToAlignWithTangentVector = GetTangentVectorFromPoint(chunkToAlignWithPoint);
-
-            //calculate the relative rotation between the initial and target tangents
-            Quaternion rotationToAlign = Quaternion.FromToRotation(chunkToAlignTangentVector, chunkToAlignWithTangentVector);
-
-            //apply the relative rotation while preserving the existing rotation
-            chunkToAlign.transform.rotation = rotationToAlign * chunkToAlign.transform.rotation;
-        }
-        
-        public static void UpdateSplineImmediately(Chunk chunk)
-        {
-            chunk.SplineComputer.RebuildImmediate();
-            chunk.UpdateSplineSampleData();
         }
 
     }

@@ -135,7 +135,7 @@ namespace Gumball
             Quaternion previousRotation = chunk.transform.rotation;
             chunk.transform.rotation = Quaternion.Euler(new Vector3(0, chunk.transform.rotation.eulerAngles.y, 0));
             
-            ChunkUtils.UpdateSplineImmediately(chunk); //this is required as the chunk is rotated
+            chunk.UpdateSplineImmediately(); //this is required as the chunk is rotated
                 
             //get the vertices on each chunks tangent
             Vector3 lastPoint = chunk.LastSample.position;

@@ -89,60 +89,47 @@ namespace Gumball
 
         private IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
+            //TODO: check to unload chunks
+
+            yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
+            yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
+        }
+        
+        private IEnumerator LoadChunksInDirection(Vector3 startingPosition, ChunkUtils.LoadDirection direction)
+        {
             float chunkLoadDistanceSqr = chunkLoadDistance * chunkLoadDistance;
             
-            //TODO: check to unload chunks
+            Chunk startingChunk = direction == ChunkUtils.LoadDirection.AFTER ? currentChunks[^1].Chunk : currentChunks[0].Chunk;
+            SplinePoint endPoint = startingChunk.SplineComputer.GetPoint(direction == ChunkUtils.LoadDirection.AFTER ? startingChunk.LastPointIndex : 0);
             
-            //check to load chunks ahead
-            Chunk lastChunk = currentChunks[^1];
-            SplinePoint lastPoint = lastChunk.SplineComputer.GetPoint(lastChunk.LastPointIndex);
-            float distanceToEndOfChunk = Vector3.SqrMagnitude(position - lastPoint.position);
+            float distanceToEndOfChunk = Vector3.SqrMagnitude(startingPosition - endPoint.position);
             while (distanceToEndOfChunk < chunkLoadDistanceSqr)
             {
                 //load next chunk
-                int indexToLoad = loadedChunksIndices.Max + 1;
-                if (indexToLoad >= currentMap.ChunkReferences.Length)
+                int indexToLoad = direction == ChunkUtils.LoadDirection.AFTER ? loadedChunksIndices.Max + 1 : loadedChunksIndices.Min - 1;
+                if (indexToLoad < 0 || indexToLoad >= currentMap.ChunkReferences.Length)
                 {
                     //end of map - no more chunks to load
                     break;
                 }
 
-                loadedChunksIndices.Max = indexToLoad;
+                if (indexToLoad > loadedChunksIndices.Max)
+                    loadedChunksIndices.Max = indexToLoad;
+                if (indexToLoad < loadedChunksIndices.Min)
+                    loadedChunksIndices.Min = indexToLoad;
+
                 AssetReferenceGameObject nextChunk = currentMap.ChunkReferences[indexToLoad];
                 
-                yield return LoadChunkAsync(nextChunk);
+                yield return LoadChunkAsync(nextChunk, direction);
                 
                 //update the distance
-                SplinePoint nextChunkLastPoint = currentChunks[^1].SplineComputer.GetPoint(lastChunk.LastPointIndex);
-                distanceToEndOfChunk = Vector3.SqrMagnitude(position - nextChunkLastPoint.position);
-            }
-            
-            //check to load chunks behind
-            Chunk firstChunk = currentChunks[0];
-            SplinePoint firstPoint = firstChunk.SplineComputer.GetPoint(0);
-            float distanceToStartOfChunk = Vector3.SqrMagnitude(position - firstPoint.position);
-            while (distanceToStartOfChunk < chunkLoadDistanceSqr)
-            {
-                //load next chunk
-                int indexToLoad = loadedChunksIndices.Min - 1;
-                if (indexToLoad < 0)
-                {
-                    //start of map - no more chunks to load
-                    break;
-                }
-            
-                loadedChunksIndices.Min = indexToLoad;
-                AssetReferenceGameObject nextChunk = currentMap.ChunkReferences[indexToLoad];
-            
-                yield return LoadChunkAsync(nextChunk);
-                
-                //update the distance
-                SplinePoint nextChunkFirstPoint = currentChunks[0].SplineComputer.GetPoint(0);
-                distanceToStartOfChunk = Vector3.SqrMagnitude(position - nextChunkFirstPoint.position);
+                Chunk newestChunk = direction == ChunkUtils.LoadDirection.AFTER ? currentChunks[^1].Chunk : currentChunks[0].Chunk;
+                SplinePoint furthestPointOnNewestChunk = newestChunk.SplineComputer.GetPoint(direction == ChunkUtils.LoadDirection.AFTER ? newestChunk.LastPointIndex : 0);
+                distanceToEndOfChunk = Vector3.SqrMagnitude(startingPosition - furthestPointOnNewestChunk.position);
             }
         }
 
-        private IEnumerator LoadChunkAsync(AssetReferenceGameObject chunkAssetReference)
+        private IEnumerator LoadChunkAsync(AssetReferenceGameObject chunkAssetReference, ChunkUtils.LoadDirection loadDirection = ChunkUtils.LoadDirection.AFTER)
         {
 #if UNITY_EDITOR
             GlobalLoggers.LoadingLogger.Log($"Loading chunk '{chunkAssetReference.editorAsset.name}'...");
@@ -154,13 +141,25 @@ namespace Gumball
             instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
 
-            currentChunks.Add(chunk);
+            LoadedChunkData loadedChunkData = new LoadedChunkData(chunk, chunkAssetReference);
+            if (loadDirection == ChunkUtils.LoadDirection.AFTER)
+                currentChunks.Add(loadedChunkData);
+            else currentChunks.Insert(0, loadedChunkData);
 
             //connect to the previous chunk (if there is one)
             if (currentChunks.Count > 1)
             {
-                Chunk previousChunk = currentChunks[^2];
-                ChunkUtils.ConnectChunks(previousChunk, chunk, currentMap.BlendData);
+                if (loadDirection == ChunkUtils.LoadDirection.AFTER)
+                {
+                    LoadedChunkData previousChunkData = currentChunks[^2];
+                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.AFTER, currentMap.GetBlendData(previousChunkData.AssetReference, chunkAssetReference));
+                }
+                if (loadDirection == ChunkUtils.LoadDirection.BEFORE)
+                {
+                    LoadedChunkData previousChunkData = currentChunks[1];
+                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.BEFORE, currentMap.GetBlendData(chunkAssetReference, previousChunkData.AssetReference));
+                }
+                
             }
             
 #if UNITY_EDITOR
