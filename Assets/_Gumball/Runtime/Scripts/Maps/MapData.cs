@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AYellowpaper.SerializedCollections;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -27,11 +28,9 @@ namespace Gumball
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public Vector3 VehicleStartingRotation => vehicleStartingRotation;
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
-
-        #if UNITY_EDITOR
-        [SerializeField] private ChunkBlendData[] blendDataEditorOnly;
-        #endif
-        [SerializeField] private MyDictionary<ChunkPair, ChunkBlendData> blendData = new();
+        
+        [SerializedDictionary("ChunkPair", "ChunkBlendData")]
+        [SerializeField] private SerializedDictionary<ChunkPair, ChunkBlendData> blendData = new();
 
         public ChunkBlendData GetBlendData(AssetReferenceGameObject firstChunk, AssetReferenceGameObject lastChunk)
         {
@@ -75,10 +74,7 @@ namespace Gumball
                     //create the blend data
                     ChunkBlendData newBlendData = ChunkUtils.ConnectChunksWithNewBlendData(previousChunk, chunk, ChunkUtils.LoadDirection.AFTER);
                     blendData[new ChunkPair(previousChunkAsset, chunkReference)] = newBlendData;
-#if UNITY_EDITOR
-                    blendDataEditorOnly = blendData.Values.ToArray();
-#endif                    
-                    
+
                     GlobalLoggers.TerrainLogger.Log($"Destroying {previousChunk.name}");
                     DestroyImmediate(previousChunk.gameObject);
                 }

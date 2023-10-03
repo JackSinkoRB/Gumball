@@ -15,10 +15,9 @@ namespace Gumball
         private readonly Chunk firstChunk;
         private readonly Chunk lastChunk;
 
-        [SerializeField, ReadOnly] private string firstChunkID; 
-        [SerializeField, ReadOnly] private string lastChunkID;
-
+        [SerializeField, ReadOnly] private string firstChunkID;
         [SerializeField, ReadOnly] private ChunkMeshData blendedFirstChunkMeshData;
+        [SerializeField, ReadOnly] private string lastChunkID;
         [SerializeField, ReadOnly] private ChunkMeshData blendedLastChunkMeshData;
 
         public string FirstChunkID => firstChunkID;

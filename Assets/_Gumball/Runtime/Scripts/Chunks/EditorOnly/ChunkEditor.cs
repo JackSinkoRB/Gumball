@@ -14,7 +14,6 @@ namespace Gumball
 
         private Chunk chunk => target as Chunk;
         
-        
         private void OnEnable()
         {
             EditorApplication.update += OnEditorUpdate;

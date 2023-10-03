@@ -163,6 +163,7 @@ namespace Gumball
         
         public static void CleanupUnusedMeshes(Chunk ignoreChunk = null)
         {
+#if UNITY_EDITOR
             if (Application.isPlaying)
                 return;
 
@@ -233,6 +234,7 @@ namespace Gumball
                 }
             }
             AssetDatabase.SaveAssets();
+#endif
         }
 
     }

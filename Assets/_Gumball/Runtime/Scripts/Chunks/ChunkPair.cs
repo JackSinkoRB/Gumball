@@ -9,8 +9,8 @@ namespace Gumball
     [Serializable]
     public struct ChunkPair : IEquatable<ChunkPair>
     {
-        private AssetReferenceGameObject firstChunk;
-        private AssetReferenceGameObject lastChunk;
+        [SerializeField] private AssetReferenceGameObject firstChunk;
+        [SerializeField] private AssetReferenceGameObject lastChunk;
 
         public ChunkPair(AssetReferenceGameObject firstChunk, AssetReferenceGameObject lastChunk)
         {
