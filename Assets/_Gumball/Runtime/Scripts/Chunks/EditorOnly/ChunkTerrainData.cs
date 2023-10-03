@@ -78,7 +78,7 @@ namespace Gumball
             mesh.RecalculateBounds();
             
             //save the mesh asset
-            string path = $"{ChunkUtils.TerrainMeshAssetFolderPath}/ProceduralTerrain_{chunk.UniqueID}.asset";
+            string path = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{chunk.UniqueID}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                 AssetDatabase.DeleteAsset(path);
             

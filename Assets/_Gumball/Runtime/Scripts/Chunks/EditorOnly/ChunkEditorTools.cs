@@ -80,8 +80,8 @@ namespace Gumball
                 return;
             
             //save the mesh asset
-            string oldPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/ProceduralTerrain_{previousID}.asset";
-            string newPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/ProceduralTerrain_{newID}.asset";
+            string oldPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{previousID}.asset";
+            string newPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{newID}.asset";
             AssetDatabase.CopyAsset(oldPath, newPath);
             AssetDatabase.SaveAssets();
             MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();

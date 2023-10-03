@@ -19,8 +19,10 @@ namespace Gumball
 
         public const string TerrainTag = "Terrain";
         public const string TerrainMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
+        public const string TerrainMeshPrefix = "ProceduralTerrain_";
+        private const string RoadMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Roads/";
+        public const string RoadMeshPrefix = "RoadMesh_";
         private const string chunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
-        private const string roadMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Roads/";
 
         /// <summary>
         /// Connects the chunks with NEW blend data.
@@ -113,22 +115,18 @@ namespace Gumball
             chunk1.DisableAutomaticTerrainRecreation(false);
             chunk2.DisableAutomaticTerrainRecreation(false);
         }
-        
-        private static void MoveChunkToOther(Chunk chunk1, Chunk chunk2, LoadDirection direction)
-        {
-            //align the rotation of chunk2 to match chunk1
-            Quaternion firstSplineEndRotation = direction == LoadDirection.AFTER ? chunk1.LastSample.rotation : chunk1.FirstSample.rotation;
-            Quaternion secondSplineStartRotation = direction == LoadDirection.AFTER ? chunk2.FirstSample.rotation : chunk2.LastSample.rotation;
-            Quaternion rotationDifference = firstSplineEndRotation * Quaternion.Inverse(secondSplineStartRotation);
-            chunk2.transform.rotation *= rotationDifference;
-            
-            //update immediately
-            chunk2.UpdateSplineImmediately();
 
-            //set the position of chunk 2 to the end of chunk 1
-            SplineSample chunk2ConnectionPoint = direction == LoadDirection.AFTER ? chunk2.FirstSample : chunk2.LastSample;
-            SplineSample chunk1ConnectionPoint = direction == LoadDirection.AFTER ? chunk1.LastSample : chunk1.FirstSample;
-            chunk2.transform.position += chunk1ConnectionPoint.position - chunk2ConnectionPoint.position;
+        public static void CleanupUnusedMeshes(Chunk ignoreChunk = null)
+        {
+#if UNITY_EDITOR
+            if (Application.isPlaying)
+                return;
+
+            CleanupUnusedMeshes(TerrainMeshAssetFolderPath, TerrainMeshPrefix, ignoreChunk);
+            CleanupUnusedMeshes(RoadMeshAssetFolderPath, RoadMeshPrefix, ignoreChunk);
+            
+            AssetDatabase.SaveAssets();
+#endif
         }
         
         /// <summary>
@@ -173,7 +171,7 @@ namespace Gumball
 
             MeshFilter meshFilter = chunk.RoadMesh.GetComponent<MeshFilter>();
             
-            string path = $"{roadMeshAssetFolderPath}/RoadMesh_{chunk.UniqueID}.asset";
+            string path = $"{RoadMeshAssetFolderPath}/{RoadMeshPrefix}_{chunk.UniqueID}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                 AssetDatabase.DeleteAsset(path);
             AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
@@ -193,13 +191,8 @@ namespace Gumball
             GlobalLoggers.ChunkLogger.Log("Baked " + path);
         }
 
-        //TODO: cleanup road meshes too
-        public static void CleanupUnusedMeshes(Chunk ignoreChunk = null)
+        private static void CleanupUnusedMeshes(string meshFolderPath, string filePrefix, Chunk ignoreChunk = null)
         {
-#if UNITY_EDITOR
-            if (Application.isPlaying)
-                return;
-
             //find all the used meshes
             string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { chunkFolderPath });
             HashSet<string> whitelistedIds = new HashSet<string>();
@@ -216,7 +209,7 @@ namespace Gumball
             }
 
             //find all the terrain meshes
-            string[] meshGuids = AssetDatabase.FindAssets("t:Mesh", new[] { TerrainMeshAssetFolderPath });
+            string[] meshGuids = AssetDatabase.FindAssets("t:Mesh", new[] { meshFolderPath });
             foreach (string meshGuid in meshGuids)
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(meshGuid);
@@ -235,7 +228,7 @@ namespace Gumball
                     isWhitelisted = true;
                 
                 //only delete scene instance if scene is loaded
-                bool isApartOfScene = assetPath.Replace("ProceduralTerrain_", "").Contains("_") && !assetPath.Contains("Prefab");
+                bool isApartOfScene = assetPath.Replace(filePrefix, "").Contains("_") && !assetPath.Contains("Prefab");
                 bool isApartOfCurrentScene = assetPath.Contains(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
                 if (isApartOfScene)
                 {
@@ -263,12 +256,26 @@ namespace Gumball
                     //remove it
                     string path = AssetDatabase.GetAssetPath(mesh);
                     AssetDatabase.DeleteAsset(path);
-                    Debug.Log($"Removed unused terrain mesh asset: {path}");
+                    Debug.Log($"Removed unused mesh asset: {path}");
                 }
             }
-            AssetDatabase.SaveAssets();
-#endif
         }
 
+        private static void MoveChunkToOther(Chunk chunk1, Chunk chunk2, LoadDirection direction)
+        {
+            //align the rotation of chunk2 to match chunk1
+            Quaternion firstSplineEndRotation = direction == LoadDirection.AFTER ? chunk1.LastSample.rotation : chunk1.FirstSample.rotation;
+            Quaternion secondSplineStartRotation = direction == LoadDirection.AFTER ? chunk2.FirstSample.rotation : chunk2.LastSample.rotation;
+            Quaternion rotationDifference = firstSplineEndRotation * Quaternion.Inverse(secondSplineStartRotation);
+            chunk2.transform.rotation *= rotationDifference;
+            
+            //update immediately
+            chunk2.UpdateSplineImmediately();
+
+            //set the position of chunk 2 to the end of chunk 1
+            SplineSample chunk2ConnectionPoint = direction == LoadDirection.AFTER ? chunk2.FirstSample : chunk2.LastSample;
+            SplineSample chunk1ConnectionPoint = direction == LoadDirection.AFTER ? chunk1.LastSample : chunk1.FirstSample;
+            chunk2.transform.position += chunk1ConnectionPoint.position - chunk2ConnectionPoint.position;
+        }
     }
 }
