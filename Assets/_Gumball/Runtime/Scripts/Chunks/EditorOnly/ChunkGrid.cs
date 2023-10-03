@@ -230,7 +230,7 @@ namespace Gumball
             {
                 Debug.DrawLine(sample.position.Flatten(), sample.position.Flatten() + tangent * GridLength, Color.yellow, debugLineDuration);
                 Debug.DrawLine(sample.position.Flatten(), sample.position.Flatten() + Vector3.right * GridLength, Color.yellow, debugLineDuration);
-                GlobalLoggers.TerrainLogger.Log(Vector2.SignedAngle(tangent.FlattenAsVector2(), Vector2.right) + " - " + movingRight + ", " + movingLeft + ", " + movingUp + ", " + movingDown);
+                GlobalLoggers.ChunkLogger.Log(Vector2.SignedAngle(tangent.FlattenAsVector2(), Vector2.right) + " - " + movingRight + ", " + movingLeft + ", " + movingUp + ", " + movingDown);
             }
             
             if (movingRight || movingLeft)

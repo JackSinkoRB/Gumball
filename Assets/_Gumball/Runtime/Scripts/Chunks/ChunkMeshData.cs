@@ -141,12 +141,12 @@ namespace Gumball
             Vector3 lastPoint = chunk.LastSample.position;
             lastEndVertices = GetVerticesOnTangent(lastPoint - chunk.LastTangent, lastPoint + chunk.LastTangent);
             Debug.DrawLine(lastPoint - chunk.LastTangent * 200, lastPoint + chunk.LastTangent * 200, Color.magenta, 15);
-            GlobalLoggers.TerrainLogger.Log($"Found {lastEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
+            GlobalLoggers.ChunkLogger.Log($"Found {lastEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
 
             Vector3 firstPoint = chunk.FirstSample.position;
             firstEndVertices = GetVerticesOnTangent(firstPoint - chunk.FirstTangent, firstPoint + chunk.FirstTangent);
             Debug.DrawLine(firstPoint - chunk.FirstTangent * 200, firstPoint + chunk.FirstTangent * 200, Color.magenta, 15);
-            GlobalLoggers.TerrainLogger.Log($"Found {firstEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
+            GlobalLoggers.ChunkLogger.Log($"Found {firstEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
 
             chunk.transform.rotation = previousRotation;
         }

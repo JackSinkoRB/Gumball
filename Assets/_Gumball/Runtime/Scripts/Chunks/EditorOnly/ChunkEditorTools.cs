@@ -236,7 +236,7 @@ namespace Gumball
             Chunk connectedBefore = chunk.ChunkBefore;
             chunk.DisconnectAll();
             
-            GlobalLoggers.TerrainLogger.Log($"Recreating terrain for '{chunk.name}'");
+            GlobalLoggers.ChunkLogger.Log($"Recreating terrain for '{chunk.name}'");
             Material[] previousMaterials = chunk.CurrentTerrain.GetComponent<MeshRenderer>().sharedMaterials;
             DestroyImmediate(chunk.CurrentTerrain);
 

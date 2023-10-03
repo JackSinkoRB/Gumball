@@ -41,7 +41,7 @@ namespace Gumball
             }
 #endif
             
-            GlobalLoggers.TerrainLogger.Log($"Appending {chunk2.name} to the end of {chunk1.name}");
+            GlobalLoggers.ChunkLogger.Log($"Appending {chunk2.name} to the end of {chunk1.name}");
 
             chunk1.DisableAutomaticTerrainRecreation(true);
             chunk2.DisableAutomaticTerrainRecreation(true);
@@ -89,7 +89,7 @@ namespace Gumball
             }
 #endif
             
-            GlobalLoggers.TerrainLogger.Log($"Appending {chunk2.name} to the end of {chunk1.name}");
+            GlobalLoggers.ChunkLogger.Log($"Appending {chunk2.name} to the end of {chunk1.name}");
             
             chunk1.DisableAutomaticTerrainRecreation(true);
             chunk2.DisableAutomaticTerrainRecreation(true);

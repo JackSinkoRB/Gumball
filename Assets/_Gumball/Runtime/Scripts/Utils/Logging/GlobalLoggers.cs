@@ -10,10 +10,10 @@ namespace Gumball
     {
         
         public static Logger LoadingLogger => Instance.loadingLogger;
-        public static Logger TerrainLogger => Instance.terrainLogger;
+        public static Logger ChunkLogger => Instance.chunkLogger;
 
         [SerializeField] private Logger loadingLogger;
-        [SerializeField] private Logger terrainLogger;
+        [SerializeField] private Logger chunkLogger;
 
     }
 }

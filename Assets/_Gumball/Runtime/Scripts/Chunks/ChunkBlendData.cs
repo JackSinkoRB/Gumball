@@ -65,7 +65,7 @@ namespace Gumball
         
         private void AlignEdges(ChunkMeshData chunkToMove, ChunkMeshData chunkToMatch)
         {
-            GlobalLoggers.TerrainLogger.Log($"Moving {chunkToMove.Chunk.gameObject.name} vertices to {chunkToMatch.Chunk.gameObject.name}");
+            GlobalLoggers.ChunkLogger.Log($"Moving {chunkToMove.Chunk.gameObject.name} vertices to {chunkToMatch.Chunk.gameObject.name}");
             var chunkToMoveEndVertices = chunkToMove == firstChunk.ChunkMeshData ? chunkToMove.LastEndVertices : chunkToMove.FirstEndVertices;
             foreach (ChunkMeshData.Vertex chunkToMoveVertex in chunkToMoveEndVertices)
             {

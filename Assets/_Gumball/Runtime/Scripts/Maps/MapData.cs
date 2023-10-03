@@ -57,11 +57,11 @@ namespace Gumball
             //you need to spawn every single chunk one after the other 
             foreach (AssetReferenceGameObject chunkReference in chunkReferences)
             {
-                GlobalLoggers.TerrainLogger.Log($"Loading {chunkReference.editorAsset.name}");
+                GlobalLoggers.ChunkLogger.Log($"Loading {chunkReference.editorAsset.name}");
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunkReference);
                 handle.WaitForCompletion();
             
-                GlobalLoggers.TerrainLogger.Log($"Instantiating {chunkReference.editorAsset.name}");
+                GlobalLoggers.ChunkLogger.Log($"Instantiating {chunkReference.editorAsset.name}");
                 GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), ChunkManager.Instance.transform);
                 instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
                 Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
@@ -69,13 +69,13 @@ namespace Gumball
                 //connect to the previous chunk (if there is one)
                 if (previousChunk != null)
                 {
-                    GlobalLoggers.TerrainLogger.Log($"Connecting {chunk.name} and {previousChunk.name}");
+                    GlobalLoggers.ChunkLogger.Log($"Connecting {chunk.name} and {previousChunk.name}");
                     
                     //create the blend data
                     ChunkBlendData newBlendData = ChunkUtils.ConnectChunksWithNewBlendData(previousChunk, chunk, ChunkUtils.LoadDirection.AFTER);
                     blendData[new ChunkPair(previousChunkAsset, chunkReference)] = newBlendData;
 
-                    GlobalLoggers.TerrainLogger.Log($"Destroying {previousChunk.name}");
+                    GlobalLoggers.ChunkLogger.Log($"Destroying {previousChunk.name}");
                     DestroyImmediate(previousChunk.gameObject);
                 }
 
@@ -85,7 +85,7 @@ namespace Gumball
 
             if (previousChunk != null)
             {
-                GlobalLoggers.TerrainLogger.Log($"Destroying {previousChunk.name}");
+                GlobalLoggers.ChunkLogger.Log($"Destroying {previousChunk.name}");
                 DestroyImmediate(previousChunk.gameObject);
             }
             
