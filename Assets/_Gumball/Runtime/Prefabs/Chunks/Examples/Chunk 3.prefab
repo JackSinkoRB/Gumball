@@ -18,7 +18,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &3733733955730149175
 Transform:
@@ -42,7 +42,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1846937086223684684}
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 4300000, guid: b6e5a83a5b5570547b647257fcebe3f5, type: 2}
 --- !u!23 &8299930124553968334
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -139,7 +139,7 @@ MonoBehaviour:
   multithreaded: 0
   buildOnAwake: 1
   buildOnEnable: 0
-  _baked: 0
+  _baked: 1
   _markDynamic: 1
   _size: 1
   _color: {r: 1, g: 1, b: 1, a: 1}
@@ -156,7 +156,7 @@ MonoBehaviour:
   _uvOffset: {x: 0, y: 0}
   _uvRotation: 0
   _meshIndexFormat: 0
-  _bakedMesh: {fileID: 0}
+  _bakedMesh: {fileID: 4300000, guid: b6e5a83a5b5570547b647257fcebe3f5, type: 2}
   colliderUpdateRate: 0.2
   _channels:
   - name: Channel 1
@@ -7040,8 +7040,8 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
---- !u!1 &6115552006328002532
+  m_Mesh: {fileID: 4300000, guid: b6e5a83a5b5570547b647257fcebe3f5, type: 2}
+--- !u!1 &2904859022810373421
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -7049,9 +7049,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5313653757251332952}
-  - component: {fileID: 6228456397063378361}
-  - component: {fileID: 4898799931296666585}
+  - component: {fileID: 3161525150699353789}
+  - component: {fileID: 7643646665291879038}
+  - component: {fileID: 2678347710168775947}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Terrain
@@ -7059,13 +7059,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5313653757251332952
+--- !u!4 &3161525150699353789
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6115552006328002532}
+  m_GameObject: {fileID: 2904859022810373421}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 76.20097, y: -5.6254597, z: 235.49103}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -7074,13 +7074,13 @@ Transform:
   m_Father: {fileID: 7139806386542147063}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &6228456397063378361
+--- !u!23 &7643646665291879038
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6115552006328002532}
+  m_GameObject: {fileID: 2904859022810373421}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -7116,13 +7116,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &4898799931296666585
+--- !u!33 &2678347710168775947
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6115552006328002532}
+  m_GameObject: {fileID: 2904859022810373421}
   m_Mesh: {fileID: 4300000, guid: 01170fa30684c5b4ba0e4471a56f38ef, type: 2}
 --- !u!1 &8493731374717290328
 GameObject:
@@ -7157,7 +7157,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3733733955730149175}
-  - {fileID: 5313653757251332952}
+  - {fileID: 3161525150699353789}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7174,10 +7174,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 5247645472736959872}
+  roadMesh: {fileID: 359794353102897230}
   terrainBlendDistance: 50
   chunkBefore: {fileID: 0}
   chunkAfter: {fileID: 0}
-  currentTerrain: {fileID: 6115552006328002532}
+  currentTerrain: {fileID: 2904859022810373421}
   ChunkMeshData:
     chunk: {fileID: 7499715070669149162}
     vertices:
@@ -9977,7 +9978,7 @@ MonoBehaviour:
   editorDrawThickness: 0
   editorBillboardThickness: 1
   isNewlyCreated: 0
-  editorUpdateMode: 0
+  editorUpdateMode: 1
   multithreaded: 0
   updateMode: 0
   triggerGroups: []
@@ -10226,8 +10227,7 @@ MonoBehaviour:
   _optimizeAngleThreshold: 0.5
   _space: 1
   _sampleMode: 1
-  _subscribers:
-  - {fileID: 359794353102897230}
+  _subscribers: []
   _rawSamples:
   - position: {x: 0, y: 0, z: 0}
     up: {x: 0, y: 1, z: 0}

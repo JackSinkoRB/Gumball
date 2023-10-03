@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &829716832715623475
+--- !u!1 &265704011373814394
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,9 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1975760770697000971}
-  - component: {fileID: 7234648475759425054}
-  - component: {fileID: 8765115606359148203}
+  - component: {fileID: 1372480467021316825}
+  - component: {fileID: 8459835308701508928}
+  - component: {fileID: 5960346362135549674}
   m_Layer: 0
   m_Name: Terrain
   m_TagString: Terrain
@@ -18,13 +18,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1975760770697000971
+--- !u!4 &1372480467021316825
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 829716832715623475}
+  m_GameObject: {fileID: 265704011373814394}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 76.20097, y: -5.6254597, z: 235.49103}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -33,13 +33,13 @@ Transform:
   m_Father: {fileID: 7139806386542147063}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &7234648475759425054
+--- !u!23 &8459835308701508928
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 829716832715623475}
+  m_GameObject: {fileID: 265704011373814394}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -75,13 +75,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &8765115606359148203
+--- !u!33 &5960346362135549674
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 829716832715623475}
+  m_GameObject: {fileID: 265704011373814394}
   m_Mesh: {fileID: 4300000, guid: ca1790974f5cda34b8aeca15dd75fb4e, type: 2}
 --- !u!1 &1846937086223684684
 GameObject:
@@ -101,7 +101,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &3733733955730149175
 Transform:
@@ -125,7 +125,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1846937086223684684}
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 4300000, guid: cb0af7515e5efe342ba3aba028c2bd70, type: 2}
 --- !u!23 &8299930124553968334
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -222,7 +222,7 @@ MonoBehaviour:
   multithreaded: 0
   buildOnAwake: 1
   buildOnEnable: 0
-  _baked: 0
+  _baked: 1
   _markDynamic: 1
   _size: 1
   _color: {r: 1, g: 1, b: 1, a: 1}
@@ -239,7 +239,7 @@ MonoBehaviour:
   _uvOffset: {x: 0, y: 0}
   _uvRotation: 0
   _meshIndexFormat: 0
-  _bakedMesh: {fileID: 0}
+  _bakedMesh: {fileID: 4300000, guid: cb0af7515e5efe342ba3aba028c2bd70, type: 2}
   colliderUpdateRate: 0.2
   _channels:
   - name: Channel 1
@@ -7123,7 +7123,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 4300000, guid: cb0af7515e5efe342ba3aba028c2bd70, type: 2}
 --- !u!1 &8493731374717290328
 GameObject:
   m_ObjectHideFlags: 0
@@ -7157,7 +7157,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3733733955730149175}
-  - {fileID: 1975760770697000971}
+  - {fileID: 1372480467021316825}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7174,10 +7174,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 5247645472736959872}
+  roadMesh: {fileID: 359794353102897230}
   terrainBlendDistance: 50
   chunkBefore: {fileID: 0}
   chunkAfter: {fileID: 0}
-  currentTerrain: {fileID: 829716832715623475}
+  currentTerrain: {fileID: 265704011373814394}
   ChunkMeshData:
     chunk: {fileID: 7499715070669149162}
     vertices:
@@ -9977,7 +9978,7 @@ MonoBehaviour:
   editorDrawThickness: 0
   editorBillboardThickness: 1
   isNewlyCreated: 0
-  editorUpdateMode: 0
+  editorUpdateMode: 1
   multithreaded: 0
   updateMode: 0
   triggerGroups: []
@@ -10226,8 +10227,7 @@ MonoBehaviour:
   _optimizeAngleThreshold: 0.5
   _space: 1
   _sampleMode: 1
-  _subscribers:
-  - {fileID: 359794353102897230}
+  _subscribers: []
   _rawSamples:
   - position: {x: 0, y: 0, z: 0}
     up: {x: 0, y: 1, z: 0}
