@@ -31,7 +31,7 @@ namespace Gumball
         #if UNITY_EDITOR
         [SerializeField] private ChunkBlendData[] blendDataEditorOnly;
         #endif
-        private readonly Dictionary<ChunkPair, ChunkBlendData> blendData = new();
+        [SerializeField] private MyDictionary<ChunkPair, ChunkBlendData> blendData = new();
 
         public ChunkBlendData GetBlendData(AssetReferenceGameObject firstChunk, AssetReferenceGameObject lastChunk)
         {
