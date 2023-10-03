@@ -18,7 +18,9 @@ namespace Gumball
         }
 
         public const string TerrainTag = "Terrain";
-        
+        public const string MeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
+        private const string chunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
+
         /// <summary>
         /// Connects the chunks with NEW blend data.
         /// Puts chunk2 at the start or end of chunk1 (depending on direction), and aligns the splines.
@@ -157,6 +159,80 @@ namespace Gumball
             }
 
             return uvs;
+        }
+        
+        public static void CleanupUnusedMeshes(Chunk ignoreChunk = null)
+        {
+            if (Application.isPlaying)
+                return;
+
+            //find all the used meshes
+            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { chunkFolderPath });
+            HashSet<string> whitelistedIds = new HashSet<string>();
+            foreach (string prefabGuid in prefabGuids)
+            {
+                string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
+                Chunk chunkPrefab = AssetDatabase.LoadAssetAtPath<Chunk>(prefabPath);
+                if (chunkPrefab == null)
+                    continue; 
+                if (chunkPrefab.CurrentTerrain == null)
+                    continue;
+
+                whitelistedIds.Add(chunkPrefab.UniqueID);
+            }
+
+            //find all the terrain meshes
+            string[] meshGuids = AssetDatabase.FindAssets("t:Mesh", new[] { MeshAssetFolderPath });
+            foreach (string meshGuid in meshGuids)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(meshGuid);
+                Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(assetPath);
+                bool isWhitelisted = false;
+                foreach (string whitelistedId in whitelistedIds)
+                {
+                    if (assetPath.Contains(whitelistedId))
+                    {
+                        isWhitelisted = true;
+                        break;
+                    }
+                }
+
+                if (ignoreChunk != null && assetPath.Contains(ignoreChunk.UniqueID))
+                    isWhitelisted = true;
+                
+                //only delete scene instance if scene is loaded
+                bool isApartOfScene = assetPath.Replace("ProceduralTerrain_", "").Contains("_") && !assetPath.Contains("Prefab");
+                bool isApartOfCurrentScene = assetPath.Contains(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+                if (isApartOfScene)
+                {
+                    if (isApartOfCurrentScene)
+                    {
+                        //search all gameobjects for chunk components
+                        List<Chunk> chunksInScene = SceneUtils.GetAllComponentsInActiveScene<Chunk>();
+                        foreach (Chunk chunkInScene in chunksInScene)
+                        {
+                            if (assetPath.Contains(chunkInScene.UniqueID))
+                            {
+                                isWhitelisted = true;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        isWhitelisted = true;
+                    }
+                }
+
+                if (!isWhitelisted)
+                {
+                    //remove it
+                    string path = AssetDatabase.GetAssetPath(mesh);
+                    AssetDatabase.DeleteAsset(path);
+                    Debug.Log($"Removed unused terrain mesh asset: {path}");
+                }
+            }
+            AssetDatabase.SaveAssets();
         }
 
     }
