@@ -84,15 +84,60 @@ namespace Gumball
 
             //can perform loading check
             timeSinceLastLoadCheck = 0;
-            distanceLoadingCoroutine.Set(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
+            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
         }
 
         private IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
-            //TODO: check to unload chunks
-
+            UnloadChunksAroundPosition(position);
+            
             yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
             yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
+        }
+
+        private void UnloadChunksAroundPosition(Vector3 position)
+        {
+            List<int> chunksToUnload = new List<int>();
+            float chunkLoadDistanceSqr = chunkLoadDistance * chunkLoadDistance;
+
+            //check to unload chunks ahead
+            for (int chunkAheadIndex = currentChunks.Count - 1; chunkAheadIndex >= 0; chunkAheadIndex--)
+            {
+                LoadedChunkData chunkData = currentChunks[chunkAheadIndex];
+                float distanceToChunk = Vector3.SqrMagnitude(position - chunkData.Chunk.FirstSample.position);
+                if (distanceToChunk <= chunkLoadDistanceSqr)
+                {
+                    //is good!
+                    break;
+                }
+                
+                //can unload
+                chunksToUnload.Add(chunkAheadIndex);
+                loadedChunksIndices.Max--;
+            }
+            
+            //check to unload chunks behind
+            for (int chunkBehindIndex = 0; chunkBehindIndex < currentChunks.Count; chunkBehindIndex++)
+            {
+                LoadedChunkData chunkData = currentChunks[chunkBehindIndex];
+                float distanceToChunk = Vector3.SqrMagnitude(position - chunkData.Chunk.LastSample.position);
+                if (distanceToChunk <= chunkLoadDistanceSqr)
+                {
+                    //is good!
+                    break;
+                }
+                
+                //can unload
+                chunksToUnload.Add(chunkBehindIndex);
+                loadedChunksIndices.Min++;
+            }
+
+            foreach (int indexToRemove in chunksToUnload)
+            {
+                LoadedChunkData chunkData = currentChunks[indexToRemove];
+                currentChunks.RemoveAt(indexToRemove);
+                Destroy(chunkData.Chunk.gameObject);
+            }
         }
         
         private IEnumerator LoadChunksInDirection(Vector3 startingPosition, ChunkUtils.LoadDirection direction)

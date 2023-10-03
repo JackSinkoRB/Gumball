@@ -17,7 +17,7 @@ namespace Gumball
 
         public TrackedCoroutine(IEnumerator action)
         {
-            Set(Start(action));
+            SetCoroutine(Start(action));
         }
 
         public TrackedCoroutine()
@@ -40,7 +40,7 @@ namespace Gumball
             Coroutine = null;
         }
 
-        public void Set(IEnumerator action)
+        public void SetCoroutine(IEnumerator action)
         {
             if (Coroutine != null)
                 Stop();
