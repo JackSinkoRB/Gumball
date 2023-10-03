@@ -78,7 +78,7 @@ namespace Gumball
             mesh.RecalculateBounds();
             
             //save the mesh asset
-            string path = $"{ChunkUtils.MeshAssetFolderPath}/ProceduralTerrain_{chunk.UniqueID}.asset";
+            string path = $"{ChunkUtils.TerrainMeshAssetFolderPath}/ProceduralTerrain_{chunk.UniqueID}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                 AssetDatabase.DeleteAsset(path);
             
@@ -87,6 +87,7 @@ namespace Gumball
             
             meshFilter.sharedMesh = newMesh;
             PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
+            EditorUtility.SetDirty(meshFilter);
             AssetDatabase.SaveAssets();
 
             ChunkUtils.CleanupUnusedMeshes(chunk);

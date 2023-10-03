@@ -16,16 +16,22 @@ namespace Gumball
         private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
 
         private GameObject previousSelection;
-        private float timeWhenUnityLastUpdated = 0;
+        private float timeWhenUnityLastUpdated;
+        
+        [InitializeOnLoadMethod]
+        private static void Initialise()
+        {
+            UniqueIDAssigner.OnAssignID += OnAssignID;
+        }
         
         private void OnEnable()
         {
-            chunk.SplineComputer.onRebuild += CheckToUpdateTerrainImmediately;
+            chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
         }
 
         private void OnDisable()
         {
-            chunk.SplineComputer.onRebuild -= CheckToUpdateTerrainImmediately;
+            chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
 
             Tools.hidden = false;
         }
@@ -52,15 +58,9 @@ namespace Gumball
         
         private void OnValidate()
         {
-            CheckToUpdateTerrainImmediately();
+            CheckToUpdateMeshesImmediately();
         }
 
-        [InitializeOnLoadMethod]
-        private static void Initialise()
-        {
-            UniqueIDAssigner.OnAssignID += OnAssignID;
-        }
-        
         private static void OnAssignID(UniqueIDAssigner uniqueIDAssigner, string previousID, string newID)
         {
             Chunk chunk = uniqueIDAssigner.GetComponent<Chunk>();
@@ -80,8 +80,8 @@ namespace Gumball
                 return;
             
             //save the mesh asset
-            string oldPath = $"{ChunkUtils.MeshAssetFolderPath}/ProceduralTerrain_{previousID}.asset";
-            string newPath = $"{ChunkUtils.MeshAssetFolderPath}/ProceduralTerrain_{newID}.asset";
+            string oldPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/ProceduralTerrain_{previousID}.asset";
+            string newPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/ProceduralTerrain_{newID}.asset";
             AssetDatabase.CopyAsset(oldPath, newPath);
             AssetDatabase.SaveAssets();
             MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
@@ -90,6 +90,7 @@ namespace Gumball
             meshFilter.sharedMesh = duplicatedMesh;
             
             PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
+            EditorUtility.SetDirty(meshFilter);
             AssetDatabase.SaveAssets();
         }
 
@@ -190,7 +191,7 @@ namespace Gumball
             playModeState = state;
         }
 
-        private void CheckToUpdateTerrainImmediately()
+        private void CheckToUpdateMeshesImmediately()
         {
             if (!updateImmediately)
                 return;
@@ -225,6 +226,9 @@ namespace Gumball
             
             EditorApplication.delayCall -= RecreateTerrain;
             EditorApplication.delayCall += RecreateTerrain;
+            
+            EditorApplication.delayCall -= () => ChunkUtils.BakeRoadMesh(chunk);
+            EditorApplication.delayCall += () => ChunkUtils.BakeRoadMesh(chunk);
         }
         
         /// <summary>

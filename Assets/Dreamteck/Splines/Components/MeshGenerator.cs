@@ -333,7 +333,7 @@ namespace Dreamteck.Splines
         {
             gameObject.isStatic = false; 
             _baked = false;
-            DestroyImmediate(_bakedMesh);
+            DestroyImmediate(_bakedMesh, true);
             _bakedMesh = null;
             CreateMesh();
             spline.Subscribe(this);

@@ -18,8 +18,9 @@ namespace Gumball
         }
 
         public const string TerrainTag = "Terrain";
-        public const string MeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
+        public const string TerrainMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
         private const string chunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
+        private const string roadMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Roads/";
 
         /// <summary>
         /// Connects the chunks with NEW blend data.
@@ -160,7 +161,39 @@ namespace Gumball
 
             return uvs;
         }
-        
+
+        public static void BakeRoadMesh(Chunk chunk, bool replace = true)
+        {
+            bool alreadyBaked = chunk.RoadMesh.baked;
+            if (alreadyBaked && !replace)
+                return;
+
+            chunk.RoadMesh.Unbake();
+            chunk.RoadMesh.Bake(true, true);
+
+            MeshFilter meshFilter = chunk.RoadMesh.GetComponent<MeshFilter>();
+            
+            string path = $"{roadMeshAssetFolderPath}/RoadMesh_{chunk.UniqueID}.asset";
+            if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
+                AssetDatabase.DeleteAsset(path);
+            AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
+
+            MeshCollider meshCollider = chunk.RoadMesh.GetComponent<MeshCollider>();
+            Mesh savedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            meshFilter.sharedMesh = savedMesh;
+            meshCollider.sharedMesh = savedMesh;
+            
+            PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(meshCollider);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(chunk.RoadMesh);
+            EditorUtility.SetDirty(chunk.gameObject);
+            
+            AssetDatabase.SaveAssets();
+            
+            GlobalLoggers.ChunkLogger.Log("Baked " + path);
+        }
+
+        //TODO: cleanup road meshes too
         public static void CleanupUnusedMeshes(Chunk ignoreChunk = null)
         {
 #if UNITY_EDITOR
@@ -183,7 +216,7 @@ namespace Gumball
             }
 
             //find all the terrain meshes
-            string[] meshGuids = AssetDatabase.FindAssets("t:Mesh", new[] { MeshAssetFolderPath });
+            string[] meshGuids = AssetDatabase.FindAssets("t:Mesh", new[] { TerrainMeshAssetFolderPath });
             foreach (string meshGuid in meshGuids)
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(meshGuid);

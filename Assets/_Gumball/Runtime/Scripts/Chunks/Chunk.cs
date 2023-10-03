@@ -19,6 +19,7 @@ namespace Gumball
     {
         
         [SerializeField] private SplineComputer splineComputer;
+        [SerializeField] private SplineMesh roadMesh;
         
         [Header("Modify")]
         [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
@@ -32,6 +33,7 @@ namespace Gumball
 
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
+        public SplineMesh RoadMesh => roadMesh;
 
         public Chunk ChunkBefore => chunkBefore;
         public Chunk ChunkAfter => chunkAfter;
