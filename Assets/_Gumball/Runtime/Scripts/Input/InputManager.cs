@@ -10,6 +10,15 @@ namespace Gumball
     public class InputManager : Singleton<InputManager>
     {
         
+        public enum ActionMapType
+        {
+            Car,
+            General
+        }
+        
+        public static InputAction PrimaryContact => Instance.GetOrCacheAction("PrimaryContact");
+        public static InputAction PrimaryPosition => Instance.GetOrCacheAction("PrimaryPosition");
+
         public static InputAction Steering => Instance.GetOrCacheAction("Steering");
         public static InputAction Accelerate  => Instance.GetOrCacheAction("Accelerate");
         public static InputAction Decelerate => Instance.GetOrCacheAction("Decelerate");
@@ -31,5 +40,11 @@ namespace Gumball
             return actionsCached[action];
         }
 
+        public void SetActionMap(ActionMapType actionMapType)
+        {
+            InputActionMap actionMap = controls.FindActionMap(actionMapType.ToString());
+            actionMap.Enable();
+        }
+        
     }
 }
