@@ -37,7 +37,7 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     
     protected void Awake()
     {
-        if (instance != null)
+        if (ExistsRuntime)
         {
             //instance already exists, so just remove this new one
             gameObject.SetActive(false); //set inactive so it doesn't trigger colliders etc.
