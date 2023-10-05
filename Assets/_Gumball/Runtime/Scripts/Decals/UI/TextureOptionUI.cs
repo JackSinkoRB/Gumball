@@ -14,7 +14,7 @@ namespace Gumball
 
         public void OnClick()
         {
-            LiveDecal decal = DecalManager.Instance.CreateLiveDecal(textureImage.sprite.texture);
+            LiveDecal decal = DecalManager.Instance.CreateLiveDecal(textureImage.sprite);
             DecalManager.Instance.SelectLiveDecal(decal);
         }
         

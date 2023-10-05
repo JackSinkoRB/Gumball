@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Gumball
 {
@@ -63,6 +65,22 @@ namespace Gumball
             OffsetSincePressed = PositionOnPress - Position;
             
             onPerform?.Invoke();
+        }
+
+        public static bool IsSelectableUnderPointer()
+        {
+            var pointer = new PointerEventData(EventSystem.current) { position = Position };
+        
+            List<RaycastResult> raycastResults = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointer, raycastResults);
+
+            foreach (RaycastResult result in raycastResults)
+            {
+                if (result.gameObject.GetComponent<Selectable>() != null);
+                return true;
+            }
+
+            return false;
         }
 
     }

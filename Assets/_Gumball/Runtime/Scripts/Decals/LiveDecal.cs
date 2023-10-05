@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using PaintIn3D;
 using UnityEngine;
 using MyBox;
+using UnityEngine.EventSystems;
 
 namespace Gumball
 {
@@ -13,21 +14,33 @@ namespace Gumball
         [SerializeField] private P3dPaintDecal paintDecal;
         [SerializeField] private LayerMask raycastLayers;
 
+        [SerializeField, ReadOnly] private Sprite sprite;
+        
         private Vector3 clickOffset;
         private Vector3 lastKnownPosition;
         private Quaternion lastKnownRotation;
 
+        public bool IsValidPosition { get; private set; }
+
         public P3dPaintDecal PaintDecal => paintDecal;
+        public Sprite Sprite => sprite;
+
+        private void SetDefaultPosition()
+        {
+            UpdatePosition(new Vector2(Screen.width / 2f, Screen.height / 2f));
+        }
 
         private void OnEnable()
         {
-            UpdatePosition();
+            SetDefaultPosition();
             PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
+            PrimaryContactInput.onRelease += OnPrimaryContactReleased;
         }
 
         private void OnDisable()
         {
             PrimaryContactInput.onPerform -= OnPrimaryContactPerformed;
+            PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
         }
 
         private void Update()
@@ -35,30 +48,49 @@ namespace Gumball
             DrawPreview();
         }
         
+        /// <summary>
+        /// Applies the current state of the live decal to the car's material.
+        /// </summary>
         public void Apply()
         {
             paintDecal.HandleHitPoint(false, int.MaxValue, 1, 0, lastKnownPosition, lastKnownRotation);
         }
         
-        private void OnPrimaryContactPerformed()
+        public void SetSprite(Sprite sprite)
         {
-            if (DecalManager.Instance.CurrentSelectedDecal == this)
-                UpdatePosition();
+            this.sprite = sprite;
         }
 
-        private void UpdatePosition()
+        private void OnPrimaryContactPerformed()
         {
-            Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
+            if (DecalManager.Instance.CurrentSelected == this 
+                && !PrimaryContactInput.IsSelectableUnderPointer())
+            {
+                UpdatePosition(PrimaryContactInput.Position);
+            }
+        }
+
+        private void OnPrimaryContactReleased()
+        {
+            if (DecalManager.Instance.CurrentSelected == this &&
+                !IsValidPosition)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        private void UpdatePosition(Vector2 screenPosition)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(screenPosition);
     
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, raycastLayers))
             {
-                if (hit.collider.GetComponent<P3dPaintable>())
-                {
-                    lastKnownPosition = hit.point;
-                    lastKnownRotation = Quaternion.LookRotation(-hit.normal);
+                lastKnownPosition = hit.point;
+                lastKnownRotation = Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Camera.main.transform.up);
 
-                    transform.position = lastKnownPosition;
-                }
+                transform.position = lastKnownPosition;
+
+                IsValidPosition = hit.collider.GetComponent<P3dPaintable>();
             }
         }
 
@@ -66,6 +98,6 @@ namespace Gumball
         {
             paintDecal.HandleHitPoint(true, int.MaxValue, 1, 0, lastKnownPosition, lastKnownRotation);
         }
-
+        
     }
 }
