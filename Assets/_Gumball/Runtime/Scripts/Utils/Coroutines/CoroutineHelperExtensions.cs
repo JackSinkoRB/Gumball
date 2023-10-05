@@ -6,6 +6,11 @@ using UnityEngine;
 public static class CoroutineHelperExtensions
 {
 
+    public static Coroutine PerformAtEndOfFrame(this MonoBehaviour monoBehaviour, Action action)
+    {
+        return CoroutineHelper.PerformAtEndOfFrame(action, monoBehaviour);
+    }
+    
     public static void PerformAfterFixedUpdate(this MonoBehaviour monoBehaviour, Action action)
     {
         CoroutineHelper.PerformAfterFixedUpdate(action, monoBehaviour);
