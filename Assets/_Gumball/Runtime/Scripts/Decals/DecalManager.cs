@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MyBox;
 using PaintIn3D;
 using UnityEngine;
@@ -11,6 +12,9 @@ namespace Gumball
     public class DecalManager : Singleton<DecalManager>
     {
 
+        private const int maxDecals = 50;
+        private const int liveDecalLayer = 6;
+        
         [SerializeField] private LiveDecal liveDecalPrefab;
         [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
         [SerializeField] private Shader carBodyShader;
@@ -21,22 +25,31 @@ namespace Gumball
         [SerializeField] private Sprite[] textureOptions;
 
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
-        
+        [SerializeField, ReadOnly] private int priorityCount;
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
 
         public Sprite[] TextureOptions => textureOptions;
         public LiveDecal CurrentSelected => currentSelected;
         
+        private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[maxDecals];
+
         private void OnEnable()
         {
             PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
+            PrimaryContactInput.onPress += OnPrimaryContactPressed;
             StartSession(); //temp
         }
 
         private void OnDisable()
         {
             PrimaryContactInput.onPerform -= OnPrimaryContactPerformed;
+            PrimaryContactInput.onPress -= OnPrimaryContactPressed;
             EndSession(); //temp
+        }
+
+        private void OnPrimaryContactPressed()
+        {
+            GetDecalsUnderPointer();
         }
 
         private void OnPrimaryContactPerformed()
@@ -127,7 +140,37 @@ namespace Gumball
             LiveDecal liveDecal = Instantiate(liveDecalPrefab.gameObject, transform).GetComponent<LiveDecal>();
             liveDecal.PaintDecal.Texture = sprite.texture;
             liveDecal.SetSprite(sprite);
+
+            priorityCount++;
+            liveDecal.SetPriority(priorityCount);
+            
             return liveDecal;
+        }
+
+        public void GetDecalsUnderPointer()
+        {
+            //raycast from the pointer position into the world
+            Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
+
+            int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, Mathf.Infinity, 1 << liveDecalLayer);
+
+            LiveDecal highestPriorityDecal = null;
+            for (int index = 0; index < raycastHits; index++)
+            {
+                RaycastHit hit = decalsUnderPointer[index];
+                if (hit.collider == null)
+                    break;
+                
+                LiveDecal decal = hit.collider.GetComponent<LiveDecal>();
+
+                if (highestPriorityDecal == null || decal.Priority > highestPriorityDecal.Priority)
+                    highestPriorityDecal = decal;
+                
+                Debug.Log("Ray hit: " + hit.collider.name + " at " + hit.point);
+            }
+            
+            if (highestPriorityDecal != null)
+                SelectLiveDecal(highestPriorityDecal);
         }
     }
 }

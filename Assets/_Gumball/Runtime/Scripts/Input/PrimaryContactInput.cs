@@ -44,6 +44,7 @@ namespace Gumball
         {
             IsPressed = true;
             PositionOnPress = InputManager.PrimaryPosition.ReadValue<Vector2>();
+            Position = PositionOnPress;
             OffsetSincePressed = Vector2.zero;
             
             onPress?.Invoke();
