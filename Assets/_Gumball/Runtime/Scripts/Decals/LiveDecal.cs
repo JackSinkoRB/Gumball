@@ -10,11 +10,14 @@ namespace Gumball
     public class LiveDecal : MonoBehaviour
     {
 
+        [SerializeField] private P3dPaintDecal paintDecal;
+        [SerializeField] private LayerMask raycastLayers;
+
         private Vector3 clickOffset;
         private Vector3 lastKnownPosition;
         private Quaternion lastKnownRotation;
 
-        private P3dPaintDecal paintDecal => GetComponent<P3dPaintDecal>();
+        public P3dPaintDecal PaintDecal => paintDecal;
 
         private void OnEnable()
         {
@@ -39,17 +42,23 @@ namespace Gumball
         
         private void OnPrimaryContactPerformed()
         {
-            UpdatePosition();
+            if (DecalManager.Instance.CurrentSelectedDecal == this)
+                UpdatePosition();
         }
 
         private void UpdatePosition()
         {
             Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
     
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, raycastLayers))
             {
-                lastKnownPosition = hit.point;
-                lastKnownRotation = Quaternion.LookRotation(-hit.normal);
+                if (hit.collider.GetComponent<P3dPaintable>())
+                {
+                    lastKnownPosition = hit.point;
+                    lastKnownRotation = Quaternion.LookRotation(-hit.normal);
+
+                    transform.position = lastKnownPosition;
+                }
             }
         }
 

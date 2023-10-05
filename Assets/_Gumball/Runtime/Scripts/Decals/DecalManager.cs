@@ -7,13 +7,22 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class DecalManager : MonoBehaviour
+    public class DecalManager : Singleton<DecalManager>
     {
-        
+
         [SerializeField] private LiveDecal liveDecalPrefab;
         [SerializeField] private Transform car;
+        [SerializeField] private RectTransform selectedLiveDecalUI;
+
+        [SerializeField] private Sprite[] textureOptions;
+
+        [SerializeField, ReadOnly] private LiveDecal currentSelectedDecal;
+        
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
 
+        public Sprite[] TextureOptions => textureOptions;
+        public LiveDecal CurrentSelectedDecal => currentSelectedDecal;
+        
         private void OnEnable()
         {
             StartSession(); //temp
@@ -22,6 +31,12 @@ namespace Gumball
         private void OnDisable()
         {
             EndSession(); //temp
+        }
+
+        private void LateUpdate()
+        {
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(currentSelectedDecal.transform.position);
+            selectedLiveDecalUI.position = screenPos;
         }
 
         [Serializable]
@@ -63,15 +78,22 @@ namespace Gumball
         
         private void SetMeshPaintable(MeshFilter meshFilter)
         {
+            MeshRenderer meshRenderer = meshFilter.GetComponent<MeshRenderer>();
+
+            //TODO: compare the shaders instead for the reflection shader
+            if (!meshRenderer.material.HasProperty("_Albedo"))
+                return; //the car reflection shader does not use a _MainTex, so only apply to the reflection shader
+            
             P3dPaintable paintable = meshFilter.gameObject.AddComponent<P3dPaintable>();
             P3dMaterialCloner materialCloner = meshFilter.gameObject.AddComponent<P3dMaterialCloner>();
             P3dPaintableTexture paintableTexture = meshFilter.gameObject.AddComponent<P3dPaintableTexture>();
-            
-            //todo: need to disable the car collider too
-            MeshCollider meshCollider = meshFilter.gameObject.AddComponent<MeshCollider>();
 
-            if (!meshFilter.GetComponent<MeshRenderer>().material.HasProperty("_MainTex"))
-                paintableTexture.Slot = new P3dSlot(0, "_Albedo");
+            paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
+            paintableTexture.Slot = new P3dSlot(0, "_Albedo");
+                        
+            //todo: need to disable the car collider too
+            meshFilter.gameObject.AddComponent<MeshCollider>();
+            
             PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture);
             paintableMeshes.Add(paintableMesh);
         }
@@ -84,14 +106,16 @@ namespace Gumball
             paintableMeshes.Remove(paintableMesh);
         }
 
-        private void Start()
+        public void SelectLiveDecal(LiveDecal liveDecal)
         {
-            CreateLiveDecal();
+            currentSelectedDecal = liveDecal;
         }
         
-        private void CreateLiveDecal()
+        public LiveDecal CreateLiveDecal(Texture texture)
         {
-            Instantiate(liveDecalPrefab.gameObject, transform);
+            LiveDecal liveDecal = Instantiate(liveDecalPrefab.gameObject, transform).GetComponent<LiveDecal>();
+            liveDecal.PaintDecal.Texture = texture;
+            return liveDecal;
         }
     }
 }
