@@ -134,6 +134,9 @@ namespace Gumball
 
             foreach (int indexToRemove in chunksToUnload)
             {
+                if (currentChunks.Count == 1)
+                    break; //keep at least 1 chunk
+                
                 LoadedChunkData chunkData = currentChunks[indexToRemove];
                 currentChunks.RemoveAt(indexToRemove);
                 Destroy(chunkData.Chunk.gameObject);
