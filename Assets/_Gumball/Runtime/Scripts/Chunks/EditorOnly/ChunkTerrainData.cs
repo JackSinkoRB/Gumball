@@ -15,6 +15,9 @@ namespace Gumball
 
         private const string defaultTerrainMaterialPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
 
+        [SerializeField] private bool matchRoadHeight = true;
+        [PositiveValueOnly, SerializeField, ConditionalField(nameof(matchRoadHeight), true)] private float terrainHeight;
+        [Space(5)]
         [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
         [PositiveValueOnly, SerializeField] private int resolution = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
@@ -203,7 +206,11 @@ namespace Gumball
             if (canFlattenUnderRoad)
             {
                 const float amountToSitUnderRoad = 0.5f; //let it sit just under the road, so it doesn't clip
-                return closestSample.position.y - amountToSitUnderRoad;
+                
+                if (matchRoadHeight)
+                    return closestSample.position.y - amountToSitUnderRoad;
+
+                return terrainHeight - amountToSitUnderRoad;
             }
 
             //check to apply height data
@@ -227,10 +234,17 @@ namespace Gumball
                 desiredHeight = vertexPosition.y + (desiredHeightDifference * blendPercent);
             }
 
-            //minus the height difference from road
-            float heightDifferenceFromRoad = vertexPosition.y - closestSample.position.y;
-            desiredHeight -= heightDifferenceFromRoad;
-            
+            if (matchRoadHeight)
+            {
+                //minus the height difference from road
+                float heightDifferenceFromRoad = vertexPosition.y - closestSample.position.y;
+                desiredHeight -= heightDifferenceFromRoad;
+            }
+            else
+            {
+                desiredHeight += terrainHeight;
+            }
+
             return desiredHeight;
         }
 
