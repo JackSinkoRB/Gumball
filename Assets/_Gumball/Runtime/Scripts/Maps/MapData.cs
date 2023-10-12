@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using AYellowpaper.SerializedCollections;
 using MyBox;
 #if UNITY_EDITOR
@@ -30,35 +31,33 @@ namespace Gumball
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
         
         [SerializedDictionary("ChunkPair", "ChunkBlendData")]
-        [SerializeField] private SerializedDictionary<ChunkPair, ChunkBlendData> blendData = new();
+        [SerializeField] private ChunkBlendData[] blendData;
 
-        public ChunkBlendData GetBlendData(AssetReferenceGameObject firstChunk, AssetReferenceGameObject lastChunk)
+        public ChunkBlendData GetBlendData(int connectionIndex)
         {
-            ChunkPair chunkPair = new ChunkPair(firstChunk, lastChunk);
-            
-            if (!blendData.ContainsKey(chunkPair))
-#if UNITY_EDITOR
-                throw new KeyNotFoundException($"Could not find blend data for chunks {firstChunk.editorAsset.name} and {lastChunk.editorAsset.name}.");
-#else
-                throw new KeyNotFoundException($"Could not find blend data for chunks.");
-#endif
-            
-            return blendData[chunkPair];
+            if (connectionIndex >= blendData.Length || connectionIndex < 0)
+                throw new IndexOutOfRangeException($"No blend data for connection index {connectionIndex}");
+
+            return blendData[connectionIndex];
         }
 
 #if UNITY_EDITOR
         [ButtonMethod]
         public void RebuildBlendData()
         {
-            blendData.Clear();
+            blendData = new ChunkBlendData[chunkReferences.Length-1];
+
             Chunk previousChunk = null;
-            AssetReferenceGameObject previousChunkAsset = null;
-            
+            int connectionIndex = 0;
+
             //you need to spawn every single chunk one after the other 
             foreach (AssetReferenceGameObject chunkReference in chunkReferences)
             {
                 GlobalLoggers.ChunkLogger.Log($"Loading {chunkReference.editorAsset.name}");
+                
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunkReference);
+
+                //TODO: can make this faster by loading and instantiating all the chunks first and waiting for them ALL to complete before connecting
                 handle.WaitForCompletion();
             
                 GlobalLoggers.ChunkLogger.Log($"Instantiating {chunkReference.editorAsset.name}");
@@ -73,14 +72,15 @@ namespace Gumball
                     
                     //create the blend data
                     ChunkBlendData newBlendData = ChunkUtils.ConnectChunksWithNewBlendData(previousChunk, chunk, ChunkUtils.LoadDirection.AFTER);
-                    blendData[new ChunkPair(previousChunkAsset, chunkReference)] = newBlendData;
+                    blendData[connectionIndex] = newBlendData;
 
                     GlobalLoggers.ChunkLogger.Log($"Destroying {previousChunk.name}");
                     DestroyImmediate(previousChunk.gameObject);
+
+                    connectionIndex++;
                 }
 
                 previousChunk = chunk;
-                previousChunkAsset = chunkReference;
             }
 
             if (previousChunk != null)

@@ -199,15 +199,16 @@ namespace Gumball
             {
                 if (loadDirection == ChunkUtils.LoadDirection.AFTER)
                 {
+                    int connectionIndex = loadedChunksIndices.Max - 1;
                     LoadedChunkData previousChunkData = currentChunks[^2];
-                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.AFTER, currentMap.GetBlendData(previousChunkData.AssetReference, chunkAssetReference));
+                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.AFTER, currentMap.GetBlendData(connectionIndex));
                 }
                 if (loadDirection == ChunkUtils.LoadDirection.BEFORE)
                 {
+                    int connectionIndex = loadedChunksIndices.Min;
                     LoadedChunkData previousChunkData = currentChunks[1];
-                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.BEFORE, currentMap.GetBlendData(chunkAssetReference, previousChunkData.AssetReference));
+                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.BEFORE, currentMap.GetBlendData(connectionIndex));
                 }
-                
             }
             
 #if UNITY_EDITOR
