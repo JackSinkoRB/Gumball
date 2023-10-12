@@ -116,7 +116,13 @@ namespace Gumball
             chunk2.DisableAutomaticTerrainRecreation(false);
         }
 
-        public static void CleanupUnusedMeshes(Chunk ignoreChunk = null)
+        [MenuItem("Gumball/Chunks/Cleanup Unused Assets")]
+        public static void CleanupUnusedMeshes()
+        {
+            CleanupUnusedMeshes(null);
+        }
+        
+        public static void CleanupUnusedMeshes(Chunk ignoreChunk)
         {
 #if UNITY_EDITOR
             if (Application.isPlaying)
