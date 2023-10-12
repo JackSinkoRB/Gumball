@@ -177,7 +177,7 @@ namespace Gumball
 
             MeshFilter meshFilter = chunk.RoadMesh.GetComponent<MeshFilter>();
             
-            string path = $"{RoadMeshAssetFolderPath}/{RoadMeshPrefix}_{chunk.UniqueID}.asset";
+            string path = $"{RoadMeshAssetFolderPath}/{RoadMeshPrefix}{chunk.UniqueID}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                 AssetDatabase.DeleteAsset(path);
             AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
