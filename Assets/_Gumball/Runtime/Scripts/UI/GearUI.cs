@@ -24,7 +24,7 @@ namespace Gumball
                 return;
             }
             
-            gearLabel.text = $"{GetGearAsUserFriendlyString(PlayerCarManager.Instance.CurrentCar.drivetrain.gear)}";
+            gearLabel.text = $"{GetGearAsUserFriendlyString(PlayerCarManager.Instance.CurrentCar.drivetrain.Gear)}";
         }
 
         private string GetGearAsUserFriendlyString(int gear)

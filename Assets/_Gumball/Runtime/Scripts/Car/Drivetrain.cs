@@ -9,6 +9,10 @@ namespace Gumball
     // torque, and applying the torque to the wheels.
     public class Drivetrain : MonoBehaviour
     {
+        
+        public delegate void OnGearChangedDelegate(int previousGear, int newGear);
+        public static event OnGearChangedDelegate onGearChanged;
+        
         // All the wheels the drivetrain should power
         public Wheel[] poweredWheels;
 
@@ -70,8 +74,25 @@ namespace Gumball
 
         private Rigidbody _rb;
 
-        // state
-        public int gear = 2;
+        public int Gear { get; private set; } = 2; //start in first
+        
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Initialise()
+        {
+            onGearChanged = null;
+        }
+        
+        public void SetGear(int newGear)
+        {
+            if (newGear == Gear)
+                return;
+            
+            int previousGear = Gear;
+            Gear = newGear;
+            
+            onGearChanged?.Invoke(previousGear, newGear);
+        }
+        
         public float rpm;
         public float slipRatio = 0.0f;
         public float engineAngularVelo;
@@ -92,7 +113,7 @@ namespace Gumball
         public float launchCutoff = 2500;
         public float launchAssist = 0;
 
-        private bool inReverse => gear == 0;
+        private bool inReverse => Gear == 0;
 
         public bool TractionControlOn => PlayerCarManager.Instance.CurrentCar.HasTractionControl && 
             Mathf.Abs(slipRatio) > PlayerCarManager.Instance.CurrentCar.TractionControlSlipTrigger;
@@ -175,14 +196,14 @@ namespace Gumball
         
         void FixedUpdate()
         {
-            float ratio = gearRatios[gear] * finalDriveRatio;
+            float ratio = gearRatios[Gear] * finalDriveRatio;
             float inertia = engineInertia * Sqr(ratio);
             float engineFrictionTorque = engineBaseFriction + rpm * engineRPMFriction;
             float engineTorque = (CalcEngineTorque() + Mathf.Abs(engineFrictionTorque)) * throttle;
             float lap = (launchCutoff + minRPM - rpm) /
                         launchCutoff; //value 1 to 0 up to the launch cutoff. Add 800 to offset idle rpm
 
-            if (throttle > 0 && (inReverse || gear == 2)) //in first gear
+            if (throttle > 0 && (inReverse || Gear == 2)) //in first gear
             {
                 if (rpm > launchCutoff)
                 {
@@ -324,14 +345,14 @@ namespace Gumball
                 {
                     ShiftUp();
                 }
-                else if (gear > 2)
+                else if (Gear > 2)
                 {
                     if (rpm <= 4000 && throttle > 0 || throttle < 0.1f && rpm < 2000)
                     {
-                        sampleRpm = rpm + rpm * (gearRatios[gear] / gearRatios[gear - 1]);
+                        sampleRpm = rpm + rpm * (gearRatios[Gear] / gearRatios[Gear - 1]);
 
 
-                        if (gear > 2 && sampleRpm + minRPM <= powerRPM && sampleRpm > minRPM)
+                        if (Gear > 2 && sampleRpm + minRPM <= powerRPM && sampleRpm > minRPM)
                         {
                             ShiftDown();
                         }
@@ -340,9 +361,9 @@ namespace Gumball
             }
             
             //automatically set into reverse (even for manual)
-            if (throttleInput < 0 && rpm <= minRPM && gear >= 2)
+            if (throttleInput < 0 && rpm <= minRPM && Gear >= 2)
             {
-                gear = 0; 
+                SetGear(0); 
             }
         }
 
@@ -365,18 +386,14 @@ namespace Gumball
 
         public void ShiftUp()
         {
-            if (gear < gearRatios.Length - 1)
-            {
-                gear++;
-            }
+            if (Gear < gearRatios.Length - 1)
+                SetGear(Gear + 1);
         }
 
         public void ShiftDown()
         {
-            if (gear > 0)
-            {
-                gear--;
-            }
+            if (Gear > 1) //can't go into reverse (0) because it's automatic when holding brake
+                SetGear(Gear - 1);
         }
     }
 

@@ -227,7 +227,7 @@ namespace Gumball
             CalculateThrottle();
             CalculateHandbrake();
 
-            if (InputManager.Accelerate.IsPressed())
+            if (InputManager.Accelerate.IsPressed)
             {
                 //if car is slipping, and there's no traction control, increase the throttle response time
                 if (drivetrain.slipRatio < tractionControlSlipTrigger)
@@ -251,7 +251,7 @@ namespace Gumball
 
             throttle = Mathf.Clamp01(throttle);
 
-            if (InputManager.Decelerate.IsPressed())
+            if (InputManager.Decelerate.IsPressed)
             {
                 if (drivetrain.slipRatio < tractionControlSlipTrigger)
                     brake += Time.deltaTime / throttleTime;
@@ -268,7 +268,7 @@ namespace Gumball
                     brake -= Time.deltaTime / throttleReleaseTimeNoTraction;
             }
 
-            if (!InputManager.Decelerate.IsPressed() && !InputManager.Accelerate.IsPressed())
+            if (!InputManager.Decelerate.IsPressed && !InputManager.Accelerate.IsPressed)
             {
                 throttleInput = 0;
             }
@@ -278,7 +278,7 @@ namespace Gumball
 
             customisation.SetBrakeLights(brake > 0);
 
-            if (InputManager.Handbrake.IsPressed() || clutchIn)
+            if (InputManager.Handbrake.IsPressed || clutchIn)
             {
                 drivetrain.clutch = 1;
             }
@@ -294,14 +294,14 @@ namespace Gumball
             //auto reverse
             //rbSpeed
 
-            if (drivetrain.gear <= 2 && Speed <= 0)
+            if (drivetrain.Gear <= 2 && Speed <= 0)
             {
                 if (throttleInput < -0.1f)
                 {
                     if (!isReversing)
                     {
                         isReversing = true;
-                        drivetrain.gear = 0;
+                        drivetrain.SetGear(0);
                     }
 
                     if (Speed > 0)
@@ -323,13 +323,13 @@ namespace Gumball
                 else
                 {
                     isReversing = false;
-                    drivetrain.gear = 2;
+                    drivetrain.SetGear(2);
                     throttle = throttleInput;
                     brake = 0;
                 }
             }
 
-            if (drivetrain.gear == 0 && throttleInput >= 0.1f)
+            if (drivetrain.Gear == 0 && throttleInput >= 0.1f)
             {
                 if (isReversing)
                 {
@@ -341,26 +341,26 @@ namespace Gumball
                     else
                     {
                         isReversing = false;
-                        drivetrain.gear = 2;
+                        drivetrain.SetGear(2);
                         throttle = throttleInput;
                         brake = 0;
                     }
                 }
             }
             
-            if (drivetrain.gear == 0)
+            if (drivetrain.Gear == 0)
                 drivetrain.throttle = throttle;
             else
                 drivetrain.throttle = throttle * shiftThrottleFactor;
 
             drivetrain.throttleInput = throttleInput;
 
-            if (InputManager.ShiftUp.WasPressedThisFrame())
+            if (InputManager.ShiftUp.WasPressedThisFrame)
             {
                 ShiftUp();
             }
 
-            if (InputManager.ShiftDown.WasPressedThisFrame())
+            if (InputManager.ShiftDown.WasPressedThisFrame)
             {
                 ShiftDown();
             }
@@ -401,7 +401,7 @@ namespace Gumball
                 }
                 
                 wheel.brakePedal = brakeToApply;
-                wheel.handbrake = InputManager.Handbrake.IsPressed() ? 1 : 0;
+                wheel.handbrake = InputManager.Handbrake.IsPressed ? 1 : 0;
                 wheel.steering = CurrentSteering;
             }
         }

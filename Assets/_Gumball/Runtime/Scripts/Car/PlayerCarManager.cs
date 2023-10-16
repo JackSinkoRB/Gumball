@@ -10,7 +10,8 @@ namespace Gumball
     public class PlayerCarManager : Singleton<PlayerCarManager>
     {
 
-        public Action OnCurrentCarChanged;
+        public delegate void CarChangedDelegate(CarManager newCar);
+        public event CarChangedDelegate onCurrentCarChanged;
         
         [SerializeField] private CarData defaultCarData; //TODO: use save data - for now just using some preset data
 
@@ -29,7 +30,7 @@ namespace Gumball
             CameraController.Instance.SetTarget(CurrentCar.transform);
 
             onComplete?.Invoke();
-            OnCurrentCarChanged?.Invoke();
+            onCurrentCarChanged?.Invoke(CurrentCar);
         }
     }
 }

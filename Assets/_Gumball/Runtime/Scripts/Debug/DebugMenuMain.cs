@@ -30,7 +30,7 @@ namespace Gumball
             
             speedLabel.text = $"{Mathf.RoundToInt(SpeedUtils.ToKmh(currentCar.Speed)).ToString()} km/h";
             rpmLabel.text = $"{Mathf.RoundToInt(currentCar.drivetrain.rpm)} RPM";
-            gearLabel.text = $"Gear {currentCar.drivetrain.gear}";
+            gearLabel.text = $"Gear {currentCar.drivetrain.Gear}";
             steerInputLabel.text = $"Steer input ({Mathf.RoundToInt(InputManager.SteeringInput * 100f)}%)";
             steerSpeedLabel.text = $"Steer speed ({currentCar.CurrentSteerSpeed:#.#})";
             steeringLabel.text = $"Steering {(currentCar.CurrentSteering.Approximately(0) ? "" : currentCar.CurrentSteering > 0 ? "RIGHT" : "LEFT")} ({Mathf.Abs(Mathf.RoundToInt(currentCar.CurrentSteering * 100f))}%)";

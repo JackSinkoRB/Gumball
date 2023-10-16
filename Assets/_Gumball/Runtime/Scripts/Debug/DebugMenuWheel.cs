@@ -26,25 +26,25 @@ namespace Gumball
         private void OnEnable()
         {
             if (currentCar != null)
-                FindWheel();
+                FindWheel(currentCar);
             
             this.PerformAfterTrue(() => PlayerCarManager.ExistsRuntime, 
-                () => PlayerCarManager.Instance.OnCurrentCarChanged += FindWheel);
+                () => PlayerCarManager.Instance.onCurrentCarChanged += FindWheel);
         }
 
         private void OnDisable()
         {
             if (PlayerCarManager.ExistsRuntime)
-                PlayerCarManager.Instance.OnCurrentCarChanged -= FindWheel;
+                PlayerCarManager.Instance.onCurrentCarChanged -= FindWheel;
         }
 
-        private void FindWheel()
+        private void FindWheel(CarManager newCar)
         {
-            foreach (Wheel currentCarWheel in currentCar.Wheels)
+            foreach (Wheel wheelOnNewCar in newCar.Wheels)
             {
-                if (currentCarWheel.isLeft == isLeft && currentCarWheel.isRear == isRear)
+                if (wheelOnNewCar.isLeft == isLeft && wheelOnNewCar.isRear == isRear)
                 {
-                    wheel = currentCarWheel;
+                    wheel = wheelOnNewCar;
                     return;
                 }
             }

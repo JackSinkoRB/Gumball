@@ -37,7 +37,6 @@ namespace Gumball
             float rotationLerped = Mathf.LerpAngle(needle.eulerAngles.z, desiredRotation, Time.deltaTime * needleLerpSpeed);
             
             needle.eulerAngles = needle.eulerAngles.SetZ(rotationLerped);
-            Debug.Log("Desired: " + Mathf.RoundToInt(desiredRotation) + " - Actual: " + Mathf.RoundToInt(rotationLerped));
         }
         
     }
