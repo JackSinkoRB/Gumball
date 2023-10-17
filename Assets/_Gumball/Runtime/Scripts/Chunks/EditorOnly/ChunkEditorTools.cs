@@ -1,9 +1,10 @@
-#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
@@ -12,6 +13,7 @@ namespace Gumball
     public class ChunkEditorTools : MonoBehaviour
     {
 
+#if UNITY_EDITOR
         private Chunk chunk => GetComponent<Chunk>();
         private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
 
@@ -310,7 +312,6 @@ namespace Gumball
         }
         
         #endregion
-
+#endif
     }
 }
-#endif
