@@ -211,12 +211,12 @@ namespace Gumball
                 }
             }
             
-#if UNITY_EDITOR
             //should create a copy of the mesh so it doesn't directly edit the saved mesh in runtime
             MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
             Mesh meshCopy = Instantiate(meshFilter.sharedMesh);
             chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = meshCopy;
 
+#if UNITY_EDITOR
             GlobalLoggers.LoadingLogger.Log($"Chunk loading '{chunkAssetReference.editorAsset.name}' complete.");
 #endif
         }
