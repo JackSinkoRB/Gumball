@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using AYellowpaper.SerializedCollections;
 using MyBox;
 #if UNITY_EDITOR
@@ -43,51 +44,54 @@ namespace Gumball
 
 #if UNITY_EDITOR
         [ButtonMethod]
-        public void RebuildBlendData()
+        public async Task RebuildBlendData()
         {
             blendData = new ChunkBlendData[chunkReferences.Length-1];
 
-            Chunk previousChunk = null;
-            int connectionIndex = 0;
+            AsyncOperationHandle[] handles = new AsyncOperationHandle[chunkReferences.Length];
+            Chunk[] chunks = new Chunk[chunkReferences.Length];
 
-            //you need to spawn every single chunk one after the other 
-            foreach (AssetReferenceGameObject chunkReference in chunkReferences)
+            for (int index = 0; index < chunkReferences.Length; index++)
             {
+                AssetReferenceGameObject chunkReference = chunkReferences[index];
                 GlobalLoggers.ChunkLogger.Log($"Loading {chunkReference.editorAsset.name}");
-                
+     
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunkReference);
+                handles[index] = handle;
 
-                //TODO: can make this faster by loading and instantiating all the chunks first and waiting for them ALL to complete before connecting
-                handle.WaitForCompletion();
-            
-                GlobalLoggers.ChunkLogger.Log($"Instantiating {chunkReference.editorAsset.name}");
-                GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), ChunkManager.Instance.transform);
-                instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-                Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
-
-                //connect to the previous chunk (if there is one)
-                if (previousChunk != null)
+                int finalIndex = index;
+                handle.Completed += x =>
                 {
-                    GlobalLoggers.ChunkLogger.Log($"Connecting {chunk.name} and {previousChunk.name}");
-                    
-                    //create the blend data
-                    ChunkBlendData newBlendData = ChunkUtils.ConnectChunksWithNewBlendData(previousChunk, chunk, ChunkUtils.LoadDirection.AFTER);
-                    blendData[connectionIndex] = newBlendData;
-
-                    GlobalLoggers.ChunkLogger.Log($"Destroying {previousChunk.name}");
-                    DestroyImmediate(previousChunk.gameObject);
-
-                    connectionIndex++;
-                }
-
-                previousChunk = chunk;
+                    GlobalLoggers.ChunkLogger.Log($"Instantiating {chunkReference.editorAsset.name}");
+                    GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), ChunkManager.Instance.transform);
+                    instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+                    Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
+                    chunks[finalIndex] = chunk;
+                };
             }
-
-            if (previousChunk != null)
+            
+            await Task.WhenAll(handles.Select(handle => handle.Task));
+            
+            //connect the chunks
+            for (int index = 1; index < chunkReferences.Length; index++)
             {
+                int connectionIndex = index - 1;
+                Chunk chunk = chunks[index];
+                Chunk previousChunk = chunks[index - 1];
+                
+                GlobalLoggers.ChunkLogger.Log($"Connecting {chunk.name} and {previousChunk.name}");
+                    
+                //create the blend data
+                ChunkBlendData newBlendData = ChunkUtils.ConnectChunksWithNewBlendData(previousChunk, chunk, ChunkUtils.LoadDirection.AFTER);
+                blendData[connectionIndex] = newBlendData;
+                
                 GlobalLoggers.ChunkLogger.Log($"Destroying {previousChunk.name}");
                 DestroyImmediate(previousChunk.gameObject);
             }
+
+            Chunk lastChunk = chunks[^1];
+            GlobalLoggers.ChunkLogger.Log($"Destroying {lastChunk.name}");
+            DestroyImmediate(lastChunk.gameObject);
             
             EditorUtility.SetDirty(this);
             AssetDatabase.SaveAssets();
