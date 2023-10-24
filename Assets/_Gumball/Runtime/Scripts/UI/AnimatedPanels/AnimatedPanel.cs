@@ -15,10 +15,13 @@ public abstract class AnimatedPanel : MonoBehaviour
     public event Action onShowComplete;
     public event Action onHideComplete;
 
-    [Space(5)] [SerializeField] private bool ignoreTimescale = true;
+    [SerializeField] private bool isAddedToPanelStack = true;
+    [Space(5)]
+    [SerializeField] private bool ignoreTimescale = true;
     [SerializeField] private bool disableWhenHidden = true;
 
-    [Space(5)] [SerializeField] private FadeElement[] fadeElements;
+    [Space(5)]
+    [SerializeField] private FadeElement[] fadeElements;
     [SerializeField] private SlideElement[] slideElements;
 
     private Sequence currentTween;
@@ -28,7 +31,7 @@ public abstract class AnimatedPanel : MonoBehaviour
 
     //shortcuts for unity events:
     public void Show() => Show(null);
-    public void Hide() => Hide(false, null);
+    public void Hide() => Hide(false, false, null);
 
     public Sequence Show(Action onComplete = null)
     {
@@ -69,11 +72,14 @@ public abstract class AnimatedPanel : MonoBehaviour
 
         IsShowing = true;
 
+        if (isAddedToPanelStack)
+            PanelManager.Instance.AddToStack(this);
+        
         OnShow();
         return currentTween;
     }
 
-    public Sequence Hide(bool instant = false, Action onComplete = null)
+    public Sequence Hide(bool keepInStack = false, bool instant = false, Action onComplete = null)
     {
         if (!IsShowing && !instant)
         {
@@ -117,10 +123,23 @@ public abstract class AnimatedPanel : MonoBehaviour
         if (instant)
             currentTween.Complete();
 
+        if (!keepInStack && PanelManager.Instance.PanelStack.Contains(this))
+            PanelManager.Instance.RemoveFromStack(this);
+        
         OnHide();
         return currentTween;
     }
 
+    public virtual void OnAddToStack()
+    {
+        
+    }
+
+    public virtual void OnRemoveFromStack()
+    {
+        
+    }
+    
     protected virtual void OnShow()
     {
         onShow?.Invoke();
