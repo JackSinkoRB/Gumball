@@ -125,6 +125,16 @@ namespace Gumball
             }
         }
 
+        private void OnEnable()
+        {
+            SettingsManager.Instance.onGearboxSettingChanged += OnGearboxSettingChanged;
+        }
+        
+        private void OnDisable()
+        {
+            SettingsManager.Instance.onGearboxSettingChanged -= OnGearboxSettingChanged;
+        }
+
         private void Start()
         {
             rigidBody = GetComponent<Rigidbody>();
@@ -136,6 +146,8 @@ namespace Gumball
             {
                 wheel.manager = this;
             }
+
+            SetGearboxFromSettings();
         }
 
         public void StabilityControlCheck()
@@ -456,6 +468,16 @@ namespace Gumball
             CurrentSteering = Mathf.Lerp(CurrentSteering, desiredSteering, Time.deltaTime * CurrentSteerSpeed);
             if (isCorrecting)
                 CurrentSteering = Mathf.Clamp(CurrentSteering, 0, -Mathf.Sign(InputManager.SteeringInput) * 1);
+        }
+        
+        private void SetGearboxFromSettings()
+        {
+            drivetrain.automatic = SettingsManager.GearboxSetting == 0;
+        }
+        
+        private void OnGearboxSettingChanged(int newValue)
+        {
+            drivetrain.automatic = newValue == 0;
         }
     }
 }

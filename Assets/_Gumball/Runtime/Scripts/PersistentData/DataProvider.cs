@@ -25,7 +25,7 @@ namespace Gumball
         /// </summary>
         public static void SaveAllAsync()
         {
-            GlobalLoggers.SaveDataLogger.Log("Saving all dirty data providers (asynchronously).");
+            GlobalLoggers.SaveDataLogger.Log("Checking to save all dirty data providers (asynchronously).");
 
             foreach (DataProvider provider in dirtyProviders)
                 provider.SaveToSourceAsync();
@@ -206,7 +206,10 @@ namespace Gumball
         {
 #if UNITY_EDITOR
             if (!DataEditorOptions.DataProvidersEnabled)
+            {
+                GlobalLoggers.SaveDataLogger.Log($"Could not save '{identifier}' as saving has been disabled in the editor.");
                 return; //don't save to source
+            }
 #endif
 
             Stopwatch stopwatch = new Stopwatch();
@@ -214,8 +217,7 @@ namespace Gumball
             await Task.Run(SaveOrRemoveFromSource);
             stopwatch.Stop();
 
-            GlobalLoggers.SaveDataLogger.Log(
-                $"Saved all to '{identifier}' (async - {stopwatch.ElapsedMilliseconds}ms)");
+            GlobalLoggers.SaveDataLogger.Log($"Saved all to '{identifier}' (async - {stopwatch.ElapsedMilliseconds}ms)");
             onComplete?.Invoke();
         }
 
