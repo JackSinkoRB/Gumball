@@ -17,6 +17,8 @@ namespace Gumball
     [RequireComponent(typeof(UniqueIDAssigner))]
     public class Chunk : MonoBehaviour
     {
+
+        public event Action onTerrainChanged;
         
         [SerializeField] private SplineComputer splineComputer;
         [SerializeField] private SplineMesh roadMesh;
@@ -64,6 +66,7 @@ namespace Gumball
         {
             currentTerrain = terrain;
             UpdateChunkMeshData();
+            onTerrainChanged?.Invoke();
         }
         
         public void UpdateChunkMeshData()

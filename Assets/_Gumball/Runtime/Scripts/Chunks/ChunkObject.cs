@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
@@ -9,6 +12,7 @@ namespace Gumball
     /// <summary>
     /// Add to a GameObject in a chunk to give extra options for how it behaves in the chunk.
     /// </summary>
+    [ExecuteAlways]
     public class ChunkObject : MonoBehaviour
     {
 #if UNITY_EDITOR
@@ -35,16 +39,46 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunkBelongsTo;
-
+        
+        [SerializeField, HideInInspector] private Vector3 lastKnownPositionWhenGrounded;
+        
         private Collider collider => GetComponent<Collider>();
+
+        private void OnEnable()
+        {
+            Initialise();
+
+            SceneView.duringSceneGui += OnSceneUpdate;
+            chunkBelongsTo.onTerrainChanged += OnTerrainChanged;
+              
+            if (alwaysGrounded)
+                GroundObject();
+        }
+          
+        private void OnDisable()
+        {
+            SceneView.duringSceneGui -= OnSceneUpdate;
+            chunkBelongsTo.onTerrainChanged -= OnTerrainChanged;
+        }
+
+        private void OnSceneUpdate(SceneView sceneView)
+        {
+            if (alwaysGrounded)
+                GroundIfMoved();
+        }
 
         private void OnValidate()
         {
-            if (chunkBelongsTo == null)
-                FindChunkBelongsTo();
-            
+            Initialise();
+
             if (alwaysGrounded)
                 GroundObject();
+        }
+        
+        private void Initialise()
+        {
+            if (chunkBelongsTo == null)
+                FindChunkBelongsTo();
         }
         
         /// <summary>
@@ -56,6 +90,7 @@ namespace Gumball
 
             int terrainLayerMask = 1 << LayerMask.NameToLayer(ChunkUtils.TerrainLayer);
 
+            Vector3 originalPosition = transform.position;
             transform.position = transform.position.SetY(chunkBelongsTo.CurrentTerrain.transform.position.y + 10000);
             
             bool useBottomOfCollider = collider != null;
@@ -71,8 +106,34 @@ namespace Gumball
                 if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, terrainLayerMask))
                     offset = -hitDown.distance;
             }
-            
-            transform.OffsetY(offset);
+
+            if (offset == 0)
+            {
+                //wasn't successful
+                transform.position = originalPosition;
+            }
+            else
+            {
+                //success
+                transform.OffsetY(offset);
+                
+                lastKnownPositionWhenGrounded = transform.position;
+            }
+        }
+        
+        private void OnTerrainChanged()
+        {
+            if (alwaysGrounded)
+                GroundObject();
+        }
+        
+        private void GroundIfMoved()
+        {
+            Vector3 currentPosition = transform.position;
+            if (currentPosition.Approximately(lastKnownPositionWhenGrounded))
+                return;
+              
+            GroundObject();
         }
 
         private void FindChunkBelongsTo()
