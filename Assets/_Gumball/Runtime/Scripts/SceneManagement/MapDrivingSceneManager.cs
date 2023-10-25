@@ -56,8 +56,8 @@ namespace Gumball
             Vector3 startingRotation = ChunkManager.Instance.CurrentMap.VehicleStartingRotation;
             currentCarRigidbody.Move(startingPosition, Quaternion.Euler(startingRotation));
             
-            InputManager.Instance.SetActionMap(InputManager.ActionMapType.Car);
-            
+            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car);
+
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
         

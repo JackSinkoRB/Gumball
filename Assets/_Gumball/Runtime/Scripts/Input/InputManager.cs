@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -14,6 +15,7 @@ namespace Gumball
         
         public enum ActionMapType
         {
+            None,
             Car,
             General
         }
@@ -47,13 +49,15 @@ namespace Gumball
         }
         
         [SerializeField] private InputActionAsset controls;
-
+        
         private readonly Dictionary<string, InputAction> actionsCached = new();
+        private readonly Dictionary<ActionMapType, InputActionMap> actionsMapsCached = new();
 
         protected override void Initialise()
         {
             base.Initialise();
             
+            EnableActionMap(ActionMapType.General);
             EnhancedTouchSupport.Enable();
         }
 
@@ -72,11 +76,26 @@ namespace Gumball
             return actionsCached[action];
         }
 
-        public void SetActionMap(ActionMapType actionMapType)
+        private InputActionMap GetActionMap(ActionMapType type)
         {
-            InputActionMap actionMap = controls.FindActionMap(actionMapType.ToString());
-            actionMap.Enable();
+            if (!actionsMapsCached.ContainsKey(type))
+            {
+                //cache it
+                actionsMapsCached[type] = controls.FindActionMap(type.ToString());
+            }
+
+            return actionsMapsCached[type];
         }
-        
+
+        public void EnableActionMap(ActionMapType type, bool enable = true)
+        {
+            InputActionMap map = GetActionMap(type);
+            if (enable)
+                map.Enable();
+            else map.Disable();
+            
+            GlobalLoggers.InputLogger.Log($"{(enable ? "Enabled" : "Disabled")} action map {type.ToString()}");
+        }
+
     }
 }

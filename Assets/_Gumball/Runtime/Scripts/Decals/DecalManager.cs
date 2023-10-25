@@ -74,8 +74,8 @@ namespace Gumball
         
         private void StartSession()
         {
-            InputManager.Instance.SetActionMap(InputManager.ActionMapType.General);
-            
+            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
+
             paintableMeshes.Clear();
             foreach (MeshFilter meshFilter in car.GetComponentsInAllChildren<MeshFilter>())
             {

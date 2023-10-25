@@ -33,10 +33,12 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             
             //move the car to the origin to be framed by the camera
+            PlayerCarManager.Instance.CurrentCar.Rigidbody.velocity = Vector3.zero;
             PlayerCarManager.Instance.CurrentCar.Rigidbody.Move(Vector3.zero, Quaternion.Euler(Vector3.zero));
-
-            InputManager.Instance.SetActionMap(InputManager.ActionMapType.General);
             
+            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car, false);
+            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
+
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
 
