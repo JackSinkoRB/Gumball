@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class CameraController : Singleton<CameraController>
+    public class DrivingCameraController : Singleton<DrivingCameraController>
     {
         
         [SerializeField] private Transform target;

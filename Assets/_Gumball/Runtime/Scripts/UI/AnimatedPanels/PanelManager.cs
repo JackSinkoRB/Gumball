@@ -2,21 +2,34 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using AYellowpaper.SerializedCollections;
+using System.Diagnostics;
+using Gumball;
 using MyBox;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using SceneManager = UnityEngine.SceneManagement.SceneManager;
 
 public class PanelManager : Singleton<PanelManager>
 {
 
-    [Tooltip("Panels that aren't under this object, that should be a part of the panel lookup.")]
-    [SerializeField] private AnimatedPanel[] additionalPanels;
-
     [SerializeField, ReadOnly] private List<AnimatedPanel> panelStack = new();
-    [SerializedDictionary, ReadOnly] private Dictionary<Type, AnimatedPanel> panelLookup = new();
+    
+    private readonly Dictionary<Type, AnimatedPanel> panelLookup = new();
 
     public ReadOnlyCollection<AnimatedPanel> PanelStack => panelStack.AsReadOnly();
-    
+
+    protected override void Initialise()
+    {
+        base.Initialise();
+
+        SceneManager.activeSceneChanged += OnSceneChange;
+    }
+
+    private void OnSceneChange(Scene oldScene, Scene newScene)
+    {
+        CreatePanelLookup();
+    }
+
     public static T GetPanel<T>() where T : AnimatedPanel
     {
         return GetPanel(typeof(T)) as T;
@@ -26,18 +39,13 @@ public class PanelManager : Singleton<PanelManager>
     {
         return Instance.panelLookup.ContainsKey(panelType) ? Instance.panelLookup[panelType] : null;
     }
-    
-    protected override void Initialise()
-    {
-        base.Initialise();
-        
-        CreatePanelLookup();
-    }
 
     public void AddToStack(AnimatedPanel animatedPanel)
     {
         panelStack.Add(animatedPanel);
+        
         animatedPanel.OnAddToStack();
+        GlobalLoggers.PanelLogger.Log($"Added {animatedPanel.gameObject.name} to stack.");
     }
 
     public void RemoveFromStack(AnimatedPanel animatedPanel)
@@ -49,33 +57,37 @@ public class PanelManager : Singleton<PanelManager>
         panelStack.Remove(animatedPanel);
 
         animatedPanel.OnRemoveFromStack();
+        GlobalLoggers.PanelLogger.Log($"Removed {animatedPanel.gameObject.name} from stack.");
     }
-    
+
+    /// <summary>
+    /// Clear the panel lookup and find and add all the panels in the current scene.
+    /// </summary>
     private void CreatePanelLookup()
     {
-        AnimatedPanel[] panels = GetComponentsInChildren<AnimatedPanel>(true);
-        foreach (AnimatedPanel panel in panels)
-        {
-            TryAddPanelToLookup(panel);
-        }
+        string sceneName = SceneManager.GetActiveScene().name;
+        
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
 
-        foreach (AnimatedPanel panel in additionalPanels)
+        //remove null panels (if scene was unloaded etc.)
+        List<Type> keys = new List<Type>(panelLookup.Keys);
+        foreach (Type key in keys)
         {
-            TryAddPanelToLookup(panel);
+            if (panelLookup[key] == null)
+            {
+                GlobalLoggers.PanelLogger.Log($"Removing {key} from panel lookup");
+                panelLookup.Remove(key);
+            }
         }
+        
+        foreach (AnimatedPanel panel in SceneUtils.GetAllComponentsInActiveScene<AnimatedPanel>(true))
+        {
+            panelLookup[panel.GetType()] = panel;
+        }
+        
+        stopwatch.Stop();
+        GlobalLoggers.LoadingLogger.Log($"Took {stopwatch.Elapsed.ToPrettyString(true)} to create the panel lookup for {sceneName}.");
     }
 
-    private void TryAddPanelToLookup(AnimatedPanel panel)
-    {
-        var panelType = panel.GetType();
-        if (panelLookup.ContainsKey(panelType))
-        {
-            Debug.LogError($"Multiple panels detected of type: {panelType.Name}");
-            return;
-        }
-
-        panel.gameObject.SetActive(false);
-        panelLookup.Add(panelType, panel);
-    }
-    
 }

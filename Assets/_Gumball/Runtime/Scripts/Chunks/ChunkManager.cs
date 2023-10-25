@@ -67,7 +67,8 @@ namespace Gumball
 
         private void LateUpdate()
         {
-            DoLoadingCheck();
+            if (currentMap != null)
+                DoLoadingCheck();
         }
 
         private void DoLoadingCheck()

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using Gumball;
 using UnityEngine;
 
 /// <summary>
@@ -29,6 +30,12 @@ public abstract class AnimatedPanel : MonoBehaviour
     public bool IsShowing { get; private set; }
     public bool IsTransitioning => currentTween != null && currentTween.IsPlaying();
 
+    private void OnDisable()
+    {
+        if (IsShowing && !IsTransitioning)
+            Hide(instant: true);
+    }
+
     //shortcuts for unity events:
     public void Show() => Show(null);
     public void Hide() => Hide(false, false, null);
@@ -40,7 +47,7 @@ public abstract class AnimatedPanel : MonoBehaviour
             Debug.LogWarning($"Tried showing panel {gameObject.name} but it is already showing.");
             return null;
         }
-
+        
         gameObject.SetActive(true);
         currentTween?.Kill();
         currentTween = DOTween.Sequence();
@@ -72,10 +79,13 @@ public abstract class AnimatedPanel : MonoBehaviour
 
         IsShowing = true;
 
-        if (isAddedToPanelStack)
+        if (isAddedToPanelStack && !PanelManager.Instance.PanelStack.Contains(this))
             PanelManager.Instance.AddToStack(this);
         
         OnShow();
+        
+        GlobalLoggers.PanelLogger.Log($"Showing {gameObject.name}.");
+
         return currentTween;
     }
 
@@ -114,19 +124,23 @@ public abstract class AnimatedPanel : MonoBehaviour
 
             onComplete?.Invoke();
             OnHideComplete();
-            IsShowing = false;
         });
-
+        
         if (ignoreTimescale)
             currentTween.SetUpdate(true);
 
         if (instant)
             currentTween.Complete();
 
-        if (!keepInStack && PanelManager.Instance.PanelStack.Contains(this))
+        IsShowing = false;
+
+        if (!keepInStack && PanelManager.ExistsRuntime && PanelManager.Instance.PanelStack.Contains(this))
             PanelManager.Instance.RemoveFromStack(this);
         
         OnHide();
+        
+        GlobalLoggers.PanelLogger.Log($"Hiding {gameObject.name}.");
+
         return currentTween;
     }
 

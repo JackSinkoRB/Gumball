@@ -27,8 +27,6 @@ namespace Gumball
                 
             yield return CurrentCar.Customisation.ApplyVehicleChanges(defaultCarData);
 
-            CameraController.Instance.SetTarget(CurrentCar.transform);
-
             onComplete?.Invoke();
             onCurrentCarChanged?.Invoke(CurrentCar);
         }

@@ -93,6 +93,8 @@ namespace Gumball
         [SerializeField] private float speedForMinSteerSpeed = 200;
 
         [ReadOnly, SerializeField] private Rigidbody rigidBody;
+        public Rigidbody Rigidbody => rigidBody;
+        
         private bool isReversing;
         private bool clutchIn;
         /// <summary>

@@ -220,7 +220,7 @@ namespace Gumball
                 return;
             
             if (playModeState is PlayModeStateChange.ExitingEditMode or PlayModeStateChange.ExitingPlayMode
-                || (Application.isPlaying && !LoadingSceneManager.HasLoaded))
+                || (Application.isPlaying && !GameLoaderSceneManager.HasLoaded))
                 return;
 
             if (chunk.CurrentTerrain == null)

@@ -27,7 +27,7 @@ namespace Gumball
             BootDurationSeconds = Time.realtimeSinceStartup;
             GlobalLoggers.LoadingLogger.Log($"Boot loading complete in {TimeSpan.FromSeconds(BootDurationSeconds).ToPrettyString(true)}");
             
-            var handle = Addressables.LoadSceneAsync(SceneManager.LoadingSceneName, LoadSceneMode.Additive, true);
+            var handle = Addressables.LoadSceneAsync(SceneManager.GameLoaderSceneName, LoadSceneMode.Additive, true);
             yield return handle;
             LoadingSceneInstance = handle.Result;
         }

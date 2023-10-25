@@ -54,6 +54,12 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
             ExistsRuntime = false;
     }
 
+    private void OnDisable()
+    {
+        if (instance == this)
+            OnInstanceDisabled();
+    }
+
     protected virtual void Initialise()
     {
         instance = this as T;
@@ -66,6 +72,14 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
         if (Application.isPlaying)
             ExistsRuntime = true;
+    }
+
+    /// <summary>
+    /// Called when the singleton instance is disabled.
+    /// </summary>
+    protected virtual void OnInstanceDisabled()
+    {
+        
     }
     
 }

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7939532910286818737
+--- !u!1 &2461551013576707325
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,44 +8,41 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3893384700848628422}
-  - component: {fileID: 3093335413192748891}
+  - component: {fileID: 724554918439022031}
+  - component: {fileID: 3910906776093393345}
   m_Layer: 0
-  m_Name: ChunkManager
+  m_Name: PanelManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3893384700848628422
+--- !u!4 &724554918439022031
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7939532910286818737}
+  m_GameObject: {fileID: 2461551013576707325}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -8.26}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3093335413192748891
+--- !u!114 &3910906776093393345
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7939532910286818737}
+  m_GameObject: {fileID: 2461551013576707325}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e6f453f09b1df245a0397222ce67498, type: 3}
+  m_Script: {fileID: 11500000, guid: 1bef231562fe32e42a9adca5af450272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dontDestroy: 0
-  testingMap: {fileID: 11400000, guid: 60486b728bfb2df43bf12e559bf615e2, type: 2}
-  chunkLoadDistance: 1000
-  currentMap: {fileID: 0}
-  currentChunks: []
+  dontDestroy: 1
+  panelStack: []

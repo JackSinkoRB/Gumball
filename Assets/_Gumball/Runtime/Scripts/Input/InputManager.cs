@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MyBox;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -58,8 +57,10 @@ namespace Gumball
             EnhancedTouchSupport.Enable();
         }
 
-        private void OnDisable()
+        protected override void OnInstanceDisabled()
         {
+            base.OnInstanceDisabled();
+            
             EnhancedTouchSupport.Disable();
         }
 

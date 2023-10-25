@@ -14,13 +14,12 @@ namespace Gumball
     /// <summary>
     /// A loading scene to handle anything that needs to be loaded before entering the game.
     /// </summary>
-    public class GameLoadingSceneManager : MonoBehaviour
+    public class GameLoaderSceneManager : MonoBehaviour
     {
 
         private enum Stage
         {
             LOADING_MAINSCENE,
-            LOADING_MAP,
             LOADING_VEHICLE,
         }
 
@@ -44,7 +43,7 @@ namespace Gumball
         private IEnumerator Start()
         {
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
-            GlobalLoggers.LoadingLogger.Log($"LoadingScene loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.GameLoaderSceneName} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
 
             Stopwatch stopwatch = new Stopwatch();
 
@@ -52,21 +51,15 @@ namespace Gumball
             currentStage = Stage.LOADING_MAINSCENE;
             if (!BootSceneManager.LoadedFromAnotherScene)
             {
-                mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.InitialSceneName, LoadSceneMode.Additive, true);
+                mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Additive, true);
                 yield return mainSceneHandle;
             }
-            GlobalLoggers.LoadingLogger.Log($"MainScene loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             stopwatch.Restart();
 
-            currentStage = Stage.LOADING_MAP;
-            mapLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(ChunkManager.Instance.LoadMap(ChunkManager.Instance.TestingMap));
-            yield return mapLoadCoroutine;
-            GlobalLoggers.LoadingLogger.Log($"Map loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-            stopwatch.Restart();
-            
             currentStage = Stage.LOADING_VEHICLE;
-            Vector3 startingPosition = ChunkManager.Instance.CurrentMap.VehicleStartingPosition;
-            Vector3 startingRotation = ChunkManager.Instance.CurrentMap.VehicleStartingRotation;
+            Vector3 startingPosition = Vector3.zero;
+            Vector3 startingRotation = Vector3.zero;
             carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(startingPosition, startingRotation));
             yield return carLoadCoroutine;
             GlobalLoggers.LoadingLogger.Log($"Vehicle loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
@@ -109,7 +102,6 @@ namespace Gumball
             debugLabel.text = currentStage switch
             {
                 Stage.LOADING_MAINSCENE => $"Loading MainScene... ({(int)(mainSceneHandle.PercentComplete*100f)}%)",
-                Stage.LOADING_MAP => $"Loading Map...",
                 Stage.LOADING_VEHICLE => $"Loading Vehicle...",
                 _ => "Loading..."
             };

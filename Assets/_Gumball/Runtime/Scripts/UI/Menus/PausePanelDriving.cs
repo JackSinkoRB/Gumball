@@ -13,6 +13,11 @@ namespace Gumball
             PanelManager.GetPanel<SettingsPanel>().Show();
         }
 
+        public void OnClickQuitButton()
+        {
+            MainSceneManager.LoadMainScene();
+        }
+
         public override void OnAddToStack()
         {
             base.OnAddToStack();
