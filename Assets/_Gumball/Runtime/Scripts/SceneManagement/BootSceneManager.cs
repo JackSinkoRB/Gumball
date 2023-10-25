@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.ResourceProviders;
@@ -14,13 +13,6 @@ namespace Gumball
 
         public static float BootDurationSeconds { get; private set; }
         public static SceneInstance LoadingSceneInstance;
-        public static bool LoadedFromAnotherScene;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void StaticStart()
-        {
-            LoadedFromAnotherScene = false;
-        }
         
         private IEnumerator Start()
         {

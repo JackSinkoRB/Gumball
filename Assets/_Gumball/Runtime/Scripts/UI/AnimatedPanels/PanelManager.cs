@@ -37,7 +37,10 @@ public class PanelManager : Singleton<PanelManager>
     
     public static AnimatedPanel GetPanel(Type panelType)
     {
-        return Instance.panelLookup.ContainsKey(panelType) ? Instance.panelLookup[panelType] : null;
+        if (!Instance.panelLookup.ContainsKey(panelType))
+            throw new NullReferenceException($"Could not find panel {panelType} in lookup. Scene is: {SceneManager.GetActiveScene().name}");
+        
+        return Instance.panelLookup[panelType];
     }
 
     public void AddToStack(AnimatedPanel animatedPanel)
@@ -83,6 +86,7 @@ public class PanelManager : Singleton<PanelManager>
         
         foreach (AnimatedPanel panel in SceneUtils.GetAllComponentsInActiveScene<AnimatedPanel>(true))
         {
+            GlobalLoggers.PanelLogger.Log($"Adding {panel.GetType()} to panel lookup");
             panelLookup[panel.GetType()] = panel;
         }
         

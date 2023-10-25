@@ -98,16 +98,16 @@ namespace Gumball.Editor
         {
             return new[]
             {
-                new EditorBuildSettingsScene(GetPathToMainScene(), true)
+                new EditorBuildSettingsScene(GetPathToInitialScene(), true)
             };
         }
 
-        private static string GetPathToMainScene()
+        private static string GetPathToInitialScene()
         {
             string pathToMainScene = null;
             foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
             {
-                if (scene.path.Contains("BootScene"))
+                if (scene.path.Contains(SceneManager.BootSceneName))
                 {
                     pathToMainScene = scene.path;
                     break;
@@ -115,8 +115,7 @@ namespace Gumball.Editor
             }
 
             if (pathToMainScene == null)
-                throw new BuildFailedException(
-                    "Could not find find the boot scene. A scene must contain 'BootScene' in the name.");
+                throw new BuildFailedException("Could not find find the boot scene. A scene must contain 'BootScene' in the name.");
 
             return pathToMainScene;
         }

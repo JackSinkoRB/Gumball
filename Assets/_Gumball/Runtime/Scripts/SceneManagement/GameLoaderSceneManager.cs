@@ -34,12 +34,6 @@ namespace Gumball
             
         public static bool HasLoaded { get; private set; }
 
-        [RuntimeInitializeOnLoadMethod]
-        private static void StaticStart()
-        {
-            HasLoaded = false;
-        }
-        
         private IEnumerator Start()
         {
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
@@ -49,11 +43,8 @@ namespace Gumball
 
             stopwatch.Start();
             currentStage = Stage.LOADING_MAINSCENE;
-            if (!BootSceneManager.LoadedFromAnotherScene)
-            {
-                mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Additive, true);
-                yield return mainSceneHandle;
-            }
+            mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Additive, true);
+            yield return mainSceneHandle;
             GlobalLoggers.LoadingLogger.Log($"{UnityEngine.SceneManagement.SceneManager.GetActiveScene().name} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             stopwatch.Restart();
 
@@ -68,12 +59,6 @@ namespace Gumball
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
             GlobalLoggers.LoadingLogger.Log($"Async loading complete in {TimeSpan.FromSeconds(asyncLoadingDurationSeconds).ToPrettyString(true)}");
 
-            if (!BootSceneManager.LoadedFromAnotherScene)
-            {
-                //activate the main scene
-                yield return mainSceneHandle.Result.ActivateAsync();
-            }
-
             OnLoadingComplete();
         }
         
@@ -82,7 +67,7 @@ namespace Gumball
             //unload the loading scenes
             UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(SceneManager.BootSceneName);
             Addressables.UnloadSceneAsync(BootSceneManager.LoadingSceneInstance);
-            
+
             GlobalLoggers.LoadingLogger.Log($"Total boot time = {TimeSpan.FromSeconds(Time.realtimeSinceStartup).ToPrettyString(true)}");
 
             HasLoaded = true;
@@ -102,7 +87,7 @@ namespace Gumball
             debugLabel.text = currentStage switch
             {
                 Stage.LOADING_MAINSCENE => $"Loading MainScene... ({(int)(mainSceneHandle.PercentComplete*100f)}%)",
-                Stage.LOADING_VEHICLE => $"Loading Vehicle...",
+                Stage.LOADING_VEHICLE => "Loading Vehicle...",
                 _ => "Loading..."
             };
         }

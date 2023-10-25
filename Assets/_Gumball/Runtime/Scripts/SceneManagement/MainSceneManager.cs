@@ -13,7 +13,8 @@ namespace Gumball
         
         private void Start()
         {
-            PanelManager.GetPanel<MainMenuPanel>().Show();
+            this.PerformAfterTrue(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MainSceneName),
+                () => PanelManager.GetPanel<MainMenuPanel>().Show());
         }
         
         public static void LoadMainScene()
@@ -37,8 +38,6 @@ namespace Gumball
             InputManager.Instance.SetActionMap(InputManager.ActionMapType.General);
             
             PanelManager.GetPanel<LoadingPanel>().Hide();
-            
-
         }
 
     }
