@@ -14,7 +14,7 @@ namespace Gumball
     /// <summary>
     /// A loading scene to handle anything that needs to be loaded before entering the game.
     /// </summary>
-    public class LoadingSceneManager : MonoBehaviour
+    public class GameLoadingSceneManager : MonoBehaviour
     {
 
         private enum Stage
