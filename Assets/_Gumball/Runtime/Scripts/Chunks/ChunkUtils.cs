@@ -18,6 +18,7 @@ namespace Gumball
         }
 
         public const string TerrainTag = "Terrain";
+        public const string TerrainLayer = "Terrain";
         public const string TerrainMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
         public const string TerrainMeshPrefix = "ProceduralTerrain_";
         private const string RoadMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Roads/";
