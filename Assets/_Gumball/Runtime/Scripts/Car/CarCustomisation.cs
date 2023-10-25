@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -61,14 +62,14 @@ namespace Gumball
             targetData = newData;
             if (updateCosmetic)
             {
-                ApplyCosmeticParts(); //TODO: make async
+                ApplyCosmeticParts();
                 yield return ApplyWheelSetup();
                 ApplyPaint();
             }
 
             if (updateEngine)
             {
-                ApplyEngineChanges(); //TODO: make async
+                ApplyEngineChanges(); //TODO
             }
 
         }
@@ -115,18 +116,25 @@ namespace Gumball
 
         private IEnumerator ApplyWheelSetup()
         {
-            //TODO: cancel check if the desired wheels are already applied
-
             RemoveWheels();
             
             //spawn the wheel model using addressables
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(wheelAssetReference);
-            yield return handle;
+            
+            if (!tyreLeftHandle.IsValid())
+                tyreLeftHandle = Addressables.LoadAssetAsync<GameObject>(tyreLeftAssetReference);
 
-            yield return CreateWheel(wheelFL, handle, false, false);
-            yield return CreateWheel(wheelFR, handle, true, false);
-            yield return CreateWheel(wheelRL, handle, false, true);
-            yield return CreateWheel(wheelRR, handle, true, true);
+            if (!tyreRightHandle.IsValid())
+                tyreRightHandle = Addressables.LoadAssetAsync<GameObject>(tyreRightAssetReference);
+
+            //wait for all 3 handles to complete
+            AsyncOperationHandle[] handles = { handle, tyreLeftHandle, tyreRightHandle };
+            yield return new WaitUntil(() => handles.AreAllComplete());
+
+            CreateWheel(wheelFL, handle, false, false);
+            CreateWheel(wheelFR, handle, true, false);
+            CreateWheel(wheelRL, handle, false, true);
+            CreateWheel(wheelRR, handle, true, true);
         }
 
         private void RemoveWheels()
@@ -140,7 +148,7 @@ namespace Gumball
             spawnedWheels.Clear();
         }
 
-        private IEnumerator CreateWheel(Transform target, AsyncOperationHandle<GameObject> handle, bool isRight, bool isRear)
+        private void CreateWheel(Transform target, AsyncOperationHandle<GameObject> handle, bool isRight, bool isRear)
         {
             GameObject model = handle.Result;
             GameObject wheel = Instantiate(model, target, false);
@@ -149,7 +157,7 @@ namespace Gumball
             int wheelIndex = spawnedWheels.Count;
             spawnedWheels.Add(wheel);
             
-            yield return CreateTyre(wheel.transform, isRight, isRear);
+            CreateTyre(wheel.transform, isRight, isRear);
             
             SetupWheel(wheelRoots[wheelIndex]);
             
@@ -178,11 +186,13 @@ namespace Gumball
             wheel.camber = wheel.isRear ? targetData.wheelCamberRear : targetData.wheelCamber;
             wheel.transform.localScale = scale;
         }
-        
-        private IEnumerator CreateTyre(Transform wheel, bool isRight, bool isRear)
+
+        private AsyncOperationHandle<GameObject> tyreLeftHandle;
+        private AsyncOperationHandle<GameObject> tyreRightHandle;
+
+        private void CreateTyre(Transform wheel, bool isRight, bool isRear)
         {
-            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(isRight ? tyreRightAssetReference : tyreLeftAssetReference);
-            yield return handle;
+            AsyncOperationHandle<GameObject> handle = isRight ? tyreRightHandle : tyreLeftHandle;
             
             GameObject tyre = Instantiate(handle.Result, wheel, false);
             tyre.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
