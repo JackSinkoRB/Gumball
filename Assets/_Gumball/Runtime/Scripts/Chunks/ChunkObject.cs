@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using MyBox;
 #if UNITY_EDITOR
+using Gumball.Editor;
 using UnityEditor;
 #endif
 using UnityEngine;
@@ -20,14 +21,15 @@ namespace Gumball
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
         [SerializeField] private bool alwaysGrounded;
 
-        [Space(5)]
+        [Space(10)]
         [Tooltip("When enabled, the terrain is flattened to the bottom of the chunk object.")]
         [SerializeField] private bool keepAtSpecificDistanceFromRoad;
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
         [SerializeField, ConditionalField(nameof(keepAtSpecificDistanceFromRoad))] private float distanceFromRoad = 10;
         
-        [Space(5)]
+        [Space(10)]
         [Tooltip("When enabled, the terrain is flattened to the bottom of the chunk object.")]
+        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, true, true)]
         [SerializeField] private bool flattenTerrain;
         [Tooltip("The distance around the transform that is flattened.")]
         [SerializeField, ConditionalField(nameof(flattenTerrain)), PositiveValueOnly]
@@ -36,12 +38,26 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(flattenTerrain)), PositiveValueOnly]
         private float flattenTerrainBlendDistance = 5;
 
+        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(flattenTerrain))]
+        public void RecreateTerrain()
+        {
+            chunkBelongsTo.GetComponent<ChunkEditorTools>().RecreateTerrain();
+        }
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunkBelongsTo;
         
         [SerializeField, HideInInspector] private Vector3 lastKnownPositionWhenGrounded;
         
         private Collider collider => GetComponent<Collider>();
+
+        public bool FlattenTerrain => flattenTerrain;
+        public float FlattenTerrainRadius => flattenTerrainRadius;
+        public float FlattenTerrainBlendDistance => flattenTerrainBlendDistance;
+        
+        public Vector3 LowestPosition => collider != null
+            ? collider.ClosestPoint(collider.bounds.center.OffsetY(-int.MaxValue))
+            : transform.position;
         
         private void Initialise()
         {
@@ -98,19 +114,8 @@ namespace Gumball
             Vector3 originalPosition = transform.position;
             transform.position = transform.position.SetY(chunkBelongsTo.CurrentTerrain.transform.position.y + 10000);
             
-            bool useBottomOfCollider = collider != null;
-            if (useBottomOfCollider)
-            {
-                Vector3 bottomOfCollider = collider.ClosestPoint(collider.bounds.center.OffsetY(-int.MaxValue));
-                if (Physics.Raycast(bottomOfCollider, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, terrainLayerMask))
-                    offset = -hitDown.distance;
-            }
-            else
-            {
-                //use the transform position
-                if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, terrainLayerMask))
-                    offset = -hitDown.distance;
-            }
+            if (Physics.Raycast(LowestPosition, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, terrainLayerMask))
+                offset = -hitDown.distance;
 
             if (offset == 0)
             {

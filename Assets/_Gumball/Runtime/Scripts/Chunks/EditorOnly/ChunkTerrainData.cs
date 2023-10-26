@@ -216,6 +216,18 @@ namespace Gumball
 
                 return terrainHeight - amountToSitUnderRoad;
             }
+            
+            //check to flatten under chunk objects
+            foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
+            {
+                if (!chunkObject.FlattenTerrain)
+                    continue;
+
+                //TODO: for multiple objects, the closest object takes priority
+                float distanceToObjectSqr = (chunkObject.LowestPosition.FlattenAsVector2() - vertexPosition.FlattenAsVector2()).sqrMagnitude;
+                if (distanceToObjectSqr < (chunkObject.FlattenTerrainRadius * chunkObject.FlattenTerrainRadius))
+                    return chunkObject.LowestPosition.y;
+            }
 
             //check to apply height data
             if (!heightData.ElevationAmount.Approximately(0))
@@ -237,6 +249,8 @@ namespace Gumball
                 float desiredHeightDifference = vertexPosition.y + desiredHeight;
                 desiredHeight = vertexPosition.y + (desiredHeightDifference * blendPercent);
             }
+            
+            //TODO: check to blend with chunk objects 
 
             if (matchRoadHeight)
             {

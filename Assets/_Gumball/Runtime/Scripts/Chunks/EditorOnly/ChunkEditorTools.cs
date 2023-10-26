@@ -237,7 +237,7 @@ namespace Gumball
         /// <summary>
         /// Force the terrain to be recreated.
         /// </summary>
-        private void RecreateTerrain()
+        public void RecreateTerrain()
         {
             Chunk connectedAfter = chunk.ChunkAfter;
             Chunk connectedBefore = chunk.ChunkBefore;
