@@ -29,6 +29,7 @@ namespace Gumball
         private void OnEnable()
         {
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
+            chunk.UpdateSplineSampleData();
         }
 
         private void OnDisable()

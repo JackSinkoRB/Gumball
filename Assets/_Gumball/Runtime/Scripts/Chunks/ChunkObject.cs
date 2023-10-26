@@ -24,8 +24,7 @@ namespace Gumball
         [Tooltip("When enabled, the terrain is flattened to the bottom of the chunk object.")]
         [SerializeField] private bool keepAtSpecificDistanceFromRoad;
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
-        [SerializeField, ConditionalField(nameof(keepAtSpecificDistanceFromRoad)), PositiveValueOnly]
-        private float distanceFromRoad = 10;
+        [SerializeField, ConditionalField(nameof(keepAtSpecificDistanceFromRoad))] private float distanceFromRoad = 10;
         
         [Space(5)]
         [Tooltip("When enabled, the terrain is flattened to the bottom of the chunk object.")]
@@ -43,37 +42,6 @@ namespace Gumball
         [SerializeField, HideInInspector] private Vector3 lastKnownPositionWhenGrounded;
         
         private Collider collider => GetComponent<Collider>();
-
-        private void OnEnable()
-        {
-            Initialise();
-
-            SceneView.duringSceneGui += OnSceneUpdate;
-            chunkBelongsTo.onTerrainChanged += OnTerrainChanged;
-              
-            if (alwaysGrounded)
-                GroundObject();
-        }
-          
-        private void OnDisable()
-        {
-            SceneView.duringSceneGui -= OnSceneUpdate;
-            chunkBelongsTo.onTerrainChanged -= OnTerrainChanged;
-        }
-
-        private void OnSceneUpdate(SceneView sceneView)
-        {
-            if (alwaysGrounded)
-                GroundIfMoved();
-        }
-
-        private void OnValidate()
-        {
-            Initialise();
-
-            if (alwaysGrounded)
-                GroundObject();
-        }
         
         private void Initialise()
         {
@@ -81,11 +49,48 @@ namespace Gumball
                 FindChunkBelongsTo();
         }
         
+        private void OnEnable()
+        {
+            Initialise();
+
+            SceneView.duringSceneGui += OnSceneUpdate;
+            chunkBelongsTo.onTerrainChanged += OnTerrainChanged;
+            
+            UpdatePosition();
+        }
+
+        private void OnDisable()
+        {
+            SceneView.duringSceneGui -= OnSceneUpdate;
+            chunkBelongsTo.onTerrainChanged -= OnTerrainChanged;
+        }
+        
+        private void OnValidate()
+        {
+            UpdatePosition();
+        }
+
+        private void OnSceneUpdate(SceneView sceneView)
+        {
+            Vector3 currentPosition = transform.position;
+            if (currentPosition.Approximately(lastKnownPositionWhenGrounded))
+                return;
+
+            UpdatePosition();
+        }
+
+        private void OnTerrainChanged()
+        {
+            UpdatePosition();
+        }
+
         /// <summary>
         /// Moves the transform so that the object is grounded on it's chunk.
         /// </summary>
         public void GroundObject()
         {
+            Initialise();
+
             float offset = 0;
 
             int terrainLayerMask = 1 << LayerMask.NameToLayer(ChunkUtils.TerrainLayer);
@@ -121,21 +126,28 @@ namespace Gumball
             }
         }
         
-        private void OnTerrainChanged()
+        private void MoveToSpecificDistanceFromRoad()
         {
+            Initialise();
+            
+            //get the closest spline
+            var (closestSample, distanceToSpline) = chunkBelongsTo.GetClosestSampleOnSpline(transform.position, true);
+            
+            Debug.DrawRay(closestSample.position, closestSample.right * distanceFromRoad, Color.red, 15);
+            Vector3 desiredPosition = closestSample.position + (closestSample.right * distanceFromRoad);
+
+            transform.position = desiredPosition.SetY(transform.position.y);
+        }
+
+        private void UpdatePosition()
+        {
+            if (keepAtSpecificDistanceFromRoad)
+                MoveToSpecificDistanceFromRoad();
+            
             if (alwaysGrounded)
                 GroundObject();
         }
         
-        private void GroundIfMoved()
-        {
-            Vector3 currentPosition = transform.position;
-            if (currentPosition.Approximately(lastKnownPositionWhenGrounded))
-                return;
-              
-            GroundObject();
-        }
-
         private void FindChunkBelongsTo()
         {
             Transform parent = transform.parent;

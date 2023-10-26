@@ -60,7 +60,7 @@ namespace Gumball
             }
         }
         
-        private readonly SampleCollection splineSampleCollection = new();
+        [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
 
         public void SetTerrain(GameObject terrain)
         {
