@@ -36,7 +36,7 @@ namespace Gumball
         private float flattenTerrainRadius = 5;
         [Tooltip("The distance after the flattening for the terrain to be blended with it's original height.")]
         [SerializeField, ConditionalField(nameof(flattenTerrain)), PositiveValueOnly]
-        private float flattenTerrainBlendDistance = 5;
+        private float flattenTerrainBlendRadius = 5;
 
         [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(flattenTerrain))]
         public void RecreateTerrain()
@@ -53,9 +53,9 @@ namespace Gumball
 
         public bool FlattenTerrain => flattenTerrain;
         public float FlattenTerrainRadius => flattenTerrainRadius;
-        public float FlattenTerrainBlendDistance => flattenTerrainBlendDistance;
+        public float FlattenTerrainBlendRadius => flattenTerrainBlendRadius;
         
-        public Vector3 LowestPosition => collider != null
+        public Vector3 GetLowestPosition() => collider != null
             ? collider.ClosestPoint(collider.bounds.center.OffsetY(-int.MaxValue))
             : transform.position;
         
@@ -114,7 +114,7 @@ namespace Gumball
             Vector3 originalPosition = transform.position;
             transform.position = transform.position.SetY(chunkBelongsTo.CurrentTerrain.transform.position.y + 10000);
             
-            if (Physics.Raycast(LowestPosition, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, terrainLayerMask))
+            if (Physics.Raycast(GetLowestPosition(), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, terrainLayerMask))
                 offset = -hitDown.distance;
 
             if (offset == 0)

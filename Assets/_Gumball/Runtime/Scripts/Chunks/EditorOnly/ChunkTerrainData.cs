@@ -224,9 +224,13 @@ namespace Gumball
                     continue;
 
                 //TODO: for multiple objects, the closest object takes priority
-                float distanceToObjectSqr = (chunkObject.LowestPosition.FlattenAsVector2() - vertexPosition.FlattenAsVector2()).sqrMagnitude;
-                if (distanceToObjectSqr < (chunkObject.FlattenTerrainRadius * chunkObject.FlattenTerrainRadius))
-                    return chunkObject.LowestPosition.y;
+                
+                float radiusSqr = chunkObject.FlattenTerrainRadius * chunkObject.FlattenTerrainRadius;
+                Vector3 lowestPos = chunkObject.GetLowestPosition();
+                float distanceToObjectSqr = (lowestPos.FlattenAsVector2() - vertexPosition.FlattenAsVector2()).sqrMagnitude;
+                bool isWithinFlattenRadius = distanceToObjectSqr < radiusSqr;
+                if (isWithinFlattenRadius)
+                    return lowestPos.y;
             }
 
             //check to apply height data
@@ -246,11 +250,34 @@ namespace Gumball
             if (canBlendWithRoad)
             {
                 float blendPercent = Mathf.Clamp01((distanceToSpline - roadFlattenDistance) / roadBlendDistance);
-                float desiredHeightDifference = vertexPosition.y + desiredHeight;
-                desiredHeight = vertexPosition.y + (desiredHeightDifference * blendPercent);
+                float roadHeight = 0; //TODO - use vertex position instead
+                float blendOffsetDifference = (roadHeight - desiredHeight) * (1-blendPercent);
+                desiredHeight += blendOffsetDifference;
             }
             
-            //TODO: check to blend with chunk objects 
+            //check to blend with chunk objects 
+            foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
+            {
+                if (!chunkObject.FlattenTerrain)
+                    continue;
+
+                if (chunkObject.FlattenTerrainBlendRadius <= 0)
+                    continue;
+                
+                float blendRadiusSqr = chunkObject.FlattenTerrainBlendRadius * chunkObject.FlattenTerrainBlendRadius;
+                Vector3 lowestPos = chunkObject.GetLowestPosition();
+                float distanceToObjectSqr = (lowestPos.FlattenAsVector2() - vertexPosition.FlattenAsVector2()).sqrMagnitude;
+                bool isWithinBlendRadius = distanceToObjectSqr < blendRadiusSqr;
+                if (!isWithinBlendRadius)
+                    continue;
+                
+                //desired height offset = desiredHeightDifference * blendPercent
+                float flattenedRadiusSqr = chunkObject.FlattenTerrainRadius * chunkObject.FlattenTerrainRadius;
+                float blendPercent = Mathf.Clamp01((distanceToObjectSqr - flattenedRadiusSqr) / blendRadiusSqr);
+                float flattenedObjectHeight = chunkObject.GetLowestPosition().y;
+                float blendOffsetDifference = (flattenedObjectHeight - desiredHeight) * (1-blendPercent);
+                desiredHeight += blendOffsetDifference;
+            }
 
             if (matchRoadHeight)
             {
