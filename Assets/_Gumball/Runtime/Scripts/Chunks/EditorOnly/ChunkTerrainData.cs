@@ -212,8 +212,6 @@ namespace Gumball
             Vector3 rightTangent = closestSplineSample.right;
             Vector3 leftTangent = -closestSplineSample.right;
             
-            Debug.DrawLine(closestSplineSample.position + rightTangent + Vector3.up*10, closestSplineSample.position + leftTangent + Vector3.up*10, Color.blue, 15);
-
             float distanceToRightTangent = (vertexPosition - closestSplineSample.position + rightTangent).sqrMagnitude;
             float distanceToLeftTangent = (vertexPosition - closestSplineSample.position + leftTangent).sqrMagnitude;
 
