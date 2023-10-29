@@ -31,7 +31,6 @@ namespace Gumball
         public Vector3 VehicleStartingRotation => vehicleStartingRotation;
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
         
-        [SerializedDictionary("ChunkPair", "ChunkBlendData")]
         [SerializeField] private ChunkBlendData[] blendData;
 
         public ChunkBlendData GetBlendData(int connectionIndex)

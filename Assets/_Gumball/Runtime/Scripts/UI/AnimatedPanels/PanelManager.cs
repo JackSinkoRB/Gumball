@@ -22,6 +22,7 @@ public class PanelManager : Singleton<PanelManager>
     {
         base.Initialise();
 
+        SceneManager.activeSceneChanged -= OnSceneChange;
         SceneManager.activeSceneChanged += OnSceneChange;
     }
 
