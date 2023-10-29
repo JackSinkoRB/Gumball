@@ -23,7 +23,9 @@ namespace Gumball
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
         [PositiveValueOnly, SerializeField] private float roadBlendDistance = 20;
 
+        [SerializeField] private bool splitTerrainSettings;
         [SerializeField] private TerrainHeightData heightData;
+        [ConditionalField(nameof(splitTerrainSettings)), SerializeField] private TerrainHeightData heightDataOther;
 
         public float WidthAroundRoad => widthAroundRoad;
         public int Resolution => resolution;
@@ -167,9 +169,10 @@ namespace Gumball
             maxPerlinHeight = Mathf.NegativeInfinity;
             minPerlinHeight = Mathf.Infinity;
             
-            foreach (Vector3 vertex in Grid.Vertices)
+            foreach (Vector3 vertexPosition in Grid.Vertices)
             {
-                float perlinHeight = GetPerlinHeightForVertex(vertex);
+                TerrainHeightData heightDataAtPos = GetHeightData(vertexPosition);
+                float perlinHeight = GetPerlinHeightForVertex(vertexPosition, heightDataAtPos);
                 
                 //check if it is highest or lowest
                 if (perlinHeight > maxPerlinHeight)
@@ -196,6 +199,35 @@ namespace Gumball
             }
 
             return verticesWithHeightData;
+        }
+
+        /// <summary>
+        /// Gets the specific height settings at the given position.
+        /// </summary>
+        private TerrainHeightData GetHeightData(Vector3 vertexPosition, SplineSample closestSplineSample)
+        {
+            if (!splitTerrainSettings)
+                return heightData;
+
+            Vector3 rightTangent = closestSplineSample.right;
+            Vector3 leftTangent = -closestSplineSample.right;
+            
+            Debug.DrawLine(closestSplineSample.position + rightTangent + Vector3.up*10, closestSplineSample.position + leftTangent + Vector3.up*10, Color.blue, 15);
+
+            float distanceToRightTangent = (vertexPosition - closestSplineSample.position + rightTangent).sqrMagnitude;
+            float distanceToLeftTangent = (vertexPosition - closestSplineSample.position + leftTangent).sqrMagnitude;
+
+            return distanceToRightTangent < distanceToLeftTangent ? heightData : heightDataOther;
+        }
+
+        private TerrainHeightData GetHeightData(Vector3 vertexPosition)
+        {
+            if (!splitTerrainSettings)
+                return heightData;
+            
+            var (closestSample, distanceToSpline) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
+
+            return GetHeightData(vertexPosition, closestSample);
         }
         
         private float GetDesiredHeightForVertex(int vertexIndex)
@@ -234,15 +266,16 @@ namespace Gumball
             }
 
             //check to apply height data
-            if (!heightData.ElevationAmount.Approximately(0))
+            TerrainHeightData heightDataAtPos = GetHeightData(vertexPosition, closestSample);
+            if (!heightDataAtPos.ElevationAmount.Approximately(0))
             {
                 //use perlin:
-                desiredHeight = GetPerlinHeightForVertex(vertexPosition);
+                desiredHeight = GetPerlinHeightForVertex(vertexPosition, heightDataAtPos);
                 
                 //multiply by the modifier, depending on the height percent
                 float difference = desiredHeight < 0 ? minPerlinHeight : maxPerlinHeight;
                 float heightPercent = desiredHeight / difference;
-                desiredHeight *= heightData.ElevationModifier.Evaluate(heightPercent);
+                desiredHeight *= heightDataAtPos.ElevationModifier.Evaluate(heightPercent);
             }
             
             //check to blend with the road
@@ -293,16 +326,16 @@ namespace Gumball
             return desiredHeight;
         }
 
-        private float GetPerlinHeightForVertex(Vector3 vertexPosition)
+        private float GetPerlinHeightForVertex(Vector3 vertexPosition, TerrainHeightData heightDataAtPos)
         {
             float noiseHeight = 0;
-            foreach (TerrainHeightData.Octave octave in heightData.GetOctaves())
+            foreach (TerrainHeightData.Octave octave in heightDataAtPos.GetOctaves())
             {
                 //use the vertex LOCAL position instead of global
                 Vector3 localVertexPosition = chunk.transform.InverseTransformPoint(vertexPosition);
                 
-                float perlinX = localVertexPosition.x / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().x;
-                float perlinY = localVertexPosition.z / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().y;
+                float perlinX = localVertexPosition.x / heightDataAtPos.Scale * octave.Frequency + heightDataAtPos.GetRandomPerlinOffset().x;
+                float perlinY = localVertexPosition.z / heightDataAtPos.Scale * octave.Frequency + heightDataAtPos.GetRandomPerlinOffset().y;
                 
                 float perlinValue = Mathf.PerlinNoise(perlinX, perlinY);
                 
@@ -310,7 +343,7 @@ namespace Gumball
                 //if ElevationPercent = 1, it should = perlinValue (between 0 and 1)
                 //if ElevationPercent = -1, it should = -perlinValue (between 0 and -1)
                 //if ElevationPercent = 0, it should = perlinValue * 2 - 1 (between -1 and 1)
-                float elevationPerlinValue = (heightData.ElevationPercent * perlinValue) + (1 - Mathf.Abs(heightData.ElevationPercent)) * (perlinValue * 2 - 1);
+                float elevationPerlinValue = (heightDataAtPos.ElevationPercent * perlinValue) + (1 - Mathf.Abs(heightDataAtPos.ElevationPercent)) * (perlinValue * 2 - 1);
                 noiseHeight += elevationPerlinValue * octave.Amplitude;
             }
 
