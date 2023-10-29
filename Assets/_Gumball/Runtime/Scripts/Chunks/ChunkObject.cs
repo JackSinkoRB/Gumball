@@ -36,7 +36,7 @@ namespace Gumball
         private float flattenTerrainRadius = 5;
         [Tooltip("The distance after the flattening for the terrain to be blended with it's original height.")]
         [SerializeField, ConditionalField(nameof(flattenTerrain)), PositiveValueOnly]
-        private float flattenTerrainBlendRadius = 5;
+        private float flattenTerrainBlendRadius = 20;
 
         [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(flattenTerrain))]
         public void RecreateTerrain()
