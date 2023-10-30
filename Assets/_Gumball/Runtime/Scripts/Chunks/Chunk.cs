@@ -18,6 +18,13 @@ namespace Gumball
     public class Chunk : MonoBehaviour
     {
 
+        public enum QualityLevel
+        {
+            HIGH,
+            MEDIUM,
+            LOW
+        }
+        
         public event Action onTerrainChanged;
         
         [SerializeField] private SplineComputer splineComputer;
@@ -26,8 +33,9 @@ namespace Gumball
         [Header("Debugging")]
         [ReadOnly, SerializeField] private Chunk chunkBefore;
         [ReadOnly, SerializeField] private Chunk chunkAfter;
-        [ReadOnly, SerializeField] private GameObject currentTerrain;
-
+        [SerializeField, ReadOnly] private GameObject[] currentTerrains = new GameObject[Enum.GetValues(typeof(QualityLevel)).Length];
+        [SerializeField, ReadOnly] private LODGroup terrainLODGroup;
+        
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
 
         public int LastPointIndex => splineComputer.pointCount - 1;
@@ -38,37 +46,53 @@ namespace Gumball
         public Chunk ChunkAfter => chunkAfter;
         public bool HasChunkConnected => chunkBefore != null || chunkAfter != null;
 
-        public ChunkMeshData ChunkMeshData;
+        public ChunkMeshData ChunkMeshData { get; private set; }
         public bool IsAutomaticTerrainRecreationDisabled { get; private set; }
         public SplineSample FirstSample { get; private set; }
         public SplineSample LastSample { get; private set; }
         public Vector3 FirstTangent { get; private set; }
         public Vector3 LastTangent { get; private set; }
-
-        public GameObject CurrentTerrain
+        
+        public LODGroup TerrainLODGroup
         {
             get
             {
-                if (currentTerrain != null)
-                    return currentTerrain;
-                TryFindExistingTerrain();
-                return currentTerrain;
+                if (terrainLODGroup == null)
+                {
+                    GameObject newObject = new GameObject("Terrain LOD");
+                    newObject.transform.SetParent(transform);
+                    terrainLODGroup = newObject.AddComponent<LODGroup>();
+                }
+
+                return terrainLODGroup;
             }
+        }
+        
+        public GameObject GetCurrentTerrain(QualityLevel quality = QualityLevel.HIGH)
+        {
+            if (currentTerrains[(int)quality] == null)
+                TryFindExistingTerrain(quality);
+
+            return currentTerrains[(int)quality];
         }
         
         [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
 
-        public void SetTerrain(GameObject terrain)
+        public void SetTerrain(GameObject terrain, QualityLevel quality)
         {
-            currentTerrain = terrain;
-            UpdateChunkMeshData();
-            onTerrainChanged?.Invoke();
+            currentTerrains[(int)quality] = terrain;
+
+            if (quality == QualityLevel.HIGH)
+            {
+                UpdateChunkMeshData();
+                onTerrainChanged?.Invoke();
+            }
         }
         
         public void UpdateChunkMeshData()
         {
             DisableAutomaticTerrainRecreation(true);
-            if (CurrentTerrain == null)
+            if (GetCurrentTerrain() == null)
             {
                 ChunkMeshData = null;
                 return;
@@ -135,7 +159,7 @@ namespace Gumball
                 List<Object> objectsToRecord = new List<Object>();
 
                 objectsToRecord.Add(transform);
-                objectsToRecord.Add(CurrentTerrain.GetComponent<MeshFilter>());
+                objectsToRecord.Add(GetCurrentTerrain().GetComponent<MeshFilter>());
 
                 if (chunkAfter != null)
                 {
@@ -207,16 +231,16 @@ namespace Gumball
             return (closestSample, Mathf.Sqrt(closestDistance));
         }
 
-        private void TryFindExistingTerrain()
+        private void TryFindExistingTerrain(QualityLevel qualityLevel)
         {
-            if (currentTerrain != null)
-                return; //already exists
-
             foreach (Transform child in transform)
             {
-                if (child.tag.Equals(ChunkUtils.TerrainTag))
+                if (!child.tag.Equals(ChunkUtils.TerrainTag))
+                    continue;
+                
+                if (child.name.Contains(qualityLevel.ToString()))
                 {
-                    currentTerrain = child.gameObject;
+                    currentTerrains[(int)qualityLevel] = child.gameObject;
                     return;
                 }
             }
