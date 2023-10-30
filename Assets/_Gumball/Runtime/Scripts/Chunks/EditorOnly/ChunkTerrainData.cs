@@ -37,23 +37,23 @@ namespace Gumball
         private float maxPerlinHeight;
         private float minPerlinHeight;
         
-        public GameObject Create(Chunk chunkToUse, Chunk.QualityLevel quality, Material[] materialsToUse = null)
+        public GameObject Create(Chunk chunkToUse, Material[] materialsToUse = null)
         {
             chunk = chunkToUse;
-            UpdateGrid(quality);
-            return GenerateTerrainMeshFromGrid(quality, materialsToUse);
+            UpdateGrid();
+            return GenerateTerrainMeshFromGrid(materialsToUse);
         }
 
-        private void UpdateGrid(Chunk.QualityLevel quality)
+        private void UpdateGrid()
         {
-            Grid = new ChunkGrid(chunk, GetResolutionForQuality(quality), widthAroundRoad);
+            Grid = new ChunkGrid(chunk, resolution, widthAroundRoad);
         }
-
-        private GameObject GenerateTerrainMeshFromGrid(Chunk.QualityLevel qualityLevel, Material[] materialsToAssign = null)
+        
+        private GameObject GenerateTerrainMeshFromGrid(Material[] materialsToAssign = null)
         {
             //create the gameobject
             GameObject terrain = new GameObject("Terrain");
-            terrain.transform.SetParent(chunk.TerrainLODGroup.transform);
+            terrain.transform.SetParent(chunk.transform);
             terrain.transform.position = Grid.GridCenter;
             terrain.tag = ChunkUtils.TerrainTag;
             terrain.layer = LayerMask.NameToLayer(ChunkUtils.TerrainLayer);
@@ -85,7 +85,7 @@ namespace Gumball
             mesh.RecalculateBounds();
             
             //save the mesh asset
-            string path = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{chunk.UniqueID}_{qualityLevel.ToString()}.asset";
+            string path = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{chunk.UniqueID}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                 AssetDatabase.DeleteAsset(path);
             
@@ -103,17 +103,6 @@ namespace Gumball
             terrain.AddComponent<MeshCollider>();
             
             return terrain;
-        }
-
-        private int GetResolutionForQuality(Chunk.QualityLevel quality)
-        {
-            return quality switch
-            {
-                Chunk.QualityLevel.HIGH => resolution,
-                Chunk.QualityLevel.MEDIUM => resolution / 2,
-                Chunk.QualityLevel.LOW => resolution / 4,
-                _ => throw new ArgumentOutOfRangeException()
-            };
         }
 
         private List<int> CreateTrianglesFromGrid()
