@@ -98,8 +98,9 @@ namespace Gumball
         private void BlendWithEdges(bool useFirstChunk)
         {
             Chunk chunkToUse = useFirstChunk ? firstChunk : lastChunk;
-            
-            if (chunkToUse.TerrainBlendDistance.Approximately(0))
+
+            float terrainBlendDistance = chunkToUse.GetComponent<ChunkEditorTools>().TerrainBlendDistance;
+            if (terrainBlendDistance.Approximately(0))
                 return; //not blending
             
             ChunkMeshData meshData = useFirstChunk ? firstChunk.ChunkMeshData : lastChunk.ChunkMeshData;
@@ -112,9 +113,9 @@ namespace Gumball
 
                 var (closestVertex, distanceToClosestVertex) = GetClosestVertex(vertexPositionWorld, otherChunksEndVertices);
 
-                if (distanceToClosestVertex <= chunkToUse.TerrainBlendDistance)
+                if (distanceToClosestVertex <= terrainBlendDistance)
                 {
-                    float differencePercent = 1 - Mathf.Clamp01(distanceToClosestVertex / chunkToUse.TerrainBlendDistance);
+                    float differencePercent = 1 - Mathf.Clamp01(distanceToClosestVertex / terrainBlendDistance);
 
                     float currentHeight = vertexPositionWorld.y;
                     

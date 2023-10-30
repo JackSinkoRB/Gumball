@@ -22,9 +22,6 @@ namespace Gumball
         
         [SerializeField] private SplineComputer splineComputer;
         [SerializeField] private SplineMesh roadMesh;
-        
-        [Header("Modify")]
-        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
 
         [Header("Debugging")]
         [ReadOnly, SerializeField] private Chunk chunkBefore;
@@ -47,7 +44,6 @@ namespace Gumball
         public SplineSample LastSample { get; private set; }
         public Vector3 FirstTangent { get; private set; }
         public Vector3 LastTangent { get; private set; }
-        public float TerrainBlendDistance => terrainBlendDistance;
 
         public GameObject CurrentTerrain
         {

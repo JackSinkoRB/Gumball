@@ -144,6 +144,10 @@ namespace Gumball
 
         [HideInInspector] public bool HasConnection; 
 
+        [Header("Blending")]
+        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
+        public float TerrainBlendDistance => terrainBlendDistance;
+
         private ChunkGrid currentGrid;
         
         private static bool subscribedToPlayModeStateChanged;
