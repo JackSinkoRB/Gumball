@@ -23,9 +23,10 @@ namespace Gumball
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
         [PositiveValueOnly, SerializeField] private float roadBlendDistance = 20;
 
-        [SerializeField] private bool splitTerrainSettings;
+        [Tooltip("Should each side of the road have their own height data?")]
+        [SerializeField] private bool splitHeightData;
         [SerializeField] private TerrainHeightData heightData;
-        [ConditionalField(nameof(splitTerrainSettings)), SerializeField] private TerrainHeightData heightDataOther;
+        [ConditionalField(nameof(splitHeightData)), SerializeField] private TerrainHeightData heightDataOther;
 
         public float WidthAroundRoad => widthAroundRoad;
         public int Resolution => resolution;
@@ -206,7 +207,7 @@ namespace Gumball
         /// </summary>
         private TerrainHeightData GetHeightData(Vector3 vertexPosition, SplineSample closestSplineSample)
         {
-            if (!splitTerrainSettings)
+            if (!splitHeightData)
                 return heightData;
 
             Vector3 rightTangent = closestSplineSample.right;
@@ -220,7 +221,7 @@ namespace Gumball
 
         private TerrainHeightData GetHeightData(Vector3 vertexPosition)
         {
-            if (!splitTerrainSettings)
+            if (!splitHeightData)
                 return heightData;
             
             var (closestSample, distanceToSpline) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
