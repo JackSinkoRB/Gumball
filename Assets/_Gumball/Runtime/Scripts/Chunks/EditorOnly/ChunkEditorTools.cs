@@ -233,9 +233,6 @@ namespace Gumball
             
             EditorApplication.delayCall -= RecreateTerrain;
             EditorApplication.delayCall += RecreateTerrain;
-            
-            EditorApplication.delayCall -= () => ChunkUtils.BakeRoadMesh(chunk);
-            EditorApplication.delayCall += () => ChunkUtils.BakeRoadMesh(chunk);
         }
         
         /// <summary>
@@ -260,6 +257,8 @@ namespace Gumball
                 ChunkUtils.ConnectChunks(connectedBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(connectedBefore, chunk));
             if (connectedAfter != null)
                 ChunkUtils.ConnectChunks(chunk, connectedAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, connectedAfter));
+
+            ChunkUtils.BakeRoadMesh(chunk);
         }
         
         #endregion
