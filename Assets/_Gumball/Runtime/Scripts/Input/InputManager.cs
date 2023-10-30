@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using MyBox;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.InputSystem.Utilities;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace Gumball
 {
@@ -12,26 +15,59 @@ namespace Gumball
         
         public enum ActionMapType
         {
+            None,
             Car,
             General
         }
-        
+
         public static InputAction PrimaryContact => Instance.GetOrCacheAction("PrimaryContact");
         public static InputAction PrimaryPosition => Instance.GetOrCacheAction("PrimaryPosition");
 
-        public static InputAction Steering => Instance.GetOrCacheAction("Steering");
-        public static InputAction Accelerate  => Instance.GetOrCacheAction("Accelerate");
-        public static InputAction Decelerate => Instance.GetOrCacheAction("Decelerate");
-        public static InputAction Handbrake => Instance.GetOrCacheAction("Handbrake");
-        public static InputAction ShiftUp  => Instance.GetOrCacheAction("ShiftUp");
-        public static InputAction ShiftDown  => Instance.GetOrCacheAction("ShiftDown");
+        public static ReadOnlyArray<Touch> ActiveTouches => Touch.activeTouches;
         
-        public static float SteeringInput => Steering.ReadValue<float>();
+        public static VirtualInputActionFloat Steering { get; private set; }
+        public static VirtualInputActionButton Accelerate { get; private set; }
+        public static VirtualInputActionButton Decelerate { get; private set; }
+        public static VirtualInputActionButton Handbrake { get; private set; }
+        public static VirtualInputActionButton ShiftUp { get; private set; }
+        public static VirtualInputActionButton ShiftDown { get; private set; }
 
+        public static float SteeringInput => Steering?.Value ?? 0;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void RuntimeInitialise()
+        {
+            CoroutineHelper.Instance.PerformAfterTrue(() => ExistsRuntime, () =>
+            {
+                Steering = new VirtualInputActionFloat(Instance.GetOrCacheAction("Steering"));
+                Accelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Accelerate"));
+                Decelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Decelerate"));
+                Handbrake = new VirtualInputActionButton(Instance.GetOrCacheAction("Handbrake"));
+                ShiftUp = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftUp"));
+                ShiftDown = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftDown"));
+            });
+        }
+        
         [SerializeField] private InputActionAsset controls;
-
-        private readonly Dictionary<string, InputAction> actionsCached = new();
         
+        private readonly Dictionary<string, InputAction> actionsCached = new();
+        private readonly Dictionary<ActionMapType, InputActionMap> actionsMapsCached = new();
+
+        protected override void Initialise()
+        {
+            base.Initialise();
+            
+            EnableActionMap(ActionMapType.General);
+            EnhancedTouchSupport.Enable();
+        }
+
+        protected override void OnInstanceDisabled()
+        {
+            base.OnInstanceDisabled();
+            
+            EnhancedTouchSupport.Disable();
+        }
+
         private InputAction GetOrCacheAction(string action)
         {
             if (!actionsCached.ContainsKey(action))
@@ -40,11 +76,26 @@ namespace Gumball
             return actionsCached[action];
         }
 
-        public void SetActionMap(ActionMapType actionMapType)
+        private InputActionMap GetActionMap(ActionMapType type)
         {
-            InputActionMap actionMap = controls.FindActionMap(actionMapType.ToString());
-            actionMap.Enable();
+            if (!actionsMapsCached.ContainsKey(type))
+            {
+                //cache it
+                actionsMapsCached[type] = controls.FindActionMap(type.ToString());
+            }
+
+            return actionsMapsCached[type];
         }
-        
+
+        public void EnableActionMap(ActionMapType type, bool enable = true)
+        {
+            InputActionMap map = GetActionMap(type);
+            if (enable)
+                map.Enable();
+            else map.Disable();
+            
+            GlobalLoggers.InputLogger.Log($"{(enable ? "Enabled" : "Disabled")} action map {type.ToString()}");
+        }
+
     }
 }

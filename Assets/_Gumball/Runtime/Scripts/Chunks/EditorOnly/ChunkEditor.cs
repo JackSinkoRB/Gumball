@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Gumball
 {
     [CustomEditor(typeof(Chunk))]
-    public class ChunkEditor : Editor
+    public class ChunkEditor : UnityEditor.Editor
     {
 
         private Chunk chunk => target as Chunk;

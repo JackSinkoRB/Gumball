@@ -99,10 +99,7 @@ namespace Gumball
         
         public void ApplyChanges()
         {
-            Mesh meshToUse = Mesh;
-#if UNITY_EDITOR
-            meshToUse = Object.Instantiate(Mesh); //use a mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
-#endif
+            Mesh meshToUse = Object.Instantiate(Mesh); //use a mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
 
             meshToUse.SetVertices(vertices);
 
@@ -113,10 +110,8 @@ namespace Gumball
             meshToUse.RecalculateNormals();
             //meshToUse.SetNormals(CalculateNormals());
             meshToUse.RecalculateBounds();
-
-#if UNITY_EDITOR
+            
             MeshFilter.sharedMesh = meshToUse; //set the mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
-#endif
         }
 
         private Vector3[] CalculateNormals()

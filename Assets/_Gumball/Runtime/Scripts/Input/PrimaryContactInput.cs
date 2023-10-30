@@ -30,14 +30,17 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialise()
         {
-            InputManager.PrimaryContact.started -= OnPressed;
-            InputManager.PrimaryContact.started += OnPressed;
+            CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
+            {
+                InputManager.PrimaryContact.started -= OnPressed;
+                InputManager.PrimaryContact.started += OnPressed;
 
-            InputManager.PrimaryContact.canceled -= OnReleased;
-            InputManager.PrimaryContact.canceled += OnReleased;
-            
-            InputManager.PrimaryPosition.performed -= OnPerformed;
-            InputManager.PrimaryPosition.performed += OnPerformed;
+                InputManager.PrimaryContact.canceled -= OnReleased;
+                InputManager.PrimaryContact.canceled += OnReleased;
+
+                InputManager.PrimaryPosition.performed -= OnPerformed;
+                InputManager.PrimaryPosition.performed += OnPerformed;
+            });
         }
         
         public static void OnPressed(InputAction.CallbackContext context)

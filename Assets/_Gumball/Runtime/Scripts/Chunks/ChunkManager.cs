@@ -67,7 +67,8 @@ namespace Gumball
 
         private void LateUpdate()
         {
-            DoLoadingCheck();
+            if (currentMap != null)
+                DoLoadingCheck();
         }
 
         private void DoLoadingCheck()
@@ -199,23 +200,24 @@ namespace Gumball
             {
                 if (loadDirection == ChunkUtils.LoadDirection.AFTER)
                 {
+                    int connectionIndex = loadedChunksIndices.Max - 1;
                     LoadedChunkData previousChunkData = currentChunks[^2];
-                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.AFTER, currentMap.GetBlendData(previousChunkData.AssetReference, chunkAssetReference));
+                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.AFTER, currentMap.GetBlendData(connectionIndex));
                 }
                 if (loadDirection == ChunkUtils.LoadDirection.BEFORE)
                 {
+                    int connectionIndex = loadedChunksIndices.Min;
                     LoadedChunkData previousChunkData = currentChunks[1];
-                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.BEFORE, currentMap.GetBlendData(chunkAssetReference, previousChunkData.AssetReference));
+                    ChunkUtils.ConnectChunks(previousChunkData.Chunk, chunk, ChunkUtils.LoadDirection.BEFORE, currentMap.GetBlendData(connectionIndex));
                 }
-                
             }
             
-#if UNITY_EDITOR
             //should create a copy of the mesh so it doesn't directly edit the saved mesh in runtime
             MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
             Mesh meshCopy = Instantiate(meshFilter.sharedMesh);
             chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = meshCopy;
 
+#if UNITY_EDITOR
             GlobalLoggers.LoadingLogger.Log($"Chunk loading '{chunkAssetReference.editorAsset.name}' complete.");
 #endif
         }

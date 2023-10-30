@@ -8,17 +8,42 @@ namespace Gumball
     public static class SceneUtils
     {
 
-        public static List<T> GetAllComponentsInActiveScene<T>() where T : MonoBehaviour
+        public static List<T> GetAllComponentsInActiveScene<T>(bool includeDontDestroyOnLoad = false) where T : MonoBehaviour
         {
             List<T> results = new List<T>();
             
-            GameObject[] rootGameObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+            List<GameObject> rootGameObjects = new(UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects());
+            
+            if (includeDontDestroyOnLoad)
+                rootGameObjects.AddRange(GetDontDestroyOnLoadObjects());
+            
             foreach (GameObject rootObject in rootGameObjects)
                 FindGameObjectsWithComponentRecursive<T>(rootObject, results);
 
             return results;
         }
 
+        private static GameObject[] GetDontDestroyOnLoadObjects()
+        {
+            GameObject temp = null;
+            try
+            {
+                temp = new GameObject();
+                Object.DontDestroyOnLoad( temp );
+                UnityEngine.SceneManagement.Scene dontDestroyOnLoad = temp.scene;
+                Object.DestroyImmediate( temp );
+                temp = null;
+     
+                return dontDestroyOnLoad.GetRootGameObjects();
+            }
+            finally
+            {
+                if( temp != null )
+                    Object.DestroyImmediate( temp );
+            }
+        }
+
+        
         private static void FindGameObjectsWithComponentRecursive<T>(GameObject parent, List<T> resultsOutput)
         {
             if (parent.GetComponent<T>() != null)

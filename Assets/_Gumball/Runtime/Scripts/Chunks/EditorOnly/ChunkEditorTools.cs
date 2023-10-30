@@ -1,9 +1,10 @@
-#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
@@ -12,6 +13,7 @@ namespace Gumball
     public class ChunkEditorTools : MonoBehaviour
     {
 
+#if UNITY_EDITOR
         private Chunk chunk => GetComponent<Chunk>();
         private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
 
@@ -218,7 +220,7 @@ namespace Gumball
                 return;
             
             if (playModeState is PlayModeStateChange.ExitingEditMode or PlayModeStateChange.ExitingPlayMode
-                || (Application.isPlaying && !LoadingSceneManager.HasLoaded))
+                || (Application.isPlaying && !GameLoaderSceneManager.HasLoaded))
                 return;
 
             if (chunk.CurrentTerrain == null)
@@ -310,7 +312,6 @@ namespace Gumball
         }
         
         #endregion
-
+#endif
     }
 }
-#endif

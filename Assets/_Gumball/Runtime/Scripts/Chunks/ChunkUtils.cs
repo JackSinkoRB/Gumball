@@ -116,19 +116,6 @@ namespace Gumball
             chunk2.DisableAutomaticTerrainRecreation(false);
         }
 
-        public static void CleanupUnusedMeshes(Chunk ignoreChunk = null)
-        {
-#if UNITY_EDITOR
-            if (Application.isPlaying)
-                return;
-
-            CleanupUnusedMeshes(TerrainMeshAssetFolderPath, TerrainMeshPrefix, ignoreChunk);
-            CleanupUnusedMeshes(RoadMeshAssetFolderPath, RoadMeshPrefix, ignoreChunk);
-            
-            AssetDatabase.SaveAssets();
-#endif
-        }
-        
         /// <summary>
         /// Gets the UV coordinates from the vertex positions in world space (triplanar mapping).
         /// </summary>
@@ -160,35 +147,22 @@ namespace Gumball
             return uvs;
         }
 
-        public static void BakeRoadMesh(Chunk chunk, bool replace = true)
+#if UNITY_EDITOR
+        [MenuItem("Gumball/Chunks/Cleanup Unused Assets")]
+        public static void CleanupUnusedMeshes()
         {
-            bool alreadyBaked = chunk.RoadMesh.baked;
-            if (alreadyBaked && !replace)
+            CleanupUnusedMeshes(null);
+        }
+        
+        public static void CleanupUnusedMeshes(Chunk ignoreChunk)
+        {
+            if (Application.isPlaying)
                 return;
 
-            chunk.RoadMesh.Unbake();
-            chunk.RoadMesh.Bake(true, true);
-
-            MeshFilter meshFilter = chunk.RoadMesh.GetComponent<MeshFilter>();
-            
-            string path = $"{RoadMeshAssetFolderPath}/{RoadMeshPrefix}_{chunk.UniqueID}.asset";
-            if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
-                AssetDatabase.DeleteAsset(path);
-            AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
-
-            MeshCollider meshCollider = chunk.RoadMesh.GetComponent<MeshCollider>();
-            Mesh savedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-            meshFilter.sharedMesh = savedMesh;
-            meshCollider.sharedMesh = savedMesh;
-            
-            PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
-            PrefabUtility.RecordPrefabInstancePropertyModifications(meshCollider);
-            PrefabUtility.RecordPrefabInstancePropertyModifications(chunk.RoadMesh);
-            EditorUtility.SetDirty(chunk.gameObject);
+            CleanupUnusedMeshes(TerrainMeshAssetFolderPath, TerrainMeshPrefix, ignoreChunk);
+            CleanupUnusedMeshes(RoadMeshAssetFolderPath, RoadMeshPrefix, ignoreChunk);
             
             AssetDatabase.SaveAssets();
-            
-            GlobalLoggers.ChunkLogger.Log("Baked " + path);
         }
 
         private static void CleanupUnusedMeshes(string meshFolderPath, string filePrefix, Chunk ignoreChunk = null)
@@ -260,6 +234,38 @@ namespace Gumball
                 }
             }
         }
+        
+        public static void BakeRoadMesh(Chunk chunk, bool replace = true)
+        {
+            bool alreadyBaked = chunk.RoadMesh.baked;
+            if (alreadyBaked && !replace)
+                return;
+
+            chunk.RoadMesh.Unbake();
+            chunk.RoadMesh.Bake(true, true);
+
+            MeshFilter meshFilter = chunk.RoadMesh.GetComponent<MeshFilter>();
+            
+            string path = $"{RoadMeshAssetFolderPath}/{RoadMeshPrefix}{chunk.UniqueID}.asset";
+            if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
+                AssetDatabase.DeleteAsset(path);
+            AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
+
+            MeshCollider meshCollider = chunk.RoadMesh.GetComponent<MeshCollider>();
+            Mesh savedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            meshFilter.sharedMesh = savedMesh;
+            meshCollider.sharedMesh = savedMesh;
+            
+            PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(meshCollider);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(chunk.RoadMesh);
+            EditorUtility.SetDirty(chunk.gameObject);
+            
+            AssetDatabase.SaveAssets();
+            
+            GlobalLoggers.ChunkLogger.Log("Baked " + path);
+        }
+#endif
 
         private static void MoveChunkToOther(Chunk chunk1, Chunk chunk2, LoadDirection direction)
         {
