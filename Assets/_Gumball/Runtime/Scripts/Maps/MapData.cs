@@ -2,9 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using AYellowpaper.SerializedCollections;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -25,28 +23,31 @@ namespace Gumball
         
         [Space(5)]
         [SerializeField] private AssetReferenceGameObject[] chunkReferences;
+        
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private List<int> chunksWithCustomLoadDistance = new();
+        [SerializeField, ReadOnly] private ChunkMapData[] chunkData;
 
         public int StartingChunkIndex => startingChunkIndex;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public Vector3 VehicleStartingRotation => vehicleStartingRotation;
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
-        
-        [SerializedDictionary("ChunkPair", "ChunkBlendData")]
-        [SerializeField] private ChunkBlendData[] blendData;
+        public List<int> ChunksWithCustomLoadDistance => chunksWithCustomLoadDistance;
 
-        public ChunkBlendData GetBlendData(int connectionIndex)
+        public ChunkMapData GetChunkData(int index)
         {
-            if (connectionIndex >= blendData.Length || connectionIndex < 0)
-                throw new IndexOutOfRangeException($"No blend data for connection index {connectionIndex}");
+            if (index >= chunkData.Length || index < 0)
+                throw new IndexOutOfRangeException($"No chunk data for index {index}");
 
-            return blendData[connectionIndex];
+            return chunkData[index];
         }
 
 #if UNITY_EDITOR
         [ButtonMethod]
-        public async Task RebuildBlendData()
+        public async Task RebuildData()
         {
-            blendData = new ChunkBlendData[chunkReferences.Length-1];
+            chunksWithCustomLoadDistance.Clear();
+            chunkData = new ChunkMapData[chunkReferences.Length];
 
             AsyncOperationHandle[] handles = new AsyncOperationHandle[chunkReferences.Length];
             Chunk[] chunks = new Chunk[chunkReferences.Length];
@@ -67,6 +68,9 @@ namespace Gumball
                     instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
                     Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
                     chunks[finalIndex] = chunk;
+
+                    if (chunk.HasCustomLoadDistance)
+                        chunksWithCustomLoadDistance.Add(finalIndex);
                 };
             }
             
@@ -75,16 +79,16 @@ namespace Gumball
             //connect the chunks
             for (int index = 1; index < chunkReferences.Length; index++)
             {
-                int connectionIndex = index - 1;
                 Chunk chunk = chunks[index];
                 Chunk previousChunk = chunks[index - 1];
                 
                 GlobalLoggers.ChunkLogger.Log($"Connecting {chunk.name} and {previousChunk.name}");
                     
-                //create the blend data
+                //create the chunk data
                 ChunkBlendData newBlendData = ChunkUtils.ConnectChunksWithNewBlendData(previousChunk, chunk, ChunkUtils.LoadDirection.AFTER);
-                blendData[connectionIndex] = newBlendData;
-                
+                chunkData[index - 1] = new ChunkMapData(previousChunk, newBlendData.BlendedFirstChunkMeshData);
+                chunkData[index] = new ChunkMapData(chunk, newBlendData.BlendedLastChunkMeshData);
+
                 GlobalLoggers.ChunkLogger.Log($"Destroying {previousChunk.name}");
                 DestroyImmediate(previousChunk.gameObject);
             }

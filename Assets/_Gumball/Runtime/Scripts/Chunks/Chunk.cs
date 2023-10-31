@@ -6,6 +6,7 @@ using MyBox;
 using UnityEngine;
 using Object = UnityEngine.Object;
 #if UNITY_EDITOR
+using Gumball.Editor;
 using UnityEditor;
 #endif
 
@@ -17,13 +18,19 @@ namespace Gumball
     [RequireComponent(typeof(UniqueIDAssigner))]
     public class Chunk : MonoBehaviour
     {
+
+        public event Action onTerrainChanged;
         
+        [Header("Required")]
         [SerializeField] private SplineComputer splineComputer;
         [SerializeField] private SplineMesh roadMesh;
-        
-        [Header("Modify")]
-        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
 
+        [Header("Modify")]
+        [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, true, true)]
+        [SerializeField] private bool hasCustomLoadDistance;
+        [Tooltip("The distance that the player must be within for the chunk to be loaded.")]
+        [ConditionalField(nameof(hasCustomLoadDistance)), SerializeField] private float customLoadDistance = 3000;
+        
         [Header("Debugging")]
         [ReadOnly, SerializeField] private Chunk chunkBefore;
         [ReadOnly, SerializeField] private Chunk chunkAfter;
@@ -45,8 +52,10 @@ namespace Gumball
         public SplineSample LastSample { get; private set; }
         public Vector3 FirstTangent { get; private set; }
         public Vector3 LastTangent { get; private set; }
-        public float TerrainBlendDistance => terrainBlendDistance;
 
+        public bool HasCustomLoadDistance => hasCustomLoadDistance;
+        public float CustomLoadDistance => customLoadDistance;
+        
         public GameObject CurrentTerrain
         {
             get
@@ -58,12 +67,13 @@ namespace Gumball
             }
         }
         
-        private readonly SampleCollection splineSampleCollection = new();
+        [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
 
         public void SetTerrain(GameObject terrain)
         {
             currentTerrain = terrain;
             UpdateChunkMeshData();
+            onTerrainChanged?.Invoke();
         }
         
         public void UpdateChunkMeshData()

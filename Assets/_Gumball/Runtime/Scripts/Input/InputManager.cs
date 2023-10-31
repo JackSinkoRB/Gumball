@@ -15,7 +15,6 @@ namespace Gumball
         
         public enum ActionMapType
         {
-            None,
             Car,
             General
         }

@@ -29,6 +29,7 @@ namespace Gumball
         private void OnEnable()
         {
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
+            chunk.UpdateSplineSampleData();
         }
 
         private void OnDisable()
@@ -143,6 +144,10 @@ namespace Gumball
 
         [HideInInspector] public bool HasConnection; 
 
+        [Header("Blending")]
+        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
+        public float TerrainBlendDistance => terrainBlendDistance;
+
         private ChunkGrid currentGrid;
         
         private static bool subscribedToPlayModeStateChanged;
@@ -228,15 +233,12 @@ namespace Gumball
             
             EditorApplication.delayCall -= RecreateTerrain;
             EditorApplication.delayCall += RecreateTerrain;
-            
-            EditorApplication.delayCall -= () => ChunkUtils.BakeRoadMesh(chunk);
-            EditorApplication.delayCall += () => ChunkUtils.BakeRoadMesh(chunk);
         }
         
         /// <summary>
         /// Force the terrain to be recreated.
         /// </summary>
-        private void RecreateTerrain()
+        public void RecreateTerrain()
         {
             Chunk connectedAfter = chunk.ChunkAfter;
             Chunk connectedBefore = chunk.ChunkBefore;
@@ -255,6 +257,8 @@ namespace Gumball
                 ChunkUtils.ConnectChunks(connectedBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(connectedBefore, chunk));
             if (connectedAfter != null)
                 ChunkUtils.ConnectChunks(chunk, connectedAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, connectedAfter));
+
+            ChunkUtils.BakeRoadMesh(chunk);
         }
         
         #endregion
