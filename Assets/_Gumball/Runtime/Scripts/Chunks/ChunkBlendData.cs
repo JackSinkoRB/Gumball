@@ -22,7 +22,10 @@ namespace Gumball
 
         public string FirstChunkID => firstChunkID;
         public string LastChunkID => lastChunkID;
-        
+
+        public ChunkMeshData BlendedFirstChunkMeshData => blendedFirstChunkMeshData;
+        public ChunkMeshData BlendedLastChunkMeshData => blendedLastChunkMeshData;
+
         public void ApplyToChunks(Chunk firstChunk, Chunk lastChunk)
         {
             firstChunk.ChunkMeshData.SetVertices(blendedFirstChunkMeshData.Vertices);

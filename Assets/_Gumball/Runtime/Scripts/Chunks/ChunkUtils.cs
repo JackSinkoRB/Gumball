@@ -13,6 +13,7 @@ namespace Gumball
         
         public enum LoadDirection
         {
+            CUSTOM,
             BEFORE,
             AFTER
         }
