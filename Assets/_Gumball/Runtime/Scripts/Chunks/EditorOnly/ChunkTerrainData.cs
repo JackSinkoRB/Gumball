@@ -28,6 +28,8 @@ namespace Gumball
         [SerializeField] private TerrainHeightData heightData;
         [ConditionalField(nameof(splitHeightData)), SerializeField] private TerrainHeightData heightDataOther;
 
+        [SerializeField] private TerrainTextureBlendSettings textureBlendSettings;
+
         public float WidthAroundRoad => widthAroundRoad;
         public int Resolution => resolution;
         public ChunkGrid Grid { get; private set; }
@@ -84,6 +86,10 @@ namespace Gumball
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
             
+            //set the vertex colours AFTER calculating normals
+            Color[] vertexColors = textureBlendSettings.GetVertexColors(chunk, verticesWithHeightData, terrain.transform);
+            mesh.SetColors(vertexColors);
+
             //save the mesh asset
             string path = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{chunk.UniqueID}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
