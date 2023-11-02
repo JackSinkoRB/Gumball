@@ -224,7 +224,7 @@ namespace Gumball
             if (!splitHeightData)
                 return heightData;
             
-            var (closestSample, distanceToSpline) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
 
             return GetHeightData(vertexPosition, closestSample);
         }
@@ -234,10 +234,11 @@ namespace Gumball
             Vector3 vertexPosition = Grid.Vertices[vertexIndex];
 
             float desiredHeight = vertexPosition.y;
-            var (closestSample, distanceToSpline) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
 
             //check to flatten under road
-            bool canFlattenUnderRoad = distanceToSpline < roadFlattenDistance;
+            float roadFlattenDistanceSqr = roadFlattenDistance * roadFlattenDistance;
+            bool canFlattenUnderRoad = distanceToSplineSqr < roadFlattenDistanceSqr;
             if (canFlattenUnderRoad)
             {
                 const float amountToSitUnderRoad = 0.5f; //let it sit just under the road, so it doesn't clip
@@ -278,10 +279,11 @@ namespace Gumball
             }
             
             //check to blend with the road
-            bool canBlendWithRoad = roadBlendDistance > 0 && distanceToSpline < (roadFlattenDistance + roadBlendDistance);
+            float roadBlendDistanceSqr = roadBlendDistance * roadBlendDistance;
+            bool canBlendWithRoad = roadBlendDistance > 0 && distanceToSplineSqr < (roadFlattenDistanceSqr + roadBlendDistanceSqr);
             if (canBlendWithRoad)
             {
-                float blendPercent = Mathf.Clamp01((distanceToSpline - roadFlattenDistance) / roadBlendDistance);
+                float blendPercent = Mathf.Clamp01((distanceToSplineSqr - roadFlattenDistanceSqr) / roadBlendDistanceSqr);
                 float roadHeight = 0; //TODO - use vertex position instead
                 float blendOffsetDifference = (roadHeight - desiredHeight) * (1-blendPercent);
                 desiredHeight += blendOffsetDifference;

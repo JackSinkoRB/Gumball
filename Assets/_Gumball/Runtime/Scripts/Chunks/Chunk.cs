@@ -202,20 +202,20 @@ namespace Gumball
 
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
         {
-            float closestDistance = Mathf.Infinity;
+            float closestDistanceSqr = Mathf.Infinity;
             SplineSample closestSample = default;
             foreach (SplineSample sample in splineSampleCollection.samples)
             {
                 float distance = flattenTheSpline
                         ? Vector2.SqrMagnitude(fromPoint.FlattenAsVector2() - sample.position.FlattenAsVector2())
                         : Vector3.SqrMagnitude(fromPoint - sample.position);
-                if (distance < closestDistance)
+                if (distance < closestDistanceSqr)
                 {
-                    closestDistance = distance;
+                    closestDistanceSqr = distance;
                     closestSample = sample;
                 }
             }
-            return (closestSample, Mathf.Sqrt(closestDistance));
+            return (closestSample, closestDistanceSqr);
         }
 
         private void TryFindExistingTerrain()

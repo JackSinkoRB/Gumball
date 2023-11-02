@@ -156,8 +156,9 @@ namespace Gumball
                         continue;
                     }
 
-                    var (closestSample, distanceToSpline) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
-                    if (distanceToSpline > widthAroundRoad)
+                    float widthAroundRoadSqr = widthAroundRoad * widthAroundRoad;
+                    var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
+                    if (distanceToSplineSqr > widthAroundRoadSqr)
                     {
                         if (showDebugLines)
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.cyan, debugLineDuration);

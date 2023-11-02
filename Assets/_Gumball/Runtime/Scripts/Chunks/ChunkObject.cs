@@ -136,7 +136,7 @@ namespace Gumball
             Initialise();
             
             //get the closest spline
-            var (closestSample, distanceToSpline) = chunkBelongsTo.GetClosestSampleOnSpline(transform.position, true);
+            var (closestSample, distanceToSplineSqr) = chunkBelongsTo.GetClosestSampleOnSpline(transform.position, true);
             
             Debug.DrawRay(closestSample.position, closestSample.right * distanceFromRoad, Color.red, 15);
             Vector3 desiredPosition = closestSample.position + (closestSample.right * distanceFromRoad);
