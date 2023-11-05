@@ -10,12 +10,14 @@ namespace Gumball
     {
         [Header("Object surrounding texture")]
         [Tooltip("The distance around chunk objects to show the 'object surrrounding texture' at full strength.")]
-        [SerializeField] private float objectSurroundingRadius = 0;
-
+        [SerializeField] private float objectSurroundingRadius = 5;
         [Tooltip("The distance that the texture is blended down.")]
-        [SerializeField] private float objectSurroundingBlendRadius = 20;
+        [SerializeField] private float objectSurroundingBlendRadius = 15;
+        [SerializeField, Range(0, 1)] private float objectSurroundingMaxOpacity = 0.7f;
 
-        [SerializeField, Range(0, 1)] private float objectSurroundingMaxOpacity = 1;
+        [Header("Noise texture")]
+        [SerializeField] private float noiseScale = 1;
+        [SerializeField, Range(0, 1)] private float noiseMaxOpacity = 0.5f;
 
         public Color[] GetVertexColors(Chunk chunk, List<Vector3> vertexPositions, Transform terrainTransform)
         {
@@ -30,7 +32,7 @@ namespace Gumball
                 // - 1 meaning it completely overrides the base layer
                 // - 0.5 means the base is half showing, and the other half is a combination of the blends
                 //TODO: set weights based on the terrain data - objects surrounding, the vertex normal etc.
-                float noiseWeight = 0f;
+                float noiseWeight = GetNoiseWeight(vertexPositionWorld);
                 float objectSurroundingWeight = GetObjectSurroundingWeight(chunk, vertexPositionWorld);
                 float slopeWeight = 0f;
 
@@ -47,6 +49,12 @@ namespace Gumball
             return vertexColors;
         }
 
+        private float GetNoiseWeight(Vector3 vertexPositionWorld)
+        {
+            float perlinValue = Mathf.Clamp01(Mathf.PerlinNoise(vertexPositionWorld.x / noiseScale, vertexPositionWorld.z / noiseScale));
+            return perlinValue * noiseMaxOpacity;
+        }
+
         private float GetObjectSurroundingWeight(Chunk chunk, Vector3 vertexPositionWorld)
         {
             //surrounding objects are: any 'chunk object' in the chunk, plus the closest spline sample
@@ -56,8 +64,7 @@ namespace Gumball
             var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPositionWorld, true);
             float objectSurroundingRadiusSqr = objectSurroundingRadius * objectSurroundingRadius;
             float objectSurroundingBlendRadiusSqr = objectSurroundingBlendRadius * objectSurroundingBlendRadius;
-            float objectSurroundingWeight =
-                1 - Mathf.Clamp01((distanceToSplineSqr - objectSurroundingRadiusSqr) / objectSurroundingBlendRadiusSqr);
+            float objectSurroundingWeight = 1 - Mathf.Clamp01((distanceToSplineSqr - objectSurroundingRadiusSqr) / objectSurroundingBlendRadiusSqr);
             objectSurroundingWeight *= objectSurroundingMaxOpacity;
 
             return objectSurroundingWeight;
