@@ -87,7 +87,7 @@ namespace Gumball
             mesh.RecalculateBounds();
             
             //set the vertex colours AFTER calculating normals
-            Color[] vertexColors = textureBlendSettings.GetVertexColors(chunk, verticesWithHeightData, terrain.transform);
+            Color[] vertexColors = textureBlendSettings.GetVertexColors(chunk, verticesWithHeightData, terrain.transform, mesh);
             mesh.SetColors(vertexColors);
 
             //save the mesh asset

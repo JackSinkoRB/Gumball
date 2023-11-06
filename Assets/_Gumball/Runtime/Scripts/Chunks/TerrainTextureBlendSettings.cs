@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
@@ -13,13 +14,17 @@ namespace Gumball
         [SerializeField] private float objectSurroundingRadius = 5;
         [Tooltip("The distance that the texture is blended down.")]
         [SerializeField] private float objectSurroundingBlendRadius = 15;
-        [SerializeField, Range(0, 1)] private float objectSurroundingMaxOpacity = 0.7f;
+        [SerializeField, Range(0, 1)] private float objectSurroundingMaxOpacity = 0.8f;
 
         [Header("Noise texture")]
-        [SerializeField] private float noiseScale = 1;
-        [SerializeField, Range(0, 1)] private float noiseMaxOpacity = 0.5f;
+        [SerializeField] private float noiseScale = 120;
+        [SerializeField, Range(0, 1)] private float noiseMaxOpacity = 0.8f;
 
-        public Color[] GetVertexColors(Chunk chunk, List<Vector3> vertexPositions, Transform terrainTransform)
+        [Header("Slope texture")]
+        [SerializeField] private MinMaxInt minMaxSlopeAngle = new(0, 50);
+        [SerializeField, Range(0, 1)] private float slopeMaxOpacity = 0.8f;
+
+        public Color[] GetVertexColors(Chunk chunk, List<Vector3> vertexPositions, Transform terrainTransform, Mesh mesh)
         {
             Color[] vertexColors = new Color[vertexPositions.Count];
             for (int i = 0; i < vertexPositions.Count; i++)
@@ -34,7 +39,7 @@ namespace Gumball
                 //TODO: set weights based on the terrain data - objects surrounding, the vertex normal etc.
                 float noiseWeight = GetNoiseWeight(vertexPositionWorld);
                 float objectSurroundingWeight = GetObjectSurroundingWeight(chunk, vertexPositionWorld);
-                float slopeWeight = 0f;
+                float slopeWeight = GetSlopeWeight(i, mesh);
 
                 Color noiseColor = new Color(0, 1, 0, 0);
                 Color objectSurroundingColor = new Color(0, 0, 1, 0);
@@ -69,5 +74,15 @@ namespace Gumball
 
             return objectSurroundingWeight;
         }
+        
+        private float GetSlopeWeight(int index, Mesh mesh)
+        {
+            Vector3 normal = mesh.normals[index];
+            float angle = Vector3.Angle(normal, Vector3.up);
+            float percent = (angle - minMaxSlopeAngle.Min) / (minMaxSlopeAngle.Max - minMaxSlopeAngle.Min);
+            
+            return Mathf.Clamp01(percent) * slopeMaxOpacity;
+        }
+        
     }
 }
