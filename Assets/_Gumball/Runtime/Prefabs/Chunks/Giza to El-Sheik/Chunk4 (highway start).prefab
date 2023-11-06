@@ -509,7 +509,8 @@ GameObject:
   - component: {fileID: 2064696009173594127}
   - component: {fileID: 5619201377745434897}
   - component: {fileID: 1232636757587881900}
-  m_Layer: 0
+  - component: {fileID: 464864120940815811}
+  m_Layer: 7
   m_Name: Terrain
   m_TagString: Terrain
   m_Icon: {fileID: 0}
@@ -580,6 +581,28 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4150564283147293409}
+  m_Mesh: {fileID: 4300000, guid: e4859db71bba627448ed4be0c5c4368d, type: 2}
+--- !u!64 &464864120940815811
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4150564283147293409}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: e4859db71bba627448ed4be0c5c4368d, type: 2}
 --- !u!1 &4914238774668938663
 GameObject:
@@ -14001,6 +14024,16 @@ MonoBehaviour:
         m_PostInfinity: 2
         m_RotationOrder: 4
       Scale: 100
+    textureBlendSettings:
+      objectSurroundingRadius: 5
+      objectSurroundingBlendRadius: 15
+      objectSurroundingMaxOpacity: 0.7
+      noiseScale: 1
+      noiseMaxOpacity: 0.7
+      minMaxSlopeAngle:
+        Min: 0
+        Max: 50
+      slopeMaxOpacity: 0.8
   updateImmediately: 0
   HasConnection: 0
   terrainBlendDistance: 50

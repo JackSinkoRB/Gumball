@@ -62,6 +62,7 @@ namespace Gumball
         private void OnValidate()
         {
             CheckToUpdateMeshesImmediately();
+            CheckIfTerrainIsRaycastable();
         }
 
         private static void OnAssignID(UniqueIDAssigner uniqueIDAssigner, string previousID, string newID)
@@ -95,6 +96,15 @@ namespace Gumball
             PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
             EditorUtility.SetDirty(meshFilter);
             AssetDatabase.SaveAssets();
+        }
+        
+        private void CheckIfTerrainIsRaycastable()
+        {
+            if (chunk.CurrentTerrain == null)
+                return;
+
+            chunk.CurrentTerrain.layer = ChunkUtils.TerrainLayer;
+            chunk.CurrentTerrain.GetComponent<MeshCollider>(true);
         }
 
         #region Show terrain vertices

@@ -109,12 +109,10 @@ namespace Gumball
 
             float offset = 0;
 
-            int terrainLayerMask = 1 << LayerMask.NameToLayer(ChunkUtils.TerrainLayer);
-
             Vector3 originalPosition = transform.position;
             transform.position = transform.position.SetY(chunkBelongsTo.CurrentTerrain.transform.position.y + 10000);
             
-            if (Physics.Raycast(GetLowestPosition(), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, terrainLayerMask))
+            if (Physics.Raycast(GetLowestPosition(), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, ChunkUtils.TerrainLayerMask))
                 offset = -hitDown.distance;
 
             if (offset == 0)

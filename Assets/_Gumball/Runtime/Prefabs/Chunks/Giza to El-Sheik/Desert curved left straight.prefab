@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 6798305476331795729}
   - component: {fileID: 2553118219281438899}
   - component: {fileID: 431898895825720062}
-  m_Layer: 0
+  - component: {fileID: -1537373666996043533}
+  m_Layer: 7
   m_Name: Terrain
   m_TagString: Terrain
   m_Icon: {fileID: 0}
@@ -83,6 +84,28 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2568498904133096843}
   m_Mesh: {fileID: 4300000, guid: 330801f732ab99c4fa3b55176b5463a8, type: 2}
+--- !u!64 &-1537373666996043533
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2568498904133096843}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4300000, guid: 330801f732ab99c4fa3b55176b5463a8, type: 2}
 --- !u!1 &2755924154531067878
 GameObject:
   m_ObjectHideFlags: 0
@@ -134,7 +157,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 3120710646307115694}
   roadMesh: {fileID: 4821658432484105179}
-  terrainBlendDistance: 50
+  hasCustomLoadDistance: 0
+  customLoadDistance: 3000
   chunkBefore: {fileID: 0}
   chunkAfter: {fileID: 0}
   currentTerrain: {fileID: 2568498904133096843}
@@ -5474,6 +5498,10 @@ MonoBehaviour:
     - index: 4825
       localPosition: {x: 178.06284, y: 4.9651656, z: -100.000015}
       chunkBelongsTo: {fileID: 4160006866059075255}
+  splineSampleCollection:
+    samples: []
+    optimizedIndices: 
+    sampleMode: 0
 --- !u!114 &8277367385075657943
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5493,6 +5521,7 @@ MonoBehaviour:
     resolution: 100
     roadFlattenDistance: 15
     roadBlendDistance: 25
+    splitHeightData: 0
     heightData:
       Seed: 389
       LayersOfDetail: 5
@@ -5524,8 +5553,50 @@ MonoBehaviour:
         m_PostInfinity: 2
         m_RotationOrder: 4
       Scale: 150
+    heightDataOther:
+      Seed: 100
+      LayersOfDetail: 3
+      MountainFrequency: 1
+      ElevationAmount: 3
+      ElevationPercent: 0.5
+      ElevationModifier:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 1
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 1
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      Scale: 100
+    textureBlendSettings:
+      objectSurroundingRadius: 5
+      objectSurroundingBlendRadius: 15
+      objectSurroundingMaxOpacity: 0.7
+      noiseScale: 1
+      noiseMaxOpacity: 0.7
+      minMaxSlopeAngle:
+        Min: 0
+        Max: 50
+      slopeMaxOpacity: 0.8
   updateImmediately: 0
   HasConnection: 0
+  terrainBlendDistance: 50
   chunkToConnectWith: {fileID: 0}
 --- !u!114 &3120710646307115694
 MonoBehaviour:

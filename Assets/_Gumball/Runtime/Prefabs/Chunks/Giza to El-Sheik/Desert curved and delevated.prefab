@@ -7092,7 +7092,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 3928984235804892301}
   roadMesh: {fileID: 1377191855773484127}
-  terrainBlendDistance: 50
+  hasCustomLoadDistance: 0
+  customLoadDistance: 3000
   chunkBefore: {fileID: 0}
   chunkAfter: {fileID: 0}
   currentTerrain: {fileID: 8049869935533970294}
@@ -11070,6 +11071,10 @@ MonoBehaviour:
     - index: 3673
       localPosition: {x: 172.92535, y: 8.503938, z: -231.20758}
       chunkBelongsTo: {fileID: 6653691841521699972}
+  splineSampleCollection:
+    samples: []
+    optimizedIndices: 
+    sampleMode: 0
 --- !u!114 &6283370177396123306
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11089,6 +11094,7 @@ MonoBehaviour:
     resolution: 100
     roadFlattenDistance: 15
     roadBlendDistance: 25
+    splitHeightData: 0
     heightData:
       Seed: 418
       LayersOfDetail: 5
@@ -11120,8 +11126,50 @@ MonoBehaviour:
         m_PostInfinity: 2
         m_RotationOrder: 4
       Scale: 150
+    heightDataOther:
+      Seed: 100
+      LayersOfDetail: 3
+      MountainFrequency: 1
+      ElevationAmount: 3
+      ElevationPercent: 0.5
+      ElevationModifier:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 1
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 1
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      Scale: 100
+    textureBlendSettings:
+      objectSurroundingRadius: 5
+      objectSurroundingBlendRadius: 15
+      objectSurroundingMaxOpacity: 0.7
+      noiseScale: 1
+      noiseMaxOpacity: 0.7
+      minMaxSlopeAngle:
+        Min: 0
+        Max: 50
+      slopeMaxOpacity: 0.8
   updateImmediately: 0
   HasConnection: 0
+  terrainBlendDistance: 50
   chunkToConnectWith: {fileID: 0}
 --- !u!114 &3928984235804892301
 MonoBehaviour:
@@ -12612,7 +12660,8 @@ GameObject:
   - component: {fileID: 7799047230965761616}
   - component: {fileID: 4065531830236487591}
   - component: {fileID: 1389039663855529874}
-  m_Layer: 0
+  - component: {fileID: -5519124489529699073}
+  m_Layer: 7
   m_Name: Terrain
   m_TagString: Terrain
   m_Icon: {fileID: 0}
@@ -12683,4 +12732,26 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8049869935533970294}
+  m_Mesh: {fileID: 4300000, guid: 3215bb34bf211c44696e1446052c79ed, type: 2}
+--- !u!64 &-5519124489529699073
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8049869935533970294}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 3215bb34bf211c44696e1446052c79ed, type: 2}
