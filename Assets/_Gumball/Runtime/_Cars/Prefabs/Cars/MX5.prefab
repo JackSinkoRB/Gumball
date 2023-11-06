@@ -619,6 +619,7 @@ MonoBehaviour:
   compression: 0
   manager: {fileID: 0}
   Smoke: {fileID: 0}
+  slipPercent: 0
   onGround: 0
 --- !u!1 &6829804874751175336
 GameObject:
@@ -1107,6 +1108,7 @@ MonoBehaviour:
   compression: 0
   manager: {fileID: 0}
   Smoke: {fileID: 0}
+  slipPercent: 0
   onGround: 0
 --- !u!1 &6830272080298800554
 GameObject:
@@ -1375,6 +1377,7 @@ MonoBehaviour:
   compression: 0
   manager: {fileID: 0}
   Smoke: {fileID: 0}
+  slipPercent: 0
   onGround: 0
 --- !u!1 &6830320533599541442
 GameObject:
@@ -1877,7 +1880,6 @@ MonoBehaviour:
   throttleInput: 0
   clutch: 0
   automatic: 1
-  gear: 2
   rpm: 0
   slipRatio: 0
   engineAngularVelo: 0
@@ -1929,11 +1931,37 @@ MonoBehaviour:
   hasTractionControl: 1
   hasAbsControl: 1
   hasStabilityControl: 1
-  maxSteerSpeed: 2.5
-  minSteerSpeed: 0.4
-  maxSteerReleaseSpeed: 15
-  minSteerReleaseSpeed: 25
-  speedForMinSteerSpeed: 300
+  stabilityControlBrakingModifierMax: 250
+  stabilityControlBrakingModifier:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  stabilityControlTorqueModifier: 0.5
+  maxSteerSpeed: 2
+  minSteerSpeed: 0.35
+  maxSteerReleaseSpeed: 10
+  minSteerReleaseSpeed: 35
+  speedForMinSteerSpeed: 250
   rigidBody: {fileID: 0}
 --- !u!1 &6830546841464558580
 GameObject:
@@ -2123,6 +2151,7 @@ MonoBehaviour:
   compression: 0
   manager: {fileID: 0}
   Smoke: {fileID: 0}
+  slipPercent: 0
   onGround: 0
 --- !u!1 &6830634467071576876
 GameObject:
