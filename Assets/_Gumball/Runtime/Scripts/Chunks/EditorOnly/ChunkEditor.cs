@@ -13,29 +13,6 @@ namespace Gumball
     {
 
         private Chunk chunk => target as Chunk;
-        
-        private void OnEnable()
-        {
-            EditorApplication.update += OnEditorUpdate;
-        }
-
-        private void OnDisable()
-        {
-            EditorApplication.update -= OnEditorUpdate;
-        }
-
-        private void OnEditorUpdate()
-        {
-            if (target == null || chunk.gameObject == null)
-            {
-                OnDestroyedInEditor();
-            }
-        }
-
-        private void OnDestroyedInEditor()
-        {
-            ChunkUtils.CleanupUnusedMeshes();
-        }
 
         private void OnSceneGUI()
         {

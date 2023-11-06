@@ -103,8 +103,6 @@ namespace Gumball
             EditorUtility.SetDirty(meshFilter);
             AssetDatabase.SaveAssets();
 
-            ChunkUtils.CleanupUnusedMeshes(chunk);
-
             //add a collider
             terrain.AddComponent<MeshCollider>();
             

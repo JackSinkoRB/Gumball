@@ -8,11 +8,22 @@ namespace Gumball
     public static class SceneUtils
     {
 
+        
         public static List<T> GetAllComponentsInActiveScene<T>(bool includeDontDestroyOnLoad = false) where T : MonoBehaviour
+        {
+            return GetAllComponentsInScene<T>(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), includeDontDestroyOnLoad);
+        }
+    
+        public static List<T> GetAllComponentsInScene<T>(string sceneName, bool includeDontDestroyOnLoad = false) where T : MonoBehaviour
+        {
+            return GetAllComponentsInScene<T>(UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName), includeDontDestroyOnLoad);
+        }
+    
+        public static List<T> GetAllComponentsInScene<T>(Scene scene, bool includeDontDestroyOnLoad = false) where T : MonoBehaviour
         {
             List<T> results = new List<T>();
             
-            List<GameObject> rootGameObjects = new(UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects());
+            List<GameObject> rootGameObjects = new(scene.GetRootGameObjects());
             
             if (includeDontDestroyOnLoad)
                 rootGameObjects.AddRange(GetDontDestroyOnLoadObjects());

@@ -22,9 +22,9 @@ namespace Gumball
         public const string TerrainLayer = "Terrain";
         public const string TerrainMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
         public const string TerrainMeshPrefix = "ProceduralTerrain_";
-        private const string RoadMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Roads/";
+        public const string RoadMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Roads/";
         public const string RoadMeshPrefix = "RoadMesh_";
-        private const string chunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
+        public const string ChunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
 
         /// <summary>
         /// Connects the chunks with NEW blend data.
@@ -149,94 +149,6 @@ namespace Gumball
             return uvs;
         }
 
-#if UNITY_EDITOR
-        [MenuItem("Gumball/Chunks/Cleanup Unused Assets")]
-        public static void CleanupUnusedMeshes()
-        {
-            CleanupUnusedMeshes(null);
-        }
-        
-        public static void CleanupUnusedMeshes(Chunk ignoreChunk)
-        {
-            if (Application.isPlaying)
-                return;
-
-            CleanupUnusedMeshes(TerrainMeshAssetFolderPath, TerrainMeshPrefix, ignoreChunk);
-            CleanupUnusedMeshes(RoadMeshAssetFolderPath, RoadMeshPrefix, ignoreChunk);
-            
-            AssetDatabase.SaveAssets();
-        }
-
-        private static void CleanupUnusedMeshes(string meshFolderPath, string filePrefix, Chunk ignoreChunk = null)
-        {
-            //find all the used meshes
-            string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { chunkFolderPath });
-            HashSet<string> whitelistedIds = new HashSet<string>();
-            foreach (string prefabGuid in prefabGuids)
-            {
-                string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuid);
-                Chunk chunkPrefab = AssetDatabase.LoadAssetAtPath<Chunk>(prefabPath);
-                if (chunkPrefab == null)
-                    continue; 
-                if (chunkPrefab.CurrentTerrain == null)
-                    continue;
-
-                whitelistedIds.Add(chunkPrefab.UniqueID);
-            }
-
-            //find all the terrain meshes
-            string[] meshGuids = AssetDatabase.FindAssets("t:Mesh", new[] { meshFolderPath });
-            foreach (string meshGuid in meshGuids)
-            {
-                string assetPath = AssetDatabase.GUIDToAssetPath(meshGuid);
-                Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(assetPath);
-                bool isWhitelisted = false;
-                foreach (string whitelistedId in whitelistedIds)
-                {
-                    if (assetPath.Contains(whitelistedId))
-                    {
-                        isWhitelisted = true;
-                        break;
-                    }
-                }
-
-                if (ignoreChunk != null && assetPath.Contains(ignoreChunk.UniqueID))
-                    isWhitelisted = true;
-                
-                //only delete scene instance if scene is loaded
-                bool isApartOfScene = assetPath.Replace(filePrefix, "").Contains("_") && !assetPath.Contains("Prefab");
-                bool isApartOfCurrentScene = assetPath.Contains(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
-                if (isApartOfScene)
-                {
-                    if (isApartOfCurrentScene)
-                    {
-                        //search all gameobjects for chunk components
-                        List<Chunk> chunksInScene = SceneUtils.GetAllComponentsInActiveScene<Chunk>();
-                        foreach (Chunk chunkInScene in chunksInScene)
-                        {
-                            if (assetPath.Contains(chunkInScene.UniqueID))
-                            {
-                                isWhitelisted = true;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        isWhitelisted = true;
-                    }
-                }
-
-                if (!isWhitelisted)
-                {
-                    //remove it
-                    string path = AssetDatabase.GetAssetPath(mesh);
-                    AssetDatabase.DeleteAsset(path);
-                    Debug.Log($"Removed unused mesh asset: {path}");
-                }
-            }
-        }
-        
         public static void BakeRoadMesh(Chunk chunk, bool replace = true)
         {
             bool alreadyBaked = chunk.RoadMesh.baked;
@@ -248,7 +160,7 @@ namespace Gumball
 
             MeshFilter meshFilter = chunk.RoadMesh.GetComponent<MeshFilter>();
             
-            string path = $"{RoadMeshAssetFolderPath}/{RoadMeshPrefix}{chunk.UniqueID}.asset";
+            string path = $"{ChunkUtils.RoadMeshAssetFolderPath}/{ChunkUtils.RoadMeshPrefix}{chunk.UniqueID}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                 AssetDatabase.DeleteAsset(path);
             AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
@@ -267,8 +179,7 @@ namespace Gumball
             
             GlobalLoggers.ChunkLogger.Log("Baked " + path);
         }
-#endif
-
+        
         private static void MoveChunkToOther(Chunk chunk1, Chunk chunk2, LoadDirection direction)
         {
             //align the rotation of chunk2 to match chunk1
