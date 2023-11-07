@@ -67,6 +67,11 @@ namespace Gumball
             EnhancedTouchSupport.Disable();
         }
 
+        private void Update()
+        {
+            PinchInput.CheckForPinch();
+        }
+
         private InputAction GetOrCacheAction(string action)
         {
             if (!actionsCached.ContainsKey(action))

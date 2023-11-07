@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using MyBox;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Gumball
 {
@@ -16,18 +17,20 @@ namespace Gumball
         [SerializeField] private float ySpeed = 0.5f;
         [SerializeField] private MinMaxFloat yClamp = new(10, 60);
         [SerializeField] private float decelerationDuration = 0.5f;
+        [SerializeField] private float zoomSpeed = 1;
 
         private float horizontal;
         private float vertical;
         private Vector2 velocity;
         
         private Tween decelerationTween;
-        
+
         private void OnEnable()
         {
             PrimaryContactInput.onPress += OnPrimaryContactPress;
             PrimaryContactInput.onMove += OnPrimaryContactMove;
             PrimaryContactInput.onRelease += OnPrimaryContactRelease;
+            PinchInput.onPinch += OnPinch;
         }
 
         private void OnDisable()
@@ -35,6 +38,17 @@ namespace Gumball
             PrimaryContactInput.onPress -= OnPrimaryContactPress;
             PrimaryContactInput.onMove -= OnPrimaryContactMove;
             PrimaryContactInput.onRelease -= OnPrimaryContactRelease;
+            PinchInput.onPinch -= OnPinch;
+        }
+        
+        private void Update()
+        {
+            CheckToZoomWithKeyboard();
+        }
+        
+        private void OnPinch(Vector2 offset)
+        {
+            ModifyZoom(offset.x + offset.y);
         }
 
         private void OnPrimaryContactPress()
@@ -72,6 +86,13 @@ namespace Gumball
             Camera.main.transform.position = position;
         }
 
+        private void ModifyZoom(float value)
+        {
+            float newDistance = distance - (Time.deltaTime * value * zoomSpeed);
+            distance = newDistance;
+            MoveCamera(velocity);
+        }
+        
         private void DoDecelerationTween()
         {
             decelerationTween?.Kill();
@@ -89,6 +110,24 @@ namespace Gumball
             if (offset > 0)
                 angle = Mathf.MoveTowardsAngle(angle, midAngle, offset);
             return angle;
+        }
+        
+        /// <summary>
+        /// Alternative for PC zooming (plus and minus keys).
+        /// </summary>
+        private void CheckToZoomWithKeyboard()
+        {
+#if UNITY_EDITOR || !UNITY_ANDROID
+            const float keyboardZoomSpeed = 800f;
+            if (Keyboard.current.numpadPlusKey.isPressed)
+            {
+                ModifyZoom(keyboardZoomSpeed * Time.deltaTime);
+            }
+            else if (Keyboard.current.numpadMinusKey.isPressed)
+            {
+                ModifyZoom(-keyboardZoomSpeed * Time.deltaTime);
+            }
+#endif
         }
         
     }
