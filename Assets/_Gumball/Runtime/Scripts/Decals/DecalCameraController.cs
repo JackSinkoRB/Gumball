@@ -31,6 +31,8 @@ namespace Gumball
             PrimaryContactInput.onMove += OnPrimaryContactMove;
             PrimaryContactInput.onRelease += OnPrimaryContactRelease;
             PinchInput.onPinch += OnPinch;
+
+            target = PlayerCarManager.Instance.CurrentCar.transform;
         }
 
         private void OnDisable()
@@ -65,9 +67,12 @@ namespace Gumball
         
         private void OnPrimaryContactMove(Vector2 offset)
         {
+            if (DecalManager.Instance.CurrentSelected != null)
+                return;
+            
             if (!PrimaryContactInput.IsPressed)
                 return;
-
+            
             velocity = offset;
             MoveCamera(offset);
         }

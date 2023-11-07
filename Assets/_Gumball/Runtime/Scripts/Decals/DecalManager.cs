@@ -1,11 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using MyBox;
 using PaintIn3D;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -34,10 +38,36 @@ namespace Gumball
         
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[maxDecals];
 
+        public static void LoadDecalEditor()
+        {
+            CoroutineHelper.Instance.StartCoroutine(LoadDecalEditorIE());
+        }
+        
+        private static IEnumerator LoadDecalEditorIE()
+        {
+            PanelManager.GetPanel<LoadingPanel>().Show();
+            
+            //set the vehicle kinematic
+            Rigidbody currentCarRigidbody = PlayerCarManager.Instance.CurrentCar.Rigidbody;
+            currentCarRigidbody.isKinematic = true;
+            
+            Stopwatch sceneLoadingStopwatch = new Stopwatch();
+            sceneLoadingStopwatch.Start();
+            yield return Addressables.LoadSceneAsync(SceneManager.DecalEditorSceneName, LoadSceneMode.Single, true);
+            sceneLoadingStopwatch.Stop();
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            
+            //move the vehicle to the right position
+            currentCarRigidbody.Move(Vector3.zero, Quaternion.Euler(Vector3.zero));
+            
+            PanelManager.GetPanel<LoadingPanel>().Hide();
+        }
+        
         private void OnEnable()
         {
             PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
             PrimaryContactInput.onPress += OnPrimaryContactPressed;
+            car = PlayerCarManager.Instance.CurrentCar.transform;
             StartSession(); //temp
         }
 
@@ -82,13 +112,9 @@ namespace Gumball
             {
                 SetMeshPaintable(meshFilter);
             }
-
-            SetupCamera();
-        }
-
-        private void SetupCamera()
-        {
-            Camera.main.transform.LookAt(car.position + cameraLookPositionOffset);
+            
+            //disable the car's collider temporarily
+            PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(false);
         }
 
         private void EndSession()
@@ -99,6 +125,8 @@ namespace Gumball
                 RemoveMeshPaintable(paintableMesh);
                 paintableMeshes.Remove(paintableMesh);
             }
+            
+            PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
         }
 
         private void SetMeshPaintable(MeshFilter meshFilter)
@@ -115,7 +143,6 @@ namespace Gumball
             paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
             paintableTexture.Slot = new P3dSlot(0, "_Albedo"); //car body shader uses albedo
                         
-            //todo: need to disable the car collider too
             meshFilter.gameObject.AddComponent<MeshCollider>();
             
             PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture);
@@ -134,6 +161,11 @@ namespace Gumball
         {
             currentSelected = liveDecal;
             selectedLiveDecalUI.Update();
+        }
+
+        public void DeselectLiveDecal()
+        {
+            currentSelected = null;
         }
 
         public LiveDecal CreateLiveDecal(Sprite sprite)
@@ -169,9 +201,11 @@ namespace Gumball
                 
                 Debug.Log("Ray hit: " + hit.collider.name + " at " + hit.point);
             }
-            
+
             if (highestPriorityDecal != null)
                 SelectLiveDecal(highestPriorityDecal);
+            else DeselectLiveDecal();
         }
+        
     }
 }
