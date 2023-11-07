@@ -1,25 +1,36 @@
 using System;
 using UnityEngine;
 
-/// <summary>
-/// Not intended for manual use. This component is attached to objects automatically when setting up in the ObjectPool.
-/// </summary>
-public class PooledObject : MonoBehaviour
+namespace Gumball
 {
-
-    [Tooltip("Should the object be pooled on disable?")]
-    public bool PoolOnDisable = true;
-
-    public bool IsPooled = false;
-
-    public Action OnPoolAction = null;
-
-    private void OnDisable()
+    /// <summary>
+    /// Not intended for manual use. This component is attached to objects automatically when setting up in the ObjectPool.
+    /// </summary>
+    public class PooledObject : MonoBehaviour
     {
-        if (PoolOnDisable)
+
+        [Tooltip("Should the object be pooled on disable?")]
+        public bool PoolOnDisable = true;
+
+        public bool IsPooled = false;
+
+        public Action OnPoolAction = null;
+
+        private void OnDisable()
         {
-            gameObject.Pool();
+            if (PoolOnDisable)
+            {
+                gameObject.Pool();
+            }
         }
-    }
+
+        private void OnDestroy()
+        {
+            if (gameObject.IsPooled())
+            {
+                gameObject.RemoveFromPool();
+            }
+        }
     
+    }   
 }
