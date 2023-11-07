@@ -22,13 +22,14 @@ namespace Gumball
         [SerializeField] private Vector3 cameraLookPositionOffset = new(0, 2, 0);
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
 
-        [SerializeField] private Sprite[] textureOptions;
+        [SerializeField] private DecalUICategory[] decalUICategories;
 
+        [Header("Debugging")]
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
         [SerializeField, ReadOnly] private int priorityCount;
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
 
-        public Sprite[] TextureOptions => textureOptions;
+        public DecalUICategory[] DecalUICategories => decalUICategories;
         public LiveDecal CurrentSelected => currentSelected;
         
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[maxDecals];

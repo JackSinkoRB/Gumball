@@ -1,16 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class TextureOptionUI : MonoBehaviour
+    public class CategoryOptionUI : MonoBehaviour
     {
         [SerializeField] private Button button;
-        [SerializeField] private Image icon;
+        [SerializeField] private TextMeshProUGUI label;
 
         public Button Button => button;
-        public Image Icon => icon;
+        public TextMeshProUGUI Label => label;
     }
 }
