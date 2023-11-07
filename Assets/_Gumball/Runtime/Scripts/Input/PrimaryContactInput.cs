@@ -12,6 +12,7 @@ namespace Gumball
     {
 
         public static event Action onPress;
+        public static event Action<Vector2> onMove;
         public static event Action onRelease;
         public static event Action onPerform;
 
@@ -26,6 +27,8 @@ namespace Gumball
         /// The amount the primary position has moved since pressed.
         /// </summary>
         public static Vector2 OffsetSincePressed;
+
+        private static Vector2 lastKnownPosition;
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialise()
@@ -48,6 +51,7 @@ namespace Gumball
             IsPressed = true;
             PositionOnPress = InputManager.PrimaryPosition.ReadValue<Vector2>();
             Position = PositionOnPress;
+            lastKnownPosition = Position;
             OffsetSincePressed = Vector2.zero;
             
             onPress?.Invoke();
@@ -69,6 +73,12 @@ namespace Gumball
             OffsetSincePressed = PositionOnPress - Position;
             
             onPerform?.Invoke();
+
+            
+            Vector2 offsetSinceLastFrame = Position - lastKnownPosition;
+            lastKnownPosition = Position;
+            if (offsetSinceLastFrame.sqrMagnitude > 0.01f)
+                onMove?.Invoke(offsetSinceLastFrame);
         }
 
         public static bool IsSelectableUnderPointer()
