@@ -58,7 +58,11 @@ namespace Gumball
             velocity = Vector2.zero;
             horizontal = Camera.main.transform.eulerAngles.y;
             vertical = Camera.main.transform.eulerAngles.x;
+
+            pressedUI = PrimaryContactInput.IsSelectableUnderPointer();
         }
+
+        private bool pressedUI;
 
         private void OnPrimaryContactRelease()
         {
@@ -72,6 +76,9 @@ namespace Gumball
             
             if (!PrimaryContactInput.IsPressed)
                 return;
+
+            if (pressedUI)
+                return; //don't move the camera if selecting UI
             
             velocity = offset;
             MoveCamera(offset);
