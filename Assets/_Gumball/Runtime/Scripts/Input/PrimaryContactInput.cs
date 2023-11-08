@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -29,6 +30,8 @@ namespace Gumball
         public static Vector2 OffsetSincePressed;
 
         private static Vector2 lastKnownPosition;
+        private static int selectablesUnderPointerLastCached = -1;
+        private static readonly List<Selectable> selectablesUnderPointerCached = new();
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialise()
@@ -50,6 +53,9 @@ namespace Gumball
         {
             IsPressed = true;
             PositionOnPress = InputManager.PrimaryPosition.ReadValue<Vector2>();
+            if (PositionOnPress.Approximately(Vector2.zero))
+                return;
+            
             Position = PositionOnPress;
             lastKnownPosition = Position;
             OffsetSincePressed = Vector2.zero;
@@ -73,7 +79,6 @@ namespace Gumball
             OffsetSincePressed = PositionOnPress - Position;
             
             onPerform?.Invoke();
-
             
             Vector2 offsetSinceLastFrame = Position - lastKnownPosition;
             lastKnownPosition = Position;
@@ -83,18 +88,44 @@ namespace Gumball
 
         public static bool IsSelectableUnderPointer()
         {
-            var pointer = new PointerEventData(EventSystem.current) { position = Position };
-        
-            List<RaycastResult> raycastResults = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(pointer, raycastResults);
+            return GetSelectablesUnderPointer().Count > 0;
+        }
 
-            foreach (RaycastResult result in raycastResults)
+        public static bool IsSelectableUnderPointer(Selectable selectable)
+        {
+            foreach (Selectable selectableUnderPointer in GetSelectablesUnderPointer())
             {
-                if (result.gameObject.GetComponent<Selectable>() != null);
-                return true;
+                if (selectableUnderPointer == selectable)
+                    return true;
             }
 
             return false;
+        }
+
+        private static List<Selectable> GetSelectablesUnderPointer()
+        {
+            //because input only updates once per frame, cache the results for the entire frame
+            bool isCached = selectablesUnderPointerLastCached == Time.frameCount;
+            if (!isCached)
+            {
+                selectablesUnderPointerCached.Clear();
+                
+                selectablesUnderPointerLastCached = Time.frameCount;
+                PointerEventData pointer = new PointerEventData(EventSystem.current) { position = Position };
+        
+                List<RaycastResult> raycastResults = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(pointer, raycastResults);
+
+                foreach (RaycastResult result in raycastResults)
+                {
+                    Selectable selectable = result.gameObject.GetComponent<Selectable>(); 
+                    if (selectable != null)
+                        selectablesUnderPointerCached.Add(selectable);
+                }
+                
+            }
+            
+            return selectablesUnderPointerCached;
         }
 
     }
