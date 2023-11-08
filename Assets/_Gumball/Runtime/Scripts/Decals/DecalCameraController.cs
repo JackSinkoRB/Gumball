@@ -28,7 +28,7 @@ namespace Gumball
         private void OnEnable()
         {
             PrimaryContactInput.onPress += OnPrimaryContactPress;
-            PrimaryContactInput.onMove += OnPrimaryContactMove;
+            PrimaryContactInput.onDrag += OnPrimaryContactMove;
             PrimaryContactInput.onRelease += OnPrimaryContactRelease;
             PinchInput.onPinch += OnPinch;
 
@@ -38,7 +38,7 @@ namespace Gumball
         private void OnDisable()
         {
             PrimaryContactInput.onPress -= OnPrimaryContactPress;
-            PrimaryContactInput.onMove -= OnPrimaryContactMove;
+            PrimaryContactInput.onDrag -= OnPrimaryContactMove;
             PrimaryContactInput.onRelease -= OnPrimaryContactRelease;
             PinchInput.onPinch -= OnPinch;
         }

@@ -143,7 +143,7 @@ namespace Gumball
             
             //set the selection collider scale:
             Vector3 selectionScale = (newScale * (2 * paintDecal.Radius)).SetZ(selectionColliderWidth);
-            selectionCollider.transform.localScale = newScale;
+            selectionCollider.transform.localScale = selectionScale;
         }
     }
 }

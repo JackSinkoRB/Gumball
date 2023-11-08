@@ -13,11 +13,15 @@ namespace Gumball
     {
 
         public static event Action onPress;
-        public static event Action<Vector2> onMove;
+        public static event Action onDragStart;
+        public static event Action<Vector2> onDrag;
+        public static event Action onDragStop;
         public static event Action onRelease;
         public static event Action onPerform;
 
         public static bool IsPressed { get; private set; }
+        public static bool IsDragging { get; private set; }
+        
         public static Vector2 Position { get; private set; }
         /// <summary>
         /// The position of the press when the primary contact was started.
@@ -83,7 +87,30 @@ namespace Gumball
             Vector2 offsetSinceLastFrame = Position - lastKnownPosition;
             lastKnownPosition = Position;
             if (offsetSinceLastFrame.sqrMagnitude > 0.01f)
-                onMove?.Invoke(offsetSinceLastFrame);
+            {
+                if (!IsDragging)
+                    OnStartDragging();
+
+                OnDrag(offsetSinceLastFrame);
+            } else if (IsDragging)
+            {
+                OnStopDragging();
+            }
+        }
+        
+        private static void OnStartDragging()
+        {
+            onDragStart?.Invoke();
+        }
+
+        private static void OnDrag(Vector2 offset)
+        {
+            onDrag?.Invoke(offset);
+        }
+
+        private static void OnStopDragging()
+        {
+            onDragStop?.Invoke();
         }
 
         public static bool IsSelectableUnderPointer()

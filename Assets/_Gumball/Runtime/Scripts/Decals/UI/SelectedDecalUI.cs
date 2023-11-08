@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +16,11 @@ namespace Gumball
         [SerializeField] private Color validColor;
         [SerializeField] private Color invalidColor;
         
+        [Header("Fade when modifying")]
+        [SerializeField] private float fadeWhenModifying = 0.2f;
+        [SerializeField] private float fadeDuration = 0.25f;
+        [SerializeField] private Ease fadeEase = Ease.InOutSine;
+
         [Header("Scale/Rotation handle")]
         [SerializeField] private ButtonEvents scaleRotationHandle;
         [SerializeField] private float scaleSpeed = 1;
@@ -23,20 +29,26 @@ namespace Gumball
 
         public ButtonEvents ScaleRotationHandle => scaleRotationHandle;
 
+        private Tween currentFadeTween;
+        private bool isFaded;
+
         private void OnEnable()
         {
-            scaleRotationHandle.onPressMove += OnPressMoveScaleRotationHandle;
+            scaleRotationHandle.onDrag += OnDragScaleRotationHandle;
         }
 
         private void OnDisable()
         {
-            scaleRotationHandle.onPressMove -= OnPressMoveScaleRotationHandle;
+            scaleRotationHandle.onDrag -= OnDragScaleRotationHandle;
         }
 
         public void Update()
         {
             if (selectedDecal == null)
             {
+                if (isFaded)
+                    Fade(false);
+                
                 gameObject.SetActive(false);
                 return;
             }
@@ -46,20 +58,32 @@ namespace Gumball
             MovePosition();
         }
         
-        private void OnPressMoveScaleRotationHandle(Vector2 offset)
+        private void OnDragScaleRotationHandle(Vector2 offset)
         {
             //move right from initial click = scale up
             //move left from initial click = scale down
             //move up from initial click = rotate ccw
             //move down from initial click = rotate cw
 
-            float scaleOffset = offset.x * scaleSpeed;
+            float scaleOffset = offset.x * (scaleSpeed * Time.deltaTime);
             float rotationOffset = offset.y;
 
             float newScale = selectedDecal.Scale.x + scaleOffset;
             selectedDecal.SetScale(newScale);
         }
 
+        public void Fade(bool fade)
+        {
+            if (isFaded == fade)
+                return; //already faded
+            
+            isFaded = fade;
+            currentFadeTween?.Kill();
+            currentFadeTween = this.GetComponent<CanvasGroup>(true)
+                .DOFade(fade ? fadeWhenModifying : 1, fadeDuration)
+                .SetEase(fadeEase);
+        }
+        
         private void MovePosition()
         {
             Vector3 screenPos = Camera.main.WorldToScreenPoint(selectedDecal.transform.position);

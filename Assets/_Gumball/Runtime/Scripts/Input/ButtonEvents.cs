@@ -17,9 +17,11 @@ namespace Gumball
     [RequireComponent(typeof(Button))]
     public class ButtonEvents : MonoBehaviour
     {
-
-        public event Action<Vector2> onPressMove;
         
+        public event Action onPress;
+        public event Action<Vector2> onDrag;
+        public event Action onRelease;
+
         [SerializeField] private UnityEvent onStartPressing;
         [SerializeField] private UnityEvent onHoldPress;
         [SerializeField] private UnityEvent onStopPressing;
@@ -70,7 +72,8 @@ namespace Gumball
             isPressingButton = true;
             
             lastKnownPosition = PrimaryContactInput.Position;
-            
+
+            onPress?.Invoke();
             onStartPressing?.Invoke();
             GlobalLoggers.InputLogger.Log($"Pressed {gameObject.name}");
         }
@@ -78,8 +81,8 @@ namespace Gumball
         private void OnRelease()
         {
             isPressingButton = false;
-            
-            //just stopped pressing
+
+            onRelease?.Invoke();
             onStopPressing?.Invoke();
             GlobalLoggers.InputLogger.Log($"Depressed {gameObject.name}");
         }
@@ -90,14 +93,14 @@ namespace Gumball
             lastKnownPosition = PrimaryContactInput.Position;
             
             if (offset.sqrMagnitude > 0.01f)
-                OnMove(offset);
+                OnDrag(offset);
 
             onHoldPress?.Invoke();
         }
 
-        private void OnMove(Vector2 offset)
+        private void OnDrag(Vector2 offset)
         {
-            onPressMove?.Invoke(offset);
+            onDrag?.Invoke(offset);
         }
         
         private bool IsScreenPositionWithinGraphic(Graphic graphic, Vector2 screenPosition)

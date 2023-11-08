@@ -23,7 +23,6 @@ namespace Gumball
         [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
         [SerializeField] private Shader carBodyShader;
         [SerializeField] private Transform car;
-        [SerializeField] private Vector3 cameraLookPositionOffset = new(0, 2, 0);
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
 
         [SerializeField] private DecalUICategory[] decalUICategories;
@@ -35,7 +34,7 @@ namespace Gumball
 
         public DecalUICategory[] DecalUICategories => decalUICategories;
         public LiveDecal CurrentSelected => currentSelected;
-        
+
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[maxDecals];
 
         public static void LoadDecalEditor()
@@ -65,16 +64,20 @@ namespace Gumball
         
         private void OnEnable()
         {
-            PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
             PrimaryContactInput.onPress += OnPrimaryContactPressed;
+            PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
+            PrimaryContactInput.onRelease += OnPrimaryContactReleased;
+            
             car = PlayerCarManager.Instance.CurrentCar.transform;
             StartSession();
         }
 
         private void OnDisable()
         {
-            PrimaryContactInput.onPerform -= OnPrimaryContactPerformed;
             PrimaryContactInput.onPress -= OnPrimaryContactPressed;
+            PrimaryContactInput.onPerform -= OnPrimaryContactPerformed;
+            PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
+            
             EndSession();
         }
 
@@ -82,11 +85,20 @@ namespace Gumball
         {
             if (!PrimaryContactInput.IsSelectableUnderPointer(selectedLiveDecalUI.ScaleRotationHandle.Button))
                 GetDecalsUnderPointer();
+            
+            if (currentSelected != null)
+                selectedLiveDecalUI.Fade(true);
         }
 
         private void OnPrimaryContactPerformed()
         {
             selectedLiveDecalUI.Update();
+        }
+
+        private void OnPrimaryContactReleased()
+        {
+            if (currentSelected != null)
+                selectedLiveDecalUI.Fade(false);
         }
         
         [Serializable]
