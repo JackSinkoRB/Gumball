@@ -65,9 +65,7 @@ namespace Gumball
         private void OnEnable()
         {
             PrimaryContactInput.onPress += OnPrimaryContactPressed;
-            PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
-            PrimaryContactInput.onRelease += OnPrimaryContactReleased;
-            
+
             car = PlayerCarManager.Instance.CurrentCar.transform;
             StartSession();
         }
@@ -75,32 +73,27 @@ namespace Gumball
         private void OnDisable()
         {
             PrimaryContactInput.onPress -= OnPrimaryContactPressed;
-            PrimaryContactInput.onPerform -= OnPrimaryContactPerformed;
-            PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
-            
+
             EndSession();
+        }
+
+        private void Update()
+        {
+            bool canFade = PrimaryContactInput.IsPressed && currentSelected != null && currentSelected.IsValidPosition;
+            selectedLiveDecalUI.Fade(canFade);
+        }
+
+        private void LateUpdate()
+        {
+            selectedLiveDecalUI.UpdatePosition();
         }
 
         private void OnPrimaryContactPressed()
         {
             if (!PrimaryContactInput.IsSelectableUnderPointer(selectedLiveDecalUI.ScaleRotationHandle.Button))
                 GetDecalsUnderPointer();
-            
-            if (currentSelected != null)
-                selectedLiveDecalUI.Fade(true);
         }
 
-        private void OnPrimaryContactPerformed()
-        {
-            selectedLiveDecalUI.Update();
-        }
-
-        private void OnPrimaryContactReleased()
-        {
-            if (currentSelected != null)
-                selectedLiveDecalUI.Fade(false);
-        }
-        
         [Serializable]
         private struct PaintableMesh
         {
@@ -174,7 +167,6 @@ namespace Gumball
         public void SelectLiveDecal(LiveDecal liveDecal)
         {
             currentSelected = liveDecal;
-            selectedLiveDecalUI.Update();
         }
 
         public void DeselectLiveDecal()
@@ -182,11 +174,14 @@ namespace Gumball
             currentSelected = null;
         }
 
-        public LiveDecal CreateLiveDecal(Sprite sprite)
+        public LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite)
         {
             LiveDecal liveDecal = Instantiate(liveDecalPrefab.gameObject, transform).GetComponent<LiveDecal>();
             liveDecal.PaintDecal.Texture = sprite.texture;
             liveDecal.SetSprite(sprite);
+
+            if (category.CategoryName.Equals("Shapes"))
+                liveDecal.SetColor(Color.gray);
 
             priorityCount++;
             liveDecal.SetPriority(priorityCount);

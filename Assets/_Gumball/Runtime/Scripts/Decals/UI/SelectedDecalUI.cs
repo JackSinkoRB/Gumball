@@ -18,31 +18,34 @@ namespace Gumball
         
         [Header("Fade when modifying")]
         [SerializeField] private float fadeWhenModifying = 0.2f;
-        [SerializeField] private float fadeDuration = 0.25f;
-        [SerializeField] private Ease fadeEase = Ease.InOutSine;
 
         [Header("Scale/Rotation handle")]
         [SerializeField] private ButtonEvents scaleRotationHandle;
-        [SerializeField] private float scaleSpeed = 1;
-
+        [SerializeField] private float scaleSpeed = 2;
+        
         private LiveDecal selectedDecal => DecalManager.Instance.CurrentSelected;
 
         public ButtonEvents ScaleRotationHandle => scaleRotationHandle;
 
         private Tween currentFadeTween;
         private bool isFaded;
+        
+        private float lastKnownRadius;
+        private Vector2 lastClickPosition;
 
         private void OnEnable()
         {
+            scaleRotationHandle.onPress += OnPressScaleRotationHandle;
             scaleRotationHandle.onDrag += OnDragScaleRotationHandle;
         }
 
         private void OnDisable()
         {
             scaleRotationHandle.onDrag -= OnDragScaleRotationHandle;
+            scaleRotationHandle.onPress -= OnPressScaleRotationHandle;
         }
 
-        public void Update()
+        public void UpdatePosition()
         {
             if (selectedDecal == null)
             {
@@ -58,32 +61,50 @@ namespace Gumball
             MovePosition();
         }
         
-        private void OnDragScaleRotationHandle(Vector2 offset)
-        {
-            //move right from initial click = scale up
-            //move left from initial click = scale down
-            //move up from initial click = rotate ccw
-            //move down from initial click = rotate cw
-
-            float scaleOffset = offset.x * (scaleSpeed * Time.deltaTime);
-            float rotationOffset = offset.y;
-
-            float newScale = selectedDecal.Scale.x + scaleOffset;
-            selectedDecal.SetScale(newScale);
-        }
-
         public void Fade(bool fade)
         {
             if (isFaded == fade)
                 return; //already faded
             
             isFaded = fade;
-            currentFadeTween?.Kill();
-            currentFadeTween = this.GetComponent<CanvasGroup>(true)
-                .DOFade(fade ? fadeWhenModifying : 1, fadeDuration)
-                .SetEase(fadeEase);
+            this.GetComponent<CanvasGroup>(true).alpha = fade ? fadeWhenModifying : 1;
         }
         
+        private void OnPressScaleRotationHandle()
+        {
+            lastClickPosition = PrimaryContactInput.Position;
+            lastKnownRadius = GetDistanceToCentre(PrimaryContactInput.Position);
+        }
+        
+        private void OnDragScaleRotationHandle(Vector2 offset)
+        {
+            UpdateScale();
+            UpdateRotation();
+        }
+
+        private void UpdateScale()
+        {
+            //scale offset = radius from middle
+            float newRadius = GetDistanceToCentre(PrimaryContactInput.Position);
+            float radiusDelta = newRadius - lastKnownRadius;
+            lastKnownRadius = newRadius;
+            
+            float scaleOffset = radiusDelta * scaleSpeed;
+            float existingScale = selectedDecal.Scale.x;
+            float newScale = existingScale + scaleOffset;
+            selectedDecal.SetScale(newScale);
+        }
+        
+        private void UpdateRotation()
+        {
+            //rotation = angle between click point to centre and new point to centre
+            float angleDelta = -Vector2.SignedAngle(PrimaryContactInput.Position - (Vector2)transform.position, lastClickPosition - (Vector2)transform.position);
+            lastClickPosition = PrimaryContactInput.Position;
+
+            float newAngle = selectedDecal.Angle + angleDelta;
+            selectedDecal.SetAngle(newAngle);
+        }
+
         private void MovePosition()
         {
             Vector3 screenPos = Camera.main.WorldToScreenPoint(selectedDecal.transform.position);
@@ -98,6 +119,11 @@ namespace Gumball
             invalidDecal.gameObject.SetActive(!selectedDecal.IsValidPosition);
             if (selectedDecal.IsValidPosition)
                 invalidDecal.sprite = selectedDecal.Sprite;
+        }
+
+        private float GetDistanceToCentre(Vector2 fromPos)
+        {
+            return Vector2.Distance(fromPos, (Vector2)transform.position);
         }
         
     }

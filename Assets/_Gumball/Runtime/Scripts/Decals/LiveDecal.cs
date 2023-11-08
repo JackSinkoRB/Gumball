@@ -37,6 +37,8 @@ namespace Gumball
         public Sprite Sprite => sprite;
         public int Priority => priority;
         public Vector3 Scale => paintDecal.Scale;
+        public float Angle => paintDecal.Angle;
+        public Color Color => paintDecal.Color;
 
         private void SetDefaultPosition()
         {
@@ -75,6 +77,11 @@ namespace Gumball
         public void SetSprite(Sprite sprite)
         {
             this.sprite = sprite;
+        }
+
+        public void SetColor(Color color)
+        {
+            paintDecal.Color = color;
         }
 
         public void SetPriority(int priority)
@@ -132,6 +139,11 @@ namespace Gumball
         private void DrawPreview()
         {
             paintDecal.HandleHitPoint(true, int.MaxValue, 1, 0, lastKnownPosition, lastKnownRotation);
+        }
+
+        public void SetAngle(float angle)
+        {
+            paintDecal.Angle = angle;
         }
         
         public void SetScale(float scale)
