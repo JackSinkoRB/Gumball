@@ -49,7 +49,8 @@ namespace Gumball
             {
                 CategoryOptionUI categoryOption = categoryOptionPrefab.GetSpareOrCreate<CategoryOptionUI>(contentHolder);
                 categoryOption.Label.text = category.CategoryName;
-                
+                categoryOption.transform.SetAsLastSibling();
+
                 categoryOption.Button.onClick.RemoveAllListeners();
                 categoryOption.Button.onClick.AddListener(() => OnClickCategoryOption(category));
             }
@@ -69,6 +70,7 @@ namespace Gumball
             {
                 TextureOptionUI textureOption = textureOptionPrefab.GetSpareOrCreate<TextureOptionUI>(contentHolder);
                 textureOption.Icon.sprite = sprite;
+                textureOption.transform.SetAsLastSibling();
                 
                 textureOption.Button.onClick.RemoveAllListeners();
                 textureOption.Button.onClick.AddListener(() => OnClickTextureOption(sprite));
@@ -94,14 +96,8 @@ namespace Gumball
 
         private void ResetScrollRect()
         {
-            scrollRect.enabled = true;
             Canvas.ForceUpdateCanvases();
-            horizontalScrollBar.value = 0;
-            this.PerformAtEndOfFrame(() =>
-            {
-                if (!horizontalScrollBar.gameObject.activeSelf)
-                    scrollRect.enabled = false;
-            });
+            scrollRect.horizontalNormalizedPosition = 0;
         }
         
         private void PoolPopulatedIcons()
