@@ -4,30 +4,40 @@ using System.Collections.Generic;
 using PaintIn3D;
 using UnityEngine;
 using MyBox;
-using UnityEngine.EventSystems;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Gumball
 {
     public class LiveDecal : MonoBehaviour
     {
 
+        private const float selectionColliderWidth = 0.1f;
+        
         [SerializeField] private Collider selectionCollider;
         [SerializeField] private P3dPaintDecal paintDecal;
-        [SerializeField] private LayerMask raycastLayers;
 
+        [Header("Settings")]
+        [SerializeField] private LayerMask raycastLayers; //TODO - vehicle only
+        [SerializeField] private MinMaxFloat minMaxScale = new(0.03f, 50);
+        
+        [Header("Debugging")]
         [SerializeField, ReadOnly] private Sprite sprite;
         
         private Vector2 clickOffset;
         private Vector3 lastKnownPosition;
         private Quaternion lastKnownRotation;
         private int priority;
+        private bool selectableUnderPointerOnPress;
 
         public bool IsValidPosition { get; private set; }
 
         public P3dPaintDecal PaintDecal => paintDecal;
         public Sprite Sprite => sprite;
         public int Priority => priority;
-        
+        public Vector3 Scale => paintDecal.Scale;
+
         private void SetDefaultPosition()
         {
             UpdatePosition(new Vector2(Screen.width / 2f, Screen.height / 2f));
@@ -35,7 +45,7 @@ namespace Gumball
 
         private void OnEnable()
         {
-            SetScale(paintDecal.Scale);
+            SetScale(paintDecal.Scale.x);
             SetDefaultPosition();
             PrimaryContactInput.onPress += OnPrimaryContactPressed;
             PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
@@ -75,12 +85,13 @@ namespace Gumball
         private void OnPrimaryContactPressed()
         {
             CalculateClickOffset();
+            selectableUnderPointerOnPress = PrimaryContactInput.IsSelectableUnderPointer();
         }
         
         private void OnPrimaryContactPerformed()
         {
             if (DecalManager.Instance.CurrentSelected == this 
-                && !PrimaryContactInput.IsSelectableUnderPointer())
+                && !selectableUnderPointerOnPress)
             {
                 UpdatePosition(PrimaryContactInput.Position - clickOffset);
             }
@@ -110,6 +121,9 @@ namespace Gumball
                 lastKnownRotation = Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Camera.main.transform.up);
 
                 transform.position = lastKnownPosition;
+                
+                //put the selection collider on the angle of the normal
+                selectionCollider.transform.rotation = Quaternion.LookRotation(hit.normal, Vector3.up);
 
                 IsValidPosition = hit.collider.GetComponent<P3dPaintable>() != null;
             }
@@ -119,11 +133,17 @@ namespace Gumball
         {
             paintDecal.HandleHitPoint(true, int.MaxValue, 1, 0, lastKnownPosition, lastKnownRotation);
         }
-
-        public void SetScale(Vector3 scale)
+        
+        public void SetScale(float scale)
         {
-            paintDecal.Scale = scale;
-            selectionCollider.transform.localScale = scale * 2 * paintDecal.Radius;
+            float newValue = Mathf.Clamp(scale, minMaxScale.Min, minMaxScale.Max);
+            Vector3 newScale = Vector3.one * newValue;
+            
+            paintDecal.Scale = newScale;
+            
+            //set the selection collider scale:
+            Vector3 selectionScale = (newScale * (2 * paintDecal.Radius)).SetZ(selectionColliderWidth);
+            selectionCollider.transform.localScale = newScale;
         }
     }
 }

@@ -68,19 +68,20 @@ namespace Gumball
             PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
             PrimaryContactInput.onPress += OnPrimaryContactPressed;
             car = PlayerCarManager.Instance.CurrentCar.transform;
-            StartSession(); //temp
+            StartSession();
         }
 
         private void OnDisable()
         {
             PrimaryContactInput.onPerform -= OnPrimaryContactPerformed;
             PrimaryContactInput.onPress -= OnPrimaryContactPressed;
-            EndSession(); //temp
+            EndSession();
         }
 
         private void OnPrimaryContactPressed()
         {
-            GetDecalsUnderPointer();
+            if (!PrimaryContactInput.IsSelectableUnderPointer(selectedLiveDecalUI.ScaleRotationHandle.Button))
+                GetDecalsUnderPointer();
         }
 
         private void OnPrimaryContactPerformed()
@@ -126,7 +127,8 @@ namespace Gumball
                 paintableMeshes.Remove(paintableMesh);
             }
             
-            PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
+            if (PlayerCarManager.ExistsRuntime)
+                PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
         }
 
         private void SetMeshPaintable(MeshFilter meshFilter)
@@ -194,7 +196,7 @@ namespace Gumball
                 if (hit.collider == null)
                     break;
                 
-                LiveDecal decal = hit.collider.GetComponent<LiveDecal>();
+                LiveDecal decal = hit.transform.parent.GetComponent<LiveDecal>();
 
                 if (highestPriorityDecal == null || decal.Priority > highestPriorityDecal.Priority)
                     highestPriorityDecal = decal;
