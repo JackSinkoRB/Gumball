@@ -23,6 +23,8 @@ namespace Gumball
         public event Action<LiveDecal> onDeselectLiveDecal;
         public event Action<LiveDecal> onCreateLiveDecal;
         public event Action<LiveDecal> onDestroyLiveDecal;
+
+        [SerializeField] private Logger logger;
         
         [SerializeField] private LiveDecal liveDecalPrefab;
         [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
@@ -194,7 +196,9 @@ namespace Gumball
 
             int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, Mathf.Infinity, 1 << liveDecalLayer);
 
-            LiveDecal highestPriorityDecal = null;
+            LiveDecal closestDecal = null;
+            float distanceToClosestDecalSqr = Mathf.Infinity;
+            
             for (int index = 0; index < raycastHits; index++)
             {
                 RaycastHit hit = decalsUnderPointer[index];
@@ -206,16 +210,25 @@ namespace Gumball
                 if (decal == currentSelected)
                 {
                     //if clicking the already-selected decal, don't select any higher priority ones, so it can be moved etc.
-                    highestPriorityDecal = decal;
+                    closestDecal = decal;
                     break;
                 }
+
+                Vector2 clickScreenPos = PrimaryContactInput.Position;
+                Vector2 centreOfDecalScreenPos = Camera.main.WorldToScreenPoint(decal.transform.position);
                 
-                if (highestPriorityDecal == null || decal.Priority > highestPriorityDecal.Priority)
-                    highestPriorityDecal = decal;
+                float distanceToDecalSqr = Vector2.SqrMagnitude(clickScreenPos - centreOfDecalScreenPos);
+                if (closestDecal == null || distanceToDecalSqr < distanceToClosestDecalSqr)
+                {
+                    closestDecal = decal;
+                    distanceToClosestDecalSqr = distanceToDecalSqr;
+                }
+
+                logger.Log($"Distance to {decal.Priority} = {distanceToDecalSqr}");
             }
 
-            if (highestPriorityDecal != null)
-                SelectLiveDecal(highestPriorityDecal);
+            if (closestDecal != null)
+                SelectLiveDecal(closestDecal);
             else DeselectLiveDecal();
         }
         
