@@ -12,6 +12,7 @@ namespace Gumball
     {
         
         [SerializeField] private Transform target;
+        [SerializeField] private Vector3 targetOffset = new(0, 0.5f);
         [SerializeField] private float distance = 5.0f;
         [SerializeField] private float xSpeed = 0.5f;
         [SerializeField] private float ySpeed = 0.5f;
@@ -92,7 +93,7 @@ namespace Gumball
             vertical = ClampAngle(vertical, yClamp.Min, yClamp.Max);
 
             Quaternion rotation = Quaternion.Euler(vertical, horizontal, 0);
-            Vector3 position = rotation * new Vector3(0, 0, -distance) + target.position;
+            Vector3 position = rotation * new Vector3(0, 0, -distance) + target.position + targetOffset;
 
             Camera.main.transform.rotation = rotation;
             Camera.main.transform.position = position;
