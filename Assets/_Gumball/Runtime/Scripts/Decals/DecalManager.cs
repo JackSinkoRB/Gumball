@@ -203,6 +203,13 @@ namespace Gumball
                 
                 LiveDecal decal = hit.transform.parent.GetComponent<LiveDecal>();
 
+                if (decal == currentSelected)
+                {
+                    //if clicking the already-selected decal, don't select any higher priority ones, so it can be moved etc.
+                    highestPriorityDecal = decal;
+                    break;
+                }
+                
                 if (highestPriorityDecal == null || decal.Priority > highestPriorityDecal.Priority)
                     highestPriorityDecal = decal;
             }
