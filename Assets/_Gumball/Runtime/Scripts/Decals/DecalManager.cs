@@ -207,8 +207,6 @@ namespace Gumball
 
                 if (highestPriorityDecal == null || decal.Priority > highestPriorityDecal.Priority)
                     highestPriorityDecal = decal;
-                
-                Debug.Log("Ray hit: " + hit.collider.name + " at " + hit.point);
             }
 
             if (highestPriorityDecal != null)
