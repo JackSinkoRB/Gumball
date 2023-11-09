@@ -74,7 +74,7 @@ namespace Gumball
                 {
                     DecalLayerIcon decalLayerIcon = (DecalLayerIcon) scrollItem.CurrentIcon;
                     decalLayerIcon.ImageComponent.sprite = liveDecal.Sprite;
-                    decalLayerIcon.PriorityLabel.text = finalIndex.ToString();
+                    decalLayerIcon.PriorityLabel.text = (finalIndex + 1).ToString();
                 };
                 
                 //onSelectComplete gets called when the pointer is no longer down
