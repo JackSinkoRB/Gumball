@@ -117,7 +117,7 @@ namespace Gumball
             image.color = selectedDecal.IsValidPosition ? validColor : invalidColor;
             
             invalidDecal.gameObject.SetActive(!selectedDecal.IsValidPosition);
-            if (selectedDecal.IsValidPosition)
+            if (!selectedDecal.IsValidPosition)
                 invalidDecal.sprite = selectedDecal.Sprite;
         }
 
