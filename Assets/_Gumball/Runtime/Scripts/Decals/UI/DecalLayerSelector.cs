@@ -11,6 +11,8 @@ namespace Gumball
         
         [SerializeField] private MagneticScroll magneticScroll;
         [SerializeField] private TextMeshProUGUI layerAmountLabel;
+
+        public MagneticScroll MagneticScroll => magneticScroll;
         
         private void OnEnable()
         {
@@ -73,6 +75,13 @@ namespace Gumball
                     DecalLayerIcon decalLayerIcon = (DecalLayerIcon) scrollItem.CurrentIcon;
                     decalLayerIcon.ImageComponent.sprite = liveDecal.Sprite;
                     decalLayerIcon.PriorityLabel.text = finalIndex.ToString();
+                };
+                
+                //onSelectComplete gets called when the pointer is no longer down
+                scrollItem.onSelectComplete += () =>
+                {
+                    if (DecalManager.Instance.CurrentSelected != liveDecal)
+                        DecalManager.Instance.SelectLiveDecal(liveDecal);
                 };
 
                 scrollItems.Add(scrollItem);

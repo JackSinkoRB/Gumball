@@ -97,8 +97,14 @@ namespace Gumball
 
         private void OnPrimaryContactPressed()
         {
-            if (!PrimaryContactInput.IsClickableUnderPointer(selectedLiveDecalUI.ScaleRotationHandle.Button.image))
-                GetDecalsUnderPointer();
+            Image layerSelectorImage = PanelManager.GetPanel<DecalEditorPanel>().LayerSelector.MagneticScroll.GetComponent<Image>();
+            Image scaleRotationHandleImage = selectedLiveDecalUI.ScaleRotationHandle.Button.image;
+            
+            if (!PrimaryContactInput.IsClickableUnderPointer(scaleRotationHandleImage)
+                && !PrimaryContactInput.IsClickableUnderPointer(layerSelectorImage))
+            {
+                UpdateDecalUnderPointer();
+            }
         }
 
         private void StartSession()
@@ -146,6 +152,9 @@ namespace Gumball
 
         public void DeselectLiveDecal()
         {
+            if (currentSelected == null)
+                return; //nothing selected
+            
             onDeselectLiveDecal?.Invoke(currentSelected);
             currentSelected = null;
         }
@@ -171,12 +180,14 @@ namespace Gumball
 
         public void DestroyLiveDecal(LiveDecal liveDecal)
         {
+            liveDecals.Remove(liveDecal);
+            
             onDestroyLiveDecal?.Invoke(liveDecal);
 
             Destroy(liveDecal.gameObject);
         }
 
-        public void GetDecalsUnderPointer()
+        public void UpdateDecalUnderPointer()
         {
             //raycast from the pointer position into the world
             Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
