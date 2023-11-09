@@ -18,23 +18,28 @@ namespace Gumball
 
         public const int MaxDecalsAllowed = 50;
         private const int liveDecalLayer = 6;
+     
+        public event Action onCreateLiveDecal;
+        public event Action onDestroyLiveDecal;
         
         [SerializeField] private LiveDecal liveDecalPrefab;
         [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
         [SerializeField] private Shader carBodyShader;
         [SerializeField] private Transform car;
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
-
         [SerializeField] private DecalUICategory[] decalUICategories;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
         [SerializeField, ReadOnly] private int priorityCount;
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
-
+        [Tooltip("Index is the priority")]
+        [SerializeField, ReadOnly] private List<LiveDecal> liveDecals = new();
+        
         public DecalUICategory[] DecalUICategories => decalUICategories;
+        public List<LiveDecal> LiveDecals => liveDecals;
         public LiveDecal CurrentSelected => currentSelected;
-
+        
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
 
         public static void LoadDecalEditor()
@@ -94,21 +99,6 @@ namespace Gumball
                 GetDecalsUnderPointer();
         }
 
-        [Serializable]
-        private struct PaintableMesh
-        {
-            public P3dPaintable Paintable;
-            public P3dMaterialCloner MaterialCloner;
-            public P3dPaintableTexture PaintableTexture;
-
-            public PaintableMesh(P3dPaintable paintable, P3dMaterialCloner materialCloner, P3dPaintableTexture paintableTexture)
-            {
-                Paintable = paintable;
-                MaterialCloner = materialCloner;
-                PaintableTexture = paintableTexture;
-            }
-        }
-        
         private void StartSession()
         {
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
@@ -136,34 +126,6 @@ namespace Gumball
                 PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
         }
 
-        private void SetMeshPaintable(MeshFilter meshFilter)
-        {
-            MeshRenderer meshRenderer = meshFilter.GetComponent<MeshRenderer>();
-
-            if (!meshRenderer.material.shader.Equals(carBodyShader))
-                return;
-            
-            P3dPaintable paintable = meshFilter.gameObject.AddComponent<P3dPaintable>();
-            P3dMaterialCloner materialCloner = meshFilter.gameObject.AddComponent<P3dMaterialCloner>();
-            P3dPaintableTexture paintableTexture = meshFilter.gameObject.AddComponent<P3dPaintableTexture>();
-
-            paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
-            paintableTexture.Slot = new P3dSlot(0, "_Albedo"); //car body shader uses albedo
-                        
-            meshFilter.gameObject.AddComponent<MeshCollider>();
-            
-            PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture);
-            paintableMeshes.Add(paintableMesh);
-        }
-
-        private void RemoveMeshPaintable(PaintableMesh paintableMesh)
-        {
-            Destroy(paintableMesh.MaterialCloner);
-            Destroy(paintableMesh.PaintableTexture);
-            Destroy(paintableMesh.Paintable);
-            paintableMeshes.Remove(paintableMesh);
-        }
-
         public void SelectLiveDecal(LiveDecal liveDecal)
         {
             currentSelected = liveDecal;
@@ -173,9 +135,6 @@ namespace Gumball
         {
             currentSelected = null;
         }
-        
-        public event Action onCreateLiveDecal;
-        public event Action onDestroyLiveDecal;
 
         public LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite)
         {
@@ -198,24 +157,11 @@ namespace Gumball
 
         public void DestroyLiveDecal(LiveDecal liveDecal)
         {
-            Destroy(gameObject);
+            Destroy(liveDecal.gameObject);
             
             onDestroyLiveDecal?.Invoke();
         }
 
-        [Serializable]
-        public class LiveDecalData
-        {
-            [SerializeField, ReadOnly] private Vector3 position;
-            [SerializeField, ReadOnly] private Sprite sprite;
-        }
-
-        //index is the priority
-        [SerializeField, ReadOnly] private List<LiveDecalData> liveDecalsData = new();
-        [SerializeField, ReadOnly] private List<LiveDecal> liveDecals = new();
-
-        public List<LiveDecal> LiveDecals => liveDecals;
-        
         public LiveDecal GetLiveDecalByPriority(int priority)
         {
             return liveDecals[priority];
@@ -244,6 +190,34 @@ namespace Gumball
             if (highestPriorityDecal != null)
                 SelectLiveDecal(highestPriorityDecal);
             else DeselectLiveDecal();
+        }
+        
+        private void SetMeshPaintable(MeshFilter meshFilter)
+        {
+            MeshRenderer meshRenderer = meshFilter.GetComponent<MeshRenderer>();
+
+            if (!meshRenderer.material.shader.Equals(carBodyShader))
+                return;
+            
+            P3dPaintable paintable = meshFilter.gameObject.AddComponent<P3dPaintable>();
+            P3dMaterialCloner materialCloner = meshFilter.gameObject.AddComponent<P3dMaterialCloner>();
+            P3dPaintableTexture paintableTexture = meshFilter.gameObject.AddComponent<P3dPaintableTexture>();
+
+            paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
+            paintableTexture.Slot = new P3dSlot(0, "_Albedo"); //car body shader uses albedo
+                        
+            meshFilter.gameObject.AddComponent<MeshCollider>();
+            
+            PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture);
+            paintableMeshes.Add(paintableMesh);
+        }
+
+        private void RemoveMeshPaintable(PaintableMesh paintableMesh)
+        {
+            Destroy(paintableMesh.MaterialCloner);
+            Destroy(paintableMesh.PaintableTexture);
+            Destroy(paintableMesh.Paintable);
+            paintableMeshes.Remove(paintableMesh);
         }
         
     }
