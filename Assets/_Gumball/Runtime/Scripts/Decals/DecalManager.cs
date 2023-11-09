@@ -2,14 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using MyBox;
 using PaintIn3D;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -17,7 +15,9 @@ namespace Gumball
     {
 
         public const int MaxDecalsAllowed = 50;
-        private const int liveDecalLayer = 6;
+        
+        private const int decalLayer = 6;
+        private static readonly LayerMask decalLayerMask = 1 << decalLayer;
 
         public event Action<LiveDecal> onSelectLiveDecal;
         public event Action<LiveDecal> onDeselectLiveDecal;
@@ -194,7 +194,9 @@ namespace Gumball
             //raycast from the pointer position into the world
             Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
 
-            int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, Mathf.Infinity, 1 << liveDecalLayer);
+            //max raycast distance from the camera to the middle of the car, so it doesn't detect decals on the other side
+            float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, car.transform.position);
+            int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, maxRaycastDistance, decalLayerMask);
 
             LiveDecal closestDecal = null;
             float distanceToClosestDecalSqr = Mathf.Infinity;
@@ -202,9 +204,6 @@ namespace Gumball
             for (int index = 0; index < raycastHits; index++)
             {
                 RaycastHit hit = decalsUnderPointer[index];
-                if (hit.collider == null)
-                    break;
-                
                 LiveDecal decal = hit.transform.parent.GetComponent<LiveDecal>();
 
                 if (decal == currentSelected)
