@@ -22,9 +22,9 @@ namespace Gumball
     /// 'Icon' refers to the physical ScrollIcon element that wraps.
     /// 'Item' represents the item data that is populated into an icon.
     /// </summary>
-//require a canvas so that when the scroll is updated, it's not updating the entire UI.
-//require a graphic raycaster for detecting input.
-//require an image component so that it has something to click and adjust the raycast padding without inheriting from Graphic.
+    //require a canvas so that when the scroll is updated, it's not updating the entire UI.
+    //require a graphic raycaster for detecting input.
+    //require an image component so that it has something to click and adjust the raycast padding without inheriting from Graphic.
     [RequireComponent(typeof(Image), typeof(Canvas), typeof(GraphicRaycaster))]
     public class MagneticScroll : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler
     {
@@ -56,7 +56,6 @@ namespace Gumball
         #region INSPECTOR SETTINGS & DEBUGGING
 
         [Header("Required")]
-
         [InitializationField, SerializeField] private Direction direction;
 
         [Space(5)]
@@ -72,7 +71,6 @@ namespace Gumball
         protected CollectionWrapper<PreDefinedScrollItem> preDefinedItems = new();
 
         [Header("Sizing")]
-
         [Tooltip("The number of icons to instantiate in the magnetic scroll.\n\nNote: this should be as minimal as possible to reduce the number of objects instantiated." +
                  "\n\nThis is an odd number because there should always be an icon in the middle, with an even amount on each side.")]
         [FormerlySerializedAs("iconsToPopulate")]
@@ -87,7 +85,6 @@ namespace Gumball
         private RectOffset clickableAreaPadding;
 
         [Header("Settings")]
-
         [Tooltip("Toggle for the 'magnetic' feature of the scroll. If enabled, the closest icon will snap to the magnet when there is no user input.")]
         [SerializeField]
         private bool useMagnetSnapping = true;
@@ -105,7 +102,6 @@ namespace Gumball
         [InitializationField, SerializeField] private bool selectIconIfButtonClicked;
 
         [Header("Input")]
-
         [SerializeField] private float scrollSpeed = 1;
 
         [Tooltip("The elasticity when infinite scroll is disabled and the user is trying to drag past the first or last icon")]
@@ -119,7 +115,6 @@ namespace Gumball
         [SerializeField] private UnityEvent onSelectIcon;
 
         [Header("Effects")]
-
         [SerializeField] private ScrollEffect[] effects;
 
         [Space(5)]
@@ -195,6 +190,7 @@ namespace Gumball
 
         private RectTransform rectTransform;
         private Vector2 lastKnownPositionOfFirstIcon;
+        private ScrollItem lastSelectCompletedItem;
 
         private Coroutine snapToItemOffscreenCoroutine;
 
@@ -293,7 +289,7 @@ namespace Gumball
                 CheckForTweenToCallMoveEvent();
             }
         }
-
+        
         private void LateUpdate()
         {
             if (isMoving)
@@ -1002,6 +998,17 @@ namespace Gumball
             {
                 SnapIconToMagnet(GetClosestIconToPosition(magnetPosition).Item1); //start snapping
             }
+
+            CheckToCallSelectCompleted();
+        }
+
+        private void CheckToCallSelectCompleted()
+        {
+            if (lastSelectCompletedItem == null || lastSelectCompletedItem != ClosestIconToMagnet.CurrentItem)
+            {
+                lastSelectCompletedItem = ClosestIconToMagnet.CurrentItem;
+                lastSelectCompletedItem.OnSelectComplete();
+            }
         }
 
         private void Decelerate(float timeSincePointerUp)
@@ -1033,9 +1040,10 @@ namespace Gumball
             ScrollIcon selectedIcon = icons[newIndex];
             ScrollItem selectedItem = selectedIcon.CurrentItem;
             selectedItem.OnSelect();
+
             lastSelectedItemIndex = items.IndexOf(selectedItem);
         }
-
+        
         private void MoveAllItems(Vector2 amount)
         {
             movement = GetModifiedMovement(amount * scrollSpeed);
