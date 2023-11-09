@@ -18,9 +18,11 @@ namespace Gumball
 
         public const int MaxDecalsAllowed = 50;
         private const int liveDecalLayer = 6;
-     
-        public event Action onCreateLiveDecal;
-        public event Action onDestroyLiveDecal;
+
+        public event Action<LiveDecal> onSelectLiveDecal;
+        public event Action<LiveDecal> onDeselectLiveDecal;
+        public event Action<LiveDecal> onCreateLiveDecal;
+        public event Action<LiveDecal> onDestroyLiveDecal;
         
         [SerializeField] private LiveDecal liveDecalPrefab;
         [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
@@ -126,13 +128,25 @@ namespace Gumball
                 PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
         }
 
+        public LiveDecal GetLiveDecalByPriority(int priority)
+        {
+            return liveDecals[priority];
+        }
+
+        public int GetPriorityOfLiveDecal(LiveDecal liveDecal)
+        {
+            return liveDecals.IndexOf(liveDecal);
+        }
+        
         public void SelectLiveDecal(LiveDecal liveDecal)
         {
             currentSelected = liveDecal;
+            onSelectLiveDecal?.Invoke(liveDecal);
         }
 
         public void DeselectLiveDecal()
         {
+            onDeselectLiveDecal?.Invoke(currentSelected);
             currentSelected = null;
         }
 
@@ -150,23 +164,18 @@ namespace Gumball
 
             liveDecals.Add(liveDecal);
             
-            onCreateLiveDecal?.Invoke();
+            onCreateLiveDecal?.Invoke(liveDecal);
             
             return liveDecal;
         }
 
         public void DestroyLiveDecal(LiveDecal liveDecal)
         {
+            onDestroyLiveDecal?.Invoke(liveDecal);
+
             Destroy(liveDecal.gameObject);
-            
-            onDestroyLiveDecal?.Invoke();
         }
 
-        public LiveDecal GetLiveDecalByPriority(int priority)
-        {
-            return liveDecals[priority];
-        }
-        
         public void GetDecalsUnderPointer()
         {
             //raycast from the pointer position into the world

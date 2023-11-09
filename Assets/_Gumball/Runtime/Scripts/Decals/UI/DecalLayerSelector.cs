@@ -16,6 +16,8 @@ namespace Gumball
         {
             DecalManager.Instance.onCreateLiveDecal += OnCreateLiveDecal;
             DecalManager.Instance.onDestroyLiveDecal += OnDestroyLiveDecal;
+            DecalManager.Instance.onSelectLiveDecal += OnSelectLiveDecal;
+            DecalManager.Instance.onDeselectLiveDecal += OnDeselectLiveDecal;
             UpdateLayers();
         }
 
@@ -25,22 +27,34 @@ namespace Gumball
             {
                 DecalManager.Instance.onCreateLiveDecal -= OnCreateLiveDecal;
                 DecalManager.Instance.onDestroyLiveDecal -= OnDestroyLiveDecal;
+                DecalManager.Instance.onSelectLiveDecal -= OnSelectLiveDecal;
+                DecalManager.Instance.onDeselectLiveDecal -= OnDeselectLiveDecal;
             }
         }
 
-        private void OnCreateLiveDecal()
+        private void OnCreateLiveDecal(LiveDecal liveDecal)
         {
             UpdateLayers();
         }
         
-        private void OnDestroyLiveDecal()
+        private void OnDestroyLiveDecal(LiveDecal liveDecal)
         {
             UpdateLayers();   
+        }
+        
+        private void OnSelectLiveDecal(LiveDecal liveDecal)
+        {
+            magneticScroll.SnapItemToMagnet(DecalManager.Instance.GetPriorityOfLiveDecal(liveDecal));
+        }
+
+        private void OnDeselectLiveDecal(LiveDecal liveDecal)
+        {
+            
         }
 
         public void UpdateLayers()
         {
-            layerAmountLabel.text = $"{DecalManager.Instance.LiveDecals.Count}/{DecalManager.MaxDecalsAllowed}";
+            layerAmountLabel.text = $"{DecalManager.Instance.LiveDecals.Count} / {DecalManager.MaxDecalsAllowed}";
             
             PopulateScroll();
         }
