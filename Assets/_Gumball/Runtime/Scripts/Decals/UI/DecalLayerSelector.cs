@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace Gumball
@@ -9,40 +10,56 @@ namespace Gumball
     {
         
         [SerializeField] private MagneticScroll magneticScroll;
-
+        [SerializeField] private TextMeshProUGUI layerAmountLabel;
+        
         private void OnEnable()
         {
             DecalManager.Instance.onCreateLiveDecal += OnCreateLiveDecal;
             DecalManager.Instance.onDestroyLiveDecal += OnDestroyLiveDecal;
-            Populate();
+            UpdateLayers();
         }
 
         private void OnDisable()
         {
-            DecalManager.Instance.onCreateLiveDecal -= OnCreateLiveDecal;
-            DecalManager.Instance.onDestroyLiveDecal -= OnDestroyLiveDecal;
+            if (DecalManager.ExistsRuntime)
+            {
+                DecalManager.Instance.onCreateLiveDecal -= OnCreateLiveDecal;
+                DecalManager.Instance.onDestroyLiveDecal -= OnDestroyLiveDecal;
+            }
         }
 
         private void OnCreateLiveDecal()
         {
-            Populate();
+            UpdateLayers();
         }
         
         private void OnDestroyLiveDecal()
         {
-            Populate();   
+            UpdateLayers();   
         }
 
-        public void Populate()
+        public void UpdateLayers()
         {
-            if (DecalManager.Instance.LiveDecals.Count == 0)
-                return;
+            layerAmountLabel.text = $"{DecalManager.Instance.LiveDecals.Count}/{DecalManager.MaxDecalsAllowed}";
             
+            PopulateScroll();
+        }
+
+        private void PopulateScroll()
+        {
             List<ScrollItem> scrollItems = new List<ScrollItem>();
-            foreach (LiveDecal liveDecal in DecalManager.Instance.LiveDecals)
+            for (int index = 0; index < DecalManager.Instance.LiveDecals.Count; index++)
             {
+                LiveDecal liveDecal = DecalManager.Instance.LiveDecals[index];
+                int finalIndex = index;
+   
                 ScrollItem scrollItem = new ScrollItem();
-                scrollItem.onLoad += () => scrollItem.CurrentIcon.ImageComponent.sprite = liveDecal.Sprite;
+                scrollItem.onLoad += () =>
+                {
+                    DecalLayerIcon decalLayerIcon = (DecalLayerIcon) scrollItem.CurrentIcon;
+                    decalLayerIcon.ImageComponent.sprite = liveDecal.Sprite;
+                    decalLayerIcon.PriorityLabel.text = finalIndex.ToString();
+                };
 
                 scrollItems.Add(scrollItem);
             }

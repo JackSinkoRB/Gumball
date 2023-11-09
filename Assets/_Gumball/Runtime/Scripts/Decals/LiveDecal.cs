@@ -109,8 +109,13 @@ namespace Gumball
             if (DecalManager.Instance.CurrentSelected == this &&
                 !IsValidPosition)
             {
-                Destroy(gameObject);
+                RemoveDecal();
             }
+        }
+
+        private void RemoveDecal()
+        {
+            DecalManager.Instance.DestroyLiveDecal(this);
         }
 
         private void CalculateClickOffset()

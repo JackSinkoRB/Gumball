@@ -16,7 +16,7 @@ namespace Gumball
     public class DecalManager : Singleton<DecalManager>
     {
 
-        private const int maxDecals = 50;
+        public const int MaxDecalsAllowed = 50;
         private const int liveDecalLayer = 6;
         
         [SerializeField] private LiveDecal liveDecalPrefab;
@@ -35,7 +35,7 @@ namespace Gumball
         public DecalUICategory[] DecalUICategories => decalUICategories;
         public LiveDecal CurrentSelected => currentSelected;
 
-        private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[maxDecals];
+        private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
 
         public static void LoadDecalEditor()
         {
@@ -173,6 +173,9 @@ namespace Gumball
         {
             currentSelected = null;
         }
+        
+        public event Action onCreateLiveDecal;
+        public event Action onDestroyLiveDecal;
 
         public LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite)
         {
@@ -183,12 +186,41 @@ namespace Gumball
             if (category.CategoryName.Equals("Shapes"))
                 liveDecal.SetColor(Color.gray);
 
-            priorityCount++;
             liveDecal.SetPriority(priorityCount);
+            priorityCount++;
+
+            liveDecals.Add(liveDecal);
+            
+            onCreateLiveDecal?.Invoke();
             
             return liveDecal;
         }
 
+        public void DestroyLiveDecal(LiveDecal liveDecal)
+        {
+            Destroy(gameObject);
+            
+            onDestroyLiveDecal?.Invoke();
+        }
+
+        [Serializable]
+        public class LiveDecalData
+        {
+            [SerializeField, ReadOnly] private Vector3 position;
+            [SerializeField, ReadOnly] private Sprite sprite;
+        }
+
+        //index is the priority
+        [SerializeField, ReadOnly] private List<LiveDecalData> liveDecalsData = new();
+        [SerializeField, ReadOnly] private List<LiveDecal> liveDecals = new();
+
+        public List<LiveDecal> LiveDecals => liveDecals;
+        
+        public LiveDecal GetLiveDecalByPriority(int priority)
+        {
+            return liveDecals[priority];
+        }
+        
         public void GetDecalsUnderPointer()
         {
             //raycast from the pointer position into the world
