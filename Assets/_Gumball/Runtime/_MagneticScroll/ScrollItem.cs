@@ -12,26 +12,31 @@ namespace Gumball
         /// <summary>
         /// Called when the item is loaded into an icon.
         /// </summary>
-        public Action onLoad;
+        public event Action onLoad;
 
         /// <summary>
         /// Called when the item is the closest icon to the magnet.
         /// </summary>
-        public Action onSelect;
+        public event Action onSelect;
 
+        /// <summary>
+        /// Called after the pointer is released after selecting an item.
+        /// </summary>
+        public event Action onSelectComplete;
+        
         /// <summary>
         /// Called when the item is no longer the closest icon to the magnet.
         /// </summary>
-        public Action onUnselect;
+        public event Action onUnselect;
 
         /// <summary>
         /// Called when the item's icon button component is clicked.
         /// </summary>
-        public Action onClick;
+        public event Action onClick;
 
         public ScrollIcon CurrentIcon { get; private set; }
         public bool HasLoaded { get; private set; }
-
+        
         public ScrollItem(Action onSelect = null)
         {
             onClick = null;
@@ -54,6 +59,11 @@ namespace Gumball
             onSelect?.Invoke();
         }
 
+        public void OnSelectComplete()
+        {
+            onSelectComplete?.Invoke();
+        }
+
         public void OnUnselect()
         {
             onUnselect?.Invoke();
@@ -61,6 +71,7 @@ namespace Gumball
 
         public void OnClick()
         {
+            OnSelectComplete();
             onClick?.Invoke();
         }
 
