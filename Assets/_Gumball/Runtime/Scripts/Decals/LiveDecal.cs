@@ -29,7 +29,7 @@ namespace Gumball
         private Vector3 lastKnownPosition;
         private Quaternion lastKnownRotation;
         private int priority;
-        private bool selectableUnderPointerOnPress;
+        private bool isClickableUnderPointerOnPress;
 
         public bool IsValidPosition { get; private set; }
 
@@ -92,13 +92,13 @@ namespace Gumball
         private void OnPrimaryContactPressed()
         {
             CalculateClickOffset();
-            selectableUnderPointerOnPress = PrimaryContactInput.IsSelectableUnderPointer();
+            isClickableUnderPointerOnPress = PrimaryContactInput.IsClickableUnderPointer();
         }
         
         private void OnPrimaryContactPerformed()
         {
             if (DecalManager.Instance.CurrentSelected == this 
-                && !selectableUnderPointerOnPress)
+                && !isClickableUnderPointerOnPress)
             {
                 UpdatePosition(PrimaryContactInput.Position - clickOffset);
             }

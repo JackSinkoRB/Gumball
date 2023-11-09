@@ -90,7 +90,7 @@ namespace Gumball
 
         private void OnPrimaryContactPressed()
         {
-            if (!PrimaryContactInput.IsSelectableUnderPointer(selectedLiveDecalUI.ScaleRotationHandle.Button))
+            if (!PrimaryContactInput.IsClickableUnderPointer(selectedLiveDecalUI.ScaleRotationHandle.Button.image))
                 GetDecalsUnderPointer();
         }
 

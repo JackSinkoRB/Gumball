@@ -59,7 +59,7 @@ namespace Gumball
             horizontal = Camera.main.transform.eulerAngles.y;
             vertical = Camera.main.transform.eulerAngles.x;
 
-            pressedUI = PrimaryContactInput.IsSelectableUnderPointer();
+            pressedUI = PrimaryContactInput.IsClickableUnderPointer();
         }
 
         private bool pressedUI;

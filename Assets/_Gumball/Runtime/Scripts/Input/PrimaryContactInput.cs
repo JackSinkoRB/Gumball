@@ -34,8 +34,8 @@ namespace Gumball
         public static Vector2 OffsetSincePressed;
 
         private static Vector2 lastKnownPosition;
-        private static int selectablesUnderPointerLastCached = -1;
-        private static readonly List<Selectable> selectablesUnderPointerCached = new();
+        private static int graphicsUnderPointerLastCached = -1;
+        private static readonly List<Graphic> clickablesUnderPointerCached = new();
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialise()
@@ -57,9 +57,6 @@ namespace Gumball
         {
             IsPressed = true;
             PositionOnPress = InputManager.PrimaryPosition.ReadValue<Vector2>();
-            if (PositionOnPress.Approximately(Vector2.zero))
-                return;
-            
             Position = PositionOnPress;
             lastKnownPosition = Position;
             OffsetSincePressed = Vector2.zero;
@@ -113,31 +110,35 @@ namespace Gumball
             onDragStop?.Invoke();
         }
 
-        public static bool IsSelectableUnderPointer()
+        /// <summary>
+        /// Is a raycastable graphic under the pointer?
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsClickableUnderPointer()
         {
-            return GetSelectablesUnderPointer().Count > 0;
+            return GetClickableGraphicsUnderPointer().Count > 0;
         }
 
-        public static bool IsSelectableUnderPointer(Selectable selectable)
+        public static bool IsClickableUnderPointer(Graphic graphic)
         {
-            foreach (Selectable selectableUnderPointer in GetSelectablesUnderPointer())
+            foreach (Graphic graphicUnderPointer in GetClickableGraphicsUnderPointer())
             {
-                if (selectableUnderPointer == selectable)
+                if (graphicUnderPointer == graphic)
                     return true;
             }
 
             return false;
         }
-
-        private static List<Selectable> GetSelectablesUnderPointer()
+        
+        private static List<Graphic> GetClickableGraphicsUnderPointer()
         {
             //because input only updates once per frame, cache the results for the entire frame
-            bool isCached = selectablesUnderPointerLastCached == Time.frameCount;
+            bool isCached = graphicsUnderPointerLastCached == Time.frameCount;
             if (!isCached)
             {
-                selectablesUnderPointerCached.Clear();
+                clickablesUnderPointerCached.Clear();
                 
-                selectablesUnderPointerLastCached = Time.frameCount;
+                graphicsUnderPointerLastCached = Time.frameCount;
                 PointerEventData pointer = new PointerEventData(EventSystem.current) { position = Position };
         
                 List<RaycastResult> raycastResults = new List<RaycastResult>();
@@ -145,14 +146,14 @@ namespace Gumball
 
                 foreach (RaycastResult result in raycastResults)
                 {
-                    Selectable selectable = result.gameObject.GetComponent<Selectable>(); 
-                    if (selectable != null)
-                        selectablesUnderPointerCached.Add(selectable);
+                    Graphic graphic = result.gameObject.GetComponent<Graphic>(); 
+                    if (graphic != null)
+                        clickablesUnderPointerCached.Add(graphic);
                 }
                 
             }
             
-            return selectablesUnderPointerCached;
+            return clickablesUnderPointerCached;
         }
 
     }
