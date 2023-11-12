@@ -12,5 +12,10 @@ namespace Gumball
 
         public DecalLayerSelector LayerSelector => layerSelector;
 
+        public void OnClickBackButton()
+        {
+            MainSceneManager.LoadMainScene();
+        }
+        
     }
 }
