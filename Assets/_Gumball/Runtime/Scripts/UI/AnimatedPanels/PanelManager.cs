@@ -89,6 +89,8 @@ public class PanelManager : Singleton<PanelManager>
         {
             GlobalLoggers.PanelLogger.Log($"Adding {panel.GetType()} to panel lookup");
             panelLookup[panel.GetType()] = panel;
+            if (panel.gameObject.activeInHierarchy)
+                panel.Show(); //starts showing
         }
         
         stopwatch.Stop();
