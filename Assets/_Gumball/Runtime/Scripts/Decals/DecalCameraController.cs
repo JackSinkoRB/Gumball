@@ -42,6 +42,8 @@ namespace Gumball
             PrimaryContactInput.onDrag -= OnPrimaryContactMove;
             PrimaryContactInput.onRelease -= OnPrimaryContactRelease;
             PinchInput.onPinch -= OnPinch;
+            
+            decelerationTween?.Kill();
         }
         
         private void Update()
