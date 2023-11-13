@@ -199,8 +199,8 @@ namespace MagneticScrollUtils
 
         private enum SnapToItemDirection
         {
-            START,
-            END
+            FORWARD,
+            BACKWARD
         }
 
         #endregion
@@ -442,6 +442,8 @@ namespace MagneticScrollUtils
             if (lastSelectedItemIndex == itemIndex)
                 return; //already selected
 
+            clickedToSelect = true;
+            
             //check if the item is currently in an icon
             ScrollIcon icon = GetItemAsIcon(itemIndex);
             if (icon != null)
@@ -450,30 +452,64 @@ namespace MagneticScrollUtils
                 return;
             }
 
-            //get which direction is closest (left = negative, right = positive)
-
-            int distanceFromEnd = Mathf.Abs(itemIndex - lastItemIndexShowing);
-            int distanceFromStart = Mathf.Abs(itemIndex - firstItemIndexShowing);
-
+            int distanceForwards = GetDistanceToItem(itemIndex, SnapToItemDirection.FORWARD);
+            int distanceBackwards = GetDistanceToItem(itemIndex, SnapToItemDirection.BACKWARD);
+            
             SnapToItemDirection directionToMove;
-            if (distanceFromEnd == distanceFromStart)
+            if (distanceBackwards == distanceForwards)
             {
                 //pick a random direction
                 int random = Random.Range(0, 2);
-                directionToMove = random == 0 ? SnapToItemDirection.START : SnapToItemDirection.END;
+                directionToMove = random == 0 ? SnapToItemDirection.FORWARD : SnapToItemDirection.BACKWARD;
             }
-            else if (distanceFromStart < distanceFromEnd)
+            else if (distanceForwards < distanceBackwards)
             {
-                directionToMove = SnapToItemDirection.START;
+                directionToMove = SnapToItemDirection.FORWARD;
             }
             else
             {
-                directionToMove = SnapToItemDirection.END;
+                directionToMove = SnapToItemDirection.BACKWARD;
             }
 
             snapToItemOffscreenCoroutine = StartCoroutine(SnapToItemOffscreen(itemIndex, directionToMove));
         }
 
+        private int GetDistanceToItem(int itemIndex, SnapToItemDirection direction)
+        {
+            if (direction == SnapToItemDirection.BACKWARD)
+            {
+                int distanceForwards = 1;
+                for (int count = lastSelectedItemIndex + 1; count < lastSelectedItemIndex + items.Count; count++)
+                {
+                    int wrapped = count;
+                    if (wrapped == items.Count)
+                        wrapped = 0;
+
+                    if (wrapped == itemIndex)
+                        return distanceForwards;
+
+                    distanceForwards++;
+                }
+            }
+            else
+            {
+                int distanceBackwards = 1;
+                for (int count = lastSelectedItemIndex - 1; count > lastSelectedItemIndex - items.Count; count--)
+                {
+                    int wrapped = count;
+                    if (wrapped == -1)
+                        wrapped = items.Count-1;
+                
+                    if (wrapped == itemIndex)
+                        return distanceBackwards;
+
+                    distanceBackwards++;
+                }
+            }
+
+            throw new InvalidOperationException($"Could not find distance to item {itemIndex} in {gameObject.name}");
+        }
+        
         /// <summary>
         /// Snaps the item to the magnet.
         /// If the item is currently shown in an icon, snap to the item. Else, keep scrolling to the end until it is shown in an icon, and select it.
@@ -767,11 +803,13 @@ namespace MagneticScrollUtils
             if (maxItemIndex < lastIconIndex) lastIconIndex = maxItemIndex;
 
             //initialise item indexes
-            int desiredFirstIndex = itemStartIndex;
 
             //take any icons before
             int iconsBefore = Mathf.FloorToInt(icons.Count / 2f); //magnet is always in the middle
-            if (CanInfiniteScroll || itemStartIndex >= iconsBefore)
+            int desiredFirstIndex = itemStartIndex;
+            if (itemStartIndex <= iconsBefore)
+                desiredFirstIndex = 0;
+            else if (CanInfiniteScroll || itemStartIndex >= iconsBefore)
             {
                 //because the first item is selected, if the items infinite scroll, the first item won't be in the first icon
                 //therefore account for that...
@@ -898,7 +936,7 @@ namespace MagneticScrollUtils
             int lastTrackedSelectedIndex = lastSelectedItemIndex;
 
             //start by moving to the furthest icon in the specified direction
-            SnapIconToMagnet(directionToMove == SnapToItemDirection.START ? icons[firstIconIndex] : icons[lastIconIndex]);
+            SnapIconToMagnet(directionToMove == SnapToItemDirection.FORWARD ? icons[firstIconIndex] : icons[lastIconIndex]);
 
             for (int count = 0; count <= items.Count - 1; count++) //we want to repeat until true, but to avoid infinite loop just check the max amount (item count)
             {
@@ -917,7 +955,7 @@ namespace MagneticScrollUtils
                 }
 
                 //continue towards the furthest icon
-                SnapIconToMagnet(directionToMove == SnapToItemDirection.START ? icons[firstIconIndex] : icons[lastIconIndex]);
+                SnapIconToMagnet(directionToMove == SnapToItemDirection.FORWARD ? icons[firstIconIndex] : icons[lastIconIndex]);
             }
 
             //shouldn't get here, but just in case log an error that something isn't right.

@@ -88,7 +88,7 @@ namespace Gumball
                 scrollItems.Add(scrollItem);
             }
 
-            magneticScroll.SetItems(scrollItems);
+            magneticScroll.SetItems(scrollItems, magneticScroll.LastSelectedItemIndex);
         }
         
     }
