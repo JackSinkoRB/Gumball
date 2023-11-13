@@ -20,7 +20,7 @@ namespace Gumball
 
         public void LoadDecalEditor()
         {
-            DecalManager.LoadDecalEditor();
+            DecalEditor.LoadDecalEditor();
         }
         
     }

@@ -1,262 +1,61 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using MyBox;
-using PaintIn3D;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class DecalManager : Singleton<DecalManager>
+    public static class DecalManager
     {
 
-        public const int MaxDecalsAllowed = 50;
-        
-        private const int decalLayer = 6;
-        private static readonly LayerMask decalLayerMask = 1 << decalLayer;
-
-        public event Action<LiveDecal> onSelectLiveDecal;
-        public event Action<LiveDecal> onDeselectLiveDecal;
-        public event Action<LiveDecal> onCreateLiveDecal;
-        public event Action<LiveDecal> onDestroyLiveDecal;
-
-        [SerializeField] private Logger logger;
-        
-        [SerializeField] private LiveDecal liveDecalPrefab;
-        [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
-        [SerializeField] private Shader carBodyShader;
-        [SerializeField] private Transform car;
-        [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
-        [SerializeField] private DecalUICategory[] decalUICategories;
-
-        [Header("Debugging")]
-        [SerializeField, ReadOnly] private LiveDecal currentSelected;
-        [SerializeField, ReadOnly] private int priorityCount;
-        [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
-        [Tooltip("Index is the priority")]
-        [SerializeField, ReadOnly] private List<LiveDecal> liveDecals = new();
-        
-        public DecalUICategory[] DecalUICategories => decalUICategories;
-        public List<LiveDecal> LiveDecals => liveDecals;
-        public LiveDecal CurrentSelected => currentSelected;
-        
-        private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
-
-        public static void LoadDecalEditor()
+        /// <summary>
+        /// Saves the specified decals to the car's save data.
+        /// </summary>
+        public static void SaveLiveDecalData(CarManager car, List<LiveDecal> liveDecals)
         {
-            CoroutineHelper.Instance.StartCoroutine(LoadDecalEditorIE());
+            LiveDecal.LiveDecalData[] liveDecalData = CreateLiveDecalData(liveDecals);
+            DataManager.Cars.Set(GetDecalsSaveKey(car), liveDecalData);
         }
-        
-        private static IEnumerator LoadDecalEditorIE()
+
+        /// <summary>
+        /// Creates a list of live decals from the specified car's save data.
+        /// </summary>
+        public static List<LiveDecal> CreateLiveDecalsFromData(CarManager car)
         {
-            PanelManager.GetPanel<LoadingPanel>().Show();
+            List<LiveDecal> liveDecals = new();
+            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(GetDecalsSaveKey(car), Array.Empty<LiveDecal.LiveDecalData>());
             
-            //set the vehicle kinematic
-            Rigidbody currentCarRigidbody = PlayerCarManager.Instance.CurrentCar.Rigidbody;
-            currentCarRigidbody.isKinematic = true;
-            
-            Stopwatch sceneLoadingStopwatch = new Stopwatch();
-            sceneLoadingStopwatch.Start();
-            yield return Addressables.LoadSceneAsync(SceneManager.DecalEditorSceneName, LoadSceneMode.Single, true);
-            sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
-            
-            //move the vehicle to the right position
-            currentCarRigidbody.Move(Vector3.zero, Quaternion.Euler(Vector3.zero));
-            
-            PanelManager.GetPanel<LoadingPanel>().Hide();
-        }
-        
-        private void OnEnable()
-        {
-            PrimaryContactInput.onPress += OnPrimaryContactPressed;
-
-            car = PlayerCarManager.Instance.CurrentCar.transform;
-            StartSession();
-        }
-
-        private void OnDisable()
-        {
-            PrimaryContactInput.onPress -= OnPrimaryContactPressed;
-
-            EndSession();
-        }
-
-        private void Update()
-        {
-            bool canFade = PrimaryContactInput.IsPressed && currentSelected != null && currentSelected.IsValidPosition;
-            selectedLiveDecalUI.Fade(canFade);
-        }
-
-        private void LateUpdate()
-        {
-            selectedLiveDecalUI.UpdatePosition();
-        }
-
-        private void OnPrimaryContactPressed()
-        {
-            Image layerSelectorImage = PanelManager.GetPanel<DecalEditorPanel>().LayerSelector.MagneticScroll.GetComponent<Image>();
-            Image scaleRotationHandleImage = selectedLiveDecalUI.ScaleRotationHandle.Button.image;
-            
-            if (!PrimaryContactInput.IsClickableUnderPointer(scaleRotationHandleImage)
-                && !PrimaryContactInput.IsClickableUnderPointer(layerSelectorImage))
+            foreach (LiveDecal.LiveDecalData data in liveDecalData)
             {
-                UpdateDecalUnderPointer();
-            }
-        }
-
-        private void StartSession()
-        {
-            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
-
-            paintableMeshes.Clear();
-            foreach (MeshFilter meshFilter in car.GetComponentsInAllChildren<MeshFilter>())
-            {
-                SetMeshPaintable(meshFilter);
-            }
-            
-            //disable the car's collider temporarily
-            PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(false);
-        }
-
-        private void EndSession()
-        {
-            for (int i = paintableMeshes.Count - 1; i >= 0; i--)
-            {
-                PaintableMesh paintableMesh = paintableMeshes[i];
-                RemoveMeshPaintable(paintableMesh);
-                paintableMeshes.Remove(paintableMesh);
-            }
-            
-            if (PlayerCarManager.ExistsRuntime)
-                PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
-        }
-
-        public LiveDecal GetLiveDecalByPriority(int priority)
-        {
-            return liveDecals[priority];
-        }
-
-        public int GetPriorityOfLiveDecal(LiveDecal liveDecal)
-        {
-            return liveDecals.IndexOf(liveDecal);
-        }
-        
-        public void SelectLiveDecal(LiveDecal liveDecal)
-        {
-            currentSelected = liveDecal;
-            onSelectLiveDecal?.Invoke(liveDecal);
-        }
-
-        public void DeselectLiveDecal()
-        {
-            if (currentSelected == null)
-                return; //nothing selected
-            
-            onDeselectLiveDecal?.Invoke(currentSelected);
-            currentSelected = null;
-        }
-
-        public LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite)
-        {
-            LiveDecal liveDecal = Instantiate(liveDecalPrefab.gameObject, transform).GetComponent<LiveDecal>();
-            liveDecal.PaintDecal.Texture = sprite.texture;
-            liveDecal.SetSprite(sprite);
-
-            if (category.CategoryName.Equals("Shapes"))
-                liveDecal.SetColor(Color.gray);
-
-            liveDecal.SetPriority(priorityCount);
-            priorityCount++;
-
-            liveDecals.Add(liveDecal);
-            
-            onCreateLiveDecal?.Invoke(liveDecal);
-            
-            return liveDecal;
-        }
-
-        public void DestroyLiveDecal(LiveDecal liveDecal)
-        {
-            liveDecals.Remove(liveDecal);
-            
-            onDestroyLiveDecal?.Invoke(liveDecal);
-
-            Destroy(liveDecal.gameObject);
-        }
-
-        public void UpdateDecalUnderPointer()
-        {
-            //raycast from the pointer position into the world
-            Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
-
-            //max raycast distance from the camera to the middle of the car, so it doesn't detect decals on the other side
-            float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, car.transform.position);
-            int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, maxRaycastDistance, decalLayerMask);
-
-            LiveDecal closestDecal = null;
-            float distanceToClosestDecalSqr = Mathf.Infinity;
-            
-            for (int index = 0; index < raycastHits; index++)
-            {
-                RaycastHit hit = decalsUnderPointer[index];
-                LiveDecal decal = hit.transform.parent.GetComponent<LiveDecal>();
-
-                if (decal == currentSelected)
-                {
-                    //if clicking the already-selected decal, don't select any higher priority ones, so it can be moved etc.
-                    closestDecal = decal;
-                    break;
-                }
-
-                Vector2 clickScreenPos = PrimaryContactInput.Position;
-                Vector2 centreOfDecalScreenPos = Camera.main.WorldToScreenPoint(decal.transform.position);
-                
-                float distanceToDecalSqr = Vector2.SqrMagnitude(clickScreenPos - centreOfDecalScreenPos);
-                if (closestDecal == null || distanceToDecalSqr < distanceToClosestDecalSqr)
-                {
-                    closestDecal = decal;
-                    distanceToClosestDecalSqr = distanceToDecalSqr;
-                }
-
-                logger.Log($"Distance to {decal.Priority} = {distanceToDecalSqr}");
+                LiveDecal liveDecal = DecalEditor.Instance.CreateLiveDecalFromData(data);
+                liveDecals.Add(liveDecal);
             }
 
-            if (closestDecal != null)
-                SelectLiveDecal(closestDecal);
-            else DeselectLiveDecal();
+            return liveDecals;
         }
         
-        private void SetMeshPaintable(MeshFilter meshFilter)
+        /// <summary>
+        /// Gets the save key for the specific car in the player's car
+        /// </summary>
+        /// <param name="car"></param>
+        /// <returns></returns>
+        private static string GetDecalsSaveKey(CarManager car)
         {
-            MeshRenderer meshRenderer = meshFilter.GetComponent<MeshRenderer>();
-
-            if (!meshRenderer.material.shader.Equals(carBodyShader))
-                return;
-            
-            P3dPaintable paintable = meshFilter.gameObject.AddComponent<P3dPaintable>();
-            P3dMaterialCloner materialCloner = meshFilter.gameObject.AddComponent<P3dMaterialCloner>();
-            P3dPaintableTexture paintableTexture = meshFilter.gameObject.AddComponent<P3dPaintableTexture>();
-
-            paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
-            paintableTexture.Slot = new P3dSlot(0, "_Albedo"); //car body shader uses albedo
-                        
-            meshFilter.gameObject.AddComponent<MeshCollider>();
-            
-            PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture);
-            paintableMeshes.Add(paintableMesh);
+            //TODO - use actual car ID
+            const string carID = "0";
+            return $"Cars.{carID}.Decals";
         }
 
-        private void RemoveMeshPaintable(PaintableMesh paintableMesh)
+        private static LiveDecal.LiveDecalData[] CreateLiveDecalData(List<LiveDecal> liveDecals)
         {
-            Destroy(paintableMesh.MaterialCloner);
-            Destroy(paintableMesh.PaintableTexture);
-            Destroy(paintableMesh.Paintable);
-            paintableMeshes.Remove(paintableMesh);
+            LiveDecal.LiveDecalData[] finalData = new LiveDecal.LiveDecalData[liveDecals.Count];
+            for (int index = 0; index < liveDecals.Count; index++)
+            {
+                LiveDecal liveDecal = liveDecals[index];
+                finalData[index] = new LiveDecal.LiveDecalData(liveDecal);
+            }
+
+            return finalData;
         }
         
     }

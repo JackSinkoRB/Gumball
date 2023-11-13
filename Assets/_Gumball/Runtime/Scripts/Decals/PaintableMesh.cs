@@ -12,16 +12,19 @@ namespace Gumball
         [SerializeField] private P3dPaintable paintable;
         [SerializeField] private P3dMaterialCloner materialCloner;
         [SerializeField] private P3dPaintableTexture paintableTexture;
+        [SerializeField] private MeshCollider meshCollider;
 
         public P3dPaintable Paintable => paintable;
         public P3dMaterialCloner MaterialCloner => materialCloner;
         public P3dPaintableTexture PaintableTexture => paintableTexture;
+        public MeshCollider MeshCollider => meshCollider;
         
-        public PaintableMesh(P3dPaintable paintable, P3dMaterialCloner materialCloner, P3dPaintableTexture paintableTexture)
+        public PaintableMesh(P3dPaintable paintable, P3dMaterialCloner materialCloner, P3dPaintableTexture paintableTexture, MeshCollider meshCollider)
         {
             this.paintable = paintable;
             this.materialCloner = materialCloner;
             this.paintableTexture = paintableTexture;
+            this.meshCollider = meshCollider;
         }
     }
 }

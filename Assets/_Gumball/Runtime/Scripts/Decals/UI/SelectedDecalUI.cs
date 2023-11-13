@@ -23,7 +23,7 @@ namespace Gumball
         [SerializeField] private ButtonEvents scaleRotationHandle;
         [SerializeField] private float scaleSpeed = 2;
         
-        private LiveDecal selectedDecal => DecalManager.Instance.CurrentSelected;
+        private LiveDecal selectedDecal => DecalEditor.Instance.CurrentSelected;
 
         public ButtonEvents ScaleRotationHandle => scaleRotationHandle;
 
@@ -88,10 +88,10 @@ namespace Gumball
             float newRadius = GetDistanceToCentre(PrimaryContactInput.Position);
             float radiusDelta = newRadius - lastKnownRadius;
             lastKnownRadius = newRadius;
-            
-            float scaleOffset = radiusDelta * scaleSpeed;
-            float existingScale = selectedDecal.Scale.x;
-            float newScale = existingScale + scaleOffset;
+
+            Vector3 scaleOffset = Vector3.one * (radiusDelta * scaleSpeed);
+            Vector3 existingScale = selectedDecal.Scale;
+            Vector3 newScale = existingScale + scaleOffset;
             selectedDecal.SetScale(newScale);
         }
         

@@ -74,7 +74,7 @@ namespace Gumball
         
         private void OnPrimaryContactMove(Vector2 offset)
         {
-            if (DecalManager.Instance.CurrentSelected != null)
+            if (DecalEditor.Instance.CurrentSelected != null)
                 return;
             
             if (!PrimaryContactInput.IsPressed)

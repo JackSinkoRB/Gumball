@@ -6,6 +6,11 @@ namespace Gumball
 {
     public static class VectorUtils
     {
+        
+        public static SerializedVector3 ToSerializedVector(this Vector3 vector)
+        {
+            return new SerializedVector3(vector.x, vector.y, vector.z);
+        }
 
         public static Vector3 Flatten(this Vector3 vector3)
         {

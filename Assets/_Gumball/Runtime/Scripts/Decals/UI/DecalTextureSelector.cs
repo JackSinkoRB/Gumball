@@ -45,7 +45,7 @@ namespace Gumball
             backButton.gameObject.SetActive(false);
             
             PoolPopulatedIcons();
-            foreach (DecalUICategory category in DecalManager.Instance.DecalUICategories)
+            foreach (DecalUICategory category in DecalEditor.Instance.DecalUICategories)
             {
                 CategoryOptionUI categoryOption = categoryOptionPrefab.GetSpareOrCreate<CategoryOptionUI>(contentHolder);
                 categoryOption.Label.text = category.CategoryName;
@@ -78,7 +78,7 @@ namespace Gumball
 
             ResetScrollRect();
         }
-
+        
         private void OnClickCategoryOption(DecalUICategory category)
         {
             if (selectedCategory == category)
@@ -90,8 +90,8 @@ namespace Gumball
         
         private void OnClickTextureOption(Sprite sprite)
         {
-            LiveDecal decal = DecalManager.Instance.CreateLiveDecal(selectedCategory, sprite);
-            DecalManager.Instance.SelectLiveDecal(decal);
+            LiveDecal decal = DecalEditor.Instance.CreateLiveDecal(selectedCategory, sprite);
+            DecalEditor.Instance.SelectLiveDecal(decal);
         }
 
         private void ResetScrollRect()

@@ -17,21 +17,21 @@ namespace Gumball
         
         private void OnEnable()
         {
-            DecalManager.Instance.onCreateLiveDecal += OnCreateLiveDecal;
-            DecalManager.Instance.onDestroyLiveDecal += OnDestroyLiveDecal;
-            DecalManager.Instance.onSelectLiveDecal += OnSelectLiveDecal;
-            DecalManager.Instance.onDeselectLiveDecal += OnDeselectLiveDecal;
+            DecalEditor.Instance.onCreateLiveDecal += OnCreateLiveDecal;
+            DecalEditor.Instance.onDestroyLiveDecal += OnDestroyLiveDecal;
+            DecalEditor.Instance.onSelectLiveDecal += OnSelectLiveDecal;
+            DecalEditor.Instance.onDeselectLiveDecal += OnDeselectLiveDecal;
             UpdateLayers();
         }
 
         private void OnDisable()
         {
-            if (DecalManager.ExistsRuntime)
+            if (DecalEditor.ExistsRuntime)
             {
-                DecalManager.Instance.onCreateLiveDecal -= OnCreateLiveDecal;
-                DecalManager.Instance.onDestroyLiveDecal -= OnDestroyLiveDecal;
-                DecalManager.Instance.onSelectLiveDecal -= OnSelectLiveDecal;
-                DecalManager.Instance.onDeselectLiveDecal -= OnDeselectLiveDecal;
+                DecalEditor.Instance.onCreateLiveDecal -= OnCreateLiveDecal;
+                DecalEditor.Instance.onDestroyLiveDecal -= OnDestroyLiveDecal;
+                DecalEditor.Instance.onSelectLiveDecal -= OnSelectLiveDecal;
+                DecalEditor.Instance.onDeselectLiveDecal -= OnDeselectLiveDecal;
             }
         }
 
@@ -47,7 +47,7 @@ namespace Gumball
         
         private void OnSelectLiveDecal(LiveDecal liveDecal)
         {
-            magneticScroll.SnapItemToMagnet(DecalManager.Instance.GetPriorityOfLiveDecal(liveDecal));
+            magneticScroll.SnapItemToMagnet(DecalEditor.Instance.GetPriorityOfLiveDecal(liveDecal));
         }
 
         private void OnDeselectLiveDecal(LiveDecal liveDecal)
@@ -57,7 +57,7 @@ namespace Gumball
 
         public void UpdateLayers()
         {
-            layerAmountLabel.text = $"{DecalManager.Instance.LiveDecals.Count} / {DecalManager.MaxDecalsAllowed}";
+            layerAmountLabel.text = $"{DecalEditor.Instance.LiveDecals.Count} / {DecalEditor.MaxDecalsAllowed}";
             
             PopulateScroll();
         }
@@ -65,9 +65,9 @@ namespace Gumball
         private void PopulateScroll()
         {
             List<ScrollItem> scrollItems = new List<ScrollItem>();
-            for (int index = 0; index < DecalManager.Instance.LiveDecals.Count; index++)
+            for (int index = 0; index < DecalEditor.Instance.LiveDecals.Count; index++)
             {
-                LiveDecal liveDecal = DecalManager.Instance.LiveDecals[index];
+                LiveDecal liveDecal = DecalEditor.Instance.LiveDecals[index];
                 int finalIndex = index;
    
                 ScrollItem scrollItem = new ScrollItem();
@@ -81,8 +81,8 @@ namespace Gumball
                 //onSelectComplete gets called when the pointer is no longer down
                 scrollItem.onSelectComplete += () =>
                 {
-                    if (DecalManager.Instance.CurrentSelected != liveDecal)
-                        DecalManager.Instance.SelectLiveDecal(liveDecal);
+                    if (DecalEditor.Instance.CurrentSelected != liveDecal)
+                        DecalEditor.Instance.SelectLiveDecal(liveDecal);
                 };
 
                 scrollItems.Add(scrollItem);

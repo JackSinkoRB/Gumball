@@ -13,6 +13,41 @@ namespace Gumball
     public class LiveDecal : MonoBehaviour
     {
 
+        [Serializable]
+        public class LiveDecalData
+        {
+            [SerializeField] private int categoryIndex;
+            [SerializeField] private int textureIndex;
+            [SerializeField] private int priority;
+            [SerializeField] private SerializedVector3 lastKnownPosition;
+            [SerializeField] private SerializedVector3 lastKnownRotationEuler;
+            [SerializeField] private SerializedVector3 lastKnownHitNormal;
+            [SerializeField] private SerializedVector3 scale;
+            [SerializeField] private float angle;
+
+            public int CategoryIndex => categoryIndex;
+            public int TextureIndex => textureIndex;
+            public int Priority => priority;
+            public SerializedVector3 LastKnownPosition => lastKnownPosition;
+            public SerializedVector3 LastKnownRotationEuler => lastKnownRotationEuler;
+            public SerializedVector3 LastKnownHitNormal => lastKnownHitNormal;
+
+            public SerializedVector3 Scale => scale;
+            public float Angle => angle;
+
+            public LiveDecalData(LiveDecal liveDecal)
+            {
+                categoryIndex = liveDecal.categoryIndex;
+                textureIndex = liveDecal.textureIndex;
+                priority = liveDecal.priority;
+                lastKnownPosition = liveDecal.lastKnownPosition.ToSerializedVector();
+                lastKnownRotationEuler = liveDecal.lastKnownRotation.eulerAngles.ToSerializedVector();
+                lastKnownHitNormal = liveDecal.lastKnownHitNormal.ToSerializedVector();
+                scale = liveDecal.Scale.ToSerializedVector();
+                angle = liveDecal.Angle;
+            }
+        }
+        
         private const float selectionColliderWidth = 0.1f;
         
         [SerializeField] private Collider selectionCollider;
@@ -20,19 +55,22 @@ namespace Gumball
 
         [Header("Settings")]
         [SerializeField] private LayerMask raycastLayers; //TODO - vehicle only
-        [SerializeField] private MinMaxFloat minMaxScale = new(0.03f, 50);
-        
+        [SerializeField] private MinMaxVector3 minMaxScale = new(0.1f * Vector3.one, 3.5f * Vector3.one);
+
         [Header("Debugging")]
+        [SerializeField, ReadOnly] private int categoryIndex;
+        [SerializeField, ReadOnly] private int textureIndex;
         [SerializeField, ReadOnly] private Sprite sprite;
         
         private Vector2 clickOffset;
         private Vector3 lastKnownPosition;
         private Quaternion lastKnownRotation;
+        private Vector3 lastKnownHitNormal;
         private int priority;
         private bool isClickableUnderPointerOnPress;
 
         public bool IsValidPosition { get; private set; }
-
+        
         public P3dPaintDecal PaintDecal => paintDecal;
         public Sprite Sprite => sprite;
         public int Priority => priority;
@@ -40,14 +78,29 @@ namespace Gumball
         public float Angle => paintDecal.Angle;
         public Color Color => paintDecal.Color;
 
-        private void SetDefaultPosition()
+        /// <summary>
+        /// Force the decal to be valid.
+        /// </summary>
+        public void SetValid()
         {
-            UpdatePosition(new Vector2(Screen.width / 2f, Screen.height / 2f));
+            IsValidPosition = true;
+        }
+        
+        public void UpdatePosition(Vector3 position, Vector3 hitNormal, Quaternion rotation)
+        {
+            lastKnownPosition = position;
+            lastKnownRotation = rotation;
+            lastKnownHitNormal = hitNormal;
+            
+            transform.position = lastKnownPosition;
+                
+            //put the selection collider on the angle of the normal
+            selectionCollider.transform.rotation = Quaternion.LookRotation(hitNormal, Vector3.up);
         }
 
         private void OnEnable()
         {
-            SetScale(paintDecal.Scale.x);
+            SetScale(paintDecal.Scale);
             SetDefaultPosition();
             PrimaryContactInput.onPress += OnPrimaryContactPressed;
             PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
@@ -65,6 +118,12 @@ namespace Gumball
         {
             DrawPreview();
         }
+
+        public void Initialise(int categoryIndex, int textureIndex)
+        {
+            this.categoryIndex = categoryIndex;
+            this.textureIndex = textureIndex;
+        }
         
         /// <summary>
         /// Applies the current state of the live decal to the car's material.
@@ -77,6 +136,23 @@ namespace Gumball
         public void SetSprite(Sprite sprite)
         {
             this.sprite = sprite;
+            paintDecal.Texture = sprite.texture;
+        }
+        
+        public void SetAngle(float angle)
+        {
+            paintDecal.Angle = angle;
+        }
+        
+        public void SetScale(Vector3 scale)
+        {
+            Vector3 clampedScale = minMaxScale.Clamp(scale);
+            
+            paintDecal.Scale = clampedScale;
+            
+            //set the selection collider scale:
+            Vector3 selectionScale = (clampedScale * (2 * paintDecal.Radius)).SetZ(selectionColliderWidth);
+            selectionCollider.transform.localScale = selectionScale;
         }
 
         public void SetColor(Color color)
@@ -97,25 +173,30 @@ namespace Gumball
         
         private void OnPrimaryContactPerformed()
         {
-            if (DecalManager.Instance.CurrentSelected == this 
+            if (DecalEditor.Instance.CurrentSelected == this 
                 && !isClickableUnderPointerOnPress)
             {
-                UpdatePosition(PrimaryContactInput.Position - clickOffset);
+                OnMoveScreenPosition(PrimaryContactInput.Position - clickOffset);
             }
         }
 
         private void OnPrimaryContactReleased()
         {
-            if (DecalManager.Instance.CurrentSelected == this &&
+            if (DecalEditor.Instance.CurrentSelected == this &&
                 !IsValidPosition)
             {
                 RemoveDecal();
             }
         }
 
+        private void SetDefaultPosition()
+        {
+            OnMoveScreenPosition(new Vector2(Screen.width / 2f, Screen.height / 2f));
+        }
+        
         private void RemoveDecal()
         {
-            DecalManager.Instance.DestroyLiveDecal(this);
+            DecalEditor.Instance.DestroyLiveDecal(this);
         }
 
         private void CalculateClickOffset()
@@ -124,43 +205,22 @@ namespace Gumball
             clickOffset = PrimaryContactInput.Position - screenPosition;
         }
 
-        private void UpdatePosition(Vector2 screenPosition)
+        private void OnMoveScreenPosition(Vector2 screenPosition)
         {
             Ray ray = Camera.main.ScreenPointToRay(screenPosition);
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, raycastLayers))
             {
-                lastKnownPosition = hit.point;
-                lastKnownRotation = Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Camera.main.transform.up);
-
-                transform.position = lastKnownPosition;
+                Quaternion rotation = Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Camera.main.transform.up);
+                UpdatePosition(hit.point, hit.normal, rotation);
                 
-                //put the selection collider on the angle of the normal
-                selectionCollider.transform.rotation = Quaternion.LookRotation(hit.normal, Vector3.up);
-
                 IsValidPosition = hit.collider.GetComponent<P3dPaintable>() != null;
             }
         }
 
         private void DrawPreview()
         {
-            paintDecal.HandleHitPoint(true, int.MaxValue, 1, 0, lastKnownPosition, lastKnownRotation);
-        }
-
-        public void SetAngle(float angle)
-        {
-            paintDecal.Angle = angle;
+            paintDecal.HandleHitPoint(true, priority, 1, 0, lastKnownPosition, lastKnownRotation);
         }
         
-        public void SetScale(float scale)
-        {
-            float newValue = Mathf.Clamp(scale, minMaxScale.Min, minMaxScale.Max);
-            Vector3 newScale = Vector3.one * newValue;
-            
-            paintDecal.Scale = newScale;
-            
-            //set the selection collider scale:
-            Vector3 selectionScale = (newScale * (2 * paintDecal.Radius)).SetZ(selectionColliderWidth);
-            selectionCollider.transform.localScale = selectionScale;
-        }
     }
 }
