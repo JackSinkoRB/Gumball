@@ -641,10 +641,10 @@ GameObject:
   - component: {fileID: 8928268311913055980}
   - component: {fileID: 5818620458994433766}
   - component: {fileID: 7110045430637665593}
-  - component: {fileID: 2972294074443544505}
-  - component: {fileID: 4811552229658364596}
-  - component: {fileID: 3055010821311033015}
-  - component: {fileID: 4025708973965680387}
+  - component: {fileID: 2781666255772288823}
+  - component: {fileID: 276205097152279473}
+  - component: {fileID: 8733459489565150476}
+  - component: {fileID: 7930767684616633659}
   m_Layer: 0
   m_Name: Magnetic Scroll (VERTICAL)
   m_TagString: Untagged
@@ -726,7 +726,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -749,7 +749,7 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &2972294074443544505
+--- !u!114 &2781666255772288823
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -758,7 +758,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3104301562472150505}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4586ffc83d27cb949b997ec9f2be50aa, type: 3}
+  m_Script: {fileID: 11500000, guid: 5ad83d911074fca49bdc3957c1d187ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   direction: 1
@@ -786,14 +786,14 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   effects:
-  - {fileID: 4811552229658364596}
-  - {fileID: 3055010821311033015}
-  - {fileID: 4025708973965680387}
+  - {fileID: 276205097152279473}
+  - {fileID: 8733459489565150476}
+  - {fileID: 7930767684616633659}
   useOutlineEffect: 0
   outlineEffectImage: {fileID: 0}
   outlineEffectMinScale: 0.5
   outlineEffectMaxScale: 1
-  logger: {fileID: 0}
+  isLoggingEnabled: 0
   initialised: 0
   icons: []
   items: []
@@ -818,7 +818,7 @@ MonoBehaviour:
   currentElasticityModifier: 0
   lastSelectedItemIndex: 0
   closestIconToMagnetIndex: -1
---- !u!114 &4811552229658364596
+--- !u!114 &276205097152279473
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -827,53 +827,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3104301562472150505}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25eb75da4f3f4004686e87d6b5dcaeb2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleAxis: 0
-  scaleEffectCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0.4
-      inSlope: 1.3073138
-      outSlope: 1.3073138
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.12598468
-    - serializedVersion: 3
-      time: 0.5
-      value: 1
-      inSlope: -0.0016100453
-      outSlope: -0.0016100453
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.3663251
-    - serializedVersion: 3
-      time: 1
-      value: 0.4
-      inSlope: -1.4878781
-      outSlope: -1.4878781
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.10155249
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
---- !u!114 &3055010821311033015
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3104301562472150505}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee854a1130706f14f8557b6d5362b615, type: 3}
+  m_Script: {fileID: 11500000, guid: 1810c753ce41ffa4485370f3b772af61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   visualOffsetEffectCurve:
@@ -909,7 +863,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &4025708973965680387
+--- !u!114 &8733459489565150476
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -918,30 +872,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 3104301562472150505}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4759cf556ef27f8478b00b07dc25006b, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e5a42a9787d48d43b715aef6b0c4265, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alphaCurve:
+  scaleAxis: 0
+  scaleEffectCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
-      inSlope: 10
-      outSlope: 10
+      value: 0.4
+      inSlope: 1.2
+      outSlope: 1.2
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.05
-      value: 0.5
-      inSlope: 2.0724463
-      outSlope: 2.0724463
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.12962963
     - serializedVersion: 3
       time: 0.5
       value: 1
@@ -952,13 +898,67 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.95
-      value: 0.5
-      inSlope: -2.1586316
-      outSlope: -2.1586316
+      time: 1
+      value: 0.4
+      inSlope: -1.2
+      outSlope: -1.2
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &7930767684616633659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3104301562472150505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c67f841174cced49ab8a3b9d1a6951e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  alphaCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 10.060997
+      outSlope: 10.060997
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.05
+      value: 0.50304985
+      inSlope: 2.294929
+      outSlope: 2.294929
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.12962964
+      inWeight: 0.33333334
+      outWeight: 0.120370366
+    - serializedVersion: 3
+      time: 0.5
+      value: 1
+      inSlope: -0.0033887625
+      outSlope: -0.0033887625
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.95
+      value: 0.5
+      inSlope: -2.3113198
+      outSlope: -2.3113198
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.11111114
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
@@ -1831,7 +1831,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6669499b8bcc5c94eb3017feac91a024, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  magneticScroll: {fileID: 2972294074443544505}
+  magneticScroll: {fileID: 2781666255772288823}
   layerAmountLabel: {fileID: 6024422486673763814}
 --- !u!1 &8708055827685428022
 GameObject:

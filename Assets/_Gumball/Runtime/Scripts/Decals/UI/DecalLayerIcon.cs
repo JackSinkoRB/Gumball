@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using MagneticScrollUtils;
 using TMPro;
 using UnityEngine;
 
