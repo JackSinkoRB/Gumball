@@ -808,7 +808,9 @@ namespace MagneticScrollUtils
             int iconsBefore = Mathf.FloorToInt(icons.Count / 2f); //magnet is always in the middle
             int desiredFirstIndex = itemStartIndex - iconsBefore;
             if (desiredFirstIndex < 0)
-                desiredFirstIndex = 0;
+                desiredFirstIndex = CanInfiniteScroll
+                    ? desiredFirstIndex + items.Count //wrap
+                    : 0;
 
             int desiredLastIndex = desiredFirstIndex + icons.Count - 1;
 
