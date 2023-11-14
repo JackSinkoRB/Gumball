@@ -1,176 +1,105 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using MyBox;
-using PaintIn3D;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class DecalManager : Singleton<DecalManager>
+    [CreateAssetMenu(menuName = "Gumball/Singletons/Decal Manager")]
+    public class DecalManager : SingletonScriptable<DecalManager>
     {
-
-        private const int maxDecals = 50;
-        private const int liveDecalLayer = 6;
         
         [SerializeField] private LiveDecal liveDecalPrefab;
-        [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
-        [SerializeField] private Shader carBodyShader;
-        [SerializeField] private Transform car;
-        [SerializeField] private Vector3 cameraLookPositionOffset = new(0, 2, 0);
-        [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
+        [SerializeField] private DecalUICategory[] decalUICategories;
 
-        [SerializeField] private Sprite[] textureOptions;
+        public DecalUICategory[] DecalUICategories => decalUICategories;
 
-        [SerializeField, ReadOnly] private LiveDecal currentSelected;
-        [SerializeField, ReadOnly] private int priorityCount;
-        [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
-
-        public Sprite[] TextureOptions => textureOptions;
-        public LiveDecal CurrentSelected => currentSelected;
-        
-        private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[maxDecals];
-
-        private void OnEnable()
+        public static LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite, int priority = -1)
         {
-            PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
-            PrimaryContactInput.onPress += OnPrimaryContactPressed;
-            StartSession(); //temp
-        }
-
-        private void OnDisable()
-        {
-            PrimaryContactInput.onPerform -= OnPrimaryContactPerformed;
-            PrimaryContactInput.onPress -= OnPrimaryContactPressed;
-            EndSession(); //temp
-        }
-
-        private void OnPrimaryContactPressed()
-        {
-            GetDecalsUnderPointer();
-        }
-
-        private void OnPrimaryContactPerformed()
-        {
-            selectedLiveDecalUI.Update();
-        }
-        
-        [Serializable]
-        private struct PaintableMesh
-        {
-            public P3dPaintable Paintable;
-            public P3dMaterialCloner MaterialCloner;
-            public P3dPaintableTexture PaintableTexture;
-
-            public PaintableMesh(P3dPaintable paintable, P3dMaterialCloner materialCloner, P3dPaintableTexture paintableTexture)
-            {
-                Paintable = paintable;
-                MaterialCloner = materialCloner;
-                PaintableTexture = paintableTexture;
-            }
-        }
-        
-        private void StartSession()
-        {
-            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
-
-            paintableMeshes.Clear();
-            foreach (MeshFilter meshFilter in car.GetComponentsInAllChildren<MeshFilter>())
-            {
-                SetMeshPaintable(meshFilter);
-            }
-
-            SetupCamera();
-        }
-
-        private void SetupCamera()
-        {
-            Camera.main.transform.LookAt(car.position + cameraLookPositionOffset);
-        }
-
-        private void EndSession()
-        {
-            for (int i = paintableMeshes.Count - 1; i >= 0; i--)
-            {
-                PaintableMesh paintableMesh = paintableMeshes[i];
-                RemoveMeshPaintable(paintableMesh);
-                paintableMeshes.Remove(paintableMesh);
-            }
-        }
-
-        private void SetMeshPaintable(MeshFilter meshFilter)
-        {
-            MeshRenderer meshRenderer = meshFilter.GetComponent<MeshRenderer>();
-
-            if (!meshRenderer.material.shader.Equals(carBodyShader))
-                return;
-            
-            P3dPaintable paintable = meshFilter.gameObject.AddComponent<P3dPaintable>();
-            P3dMaterialCloner materialCloner = meshFilter.gameObject.AddComponent<P3dMaterialCloner>();
-            P3dPaintableTexture paintableTexture = meshFilter.gameObject.AddComponent<P3dPaintableTexture>();
-
-            paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
-            paintableTexture.Slot = new P3dSlot(0, "_Albedo"); //car body shader uses albedo
-                        
-            //todo: need to disable the car collider too
-            meshFilter.gameObject.AddComponent<MeshCollider>();
-            
-            PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture);
-            paintableMeshes.Add(paintableMesh);
-        }
-
-        private void RemoveMeshPaintable(PaintableMesh paintableMesh)
-        {
-            Destroy(paintableMesh.MaterialCloner);
-            Destroy(paintableMesh.PaintableTexture);
-            Destroy(paintableMesh.Paintable);
-            paintableMeshes.Remove(paintableMesh);
-        }
-
-        public void SelectLiveDecal(LiveDecal liveDecal)
-        {
-            currentSelected = liveDecal;
-            selectedLiveDecalUI.Update();
-        }
-
-        public LiveDecal CreateLiveDecal(Sprite sprite)
-        {
-            LiveDecal liveDecal = Instantiate(liveDecalPrefab.gameObject, transform).GetComponent<LiveDecal>();
-            liveDecal.PaintDecal.Texture = sprite.texture;
+            LiveDecal liveDecal = Instantiate(Instance.liveDecalPrefab.gameObject).GetComponent<LiveDecal>();
+            liveDecal.Initialise(Array.IndexOf(Instance.decalUICategories, category), Array.IndexOf(category.Sprites, sprite));
             liveDecal.SetSprite(sprite);
+            DontDestroyOnLoad(liveDecal);
 
-            priorityCount++;
-            liveDecal.SetPriority(priorityCount);
+            if (category.CategoryName.Equals("Shapes"))
+                liveDecal.SetColor(Color.gray);
+
+            liveDecal.SetPriority(priority);
             
             return liveDecal;
         }
 
-        public void GetDecalsUnderPointer()
+        /// <summary>
+        /// Saves the specified decals to the car's save data.
+        /// </summary>
+        public static void SaveLiveDecalData(CarManager car, List<LiveDecal> liveDecals)
         {
-            //raycast from the pointer position into the world
-            Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
-
-            int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, Mathf.Infinity, 1 << liveDecalLayer);
-
-            LiveDecal highestPriorityDecal = null;
-            for (int index = 0; index < raycastHits; index++)
-            {
-                RaycastHit hit = decalsUnderPointer[index];
-                if (hit.collider == null)
-                    break;
-                
-                LiveDecal decal = hit.collider.GetComponent<LiveDecal>();
-
-                if (highestPriorityDecal == null || decal.Priority > highestPriorityDecal.Priority)
-                    highestPriorityDecal = decal;
-                
-                Debug.Log("Ray hit: " + hit.collider.name + " at " + hit.point);
-            }
-            
-            if (highestPriorityDecal != null)
-                SelectLiveDecal(highestPriorityDecal);
+            LiveDecal.LiveDecalData[] liveDecalData = CreateLiveDecalData(liveDecals);
+            DataManager.Cars.Set(GetDecalsSaveKey(car), liveDecalData);
+            GlobalLoggers.DecalsLogger.Log($"Saving {liveDecals.Count} live decals for {car.gameObject.name}.");
         }
+
+        /// <summary>
+        /// Loads and applies the decals from the car's save data.
+        /// </summary>
+        public static void ApplyDecalDataToCar(CarManager car)
+        {
+            DecalEditor.Instance.StartSession(car);
+            DecalEditor.Instance.EndSession();
+        }
+
+        /// <summary>
+        /// Creates a list of live decals from the specified car's save data.
+        /// </summary>
+        public static List<LiveDecal> CreateLiveDecalsFromData(CarManager car)
+        {
+            List<LiveDecal> liveDecals = new();
+            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(GetDecalsSaveKey(car), Array.Empty<LiveDecal.LiveDecalData>());
+            
+            foreach (LiveDecal.LiveDecalData data in liveDecalData)
+            {
+                LiveDecal liveDecal = CreateLiveDecalFromData(data);
+                liveDecals.Add(liveDecal);
+            }
+
+            return liveDecals;
+        }
+        
+        private static LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
+        {
+            DecalUICategory category = Instance.decalUICategories[data.CategoryIndex];
+            Sprite sprite = category.Sprites[data.TextureIndex];
+            LiveDecal liveDecal = CreateLiveDecal(category, sprite, data.Priority);
+            liveDecal.UpdatePosition(data.LastKnownPosition.ToVector3(), data.LastKnownHitNormal.ToVector3(), Quaternion.Euler(data.LastKnownRotationEuler.ToVector3()));
+            liveDecal.SetScale(data.Scale.ToVector3());
+            liveDecal.SetAngle(data.Angle);
+            liveDecal.SetValid();
+            return liveDecal;
+        }
+
+        private static LiveDecal.LiveDecalData[] CreateLiveDecalData(List<LiveDecal> liveDecals)
+        {
+            LiveDecal.LiveDecalData[] finalData = new LiveDecal.LiveDecalData[liveDecals.Count];
+            for (int index = 0; index < liveDecals.Count; index++)
+            {
+                LiveDecal liveDecal = liveDecals[index];
+                finalData[index] = new LiveDecal.LiveDecalData(liveDecal);
+            }
+
+            return finalData;
+        }
+        
+        /// <summary>
+        /// Gets the save key for the specific car in the player's car.
+        /// </summary>
+        /// <param name="car"></param>
+        /// <returns></returns>
+        private static string GetDecalsSaveKey(CarManager car)
+        {
+            //TODO - use actual car ID
+            const string carID = "0";
+            return $"Cars.{carID}.Decals";
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,24 +12,104 @@ namespace Gumball
 
         [SerializeField] private ScrollRect scrollRect;
         [SerializeField] private GameObject textureOptionPrefab;
+        [SerializeField] private GameObject categoryOptionPrefab;
         [SerializeField] private Transform contentHolder;
         [SerializeField] private Scrollbar horizontalScrollBar;
+        [SerializeField] private Button backButton;
+
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private DecalUICategory selectedCategory;
         
         private void OnEnable()
         {
-            Populate();
+            PopulateCategories();
         }
 
-        private void Populate()
+        private void OnDisable()
         {
-            foreach (Sprite texture in DecalManager.Instance.TextureOptions)
-            {
-                TextureOptionUI textureOption = Instantiate(textureOptionPrefab, contentHolder).GetComponent<TextureOptionUI>();
-                textureOption.TextureImage.sprite = texture;
-            }
+            selectedCategory = null;
+            DestroyPopulatedIcons(); //don't keep textures in memory
+        }
+
+        public void OnClickBackButton()
+        {
+            if (selectedCategory == null)
+                return;
             
-            horizontalScrollBar.value = 0;
-            this.PerformAtEndOfFrame(() => scrollRect.enabled = horizontalScrollBar.gameObject.activeSelf);
+            selectedCategory = null;
+            PopulateCategories();
+        }
+
+        private void PopulateCategories()
+        {
+            backButton.gameObject.SetActive(false);
+            
+            PoolPopulatedIcons();
+            foreach (DecalUICategory category in DecalManager.Instance.DecalUICategories)
+            {
+                CategoryOptionUI categoryOption = categoryOptionPrefab.GetSpareOrCreate<CategoryOptionUI>(contentHolder);
+                categoryOption.Label.text = category.CategoryName;
+                categoryOption.transform.SetAsLastSibling();
+
+                categoryOption.Button.onClick.RemoveAllListeners();
+                categoryOption.Button.onClick.AddListener(() => OnClickCategoryOption(category));
+            }
+
+            ResetScrollRect();
+        }
+
+        /// <summary>
+        /// Populates the texture in the current selected category.
+        /// </summary>
+        private void PopulateTextures()
+        {
+            backButton.gameObject.SetActive(true);
+
+            PoolPopulatedIcons();
+            foreach (Sprite sprite in selectedCategory.Sprites)
+            {
+                TextureOptionUI textureOption = textureOptionPrefab.GetSpareOrCreate<TextureOptionUI>(contentHolder);
+                textureOption.Icon.sprite = sprite;
+                textureOption.transform.SetAsLastSibling();
+                
+                textureOption.Button.onClick.RemoveAllListeners();
+                textureOption.Button.onClick.AddListener(() => OnClickTextureOption(sprite));
+            }
+
+            ResetScrollRect();
+        }
+        
+        private void OnClickCategoryOption(DecalUICategory category)
+        {
+            if (selectedCategory == category)
+                return;
+            
+            selectedCategory = category;
+            PopulateTextures();
+        }
+        
+        private void OnClickTextureOption(Sprite sprite)
+        {
+            LiveDecal decal = DecalEditor.Instance.CreateLiveDecal(selectedCategory, sprite);
+            DecalEditor.Instance.SelectLiveDecal(decal);
+        }
+
+        private void ResetScrollRect()
+        {
+            Canvas.ForceUpdateCanvases();
+            scrollRect.horizontalNormalizedPosition = 0;
+        }
+        
+        private void PoolPopulatedIcons()
+        {
+            foreach (Transform child in contentHolder)
+                child.gameObject.Pool();
+        }
+        
+        private void DestroyPopulatedIcons()
+        {
+            foreach (Transform child in contentHolder)
+                Destroy(child.gameObject);
         }
         
     }

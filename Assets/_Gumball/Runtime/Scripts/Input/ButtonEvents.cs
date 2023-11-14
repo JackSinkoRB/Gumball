@@ -11,21 +11,98 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace Gumball
 {
+    /// <summary>
+    /// Listen for presses from all active touches.
+    /// </summary>
+    [RequireComponent(typeof(Button))]
     public class ButtonEvents : MonoBehaviour
     {
+        
+        public event Action onPress;
+        public event Action<Vector2> onDrag;
+        public event Action onRelease;
 
         [SerializeField] private UnityEvent onStartPressing;
+        [SerializeField] private UnityEvent onHoldPress;
         [SerializeField] private UnityEvent onStopPressing;
-        
-        public bool IsPressingButton { get; private set; }
 
-        private Button button => GetComponent<Button>();
+        [Header("Settings")]
+        [Tooltip("Should the press be cancelled if the pointer is no longer on top of the selectable?")]
+        [SerializeField] private bool pointerMustBeOnRect = true;
+
+        [Header("Debugging")]
+        [SerializeField] private bool isPressingButton;
+        
+        public Button Button => GetComponent<Button>();
+        public bool IsPressingButton => isPressingButton;
+
+        private Vector2 lastKnownPosition;
 
         private void Update()
         {
             CheckIfButtonIsPressed();
+            if (IsPressingButton)
+                OnHold();
         }
 
+        private void CheckIfButtonIsPressed()
+        {
+            bool isPressed = false;
+            foreach (Touch touch in InputManager.ActiveTouches)
+            {
+                if (IsScreenPositionWithinGraphic(Button.image, touch.screenPosition))
+                {
+                    isPressed = true;
+                    break;
+                }
+            }
+
+            if (isPressed && !IsPressingButton)
+                OnPress();
+
+            if (pointerMustBeOnRect && !isPressed && IsPressingButton)
+                OnRelease();
+
+            if (!pointerMustBeOnRect && !PrimaryContactInput.IsPressed)
+                OnRelease();
+        }
+
+        private void OnPress()
+        {
+            isPressingButton = true;
+            
+            lastKnownPosition = PrimaryContactInput.Position;
+
+            onPress?.Invoke();
+            onStartPressing?.Invoke();
+            GlobalLoggers.InputLogger.Log($"Pressed {gameObject.name}");
+        }
+
+        private void OnRelease()
+        {
+            isPressingButton = false;
+
+            onRelease?.Invoke();
+            onStopPressing?.Invoke();
+            GlobalLoggers.InputLogger.Log($"Depressed {gameObject.name}");
+        }
+
+        private void OnHold()
+        {
+            Vector2 offset = PrimaryContactInput.Position - lastKnownPosition;
+            lastKnownPosition = PrimaryContactInput.Position;
+            
+            if (offset.sqrMagnitude > 0.01f)
+                OnDrag(offset);
+
+            onHoldPress?.Invoke();
+        }
+
+        private void OnDrag(Vector2 offset)
+        {
+            onDrag?.Invoke(offset);
+        }
+        
         private bool IsScreenPositionWithinGraphic(Graphic graphic, Vector2 screenPosition)
         {
             Vector4 padding = graphic.raycastPadding;
@@ -55,33 +132,5 @@ namespace Gumball
         }
 #endif
         
-        private void CheckIfButtonIsPressed()
-        {
-            bool isPressed = false;
-            foreach (Touch touch in InputManager.ActiveTouches)
-            {
-                if (IsScreenPositionWithinGraphic(button.image, touch.screenPosition))
-                {
-                    isPressed = true;
-                    break;
-                }
-            }
-
-            if (isPressed && !IsPressingButton)
-            {
-                //just started pressing
-                onStartPressing?.Invoke();
-                GlobalLoggers.InputLogger.Log($"Pressed {gameObject.name}");
-            }
-            
-            if (!isPressed && IsPressingButton)
-            {
-                //just stopped pressing
-                onStopPressing?.Invoke();
-                GlobalLoggers.InputLogger.Log($"Depressed {gameObject.name}");
-            }
-            
-            IsPressingButton = isPressed;
-        }
     }
 }

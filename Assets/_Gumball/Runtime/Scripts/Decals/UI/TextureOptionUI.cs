@@ -7,16 +7,10 @@ namespace Gumball
 {
     public class TextureOptionUI : MonoBehaviour
     {
+        [SerializeField] private Button button;
+        [SerializeField] private Image icon;
 
-        [SerializeField] private Image textureImage;
-
-        public Image TextureImage => textureImage;
-
-        public void OnClick()
-        {
-            LiveDecal decal = DecalManager.Instance.CreateLiveDecal(textureImage.sprite);
-            DecalManager.Instance.SelectLiveDecal(decal);
-        }
-        
+        public Button Button => button;
+        public Image Icon => icon;
     }
 }

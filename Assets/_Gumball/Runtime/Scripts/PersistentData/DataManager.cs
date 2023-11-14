@@ -10,6 +10,7 @@ namespace Gumball
 
         //construct providers here:
         public static readonly JsonDataProvider Settings = new("Settings");
+        public static readonly JsonDataProvider Cars = new("Cars");
 
         /// <summary>
         /// Force loads all the data from the sources into the providers asynchronously.
@@ -20,7 +21,8 @@ namespace Gumball
             GlobalLoggers.SaveDataLogger.Log("Loading all providers from source (asynchronously).");
             //add any data providers here, and then finally wait for all to be complete
             Settings.LoadFromSourceAsync();
-            yield return new WaitUntil(() => Settings.IsLoaded);
+            Cars.LoadFromSourceAsync();
+            yield return new WaitUntil(() => Settings.IsLoaded && Cars.IsLoaded);
             onComplete?.Invoke();
         }
 
@@ -31,11 +33,13 @@ namespace Gumball
         {
             GlobalLoggers.SaveDataLogger.Log("Loading all providers from source (synchronously).");
             Settings.LoadFromSourceSync();
+            Cars.LoadFromSourceSync();
         }
 
         public static void RemoveAllData()
         {
             Settings.RemoveFromSource();
+            Cars.RemoveFromSource();
         }
         
     }

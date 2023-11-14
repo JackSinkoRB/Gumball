@@ -27,6 +27,8 @@ namespace Gumball
                  "\nThe further the CoG is towards the rear of the car, the more the car tends to oversteer." +
                  "\nIf this is not set, the center of mass is calculated from the colliders.")]
         [SerializeField] private Transform centerOfMass;
+
+        [SerializeField] private GameObject colliders;
         
         [SerializeField] private TyreCompound tyreCompound = TyreCompound.Street;
 
@@ -104,6 +106,9 @@ namespace Gumball
         
         private bool isReversing;
         private bool clutchIn;
+
+        public GameObject Colliders => colliders;
+        
         /// <summary>
         /// The speed that the rigidbody is moving (in m/s).
         /// </summary>

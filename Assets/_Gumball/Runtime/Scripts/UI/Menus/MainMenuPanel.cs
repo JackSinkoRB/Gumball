@@ -17,6 +17,11 @@ namespace Gumball
         {
             MapDrivingSceneManager.LoadMapDrivingScene(ChunkManager.Instance.TestingMap);
         }
+
+        public void LoadDecalEditor()
+        {
+            DecalEditor.LoadDecalEditor();
+        }
         
     }
 }

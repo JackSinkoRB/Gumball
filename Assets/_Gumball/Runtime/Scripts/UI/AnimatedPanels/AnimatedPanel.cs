@@ -17,7 +17,8 @@ public abstract class AnimatedPanel : MonoBehaviour
     public event Action onHideComplete;
 
     [SerializeField] private bool isAddedToPanelStack = true;
-    [Space(5)]
+    
+    [Header("Animation")]
     [SerializeField] private bool ignoreTimescale = true;
     [SerializeField] private bool disableWhenHidden = true;
 

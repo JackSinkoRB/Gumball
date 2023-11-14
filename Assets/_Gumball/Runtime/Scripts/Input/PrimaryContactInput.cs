@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -12,10 +13,15 @@ namespace Gumball
     {
 
         public static event Action onPress;
+        public static event Action onDragStart;
+        public static event Action<Vector2> onDrag;
+        public static event Action onDragStop;
         public static event Action onRelease;
         public static event Action onPerform;
 
         public static bool IsPressed { get; private set; }
+        public static bool IsDragging { get; private set; }
+        
         public static Vector2 Position { get; private set; }
         /// <summary>
         /// The position of the press when the primary contact was started.
@@ -26,9 +32,24 @@ namespace Gumball
         /// The amount the primary position has moved since pressed.
         /// </summary>
         public static Vector2 OffsetSincePressed;
+
+        private static Vector2 lastKnownPosition;
+        private static int graphicsUnderPointerLastCached = -1;
+        private static readonly List<Graphic> clickablesUnderPointerCached = new();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void InitialisePreSceneLoad()
+        {
+            onPress = null;
+            onDragStart = null;
+            onDrag = null;
+            onDragStop = null;
+            onRelease = null;
+            onPerform = null;
+        }
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void Initialise()
+        private static void InitialisePostSceneLoad()
         {
             CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
             {
@@ -48,6 +69,7 @@ namespace Gumball
             IsPressed = true;
             PositionOnPress = InputManager.PrimaryPosition.ReadValue<Vector2>();
             Position = PositionOnPress;
+            lastKnownPosition = Position;
             OffsetSincePressed = Vector2.zero;
             
             onPress?.Invoke();
@@ -69,22 +91,80 @@ namespace Gumball
             OffsetSincePressed = PositionOnPress - Position;
             
             onPerform?.Invoke();
+            
+            Vector2 offsetSinceLastFrame = Position - lastKnownPosition;
+            lastKnownPosition = Position;
+            if (offsetSinceLastFrame.sqrMagnitude > 0.01f)
+            {
+                if (!IsDragging)
+                    OnStartDragging();
+
+                OnDrag(offsetSinceLastFrame);
+            } else if (IsDragging)
+            {
+                OnStopDragging();
+            }
+        }
+        
+        private static void OnStartDragging()
+        {
+            onDragStart?.Invoke();
         }
 
-        public static bool IsSelectableUnderPointer()
+        private static void OnDrag(Vector2 offset)
         {
-            var pointer = new PointerEventData(EventSystem.current) { position = Position };
-        
-            List<RaycastResult> raycastResults = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(pointer, raycastResults);
+            onDrag?.Invoke(offset);
+        }
 
-            foreach (RaycastResult result in raycastResults)
+        private static void OnStopDragging()
+        {
+            onDragStop?.Invoke();
+        }
+
+        /// <summary>
+        /// Is a raycastable graphic under the pointer?
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsClickableUnderPointer()
+        {
+            return GetClickableGraphicsUnderPointer().Count > 0;
+        }
+
+        public static bool IsClickableUnderPointer(Graphic graphic)
+        {
+            foreach (Graphic graphicUnderPointer in GetClickableGraphicsUnderPointer())
             {
-                if (result.gameObject.GetComponent<Selectable>() != null);
-                return true;
+                if (graphicUnderPointer == graphic)
+                    return true;
             }
 
             return false;
+        }
+        
+        private static List<Graphic> GetClickableGraphicsUnderPointer()
+        {
+            //because input only updates once per frame, cache the results for the entire frame
+            bool isCached = graphicsUnderPointerLastCached == Time.frameCount;
+            if (!isCached)
+            {
+                clickablesUnderPointerCached.Clear();
+                
+                graphicsUnderPointerLastCached = Time.frameCount;
+                PointerEventData pointer = new PointerEventData(EventSystem.current) { position = Position };
+        
+                List<RaycastResult> raycastResults = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(pointer, raycastResults);
+
+                foreach (RaycastResult result in raycastResults)
+                {
+                    Graphic graphic = result.gameObject.GetComponent<Graphic>(); 
+                    if (graphic != null)
+                        clickablesUnderPointerCached.Add(graphic);
+                }
+                
+            }
+            
+            return clickablesUnderPointerCached;
         }
 
     }

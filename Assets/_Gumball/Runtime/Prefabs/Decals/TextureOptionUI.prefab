@@ -85,7 +85,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4987638421713463781}
-  - component: {fileID: 1610920239874674039}
+  - component: {fileID: 9219377919084893100}
   - component: {fileID: 1004117684778467409}
   m_Layer: 5
   m_Name: TextureOptionUI
@@ -116,7 +116,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1610920239874674039
+--- !u!114 &9219377919084893100
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -125,10 +125,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 4078241414235999758}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96add8ec44889264e9c18612798c16f3, type: 3}
+  m_Script: {fileID: 11500000, guid: c38eb053da20ab444b41a2227a69636b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textureImage: {fileID: 6353034766135937788}
+  button: {fileID: 1004117684778467409}
+  icon: {fileID: 6353034766135937788}
 --- !u!114 &1004117684778467409
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,19 +173,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6363987951802987807}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1610920239874674039}
-        m_TargetAssemblyTypeName: Gumball.TextureOptionUI, Gumball
-        m_MethodName: OnClick
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &6726798743351295656
 GameObject:
   m_ObjectHideFlags: 0
@@ -253,7 +242,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: bf4e7e0afde729e4098cf3f7a2c156ef, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
