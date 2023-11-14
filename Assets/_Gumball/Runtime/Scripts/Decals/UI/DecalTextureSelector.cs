@@ -45,7 +45,7 @@ namespace Gumball
             backButton.gameObject.SetActive(false);
             
             PoolPopulatedIcons();
-            foreach (DecalUICategory category in DecalEditor.Instance.DecalUICategories)
+            foreach (DecalUICategory category in DecalManager.Instance.DecalUICategories)
             {
                 CategoryOptionUI categoryOption = categoryOptionPrefab.GetSpareOrCreate<CategoryOptionUI>(contentHolder);
                 categoryOption.Label.text = category.CategoryName;

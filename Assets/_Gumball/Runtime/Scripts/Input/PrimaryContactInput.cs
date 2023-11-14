@@ -36,9 +36,20 @@ namespace Gumball
         private static Vector2 lastKnownPosition;
         private static int graphicsUnderPointerLastCached = -1;
         private static readonly List<Graphic> clickablesUnderPointerCached = new();
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void InitialisePreSceneLoad()
+        {
+            onPress = null;
+            onDragStart = null;
+            onDrag = null;
+            onDragStop = null;
+            onRelease = null;
+            onPerform = null;
+        }
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void Initialise()
+        private static void InitialisePostSceneLoad()
         {
             CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
             {

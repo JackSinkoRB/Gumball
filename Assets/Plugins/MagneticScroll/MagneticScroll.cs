@@ -482,8 +482,8 @@ namespace MagneticScrollUtils
                 for (int count = lastSelectedItemIndex + 1; count < lastSelectedItemIndex + items.Count; count++)
                 {
                     int wrapped = count;
-                    if (wrapped == items.Count)
-                        wrapped = 0;
+                    if (wrapped >= items.Count)
+                        wrapped -= items.Count;
 
                     if (wrapped == itemIndex)
                         return distanceForwards;
@@ -497,8 +497,8 @@ namespace MagneticScrollUtils
                 for (int count = lastSelectedItemIndex - 1; count > lastSelectedItemIndex - items.Count; count--)
                 {
                     int wrapped = count;
-                    if (wrapped == -1)
-                        wrapped = items.Count-1;
+                    if (wrapped <= -1)
+                        wrapped += items.Count;
                 
                     if (wrapped == itemIndex)
                         return distanceBackwards;

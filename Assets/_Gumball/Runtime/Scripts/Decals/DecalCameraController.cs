@@ -28,15 +28,27 @@ namespace Gumball
 
         private void OnEnable()
         {
+            DecalEditor.onSessionStart += OnSessionStart;
+            DecalEditor.onSessionEnd += OnSessionEnd;
+        }
+        
+        private void OnDisable()
+        {
+            DecalEditor.onSessionStart -= OnSessionStart;
+            DecalEditor.onSessionEnd -= OnSessionEnd;
+        }
+
+        private void OnSessionStart()
+        {
             PrimaryContactInput.onPress += OnPrimaryContactPress;
             PrimaryContactInput.onDrag += OnPrimaryContactMove;
             PrimaryContactInput.onRelease += OnPrimaryContactRelease;
             PinchInput.onPinch += OnPinch;
-
-            target = PlayerCarManager.Instance.CurrentCar.transform;
+            
+            target = DecalEditor.Instance.CurrentCar.transform;
         }
 
-        private void OnDisable()
+        private void OnSessionEnd()
         {
             PrimaryContactInput.onPress -= OnPrimaryContactPress;
             PrimaryContactInput.onDrag -= OnPrimaryContactMove;
@@ -44,8 +56,10 @@ namespace Gumball
             PinchInput.onPinch -= OnPinch;
             
             decelerationTween?.Kill();
+            
+            gameObject.SetActive(false);
         }
-        
+
         private void Update()
         {
             CheckToZoomWithKeyboard();
@@ -89,6 +103,9 @@ namespace Gumball
 
         private void MoveCamera(Vector2 offset)
         {
+            if (target == null)
+                return;
+            
             horizontal += offset.x * xSpeed * distance;
             vertical -= offset.y * ySpeed;
 

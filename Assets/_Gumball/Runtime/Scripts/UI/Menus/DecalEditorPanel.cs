@@ -14,6 +14,7 @@ namespace Gumball
 
         public void OnClickBackButton()
         {
+            DecalEditor.Instance.EndSession();
             MainSceneManager.LoadMainScene();
         }
         

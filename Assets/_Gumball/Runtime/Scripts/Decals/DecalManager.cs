@@ -5,8 +5,29 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public static class DecalManager
+    [CreateAssetMenu(menuName = "Gumball/Singletons/Decal Manager")]
+    public class DecalManager : SingletonScriptable<DecalManager>
     {
+        
+        [SerializeField] private LiveDecal liveDecalPrefab;
+        [SerializeField] private DecalUICategory[] decalUICategories;
+
+        public DecalUICategory[] DecalUICategories => decalUICategories;
+
+        public static LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite, int priority = -1)
+        {
+            LiveDecal liveDecal = Instantiate(Instance.liveDecalPrefab.gameObject).GetComponent<LiveDecal>();
+            liveDecal.Initialise(Array.IndexOf(Instance.decalUICategories, category), Array.IndexOf(category.Sprites, sprite));
+            liveDecal.SetSprite(sprite);
+            DontDestroyOnLoad(liveDecal);
+
+            if (category.CategoryName.Equals("Shapes"))
+                liveDecal.SetColor(Color.gray);
+
+            liveDecal.SetPriority(priority);
+            
+            return liveDecal;
+        }
 
         /// <summary>
         /// Saves the specified decals to the car's save data.
@@ -15,6 +36,16 @@ namespace Gumball
         {
             LiveDecal.LiveDecalData[] liveDecalData = CreateLiveDecalData(liveDecals);
             DataManager.Cars.Set(GetDecalsSaveKey(car), liveDecalData);
+            GlobalLoggers.DecalsLogger.Log($"Saving {liveDecals.Count} live decals for {car.gameObject.name}.");
+        }
+
+        /// <summary>
+        /// Loads and applies the decals from the car's save data.
+        /// </summary>
+        public static void ApplyDecalDataToCar(CarManager car)
+        {
+            DecalEditor.Instance.StartSession(car);
+            DecalEditor.Instance.EndSession();
         }
 
         /// <summary>
@@ -27,23 +58,23 @@ namespace Gumball
             
             foreach (LiveDecal.LiveDecalData data in liveDecalData)
             {
-                LiveDecal liveDecal = DecalEditor.Instance.CreateLiveDecalFromData(data);
+                LiveDecal liveDecal = CreateLiveDecalFromData(data);
                 liveDecals.Add(liveDecal);
             }
 
             return liveDecals;
         }
         
-        /// <summary>
-        /// Gets the save key for the specific car in the player's car
-        /// </summary>
-        /// <param name="car"></param>
-        /// <returns></returns>
-        private static string GetDecalsSaveKey(CarManager car)
+        private static LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
         {
-            //TODO - use actual car ID
-            const string carID = "0";
-            return $"Cars.{carID}.Decals";
+            DecalUICategory category = Instance.decalUICategories[data.CategoryIndex];
+            Sprite sprite = category.Sprites[data.TextureIndex];
+            LiveDecal liveDecal = CreateLiveDecal(category, sprite, data.Priority);
+            liveDecal.UpdatePosition(data.LastKnownPosition.ToVector3(), data.LastKnownHitNormal.ToVector3(), Quaternion.Euler(data.LastKnownRotationEuler.ToVector3()));
+            liveDecal.SetScale(data.Scale.ToVector3());
+            liveDecal.SetAngle(data.Angle);
+            liveDecal.SetValid();
+            return liveDecal;
         }
 
         private static LiveDecal.LiveDecalData[] CreateLiveDecalData(List<LiveDecal> liveDecals)
@@ -58,5 +89,17 @@ namespace Gumball
             return finalData;
         }
         
+        /// <summary>
+        /// Gets the save key for the specific car in the player's car.
+        /// </summary>
+        /// <param name="car"></param>
+        /// <returns></returns>
+        private static string GetDecalsSaveKey(CarManager car)
+        {
+            //TODO - use actual car ID
+            const string carID = "0";
+            return $"Cars.{carID}.Decals";
+        }
+
     }
 }

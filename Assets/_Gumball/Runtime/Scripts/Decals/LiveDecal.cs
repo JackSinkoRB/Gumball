@@ -130,7 +130,7 @@ namespace Gumball
         /// </summary>
         public void Apply()
         {
-            paintDecal.HandleHitPoint(false, int.MaxValue, 1, 0, lastKnownPosition, lastKnownRotation);
+            paintDecal.HandleHitPoint(false, priority, 1, 0, lastKnownPosition, lastKnownRotation);
         }
         
         public void SetSprite(Sprite sprite)

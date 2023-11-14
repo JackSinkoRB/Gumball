@@ -46,40 +46,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15aa00f6fbc6d0e46a53f0bb4f11d485, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dontDestroy: 0
-  logger: {fileID: 11400000, guid: b3bb94ce33d56b64a937112061ca64e1, type: 2}
-  liveDecalPrefab: {fileID: 1441583455122195192, guid: 70db1708e356bd04da2926c9a2adc6b9,
-    type: 3}
+  dontDestroy: 1
   carBodyShader: {fileID: 4800000, guid: d483042875cc1c54da5fc1651ba0efa3, type: 3}
-  car: {fileID: 0}
+  currentCar: {fileID: 0}
   selectedLiveDecalUI: {fileID: 1925627446997356956}
-  decalUICategories:
-  - categoryName: Shapes
-    sprites:
-    - {fileID: 21300000, guid: 8f4359dd12c6e91498445dbac73ed9bc, type: 3}
-    - {fileID: 21300000, guid: 33460dc21bae748459e4f27d951737ae, type: 3}
-    - {fileID: 21300000, guid: bc5a5b1a19bca2d4ea752ced36f5333a, type: 3}
-    - {fileID: 21300000, guid: 6fcd576de381a46409c936d1976f6ec9, type: 3}
-    - {fileID: 21300000, guid: a12a141bc88f9364c8b6e9acbff48c2d, type: 3}
-    - {fileID: 21300000, guid: f36611c98d3760a448c6b6230e90d72d, type: 3}
-    - {fileID: 21300000, guid: 8d77db2ee110fa6439c7145ebffc3a57, type: 3}
-    - {fileID: 21300000, guid: 540ea650b8fefb041820ae8b3670eab0, type: 3}
-    - {fileID: 21300000, guid: c908e825642ad1945a6593ef806a5f67, type: 3}
-    - {fileID: 21300000, guid: 1c4b82c79f94b3144b8cef3861f46ed9, type: 3}
-    - {fileID: 21300000, guid: 9cec6d3d6a2049740b58d41bb0929b85, type: 3}
-    - {fileID: 21300000, guid: 74f75155921493a44b3175fb0b60bf53, type: 3}
-    - {fileID: 21300000, guid: 14678d4bac0e64f45a1b29f9235f24ae, type: 3}
-    - {fileID: 21300000, guid: 93bfb3400bbec484f9a184c4eb72334a, type: 3}
-    - {fileID: 21300000, guid: 3625f6cf80cd49643a7ef3392aa75bd6, type: 3}
-    - {fileID: 21300000, guid: 252f914dbe44265449ecd31905c3439a, type: 3}
-    - {fileID: 21300000, guid: 94fa7b5ba2788fb48be3aaf3bd8f9d30, type: 3}
-    - {fileID: 21300000, guid: ae74234f369a06f4fa3322c796ab76c8, type: 3}
-    - {fileID: 21300000, guid: 8ec7a0a1d659a0a489d4fa32c7ea764a, type: 3}
-  - categoryName: Sponsors
-    sprites:
-    - {fileID: 21300000, guid: f86097a1912771b4281a3f67b12f2852, type: 3}
-    - {fileID: 21300000, guid: cb6cefa78a1ddd54499c3c67e429d087, type: 3}
-    - {fileID: 21300000, guid: ad22cdef9f1fcc843a15439a16477614, type: 3}
+  cameraController: {fileID: 8801126979822624446}
   currentSelected: {fileID: 0}
   priorityCount: 0
   paintableMeshes: []
@@ -100,7 +71,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8278154539206843152
 Transform:
   m_ObjectHideFlags: 0

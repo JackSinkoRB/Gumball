@@ -8,7 +8,7 @@ using UnityEditor;
 /// <summary>
 /// A tool for identifying builds
 /// </summary>
-[CreateAssetMenu(fileName = "Gumball/Singletons/Version Manager")]
+[CreateAssetMenu(menuName = "Gumball/Singletons/Version Manager")]
 public class VersionManager : SingletonScriptable<VersionManager>
 {
 

@@ -22,6 +22,8 @@ public class PanelManager : Singleton<PanelManager>
     {
         base.Initialise();
 
+        panelLookup.Clear();
+        
         SceneManager.activeSceneChanged -= OnSceneChange;
         SceneManager.activeSceneChanged += OnSceneChange;
     }
@@ -42,6 +44,16 @@ public class PanelManager : Singleton<PanelManager>
             throw new NullReferenceException($"Could not find panel {panelType} in lookup. Scene is: {SceneManager.GetActiveScene().name}");
         
         return Instance.panelLookup[panelType];
+    }
+
+    public static bool PanelExists<T>() where T : AnimatedPanel
+    {
+        return PanelExists(typeof(T));
+    }
+    
+    public static bool PanelExists(Type panelType)
+    {
+        return Instance.panelLookup.ContainsKey(panelType);
     }
 
     public void AddToStack(AnimatedPanel animatedPanel)

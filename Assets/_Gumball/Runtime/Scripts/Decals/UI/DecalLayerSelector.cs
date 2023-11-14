@@ -21,7 +21,8 @@ namespace Gumball
             DecalEditor.Instance.onDestroyLiveDecal += OnDestroyLiveDecal;
             DecalEditor.Instance.onSelectLiveDecal += OnSelectLiveDecal;
             DecalEditor.Instance.onDeselectLiveDecal += OnDeselectLiveDecal;
-            UpdateLayers();
+            
+            DecalEditor.onSessionStart += OnStartSession;
         }
 
         private void OnDisable()
@@ -32,7 +33,14 @@ namespace Gumball
                 DecalEditor.Instance.onDestroyLiveDecal -= OnDestroyLiveDecal;
                 DecalEditor.Instance.onSelectLiveDecal -= OnSelectLiveDecal;
                 DecalEditor.Instance.onDeselectLiveDecal -= OnDeselectLiveDecal;
+                
+                DecalEditor.onSessionStart -= OnStartSession;
             }
+        }
+
+        private void OnStartSession()
+        {
+            UpdateLayers();
         }
 
         private void OnCreateLiveDecal(LiveDecal liveDecal)

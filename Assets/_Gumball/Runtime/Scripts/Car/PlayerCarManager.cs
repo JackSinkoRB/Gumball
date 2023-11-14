@@ -27,6 +27,8 @@ namespace Gumball
                 
             yield return CurrentCar.Customisation.ApplyVehicleChanges(defaultCarData);
 
+            DecalManager.ApplyDecalDataToCar(CurrentCar);
+
             onComplete?.Invoke();
             onCurrentCarChanged?.Invoke(CurrentCar);
         }

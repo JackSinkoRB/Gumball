@@ -18,21 +18,22 @@ namespace Gumball
         
         private const int decalLayer = 6;
         private static readonly LayerMask decalLayerMask = 1 << decalLayer;
+        private static readonly int AlbedoShaderID = Shader.PropertyToID("_Albedo");
 
+        public static event Action onSessionStart;
+        public static event Action onSessionEnd;
+        
         public event Action<LiveDecal> onSelectLiveDecal;
         public event Action<LiveDecal> onDeselectLiveDecal;
         public event Action<LiveDecal> onCreateLiveDecal;
         public event Action<LiveDecal> onDestroyLiveDecal;
-
-        [SerializeField] private Logger logger;
         
-        [SerializeField] private LiveDecal liveDecalPrefab;
         [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
         [SerializeField] private Shader carBodyShader;
-        [SerializeField] private CarManager car;
+        [SerializeField] private CarManager currentCar;
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
-        [SerializeField] private DecalUICategory[] decalUICategories;
-
+        [SerializeField] private DecalCameraController cameraController;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
         [SerializeField, ReadOnly] private int priorityCount;
@@ -40,12 +41,19 @@ namespace Gumball
         [Tooltip("Index is the priority")]
         [SerializeField, ReadOnly] private List<LiveDecal> liveDecals = new();
         
-        public DecalUICategory[] DecalUICategories => decalUICategories;
         public List<LiveDecal> LiveDecals => liveDecals;
         public LiveDecal CurrentSelected => currentSelected;
+        public CarManager CurrentCar => currentCar;
         
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void RuntimeInitialise()
+        {
+            onSessionStart = null;
+            onSessionEnd = null;
+        }
+        
         public static void LoadDecalEditor()
         {
             CoroutineHelper.Instance.StartCoroutine(LoadDecalEditorIE());
@@ -54,36 +62,22 @@ namespace Gumball
         private static IEnumerator LoadDecalEditorIE()
         {
             PanelManager.GetPanel<LoadingPanel>().Show();
-            
-            //set the vehicle kinematic
-            Rigidbody currentCarRigidbody = PlayerCarManager.Instance.CurrentCar.Rigidbody;
-            currentCarRigidbody.isKinematic = true;
-            
+
             Stopwatch sceneLoadingStopwatch = new Stopwatch();
             sceneLoadingStopwatch.Start();
             yield return Addressables.LoadSceneAsync(SceneManager.DecalEditorSceneName, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+
+            CarManager car = PlayerCarManager.Instance.CurrentCar;
             
             //move the vehicle to the right position
-            currentCarRigidbody.Move(Vector3.zero, Quaternion.Euler(Vector3.zero));
+            car.Rigidbody.Move(Vector3.zero, Quaternion.Euler(Vector3.zero));
+            
+            Instance.cameraController.gameObject.SetActive(true);
+            Instance.StartSession(car);
             
             PanelManager.GetPanel<LoadingPanel>().Hide();
-        }
-        
-        private void OnEnable()
-        {
-            PrimaryContactInput.onPress += OnPrimaryContactPressed;
-
-            car = PlayerCarManager.Instance.CurrentCar;
-            StartSession();
-        }
-
-        private void OnDisable()
-        {
-            PrimaryContactInput.onPress -= OnPrimaryContactPressed;
-
-            EndSession();
         }
 
         private void Update()
@@ -99,6 +93,9 @@ namespace Gumball
 
         private void OnPrimaryContactPressed()
         {
+            if (!PanelManager.PanelExists<DecalEditorPanel>())
+                return; //editor panel isn't open
+            
             Image layerSelectorImage = PanelManager.GetPanel<DecalEditorPanel>().LayerSelector.MagneticScroll.GetComponent<Image>();
             Image scaleRotationHandleImage = selectedLiveDecalUI.ScaleRotationHandle.Button.image;
             
@@ -109,13 +106,22 @@ namespace Gumball
             }
         }
 
-        private void StartSession()
+        public void StartSession(CarManager car)
         {
+            PrimaryContactInput.onPress += OnPrimaryContactPressed;
+
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
 
+            currentCar = car;
+            
+            //set the vehicle kinematic
+            currentCar.Rigidbody.isKinematic = true;
+            
             liveDecals = DecalManager.CreateLiveDecalsFromData(car);
             this.PerformAtEndOfFrame(DeselectLiveDecal);
             
+            GlobalLoggers.DecalsLogger.Log($"Starting session for {car.gameObject.name} with {liveDecals.Count} saved decals.");
+
             paintableMeshes.Clear();
             foreach (MeshFilter meshFilter in car.transform.GetComponentsInAllChildren<MeshFilter>())
             {
@@ -124,13 +130,19 @@ namespace Gumball
             
             //disable the car's collider temporarily
             PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(false);
+
+            onSessionStart?.Invoke();
         }
 
-        private void EndSession()
+        public void EndSession()
         {
+            GlobalLoggers.DecalsLogger.Log($"Ending session.");
+
+            PrimaryContactInput.onPress -= OnPrimaryContactPressed;
+
             DeselectLiveDecal();
             
-            DecalManager.SaveLiveDecalData(car, liveDecals);
+            DecalManager.SaveLiveDecalData(currentCar, liveDecals);
 
             foreach (LiveDecal liveDecal in liveDecals)
             {
@@ -141,21 +153,37 @@ namespace Gumball
             liveDecals.Clear();
             priorityCount = 0;
             
-            for (int i = paintableMeshes.Count - 1; i >= 0; i--)
+            //need to wait for the texture to fully apply before removing paintable components
+            this.PerformAtEndOfFrame(() =>
             {
-                PaintableMesh paintableMesh = paintableMeshes[i];
-                RemoveMeshPaintable(paintableMesh);
-                paintableMeshes.Remove(paintableMesh);
-            }
-            
+                for (int i = paintableMeshes.Count - 1; i >= 0; i--)
+                {
+                    PaintableMesh paintableMesh = paintableMeshes[i];
+                    RemoveMeshPaintable(paintableMesh);
+                    paintableMeshes.Remove(paintableMesh);
+                }
+            });
+
             if (PlayerCarManager.ExistsRuntime)
                 PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
+            
+            currentCar.Rigidbody.isKinematic = false;
+            
+            onSessionEnd?.Invoke();
+
+            currentCar = null;
         }
 
-
-        public Sprite GetTextureFromCategoryAndIndex(int categoryIndex, int index)
+        public LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite)
         {
-            return decalUICategories[categoryIndex].Sprites[index];
+            LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, sprite, priorityCount);
+            priorityCount++;
+            
+            liveDecals.Add(liveDecal);
+            
+            onCreateLiveDecal?.Invoke(liveDecal);
+
+            return liveDecal;
         }
 
         public LiveDecal GetLiveDecalByPriority(int priority)
@@ -183,47 +211,6 @@ namespace Gumball
             currentSelected = null;
         }
 
-        public LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
-        {
-            DecalUICategory category = decalUICategories[data.CategoryIndex];
-            Sprite sprite = category.Sprites[data.TextureIndex];
-            LiveDecal liveDecal = CreateLiveDecal(category, sprite, data.Priority);
-            liveDecal.UpdatePosition(data.LastKnownPosition.ToVector3(), data.LastKnownHitNormal.ToVector3(), Quaternion.Euler(data.LastKnownRotationEuler.ToVector3()));
-            liveDecal.SetScale(data.Scale.ToVector3());
-            liveDecal.SetAngle(data.Angle);
-            liveDecal.SetValid();
-            return liveDecal;
-        }
-
-        public LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite, int priority = -1)
-        {
-            LiveDecal liveDecal = Instantiate(liveDecalPrefab.gameObject, transform).GetComponent<LiveDecal>();
-            liveDecal.Initialise(Array.IndexOf(decalUICategories, category), Array.IndexOf(category.Sprites, sprite));
-            liveDecal.SetSprite(sprite);
-
-            if (category.CategoryName.Equals("Shapes"))
-                liveDecal.SetColor(Color.gray);
-
-            //set priority
-            if (priority == -1)
-            {
-                liveDecal.SetPriority(priorityCount);
-                priorityCount++;
-            }
-            else
-            {
-                liveDecal.SetPriority(priority);
-                if (priority > priorityCount)
-                    priorityCount = priority;
-            }
-
-            liveDecals.Add(liveDecal);
-            
-            onCreateLiveDecal?.Invoke(liveDecal);
-            
-            return liveDecal;
-        }
-
         public void DestroyLiveDecal(LiveDecal liveDecal)
         {
             liveDecals.Remove(liveDecal);
@@ -239,7 +226,7 @@ namespace Gumball
             Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
 
             //max raycast distance from the camera to the middle of the car, so it doesn't detect decals on the other side
-            float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, car.transform.position);
+            float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, currentCar.transform.position);
             int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, maxRaycastDistance, decalLayerMask);
 
             LiveDecal closestDecal = null;
@@ -267,7 +254,7 @@ namespace Gumball
                     distanceToClosestDecalSqr = distanceToDecalSqr;
                 }
 
-                logger.Log($"Distance to {decal.Priority} = {distanceToDecalSqr}");
+                GlobalLoggers.DecalsLogger.Log($"Distance to {decal.Priority} = {distanceToDecalSqr}");
             }
 
             if (closestDecal != null)
@@ -281,17 +268,23 @@ namespace Gumball
 
             if (!meshRenderer.material.shader.Equals(carBodyShader))
                 return;
+
+            //before resetting the textures, clear the previous texture it has made
+            meshRenderer.sharedMaterial.SetTexture(AlbedoShaderID, null);
+
+            DestroyImmediate(meshFilter.gameObject.GetComponent<P3dPaintableTexture>());
             
             P3dPaintable paintable = meshFilter.gameObject.GetComponent<P3dPaintable>(true);
-            P3dMaterialCloner materialCloner = meshFilter.gameObject.GetComponent<P3dMaterialCloner>(true);
             P3dPaintableTexture paintableTexture = meshFilter.gameObject.GetComponent<P3dPaintableTexture>(true);
             MeshCollider meshCollider = meshFilter.gameObject.GetComponent<MeshCollider>(true);
+            P3dMaterialCloner materialCloner = meshFilter.gameObject.GetComponent<P3dMaterialCloner>(true);
+            
             materialCloner.enabled = true;
             paintableTexture.enabled = true;
-            paintable.enabled = true;
             meshCollider.enabled = true;
-            
-            paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
+            paintable.enabled = true;
+
+            //paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
             paintableTexture.Slot = new P3dSlot(0, "_Albedo"); //car body shader uses albedo
             
             PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture, meshCollider);
@@ -300,9 +293,9 @@ namespace Gumball
 
         private void RemoveMeshPaintable(PaintableMesh paintableMesh)
         {
-            paintableMesh.MaterialCloner.enabled = false;
+            Destroy(paintableMesh.MaterialCloner);
+            Destroy(paintableMesh.Paintable);
             paintableMesh.PaintableTexture.enabled = false;
-            paintableMesh.Paintable.enabled = false;
             paintableMesh.MeshCollider.enabled = false;
             paintableMeshes.Remove(paintableMesh);
         }
