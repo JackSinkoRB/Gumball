@@ -12,6 +12,9 @@ namespace Gumball
     public class ChunkManager : Singleton<ChunkManager>
     {
         
+        public event Action<Chunk> onChunkLoad;
+        public event Action<Chunk> onChunkUnload;
+        
         private const float timeBetweenLoadingChecks = 0.5f;
 
         [Header("Settings")]
@@ -109,8 +112,7 @@ namespace Gumball
                 if (!isWithinLoadDistance && isChunkCustomLoaded)
                 {
                     //should not be loaded - unload if so
-                    Destroy(customLoadedData.Value.Chunk.gameObject);
-                    currentCustomLoadedChunks.Remove(customLoadedData.Value);
+                    UnloadChunk(customLoadedData.Value);
                 }
             }
         }
@@ -176,9 +178,7 @@ namespace Gumball
                     break; //keep at least 1 chunk
                 
                 LoadedChunkData chunkData = currentChunks[indexToRemove];
-
-                currentChunks.Remove(indexToRemove);
-                Destroy(chunkData.Chunk.gameObject);
+                UnloadChunk(chunkData);
             }
         }
 
@@ -273,9 +273,18 @@ namespace Gumball
             Mesh meshCopy = Instantiate(meshFilter.sharedMesh);
             chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = meshCopy;
 
+            onChunkLoad?.Invoke(chunk);
+            
 #if UNITY_EDITOR
             GlobalLoggers.LoadingLogger.Log($"Chunk loading '{chunkAssetReference.editorAsset.name}' complete.");
 #endif
+        }
+        
+        private void UnloadChunk(LoadedChunkData chunkData)
+        {
+            onChunkUnload?.Invoke(chunkData.Chunk);
+            Destroy(chunkData.Chunk.gameObject);
+            currentCustomLoadedChunks.Remove(chunkData);
         }
         
     }

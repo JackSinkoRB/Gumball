@@ -200,6 +200,11 @@ namespace Gumball
             return middle;
         }
 
+        public SplineSample GetRandomSplineSample()
+        {
+            return splineSampleCollection.samples.GetRandom();
+        }
+
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
         {
             float closestDistanceSqr = Mathf.Infinity;
