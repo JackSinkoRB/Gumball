@@ -9,29 +9,14 @@ namespace Gumball
 {
     public class ChunkTrafficManager : MonoBehaviour
     {
-        
-        [Serializable]
-        public struct LaneData
-        {
-            [SerializeField] private int id;
-            [SerializeField] private float distance;
-
-            public int ID => id;
-            public float Distance => distance;
-
-            public LaneData(int id, float distance)
-            {
-                this.id = id;
-                this.distance = distance;
-            }
-        }
 
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US)")]
         [SerializeField] private bool driveOnLeft = true;
         
         //when map driving scene loads, load all the traffic cars (eg. a traffic manager that holds reference to all traffic cars)
 
-        [SerializeField] private int numberOfCars = 5;
+        [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
+        [SerializeField] private int density = 100;
         [SerializeField] private float[] laneDistances;
 
         [Header("Debugging")]
@@ -57,6 +42,7 @@ namespace Gumball
         {
             ChunkManager.Instance.onChunkLoad += OnChunkLoad;
             
+            //if no lanes, just create one in the centre
             if (laneDistances.Length == 0)
                 laneDistances = new[] { 0f };
         }
@@ -77,6 +63,8 @@ namespace Gumball
         /// </summary>
         private void InitialiseCars()
         {
+            float splineLength = chunk.SplineComputer.CalculateLength();
+            int numberOfCars = Mathf.RoundToInt(splineLength / density);
             for (int count = 0; count < numberOfCars; count++)
             {
                 SpawnCarInRandomPosition();
@@ -102,19 +90,11 @@ namespace Gumball
         }
 
 #if UNITY_EDITOR
-        private SampleCollection splineSampleCollection;
+        private readonly SampleCollection splineSampleCollection = new();
 
         private void OnDrawGizmos()
         {
-            try
-            {
-                chunk.SplineComputer.GetSamples(splineSampleCollection);
-            }
-            catch (NullReferenceException)
-            {
-                chunk.SplineComputer.RebuildImmediate();
-                chunk.SplineComputer.GetSamples(splineSampleCollection);
-            }
+            chunk.SplineComputer.GetSamples(splineSampleCollection);
 
             SplineSample firstSample = splineSampleCollection.samples[0];
             SplineSample lastSample = splineSampleCollection.samples[^1];

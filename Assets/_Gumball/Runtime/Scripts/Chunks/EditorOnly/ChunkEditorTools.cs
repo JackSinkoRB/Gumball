@@ -103,7 +103,7 @@ namespace Gumball
             if (chunk.CurrentTerrain == null)
                 return;
 
-            chunk.CurrentTerrain.layer = ChunkUtils.TerrainLayer;
+            chunk.CurrentTerrain.layer = (int)GameObjectLayers.Layer.Terrain;
             chunk.CurrentTerrain.GetComponent<MeshCollider>(true);
         }
 
