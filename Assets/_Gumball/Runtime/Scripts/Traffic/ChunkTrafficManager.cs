@@ -25,11 +25,14 @@ namespace Gumball
                 this.distance = distance;
             }
         }
+
+        [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US)")]
+        [SerializeField] private bool driveOnLeft = true;
         
         //when map driving scene loads, load all the traffic cars (eg. a traffic manager that holds reference to all traffic cars)
 
         [SerializeField] private int numberOfCars = 5;
-        [SerializeField] private LaneData[] laneData;
+        [SerializeField] private float[] laneDistances;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunk;
@@ -54,8 +57,8 @@ namespace Gumball
         {
             ChunkManager.Instance.onChunkLoad += OnChunkLoad;
             
-            if (laneData.Length == 0)
-                laneData = new[] { new LaneData() };
+            if (laneDistances.Length == 0)
+                laneDistances = new[] { 0f };
         }
         
         private void OnDisable()
@@ -82,22 +85,52 @@ namespace Gumball
 
         private void SpawnCarInRandomPosition()
         {
-            LaneData randomLane = laneData.GetRandom();
-            Vector3 randomPosition = GetRandomPosition(randomLane);
-            TrafficCarSpawner.Instance.SpawnCar(randomPosition);
+            float randomLaneDistance = laneDistances.GetRandom();
+            var (position, rotation) = GetRandomPositionOnSpline(randomLaneDistance);
+            TrafficCarSpawner.Instance.SpawnCar(position, rotation);
         }
-
-        /// <summary>
-        /// Gets a random position in a lane.
-        /// </summary>
-        private Vector3 GetRandomPosition(LaneData lane)
+        
+        private (Vector3, Quaternion) GetRandomPositionOnSpline(float laneDistance)
         {
             //get a random sample on the spline, then get the distance depending on the lane
             SplineSample randomSample = chunk.GetRandomSplineSample();
-            Vector3 laneOffset = randomSample.right * lane.Distance;
+            Vector3 laneOffset = randomSample.right * laneDistance;
+            Vector3 finalPos = randomSample.position + laneOffset;
+            Quaternion rotation = Quaternion.LookRotation(driveOnLeft && laneDistance < 0 ? -randomSample.right : randomSample.right);
             
-            return randomSample.position + laneOffset;
+            return (finalPos, rotation);
         }
 
+#if UNITY_EDITOR
+        private SampleCollection splineSampleCollection;
+
+        private void OnDrawGizmos()
+        {
+            try
+            {
+                chunk.SplineComputer.GetSamples(splineSampleCollection);
+            }
+            catch (NullReferenceException)
+            {
+                chunk.SplineComputer.RebuildImmediate();
+                chunk.SplineComputer.GetSamples(splineSampleCollection);
+            }
+
+            SplineSample firstSample = splineSampleCollection.samples[0];
+            SplineSample lastSample = splineSampleCollection.samples[^1];
+            
+            Gizmos.color = Color.yellow;
+
+            for (int i = 0; i < laneDistances.Length; i++)
+            {
+                Vector3 firstSamplePos = firstSample.position + laneDistances[i] * firstSample.right;
+                Gizmos.DrawSphere(firstSamplePos, 1f);
+
+                Vector3 lastSamplePos = lastSample.position + laneDistances[i] * lastSample.right;
+                Gizmos.DrawSphere(lastSamplePos, 1f);
+            }
+        }
+#endif
+        
     }
 }
