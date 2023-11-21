@@ -12,7 +12,8 @@ namespace Gumball
     public class TrafficCar : MonoBehaviour
     {
 
-        private const float timeBetweenChunkChecks = 1;
+        private const float timeBetweenDelayedUpdates = 1;
+        private const float carActivationRange = 100;
 
         [SerializeField] private Transform[] frontWheels;
         [SerializeField] private Transform[] wheels;
@@ -26,7 +27,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool activated;
         [SerializeField, ReadOnly] private ChunkTrafficManager currentChunkTraffic;
 
-        private float timeSinceLastChunkCheck;
+        private float timeSinceLastDelayedUpdate;
         private float currentLaneDistance;
         private readonly RaycastHit[] terrainRaycastHits = new RaycastHit[1];
 
@@ -34,25 +35,49 @@ namespace Gumball
         
         private void OnEnable()
         {
-            DoChunkCheck();
+            DelayedUpdate();
         }
         
         private void Update()
         {
-            TryChunkCheck();
-
-            //todo: activation range - enable/disable 'activated' if within range of player
+            TryDelayedUpdate();
             
+            Move();
             if (activated)
             {
-                Move();
                 RotateWheels();
             }
+        }
+        
+        private void DelayedUpdate()
+        {
+            ChunkCheck();
+            ActivationRangeCheck();
         }
         
         public void SetLaneDistance(float laneDistance)
         {
             currentLaneDistance = laneDistance;
+        }
+        
+        private void ActivationRangeCheck()
+        {
+            float carActivationRangeSqr = carActivationRange * carActivationRange;
+            float distanceToPlayerSqr = Vector3.SqrMagnitude(PlayerCarManager.Instance.CurrentCar.transform.position - transform.position);
+            if (!activated && distanceToPlayerSqr < carActivationRangeSqr)
+                OnActivate();
+            else if (activated && distanceToPlayerSqr > carActivationRangeSqr)
+                OnDeactivate();
+        }
+
+        private void OnActivate()
+        {
+            activated = true;
+        }
+
+        private void OnDeactivate()
+        {
+            activated = false;
         }
         
         private void RotateWheels()
@@ -120,18 +145,18 @@ namespace Gumball
             return (position, rotation);
         }
 
-        private void TryChunkCheck()
+        private void TryDelayedUpdate()
         {
-            timeSinceLastChunkCheck += Time.deltaTime;
+            timeSinceLastDelayedUpdate += Time.deltaTime;
 
-            if (timeSinceLastChunkCheck > timeBetweenChunkChecks)
+            if (timeSinceLastDelayedUpdate > timeBetweenDelayedUpdates)
             {
-                timeSinceLastChunkCheck = 0;
-                DoChunkCheck();
+                timeSinceLastDelayedUpdate = 0;
+                DelayedUpdate();
             }
         }
 
-        private void DoChunkCheck()
+        private void ChunkCheck()
         {
             //raycast down to get the chunk
             int hits = Physics.RaycastNonAlloc(transform.position,
