@@ -41,6 +41,7 @@ namespace Gumball
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
         public SplineMesh RoadMesh => roadMesh;
+        public SplineSample[] SplineSamples => splineSampleCollection.samples;
 
         public Chunk ChunkBefore => chunkBefore;
         public Chunk ChunkAfter => chunkAfter;
@@ -199,14 +200,10 @@ namespace Gumball
             Vector3 middle = splineComputer.EvaluatePosition(travel);
             return middle;
         }
-
-        public SplineSample GetRandomSplineSample()
-        {
-            return splineSampleCollection.samples.GetRandom();
-        }
-
+        
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
         {
+            UpdateSplineSampleData();
             float closestDistanceSqr = Mathf.Infinity;
             SplineSample closestSample = default;
             foreach (SplineSample sample in splineSampleCollection.samples)
@@ -221,6 +218,28 @@ namespace Gumball
                 }
             }
             return (closestSample, closestDistanceSqr);
+        }
+        
+        public (int, float) GetClosestSampleIndexOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
+        {
+            UpdateSplineSampleData();
+            float closestDistanceSqr = Mathf.Infinity;
+            int closestSampleIndex = -1;
+            for (int index = 0; index < splineSampleCollection.samples.Length; index++)
+            {
+                SplineSample sample = splineSampleCollection.samples[index];
+                
+                float distance = flattenTheSpline
+                    ? Vector2.SqrMagnitude(fromPoint.FlattenAsVector2() - sample.position.FlattenAsVector2())
+                    : Vector3.SqrMagnitude(fromPoint - sample.position);
+                if (distance < closestDistanceSqr)
+                {
+                    closestDistanceSqr = distance;
+                    closestSampleIndex = index;
+                }
+            }
+
+            return (closestSampleIndex, closestDistanceSqr);
         }
 
         private void TryFindExistingTerrain()

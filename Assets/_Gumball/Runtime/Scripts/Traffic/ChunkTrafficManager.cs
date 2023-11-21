@@ -10,7 +10,7 @@ namespace Gumball
     public class ChunkTrafficManager : MonoBehaviour
     {
 
-        [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US)")]
+        [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
         
         //when map driving scene loads, load all the traffic cars (eg. a traffic manager that holds reference to all traffic cars)
@@ -21,6 +21,9 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunk;
+
+        public Chunk Chunk => chunk;
+        public bool DriveOnLeft => driveOnLeft;
         
         //have a distance for spawning cars (based on chunk distance, not car distance)
         //have an activation distance - if not activated, rigidbody is kinematic and collider is disabled
@@ -74,30 +77,26 @@ namespace Gumball
         private void SpawnCarInRandomPosition()
         {
             float randomLaneDistance = laneDistances.GetRandom();
-            var (position, rotation) = GetRandomPositionOnSpline(randomLaneDistance);
-            TrafficCarSpawner.Instance.SpawnCar(position, rotation);
+            var (position, rotation) = GetLanePosition(chunk.SplineSamples.GetRandom(), randomLaneDistance);
+            TrafficCar car = TrafficCarSpawner.Instance.SpawnCar(position, rotation);
+            car.SetLaneDistance(randomLaneDistance);
         }
         
-        private (Vector3, Quaternion) GetRandomPositionOnSpline(float laneDistance)
+        public (Vector3, Quaternion) GetLanePosition(SplineSample splineSample, float laneDistance)
         {
             //get a random sample on the spline, then get the distance depending on the lane
-            SplineSample randomSample = chunk.GetRandomSplineSample();
-            Vector3 laneOffset = randomSample.right * laneDistance;
-            Vector3 finalPos = randomSample.position + laneOffset;
-            Quaternion rotation = Quaternion.LookRotation(driveOnLeft && laneDistance < 0 ? -randomSample.right : randomSample.right);
+            Vector3 laneOffset = splineSample.right * laneDistance;
+            Vector3 finalPos = splineSample.position + laneOffset;
+            Quaternion rotation = Quaternion.LookRotation(driveOnLeft && laneDistance < 0 ? splineSample.forward : -splineSample.forward);
             
             return (finalPos, rotation);
         }
 
 #if UNITY_EDITOR
-        private readonly SampleCollection splineSampleCollection = new();
-
         private void OnDrawGizmos()
         {
-            chunk.SplineComputer.GetSamples(splineSampleCollection);
-
-            SplineSample firstSample = splineSampleCollection.samples[0];
-            SplineSample lastSample = splineSampleCollection.samples[^1];
+            SplineSample firstSample = chunk.SplineSamples[0];
+            SplineSample lastSample = chunk.SplineSamples[^1];
             
             Gizmos.color = Color.yellow;
 
