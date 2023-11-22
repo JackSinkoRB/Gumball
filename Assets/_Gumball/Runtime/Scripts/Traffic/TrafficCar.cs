@@ -25,13 +25,18 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField] private bool debug;
         [SerializeField, ReadOnly] private bool activated;
-        [SerializeField, ReadOnly] private ChunkTrafficManager currentChunkTraffic;
+        [SerializeField, ReadOnly] private Chunk currentChunk;
 
         private float timeSinceLastDelayedUpdate;
         private float currentLaneDistance;
         private readonly RaycastHit[] terrainRaycastHits = new RaycastHit[1];
 
         private Rigidbody rigidbody => GetComponent<Rigidbody>();
+
+        public void Initialise(Chunk currentChunk)
+        {
+            this.currentChunk = currentChunk;
+        }
         
         private void OnEnable()
         {
@@ -51,7 +56,7 @@ namespace Gumball
         
         private void DelayedUpdate()
         {
-            ChunkCheck();
+            //ChunkCheck();
             ActivationRangeCheck();
         }
         
@@ -93,16 +98,16 @@ namespace Gumball
             {
                 const int turningDistance = 5; //the number of spline samples
                 
-                int closestSplineIndex = currentChunkTraffic.Chunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
-                bool faceForward = currentChunkTraffic.DriveOnLeft && currentLaneDistance < 0;
+                int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
+                bool faceForward = currentChunk.TrafficManager.DriveOnLeft && currentLaneDistance < 0;
                 int desiredSplineSampleIndex = faceForward ? closestSplineIndex + turningDistance : closestSplineIndex - turningDistance;
-                if (desiredSplineSampleIndex >= currentChunkTraffic.Chunk.SplineSamples.Length || desiredSplineSampleIndex < 0)
+                if (desiredSplineSampleIndex >= currentChunk.SplineSamples.Length || desiredSplineSampleIndex < 0)
                 {
                     //todo: get next chunk
                     break;
                 }
                 
-                var (position, rotation) = currentChunkTraffic.GetLanePosition(currentChunkTraffic.Chunk.SplineSamples[desiredSplineSampleIndex], currentLaneDistance);
+                var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(currentChunk.SplineSamples[desiredSplineSampleIndex], currentLaneDistance);
                 Vector3 directionAhead = (position - transform.position).normalized;
                 
                 float angle = Vector2.SignedAngle(transform.forward.FlattenAsVector2(), directionAhead.FlattenAsVector2());
@@ -121,7 +126,14 @@ namespace Gumball
         
         private void Move()
         {
-            var (targetPosition, targetRotation) = GetTargetPosition();
+            var targetPos = GetTargetPosition();
+            if (targetPos == null)
+            {
+                Despawn();
+                return;
+            }
+            
+            var (targetPosition, targetRotation) = targetPos.Value;
             
             Vector3 direction = (targetPosition - transform.position).normalized;
             Vector3 targetVelocity = direction * moveSpeed;
@@ -130,17 +142,41 @@ namespace Gumball
             rigidbody.MoveRotation(Quaternion.Slerp(rigidbody.rotation, targetRotation, turnSpeed * Time.deltaTime));
         }
 
-        private (Vector3, Quaternion) GetTargetPosition()
+        /// <summary>
+        /// Get the next desired position and rotation relative to the sample on the next chunk's spline.
+        /// </summary>
+        /// <returns>The spline sample's position and rotation, or null if no more loaded chunks in the desired direction.</returns>
+        private (Vector3, Quaternion)? GetTargetPosition()
         {
-            //get the closest spline sample, then get the spline sample ahead and spline sample 10 ahead and 
-            int closestSplineIndex = currentChunkTraffic.Chunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
-            bool faceForward = currentChunkTraffic.DriveOnLeft && currentLaneDistance < 0;
+            if (currentChunk.TrafficManager == null)
+            {
+                Debug.LogWarning($"A traffic car is on the chunk {currentChunk.gameObject.name}, but it doesn't have a traffic manager.");
+                return null;
+            }
+            
+            int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
+            bool faceForward = currentChunk.TrafficManager.DriveOnLeft && currentLaneDistance < 0;
             int desiredSplineSampleIndex = faceForward ? closestSplineIndex + 1 : closestSplineIndex - 1;
 
-            if (desiredSplineSampleIndex >= currentChunkTraffic.Chunk.SplineSamples.Length || desiredSplineSampleIndex < 0)
-                return (transform.position, transform.rotation); //todo: need to get the next chunks splines
+            int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(currentChunk);
+            while (desiredSplineSampleIndex >= currentChunk.SplineSamples.Length || desiredSplineSampleIndex < 0) //has reached end of chunk
+            {
+                //get the next chunk
+                chunkIndex = faceForward ? chunkIndex + 1 : chunkIndex - 1;
 
-            var (position, rotation) = currentChunkTraffic.GetLanePosition(currentChunkTraffic.Chunk.SplineSamples[desiredSplineSampleIndex], currentLaneDistance);
+                if (!ChunkManager.Instance.IsChunkLoaded(chunkIndex))
+                {
+                    //no more loaded chunks
+                    return null;
+                }
+
+                Chunk newChunk = ChunkManager.Instance.GetLoadedChunkByMapIndex(chunkIndex);
+                currentChunk = newChunk;
+                closestSplineIndex = newChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
+                desiredSplineSampleIndex = faceForward ? closestSplineIndex + 1 : closestSplineIndex - 1;
+            }
+            
+            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(currentChunk.SplineSamples[desiredSplineSampleIndex], currentLaneDistance);
 
             return (position, rotation);
         }
@@ -156,21 +192,10 @@ namespace Gumball
             }
         }
 
-        private void ChunkCheck()
+        private void Despawn()
         {
-            //raycast down to get the chunk
-            int hits = Physics.RaycastNonAlloc(transform.position,
-                Vector3.down, terrainRaycastHits, Mathf.Infinity,
-                GameObjectLayers.GetLayerMaskFromLayer(GameObjectLayers.Layer.Terrain));
-            if (hits == 0)
-            {
-                gameObject.Pool();
-            }
-            else
-            {
-                currentChunkTraffic = terrainRaycastHits[0].transform.parent.GetComponentInChildren<ChunkTrafficManager>();
-            }
+            gameObject.Pool();
         }
-        
+
     }
 }

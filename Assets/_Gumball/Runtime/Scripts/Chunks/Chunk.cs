@@ -24,6 +24,7 @@ namespace Gumball
         [Header("Required")]
         [SerializeField] private SplineComputer splineComputer;
         [SerializeField] private SplineMesh roadMesh;
+        [SerializeField] private ChunkTrafficManager trafficManager;
 
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, true, true)]
@@ -56,6 +57,8 @@ namespace Gumball
 
         public bool HasCustomLoadDistance => hasCustomLoadDistance;
         public float CustomLoadDistance => customLoadDistance;
+
+        public ChunkTrafficManager TrafficManager => trafficManager;
         
         public GameObject CurrentTerrain
         {

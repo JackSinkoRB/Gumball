@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Dreamteck.Splines;
+using AYellowpaper.SerializedCollections;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -27,7 +27,11 @@ namespace Gumball
         [ReadOnly, SerializeField] private MinMaxInt loadedChunksIndices;
         [ReadOnly, SerializeField] private List<LoadedChunkData> currentCustomLoadedChunks = new();
 
-        private readonly Dictionary<int, LoadedChunkData> currentChunks = new();
+        /// <summary>
+        /// int = the map index
+        /// </summary>
+        [SerializedDictionary("Map Index", "Data")]
+        public SerializedDictionary<int, LoadedChunkData> CurrentChunks = new();
 
         [Obsolete("To be removed - for testing only")]
         public MapData TestingMap => testingMap;
@@ -37,12 +41,54 @@ namespace Gumball
         private readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private float timeSinceLastLoadCheck;
 
+        public bool IsChunkLoaded(int chunkMapIndex)
+        {
+            return chunkMapIndex >= loadedChunksIndices.Min && chunkMapIndex <= loadedChunksIndices.Max;
+        }
+        
+        /// <exception cref="ArgumentOutOfRangeException">If the chunk is not currently loaded.</exception>
+        public Chunk GetLoadedChunkByMapIndex(int chunkMapIndex)
+        {
+            if (CurrentChunks.ContainsKey(chunkMapIndex))
+                return CurrentChunks[chunkMapIndex].Chunk;
+            
+            foreach (LoadedChunkData data in currentCustomLoadedChunks)
+            {
+                if (data.MapIndex.Equals(chunkMapIndex))
+                    return data.Chunk;
+            }
+
+            throw new ArgumentException($"The chunk with index '{chunkMapIndex}' is not currently loaded. Loaded chunks are within range {loadedChunksIndices.Min} and {loadedChunksIndices.Max}.");
+        } 
+
+        /// <summary>
+        /// Get the map index of the supplied chunk.
+        /// <remarks>The chunk must be loaded.</remarks>
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">If the chunk is not currently loaded.</exception>
+        public int GetMapIndexOfLoadedChunk(Chunk chunk)
+        {
+            foreach (LoadedChunkData data in CurrentChunks.Values)
+            {
+                if (data.Chunk.Equals(chunk))
+                    return data.MapIndex;
+            }
+
+            foreach (LoadedChunkData data in currentCustomLoadedChunks)
+            {
+                if (data.Chunk.Equals(chunk))
+                    return data.MapIndex;
+            }
+
+            throw new ArgumentException($"The chunk {chunk.name} is not currently loaded.");
+        }
+        
         public IEnumerator LoadMap(MapData map)
         {
             GlobalLoggers.LoadingLogger.Log($"Loading map '{map.name}'");
             isLoading = true;
             currentMap = map;
-            currentChunks.Clear();
+            CurrentChunks.Clear();
 
             //load the first chunk since none are loaded
             loadedChunksIndices = new MinMaxInt(map.StartingChunkIndex, map.StartingChunkIndex);
@@ -174,10 +220,10 @@ namespace Gumball
 
             foreach (int indexToRemove in chunksToUnload)
             {
-                if (currentChunks.Count == 1)
+                if (CurrentChunks.Count == 1)
                     break; //keep at least 1 chunk
                 
-                LoadedChunkData chunkData = currentChunks[indexToRemove];
+                LoadedChunkData chunkData = CurrentChunks[indexToRemove];
                 UnloadChunk(chunkData);
             }
         }
@@ -261,7 +307,7 @@ namespace Gumball
                 currentCustomLoadedChunks.Add(loadedChunkData);
             } else
             {
-                currentChunks[mapIndex] = loadedChunkData;
+                CurrentChunks[mapIndex] = loadedChunkData;
             }
 
             ChunkMapData chunkMapData = currentMap.GetChunkData(mapIndex);
