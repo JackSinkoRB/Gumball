@@ -8,11 +8,11 @@ using UnityEngine;
 
 namespace Gumball
 {
-    [CustomEditor(typeof(Chunk))]
+    [CustomEditor(typeof(ChunkEditorTools))]
     public class ChunkEditor : UnityEditor.Editor
     {
 
-        private Chunk chunk => target as Chunk;
+        private ChunkEditorTools chunk => target as ChunkEditorTools;
 
         private void OnSceneGUI()
         {
@@ -20,8 +20,6 @@ namespace Gumball
             
             if (!chunk.HasChunkConnected && !chunk.transform.rotation.eulerAngles.Approximately(Vector3.zero))
                 chunk.transform.rotation = Quaternion.Euler(Vector3.zero);
-            
-            chunk.GetComponent<ChunkEditorTools>().HasConnection = chunk.HasChunkConnected;
         }
         
     }

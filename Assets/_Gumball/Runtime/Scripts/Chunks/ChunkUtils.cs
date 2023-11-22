@@ -65,9 +65,11 @@ namespace Gumball
             chunk1.UpdateSplineImmediately();
             chunk2.UpdateSplineImmediately();
             
-            chunk1.OnConnectChunkAfter(chunk2);
-            chunk2.OnConnectChunkBefore(chunk1);
-
+#if UNITY_EDITOR
+            chunk1.GetComponent<ChunkEditorTools>().OnConnectChunkAfter(chunk2);
+            chunk2.GetComponent<ChunkEditorTools>().OnConnectChunkBefore(chunk1);
+#endif
+            
             chunk1.DisableAutomaticTerrainRecreation(false);
             chunk2.DisableAutomaticTerrainRecreation(false);
 
@@ -106,9 +108,11 @@ namespace Gumball
             Chunk firstChunk = chunk1.UniqueID.Equals(blendData.FirstChunkID) ? chunk1 : chunk2;
             Chunk lastChunk = chunk2.UniqueID.Equals(blendData.LastChunkID) ? chunk2 : chunk1;
             blendData.ApplyToChunks(firstChunk, lastChunk);
-            
-            chunk1.OnConnectChunkAfter(chunk2);
-            chunk2.OnConnectChunkBefore(chunk1);
+
+#if UNITY_EDITOR
+            chunk1.GetComponent<ChunkEditorTools>().OnConnectChunkAfter(chunk2);
+            chunk2.GetComponent<ChunkEditorTools>().OnConnectChunkBefore(chunk1);
+#endif
             
             //update immediately as the position has changed
             chunk2.UpdateSplineImmediately();

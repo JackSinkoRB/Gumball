@@ -33,8 +33,6 @@ namespace Gumball
         [ConditionalField(nameof(hasCustomLoadDistance)), SerializeField] private float customLoadDistance = 3000;
         
         [Header("Debugging")]
-        [ReadOnly, SerializeField] private Chunk chunkBefore;
-        [ReadOnly, SerializeField] private Chunk chunkAfter;
         [ReadOnly, SerializeField] private GameObject currentTerrain;
 
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
@@ -43,10 +41,6 @@ namespace Gumball
         public SplineComputer SplineComputer => splineComputer;
         public SplineMesh RoadMesh => roadMesh;
         public SplineSample[] SplineSamples => splineSampleCollection.samples;
-
-        public Chunk ChunkBefore => chunkBefore;
-        public Chunk ChunkAfter => chunkAfter;
-        public bool HasChunkConnected => chunkBefore != null || chunkAfter != null;
 
         public ChunkMeshData ChunkMeshData;
         public bool IsAutomaticTerrainRecreationDisabled { get; private set; }
@@ -117,83 +111,6 @@ namespace Gumball
             
             LastSample = splineSampleCollection.samples[splineSampleCollection.length-1];
             LastTangent = LastSample.right.Flatten();
-        }
-
-        public void OnConnectChunkBefore(Chunk chunk)
-        {
-            OnConnectChunk();
-            chunkBefore = chunk;
-        }
-        
-        public void OnConnectChunkAfter(Chunk chunk)
-        {
-            OnConnectChunk();
-            chunkAfter = chunk;
-        }
-
-        private void OnConnectChunk()
-        {
-            
-        }
-
-        private void OnDisconnectChunk()
-        {
-            if (!HasChunkConnected)
-                transform.rotation = Quaternion.Euler(Vector3.zero); //reset rotation
-        }
-
-        public void DisconnectAll(bool canUndo = false)
-        {
-#if UNITY_EDITOR
-            if (canUndo)
-            {
-                List<Object> objectsToRecord = new List<Object>();
-
-                objectsToRecord.Add(transform);
-                objectsToRecord.Add(CurrentTerrain.GetComponent<MeshFilter>());
-
-                if (chunkAfter != null)
-                {
-                    objectsToRecord.Add(chunkAfter);
-                    if (chunkAfter.chunkBefore != null)
-                        objectsToRecord.Add(chunkAfter.chunkBefore);
-                }
-
-                if (chunkBefore != null)
-                {
-                    objectsToRecord.Add(chunkBefore);
-                    if (chunkBefore.chunkAfter != null)
-                        objectsToRecord.Add(chunkBefore.chunkAfter);
-                }
-                
-                Undo.RecordObjects(objectsToRecord.ToArray(), "Disconnect Chunk");
-            }
-#endif
-            
-            OnDisconnectChunkAfter();
-            OnDisconnectChunkBefore();
-        }
-
-        public void OnDisconnectChunkBefore()
-        {
-            if (chunkBefore == null)
-                return;
-
-            Chunk previousChunk = chunkBefore;
-            chunkBefore = null;
-            previousChunk.OnDisconnectChunkAfter();
-            OnDisconnectChunk();
-        }
-
-        public void OnDisconnectChunkAfter()
-        {
-            if (chunkAfter == null)
-                return;
-            
-            Chunk previousChunk = chunkAfter;
-            chunkAfter = null;
-            previousChunk.OnDisconnectChunkBefore();
-            OnDisconnectChunk();
         }
 
         public Vector3 GetCenterOfSpline()
