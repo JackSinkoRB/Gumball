@@ -9,7 +9,16 @@ namespace Gumball
 
         public enum Layer
         {
-            Terrain = 7
+            Terrain = 7,
+            Player = 8,
+            TrafficCar = 9
+        }
+        
+        public static LayerMask TrafficCarCollisionLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.Player;
+
+        public static bool ContainsLayer(this LayerMask layerMask, int layer)
+        {
+            return layerMask == (layerMask | (1 << layer));
         }
 
         public static LayerMask GetLayerMaskFromLayer(Layer layer)

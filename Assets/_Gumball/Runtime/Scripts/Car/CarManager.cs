@@ -141,6 +141,7 @@ namespace Gumball
 
         private void OnEnable()
         {
+            gameObject.layer = (int)GameObjectLayers.Layer.Player;
             SettingsManager.Instance.onGearboxSettingChanged += OnGearboxSettingChanged;
         }
         

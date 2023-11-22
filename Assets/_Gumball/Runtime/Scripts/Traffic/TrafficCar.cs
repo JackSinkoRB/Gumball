@@ -10,10 +10,11 @@ namespace Gumball
     [RequireComponent(typeof(Rigidbody))]
     public class TrafficCar : MonoBehaviour
     {
-
+        
         private const float timeBetweenDelayedUpdates = 1;
         private const float carActivationRange = 100;
-
+        private const float collisionRecoverDuration = 5;
+        
         [SerializeField] private Transform[] frontWheels;
         [SerializeField] private Transform[] wheels;
         [SerializeField] private float wheelRotateSpeed = 10;
@@ -27,10 +28,14 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isFrozen;
         [SerializeField, ReadOnly] private bool isActivated = true;
         [SerializeField, ReadOnly] private Chunk currentChunk;
+        [SerializeField, ReadOnly] private float timeSinceCollision;
+        [SerializeField, ReadOnly] private bool inCollision;
 
+        private readonly List<Collision> collisions = new();
         private float timeSinceLastDelayedUpdate;
         private float currentLaneDistance;
-
+        
+        private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
         private bool faceForward => currentChunk.TrafficManager.DriveOnLeft && currentLaneDistance < 0;
         private Rigidbody rigidbody => GetComponent<Rigidbody>();
 
@@ -38,7 +43,9 @@ namespace Gumball
         {
             isInitialised = true;
             this.currentChunk = currentChunk;
-            
+
+            timeSinceCollision = Mathf.Infinity;
+            gameObject.layer = (int)GameObjectLayers.Layer.TrafficCar;
             DelayedUpdate();
         }
 
@@ -47,9 +54,10 @@ namespace Gumball
             if (!isInitialised)
                 return;
             
+            CollisionFreezeCheck();
             TryDelayedUpdate();
 
-            if (!isFrozen)
+            if (!isFrozen && !recoveringFromCollision)
             {
                 Move();
             }
@@ -57,7 +65,8 @@ namespace Gumball
             if (isActivated)
             {
                 RotateWheels();
-                TurnFrontWheels();
+                if (!recoveringFromCollision)
+                    TurnFrontWheels();
             }
         }
         
@@ -66,12 +75,66 @@ namespace Gumball
             FreezeRangeCheck();
             ActivationRangeCheck();
         }
-        
+
         public void SetLaneDistance(float laneDistance)
         {
             currentLaneDistance = laneDistance;
         }
         
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (!GameObjectLayers.TrafficCarCollisionLayers.ContainsLayer(collision.gameObject.layer))
+                return;
+
+            Debug.Log($"{gameObject.name} collided with {collision.gameObject.name}");
+
+            if (collisions.Count == 0)
+            {
+                OnCollisionStart();
+            }
+            
+            collisions.Add(collision);
+
+            if (collision.rigidbody.Equals(PlayerCarManager.Instance.CurrentCar.Rigidbody))
+            {
+                Debug.Log($"Player hit {gameObject.name} at {collision.impulse.magnitude}m/s");
+            }
+        }
+
+        private void OnCollisionExit(Collision collision)
+        {
+            if (!collisions.Contains(collision))
+                return;
+            
+            collisions.Remove(collision);
+
+            if (collisions.Count == 0)
+            {
+                OnCollisionEnd();
+            }
+        }
+        
+        private void OnCollisionStart()
+        {
+            inCollision = true;
+        }
+        
+        private void OnCollisionEnd()
+        {
+            inCollision = false;
+        }
+        
+        private void CollisionFreezeCheck()
+        {
+            if (inCollision)
+            {
+                timeSinceCollision = 0;
+                return;
+            }
+
+            timeSinceCollision += Time.deltaTime;
+        }
+
         private void FreezeRangeCheck()
         {
             bool shouldBeFrozen = !ChunkManager.Instance.CanPlayerAccessChunk(currentChunk);
