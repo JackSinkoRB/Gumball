@@ -76,10 +76,12 @@ namespace Gumball
 
         private void SpawnCarInRandomPosition()
         {
+            MinMaxFloat randomLaneOffset = new(-0.5f, 0.5f);
+
             float randomLaneDistance = laneDistances.GetRandom();
             var (position, rotation) = GetLanePosition(chunk.SplineSamples.GetRandom(), randomLaneDistance);
             TrafficCar car = TrafficCarSpawner.Instance.SpawnCar(chunk, position, rotation);
-            car.SetLaneDistance(randomLaneDistance);
+            car.SetLaneDistance(randomLaneDistance + randomLaneOffset.RandomInRange());
         }
         
         public (Vector3, Quaternion) GetLanePosition(SplineSample splineSample, float laneDistance)
