@@ -1501,13 +1501,20 @@ MonoBehaviour:
   - {fileID: 8072705045073224769}
   - {fileID: 6660601429997465544}
   wheelRotateSpeed: 85
-  moveSpeed: 10
-  turnSpeed: 10
+  maxSpeed: 10
+  turnSpeed: 3
+  accelerationDuration: 10
+  decelerationDuration: 2
   debug: 0
   isInitialised: 0
   isFrozen: 0
   isActivated: 1
   currentChunk: {fileID: 0}
+  isMoving: 0
+  isAccelerating: 0
+  timeSinceAccelerating: 0
+  isDecelerating: 0
+  timeSinceDecelerating: 0
   timeSinceCollision: 0
   inCollision: 0
 --- !u!54 &5974823439251168409
@@ -1519,7 +1526,7 @@ Rigidbody:
   m_GameObject: {fileID: 3376700106487986623}
   serializedVersion: 4
   m_Mass: 2000
-  m_Drag: 0
+  m_Drag: 1
   m_AngularDrag: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
