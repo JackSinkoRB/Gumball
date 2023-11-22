@@ -41,12 +41,60 @@ namespace Gumball
         private readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private float timeSinceLastLoadCheck;
 
-        public bool IsChunkLoaded(int chunkMapIndex)
+        /// <summary>
+        /// Returns whether the chunk is within the load distance radius. Can be false if the chunk is custom loaded.
+        /// </summary>
+        public bool IsChunkWithinLoadRadius(int chunkMapIndex)
         {
             return chunkMapIndex >= loadedChunksIndices.Min && chunkMapIndex <= loadedChunksIndices.Max;
         }
         
-        /// <exception cref="ArgumentOutOfRangeException">If the chunk is not currently loaded.</exception>
+        /// <summary>
+        /// Returns whether the chunk is within the load distance radius. Can be false if the chunk is custom loaded.
+        /// </summary>
+        public bool IsChunkWithinLoadRadius(Chunk chunk)
+        {
+            int chunkMapIndex = GetMapIndexOfLoadedChunk(chunk);
+            return IsChunkWithinLoadRadius(chunkMapIndex);
+        }
+
+        /// <summary>
+        /// Returns whether the chunk is accessible to the player (ie. is connected with the chunks that the player is near).
+        /// </summary>
+        public bool CanPlayerAccessChunk(Chunk chunk)
+        {
+            int currentChunkMapIndex = GetMapIndexOfLoadedChunk(chunk);
+
+            if (IsChunkWithinLoadRadius(chunk))
+                return true;
+
+            int chunkAheadIndex = loadedChunksIndices.Max + 1;
+            while (chunkAheadIndex <= currentChunkMapIndex)
+            {
+                if (chunkAheadIndex == currentChunkMapIndex)
+                    return true;
+                
+                if (GetLoadedChunkByMapIndex(chunkAheadIndex) == null)
+                    break;
+
+                chunkAheadIndex++;
+            }
+            
+            int chunkBehindIndex = loadedChunksIndices.Min - 1;
+            while (chunkBehindIndex >= currentChunkMapIndex)
+            {
+                if (chunkBehindIndex == currentChunkMapIndex)
+                    return true;
+                
+                if (GetLoadedChunkByMapIndex(chunkBehindIndex) == null)
+                    break;
+
+                chunkBehindIndex++;
+            }
+
+            return false;
+        }
+        
         public Chunk GetLoadedChunkByMapIndex(int chunkMapIndex)
         {
             if (CurrentChunks.ContainsKey(chunkMapIndex))
@@ -58,7 +106,7 @@ namespace Gumball
                     return data.Chunk;
             }
 
-            throw new ArgumentException($"The chunk with index '{chunkMapIndex}' is not currently loaded. Loaded chunks are within range {loadedChunksIndices.Min} and {loadedChunksIndices.Max}.");
+            return null;
         } 
 
         /// <summary>

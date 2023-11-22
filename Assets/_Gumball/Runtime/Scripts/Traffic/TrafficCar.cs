@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Codice.CM.Client.Differences;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
@@ -25,7 +23,9 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField] private bool debug;
-        [SerializeField, ReadOnly] private bool activated;
+        [SerializeField, ReadOnly] private bool isInitialised;
+        [SerializeField, ReadOnly] private bool isFrozen;
+        [SerializeField, ReadOnly] private bool isActivated = true;
         [SerializeField, ReadOnly] private Chunk currentChunk;
 
         private float timeSinceLastDelayedUpdate;
@@ -36,20 +36,25 @@ namespace Gumball
 
         public void Initialise(Chunk currentChunk)
         {
+            isInitialised = true;
             this.currentChunk = currentChunk;
-        }
-        
-        private void OnEnable()
-        {
+            
             DelayedUpdate();
         }
-        
+
         private void Update()
         {
-            TryDelayedUpdate();
+            if (!isInitialised)
+                return;
             
-            Move();
-            if (activated)
+            TryDelayedUpdate();
+
+            if (!isFrozen)
+            {
+                Move();
+            }
+            
+            if (isActivated)
             {
                 RotateWheels();
                 TurnFrontWheels();
@@ -58,7 +63,7 @@ namespace Gumball
         
         private void DelayedUpdate()
         {
-            //ChunkCheck();
+            FreezeRangeCheck();
             ActivationRangeCheck();
         }
         
@@ -67,24 +72,67 @@ namespace Gumball
             currentLaneDistance = laneDistance;
         }
         
+        private void FreezeRangeCheck()
+        {
+            bool shouldBeFrozen = !ChunkManager.Instance.CanPlayerAccessChunk(currentChunk);
+            if (!isFrozen && shouldBeFrozen)
+                OnFreeze();
+
+            if (isFrozen && !shouldBeFrozen)
+                OnUnfreeze();
+        }
+
+        private void OnFreeze()
+        {
+            isFrozen = true;
+            
+            rigidbody.velocity = Vector3.zero;
+        }
+
+        private void OnUnfreeze()
+        {
+            isFrozen = false;
+        }
+        
         private void ActivationRangeCheck()
         {
+            if (isFrozen)
+            {
+                if (isActivated)
+                    OnDeactivate();
+                return;
+            }
+            
             float carActivationRangeSqr = carActivationRange * carActivationRange;
             float distanceToPlayerSqr = Vector3.SqrMagnitude(PlayerCarManager.Instance.CurrentCar.transform.position - transform.position);
-            if (!activated && distanceToPlayerSqr < carActivationRangeSqr)
+            if (!isActivated && distanceToPlayerSqr < carActivationRangeSqr)
                 OnActivate();
-            else if (activated && distanceToPlayerSqr > carActivationRangeSqr)
+            else if (isActivated && distanceToPlayerSqr > carActivationRangeSqr)
                 OnDeactivate();
         }
 
         private void OnActivate()
         {
-            activated = true;
+            isActivated = true;
+
+            rigidbody.useGravity = true;
+            
+            foreach (Collider carCollider in GetComponents<Collider>())
+            {
+                carCollider.enabled = true;
+            }
         }
 
         private void OnDeactivate()
         {
-            activated = false;
+            isActivated = false;
+            
+            rigidbody.useGravity = false;
+
+            foreach (Collider carCollider in GetComponents<Collider>())
+            {
+                carCollider.enabled = false;
+            }
         }
 
         /// <summary>
@@ -93,6 +141,9 @@ namespace Gumball
         /// <param name="sampleDistance">How many samples away should be retrieved.</param>
         private SplineSample? GetSplineSampleAhead(int sampleDistance)
         {
+            if (currentChunk.TrafficManager == null)
+                return null; //no traffic manager
+            
             int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
             int desiredSplineSampleIndex = faceForward ? closestSplineIndex + sampleDistance : closestSplineIndex - sampleDistance;
 
@@ -102,7 +153,7 @@ namespace Gumball
                 //get the next chunk
                 chunkIndex = faceForward ? chunkIndex + 1 : chunkIndex - 1;
 
-                if (!ChunkManager.Instance.IsChunkLoaded(chunkIndex))
+                if (!ChunkManager.Instance.IsChunkWithinLoadRadius(chunkIndex))
                 {
                     //no more loaded chunks
                     return null;
@@ -110,6 +161,9 @@ namespace Gumball
 
                 Chunk newChunk = ChunkManager.Instance.GetLoadedChunkByMapIndex(chunkIndex);
                 currentChunk = newChunk;
+                if (currentChunk.TrafficManager == null)
+                    return null; //no traffic manager
+                
                 closestSplineIndex = newChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
                 desiredSplineSampleIndex = faceForward ? closestSplineIndex + 1 : closestSplineIndex - 1;
             }
