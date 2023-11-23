@@ -22,8 +22,10 @@ namespace Gumball
         [Space(5)]
         [SerializeField] private float turnSpeed = 3; //todo: adjust depending on moveSpeed
         [Space(5)]
-        [SerializeField] private float accelerationDuration = 3;
-        [SerializeField] private float decelerationDuration = 2;
+        [Tooltip("The time (in seconds) it takes to go from 0 to 60.")]
+        [SerializeField] private float timeToAccelerateTo60 = 10;
+        [Tooltip("The time (in seconds) it takes to go from 60 to 0.")]
+        [SerializeField] private float timeToDecelerateFrom60 = 2;
         
         [Header("Debugging")]
         [SerializeField] private bool debug;
@@ -34,6 +36,7 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private bool isMoving;
         [SerializeField, ReadOnly] private float speed;
+        [SerializeField, ReadOnly] private float desiredSpeed;
         [SerializeField, ReadOnly] private bool isAccelerating;
         [SerializeField, ReadOnly] private float timeSinceAccelerating;
         [SerializeField, ReadOnly] private bool isDecelerating;
@@ -45,8 +48,7 @@ namespace Gumball
         private readonly List<Collision> collisions = new();
         private float timeSinceLastDelayedUpdate;
         private float currentLaneDistance;
-        
-        private float maxSpeed => SpeedUtils.FromKmh(currentChunk.TrafficManager.SpeedLimitKmh);
+
         private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
         private bool faceForward => currentChunk.TrafficManager.DriveOnLeft && currentLaneDistance < 0;
         private Rigidbody rigidbody => GetComponent<Rigidbody>();
@@ -232,22 +234,32 @@ namespace Gumball
         private void OnStartMoving()
         {
             isMoving = true;
-            OnStartAccelerating();
+            
+            if (debug) GlobalLoggers.TrafficLogger.Log("Started moving");
         }
 
         private void OnStopMoving()
         {
             isMoving = false;
             speed = 0;
+            desiredSpeed = 0;
             OnStopAccelerating();
-            onStopDecelerating();
+            OnStopDecelerating();
+            
+            if (debug) GlobalLoggers.TrafficLogger.Log("Stopped moving");
         }
         
         private void OnStartAccelerating()
         {
             isAccelerating = true;
             timeSinceAccelerating = 0;
+            speedBeforeAccelerating = speed;
+            
+            if (debug) GlobalLoggers.TrafficLogger.Log("Started accelerating");
         }
+
+        private float speedBeforeAccelerating;
+        private float speedBeforeDecelerating;
 
         private void OnAccelerate()
         {
@@ -261,12 +273,17 @@ namespace Gumball
         {
             isAccelerating = false;
             timeSinceAccelerating = 0;
+            
+            if (debug) GlobalLoggers.TrafficLogger.Log("Stopped accelerating");
         }
         
         private void OnStartDecelerating()
         {
             isDecelerating = true;
             timeSinceDecelerating = 0;
+            speedBeforeDecelerating = speed;
+            
+            if (debug) GlobalLoggers.TrafficLogger.Log("Started decelerating");
         }
 
         private void OnDecelerate()
@@ -274,10 +291,34 @@ namespace Gumball
             timeSinceDecelerating += Time.deltaTime;
         }
         
-        private void onStopDecelerating()
+        private void OnStopDecelerating()
         {
             isDecelerating = false;
             timeSinceDecelerating = 0;
+            
+            if (debug) GlobalLoggers.TrafficLogger.Log("Stopped decelerating");
+        }
+
+        private void OnChangeDesiredSpeed(float newSpeed)
+        {
+            float previousSpeed = desiredSpeed;
+            
+            desiredSpeed = newSpeed;
+            
+            if (debug) GlobalLoggers.TrafficLogger.Log($"Changed desired speed to {desiredSpeed}");
+
+            if (newSpeed > previousSpeed)
+            {
+                OnStartAccelerating();
+                if (isDecelerating)
+                    OnStopDecelerating();
+            }
+            else if (newSpeed < previousSpeed)
+            {
+                OnStartDecelerating();
+                if (isAccelerating)
+                    OnStopAccelerating();
+            }
         }
         
         private void Move()
@@ -289,30 +330,68 @@ namespace Gumball
                 return;
             }
 
+            float newDesiredSpeed = currentChunk.TrafficManager.SpeedLimitKmh;
+            if (!newDesiredSpeed.Approximately(desiredSpeed))
+            {
+                OnChangeDesiredSpeed(newDesiredSpeed);
+            }
+            
+            float accelerationTime = ((desiredSpeed - speedBeforeAccelerating)/60f) * timeToAccelerateTo60;
+            float decelerationTime = ((speedBeforeDecelerating - desiredSpeed)/60f) * timeToDecelerateFrom60;
+            
+            if (isAccelerating)
+            {
+                if (timeSinceAccelerating >= accelerationTime)
+                    OnStopAccelerating();
+                else
+                    OnAccelerate();
+            }
+
+            if (isDecelerating)
+            {
+                if (timeSinceDecelerating >= decelerationTime)
+                    OnStopDecelerating();
+                else
+                    OnDecelerate();
+            }
+
+            if (isAccelerating)
+            {
+                float difference = desiredSpeed - speedBeforeAccelerating;
+                speed = speedBeforeAccelerating + (difference * Mathf.Clamp01(timeSinceAccelerating / accelerationTime));
+            } else if (isDecelerating)
+            {
+                float difference = speedBeforeDecelerating - desiredSpeed;
+                speed = speedBeforeDecelerating - (difference * Mathf.Clamp01(timeSinceDecelerating / decelerationTime));
+            }
+            else
+            {
+                speed = desiredSpeed;
+            }
+
+            if (speed.Approximately(0))
+            {
+                if (isMoving)
+                    OnStopMoving();
+                return;
+            }
+
             if (!isMoving)
                 OnStartMoving();
-            
-            if (isAccelerating && timeSinceAccelerating < accelerationDuration)
-                OnAccelerate();
 
-            if (isDecelerating && timeSinceDecelerating < decelerationDuration)
-                OnDecelerate();
-            
-            float accelerationFactor = isAccelerating ? Mathf.Clamp01(timeSinceAccelerating / accelerationDuration) : 1;
-            float decelerationFactor = isDecelerating ? Mathf.Clamp01(timeSinceDecelerating / decelerationDuration) : 1;
-            speed = maxSpeed * (accelerationFactor * decelerationFactor);
-            
-            var (targetPosition, targetRotation) = targetPos.Value;
+            var (newChunk, targetPosition, targetRotation) = targetPos.Value;
 
+            currentChunk = newChunk;
+            
             Vector3 directionToTarget = targetPosition - transform.position;
             Quaternion targetRotationFinal = Quaternion.LookRotation(directionToTarget); //face towards the target position
             
-            Vector3 targetVelocity = transform.forward * speed; //car always moves forward
+            Vector3 targetVelocity = transform.forward * SpeedUtils.FromKmh(speed); //car always moves forward
             rigidbody.velocity = targetVelocity;
 
             Debug.DrawLine(transform.position, targetPosition, Color.yellow);
             
-            float speedFactor = Mathf.Clamp01(speed / maxSpeed);
+            float speedFactor = Mathf.Clamp01(speed / desiredSpeed);
             float finalTurnSpeed = turnSpeed * speedFactor;
             rigidbody.MoveRotation(Quaternion.Slerp(rigidbody.rotation, targetRotationFinal, finalTurnSpeed * Time.deltaTime));
         }
@@ -327,18 +406,18 @@ namespace Gumball
         
         private void TurnFrontWheels()
         {
-            SplineSample? desiredSplineSample = GetSplineSampleAhead(movementTargetDistance);
-            if (desiredSplineSample == null)
+            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(movementTargetDistance);
+            if (splineSampleAhead == null)
                 return; //no more chunks
             
-            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(desiredSplineSample.Value, currentLaneDistance);
+            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance);
             Vector3 directionAhead = (position - transform.position).normalized;
             
             Debug.DrawLine(transform.position, position, Color.blue);
 
             foreach (Transform wheel in frontWheels)
             {
-                float speedFactor = Mathf.Clamp01(speed / maxSpeed);
+                float speedFactor = Mathf.Clamp01(speed / desiredSpeed);
                 const float minWheelTurnSpeed = 0f;
                 const float maxWheelTurnSpeed = 1f;
                 float wheelTurnSpeed = Mathf.Lerp(minWheelTurnSpeed, maxWheelTurnSpeed, speedFactor);
@@ -352,7 +431,7 @@ namespace Gumball
         /// Get the next desired position and rotation relative to the sample on the next chunk's spline.
         /// </summary>
         /// <returns>The spline sample's position and rotation, or null if no more loaded chunks in the desired direction.</returns>
-        private (Vector3, Quaternion)? GetTargetPosition()
+        private (Chunk, Vector3, Quaternion)? GetTargetPosition()
         {
             if (currentChunk == null)
                 return null;
@@ -363,19 +442,19 @@ namespace Gumball
                 return null;
             }
 
-            SplineSample? desiredSplineSample = GetSplineSampleAhead(movementTargetDistance);
-            if (desiredSplineSample == null)
+            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(movementTargetDistance);
+            if (splineSampleAhead == null)
                 return null; //no more chunks loaded
             
-            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(desiredSplineSample.Value, currentLaneDistance);
+            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance);
 
-            return (position, rotation);
+            return (splineSampleAhead.Value.Item2, position, rotation);
         }
 
         /// <summary>
         /// Gets the spline sample that is 'distance' metres away from the closest sample.
         /// </summary>
-        private SplineSample? GetSplineSampleAhead(float desiredDistance)
+        private (SplineSample, Chunk)? GetSplineSampleAhead(float desiredDistance)
         {
             if (currentChunk.TrafficManager == null)
                 return null; //no traffic manager
@@ -388,7 +467,7 @@ namespace Gumball
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
             int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
             SplineSample closestSample = currentChunk.SplineSamples[closestSplineIndex];
-            
+
             SplineSample? previousSample = null;
             float previousDistanceOffset = 0;
             int offset = faceForward ? 1 : -1;
@@ -427,7 +506,7 @@ namespace Gumball
                 
                 bool isFurtherAway = previousSample != null && distanceOffset > previousDistanceOffset;
                 if (isFurtherAway)
-                    return previousSample;
+                    return (previousSample.Value, chunkToUse);
                 
                 previousDistanceOffset = distanceOffset;
                 previousSample = sample;
