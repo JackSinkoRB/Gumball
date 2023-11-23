@@ -308,11 +308,6 @@ namespace Gumball
                     //end of map - no more chunks to load
                     yield break;
                 }
-                
-                if (indexToLoad > loadedChunksIndices.Max)
-                    loadedChunksIndices.Max = indexToLoad;
-                if (indexToLoad < loadedChunksIndices.Min)
-                    loadedChunksIndices.Min = indexToLoad;
 
                 LoadedChunkData? customLoadedChunk = GetCustomLoadedChunkData(indexToLoad);
                 bool chunkIsCustomLoaded = customLoadedChunk != null;
@@ -322,11 +317,14 @@ namespace Gumball
                     ChunkMapData customLoadedChunkData = currentMap.GetChunkData(indexToLoad);
                     Vector3 furthestPointOnCustomLoadedChunk = direction == ChunkUtils.LoadDirection.AFTER ? customLoadedChunkData.SplineEndPosition : customLoadedChunkData.SplineStartPosition;
                     distanceToEndOfChunk = Vector3.SqrMagnitude(startingPosition - furthestPointOnCustomLoadedChunk);
+
+                    RegisterLoadedChunkIndex(indexToLoad);
                     continue;
                 }
 
                 yield return LoadChunkAsync(indexToLoad, direction);
-                
+                RegisterLoadedChunkIndex(indexToLoad); //only register once the chunk has been created
+
                 //update the distance
                 ChunkMapData chunkData = currentMap.GetChunkData(indexToLoad);
                 Vector3 furthestPointOnChunk = direction == ChunkUtils.LoadDirection.AFTER ? chunkData.SplineEndPosition : chunkData.SplineStartPosition;
@@ -334,6 +332,14 @@ namespace Gumball
             }
         }
 
+        private void RegisterLoadedChunkIndex(int index)
+        {
+            if (index > loadedChunksIndices.Max)
+                loadedChunksIndices.Max = index;
+            if (index < loadedChunksIndices.Min)
+                loadedChunksIndices.Min = index;
+        }
+        
         private IEnumerator LoadChunkAsync(int mapIndex, ChunkUtils.LoadDirection loadDirection)
         {
             AssetReferenceGameObject chunkAssetReference = currentMap.ChunkReferences[mapIndex];
