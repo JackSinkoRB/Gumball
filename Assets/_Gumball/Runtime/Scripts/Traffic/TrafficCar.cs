@@ -14,19 +14,21 @@ namespace Gumball
         private const float timeBetweenDelayedUpdates = 1;
         private const float carActivationRange = 100;
         private const float collisionRecoverDuration = 5;
-        
-        private static readonly MinMaxFloat movementTargetDistance = new(3, 10);
-        /// <summary>
-        /// At less than or equal to 'min' km/h, the movementTargetDistance is min.
-        /// At greater than or equal to 'max' km/h, the movementTargetDistance is max.
-        /// </summary>
-        private static readonly MinMaxFloat movementTargetDistanceSpeedFactors = new(40, 90);
-            
+
         [SerializeField] private Transform[] frontWheels;
         [SerializeField] private Transform[] wheels;
-        [SerializeField] private float wheelRotateSpeed = 85; //todo: adjust depending on the moveSpeed 
         [Space(5)]
-        [SerializeField] private float turnSpeed = 3; //todo: adjust depending on moveSpeed
+        [SerializeField] private MinMaxFloat movementTargetDistance = new(3, 10);
+        [Tooltip("At less than or equal to 'min' km/h, the movementTargetDistance is min.\n" +
+                 "At greater than or equal to 'max' km/h, the movementTargetDistance is max.")]
+        [SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(40, 90);
+        [Space(5)]
+        [SerializeField] private float wheelRotateSpeed = 30;
+        [Space(5)]
+        [SerializeField] private MinMaxFloat turnSpeed = new(0, 4.5f);
+        [Tooltip("At less than or equal to 'min' km/h, the turnSpeed is min.\n" +
+                 "At greater than or equal to 'max' km/h, the turnSpeed is max.")]
+        [SerializeField] private MinMaxFloat turnSpeedFactors = new(0, 90);
         [Space(5)]
         [Tooltip("The time (in seconds) it takes to go from 0 to 60.")]
         [SerializeField] private float timeToAccelerateTo60 = 10;
@@ -404,9 +406,7 @@ namespace Gumball
 
             Debug.DrawLine(transform.position, targetPosition, Color.yellow);
             
-            float speedFactor = Mathf.Clamp01(speed / desiredSpeed);
-            float finalTurnSpeed = turnSpeed * speedFactor;
-            rigidbody.MoveRotation(Quaternion.Slerp(rigidbody.rotation, targetRotationFinal, finalTurnSpeed * Time.deltaTime));
+            rigidbody.MoveRotation(Quaternion.Slerp(rigidbody.rotation, targetRotationFinal, GetTurnSpeed(speed) * Time.deltaTime));
         }
         
         private void RotateWheels()
@@ -425,9 +425,17 @@ namespace Gumball
             return resultDistance;
         }
         
+        private float GetTurnSpeed(float speedToCheck)
+        {
+            speedToCheck = Mathf.Clamp(speedToCheck, turnSpeedFactors.Min, turnSpeedFactors.Max);
+            float percentage = (speedToCheck - turnSpeedFactors.Min) / (turnSpeedFactors.Max - turnSpeedFactors.Min);
+            float resultSpeed = Mathf.Lerp(turnSpeed.Min, turnSpeed.Max, percentage);
+            return resultSpeed;
+        }
+        
         private void TurnFrontWheels()
         {
-            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(GetMovementTargetDistance(speed) * 2f);
+            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(GetMovementTargetDistance(speed));
             if (splineSampleAhead == null)
                 return; //no more chunks
             
