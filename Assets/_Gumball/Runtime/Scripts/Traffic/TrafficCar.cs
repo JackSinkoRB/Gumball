@@ -14,8 +14,14 @@ namespace Gumball
         private const float timeBetweenDelayedUpdates = 1;
         private const float carActivationRange = 100;
         private const float collisionRecoverDuration = 5;
-        private const float movementTargetDistance = 3;
-
+        
+        private static readonly MinMaxFloat movementTargetDistance = new(3, 10);
+        /// <summary>
+        /// At less than or equal to 'min' km/h, the movementTargetDistance is min.
+        /// At greater than or equal to 'max' km/h, the movementTargetDistance is max.
+        /// </summary>
+        private static readonly MinMaxFloat movementTargetDistanceSpeedFactors = new(40, 90);
+            
         [SerializeField] private Transform[] frontWheels;
         [SerializeField] private Transform[] wheels;
         [SerializeField] private float wheelRotateSpeed = 85; //todo: adjust depending on the moveSpeed 
@@ -25,7 +31,7 @@ namespace Gumball
         [Tooltip("The time (in seconds) it takes to go from 0 to 60.")]
         [SerializeField] private float timeToAccelerateTo60 = 10;
         [Tooltip("The time (in seconds) it takes to go from 60 to 0.")]
-        [SerializeField] private float timeToDecelerateFrom60 = 2;
+        [SerializeField] private float timeToDecelerateFrom60 = 5;
         
         [Header("Debugging")]
         [SerializeField] private bool debug;
@@ -410,10 +416,18 @@ namespace Gumball
                 wheel.Rotate(Vector3.up, wheelRotateSpeed * speed * Time.deltaTime, Space.Self);
             }
         }
+
+        private float GetMovementTargetDistance(float speedToCheck)
+        {
+            speedToCheck = Mathf.Clamp(speedToCheck, movementTargetDistanceSpeedFactors.Min, movementTargetDistanceSpeedFactors.Max);
+            float percentage = (speedToCheck - movementTargetDistanceSpeedFactors.Min) / (movementTargetDistanceSpeedFactors.Max - movementTargetDistanceSpeedFactors.Min);
+            float resultDistance = Mathf.Lerp(movementTargetDistance.Min, movementTargetDistance.Max, percentage);
+            return resultDistance;
+        }
         
         private void TurnFrontWheels()
         {
-            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(movementTargetDistance);
+            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(GetMovementTargetDistance(speed) * 2f);
             if (splineSampleAhead == null)
                 return; //no more chunks
             
@@ -449,7 +463,7 @@ namespace Gumball
                 return null;
             }
 
-            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(movementTargetDistance);
+            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(GetMovementTargetDistance(speed));
             if (splineSampleAhead == null)
                 return null; //no more chunks loaded
             

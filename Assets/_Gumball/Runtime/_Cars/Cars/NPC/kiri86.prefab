@@ -1454,8 +1454,6 @@ GameObject:
   - component: {fileID: 2708812335598609157}
   - component: {fileID: 1481789117914317419}
   - component: {fileID: 5974823439251168409}
-  - component: {fileID: 4808298854958528334}
-  - component: {fileID: 185508884205254127}
   - component: {fileID: 239077691434506723}
   m_Layer: 0
   m_Name: kiri86
@@ -1501,16 +1499,17 @@ MonoBehaviour:
   - {fileID: 8072705045073224769}
   - {fileID: 6660601429997465544}
   wheelRotateSpeed: 85
-  maxSpeed: 10
   turnSpeed: 3
-  accelerationDuration: 10
-  decelerationDuration: 2
+  timeToAccelerateTo60: 10
+  timeToDecelerateFrom60: 5
   debug: 0
   isInitialised: 0
   isFrozen: 0
   isActivated: 1
   currentChunk: {fileID: 0}
   isMoving: 0
+  speed: 0
+  desiredSpeed: 0
   isAccelerating: 0
   timeSinceAccelerating: 0
   isDecelerating: 0
@@ -1544,52 +1543,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!136 &4808298854958528334
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3376700106487986623}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.55
-  m_Height: 4.4
-  m_Direction: 2
-  m_Center: {x: 0.3, y: 0.55, z: 0.1}
---- !u!136 &185508884205254127
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3376700106487986623}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.55
-  m_Height: 4.4
-  m_Direction: 2
-  m_Center: {x: -0.3, y: 0.55, z: 0.1}
 --- !u!65 &239077691434506723
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1609,8 +1562,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.6004531, y: 1.3022897, z: 4.383953}
-  m_Center: {x: 0, y: 0.7511449, z: 0.08697665}
+  m_Size: {x: 1.6004531, y: 1.3222369, z: 4.276263}
+  m_Center: {x: 0, y: 0.6625107, z: 0.07164192}
 --- !u!1 &3415610770349403201
 GameObject:
   m_ObjectHideFlags: 0
