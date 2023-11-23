@@ -118,7 +118,7 @@ namespace Gumball
         #region Show terrain vertices
         private const float timeToShowVertices = 15;
         
-        private float timeLastClickedShowTerrainVertices;
+        private float timeLastClickedShowTerrainVertices = -10000f;
         
         private float timeSinceClickedShowTerrainVertices => Time.realtimeSinceStartup - timeLastClickedShowTerrainVertices;
         
