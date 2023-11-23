@@ -15,6 +15,7 @@ namespace Gumball
         
         //when map driving scene loads, load all the traffic cars (eg. a traffic manager that holds reference to all traffic cars)
 
+        [SerializeField] private float speedLimitKmh = 40;
         [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
         [SerializeField] private int density = 100;
         [SerializeField] private float[] laneDistances;
@@ -24,6 +25,7 @@ namespace Gumball
 
         public Chunk Chunk => chunk;
         public bool DriveOnLeft => driveOnLeft;
+        public float SpeedLimitKmh => speedLimitKmh;
         
         //have a distance for spawning cars (based on chunk distance, not car distance)
         //have an activation distance - if not activated, rigidbody is kinematic and collider is disabled

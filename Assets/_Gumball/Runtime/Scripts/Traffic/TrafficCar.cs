@@ -20,7 +20,6 @@ namespace Gumball
         [SerializeField] private Transform[] wheels;
         [SerializeField] private float wheelRotateSpeed = 85; //todo: adjust depending on the moveSpeed 
         [Space(5)]
-        [SerializeField] private float maxSpeed = 10; //todo: remove and use the chunk's speed limit
         [SerializeField] private float turnSpeed = 3; //todo: adjust depending on moveSpeed
         [Space(5)]
         [SerializeField] private float accelerationDuration = 3;
@@ -47,6 +46,7 @@ namespace Gumball
         private float timeSinceLastDelayedUpdate;
         private float currentLaneDistance;
         
+        private float maxSpeed => SpeedUtils.FromKmh(currentChunk.TrafficManager.SpeedLimitKmh);
         private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
         private bool faceForward => currentChunk.TrafficManager.DriveOnLeft && currentLaneDistance < 0;
         private Rigidbody rigidbody => GetComponent<Rigidbody>();
