@@ -14,7 +14,7 @@ namespace Gumball
         private const float timeBetweenDelayedUpdates = 1;
         private const float carActivationRange = 100;
         private const float collisionRecoverDuration = 5;
-        private const int movementTargetDistance = 3; //the number of spline samples
+        private const float movementTargetDistance = 3;
 
         [SerializeField] private Transform[] frontWheels;
         [SerializeField] private Transform[] wheels;
@@ -81,7 +81,7 @@ namespace Gumball
                     TurnFrontWheels();
             }
         }
-        
+
         private void DelayedUpdate()
         {
             FreezeRangeCheck();
@@ -150,44 +150,62 @@ namespace Gumball
 
         private void FreezeRangeCheck()
         {
+#if UNITY_EDITOR
+            if (debug)
+            {
+                if (isFrozen)
+                    Unfreeze();
+                return;
+            }
+#endif
+            
             bool shouldBeFrozen = !ChunkManager.Instance.CanPlayerAccessChunk(currentChunk);
             if (!isFrozen && shouldBeFrozen)
-                OnFreeze();
+                Freeze();
 
             if (isFrozen && !shouldBeFrozen)
-                OnUnfreeze();
+                Unfreeze();
         }
 
-        private void OnFreeze()
+        private void Freeze()
         {
             isFrozen = true;
             
             rigidbody.velocity = Vector3.zero;
         }
 
-        private void OnUnfreeze()
+        private void Unfreeze()
         {
             isFrozen = false;
         }
         
         private void ActivationRangeCheck()
         {
+#if UNITY_EDITOR
+            if (debug)
+            {
+                if (!isActivated)
+                    Activate();
+                return;
+            }
+#endif
+            
             if (isFrozen)
             {
                 if (isActivated)
-                    OnDeactivate();
+                    Deactivate();
                 return;
             }
             
             float carActivationRangeSqr = carActivationRange * carActivationRange;
             float distanceToPlayerSqr = Vector3.SqrMagnitude(PlayerCarManager.Instance.CurrentCar.transform.position - transform.position);
             if (!isActivated && distanceToPlayerSqr < carActivationRangeSqr)
-                OnActivate();
+                Activate();
             else if (isActivated && distanceToPlayerSqr > carActivationRangeSqr)
-                OnDeactivate();
+                Deactivate();
         }
 
-        private void OnActivate()
+        private void Activate()
         {
             isActivated = true;
 
@@ -199,7 +217,7 @@ namespace Gumball
             }
         }
 
-        private void OnDeactivate()
+        private void Deactivate()
         {
             isActivated = false;
             
@@ -292,6 +310,8 @@ namespace Gumball
             Vector3 targetVelocity = transform.forward * speed; //car always moves forward
             rigidbody.velocity = targetVelocity;
 
+            Debug.DrawLine(transform.position, targetPosition, Color.yellow);
+            
             float speedFactor = Mathf.Clamp01(speed / maxSpeed);
             float finalTurnSpeed = turnSpeed * speedFactor;
             rigidbody.MoveRotation(Quaternion.Slerp(rigidbody.rotation, targetRotationFinal, finalTurnSpeed * Time.deltaTime));
@@ -307,22 +327,22 @@ namespace Gumball
         
         private void TurnFrontWheels()
         {
-            const int maxTurningDistance = 6; //the number of spline samples
-            
-            float speedFactor = Mathf.Clamp01(speed / maxSpeed);
-
-            int distanceAhead = Mathf.RoundToInt(Mathf.Lerp(movementTargetDistance, maxTurningDistance, speedFactor));
-            
-            SplineSample? desiredSplineSample = GetSplineSampleAhead(distanceAhead);
+            SplineSample? desiredSplineSample = GetSplineSampleAhead(movementTargetDistance);
             if (desiredSplineSample == null)
                 return; //no more chunks
             
             var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(desiredSplineSample.Value, currentLaneDistance);
             Vector3 directionAhead = (position - transform.position).normalized;
             
+            Debug.DrawLine(transform.position, position, Color.blue);
+
             foreach (Transform wheel in frontWheels)
             {
-                const float wheelTurnSpeed = 1f;
+                float speedFactor = Mathf.Clamp01(speed / maxSpeed);
+                const float minWheelTurnSpeed = 0f;
+                const float maxWheelTurnSpeed = 1f;
+                float wheelTurnSpeed = Mathf.Lerp(minWheelTurnSpeed, maxWheelTurnSpeed, speedFactor);
+                
                 Quaternion targetRotation = Quaternion.LookRotation(directionAhead, wheel.transform.up);
                 wheel.rotation = Quaternion.Slerp(wheel.rotation, targetRotation, Time.deltaTime * wheelTurnSpeed);
             }
@@ -351,43 +371,71 @@ namespace Gumball
 
             return (position, rotation);
         }
-        
+
         /// <summary>
-        /// Gets the spline sample that is sampleDistance away from the closest sample.
+        /// Gets the spline sample that is 'distance' metres away from the closest sample.
         /// </summary>
-        /// <param name="sampleDistance">How many samples away should be retrieved.</param>
-        private SplineSample? GetSplineSampleAhead(int sampleDistance)
+        private SplineSample? GetSplineSampleAhead(float desiredDistance)
         {
             if (currentChunk.TrafficManager == null)
                 return null; //no traffic manager
-            
+
+            float desiredDistanceSqr = desiredDistance * desiredDistance;
+
+            Chunk chunkToUse = currentChunk;
+            int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkToUse);
+
+            //get the closest sample, then get the next, and next, until it is X distance away from the closest
             int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
-            int desiredSplineSampleIndex = faceForward ? closestSplineIndex + sampleDistance : closestSplineIndex - sampleDistance;
-
-            int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(currentChunk);
-            while (desiredSplineSampleIndex >= currentChunk.SplineSamples.Length || desiredSplineSampleIndex < 0) //has reached end of chunk
+            SplineSample closestSample = currentChunk.SplineSamples[closestSplineIndex];
+            
+            SplineSample? previousSample = null;
+            float previousDistanceOffset = 0;
+            int offset = faceForward ? 1 : -1;
+            while (true)
             {
-                //get the next chunk
-                chunkIndex = faceForward ? chunkIndex + 1 : chunkIndex - 1;
-
-                if (!ChunkManager.Instance.IsChunkWithinLoadRadius(chunkIndex))
-                {
-                    //no more loaded chunks
-                    return null;
-                }
-
-                Chunk newChunk = ChunkManager.Instance.GetLoadedChunkByMapIndex(chunkIndex);
-                currentChunk = newChunk;
-                if (currentChunk.TrafficManager == null)
-                    return null; //no traffic manager
+                int sampleIndex = closestSplineIndex + offset;
                 
-                closestSplineIndex = newChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
-                desiredSplineSampleIndex = faceForward ? closestSplineIndex + 1 : closestSplineIndex - 1;
+                //check if it goes past the current chunk
+                if (sampleIndex >= chunkToUse.SplineSamples.Length || sampleIndex < 0)
+                {
+                    //get the next chunk
+                    chunkIndex = faceForward ? chunkIndex + 1 : chunkIndex - 1;
+                    
+                    if (!ChunkManager.Instance.IsChunkWithinLoadRadius(chunkIndex))
+                    {
+                        //no more loaded chunks
+                        return null;
+                    }
+                    
+                    Chunk newChunk = ChunkManager.Instance.GetLoadedChunkByMapIndex(chunkIndex);
+                    chunkToUse = newChunk;
+                    if (newChunk.TrafficManager == null)
+                        return null; //no traffic manager
+
+                    //reset the values
+                    previousSample = null;
+                    closestSplineIndex = newChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
+                    closestSample = newChunk.SplineSamples[closestSplineIndex];
+                    offset = faceForward ? 1 : -1;
+                    continue;
+                }
+                
+                SplineSample sample = chunkToUse.SplineSamples[closestSplineIndex + offset];
+                float distanceToSampleSqr = Vector3.SqrMagnitude(sample.position - closestSample.position);
+                float distanceOffset = Mathf.Abs(desiredDistanceSqr - distanceToSampleSqr);
+                
+                bool isFurtherAway = previousSample != null && distanceOffset > previousDistanceOffset;
+                if (isFurtherAway)
+                    return previousSample;
+                
+                previousDistanceOffset = distanceOffset;
+                previousSample = sample;
+                
+                offset = faceForward ? offset + 1 : offset - 1;
             }
-
-            return currentChunk.SplineSamples[desiredSplineSampleIndex];
         }
-
+        
         private void TryDelayedUpdate()
         {
             timeSinceLastDelayedUpdate += Time.deltaTime;
@@ -403,6 +451,7 @@ namespace Gumball
         {
             OnStopMoving();
             gameObject.Pool();
+            GlobalLoggers.TrafficLogger.Log("Despawned");
         }
 
     }
