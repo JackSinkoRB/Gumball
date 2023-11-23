@@ -67,6 +67,13 @@ namespace Gumball
         {
             if (!isInitialised)
                 return;
+
+            if (currentChunk == null)
+            {
+                //current chunk may have despawned
+                Despawn();
+                return;
+            }
             
             CollisionFreezeCheck();
             TryDelayedUpdate();
