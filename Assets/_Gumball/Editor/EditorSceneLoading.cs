@@ -14,7 +14,11 @@ namespace Gumball.Editor
         public static bool BootSceneLoadingEnabled
         {
             get => EditorPrefs.GetBool(ToggleBootSceneLoading, true);
-            set => EditorPrefs.SetBool(ToggleBootSceneLoading, value);
+            set
+            {
+                EditorPrefs.SetBool(ToggleBootSceneLoading, value);
+                UpdatePlayModeStartScene();
+            }
         }
         
         static EditorSceneLoading()
@@ -41,7 +45,6 @@ namespace Gumball.Editor
         private static void ToggleBootSceneLoadOption()
         {
             BootSceneLoadingEnabled = !BootSceneLoadingEnabled;
-            UpdatePlayModeStartScene();
         }
 
         [MenuItem(ToggleBootSceneLoading, true)]
