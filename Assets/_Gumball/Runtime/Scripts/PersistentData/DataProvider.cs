@@ -55,6 +55,9 @@ namespace Gumball
 
         public static void StartAutoSave()
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (IsAutoSaveActive)
             {
                 Debug.LogWarning("Tried running auto save, but it is already running.");
