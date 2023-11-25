@@ -51,17 +51,24 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void InitialisePostSceneLoad()
         {
-            CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
+            try
             {
-                InputManager.PrimaryContact.started -= OnPressed;
-                InputManager.PrimaryContact.started += OnPressed;
+                CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
+                {
+                    InputManager.PrimaryContact.started -= OnPressed;
+                    InputManager.PrimaryContact.started += OnPressed;
 
-                InputManager.PrimaryContact.canceled -= OnReleased;
-                InputManager.PrimaryContact.canceled += OnReleased;
+                    InputManager.PrimaryContact.canceled -= OnReleased;
+                    InputManager.PrimaryContact.canceled += OnReleased;
 
-                InputManager.PrimaryPosition.performed -= OnPerformed;
-                InputManager.PrimaryPosition.performed += OnPerformed;
-            });
+                    InputManager.PrimaryPosition.performed -= OnPerformed;
+                    InputManager.PrimaryPosition.performed += OnPerformed;
+                });
+            }
+            catch (NullReferenceException)
+            {
+                //scene might not be set up for coroutine helper
+            }
         }
         
         public static void OnPressed(InputAction.CallbackContext context)
