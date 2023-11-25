@@ -52,10 +52,25 @@ namespace Gumball.Editor.Tests
         }
         
         [TestCaseSource(nameof(providers))]
+        public void SaveReloadAndGet(DataProvider provider)
+        {
+            const string testKey = "TestKey";
+            const string testValue = "TestValue";
+
+            provider.Set(testKey, testValue);
+            DataProvider.SaveAllSync();
+            Assert.IsTrue(provider.SourceHasValue());
+
+            provider.ReloadFromSource();
+            Assert.IsTrue(provider.Get<string>(testKey).Equals(testValue));
+        }
+        
+        [TestCaseSource(nameof(providers))]
         public void SetAndGetMemoryString(DataProvider provider)
         {
             const string key = "TestKey";
             const string value = "TestValue";
+            
             provider.Set(key, value);
             Assert.IsTrue(provider.HasKey(key));
             Assert.AreEqual(provider.Get<string>(key), value);
@@ -66,6 +81,7 @@ namespace Gumball.Editor.Tests
         {
             const string key = "TestKey";
             const string value = "TestValue";
+            
             provider.Set(key, value);
             DataProvider.SaveAllSync();
             Assert.IsTrue(provider.HasKey(key));
@@ -237,6 +253,28 @@ namespace Gumball.Editor.Tests
             Assert.IsTrue(!provider.IsDirty);
             provider.Set(key, null);
             Assert.IsTrue(!provider.IsDirty);
+        }
+        
+        [TestCaseSource(nameof(providers))]
+        public void NotDirtyFromReload(DataProvider provider)
+        {
+            provider.ReloadFromSource();
+            Assert.IsTrue(!provider.IsDirty);
+        }
+        
+        [TestCaseSource(nameof(providers))]
+        public void RemoveAll(DataProvider provider)
+        {
+            const string key = "TestKey";
+            const string value = "TestValue";
+
+            provider.Set(key, value);
+            DataProvider.SaveAllSync();
+            Assert.IsTrue(provider.SourceHasValue());
+
+            provider.RemoveFromSource();
+            DataProvider.SaveAllSync();
+            Assert.IsTrue(!provider.SourceHasValue());
         }
 
     }

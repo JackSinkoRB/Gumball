@@ -193,8 +193,6 @@ namespace Gumball
         /// </summary>
         public virtual void RemoveFromSource()
         {
-            CheckIfLoaded();
-
             currentValues.Clear();
             IsLoaded = false;
             RemoveDirty();
