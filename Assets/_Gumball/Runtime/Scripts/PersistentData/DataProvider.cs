@@ -10,6 +10,7 @@ namespace Gumball
 {
     public abstract class DataProvider
     {
+        
         #region STATIC
 
         private const float timeBetweenAutoSaveInSeconds = 30;
@@ -126,8 +127,7 @@ namespace Gumball
             stopwatch.Stop();
 
             IsLoaded = true;
-            GlobalLoggers.SaveDataLogger.Log(
-                $"Loaded from source '{identifier}' (async - {stopwatch.ElapsedMilliseconds}ms)");
+            GlobalLoggers.SaveDataLogger.Log($"Loaded from source '{identifier}' (async - {stopwatch.ElapsedMilliseconds}ms)");
             onComplete?.Invoke();
         }
 
@@ -218,10 +218,7 @@ namespace Gumball
         {
 #if UNITY_EDITOR
             if (!DataEditorOptions.DataProvidersEnabled)
-            {
-                GlobalLoggers.SaveDataLogger.Log($"Could not save '{identifier}' as saving has been disabled in the editor.");
                 return; //don't save to source
-            }
 #endif
 
             Stopwatch stopwatch = new Stopwatch();
