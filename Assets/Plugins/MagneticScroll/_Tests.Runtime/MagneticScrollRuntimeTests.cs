@@ -33,7 +33,7 @@ namespace MagneticScrollUtils.Tests.Runtime
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.TestScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(MagneticScrollTestManager.Instance.TestScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadMainScene.completed += OnSceneLoadComplete;
         }
 

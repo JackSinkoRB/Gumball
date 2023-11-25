@@ -9,17 +9,17 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 namespace MagneticScrollUtils.Tests.Runtime
 {
     [CreateAssetMenu(menuName = "MagneticScroll/Test Manager")]
-    public class TestManager : ScriptableObject
+    public class MagneticScrollTestManager : ScriptableObject
     {
 
-        private static  TestManager instance;
-        public static TestManager Instance
+        private static  MagneticScrollTestManager instance;
+        public static MagneticScrollTestManager Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    AsyncOperationHandle<TestManager> handle = Addressables.LoadAssetAsync<TestManager>(nameof(TestManager));
+                    AsyncOperationHandle<MagneticScrollTestManager> handle = Addressables.LoadAssetAsync<MagneticScrollTestManager>(nameof(MagneticScrollTestManager));
                     instance = handle.WaitForCompletion();
                 }
                 return instance;
