@@ -14,8 +14,9 @@ namespace MagneticScrollUtils.Tests.Runtime
     public class MagneticScrollRuntimeTests : IPrebuildSetup, IPostBuildCleanup
     {
         
+        private static SceneAsset loadBootScene;
+
         private bool isInitialised;
-        private SceneAsset loadBootScene;
         private MagneticScrollTestSceneManager sceneManager;
 
         public void Setup()
