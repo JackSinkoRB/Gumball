@@ -147,6 +147,15 @@ namespace Gumball
             if (currentValues.ContainsKey(key) && currentValues[key] == value)
                 return;
 
+            if (!currentValues.ContainsKey(key) && value == null)
+                return;
+
+            if (value == null)
+            {
+                RemoveKey(key);
+                return;
+            }
+            
             currentValues[key] = value;
             SetDirty();
 
@@ -184,6 +193,8 @@ namespace Gumball
             CheckIfLoaded();
 
             currentValues.Clear();
+            IsLoaded = false;
+            RemoveDirty();
             GlobalLoggers.SaveDataLogger.Log($"Removed all keys from {identifier}.");
         }
 
