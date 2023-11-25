@@ -196,7 +196,8 @@ namespace MagneticScrollUtils
             Button.onClick.RemoveAllListeners();
 
             //also add the click listener on the icon
-            Button.onClick.AddListener(() => scrollBelongsTo.OnClickIcon(this));
+            if (scrollBelongsTo.SelectIconIfButtonClicked)
+                Button.onClick.AddListener(() => scrollBelongsTo.OnClickIcon(this));
         }
         
         /// <summary>

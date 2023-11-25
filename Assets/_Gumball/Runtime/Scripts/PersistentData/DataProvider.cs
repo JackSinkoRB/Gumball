@@ -55,6 +55,9 @@ namespace Gumball
 
         public static void StartAutoSave()
         {
+            if (!Application.isPlaying)
+                return;
+            
             if (IsAutoSaveActive)
             {
                 Debug.LogWarning("Tried running auto save, but it is already running.");
@@ -147,6 +150,15 @@ namespace Gumball
             if (currentValues.ContainsKey(key) && currentValues[key] == value)
                 return;
 
+            if (!currentValues.ContainsKey(key) && value == null)
+                return;
+
+            if (value == null)
+            {
+                RemoveKey(key);
+                return;
+            }
+            
             currentValues[key] = value;
             SetDirty();
 
@@ -184,6 +196,8 @@ namespace Gumball
             CheckIfLoaded();
 
             currentValues.Clear();
+            IsLoaded = false;
+            RemoveDirty();
             GlobalLoggers.SaveDataLogger.Log($"Removed all keys from {identifier}.");
         }
 

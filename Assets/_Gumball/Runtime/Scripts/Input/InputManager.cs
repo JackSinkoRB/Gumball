@@ -36,15 +36,22 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void RuntimeInitialise()
         {
-            CoroutineHelper.Instance.PerformAfterTrue(() => ExistsRuntime, () =>
+            try
             {
-                Steering = new VirtualInputActionFloat(Instance.GetOrCacheAction("Steering"));
-                Accelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Accelerate"));
-                Decelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Decelerate"));
-                Handbrake = new VirtualInputActionButton(Instance.GetOrCacheAction("Handbrake"));
-                ShiftUp = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftUp"));
-                ShiftDown = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftDown"));
-            });
+                CoroutineHelper.Instance.PerformAfterTrue(() => ExistsRuntime, () =>
+                {
+                    Steering = new VirtualInputActionFloat(Instance.GetOrCacheAction("Steering"));
+                    Accelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Accelerate"));
+                    Decelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Decelerate"));
+                    Handbrake = new VirtualInputActionButton(Instance.GetOrCacheAction("Handbrake"));
+                    ShiftUp = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftUp"));
+                    ShiftDown = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftDown"));
+                });
+            }
+            catch (NullReferenceException)
+            {
+                //CoroutineHelper might not exist in the scene
+            }
         }
         
         [SerializeField] private InputActionAsset controls;

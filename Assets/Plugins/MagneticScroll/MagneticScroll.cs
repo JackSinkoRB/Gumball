@@ -158,12 +158,10 @@ namespace MagneticScrollUtils
         [Space(5)]
         //because the icons can wrap, it is not always the first and last elements in the icons array
         [ReadOnly, SerializeField] protected int firstIconIndex;
-
         [ReadOnly, SerializeField] protected int lastIconIndex;
 
         [Space(5)]
         [ReadOnly, SerializeField] protected int firstItemIndexShowing;
-
         [ReadOnly, SerializeField] protected int lastItemIndexShowing;
 
         [Space(5)]
@@ -183,6 +181,7 @@ namespace MagneticScrollUtils
         [ReadOnly, SerializeField] private float currentElasticityModifier;
 
         [ReadOnly, SerializeField] private int lastSelectedItemIndex;
+        [ReadOnly, SerializeField] private int lastSelectedIconIndex;
         [ReadOnly, SerializeField] private int closestIconToMagnetIndex = -1;
 
         #endregion
@@ -221,12 +220,19 @@ namespace MagneticScrollUtils
         public RectOffset ClickableAreaPadding => clickableAreaPadding ?? new RectOffset(); //check for null in case inspector hasn't been updated
         public bool SelectIconIfButtonClicked => selectIconIfButtonClicked;
 
+        public int FirstIconIndex => firstIconIndex;
+        public int LastIconIndex => lastIconIndex;
+        public int FirstItemIndexShowing => firstItemIndexShowing;
+        public int LastItemIndexShowing => lastItemIndexShowing;
+        public List<ScrollIcon> Icons => icons;
+
         /// <summary>
         /// The index of the last selected item. Useful for recovering the last selected item when repopulating at runtime.
         /// <remarks>If the item order has changed, this value won't match the new positions.</remarks>
         /// </summary>
         public int LastSelectedItemIndex => lastSelectedItemIndex;
-
+        public int LastSelectedIconIndex => lastSelectedIconIndex;
+        
         public int ClosestIconToMagnetIndex => closestIconToMagnetIndex;
 
         /// <summary>
@@ -344,16 +350,34 @@ namespace MagneticScrollUtils
 
         public void SnapToNextItem()
         {
-            if (ClosestIconToMagnetIndex + 1 >= icons.Count)
-                return;
-            SnapIconToMagnet(icons[ClosestIconToMagnetIndex + 1]);
+            int desiredIconIndex = lastSelectedIconIndex + 1;
+            if (desiredIconIndex == icons.Count)
+            {
+                desiredIconIndex = 0; //wrap
+            }
+
+            int desiredItemIndex = lastSelectedItemIndex + 1;
+            if (!CanInfiniteScroll && desiredItemIndex >= items.Count)
+                return; //at the end
+            
+            ScrollIcon iconToSelect = icons[desiredIconIndex];
+            OnClickIcon(iconToSelect);
         }
 
         public void SnapToPreviousItem()
         {
-            if (ClosestIconToMagnetIndex - 1 < 0)
-                return;
-            SnapIconToMagnet(icons[ClosestIconToMagnetIndex - 1]);
+            int desiredIndex = lastSelectedIconIndex - 1;
+            if (desiredIndex == -1)
+            {
+                desiredIndex = icons.Count - 1; //wrap
+            }
+
+            int desiredItemIndex = lastSelectedItemIndex - 1;
+            if (!CanInfiniteScroll && desiredItemIndex < 0)
+                return; //at the end
+            
+            ScrollIcon iconToSelect = icons[desiredIndex];
+            OnClickIcon(iconToSelect);
         }
 
         public void SetItems(List<ScrollItem> newItems, int itemToSelectIndex = 0)
@@ -380,6 +404,10 @@ namespace MagneticScrollUtils
                 }
             }
 
+            snapToItemOffscreenCoroutine = null;
+            selectedItemWhenPointerDown = -1;
+            clickedToSelect = false;
+            
             //calculate the movement difference:
             Vector2 oldDistance = movementOffset; //previously tracked movement offset
             Vector2 newDistance = distanceBetweenIcons * itemToSelectIndex; //the new desired movement offset
@@ -432,6 +460,16 @@ namespace MagneticScrollUtils
             }
         }
 
+        public void CompleteAllTweens()
+        {
+            foreach (ScrollIcon icon in icons)
+            {
+                icon.CurrentTween.Complete();
+            }
+            
+            PostMovement();
+        }
+
         /// <summary>
         /// Snaps the item to the magnet.
         /// If the item is currently shown in an icon, snap to the item. Else, keep scrolling to the end until it is shown in an icon, and select it.
@@ -473,42 +511,7 @@ namespace MagneticScrollUtils
 
             snapToItemOffscreenCoroutine = StartCoroutine(SnapToItemOffscreen(itemIndex, directionToMove));
         }
-
-        private int GetDistanceToItem(int itemIndex, SnapToItemDirection direction)
-        {
-            if (direction == SnapToItemDirection.BACKWARD)
-            {
-                int distanceForwards = 1;
-                for (int count = lastSelectedItemIndex + 1; count < lastSelectedItemIndex + items.Count; count++)
-                {
-                    int wrapped = count;
-                    if (wrapped >= items.Count)
-                        wrapped -= items.Count;
-
-                    if (wrapped == itemIndex)
-                        return distanceForwards;
-
-                    distanceForwards++;
-                }
-            }
-            else
-            {
-                int distanceBackwards = 1;
-                for (int count = lastSelectedItemIndex - 1; count > lastSelectedItemIndex - items.Count; count--)
-                {
-                    int wrapped = count;
-                    if (wrapped <= -1)
-                        wrapped += items.Count;
-                
-                    if (wrapped == itemIndex)
-                        return distanceBackwards;
-
-                    distanceBackwards++;
-                }
-            }
-
-            throw new InvalidOperationException($"Could not find distance to item {itemIndex} in {gameObject.name}");
-        }
+        
         
         /// <summary>
         /// Snaps the item to the magnet.
@@ -540,9 +543,6 @@ namespace MagneticScrollUtils
 
         public void OnClickIcon(ScrollIcon icon)
         {
-            if (!selectIconIfButtonClicked)
-                return;
-
             clickedToSelect = true;
             icon.CurrentItem.OnClick();
 
@@ -579,6 +579,12 @@ namespace MagneticScrollUtils
             this.interactable = interactable;
         }
 
+        public void ToggleUseInfiniteScroll(bool enable)
+        {
+            useInfiniteScroll = enable;
+            CheckToDisableInfiniteScroll();
+        }
+
         #endregion
 
 
@@ -599,10 +605,6 @@ namespace MagneticScrollUtils
             scrollMaxPos = Vector2.zero;
             scrollMinPos = IsVertical ? -rectTransform.rect.size : rectTransform.rect.size;
 
-            snapToItemOffscreenCoroutine = null;
-            selectedItemWhenPointerDown = -1;
-            clickedToSelect = false;
-            
             if (populatesAtRuntime)
             {
                 Populate();
@@ -800,30 +802,33 @@ namespace MagneticScrollUtils
 
             //update the last icon index in case where infinite scroll is disabled
             int maxItemIndex = items.Count - 1;
-            if (maxItemIndex < lastIconIndex) lastIconIndex = maxItemIndex;
+            if (maxItemIndex < lastIconIndex && !CanInfiniteScroll) lastIconIndex = maxItemIndex;
 
-            //initialise item indexes
+            //initialise item indexes:
 
             //take any icons before
             int iconsBefore = Mathf.FloorToInt(icons.Count / 2f); //magnet is always in the middle
-            int desiredFirstIndex = itemStartIndex - iconsBefore;
-            if (desiredFirstIndex < 0)
-                desiredFirstIndex = CanInfiniteScroll
-                    ? desiredFirstIndex + items.Count //wrap
-                    : 0;
-
-            int desiredLastIndex = desiredFirstIndex + icons.Count - 1;
-
-            firstItemIndexShowing = desiredFirstIndex;
+            
+            firstItemIndexShowing = CanInfiniteScroll ? itemStartIndex - iconsBefore : 0;
             if (firstItemIndexShowing < 0)
             {
-                firstItemIndexShowing = items.Count == 1 ? 0 : items.Count + (desiredFirstIndex % maxItemIndex); //wrap
+                int wrappedFirstItemIndex = itemStartIndex;
+                for (int count = 0; count < iconsBefore; count++)
+                {
+                    wrappedFirstItemIndex--;
+                    if (wrappedFirstItemIndex < 0)
+                        wrappedFirstItemIndex = items.Count - 1; //wrap
+                }
+
+                firstItemIndexShowing = wrappedFirstItemIndex;
             }
 
-            lastItemIndexShowing = items.Count == 1 ? 0 : desiredLastIndex;
+            lastItemIndexShowing = CanInfiniteScroll ? itemStartIndex + iconsBefore : firstItemIndexShowing + icons.Count - 1;
             if (lastItemIndexShowing > items.Count - 1)
             {
-                lastItemIndexShowing = items.Count == 1 ? 0 : (desiredLastIndex % maxItemIndex) - 1; //wrap
+                if (CanInfiniteScroll)
+                    lastItemIndexShowing = items.Count == 1 ? 0 : (lastItemIndexShowing % maxItemIndex) - 1; //wrap
+                else lastItemIndexShowing = items.Count - 1;
             }
 
             if (isLoggingEnabled) Debug.Log("Reset index positions for " + gameObject.name + " to " + firstIconIndex + "-" + lastIconIndex + " / " + firstItemIndexShowing + "-" + lastItemIndexShowing);
@@ -870,9 +875,40 @@ namespace MagneticScrollUtils
             }
         }
         
-        private void OnStartMoving()
+        private int GetDistanceToItem(int itemIndex, SnapToItemDirection direction)
         {
-            
+            if (direction == SnapToItemDirection.BACKWARD)
+            {
+                int distanceForwards = 1;
+                for (int count = lastSelectedItemIndex + 1; count < lastSelectedItemIndex + items.Count; count++)
+                {
+                    int wrapped = count;
+                    if (wrapped >= items.Count)
+                        wrapped -= items.Count;
+
+                    if (wrapped == itemIndex)
+                        return distanceForwards;
+
+                    distanceForwards++;
+                }
+            }
+            else
+            {
+                int distanceBackwards = 1;
+                for (int count = lastSelectedItemIndex - 1; count > lastSelectedItemIndex - items.Count; count--)
+                {
+                    int wrapped = count;
+                    if (wrapped <= -1)
+                        wrapped += items.Count;
+                
+                    if (wrapped == itemIndex)
+                        return distanceBackwards;
+
+                    distanceBackwards++;
+                }
+            }
+
+            throw new InvalidOperationException($"Could not find distance to item {itemIndex} in {gameObject.name}");
         }
 
         /// <summary>
@@ -1096,6 +1132,7 @@ namespace MagneticScrollUtils
                 selectedItem.OnSelectComplete();
             
             lastSelectedItemIndex = items.IndexOf(selectedItem);
+            lastSelectedIconIndex = newIndex;
         }
 
         private void MoveAllItems(Vector2 amount)
