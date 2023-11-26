@@ -16,15 +16,15 @@ public class VersionManager : SingletonScriptable<VersionManager>
     /// The full formatted build name.
     /// <remarks>These have full public access, as (for some odd reason) with private setters, the values are null in builds.</remarks>
     /// </summary>
-    public string FullBuildName = "NOT INITIALISED";
-    public string ShortBuildName = "NOT INITIALISED";
-    public string ApplicationNameFormatted = "NOT INITIALISED";
-    public string CommitHash = "NOT INITIALISED";
+    [SerializeField] public string FullBuildName = "NOT INITIALISED";
+    [SerializeField] public string ShortBuildName = "NOT INITIALISED";
+    [SerializeField] public string ApplicationNameFormatted = "NOT INITIALISED";
+    [SerializeField] public string CommitHash = "NOT INITIALISED";
     public string CommitHashFormatted => CommitHash.Substring(0, 7);
-    public string DateFormatted = "NOT INITIALISED";
-    public string PlatformNameFormatted = "NOT INITIALISED";
-    public string BuildTypeFormatted = "NOT INITIALISED";
-    public string BranchName = "NOT INITIALISED";
+    [SerializeField] public string DateFormatted = "NOT INITIALISED";
+    [SerializeField] public string PlatformNameFormatted = "NOT INITIALISED";
+    [SerializeField] public string BuildTypeFormatted = "NOT INITIALISED";
+    [SerializeField] public string BranchName = "NOT INITIALISED";
 
 #if UNITY_EDITOR
     public void UpdateVersion()

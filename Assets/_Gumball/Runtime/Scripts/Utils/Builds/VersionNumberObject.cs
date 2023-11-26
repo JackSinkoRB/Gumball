@@ -10,7 +10,7 @@ public class VersionNumberObject : MonoBehaviour
     private void Awake()
     {
 #if UNITY_EDITOR
-        GetComponent<TextMeshProUGUI>().text = "EDITOR";
+        GetComponent<TextMeshProUGUI>().text = $"EDITOR_{VersionManager.Instance.ShortBuildName}";
 #else
         GetComponent<TextMeshProUGUI>().text = VersionManager.Instance.FullBuildName;
 #endif
