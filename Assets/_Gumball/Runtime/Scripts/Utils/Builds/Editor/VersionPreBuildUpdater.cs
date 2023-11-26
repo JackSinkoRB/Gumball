@@ -11,8 +11,8 @@ using CompressionLevel = System.IO.Compression.CompressionLevel;
 
 public class VersionPreBuildUpdater : IPreprocessBuildWithReport
 {
-
     public int callbackOrder => 0;
+    
     public void OnPreprocessBuild(BuildReport report)
     {
         //delete any existing builds in the folder

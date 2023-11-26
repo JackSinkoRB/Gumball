@@ -1,12 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEditor;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 
-namespace Gumball.Editor
+namespace Gumball
 {
     public static class CustomTestRunner
     {
