@@ -8,22 +8,13 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Callbacks;
 using CompressionLevel = System.IO.Compression.CompressionLevel;
-using UnityEditor.TestTools.TestRunner.Api;
-using Object = UnityEngine.Object;
 
 public class VersionPreBuildUpdater : IPreprocessBuildWithReport
 {
+
     public int callbackOrder => 0;
     public void OnPreprocessBuild(BuildReport report)
     {
-        TestStatus editModeTests = RunTests(TestMode.EditMode);
-        if (editModeTests != TestStatus.Passed)
-            throw new BuildFailedException("One or more EDIT mode tests were not successful, so the build was cancelled.");
-
-        TestStatus playModeTests = RunTests(TestMode.PlayMode);
-        if (playModeTests != TestStatus.Passed)
-            throw new BuildFailedException("One or more PLAY mode tests were not successful, so the build was cancelled.");
-        
         //delete any existing builds in the folder
         string buildDirectory = GetDesiredBuildDirectory(report.summary.outputPath);
         if (Directory.Exists(buildDirectory) && Directory.GetFiles(buildDirectory).Length > 0)
@@ -31,28 +22,6 @@ public class VersionPreBuildUpdater : IPreprocessBuildWithReport
             Directory.Delete(buildDirectory, true);
         }
         VersionManager.Instance.UpdateVersion();
-    }
-
-    private TestStatus RunTests(TestMode mode)
-    {
-        var testRunner = ScriptableObject.CreateInstance<TestRunnerApi>();
-        var filter = new Filter()
-        {
-            testMode = mode,
-            categoryNames = Array.Empty<string>()
-        };
-        var resultHandler = new ResultHandler();
-        testRunner.RegisterCallbacks(resultHandler);
-        testRunner.Execute(new ExecutionSettings(filter)
-        {
-            runSynchronously = true
-        });
-        
-        TestStatus status = resultHandler.result.TestStatus;
-        
-        Object.DestroyImmediate(testRunner);
-        
-        return status;
     }
 
     /// <summary>
@@ -163,21 +132,6 @@ public class VersionPreBuildUpdater : IPreprocessBuildWithReport
         }
 
         return false;
-    }
-    
-    private class ResultHandler : ICallbacks
-    {
-        public ITestResultAdaptor result { get; private set; }
- 
-        public void RunFinished(ITestResultAdaptor result)
-        {
-            this.result = result;
-        }
- 
-        // No interface segregation or separate events?
-        public void RunStarted(ITestAdaptor testsToRun) { }
-        public void TestFinished(ITestResultAdaptor result) { }
-        public void TestStarted(ITestAdaptor test) { }
     }
 }
 #endif
