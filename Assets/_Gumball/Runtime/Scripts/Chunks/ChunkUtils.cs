@@ -19,14 +19,13 @@ namespace Gumball
         }
 
         public const string TerrainTag = "Terrain";
-        public const int TerrainLayer = 7;
-        public static LayerMask TerrainLayerMask = 1 << TerrainLayer;
         public const string TerrainMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Terrains/";
         public const string TerrainMeshPrefix = "ProceduralTerrain_";
         public const string RoadMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Roads/";
         public const string RoadMeshPrefix = "RoadMesh_";
         public const string ChunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
-
+        
+#if UNITY_EDITOR
         /// <summary>
         /// Connects the chunks with NEW blend data.
         /// Puts chunk2 at the start or end of chunk1 (depending on direction), and aligns the splines.
@@ -34,7 +33,6 @@ namespace Gumball
         /// </summary>
         public static ChunkBlendData ConnectChunksWithNewBlendData(Chunk chunk1, Chunk chunk2, LoadDirection direction, bool canUndo = false)
         {
-#if UNITY_EDITOR
             if (canUndo)
             {
                 Undo.RecordObjects(new Object[]
@@ -45,7 +43,6 @@ namespace Gumball
                     chunk2.CurrentTerrain.GetComponent<MeshFilter>()
                 }, "Connect Chunk");
             }
-#endif
             
             GlobalLoggers.ChunkLogger.Log($"Appending {chunk2.name} to the end of {chunk1.name}");
 
@@ -67,14 +64,15 @@ namespace Gumball
             chunk1.UpdateSplineImmediately();
             chunk2.UpdateSplineImmediately();
             
-            chunk1.OnConnectChunkAfter(chunk2);
-            chunk2.OnConnectChunkBefore(chunk1);
-
+            chunk1.GetComponent<ChunkEditorTools>().OnConnectChunkAfter(chunk2);
+            chunk2.GetComponent<ChunkEditorTools>().OnConnectChunkBefore(chunk1);
+            
             chunk1.DisableAutomaticTerrainRecreation(false);
             chunk2.DisableAutomaticTerrainRecreation(false);
 
             return blendData;
         }
+#endif
 
         /// <summary>
         /// Connects the chunks using EXISTING blend data.
@@ -108,9 +106,11 @@ namespace Gumball
             Chunk firstChunk = chunk1.UniqueID.Equals(blendData.FirstChunkID) ? chunk1 : chunk2;
             Chunk lastChunk = chunk2.UniqueID.Equals(blendData.LastChunkID) ? chunk2 : chunk1;
             blendData.ApplyToChunks(firstChunk, lastChunk);
-            
-            chunk1.OnConnectChunkAfter(chunk2);
-            chunk2.OnConnectChunkBefore(chunk1);
+
+#if UNITY_EDITOR
+            chunk1.GetComponent<ChunkEditorTools>().OnConnectChunkAfter(chunk2);
+            chunk2.GetComponent<ChunkEditorTools>().OnConnectChunkBefore(chunk1);
+#endif
             
             //update immediately as the position has changed
             chunk2.UpdateSplineImmediately();
@@ -150,6 +150,7 @@ namespace Gumball
             return uvs;
         }
 
+#if UNITY_EDITOR
         public static void BakeRoadMesh(Chunk chunk, bool replace = true)
         {
             bool alreadyBaked = chunk.RoadMesh.baked;
@@ -161,7 +162,7 @@ namespace Gumball
 
             MeshFilter meshFilter = chunk.RoadMesh.GetComponent<MeshFilter>();
             
-            string path = $"{ChunkUtils.RoadMeshAssetFolderPath}/{ChunkUtils.RoadMeshPrefix}{chunk.UniqueID}.asset";
+            string path = $"{RoadMeshAssetFolderPath}/{RoadMeshPrefix}{chunk.UniqueID}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                 AssetDatabase.DeleteAsset(path);
             AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
@@ -180,6 +181,7 @@ namespace Gumball
             
             GlobalLoggers.ChunkLogger.Log("Baked " + path);
         }
+#endif
         
         private static void MoveChunkToOther(Chunk chunk1, Chunk chunk2, LoadDirection direction)
         {

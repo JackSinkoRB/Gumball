@@ -246,5 +246,5 @@ namespace MagneticScrollUtils
         }
 
     }
-#endif
 }
+#endif

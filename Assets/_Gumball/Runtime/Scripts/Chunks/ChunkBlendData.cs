@@ -34,7 +34,8 @@ namespace Gumball
             lastChunk.ChunkMeshData.SetVertices(blendedLastChunkMeshData.Vertices);
             lastChunk.ChunkMeshData.ApplyChanges();
         }
-        
+
+#if UNITY_EDITOR
         public ChunkBlendData(Chunk firstChunk, Chunk lastChunk)
         {
             this.firstChunk = firstChunk;
@@ -223,6 +224,6 @@ namespace Gumball
             return false;
         }
         #endregion
-        
+#endif
     }
 }
