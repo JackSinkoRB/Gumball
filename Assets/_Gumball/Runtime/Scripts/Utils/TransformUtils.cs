@@ -26,6 +26,21 @@ namespace Gumball
     
             return existingComponents;
         }
-        
+
+        public static T FindComponentInParents<T>(this Transform transform) where T : MonoBehaviour
+        {
+            Transform parent = transform;
+            while (parent != null)
+            {
+                T componentOnParent = parent.GetComponent<T>();
+                if (componentOnParent != null)
+                    return componentOnParent;
+
+                parent = parent.parent;
+            }
+
+            return null; //no component
+        }
+
     }
 }

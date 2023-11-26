@@ -16,6 +16,7 @@ namespace Gumball
         public static Logger PanelLogger => Instance.panelLogger;
         public static Logger ObjectPoolLogger => Instance.objectPoolLogger;
         public static Logger DecalsLogger => Instance.decalsLogger;
+        public static Logger TrafficLogger => Instance.trafficLogger;
         
         [SerializeField] private Logger loadingLogger;
         [SerializeField] private Logger chunkLogger;
@@ -24,6 +25,7 @@ namespace Gumball
         [SerializeField] private Logger panelLogger;
         [SerializeField] private Logger objectPoolLogger;
         [SerializeField] private Logger decalsLogger;
-        
+        [SerializeField] private Logger trafficLogger;
+
     }
 }

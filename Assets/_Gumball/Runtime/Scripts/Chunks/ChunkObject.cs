@@ -112,7 +112,7 @@ namespace Gumball
             Vector3 originalPosition = transform.position;
             transform.position = transform.position.SetY(chunkBelongsTo.CurrentTerrain.transform.position.y + 10000);
             
-            if (Physics.Raycast(GetLowestPosition(), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, ChunkUtils.TerrainLayerMask))
+            if (Physics.Raycast(GetLowestPosition(), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, GameObjectLayers.GetLayerMaskFromLayer(GameObjectLayers.Layer.Terrain)))
                 offset = -hitDown.distance;
 
             if (offset == 0)

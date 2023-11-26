@@ -20,7 +20,7 @@ namespace Gumball
         /// <param name="prefab">The prefab from the assets folder</param>
         /// <param name="assignToParent">The parent transform to assign the object too</param>
         /// <param name="poolOnDisable">Should the object be pooled when disabled in the hierarchy? If false, the object will need to be manually pooled.</param>
-        public GameObject GetSpareOrCreate(GameObject prefab, Transform assignToParent = null, bool poolOnDisable = true, Action onPool = null)
+        public GameObject GetSpareOrCreate(GameObject prefab, Transform assignToParent = null, Vector3 position = default, Quaternion rotation = default, bool poolOnDisable = true, Action onPool = null)
         {
             bool objectIsInScene = prefab.scene.name != null;
             if (objectIsInScene)
@@ -36,7 +36,7 @@ namespace Gumball
                 PoolablePrefab poolablePrefab = new PoolablePrefab(prefab);
                 InitialisePoolablePrefab(poolablePrefab);
             }
-            return GetSpareOrCreate(prefabName, assignToParent, poolOnDisable, onPool);
+            return GetSpareOrCreate(prefabName, assignToParent, position, rotation, poolOnDisable, onPool);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Gumball
         /// <param name="prefabName">The prefab name from the assets folder</param>
         /// <param name="assignToParent">The parent transform to assign the object too</param>
         /// <param name="poolOnDisable">Should the object be pooled when disabled in the hierarchy? If false, the object will need to be manually pooled.</param>
-        public GameObject GetSpareOrCreate(string prefabName, Transform assignToParent = null, bool poolOnDisable = true, Action onPool = null)
+        public GameObject GetSpareOrCreate(string prefabName, Transform assignToParent = null, Vector3 position = default, Quaternion rotation = default, bool poolOnDisable = true, Action onPool = null)
         {
             if (!poolablePrefabsByName.ContainsKey(prefabName))
             {
@@ -60,27 +60,19 @@ namespace Gumball
             if (spares.Count > 0)
             {
                 GlobalLoggers.ObjectPoolLogger.Log($"Taking object from '{prefabName}' pool. ({spareObjectsByName[prefabName].Count} spare)");
-                
+
                 //use first available spare
-                while(spares.Count > 0)
-                {
-				    objectToGive = spares[0];
-				    spares.Remove(objectToGive);
-                    if (objectToGive != null)
-                        break;//This is a valid object. Otherwise keep looking for a valid object
-			    }
-                if(objectToGive == null)
-                {
-				    //Failed to find an available spare. Make a new one.
-				    objectToGive = CreateObjectFromPrefab(GetPrefabByName(prefabName));
-			    }
-                
+                objectToGive = spares[0];
+                spares.Remove(objectToGive);
+
+                objectToGive.transform.position = position;
+                objectToGive.transform.rotation = rotation;
             } else
             {
                 GlobalLoggers.ObjectPoolLogger.Log($"No available pooled items in '{prefabName}' pool. Creating a new one.");
                 
                 //instantiate a new one
-                objectToGive = CreateObjectFromPrefab(GetPrefabByName(prefabName));
+                objectToGive = CreateObjectFromPrefab(GetPrefabByName(prefabName), position, rotation);
             }
             
             objectToGive.SetActive(true); //set object active
@@ -186,9 +178,9 @@ namespace Gumball
             }
         }
 
-        private GameObject CreateObjectFromPrefab(GameObject prefab)
+        private GameObject CreateObjectFromPrefab(GameObject prefab, Vector3 position = default, Quaternion rotation = default)
         {
-            GameObject newObject = Instantiate(prefab);
+            GameObject newObject = Instantiate(prefab, position, rotation);
             newObject.name = prefab.name;
                 
             //ensure the new object has PooledObject attached
@@ -235,15 +227,16 @@ namespace Gumball
         /// Get a spare of this object from the pool or create a new one.
         /// NOTE: You must pass an object prefab that isn't in the scene
         /// </summary>
-        public static GameObject GetSpareOrCreate(this GameObject prefab, Transform assignToParent = null, bool poolOnDisable = true, Action onPool = null) 
-            => ObjectPool.ExistsRuntime ? ObjectPool.Instance.GetSpareOrCreate(prefab, assignToParent, poolOnDisable, onPool) : null;
+        public static GameObject GetSpareOrCreate(this GameObject prefab, Transform assignToParent = null, Vector3 position = default, Quaternion rotation = default, bool poolOnDisable = true, Action onPool = null) 
+            => ObjectPool.ExistsRuntime ? ObjectPool.Instance.GetSpareOrCreate(prefab, assignToParent, position, rotation, poolOnDisable, onPool) : null;
 
         /// <summary>
         /// Get a spare of this object from the pool or create a new one.
         /// NOTE: You must pass an object prefab that isn't in the scene
         /// <returns>The attached component of type T</returns>
         /// </summary>
-        public static T GetSpareOrCreate<T>(this GameObject prefab, Transform assignToParent = null, bool poolOnDisable = true, Action onPool = null) => prefab.GetSpareOrCreate(assignToParent, poolOnDisable, onPool).GetComponent<T>();
+        public static T GetSpareOrCreate<T>(this GameObject prefab, Transform assignToParent = null, Vector3 position = default, Quaternion rotation = default, bool poolOnDisable = true, Action onPool = null)
+            => prefab.GetSpareOrCreate(assignToParent, position, rotation, poolOnDisable, onPool).GetComponent<T>();
 
         /// <summary>
         /// Gets whether a gameobject is pooled.

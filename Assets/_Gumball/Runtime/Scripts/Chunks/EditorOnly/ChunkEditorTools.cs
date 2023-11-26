@@ -6,6 +6,7 @@ using MyBox;
 using UnityEditor;
 #endif
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Gumball
 {
@@ -17,6 +18,13 @@ namespace Gumball
         private Chunk chunk => GetComponent<Chunk>();
         private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
 
+        [ReadOnly, SerializeField] private Chunk chunkBefore;
+        [ReadOnly, SerializeField] private Chunk chunkAfter;
+
+        [SerializeField, HideInInspector] private bool hasChunkConnected;
+
+        public bool HasChunkConnected => hasChunkConnected;
+        
         private GameObject previousSelection;
         private float timeWhenUnityLastUpdated;
         
@@ -103,14 +111,14 @@ namespace Gumball
             if (chunk.CurrentTerrain == null)
                 return;
 
-            chunk.CurrentTerrain.layer = ChunkUtils.TerrainLayer;
+            chunk.CurrentTerrain.layer = (int)GameObjectLayers.Layer.Terrain;
             chunk.CurrentTerrain.GetComponent<MeshCollider>(true);
         }
 
         #region Show terrain vertices
         private const float timeToShowVertices = 15;
         
-        private float timeLastClickedShowTerrainVertices;
+        private float timeLastClickedShowTerrainVertices = -10000f;
         
         private float timeSinceClickedShowTerrainVertices => Time.realtimeSinceStartup - timeLastClickedShowTerrainVertices;
         
@@ -147,12 +155,10 @@ namespace Gumball
         #region Generate terrain
 
         [Header("Create terrain")]
-        [ReadOnly(nameof(HasConnection)), SerializeField]
+        [ReadOnly(nameof(hasChunkConnected)), SerializeField]
         private ChunkTerrainData terrainData = new();
         [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
         [SerializeField] private bool updateImmediately = true;
-
-        [HideInInspector] public bool HasConnection; 
 
         [Header("Blending")]
         [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
@@ -219,7 +225,7 @@ namespace Gumball
             if (timeSinceUnityUpdated < 1) //likely recompiling
                 return;
 
-            if (chunk.IsAutomaticTerrainRecreationDisabled || chunk.HasChunkConnected)
+            if (chunk.IsAutomaticTerrainRecreationDisabled || hasChunkConnected)
                 return;
             
             bool justSelected = previousSelection != gameObject && Selection.activeGameObject == gameObject;
@@ -250,9 +256,7 @@ namespace Gumball
         /// </summary>
         public void RecreateTerrain()
         {
-            Chunk connectedAfter = chunk.ChunkAfter;
-            Chunk connectedBefore = chunk.ChunkBefore;
-            chunk.DisconnectAll();
+            DisconnectAll();
             
             GlobalLoggers.ChunkLogger.Log($"Recreating terrain for '{chunk.name}'");
             Material[] previousMaterials = chunk.CurrentTerrain.GetComponent<MeshRenderer>().sharedMaterials;
@@ -263,10 +267,10 @@ namespace Gumball
             GameObject newTerrain = terrainData.Create(chunk, previousMaterials);
             chunk.SetTerrain(newTerrain);
             
-            if (connectedBefore != null)
-                ChunkUtils.ConnectChunks(connectedBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(connectedBefore, chunk));
-            if (connectedAfter != null)
-                ChunkUtils.ConnectChunks(chunk, connectedAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, connectedAfter));
+            if (chunkBefore != null)
+                ChunkUtils.ConnectChunks(chunkBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunkBefore, chunk));
+            if (chunkAfter != null)
+                ChunkUtils.ConnectChunks(chunk, chunkAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, chunkAfter));
 
             ChunkUtils.BakeRoadMesh(chunk);
         }
@@ -277,6 +281,82 @@ namespace Gumball
         [Header("Connect")]
         [SerializeField] private Chunk chunkToConnectWith;
 
+        public void OnConnectChunkBefore(Chunk chunk)
+        {
+            OnConnectChunk();
+            chunkBefore = chunk;
+        }
+        
+        public void OnConnectChunkAfter(Chunk chunk)
+        {
+            OnConnectChunk();
+            chunkAfter = chunk;
+        }
+
+        private void OnConnectChunk()
+        {
+            
+        }
+
+        private void OnDisconnectChunk()
+        {
+            if (!hasChunkConnected)
+                transform.rotation = Quaternion.Euler(Vector3.zero); //reset rotation
+        }
+        
+        
+        public void DisconnectAll(bool canUndo = false)
+        {
+            if (canUndo)
+            {
+                List<Object> objectsToRecord = new List<Object>();
+
+                objectsToRecord.Add(transform);
+                objectsToRecord.Add(chunk.CurrentTerrain.GetComponent<MeshFilter>());
+
+                if (chunkAfter != null)
+                {
+                    objectsToRecord.Add(chunkAfter);
+                    if (chunkAfter.GetComponent<ChunkEditorTools>().chunkBefore != null)
+                        objectsToRecord.Add(chunkAfter.GetComponent<ChunkEditorTools>().chunkBefore);
+                }
+
+                if (chunkBefore != null)
+                {
+                    objectsToRecord.Add(chunkBefore);
+                    if (chunkAfter.GetComponent<ChunkEditorTools>().chunkAfter != null)
+                        objectsToRecord.Add(chunkAfter.GetComponent<ChunkEditorTools>().chunkAfter);
+                }
+                
+                Undo.RecordObjects(objectsToRecord.ToArray(), "Disconnect Chunk");
+            }
+
+            OnDisconnectChunkAfter();
+            OnDisconnectChunkBefore();
+        }
+
+        public void OnDisconnectChunkBefore()
+        {
+            if (chunkBefore == null)
+                return;
+
+            Chunk previousChunk = chunkBefore;
+            chunkBefore = null;
+            previousChunk.GetComponent<ChunkEditorTools>().OnDisconnectChunkAfter();
+            OnDisconnectChunk();
+        }
+
+        public void OnDisconnectChunkAfter()
+        {
+            if (chunkAfter == null)
+                return;
+            
+            Chunk previousChunk = chunkAfter;
+            chunkAfter = null;
+            previousChunk.GetComponent<ChunkEditorTools>().OnDisconnectChunkBefore();
+            OnDisconnectChunk();
+        }
+
         /// <summary>
         /// Connect the chunk with the specified chunk.
         /// </summary>
@@ -286,7 +366,7 @@ namespace Gumball
             if (chunkToConnectWith == null)
                 throw new NullReferenceException($"There is no '{nameof(chunkToConnectWith)}' value set in the inspector.");
             
-            if (chunk.HasChunkConnected)
+            if (hasChunkConnected)
                 throw new InvalidOperationException("This chunk is already connected. Disconnect the chunk first.");
 
             ChunkUtils.ConnectChunksWithNewBlendData(chunkToConnectWith, chunk, ChunkUtils.LoadDirection.AFTER, true);
@@ -295,14 +375,14 @@ namespace Gumball
         [ButtonMethod]
         public void Disconnect()
         {
-            if (!chunk.HasChunkConnected)
+            if (!hasChunkConnected)
             {
                 Debug.Log("This chunk is already disconnected.");
                 return;
             }
 
-            Chunk[] affectedChunks = { chunk, chunk.ChunkAfter, chunk.ChunkBefore};
-            chunk.DisconnectAll(true);
+            Chunk[] affectedChunks = { chunk, chunkAfter, chunkBefore};
+            DisconnectAll(true);
             foreach (Chunk affectedChunk in affectedChunks)
             {
                 if (affectedChunk != null)
@@ -322,7 +402,7 @@ namespace Gumball
             if (Selection.activeGameObject != gameObject)
                 return;
             
-            Tools.hidden = chunk.HasChunkConnected;
+            Tools.hidden = hasChunkConnected;
         }
         
         #endregion

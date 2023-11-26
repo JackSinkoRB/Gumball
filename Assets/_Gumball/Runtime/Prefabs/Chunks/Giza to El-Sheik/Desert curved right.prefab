@@ -26,13 +26,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3408673429275562826}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 2.6675415, y: 0, z: 102.89785}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1407599385920895998}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &7442981492836341147
 MeshRenderer:
@@ -133,13 +133,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6977959645089255225}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1407599385920895998}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8093619577021207231
 MeshFilter:
@@ -7174,6 +7174,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8204167923626563025}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 341.2177, y: -0.000030517578, z: -9.790619}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -7182,7 +7183,6 @@ Transform:
   - {fileID: 8631759746124634753}
   - {fileID: 8828020862994655276}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1263576944514640743
 MonoBehaviour:
@@ -7198,10 +7198,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 7895396923362263192}
   roadMesh: {fileID: 2496437688564537410}
+  trafficManager: {fileID: 0}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
-  chunkBefore: {fileID: 0}
-  chunkAfter: {fileID: 0}
   currentTerrain: {fileID: 3408673429275562826}
   ChunkMeshData:
     chunk: {fileID: 1263576944514640743}
@@ -12533,6 +12532,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 930d203b93acfac48ac377e5145c5d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chunkBefore: {fileID: 0}
+  chunkAfter: {fileID: 0}
+  hasChunkConnected: 0
   terrainData:
     matchRoadHeight: 1
     terrainHeight: 0
@@ -12614,7 +12616,6 @@ MonoBehaviour:
         Max: 50
       slopeMaxOpacity: 0.8
   updateImmediately: 0
-  HasConnection: 0
   terrainBlendDistance: 50
   chunkToConnectWith: {fileID: 0}
 --- !u!114 &7895396923362263192

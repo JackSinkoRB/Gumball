@@ -27,13 +27,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2968760220409542215}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 363764834581614118}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6608677229043605014
 MeshFilter:
@@ -7068,6 +7068,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3506296514753606664}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 341.2177, y: -0.000030517578, z: -9.790619}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -7076,7 +7077,6 @@ Transform:
   - {fileID: 3130751556155582696}
   - {fileID: 7799047230965761616}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6653691841521699972
 MonoBehaviour:
@@ -7092,10 +7092,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 3928984235804892301}
   roadMesh: {fileID: 1377191855773484127}
+  trafficManager: {fileID: 0}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
-  chunkBefore: {fileID: 0}
-  chunkAfter: {fileID: 0}
   currentTerrain: {fileID: 8049869935533970294}
   ChunkMeshData:
     chunk: {fileID: 6653691841521699972}
@@ -11087,6 +11086,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 930d203b93acfac48ac377e5145c5d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chunkBefore: {fileID: 0}
+  chunkAfter: {fileID: 0}
+  hasChunkConnected: 0
   terrainData:
     matchRoadHeight: 1
     terrainHeight: 0
@@ -11168,7 +11170,6 @@ MonoBehaviour:
         Max: 50
       slopeMaxOpacity: 0.8
   updateImmediately: 0
-  HasConnection: 0
   terrainBlendDistance: 50
   chunkToConnectWith: {fileID: 0}
 --- !u!114 &3928984235804892301
@@ -12675,13 +12676,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8049869935533970294}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -24.251312, y: -1.0738407, z: 231.20758}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 363764834581614118}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &4065531830236487591
 MeshRenderer:
