@@ -19,6 +19,7 @@ namespace Gumball
 
         private enum Stage
         {
+            LOADING_SAVE_DATA,
             LOADING_MAINSCENE,
             LOADING_VEHICLE,
         }
@@ -39,8 +40,10 @@ namespace Gumball
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.GameLoaderSceneName} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
 
+            currentStage = Stage.LOADING_SAVE_DATA;
+            TrackedCoroutine loadSaveDataAsync = new TrackedCoroutine(DataManager.LoadAllAsync());
+            
             Stopwatch stopwatch = new Stopwatch();
-
             stopwatch.Start();
             currentStage = Stage.LOADING_MAINSCENE;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Additive, true);
@@ -55,6 +58,8 @@ namespace Gumball
             yield return carLoadCoroutine;
             GlobalLoggers.LoadingLogger.Log($"Vehicle loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             stopwatch.Restart();
+
+            yield return new WaitUntil(() => !loadSaveDataAsync.IsPlaying);
             
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
             GlobalLoggers.LoadingLogger.Log($"Async loading complete in {TimeSpan.FromSeconds(asyncLoadingDurationSeconds).ToPrettyString(true)}");
