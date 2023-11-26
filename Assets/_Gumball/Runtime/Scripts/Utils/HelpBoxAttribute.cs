@@ -1,10 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
-namespace Gumball.Editor
+namespace Gumball
 {
+    
+#if !UNITY_EDITOR
+        public enum MessageType
+        {
+            None,
+            Info,
+            Warning,
+            Error
+        }
+#endif
+    
     public class HelpBoxAttribute : PropertyAttribute
     {
         public readonly string text;
@@ -22,6 +36,7 @@ namespace Gumball.Editor
         }
     }
 
+#if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(HelpBoxAttribute))]
     public class HelpBoxDrawer : PropertyDrawer
     {
@@ -71,4 +86,5 @@ namespace Gumball.Editor
             };
         }
     }
+#endif
 }
