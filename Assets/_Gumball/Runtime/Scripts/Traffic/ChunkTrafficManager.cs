@@ -99,6 +99,9 @@ namespace Gumball
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
+            if (laneDistances == null)
+                return;
+            
             SplineSample firstSample = chunk.SplineSamples[0];
             SplineSample lastSample = chunk.SplineSamples[^1];
             

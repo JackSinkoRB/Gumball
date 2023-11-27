@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Dreamteck.Splines;
+using Gumball.Editor;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -27,15 +29,19 @@ namespace Gumball
         
         private GameObject previousSelection;
         private float timeWhenUnityLastUpdated;
-        
-        [InitializeOnLoadMethod]
-        private static void Initialise()
+
+        private void OnSavePrefab(string prefabName, string path)
         {
-            UniqueIDAssigner.OnAssignID += OnAssignID;
+            if (prefabName.Equals(gameObject.name))
+            {
+                ChunkUtils.BakeMeshes(chunk);
+            }
         }
         
         private void OnEnable()
         {
+            SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
+            
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
             chunk.UpdateSplineSampleData();
         }
@@ -44,6 +50,8 @@ namespace Gumball
         {
             chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
 
+            SaveEditorAssetsEvents.onSavePrefab -= OnSavePrefab;
+            
             Tools.hidden = false;
         }
 
@@ -73,39 +81,6 @@ namespace Gumball
             CheckIfTerrainIsRaycastable();
         }
 
-        private static void OnAssignID(UniqueIDAssigner uniqueIDAssigner, string previousID, string newID)
-        {
-            Chunk chunk = uniqueIDAssigner.GetComponent<Chunk>();
-            if (chunk == null)
-                return;
-            
-            TryDuplicateMeshWithNewID(chunk, previousID, newID);
-        }
-
-        private static void TryDuplicateMeshWithNewID(Chunk chunk, string previousID, string newID)
-        {
-            if (chunk.CurrentTerrain == null)
-                return;
-
-            Mesh mesh = chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh;
-            if (mesh == null)
-                return;
-            
-            //save the mesh asset
-            string oldPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{previousID}.asset";
-            string newPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{newID}.asset";
-            AssetDatabase.CopyAsset(oldPath, newPath);
-            AssetDatabase.SaveAssets();
-            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
-
-            Mesh duplicatedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(newPath);
-            meshFilter.sharedMesh = duplicatedMesh;
-            
-            PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
-            EditorUtility.SetDirty(meshFilter);
-            AssetDatabase.SaveAssets();
-        }
-        
         private void CheckIfTerrainIsRaycastable()
         {
             if (chunk.CurrentTerrain == null)
@@ -188,7 +163,7 @@ namespace Gumball
             Debug.DrawRay(chunk.LastSample.position, chunk.LastSample.right * 15, Color.red, 15);
         }
         
-        [ButtonMethod]
+        [ButtonMethod()]
         public void CreateTerrain()
         {
             GameObject newTerrain = terrainData.Create(chunk);
@@ -272,7 +247,17 @@ namespace Gumball
             if (chunkAfter != null)
                 ChunkUtils.ConnectChunks(chunk, chunkAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, chunkAfter));
 
-            ChunkUtils.BakeRoadMesh(chunk);
+            UnbakeSplineMeshes();
+        }
+
+        private void UnbakeSplineMeshes()
+        {
+            foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
+            {
+                if (!splineMesh.gameObject.activeSelf)
+                    continue;
+                splineMesh.Unbake();
+            }
         }
         
         #endregion

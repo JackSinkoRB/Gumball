@@ -20,8 +20,10 @@ namespace Gumball
         [SerializeField] private int startingChunkIndex;
         [SerializeField] private Vector3 vehicleStartingPosition;
         [SerializeField] private Vector3 vehicleStartingRotation;
-        
+
         [Space(5)]
+        [SerializeField] private Material skybox;
+        [SerializeField] private float chunkLoadDistance = 700;
         [SerializeField] private AssetReferenceGameObject[] chunkReferences;
         
         [Header("Debugging")]
@@ -33,7 +35,24 @@ namespace Gumball
         public Vector3 VehicleStartingRotation => vehicleStartingRotation;
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
         public List<int> ChunksWithCustomLoadDistance => chunksWithCustomLoadDistance;
+        public float ChunkLoadDistance => chunkLoadDistance;
 
+        public void OnMapLoad()
+        {
+            UpdateSkybox();
+        }
+
+        private void UpdateSkybox()
+        {
+            if (skybox == null)
+            {
+                Debug.LogError($"{name} is missing a skybox reference.");
+                return;
+            }
+
+            RenderSettings.skybox = skybox;
+        }
+        
         public ChunkMapData GetChunkData(int index)
         {
             if (index >= chunkData.Length || index < 0)

@@ -20,7 +20,6 @@ namespace Gumball
         [Header("Settings")]
         [Obsolete("To be removed - for testing only")]
         [SerializeField] private MapData testingMap;
-        [SerializeField] private float chunkLoadDistance = 50;
 
         [Header("Debugging")]
         [ReadOnly, SerializeField] private MapData currentMap;
@@ -138,6 +137,8 @@ namespace Gumball
             currentMap = map;
             CurrentChunks.Clear();
 
+            map.OnMapLoad();
+            
             //load the first chunk since none are loaded
             loadedChunksIndices = new MinMaxInt(map.StartingChunkIndex, map.StartingChunkIndex);
             yield return LoadChunkAsync(map.StartingChunkIndex, 
@@ -214,7 +215,7 @@ namespace Gumball
         private void UnloadChunksAroundPosition(Vector3 position)
         {
             List<int> chunksToUnload = new List<int>();
-            float chunkLoadDistanceSqr = chunkLoadDistance * chunkLoadDistance;
+            float chunkLoadDistanceSqr = currentMap.ChunkLoadDistance * currentMap.ChunkLoadDistance;
 
             //check to unload chunks ahead
             for (int chunkAheadIndex = loadedChunksIndices.Max; chunkAheadIndex >= loadedChunksIndices.Min; chunkAheadIndex--)
@@ -289,7 +290,7 @@ namespace Gumball
 
         private IEnumerator LoadChunksInDirection(Vector3 startingPosition, ChunkUtils.LoadDirection direction)
         {
-            float chunkLoadDistanceSqr = chunkLoadDistance * chunkLoadDistance;
+            float chunkLoadDistanceSqr = currentMap.ChunkLoadDistance * currentMap.ChunkLoadDistance;
             
             Vector3 endOfChunk = direction == ChunkUtils.LoadDirection.AFTER
                 ? currentMap.GetChunkData(loadedChunksIndices.Max).SplineEndPosition

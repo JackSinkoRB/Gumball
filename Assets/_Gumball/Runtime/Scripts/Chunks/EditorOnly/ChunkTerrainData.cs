@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEditor;
@@ -22,6 +23,8 @@ namespace Gumball
         [PositiveValueOnly, SerializeField] private int resolution = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
         [PositiveValueOnly, SerializeField] private float roadBlendDistance = 20;
+        [Tooltip("Let it sit under the road just enough so it doesn't clip.")]
+        [PositiveValueOnly, SerializeField] private float amountToSitUnderRoad = 0.2f;
 
         [Tooltip("Should each side of the road have their own height data?")]
         [SerializeField] private bool splitHeightData;
@@ -91,10 +94,12 @@ namespace Gumball
             mesh.SetColors(vertexColors);
 
             //save the mesh asset
-            string path = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{chunk.UniqueID}.asset";
+            string chunkDirectory = $"{ChunkUtils.ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
+            string path = $"{chunkDirectory}/{meshFilter.gameObject.name}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                 AssetDatabase.DeleteAsset(path);
-            
+            if (!Directory.Exists(chunkDirectory))
+                Directory.CreateDirectory(chunkDirectory);
             AssetDatabase.CreateAsset(mesh, path);
             Mesh newMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
             
@@ -245,8 +250,6 @@ namespace Gumball
             bool canFlattenUnderRoad = distanceToSplineSqr < roadFlattenDistanceSqr;
             if (canFlattenUnderRoad)
             {
-                const float amountToSitUnderRoad = 0.5f; //let it sit just under the road, so it doesn't clip
-                
                 if (matchRoadHeight)
                     return closestSample.position.y - amountToSitUnderRoad;
 

@@ -23,8 +23,10 @@ namespace Gumball
         
         [Header("Required")]
         [SerializeField] private SplineComputer splineComputer;
-        [SerializeField] private SplineMesh roadMesh;
         [SerializeField] private ChunkTrafficManager trafficManager;
+
+        [Header("Optional")]
+        [SerializeField] private SplineMesh[] splineMeshes;
 
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, true, true)]
@@ -39,7 +41,7 @@ namespace Gumball
 
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
-        public SplineMesh RoadMesh => roadMesh;
+        public SplineMesh[] SplinesMeshes => splineMeshes;
         public SplineSample[] SplineSamples => splineSampleCollection.samples;
 
         public ChunkMeshData ChunkMeshData;
