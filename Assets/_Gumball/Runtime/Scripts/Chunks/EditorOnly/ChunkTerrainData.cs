@@ -15,35 +15,39 @@ namespace Gumball
     {
 
         private const string defaultTerrainMaterialPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
-
-        [SerializeField] private bool matchRoadHeight = true;
-        [PositiveValueOnly, SerializeField, ConditionalField(nameof(matchRoadHeight), true)] private float terrainHeight;
-        [Space(5)]
-        [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
+        
         [PositiveValueOnly, SerializeField] private int resolution = 100;
+        [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 50;
+        [PositiveValueOnly, SerializeField, ConditionalField(nameof(matchRoadHeight), true)] private float terrainHeight;
+
+        [Header("Road")]
+        [Tooltip("Should the terrain match the road's height? Or should it be above (eg. a highway overpass)?")]
+        [SerializeField] private bool matchRoadHeight = true;
+        [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
         [PositiveValueOnly, SerializeField] private float roadBlendDistance = 20;
         [Tooltip("Let it sit under the road just enough so it doesn't clip.")]
         [PositiveValueOnly, SerializeField] private float amountToSitUnderRoad = 0.2f;
-
+        
+        [Header("Height")]
         [Tooltip("Should each side of the road have their own height data?")]
         [SerializeField] private bool splitHeightData;
         [SerializeField] private TerrainHeightData heightData;
         [ConditionalField(nameof(splitHeightData)), SerializeField] private TerrainHeightData heightDataOther;
-
+        [Space(5)]
         [SerializeField] private TerrainTextureBlendSettings textureBlendSettings;
 
+        [SerializeField, HideInInspector] private Chunk chunk;
+        [SerializeField, HideInInspector] private MinMaxFloat perlinHeight;
+
         public float WidthAroundRoad => widthAroundRoad;
+        public float RoadFlattenDistance => roadFlattenDistance;
         public int Resolution => resolution;
+        public float ChunkBlendDistance => chunkBlendDistance;
         public TerrainTextureBlendSettings TextureBlendSettings => textureBlendSettings;
         
         public ChunkGrid Grid { get; private set; }
-        
-        private Chunk chunk;
 
-        private float maxPerlinHeight;
-        private float minPerlinHeight;
-        
         public GameObject Create(Chunk chunkToUse, Material[] materialsToUse = null)
         {
             chunk = chunkToUse;
@@ -178,19 +182,19 @@ namespace Gumball
 
         private void CalculateMinMaxPerlinHeights()
         {
-            maxPerlinHeight = Mathf.NegativeInfinity;
-            minPerlinHeight = Mathf.Infinity;
+            perlinHeight.Max = Mathf.NegativeInfinity;
+            perlinHeight.Min = Mathf.Infinity;
             
             foreach (Vector3 vertexPosition in Grid.Vertices)
             {
                 TerrainHeightData heightDataAtPos = GetHeightData(vertexPosition);
-                float perlinHeight = GetPerlinHeightForVertex(vertexPosition, heightDataAtPos);
+                float actualPerlinHeight = GetPerlinHeightForVertex(vertexPosition, heightDataAtPos);
                 
                 //check if it is highest or lowest
-                if (perlinHeight > maxPerlinHeight)
-                    maxPerlinHeight = perlinHeight;
-                if (perlinHeight < minPerlinHeight)
-                    minPerlinHeight = perlinHeight;
+                if (actualPerlinHeight > perlinHeight.Max)
+                    perlinHeight.Max = actualPerlinHeight;
+                if (actualPerlinHeight < perlinHeight.Min)
+                    perlinHeight.Min = actualPerlinHeight;
             }
         }
         
@@ -205,7 +209,7 @@ namespace Gumball
             for (int vertexIndex = 0; vertexIndex < Grid.Vertices.Count; vertexIndex++)
             {
                 Vector3 vertex = Grid.Vertices[vertexIndex];
-                float desiredHeight = GetDesiredHeightForVertex(vertexIndex);
+                float desiredHeight = GetDesiredHeightAtPosition(vertex);
                 
                 verticesWithHeightData.Add(new Vector3(vertex.x, desiredHeight, vertex.z));
             }
@@ -239,11 +243,9 @@ namespace Gumball
 
             return GetHeightData(vertexPosition, closestSample);
         }
-        
-        private float GetDesiredHeightForVertex(int vertexIndex)
-        {
-            Vector3 vertexPosition = Grid.Vertices[vertexIndex];
 
+        public float GetDesiredHeightAtPosition(Vector3 vertexPosition)
+        {
             float desiredHeight = vertexPosition.y;
             var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
 
@@ -259,6 +261,7 @@ namespace Gumball
             }
             
             //check to flatten under chunk objects
+            //TODO: GetComponentsInChildren should only be retrieved once for all vertices
             foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
             {
                 if (!chunkObject.FlattenTerrain)
@@ -273,32 +276,33 @@ namespace Gumball
                 if (isWithinFlattenRadius)
                     return lowestPos.y;
             }
-
+            
             //check to apply height data
             TerrainHeightData heightDataAtPos = GetHeightData(vertexPosition, closestSample);
             if (!heightDataAtPos.ElevationAmount.Approximately(0))
             {
                 //use perlin:
                 desiredHeight = GetPerlinHeightForVertex(vertexPosition, heightDataAtPos);
-                
+
                 //multiply by the modifier, depending on the height percent
-                float difference = desiredHeight < 0 ? minPerlinHeight : maxPerlinHeight;
+                float difference = desiredHeight < 0 ? perlinHeight.Min : perlinHeight.Max;
                 float heightPercent = desiredHeight / difference;
                 desiredHeight *= heightDataAtPos.ElevationModifier.Evaluate(heightPercent);
             }
-            
+
             //check to blend with the road
             float roadBlendDistanceSqr = roadBlendDistance * roadBlendDistance;
             bool canBlendWithRoad = roadBlendDistance > 0 && distanceToSplineSqr < (roadFlattenDistanceSqr + roadBlendDistanceSqr);
             if (canBlendWithRoad)
             {
                 float blendPercent = Mathf.Clamp01((distanceToSplineSqr - roadFlattenDistanceSqr) / roadBlendDistanceSqr);
-                float roadHeight = 0; //TODO - use vertex position instead
+                float roadHeight = 0; //TODO - use vertex position at the road position instead
                 float blendOffsetDifference = (roadHeight - desiredHeight) * (1-blendPercent);
                 desiredHeight += blendOffsetDifference;
             }
             
             //check to blend with chunk objects 
+            //TODO: GetComponentsInChildren should only be retrieved once for all vertices
             foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
             {
                 if (!chunkObject.FlattenTerrain)
@@ -344,8 +348,8 @@ namespace Gumball
                 //use the vertex LOCAL position instead of global
                 Vector3 localVertexPosition = chunk.transform.InverseTransformPoint(vertexPosition);
                 
-                float perlinX = localVertexPosition.x / heightDataAtPos.Scale * octave.Frequency + heightDataAtPos.GetRandomPerlinOffset().x;
-                float perlinY = localVertexPosition.z / heightDataAtPos.Scale * octave.Frequency + heightDataAtPos.GetRandomPerlinOffset().y;
+                float perlinX = localVertexPosition.x / heightDataAtPos.Scale.x * octave.Frequency + heightDataAtPos.GetRandomPerlinOffset().x + heightDataAtPos.Offset.x;
+                float perlinY = localVertexPosition.z / heightDataAtPos.Scale.y * octave.Frequency + heightDataAtPos.GetRandomPerlinOffset().y + heightDataAtPos.Offset.y;
                 
                 float perlinValue = Mathf.PerlinNoise(perlinX, perlinY);
                 

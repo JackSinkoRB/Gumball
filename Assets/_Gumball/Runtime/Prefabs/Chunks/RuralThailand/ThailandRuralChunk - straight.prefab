@@ -6798,7 +6798,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: d9ccdc0d63e5c2a4e89f3bd922097f59, type: 2}
---- !u!1 &4633099607445732202
+--- !u!1 &5460250742937699139
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6806,10 +6806,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2993405009750387314}
-  - component: {fileID: 250923754869545085}
-  - component: {fileID: 2769075615369366876}
-  - component: {fileID: 199475785337141566}
+  - component: {fileID: 6452637943248550232}
+  - component: {fileID: 7573155658645197257}
+  - component: {fileID: 4971862171699931187}
+  - component: {fileID: 4313803154504182966}
   m_Layer: 7
   m_Name: Terrain
   m_TagString: Terrain
@@ -6817,13 +6817,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2993405009750387314
+--- !u!4 &6452637943248550232
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4633099607445732202}
+  m_GameObject: {fileID: 5460250742937699139}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 50}
@@ -6832,13 +6832,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3484799456111798066}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &250923754869545085
+--- !u!23 &7573155658645197257
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4633099607445732202}
+  m_GameObject: {fileID: 5460250742937699139}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -6874,21 +6874,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &2769075615369366876
+--- !u!33 &4971862171699931187
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4633099607445732202}
+  m_GameObject: {fileID: 5460250742937699139}
   m_Mesh: {fileID: 4300000, guid: a31780c50968eca4f82c180f3447922b, type: 2}
---- !u!64 &199475785337141566
+--- !u!64 &4313803154504182966
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4633099607445732202}
+  m_GameObject: {fileID: 5460250742937699139}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -6940,7 +6940,7 @@ Transform:
   - {fileID: 8248771806123017575}
   - {fileID: 449970663049101408}
   - {fileID: 2287638584787009367}
-  - {fileID: 2993405009750387314}
+  - {fileID: 6452637943248550232}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6860265999645676851
@@ -6962,7 +6962,7 @@ MonoBehaviour:
   - {fileID: 6230824291809491558}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
-  currentTerrain: {fileID: 4633099607445732202}
+  currentTerrain: {fileID: 5460250742937699139}
   chunkMeshData:
     chunk: {fileID: 6860265999645676851}
     vertices:
@@ -11527,11 +11527,13 @@ MonoBehaviour:
   chunkBefore: {fileID: 0}
   chunkAfter: {fileID: 0}
   hasChunkConnected: 0
+  updateImmediately: 0
   terrainData:
-    matchRoadHeight: 1
-    terrainHeight: 0
-    widthAroundRoad: 200
     resolution: 100
+    chunkBlendDistance: 25
+    terrainHeight: 0
+    matchRoadHeight: 1
+    widthAroundRoad: 200
     roadFlattenDistance: 23
     roadBlendDistance: 30
     amountToSitUnderRoad: 0.05
@@ -11566,7 +11568,8 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-      Scale: 150
+      Scale: {x: 150, y: 150}
+      Offset: {x: 0, y: 0}
     heightDataOther:
       Seed: 100
       LayersOfDetail: 3
@@ -11597,7 +11600,8 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-      Scale: 100
+      Scale: {x: 150, y: 150}
+      Offset: {x: 0, y: 0}
     textureBlendSettings:
       objectSurroundingRadius: 17
       objectSurroundingBlendRadius: 15
@@ -11608,8 +11612,10 @@ MonoBehaviour:
         Min: 0
         Max: 50
       slopeMaxOpacity: 0.8
-  updateImmediately: 0
-  terrainBlendDistance: 50
+    chunk: {fileID: 6860265999645676851}
+    perlinHeight:
+      Min: 0.7558125
+      Max: 5.4906945
   chunkToConnectWith: {fileID: 0}
 --- !u!114 &548465593941109952
 MonoBehaviour:

@@ -42,5 +42,18 @@ namespace Gumball
             return true;
         }
         
+        public static async Task WaitForNoNulls<T>(this T[] array, long timeoutSeconds)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            
+            while (array.Any(element => element == null))
+            {
+                if (stopwatch.Elapsed.Seconds >= timeoutSeconds)
+                    throw new TimeoutException("Timeout waiting for array to have no null elements.");
+                
+                await Task.Delay(100);
+            }
+        }
+        
     }
 }

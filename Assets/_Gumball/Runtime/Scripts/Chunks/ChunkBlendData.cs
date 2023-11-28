@@ -64,7 +64,7 @@ namespace Gumball
             }
             catch (Exception e)
             {
-                throw new Exception($"Error creating blend data between {firstChunk.gameObject.name} and {lastChunk.gameObject.name}", e);
+                Debug.LogError($"Error creating blend data between {firstChunk.gameObject.name} and {lastChunk.gameObject.name}\n{e.StackTrace}");
             }
         }
 
@@ -102,7 +102,7 @@ namespace Gumball
 
         private void BlendWithEdges(Chunk chunk)
         {
-            float terrainBlendDistance = chunk.GetComponent<ChunkEditorTools>().TerrainBlendDistance;
+            float terrainBlendDistance = chunk.GetComponent<ChunkEditorTools>().TerrainData.ChunkBlendDistance;
             if (terrainBlendDistance.Approximately(0))
                 return; //not blending
 
@@ -119,6 +119,10 @@ namespace Gumball
 
                 if (distanceToClosestVertex <= terrainBlendDistance)
                 {
+                    //don't blend if should be under the should
+                    if (IsPositionUnderRoad(vertexPositionWorld, chunk))
+                        continue;
+
                     float differencePercent = 1 - Mathf.Clamp01(distanceToClosestVertex / terrainBlendDistance);
 
                     float currentHeight = vertexPositionWorld.y;
@@ -127,12 +131,23 @@ namespace Gumball
                     float closestVertexHeight = closestVertexPositionWorld.y;
 
                     float heightDifference = closestVertexHeight - currentHeight;
-                    float desiredHeight = currentHeight + (heightDifference * differencePercent);
-
-                    Vector3 desiredPosition = vertexPositionWorld.SetY(desiredHeight);
-                    meshData.SetVertexWorldPosition(vertexIndex, desiredPosition);
+                    float heightBlended = currentHeight + (heightDifference * differencePercent);
+                    Vector3 newDesiredPosition = vertexPositionWorld.SetY(heightBlended);
+                    
+                    meshData.SetVertexWorldPosition(vertexIndex, newDesiredPosition);
                 }
             }
+        }
+        
+        private bool IsPositionUnderRoad(Vector3 position, Chunk chunk)
+        {
+            ChunkEditorTools chunkEditorTools = chunk.GetComponent<ChunkEditorTools>();
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(position, true);
+
+            //check to flatten under road
+            float roadFlattenDistanceSqr = chunkEditorTools.TerrainData.RoadFlattenDistance * chunkEditorTools.TerrainData.RoadFlattenDistance;
+            bool isUnderRoad = distanceToSplineSqr < roadFlattenDistanceSqr;
+            return isUnderRoad;
         }
 
         private (ChunkMeshData.Vertex, float) GetClosestVertex(Vector3 worldPosition, ReadOnlyCollection<ChunkMeshData.Vertex> verticesToCheck)

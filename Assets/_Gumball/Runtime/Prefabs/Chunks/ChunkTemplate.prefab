@@ -6829,11 +6829,12 @@ MonoBehaviour:
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   currentTerrain: {fileID: 0}
-  ChunkMeshData:
+  chunkMeshData:
     chunk: {fileID: 0}
     vertices: []
     lastEndVertices: []
     firstEndVertices: []
+    vertexColors: []
   splineSampleCollection:
     samples:
     - position: {x: 0, y: 0, z: 0}
@@ -7453,11 +7454,13 @@ MonoBehaviour:
   chunkBefore: {fileID: 0}
   chunkAfter: {fileID: 0}
   hasChunkConnected: 0
+  updateImmediately: 1
   terrainData:
-    matchRoadHeight: 1
-    terrainHeight: 0
-    widthAroundRoad: 100
     resolution: 100
+    chunkBlendDistance: 25
+    terrainHeight: 0
+    matchRoadHeight: 1
+    widthAroundRoad: 100
     roadFlattenDistance: 15
     roadBlendDistance: 25
     amountToSitUnderRoad: 0.2
@@ -7534,8 +7537,10 @@ MonoBehaviour:
         Min: 0
         Max: 50
       slopeMaxOpacity: 0.8
-  updateImmediately: 1
-  terrainBlendDistance: 50
+    chunk: {fileID: 0}
+    perlinHeight:
+      Min: 0
+      Max: 0
   chunkToConnectWith: {fileID: 0}
 --- !u!114 &281317726593344272
 MonoBehaviour:

@@ -93,7 +93,7 @@ namespace Gumball
                 };
             }
             
-            await Task.WhenAll(handles.Select(handle => handle.Task));
+            await chunks.WaitForNoNulls(15);
             
             //connect the chunks
             for (int index = 1; index < chunkReferences.Length; index++)

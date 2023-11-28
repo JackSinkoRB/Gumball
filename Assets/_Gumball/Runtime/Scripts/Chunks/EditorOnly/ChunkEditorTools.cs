@@ -128,16 +128,12 @@ namespace Gumball
         #endregion
         
         #region Generate terrain
-
-        [Header("Create terrain")]
-        [ReadOnly(nameof(hasChunkConnected)), SerializeField]
-        private ChunkTerrainData terrainData = new();
+        
         [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
         [SerializeField] private bool updateImmediately = true;
-
-        [Header("Blending")]
-        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
-        public float TerrainBlendDistance => terrainBlendDistance;
+        
+        [ReadOnly(nameof(hasChunkConnected)), SerializeField]
+        private ChunkTerrainData terrainData = new();
 
         private ChunkGrid currentGrid;
         
