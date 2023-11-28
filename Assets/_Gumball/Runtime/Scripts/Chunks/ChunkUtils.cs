@@ -101,10 +101,6 @@ namespace Gumball
 
             MoveChunkToOther(chunk1, chunk2, direction);
 
-            Chunk firstChunk = chunk1.UniqueID.Equals(blendData.FirstChunkID) ? chunk1 : chunk2;
-            Chunk lastChunk = chunk2.UniqueID.Equals(blendData.LastChunkID) ? chunk2 : chunk1;
-            blendData.ApplyToChunks(firstChunk, lastChunk);
-
 #if UNITY_EDITOR
             chunk1.GetComponent<ChunkEditorTools>().OnConnectChunkAfter(chunk2);
             chunk2.GetComponent<ChunkEditorTools>().OnConnectChunkBefore(chunk1);

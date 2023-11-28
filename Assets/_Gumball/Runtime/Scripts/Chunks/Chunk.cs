@@ -36,15 +36,16 @@ namespace Gumball
         
         [Header("Debugging")]
         [ReadOnly, SerializeField] private GameObject currentTerrain;
+        [ReadOnly, SerializeField] private ChunkMeshData chunkMeshData;
 
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
 
+        public ChunkMeshData ChunkMeshData => chunkMeshData;
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
         public SplineMesh[] SplinesMeshes => splineMeshes;
         public SplineSample[] SplineSamples => splineSampleCollection.samples;
 
-        public ChunkMeshData ChunkMeshData;
         public bool IsAutomaticTerrainRecreationDisabled { get; private set; }
         public SplineSample FirstSample { get; private set; }
         public SplineSample LastSample { get; private set; }
@@ -81,11 +82,11 @@ namespace Gumball
             DisableAutomaticTerrainRecreation(true);
             if (CurrentTerrain == null)
             {
-                ChunkMeshData = null;
+                chunkMeshData = null;
                 return;
             }
 
-            ChunkMeshData = new ChunkMeshData(this);
+            chunkMeshData = new ChunkMeshData(this);
             DisableAutomaticTerrainRecreation(false);
         }
 

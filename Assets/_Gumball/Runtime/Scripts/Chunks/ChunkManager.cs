@@ -373,6 +373,7 @@ namespace Gumball
             MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
             Mesh meshCopy = Instantiate(meshFilter.sharedMesh);
             chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = meshCopy;
+            chunk.CurrentTerrain.GetComponent<MeshCollider>().sharedMesh = meshCopy;
 
             onChunkLoad?.Invoke(chunk);
             

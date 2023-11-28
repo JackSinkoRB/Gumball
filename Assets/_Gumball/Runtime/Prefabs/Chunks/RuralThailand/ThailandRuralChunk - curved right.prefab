@@ -6824,7 +6824,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 8410160a1b7e2854b90629fc30b0d28a, type: 2}
---- !u!1 &3800391465063587144
+--- !u!1 &5724915001337365022
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6832,10 +6832,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8404686284572706143}
-  - component: {fileID: 105393872429957776}
-  - component: {fileID: 5220148722358301430}
-  - component: {fileID: 5538606440250927743}
+  - component: {fileID: 644187309957134543}
+  - component: {fileID: 6537976863659766314}
+  - component: {fileID: 5778859741371490776}
+  - component: {fileID: 3280629225810197918}
   m_Layer: 7
   m_Name: Terrain
   m_TagString: Terrain
@@ -6843,13 +6843,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8404686284572706143
+--- !u!4 &644187309957134543
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3800391465063587144}
+  m_GameObject: {fileID: 5724915001337365022}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 7.1934996, y: 0, z: 45.144234}
@@ -6858,13 +6858,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2490292562480317099}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &105393872429957776
+--- !u!23 &6537976863659766314
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3800391465063587144}
+  m_GameObject: {fileID: 5724915001337365022}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -6900,21 +6900,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &5220148722358301430
+--- !u!33 &5778859741371490776
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3800391465063587144}
+  m_GameObject: {fileID: 5724915001337365022}
   m_Mesh: {fileID: 4300000, guid: b8c1195216628534eae2bb09a2a3bc7b, type: 2}
---- !u!64 &5538606440250927743
+--- !u!64 &3280629225810197918
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3800391465063587144}
+  m_GameObject: {fileID: 5724915001337365022}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -6966,7 +6966,7 @@ Transform:
   - {fileID: 1322031710047663550}
   - {fileID: 3914111257140129082}
   - {fileID: 7678348556688929828}
-  - {fileID: 8404686284572706143}
+  - {fileID: 644187309957134543}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5405097365982972202
@@ -6988,8 +6988,8 @@ MonoBehaviour:
   - {fileID: 5708712595393566025}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
-  currentTerrain: {fileID: 3800391465063587144}
-  ChunkMeshData:
+  currentTerrain: {fileID: 5724915001337365022}
+  chunkMeshData:
     chunk: {fileID: 5405097365982972202}
     vertices:
     - {x: -155.89273, y: -0.18709792, z: -124.71418}
@@ -11485,6 +11485,7 @@ MonoBehaviour:
     - index: 3938
       localPosition: {x: 152.77487, y: 1.6221045, z: 50.830498}
       chunkBelongsTo: {fileID: 5405097365982972202}
+    vertexColors: []
   splineSampleCollection:
     samples:
     - position: {x: 40, y: 0, z: 0}

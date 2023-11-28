@@ -35,6 +35,8 @@ namespace Gumball
 
         public float WidthAroundRoad => widthAroundRoad;
         public int Resolution => resolution;
+        public TerrainTextureBlendSettings TextureBlendSettings => textureBlendSettings;
+        
         public ChunkGrid Grid { get; private set; }
         
         private Chunk chunk;
@@ -109,7 +111,7 @@ namespace Gumball
             AssetDatabase.SaveAssets();
 
             //add a collider
-            terrain.AddComponent<MeshCollider>();
+            terrain.AddComponent<MeshCollider>().sharedMesh = newMesh;
             
             return terrain;
         }

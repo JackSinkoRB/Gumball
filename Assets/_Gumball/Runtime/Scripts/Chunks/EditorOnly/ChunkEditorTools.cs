@@ -143,6 +143,8 @@ namespace Gumball
         
         private static bool subscribedToPlayModeStateChanged;
         private static PlayModeStateChange playModeState;
+
+        public ChunkTerrainData TerrainData => terrainData;
         
         [ButtonMethod]
         public void ShowTerrainGrid()
@@ -161,6 +163,27 @@ namespace Gumball
             Debug.DrawRay(chunk.LastSample.position, chunk.LastSample.forward * 15, Color.blue, 15);
             Debug.DrawRay(chunk.LastSample.position, chunk.LastSample.up * 15, Color.green, 15);
             Debug.DrawRay(chunk.LastSample.position, chunk.LastSample.right * 15, Color.red, 15);
+        }
+        
+        [ButtonMethod]
+        public void DrawMeshEdgeNormals()
+        {
+            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.FirstEndVertices)
+            {
+                DrawNormal(vertex.Index, Color.red);
+            }
+            
+            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.LastEndVertices)
+            {
+                DrawNormal(vertex.Index, Color.blue);
+            }
+
+            void DrawNormal(int vertexIndex, Color color)
+            {
+                const float distance = 5;
+                const float duration = 120;
+                Debug.DrawRay(chunk.ChunkMeshData.GetCurrentVertexWorldPosition(vertexIndex), chunk.ChunkMeshData.Mesh.normals[vertexIndex] * distance, color, duration);
+            }
         }
         
         [ButtonMethod()]

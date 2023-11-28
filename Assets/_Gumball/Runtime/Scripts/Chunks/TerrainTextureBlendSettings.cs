@@ -9,6 +9,11 @@ namespace Gumball
     [Serializable]
     public class TerrainTextureBlendSettings
     {
+        
+        private static readonly Color noiseColor = new(0, 1, 0, 0);
+        private static readonly Color objectSurroundingColor = new(0, 0, 1, 0);
+        private static readonly Color slopeColor = new(0, 0, 0, 1);
+        
         [Header("Object surrounding texture")]
         [Tooltip("The distance around chunk objects to show the 'object surrrounding texture' at full strength.")]
         [SerializeField] private float objectSurroundingRadius = 5;
@@ -36,14 +41,9 @@ namespace Gumball
                 // - the total of all 3 should be between 0 and 1
                 // - 1 meaning it completely overrides the base layer
                 // - 0.5 means the base is half showing, and the other half is a combination of the blends
-                //TODO: set weights based on the terrain data - objects surrounding, the vertex normal etc.
                 float noiseWeight = GetNoiseWeight(vertexPositionWorld);
                 float objectSurroundingWeight = GetObjectSurroundingWeight(chunk, vertexPositionWorld);
                 float slopeWeight = GetSlopeWeight(i, mesh);
-
-                Color noiseColor = new Color(0, 1, 0, 0);
-                Color objectSurroundingColor = new Color(0, 0, 1, 0);
-                Color slopeColor = new Color(0, 0, 0, 1);
 
                 Color finalColor = noiseWeight * noiseColor + objectSurroundingWeight * objectSurroundingColor +
                                    slopeWeight * slopeColor;

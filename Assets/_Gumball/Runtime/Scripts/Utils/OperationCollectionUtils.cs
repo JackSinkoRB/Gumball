@@ -1,5 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -17,6 +21,14 @@ namespace Gumball
             }
             
             return true;
+        }
+
+        public static async Task WaitForCompletion(this IEnumerable<AsyncOperationHandle> handles)
+        {
+            while (!handles.AreAllComplete())
+            {
+                await Task.Delay(100);
+            }
         }
         
         public static bool AreAllComplete(this IEnumerable<TrackedCoroutine> collection)
