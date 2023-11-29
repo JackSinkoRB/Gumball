@@ -121,8 +121,7 @@ namespace Gumball
 
         public async void LoadFromSourceAsync(Action onComplete = null)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             await Task.Run(LoadFromSource);
             stopwatch.Stop();
 
@@ -221,8 +220,7 @@ namespace Gumball
                 return; //don't save to source
 #endif
 
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             await Task.Run(SaveOrRemoveFromSource);
             stopwatch.Stop();
 

@@ -43,8 +43,7 @@ namespace Gumball
             currentStage = Stage.LOADING_SAVE_DATA;
             TrackedCoroutine loadSaveDataAsync = new TrackedCoroutine(DataManager.LoadAllAsync());
             
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             currentStage = Stage.LOADING_MAINSCENE;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Additive, true);
             yield return mainSceneHandle;

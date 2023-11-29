@@ -85,7 +85,10 @@ namespace Gumball
             
             CollisionFreezeCheck();
             TryDelayedUpdate();
+        }
 
+        private void FixedUpdate()
+        {
             if (!isFrozen && !recoveringFromCollision)
             {
                 Move();
@@ -249,7 +252,8 @@ namespace Gumball
         private void OnStartMoving()
         {
             isMoving = true;
-            
+            rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
             if (debug) GlobalLoggers.TrafficLogger.Log("Started moving");
         }
 
@@ -260,7 +264,8 @@ namespace Gumball
             desiredSpeed = 0;
             OnStopAccelerating();
             OnStopDecelerating();
-            
+            rigidbody.constraints = RigidbodyConstraints.None;
+
             if (debug) GlobalLoggers.TrafficLogger.Log("Stopped moving");
         }
         
@@ -401,12 +406,12 @@ namespace Gumball
             Vector3 directionToTarget = targetPosition - transform.position;
             Quaternion targetRotationFinal = Quaternion.LookRotation(directionToTarget); //face towards the target position
             
+            rigidbody.MoveRotation(Quaternion.Slerp(rigidbody.rotation, targetRotationFinal, GetTurnSpeed(speed) * Time.deltaTime));
+
             Vector3 targetVelocity = transform.forward * SpeedUtils.FromKmh(speed); //car always moves forward
             rigidbody.velocity = targetVelocity;
-
+            Debug.DrawLine(transform.position + rigidbody.velocity * 5, targetPosition, Color.green);
             Debug.DrawLine(transform.position, targetPosition, Color.yellow);
-            
-            rigidbody.MoveRotation(Quaternion.Slerp(rigidbody.rotation, targetRotationFinal, GetTurnSpeed(speed) * Time.deltaTime));
         }
         
         private void RotateWheels()

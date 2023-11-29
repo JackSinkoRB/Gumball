@@ -23,8 +23,10 @@ namespace Gumball
         
         [Header("Required")]
         [SerializeField] private SplineComputer splineComputer;
-        [SerializeField] private SplineMesh roadMesh;
         [SerializeField] private ChunkTrafficManager trafficManager;
+
+        [Header("Optional")]
+        [SerializeField] private SplineMesh[] splineMeshes;
 
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, true, true)]
@@ -34,15 +36,16 @@ namespace Gumball
         
         [Header("Debugging")]
         [ReadOnly, SerializeField] private GameObject currentTerrain;
+        [ReadOnly, SerializeField] private ChunkMeshData chunkMeshData;
 
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
 
+        public ChunkMeshData ChunkMeshData => chunkMeshData;
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
-        public SplineMesh RoadMesh => roadMesh;
+        public SplineMesh[] SplinesMeshes => splineMeshes;
         public SplineSample[] SplineSamples => splineSampleCollection.samples;
 
-        public ChunkMeshData ChunkMeshData;
         public bool IsAutomaticTerrainRecreationDisabled { get; private set; }
         public SplineSample FirstSample { get; private set; }
         public SplineSample LastSample { get; private set; }
@@ -79,11 +82,11 @@ namespace Gumball
             DisableAutomaticTerrainRecreation(true);
             if (CurrentTerrain == null)
             {
-                ChunkMeshData = null;
+                chunkMeshData = null;
                 return;
             }
 
-            ChunkMeshData = new ChunkMeshData(this);
+            chunkMeshData = new ChunkMeshData(this);
             DisableAutomaticTerrainRecreation(false);
         }
 

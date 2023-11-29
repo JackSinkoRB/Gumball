@@ -36,15 +36,13 @@ namespace Gumball
         {
             PanelManager.GetPanel<LoadingPanel>().Show();
             
-            Stopwatch sceneLoadingStopwatch = new Stopwatch();
-            sceneLoadingStopwatch.Start();
+            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
             yield return Addressables.LoadSceneAsync(SceneManager.MapDrivingSceneName, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MapDrivingSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             //load the map chunks
-            Stopwatch chunkLoadingStopwatch = new Stopwatch();
-            chunkLoadingStopwatch.Start();
+            Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
             yield return ChunkManager.Instance.LoadMap(map);
             chunkLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map '{map.name}' in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");

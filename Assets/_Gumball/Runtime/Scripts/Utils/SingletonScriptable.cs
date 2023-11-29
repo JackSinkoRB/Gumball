@@ -19,8 +19,7 @@ namespace Gumball
             {
                 if (instance == null)
                 {
-                    Stopwatch stopwatch = new Stopwatch();
-                    stopwatch.Start();
+                    Stopwatch stopwatch = Stopwatch.StartNew();
                     
                     AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
                     instance = handle.WaitForCompletion();

@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Dreamteck.Splines;
 using MyBox;
 #if UNITY_EDITOR
+using Gumball.Editor;
 using UnityEditor;
 #endif
 using UnityEngine;
@@ -27,15 +29,19 @@ namespace Gumball
         
         private GameObject previousSelection;
         private float timeWhenUnityLastUpdated;
-        
-        [InitializeOnLoadMethod]
-        private static void Initialise()
+
+        private void OnSavePrefab(string prefabName, string path)
         {
-            UniqueIDAssigner.OnAssignID += OnAssignID;
+            if (prefabName.Equals(gameObject.name))
+            {
+                ChunkUtils.BakeMeshes(chunk);
+            }
         }
         
         private void OnEnable()
         {
+            SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
+            
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
             chunk.UpdateSplineSampleData();
         }
@@ -44,6 +50,8 @@ namespace Gumball
         {
             chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
 
+            SaveEditorAssetsEvents.onSavePrefab -= OnSavePrefab;
+            
             Tools.hidden = false;
         }
 
@@ -73,39 +81,6 @@ namespace Gumball
             CheckIfTerrainIsRaycastable();
         }
 
-        private static void OnAssignID(UniqueIDAssigner uniqueIDAssigner, string previousID, string newID)
-        {
-            Chunk chunk = uniqueIDAssigner.GetComponent<Chunk>();
-            if (chunk == null)
-                return;
-            
-            TryDuplicateMeshWithNewID(chunk, previousID, newID);
-        }
-
-        private static void TryDuplicateMeshWithNewID(Chunk chunk, string previousID, string newID)
-        {
-            if (chunk.CurrentTerrain == null)
-                return;
-
-            Mesh mesh = chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh;
-            if (mesh == null)
-                return;
-            
-            //save the mesh asset
-            string oldPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{previousID}.asset";
-            string newPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{newID}.asset";
-            AssetDatabase.CopyAsset(oldPath, newPath);
-            AssetDatabase.SaveAssets();
-            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
-
-            Mesh duplicatedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(newPath);
-            meshFilter.sharedMesh = duplicatedMesh;
-            
-            PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
-            EditorUtility.SetDirty(meshFilter);
-            AssetDatabase.SaveAssets();
-        }
-        
         private void CheckIfTerrainIsRaycastable()
         {
             if (chunk.CurrentTerrain == null)
@@ -153,21 +128,19 @@ namespace Gumball
         #endregion
         
         #region Generate terrain
-
-        [Header("Create terrain")]
-        [ReadOnly(nameof(hasChunkConnected)), SerializeField]
-        private ChunkTerrainData terrainData = new();
+        
         [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
         [SerializeField] private bool updateImmediately = true;
-
-        [Header("Blending")]
-        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
-        public float TerrainBlendDistance => terrainBlendDistance;
+        
+        [ReadOnly(nameof(hasChunkConnected)), SerializeField]
+        private ChunkTerrainData terrainData = new();
 
         private ChunkGrid currentGrid;
         
         private static bool subscribedToPlayModeStateChanged;
         private static PlayModeStateChange playModeState;
+
+        public ChunkTerrainData TerrainData => terrainData;
         
         [ButtonMethod]
         public void ShowTerrainGrid()
@@ -189,6 +162,27 @@ namespace Gumball
         }
         
         [ButtonMethod]
+        public void DrawMeshEdgeNormals()
+        {
+            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.FirstEndVertices)
+            {
+                DrawNormal(vertex.Index, Color.red);
+            }
+            
+            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.LastEndVertices)
+            {
+                DrawNormal(vertex.Index, Color.blue);
+            }
+
+            void DrawNormal(int vertexIndex, Color color)
+            {
+                const float distance = 5;
+                const float duration = 120;
+                Debug.DrawRay(chunk.ChunkMeshData.GetCurrentVertexWorldPosition(vertexIndex), chunk.ChunkMeshData.Mesh.normals[vertexIndex] * distance, color, duration);
+            }
+        }
+        
+        [ButtonMethod()]
         public void CreateTerrain()
         {
             GameObject newTerrain = terrainData.Create(chunk);
@@ -272,7 +266,17 @@ namespace Gumball
             if (chunkAfter != null)
                 ChunkUtils.ConnectChunks(chunk, chunkAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, chunkAfter));
 
-            ChunkUtils.BakeRoadMesh(chunk);
+            UnbakeSplineMeshes();
+        }
+
+        private void UnbakeSplineMeshes()
+        {
+            foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
+            {
+                if (!splineMesh.gameObject.activeSelf)
+                    continue;
+                splineMesh.Unbake();
+            }
         }
         
         #endregion

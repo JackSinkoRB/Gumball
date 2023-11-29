@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -121,3 +122,4 @@ namespace Gumball
         private static void CheckPlayModeTestStatus() => CheckTestStatus(TestMode.PlayMode);
     }
 }
+#endif

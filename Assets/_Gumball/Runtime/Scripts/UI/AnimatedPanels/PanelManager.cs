@@ -83,8 +83,7 @@ public class PanelManager : Singleton<PanelManager>
     {
         string sceneName = SceneManager.GetActiveScene().name;
         
-        Stopwatch stopwatch = new Stopwatch();
-        stopwatch.Start();
+        Stopwatch stopwatch = Stopwatch.StartNew();
 
         //remove null panels (if scene was unloaded etc.)
         List<Type> keys = new List<Type>(panelLookup.Keys);

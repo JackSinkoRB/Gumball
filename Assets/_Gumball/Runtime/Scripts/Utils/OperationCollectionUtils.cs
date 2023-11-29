@@ -1,5 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -18,6 +22,14 @@ namespace Gumball
             
             return true;
         }
+
+        public static async Task WaitForCompletion(this IEnumerable<AsyncOperationHandle> handles)
+        {
+            while (!handles.AreAllComplete())
+            {
+                await Task.Delay(100);
+            }
+        }
         
         public static bool AreAllComplete(this IEnumerable<TrackedCoroutine> collection)
         {
@@ -28,6 +40,19 @@ namespace Gumball
             }
             
             return true;
+        }
+        
+        public static async Task WaitForNoNulls<T>(this T[] array, long timeoutSeconds)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            
+            while (array.Any(element => element == null))
+            {
+                if (stopwatch.Elapsed.Seconds >= timeoutSeconds)
+                    throw new TimeoutException("Timeout waiting for array to have no null elements.");
+                
+                await Task.Delay(100);
+            }
         }
         
     }

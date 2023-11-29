@@ -63,8 +63,7 @@ namespace Gumball
         {
             PanelManager.GetPanel<LoadingPanel>().Show();
 
-            Stopwatch sceneLoadingStopwatch = new Stopwatch();
-            sceneLoadingStopwatch.Start();
+            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
             yield return Addressables.LoadSceneAsync(SceneManager.DecalEditorSceneName, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");

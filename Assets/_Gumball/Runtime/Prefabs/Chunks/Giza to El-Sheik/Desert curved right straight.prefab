@@ -7197,11 +7197,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 1932630189597001329}
-  roadMesh: {fileID: 2263610899461037094}
+  trafficManager: {fileID: 0}
+  splineMeshes: []
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
-  chunkBefore: {fileID: 0}
-  chunkAfter: {fileID: 0}
   currentTerrain: {fileID: 5774656387205957988}
   ChunkMeshData:
     chunk: {fileID: 3427455153107419420}
@@ -12659,6 +12658,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 930d203b93acfac48ac377e5145c5d2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chunkBefore: {fileID: 0}
+  chunkAfter: {fileID: 0}
+  hasChunkConnected: 0
   terrainData:
     matchRoadHeight: 1
     terrainHeight: 0
@@ -12666,6 +12668,7 @@ MonoBehaviour:
     resolution: 100
     roadFlattenDistance: 15
     roadBlendDistance: 25
+    amountToSitUnderRoad: 0.2
     splitHeightData: 0
     heightData:
       Seed: 470
@@ -12740,7 +12743,6 @@ MonoBehaviour:
         Max: 50
       slopeMaxOpacity: 0.8
   updateImmediately: 0
-  HasConnection: 0
   terrainBlendDistance: 50
   chunkToConnectWith: {fileID: 0}
 --- !u!114 &1932630189597001329

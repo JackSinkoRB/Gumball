@@ -26,8 +26,7 @@ namespace Gumball
         {
             PanelManager.GetPanel<LoadingPanel>().Show();
             
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             yield return Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Single, true);
             stopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");

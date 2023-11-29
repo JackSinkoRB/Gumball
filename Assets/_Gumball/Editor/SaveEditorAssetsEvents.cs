@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -9,31 +10,43 @@ namespace Gumball.Editor
     public class SaveEditorAssetsEvents : AssetModificationProcessor
     {
     
-        public delegate void SceneSaveDelegate(string sceneName);
+        public delegate void SceneSaveDelegate(string sceneName, string path);
         public static event SceneSaveDelegate onSaveScene;
-    
+        
+        public delegate void PrefabSaveDelegate(string sceneName, string path);
+        public static event PrefabSaveDelegate onSavePrefab;
+
+        private static bool isSaving;
+        
         private static string[] OnWillSaveAssets(string[] paths)
         {
-            // Get the name of the scene to save.
-            string scenePath = string.Empty;
-            string sceneName = string.Empty;
+            if (isSaving)
+                return paths;
+            
+            isSaving = true;
 
-            foreach (string path in paths)
+            try
             {
-                if (path.Contains(".unity"))
+                foreach (string path in paths)
                 {
-                    scenePath = Path.GetDirectoryName(path);
-                    sceneName = Path.GetFileNameWithoutExtension(path);
+                    if (path.Contains(".unity"))
+                    {
+                        string sceneName = Path.GetFileNameWithoutExtension(path);
+                        onSaveScene?.Invoke(sceneName, path);
+                    }
+
+                    if (path.Contains(".prefab"))
+                    {
+                        string sceneName = Path.GetFileNameWithoutExtension(path);
+                        onSavePrefab?.Invoke(sceneName, path);
+                    }
                 }
             }
-
-            if (sceneName.Length == 0)
+            finally
             {
-                return paths;
+                isSaving = false;
             }
-        
-            onSaveScene?.Invoke(sceneName);
-
+            
             return paths;
         }
     

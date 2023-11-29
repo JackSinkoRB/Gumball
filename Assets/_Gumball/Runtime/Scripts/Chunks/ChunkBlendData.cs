@@ -20,53 +20,54 @@ namespace Gumball
         [SerializeField, ReadOnly] private string lastChunkID;
         [SerializeField, ReadOnly] private ChunkMeshData blendedLastChunkMeshData;
 
-        public string FirstChunkID => firstChunkID;
-        public string LastChunkID => lastChunkID;
-
         public ChunkMeshData BlendedFirstChunkMeshData => blendedFirstChunkMeshData;
         public ChunkMeshData BlendedLastChunkMeshData => blendedLastChunkMeshData;
-
-        public void ApplyToChunks(Chunk firstChunk, Chunk lastChunk)
-        {
-            firstChunk.ChunkMeshData.SetVertices(blendedFirstChunkMeshData.Vertices);
-            firstChunk.ChunkMeshData.ApplyChanges();
-            
-            lastChunk.ChunkMeshData.SetVertices(blendedLastChunkMeshData.Vertices);
-            lastChunk.ChunkMeshData.ApplyChanges();
-        }
 
 #if UNITY_EDITOR
         public ChunkBlendData(Chunk firstChunk, Chunk lastChunk)
         {
-            this.firstChunk = firstChunk;
-            this.lastChunk = lastChunk;
+            try
+            {
+                this.firstChunk = firstChunk;
+                this.lastChunk = lastChunk;
 
-            firstChunkID = firstChunk.UniqueID;
-            lastChunkID = lastChunk.UniqueID;
-            
-            //align
-            // - we move the chunk with more end vertices to the chunk with less end vertices
-            // - then, we do the opposite, in case there's any vertices in the other chunk that didn't have a connection
-            ChunkMeshData chunkWithMoreEndVertices = firstChunk.ChunkMeshData.LastEndVertices.Count > lastChunk.ChunkMeshData.FirstEndVertices.Count ? firstChunk.ChunkMeshData : lastChunk.ChunkMeshData;
-            ChunkMeshData chunkWithLessEndVertices = chunkWithMoreEndVertices == firstChunk.ChunkMeshData ? lastChunk.ChunkMeshData : firstChunk.ChunkMeshData;
-            AlignEdges(chunkWithMoreEndVertices, chunkWithLessEndVertices);
-            AlignEdges(chunkWithLessEndVertices, chunkWithMoreEndVertices);
+                firstChunkID = firstChunk.UniqueID;
+                lastChunkID = lastChunk.UniqueID;
 
-            //blend
-            BlendWithEdges(true);
-            BlendWithEdges(false);
-            
-            FixOverlappingVertices(true);
-            FixOverlappingVertices(false);
-            
-            firstChunk.ChunkMeshData.ApplyChanges();
-            lastChunk.ChunkMeshData.ApplyChanges();
-            
-            //save the ChunkMeshData's, so they can be applied at a later time
-            blendedFirstChunkMeshData = firstChunk.ChunkMeshData;
-            blendedLastChunkMeshData = lastChunk.ChunkMeshData;
+                //align
+                // - we move the chunk with more end vertices to the chunk with less end vertices
+                // - then, we do the opposite, in case there's any vertices in the other chunk that didn't have a connection
+                ChunkMeshData chunkWithMoreEndVertices = firstChunk.ChunkMeshData.LastEndVertices.Count > lastChunk.ChunkMeshData.FirstEndVertices.Count ? firstChunk.ChunkMeshData : lastChunk.ChunkMeshData;
+                ChunkMeshData chunkWithLessEndVertices = chunkWithMoreEndVertices == firstChunk.ChunkMeshData ? lastChunk.ChunkMeshData : firstChunk.ChunkMeshData;
+                AlignEdges(chunkWithMoreEndVertices, chunkWithLessEndVertices);
+                AlignEdges(chunkWithLessEndVertices, chunkWithMoreEndVertices);
+
+                //blend
+                BlendWithEdges(firstChunk);
+                BlendWithEdges(lastChunk);
+
+                FixOverlappingVertices(firstChunk);
+                FixOverlappingVertices(lastChunk);
+
+                firstChunk.ChunkMeshData.ApplyChanges();
+                lastChunk.ChunkMeshData.ApplyChanges();
+
+                //need to update colours once all the vertices and normals have been set
+                Color[] firstChunkColors = firstChunk.ChunkMeshData.CalculateVertexColors();
+                Color[] lastChunkColors = lastChunk.ChunkMeshData.CalculateVertexColors();
+                firstChunk.ChunkMeshData.UpdateVertexColors(firstChunkColors.ToSerializableColors());
+                lastChunk.ChunkMeshData.UpdateVertexColors(lastChunkColors.ToSerializableColors());
+                
+                //save the ChunkMeshData's, so they can be applied at a later time
+                blendedFirstChunkMeshData = firstChunk.ChunkMeshData;
+                blendedLastChunkMeshData = lastChunk.ChunkMeshData;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error creating blend data between {firstChunk.gameObject.name} and {lastChunk.gameObject.name}\n{e.StackTrace}");
+            }
         }
-        
+
         private void AlignEdges(ChunkMeshData chunkToMove, ChunkMeshData chunkToMatch)
         {
             GlobalLoggers.ChunkLogger.Log($"Moving {chunkToMove.Chunk.gameObject.name} vertices to {chunkToMatch.Chunk.gameObject.name}");
@@ -99,16 +100,15 @@ namespace Gumball
             chunkMeshVertexToMatch.MeshBelongsTo.SetVertexWorldPosition(chunkMeshVertexToMatch.Index, desiredPosition);
         }
 
-        private void BlendWithEdges(bool useFirstChunk)
+        private void BlendWithEdges(Chunk chunk)
         {
-            Chunk chunkToUse = useFirstChunk ? firstChunk : lastChunk;
-
-            float terrainBlendDistance = chunkToUse.GetComponent<ChunkEditorTools>().TerrainBlendDistance;
+            float terrainBlendDistance = chunk.GetComponent<ChunkEditorTools>().TerrainData.ChunkBlendDistance;
             if (terrainBlendDistance.Approximately(0))
                 return; //not blending
-            
-            ChunkMeshData meshData = useFirstChunk ? firstChunk.ChunkMeshData : lastChunk.ChunkMeshData;
-            ReadOnlyCollection<ChunkMeshData.Vertex> otherChunksEndVertices = useFirstChunk ? lastChunk.ChunkMeshData.FirstEndVertices : firstChunk.ChunkMeshData.LastEndVertices;
+
+            bool isFirstChunk = chunk == firstChunk;
+            ChunkMeshData meshData = chunk.ChunkMeshData;
+            ReadOnlyCollection<ChunkMeshData.Vertex> otherChunksEndVertices = isFirstChunk ? lastChunk.ChunkMeshData.FirstEndVertices : firstChunk.ChunkMeshData.LastEndVertices;
 
             //check all the vertices if they're within distance to blend with the new middle heights
             for (int vertexIndex = 0; vertexIndex < meshData.Vertices.Length; vertexIndex++)
@@ -119,6 +119,10 @@ namespace Gumball
 
                 if (distanceToClosestVertex <= terrainBlendDistance)
                 {
+                    //don't blend if should be under the should
+                    if (IsPositionUnderRoad(vertexPositionWorld, chunk))
+                        continue;
+
                     float differencePercent = 1 - Mathf.Clamp01(distanceToClosestVertex / terrainBlendDistance);
 
                     float currentHeight = vertexPositionWorld.y;
@@ -127,12 +131,23 @@ namespace Gumball
                     float closestVertexHeight = closestVertexPositionWorld.y;
 
                     float heightDifference = closestVertexHeight - currentHeight;
-                    float desiredHeight = currentHeight + (heightDifference * differencePercent);
-
-                    Vector3 desiredPosition = vertexPositionWorld.SetY(desiredHeight);
-                    meshData.SetVertexWorldPosition(vertexIndex, desiredPosition);
+                    float heightBlended = currentHeight + (heightDifference * differencePercent);
+                    Vector3 newDesiredPosition = vertexPositionWorld.SetY(heightBlended);
+                    
+                    meshData.SetVertexWorldPosition(vertexIndex, newDesiredPosition);
                 }
             }
+        }
+        
+        private bool IsPositionUnderRoad(Vector3 position, Chunk chunk)
+        {
+            ChunkEditorTools chunkEditorTools = chunk.GetComponent<ChunkEditorTools>();
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(position, true);
+
+            //check to flatten under road
+            float roadFlattenDistanceSqr = chunkEditorTools.TerrainData.RoadFlattenDistance * chunkEditorTools.TerrainData.RoadFlattenDistance;
+            bool isUnderRoad = distanceToSplineSqr < roadFlattenDistanceSqr;
+            return isUnderRoad;
         }
 
         private (ChunkMeshData.Vertex, float) GetClosestVertex(Vector3 worldPosition, ReadOnlyCollection<ChunkMeshData.Vertex> verticesToCheck)
@@ -154,10 +169,10 @@ namespace Gumball
             return (closestChunkMeshVertex, Mathf.Sqrt(minDistanceSquared));
         }
 
-        private void FixOverlappingVertices(bool useFirstChunk)
+        private void FixOverlappingVertices(Chunk chunk)
         {
-            Chunk chunk = useFirstChunk ? firstChunk : lastChunk;
-            Chunk otherChunk = useFirstChunk ? lastChunk : firstChunk;
+            bool isFirstChunk = chunk == firstChunk;
+            Chunk otherChunk = isFirstChunk ? lastChunk : firstChunk;
 
             for (var vertexIndex = 0; vertexIndex < chunk.ChunkMeshData.Mesh.vertices.Length; vertexIndex++)
             {
@@ -167,9 +182,9 @@ namespace Gumball
                     continue; //don't do for end vertices
                 
                 //get the end point tangent direction
-                SplineSample endPoint = useFirstChunk ? firstChunk.LastSample : lastChunk.FirstSample;
-                Vector3 tangentDirection = useFirstChunk ? -endPoint.forward : endPoint.forward;
-                Debug.DrawLine(endPoint.position, endPoint.position + tangentDirection * 100, useFirstChunk ? Color.red : Color.green, 15);
+                SplineSample endPoint = isFirstChunk ? chunk.LastSample : chunk.FirstSample;
+                Vector3 tangentDirection = isFirstChunk ? -endPoint.forward : endPoint.forward;
+                Debug.DrawLine(endPoint.position, endPoint.position + tangentDirection * 100, isFirstChunk ? Color.red : Color.green, 15);
                 
                 //get the closest end vertex on the other chunk
                 var (closestEndVertex, closestEndVertexDistance) = GetClosestVertex(chunkMeshVertex.WorldPosition, otherChunk.ChunkMeshData.FirstEndVertices);
