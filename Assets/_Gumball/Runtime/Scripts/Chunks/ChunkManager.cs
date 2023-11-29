@@ -146,7 +146,7 @@ namespace Gumball
                     ? ChunkUtils.LoadDirection.CUSTOM : ChunkUtils.LoadDirection.AFTER);
             
             //load the rest of the chunks in range
-            yield return LoadChunksAroundPosition(map.VehicleStartingPosition);
+            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(map.VehicleStartingPosition));
             
             isLoading = false;
         }
