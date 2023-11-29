@@ -18,11 +18,11 @@ namespace Gumball
         
         [PositiveValueOnly, SerializeField] private int resolution = 100;
         [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 50;
-        [PositiveValueOnly, SerializeField, ConditionalField(nameof(matchRoadHeight), true)] private float terrainHeight;
 
         [Header("Road")]
         [Tooltip("Should the terrain match the road's height? Or should it be above (eg. a highway overpass)?")]
         [SerializeField] private bool matchRoadHeight = true;
+        [SerializeField, ConditionalField(nameof(matchRoadHeight), true)] private float terrainHeightFromRoad;
         [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
         [PositiveValueOnly, SerializeField] private float roadBlendDistance = 20;
@@ -42,6 +42,7 @@ namespace Gumball
 
         public float WidthAroundRoad => widthAroundRoad;
         public float RoadFlattenDistance => roadFlattenDistance;
+        public bool MatchRoadHeight => matchRoadHeight;
         public int Resolution => resolution;
         public float ChunkBlendDistance => chunkBlendDistance;
         public TerrainTextureBlendSettings TextureBlendSettings => textureBlendSettings;
@@ -257,7 +258,7 @@ namespace Gumball
                 if (matchRoadHeight)
                     return closestSample.position.y - amountToSitUnderRoad;
 
-                return terrainHeight - amountToSitUnderRoad;
+                return terrainHeightFromRoad - amountToSitUnderRoad;
             }
             
             //check to flatten under chunk objects
@@ -334,7 +335,7 @@ namespace Gumball
             }
             else
             {
-                desiredHeight += terrainHeight;
+                desiredHeight += terrainHeightFromRoad;
             }
 
             return desiredHeight;

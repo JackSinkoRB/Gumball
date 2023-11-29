@@ -66,6 +66,9 @@ namespace Gumball
 
             //for now, just do road
             //get the distance to the road
+            if (!chunk.GetComponent<ChunkEditorTools>().TerrainData.MatchRoadHeight)
+                return 0;
+            
             var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPositionWorld, true);
             float objectSurroundingRadiusSqr = objectSurroundingRadius * objectSurroundingRadius;
             float objectSurroundingBlendRadiusSqr = objectSurroundingBlendRadius * objectSurroundingBlendRadius;
