@@ -147,6 +147,7 @@ namespace Gumball
             
             //load the rest of the chunks in range
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(map.VehicleStartingPosition));
+            yield return distanceLoadingCoroutine.Coroutine;
             
             isLoading = false;
         }
