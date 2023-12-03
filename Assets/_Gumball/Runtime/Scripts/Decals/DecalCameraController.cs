@@ -19,6 +19,7 @@ namespace Gumball
         [SerializeField] private MinMaxFloat yClamp = new(10, 60);
         [SerializeField] private float decelerationDuration = 0.5f;
         [SerializeField] private float zoomSpeed = 1;
+        [SerializeField] private float movementSpeed = 1;
 
         private float horizontal;
         private float vertical;
@@ -98,7 +99,7 @@ namespace Gumball
                 return; //don't move the camera if selecting UI
             
             velocity = offset;
-            MoveCamera(offset);
+            MoveCamera(offset * Time.deltaTime * movementSpeed);
         }
 
         private void MoveCamera(Vector2 offset)
@@ -122,14 +123,14 @@ namespace Gumball
         {
             float newDistance = distance - (Time.deltaTime * value * zoomSpeed);
             distance = newDistance;
-            MoveCamera(velocity);
+            MoveCamera(velocity * Time.deltaTime * movementSpeed);
         }
         
         private void DoDecelerationTween()
         {
             decelerationTween?.Kill();
             decelerationTween = DOTween.To(() => velocity, x => velocity = x, Vector2.zero, decelerationDuration)
-                .OnUpdate(() => MoveCamera(velocity));
+                .OnUpdate(() => MoveCamera(velocity * Time.deltaTime * movementSpeed));
         }
         
         private float ClampAngle(float angle, float min, float max)
