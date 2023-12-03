@@ -13,14 +13,20 @@ namespace Gumball
         
         [SerializeField] private Transform target;
         [SerializeField] private Vector3 targetOffset = new(0, 0.5f);
-        [SerializeField] private float distance = 5.0f;
+        
+        [Header("Movement")]
         [SerializeField] private float xSpeed = 0.5f;
         [SerializeField] private float ySpeed = 0.5f;
         [SerializeField] private MinMaxFloat yClamp = new(10, 60);
+        [SerializeField] private float movementSpeed = 100;
         [SerializeField] private float decelerationDuration = 0.5f;
-        [SerializeField] private float zoomSpeed = 1;
-        [SerializeField] private float movementSpeed = 1;
 
+        [Header("Zoom")]
+        [SerializeField] private float distance = 5.0f;
+        [SerializeField] private float pinchZoomSpeed = 1;
+        [SerializeField] private float keyboardZoomSpeed = 1;
+        [SerializeField] private MinMaxFloat zoomDistanceClamp = new(10, 50);
+        
         private float horizontal;
         private float vertical;
         private Vector2 velocity;
@@ -68,7 +74,7 @@ namespace Gumball
         
         private void OnPinch(Vector2 offset)
         {
-            ModifyZoom(offset.x + offset.y);
+            ModifyZoom((offset.x + offset.y) * pinchZoomSpeed);
         }
 
         private void OnPrimaryContactPress()
@@ -121,7 +127,9 @@ namespace Gumball
 
         private void ModifyZoom(float value)
         {
-            float newDistance = distance - (Time.deltaTime * value * zoomSpeed);
+            float newDistance = distance - (Time.deltaTime * value);
+            newDistance = Mathf.Clamp(newDistance, zoomDistanceClamp.Min, zoomDistanceClamp.Max);
+            
             distance = newDistance;
             MoveCamera(velocity * Time.deltaTime * movementSpeed);
         }
@@ -151,14 +159,13 @@ namespace Gumball
         private void CheckToZoomWithKeyboard()
         {
 #if UNITY_EDITOR || !UNITY_ANDROID
-            const float keyboardZoomSpeed = 800f;
             if (Keyboard.current.numpadPlusKey.isPressed)
             {
-                ModifyZoom(keyboardZoomSpeed * Time.deltaTime);
+                ModifyZoom(keyboardZoomSpeed);
             }
             else if (Keyboard.current.numpadMinusKey.isPressed)
             {
-                ModifyZoom(-keyboardZoomSpeed * Time.deltaTime);
+                ModifyZoom(-keyboardZoomSpeed);
             }
 #endif
         }
