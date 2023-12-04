@@ -115,9 +115,10 @@ namespace Gumball
             PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
         }
 
-        private void Update()
+        private void LateUpdate()
         {
-            DrawPreview();
+            if (IsValidPosition)
+                DrawPreview();
         }
 
         public void Initialise(int categoryIndex, int textureIndex)
