@@ -11,13 +11,13 @@ namespace Gumball
         {
             LiveDecal = 6,
             Terrain = 7,
-            Vehicle = 8,
+            PlayerVehicle = 8,
             TrafficCar = 9
         }
         
         public const string CanPaintDecalsTag = "CanPaintDecals";
 
-        public static LayerMask TrafficCarCollisionLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.Vehicle;
+        public static LayerMask TrafficCarCollisionLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerVehicle;
 
         public static bool ContainsLayer(this LayerMask layerMask, int layer)
         {
