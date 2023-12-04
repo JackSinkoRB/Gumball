@@ -4,17 +4,20 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public static class GameObjectLayers
+    public static class LayersAndTags
     {
 
         public enum Layer
         {
+            LiveDecal = 6,
             Terrain = 7,
-            Player = 8,
+            PlayerVehicle = 8,
             TrafficCar = 9
         }
         
-        public static LayerMask TrafficCarCollisionLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.Player;
+        public const string CanPaintDecalsTag = "CanPaintDecals";
+
+        public static LayerMask TrafficCarCollisionLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerVehicle;
 
         public static bool ContainsLayer(this LayerMask layerMask, int layer)
         {

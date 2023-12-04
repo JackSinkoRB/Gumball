@@ -67,7 +67,7 @@ namespace Gumball
             this.currentChunk = currentChunk;
 
             timeSinceCollision = Mathf.Infinity;
-            gameObject.layer = (int)GameObjectLayers.Layer.TrafficCar;
+            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
             DelayedUpdate();
         }
 
@@ -115,7 +115,7 @@ namespace Gumball
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (!GameObjectLayers.TrafficCarCollisionLayers.ContainsLayer(collision.gameObject.layer))
+            if (!LayersAndTags.TrafficCarCollisionLayers.ContainsLayer(collision.gameObject.layer))
                 return;
 
             GlobalLoggers.TrafficLogger.Log($"{gameObject.name} collided with {collision.gameObject.name}");

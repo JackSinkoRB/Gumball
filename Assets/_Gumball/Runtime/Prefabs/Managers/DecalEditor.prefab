@@ -101,14 +101,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 0}
   targetOffset: {x: 0, y: 0.5, z: 0}
-  distance: 5
   xSpeed: 0.05
   ySpeed: 0.1
   yClamp:
     Min: 0
     Max: 60
+  movementSpeed: 100
   decelerationDuration: 0.5
-  zoomSpeed: 1
+  distance: 5
+  pinchZoomSpeed: 0.5
+  keyboardZoomSpeed: 5
+  zoomDistanceClamp:
+    Min: 3
+    Max: 5
 --- !u!1 &4766203065556970479
 GameObject:
   m_ObjectHideFlags: 0

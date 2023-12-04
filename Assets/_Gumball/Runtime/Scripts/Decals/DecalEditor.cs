@@ -16,8 +16,6 @@ namespace Gumball
 
         public const int MaxDecalsAllowed = 50;
         
-        private const int decalLayer = 6;
-        private static readonly LayerMask decalLayerMask = 1 << decalLayer;
         private static readonly int AlbedoShaderID = Shader.PropertyToID("_Albedo");
 
         public static event Action onSessionStart;
@@ -27,9 +25,7 @@ namespace Gumball
         public event Action<LiveDecal> onDeselectLiveDecal;
         public event Action<LiveDecal> onCreateLiveDecal;
         public event Action<LiveDecal> onDestroyLiveDecal;
-        
-        [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
-        [SerializeField] private Shader carBodyShader;
+
         [SerializeField] private CarManager currentCar;
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
         [SerializeField] private DecalCameraController cameraController;
@@ -124,6 +120,8 @@ namespace Gumball
             paintableMeshes.Clear();
             foreach (MeshFilter meshFilter in car.transform.GetComponentsInAllChildren<MeshFilter>())
             {
+                if (!meshFilter.gameObject.tag.Equals(LayersAndTags.CanPaintDecalsTag))
+                    continue;
                 SetMeshPaintable(meshFilter);
             }
             
@@ -226,7 +224,7 @@ namespace Gumball
 
             //max raycast distance from the camera to the middle of the car, so it doesn't detect decals on the other side
             float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, currentCar.transform.position);
-            int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, maxRaycastDistance, decalLayerMask);
+            int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, maxRaycastDistance, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.LiveDecal));
 
             LiveDecal closestDecal = null;
             float distanceToClosestDecalSqr = Mathf.Infinity;
@@ -264,27 +262,25 @@ namespace Gumball
         private void SetMeshPaintable(MeshFilter meshFilter)
         {
             MeshRenderer meshRenderer = meshFilter.GetComponent<MeshRenderer>();
-
-            if (!meshRenderer.material.shader.Equals(carBodyShader))
-                return;
-
+            
             //before resetting the textures, clear the previous texture it has made
             meshRenderer.sharedMaterial.SetTexture(AlbedoShaderID, null);
 
-            DestroyImmediate(meshFilter.gameObject.GetComponent<P3dPaintableTexture>());
+            if (meshFilter.gameObject.GetComponent<P3dPaintableTexture>() != null)
+                DestroyImmediate(meshFilter.gameObject.GetComponent<P3dPaintableTexture>());
             
             P3dPaintable paintable = meshFilter.gameObject.GetComponent<P3dPaintable>(true);
             P3dPaintableTexture paintableTexture = meshFilter.gameObject.GetComponent<P3dPaintableTexture>(true);
             MeshCollider meshCollider = meshFilter.gameObject.GetComponent<MeshCollider>(true);
             P3dMaterialCloner materialCloner = meshFilter.gameObject.GetComponent<P3dMaterialCloner>(true);
-            
+
             materialCloner.enabled = true;
             paintableTexture.enabled = true;
             meshCollider.enabled = true;
             paintable.enabled = true;
 
             //paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
-            paintableTexture.Slot = new P3dSlot(0, "_Albedo"); //car body shader uses albedo
+            paintableTexture.Slot = new P3dSlot(0, "_BaseMap"); //car body shader uses albedo
             
             PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture, meshCollider);
             paintableMeshes.Add(paintableMesh);

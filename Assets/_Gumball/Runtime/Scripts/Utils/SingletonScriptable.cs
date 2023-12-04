@@ -25,7 +25,7 @@ namespace Gumball
                     instance = handle.WaitForCompletion();
                     
                     stopwatch.Stop();
-                    GlobalLoggers.LoadingLogger.Log($"Had to load singleton scriptable {typeof(T).Name} synchronously ({stopwatch.ElapsedMilliseconds}ms)");
+                    Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously ({stopwatch.ElapsedMilliseconds}ms)");
                 }
                 return instance;
             }

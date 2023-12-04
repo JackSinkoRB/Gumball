@@ -1,5 +1,18 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5998174373538354719
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -8,19 +21,17 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Car_Colour
-  m_Shader: {fileID: 4800000, guid: d483042875cc1c54da5fc1651ba0efa3, type: 3}
+  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _COLOR_ON
-  - _GLOSSYREFLECTIONS_OFF
-  - _OUTLINEENABLED_ON
-  m_LightmapFlags: 0
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap: {}
+  stringTagMap:
+    RenderType: Opaque
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -31,6 +42,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BackTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BaseMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -97,7 +112,7 @@ Material:
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: -1}
+        m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -189,27 +204,36 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 10
+    - _AlphaClip: 0
     - _AlphaCutoff: 0.5
     - _AlphaMultiplier: 0.51
+    - _AlphaToMask: 0
     - _Asym: 0
     - _Bias: 0
+    - _Blend: 0
     - _BlendAmount: 1
+    - _BlendModePreserveSpecular: 1
     - _Blur: 0.5
     - _Brightness: 1
     - _BumpScale: 1
     - _ClampBlack: 0
     - _ClampWhite: 1.9999999
+    - _ClearCoatMask: 0
+    - _ClearCoatSmoothness: 0
     - _CoatGloss: 0
     - _CoatStr: 2
     - _ColorBoost: 1
     - _ColorMulti: 0.755
+    - _Cull: 2
     - _CullMode: 0
     - _Cutoff: 0.5
     - _DecalColoring: 0.5
+    - _DetailAlbedoMapScale: 1
     - _DetailMapDepthBias: 1
     - _DetailNormalMapScale: 1
     - _DetailTex: 0
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _EdgeBlack: 0
     - _EdgeWhite: 1
     - _EmissionLM: 1
@@ -225,7 +249,7 @@ Material:
     - _Highlight: 0.1
     - _Intensity: 1
     - _Metal: 0
-    - _Metallic: 0.05
+    - _Metallic: 0.1
     - _MixPower: 0.808
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -244,17 +268,21 @@ Material:
     - _RimPower: 0.8
     - _Scale: 0
     - _Shininess: 0.6
+    - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
     - _Sparkle: 0.01
     - _SpecularEdge: 0
     - _SpecularHighlights: 1
     - _SpecularPower: 4
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
+    - _Surface: 0
     - _TintColor: 1
     - _Transition: 7
     - _UVSec: 0
     - _UseToonData: 0
     - _VertexColor: 0
+    - _WorkflowMode: 1
     - _ZWrite: 1
     - __dirty: 0
     m_Colors:
