@@ -103,7 +103,13 @@ namespace Gumball
 
             if (pressedUI)
                 return; //don't move the camera if selecting UI
-            
+
+            if (PinchInput.IsPinching)
+            {
+                velocity = Vector2.zero;
+                return;
+            }
+
             velocity = offset;
             MoveCamera(offset * Time.deltaTime * movementSpeed);
         }
