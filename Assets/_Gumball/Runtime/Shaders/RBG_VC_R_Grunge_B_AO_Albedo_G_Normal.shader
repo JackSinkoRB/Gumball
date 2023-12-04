@@ -16,6 +16,7 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 		_Grundge_Gloss("Grundge_Gloss", Range( 0 , 3)) = 0.8293218
 		_Grunge_Color("Grunge_Color", Color) = (0,0,0,0)
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
+		[HideInInspector] _texcoord3( "", 2D ) = "white" {}
 
 
 		//_TransmissionShadow( "Transmission Shadow", Range( 0, 1 ) ) = 0.5
@@ -344,10 +345,8 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 				o.ase_texcoord8.xy = v.texcoord.xy;
+				o.ase_texcoord8.zw = v.texcoord2.xy;
 				o.ase_color = v.ase_color;
-				
-				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord8.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
@@ -551,8 +550,8 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 
 				float2 uv_MainTex = IN.ase_texcoord8.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				float4 tex2DNode210 = tex2D( _MainTex, uv_MainTex );
-				float2 uv_Noise = IN.ase_texcoord8.xy * _Noise_ST.xy + _Noise_ST.zw;
-				float temp_output_261_0 = ( ( _Noise_Str * tex2D( _Noise, uv_Noise ).r ) * IN.ase_color.r );
+				float2 uv2_Noise = IN.ase_texcoord8.zw * _Noise_ST.xy + _Noise_ST.zw;
+				float temp_output_261_0 = ( ( _Noise_Str * tex2D( _Noise, uv2_Noise ).r ) * IN.ase_color.r );
 				float4 lerpResult253 = lerp( tex2DNode210 , ( tex2DNode210 * ( _Grunge_Color * temp_output_261_0 ) ) , temp_output_261_0);
 				
 				float2 uv_BumpMap = IN.ase_texcoord8.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
@@ -1524,10 +1523,8 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 				o.ase_texcoord4.xy = v.texcoord0.xy;
+				o.ase_texcoord4.zw = v.texcoord2.xy;
 				o.ase_color = v.ase_color;
-				
-				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord4.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
@@ -1681,8 +1678,8 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 
 				float2 uv_MainTex = IN.ase_texcoord4.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				float4 tex2DNode210 = tex2D( _MainTex, uv_MainTex );
-				float2 uv_Noise = IN.ase_texcoord4.xy * _Noise_ST.xy + _Noise_ST.zw;
-				float temp_output_261_0 = ( ( _Noise_Str * tex2D( _Noise, uv_Noise ).r ) * IN.ase_color.r );
+				float2 uv2_Noise = IN.ase_texcoord4.zw * _Noise_ST.xy + _Noise_ST.zw;
+				float temp_output_261_0 = ( ( _Noise_Str * tex2D( _Noise, uv2_Noise ).r ) * IN.ase_color.r );
 				float4 lerpResult253 = lerp( tex2DNode210 , ( tex2DNode210 * ( _Grunge_Color * temp_output_261_0 ) ) , temp_output_261_0);
 				
 
@@ -1751,6 +1748,7 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 				float4 vertex : POSITION;
 				float3 ase_normal : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_texcoord2 : TEXCOORD2;
 				float4 ase_color : COLOR;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
@@ -1823,10 +1821,8 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
 
 				o.ase_texcoord2.xy = v.ase_texcoord.xy;
+				o.ase_texcoord2.zw = v.ase_texcoord2.xy;
 				o.ase_color = v.ase_color;
-				
-				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord2.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
@@ -1869,6 +1865,7 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 				float4 vertex : INTERNALTESSPOS;
 				float3 ase_normal : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_texcoord2 : TEXCOORD2;
 				float4 ase_color : COLOR;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -1888,6 +1885,7 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 				o.vertex = v.vertex;
 				o.ase_normal = v.ase_normal;
 				o.ase_texcoord = v.ase_texcoord;
+				o.ase_texcoord2 = v.ase_texcoord2;
 				o.ase_color = v.ase_color;
 				return o;
 			}
@@ -1928,6 +1926,7 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
 				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
 				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				o.ase_texcoord2 = patch[0].ase_texcoord2 * bary.x + patch[1].ase_texcoord2 * bary.y + patch[2].ase_texcoord2 * bary.z;
 				o.ase_color = patch[0].ase_color * bary.x + patch[1].ase_color * bary.y + patch[2].ase_color * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
@@ -1967,8 +1966,8 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 
 				float2 uv_MainTex = IN.ase_texcoord2.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				float4 tex2DNode210 = tex2D( _MainTex, uv_MainTex );
-				float2 uv_Noise = IN.ase_texcoord2.xy * _Noise_ST.xy + _Noise_ST.zw;
-				float temp_output_261_0 = ( ( _Noise_Str * tex2D( _Noise, uv_Noise ).r ) * IN.ase_color.r );
+				float2 uv2_Noise = IN.ase_texcoord2.zw * _Noise_ST.xy + _Noise_ST.zw;
+				float temp_output_261_0 = ( ( _Noise_Str * tex2D( _Noise, uv2_Noise ).r ) * IN.ase_color.r );
 				float4 lerpResult253 = lerp( tex2DNode210 , ( tex2DNode210 * ( _Grunge_Color * temp_output_261_0 ) ) , temp_output_261_0);
 				
 
@@ -2497,10 +2496,8 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 				o.ase_texcoord8.xy = v.texcoord.xy;
+				o.ase_texcoord8.zw = v.texcoord2.xy;
 				o.ase_color = v.ase_color;
-				
-				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord8.zw = 0;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
 				#else
@@ -2697,8 +2694,8 @@ Shader "RBG/VC_R_Grunge_B_AO_Albedo_G_Normal"
 
 				float2 uv_MainTex = IN.ase_texcoord8.xy * _MainTex_ST.xy + _MainTex_ST.zw;
 				float4 tex2DNode210 = tex2D( _MainTex, uv_MainTex );
-				float2 uv_Noise = IN.ase_texcoord8.xy * _Noise_ST.xy + _Noise_ST.zw;
-				float temp_output_261_0 = ( ( _Noise_Str * tex2D( _Noise, uv_Noise ).r ) * IN.ase_color.r );
+				float2 uv2_Noise = IN.ase_texcoord8.zw * _Noise_ST.xy + _Noise_ST.zw;
+				float temp_output_261_0 = ( ( _Noise_Str * tex2D( _Noise, uv2_Noise ).r ) * IN.ase_color.r );
 				float4 lerpResult253 = lerp( tex2DNode210 , ( tex2DNode210 * ( _Grunge_Color * temp_output_261_0 ) ) , temp_output_261_0);
 				
 				float2 uv_BumpMap = IN.ase_texcoord8.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
@@ -3342,7 +3339,6 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;268;2837.107,-2093.97;Inherit;Fals
 Node;AmplifyShaderEditor.RangedFloatNode;213;1736.925,-2228.727;Float;False;Property;_Noise_Str;Noise_Str;6;0;Create;True;0;0;0;False;0;False;1;0.6;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;239;3208.554,-1703.631;Inherit;False;Property;_Gloss;Gloss;4;0;Create;True;0;0;0;False;0;False;0.8293218;0;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SamplerNode;235;3945.653,-1784.159;Inherit;True;Property;_BumpMap;Normal;1;0;Create;False;0;0;0;False;0;False;-1;None;f3c400a3509738246b088656d3b3da3f;True;0;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;219;1704.434,-2026.93;Inherit;True;Property;_Noise;Grunge_Mask;5;0;Create;False;0;0;0;False;0;False;-1;8e0e388733a4e25479f0ca669c0069e1;8e0e388733a4e25479f0ca669c0069e1;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;261;2514.24,-1828.313;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ColorNode;254;2416.318,-2162.285;Inherit;False;Property;_Grunge_Color;Grunge_Color;8;0;Create;True;0;0;0;False;0;False;0,0,0,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SamplerNode;210;2607.051,-2433.356;Inherit;True;Property;_MainTex;Albedo_G;0;0;Create;False;0;0;0;False;0;False;-1;9514eb982c7b14f479009ea7066016b2;23d63906f4cab5e43ae54f176a91dead;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
@@ -3350,6 +3346,7 @@ Node;AmplifyShaderEditor.OneMinusNode;270;2459.607,-1512.595;Inherit;False;1;0;F
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;201;4703.265,-1635.118;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/VC_R_Grunge_B_AO_Albedo_G_Normal;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
 Node;AmplifyShaderEditor.RangedFloatNode;265;3411.395,-1342.496;Inherit;False;Property;_Grundge_Gloss;Grundge_Gloss;7;0;Create;True;0;0;0;False;0;False;0.8293218;0;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;275;2667.426,-1417.15;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;219;1704.434,-2026.93;Inherit;True;Property;_Noise;Grunge_Mask;5;0;Create;False;0;0;0;False;0;False;-1;8e0e388733a4e25479f0ca669c0069e1;8e0e388733a4e25479f0ca669c0069e1;True;2;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 WireConnection;267;0;210;0
 WireConnection;267;1;268;0
 WireConnection;266;0;238;0
@@ -3376,4 +3373,4 @@ WireConnection;201;5;275;0
 WireConnection;275;0;270;0
 WireConnection;275;1;270;0
 ASEEND*/
-//CHKSM=5DBA30B56B33C33516F0E1DCBD8A42546A1DA4FF
+//CHKSM=F4AA9A6CCAAAA31F526D73E0B2DE1C07EABE0101
