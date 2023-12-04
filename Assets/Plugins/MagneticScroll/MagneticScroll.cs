@@ -390,6 +390,12 @@ namespace MagneticScrollUtils
                 return; //no items to show
             }
 
+            if (itemToSelectIndex >= newItems.Count)
+                itemToSelectIndex = newItems.Count - 1;
+
+            if (itemToSelectIndex < 0)
+                itemToSelectIndex = 0;
+            
             if (!initialised)
             {
                 Initialise();
