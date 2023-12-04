@@ -24,13 +24,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 937583460084294770}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8056736623055555560}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &6590793842370622995
 BoxCollider:
@@ -78,6 +78,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3491062556393899948}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -85,7 +86,6 @@ Transform:
   m_Children:
   - {fileID: 3872783395350169847}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1441583455122195192
 MonoBehaviour:
@@ -105,8 +105,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   minMaxScale:
-    Min: 0.1
-    Max: 3.5
+    min: {x: 0.1, y: 0.1, z: 0.1}
+    max: {x: 3.5, y: 3.5, z: 3.5}
+  categoryIndex: 0
+  textureIndex: 0
   sprite: {fileID: 0}
 --- !u!114 &1126412886728318617
 MonoBehaviour:
@@ -142,7 +144,7 @@ MonoBehaviour:
   scale: {x: 1, y: 1, z: 1}
   radius: 0.2
   hardness: 3
-  wrapping: 1
+  wrapping: 0
   normalFront: 1
   normalBack: 0
   normalFade: 0.01
