@@ -68,7 +68,7 @@ namespace Gumball
             terrain.transform.SetParent(chunk.transform);
             terrain.transform.position = Grid.GridCenter;
             terrain.tag = ChunkUtils.TerrainTag;
-            terrain.layer = (int) GameObjectLayers.Layer.Terrain;
+            terrain.layer = (int) LayersAndTags.Layer.Terrain;
             
             //apply materials
             MeshRenderer meshRenderer = terrain.AddComponent<MeshRenderer>();
