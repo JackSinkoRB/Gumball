@@ -131,7 +131,7 @@ namespace Gumball
             newDistance = Mathf.Clamp(newDistance, zoomDistanceClamp.Min, zoomDistanceClamp.Max);
             
             distance = newDistance;
-            MoveCamera(velocity * Time.deltaTime * movementSpeed);
+            MoveCamera(velocity * (Time.deltaTime * movementSpeed));
         }
         
         private void DoDecelerationTween()

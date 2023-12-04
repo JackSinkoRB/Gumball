@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using PaintIn3D;
 using UnityEngine;
 using MyBox;
+using UnityEngine.UI;
 using Quaternion = UnityEngine.Quaternion;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
@@ -168,7 +169,9 @@ namespace Gumball
         private void OnPrimaryContactPressed()
         {
             CalculateClickOffset();
-            isClickableUnderPointerOnPress = PrimaryContactInput.IsClickableUnderPointer();
+
+            Graphic[] excludeRing = {DecalEditor.Instance.SelectedDecalUI.Ring};
+            isClickableUnderPointerOnPress = PrimaryContactInput.IsClickableUnderPointer(excludeRing);
         }
         
         private void OnPrimaryContactPerformed()

@@ -40,7 +40,8 @@ namespace Gumball
         public List<LiveDecal> LiveDecals => liveDecals;
         public LiveDecal CurrentSelected => currentSelected;
         public CarManager CurrentCar => currentCar;
-        
+        public SelectedDecalUI SelectedDecalUI => selectedLiveDecalUI;
+
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -219,6 +220,10 @@ namespace Gumball
 
         public void UpdateDecalUnderPointer()
         {
+            Image ringUI = selectedLiveDecalUI.Ring;
+            if (currentSelected != null && PrimaryContactInput.IsClickableUnderPointer(ringUI))
+                return; //keep the current selected
+
             //raycast from the pointer position into the world
             Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
 

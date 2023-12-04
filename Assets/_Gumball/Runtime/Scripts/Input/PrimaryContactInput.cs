@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MyBox;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -132,9 +133,16 @@ namespace Gumball
         /// Is a raycastable graphic under the pointer?
         /// </summary>
         /// <returns></returns>
-        public static bool IsClickableUnderPointer()
+        public static bool IsClickableUnderPointer(Graphic[] exclusions = null)
         {
-            return GetClickableGraphicsUnderPointer().Count > 0;
+            foreach (Graphic graphic in GetClickableGraphicsUnderPointer())
+            {
+                bool isExcluded = exclusions != null && exclusions.Contains(graphic);
+                if (!isExcluded)
+                    return true;
+            }
+
+            return false;
         }
 
         public static bool IsClickableUnderPointer(Graphic graphic)
@@ -164,9 +172,11 @@ namespace Gumball
 
                 foreach (RaycastResult result in raycastResults)
                 {
-                    Graphic graphic = result.gameObject.GetComponent<Graphic>(); 
-                    if (graphic != null)
-                        clickablesUnderPointerCached.Add(graphic);
+                    Graphic graphic = result.gameObject.GetComponent<Graphic>();
+                    if (graphic == null)
+                        continue;
+                    
+                    clickablesUnderPointerCached.Add(graphic);
                 }
                 
             }
