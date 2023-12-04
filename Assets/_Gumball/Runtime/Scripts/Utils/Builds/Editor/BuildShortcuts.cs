@@ -110,8 +110,7 @@ namespace Gumball.Editor
 
         private static string GetFileNameForTarget(BuildTarget target)
         {
-            string fileName = VersionManager.Instance.ApplicationNameFormatted + "_" +
-                              VersionManager.Instance.ShortBuildName;
+            string fileName = Application.productName;
             switch (target)
             {
                 case BuildTarget.Android:
