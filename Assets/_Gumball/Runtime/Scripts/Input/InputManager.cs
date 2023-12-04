@@ -54,11 +54,13 @@ namespace Gumball
             }
         }
         
-        [SerializeField] private InputActionAsset controls;
-        
+        [SerializeField] private PlayerInput playerInput;
+
         private readonly Dictionary<string, InputAction> actionsCached = new();
         private readonly Dictionary<ActionMapType, InputActionMap> actionsMapsCached = new();
 
+        public PlayerInput PlayerInput => playerInput;
+        
         protected override void Initialise()
         {
             base.Initialise();
@@ -82,7 +84,7 @@ namespace Gumball
         private InputAction GetOrCacheAction(string action)
         {
             if (!actionsCached.ContainsKey(action))
-                actionsCached[action] = controls.FindAction(action);
+                actionsCached[action] = playerInput.actions.FindAction(action);
         
             return actionsCached[action];
         }
@@ -92,7 +94,7 @@ namespace Gumball
             if (!actionsMapsCached.ContainsKey(type))
             {
                 //cache it
-                actionsMapsCached[type] = controls.FindActionMap(type.ToString());
+                actionsMapsCached[type] = playerInput.actions.FindActionMap(type.ToString());
             }
 
             return actionsMapsCached[type];
