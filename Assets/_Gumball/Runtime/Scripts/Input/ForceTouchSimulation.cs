@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +14,20 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Initialise()
         {
-            CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
+            try
             {
-                TouchSimulation.Enable();
-         
-                //need to set the device as the current device after enabled
-                InputManager.Instance.PlayerInput.SwitchCurrentControlScheme(InputSystem.devices.First(device => device == Touchscreen.current));
-            });
+                CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
+                {
+                    TouchSimulation.Enable();
+
+                    //need to set the device as the current device after enabled
+                    InputManager.Instance.PlayerInput.SwitchCurrentControlScheme(InputSystem.devices.First(device => device == Touchscreen.current));
+                });
+            }
+            catch (Exception)
+            {
+                //coroutine helper may not be set up for this scene
+            }
         }
     }
 }
