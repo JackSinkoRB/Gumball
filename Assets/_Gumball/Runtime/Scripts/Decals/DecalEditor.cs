@@ -15,8 +15,9 @@ namespace Gumball
     {
 
         public const int MaxDecalsAllowed = 50;
-        
-        private static readonly int AlbedoShaderID = Shader.PropertyToID("_Albedo");
+
+        private const string textureString = "_BaseMap";
+        private static readonly int textureID = Shader.PropertyToID(textureString);
 
         public static event Action onSessionStart;
         public static event Action onSessionEnd;
@@ -269,7 +270,7 @@ namespace Gumball
             MeshRenderer meshRenderer = meshFilter.GetComponent<MeshRenderer>();
             
             //before resetting the textures, clear the previous texture it has made
-            meshRenderer.sharedMaterial.SetTexture(AlbedoShaderID, null);
+            meshRenderer.sharedMaterial.SetTexture(textureID, null);
 
             if (meshFilter.gameObject.GetComponent<P3dPaintableTexture>() != null)
                 DestroyImmediate(meshFilter.gameObject.GetComponent<P3dPaintableTexture>());
@@ -285,7 +286,7 @@ namespace Gumball
             paintable.enabled = true;
 
             //paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
-            paintableTexture.Slot = new P3dSlot(0, "_BaseMap"); //car body shader uses albedo
+            paintableTexture.Slot = new P3dSlot(0, textureString); //car body shader uses albedo
             
             PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture, meshCollider);
             paintableMeshes.Add(paintableMesh);
