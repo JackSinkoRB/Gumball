@@ -107,7 +107,8 @@ namespace Gumball
                 map.Enable();
             else map.Disable();
             
-            GlobalLoggers.InputLogger.Log($"{(enable ? "Enabled" : "Disabled")} action map {type.ToString()}");
+            if (GlobalLoggers.HasLoaded)
+                GlobalLoggers.InputLogger.Log($"{(enable ? "Enabled" : "Disabled")} action map {type.ToString()}");
         }
 
     }

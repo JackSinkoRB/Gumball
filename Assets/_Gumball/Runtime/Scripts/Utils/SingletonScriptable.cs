@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,16 +21,36 @@ namespace Gumball
                 if (instance == null)
                 {
                     Stopwatch stopwatch = Stopwatch.StartNew();
+                    LoadInstanceAsync();
                     
-                    AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
-                    instance = handle.WaitForCompletion();
-                    
-                    stopwatch.Stop();
-                    Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously ({stopwatch.ElapsedMilliseconds}ms)");
+                    if (!Application.isPlaying)
+                    {
+                        instance = handle.WaitForCompletion();
+                        stopwatch.Stop();
+                        Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously ({stopwatch.ElapsedMilliseconds}ms)");
+                    }
+                    else
+                    {
+                        throw new NullReferenceException($"Trying to access singleton scriptable {typeof(T).Name}, but it has not loaded yet.");
+                    }
                 }
                 return instance;
             }
         }
+
+        public static bool HasLoaded => instance != null;
+        public static bool IsLoading => handle.IsValid() && !handle.IsDone;
         
+        private static AsyncOperationHandle<T> handle;
+        
+        public static AsyncOperationHandle LoadInstanceAsync()
+        {
+            if (IsLoading)
+                return handle;
+            
+            handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
+            handle.Completed += h => instance = h.Result;
+            return handle;
+        }
     }
 }
