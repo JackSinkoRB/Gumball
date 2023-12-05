@@ -70,7 +70,10 @@ namespace Gumball
         private void Update()
         {
             CheckToZoomWithKeyboard();
+        }
 
+        private void LateUpdate()
+        {
             if (PrimaryContactInput.IsPressed)
                 SetVelocity(PrimaryContactInput.OffsetSinceLastFrame);
         }
