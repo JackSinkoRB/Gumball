@@ -91,7 +91,8 @@ namespace Gumball
         
         private void OnPrimaryContactRelease()
         {
-            DoDecelerationTween();
+            if (!pressedUI)
+                DoDecelerationTween();
         }
         
         private void OnPrimaryContactMove(Vector2 offset)
