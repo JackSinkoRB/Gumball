@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using MyBox;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,7 +19,6 @@ namespace Gumball
         [SerializeField] private float xSpeed = 0.5f;
         [SerializeField] private float ySpeed = 0.5f;
         [SerializeField] private MinMaxFloat yClamp = new(10, 60);
-        [SerializeField] private float movementSpeed = 100;
         [SerializeField] private float decelerationDuration = 0.5f;
 
         [Header("Zoom")]
@@ -30,8 +30,8 @@ namespace Gumball
         private float horizontal;
         private float vertical;
         private Vector2 velocity;
-        
         private Tween decelerationTween;
+        private bool pressedUI;
 
         private void OnEnable()
         {
@@ -66,12 +66,15 @@ namespace Gumball
             
             gameObject.SetActive(false);
         }
-
+        
         private void Update()
         {
             CheckToZoomWithKeyboard();
+
+            if (PrimaryContactInput.IsPressed)
+                SetVelocity(PrimaryContactInput.OffsetSinceLastFrame);
         }
-        
+
         private void OnPinch(Vector2 offset)
         {
             ModifyZoom((offset.x + offset.y) * pinchZoomSpeed);
@@ -85,9 +88,7 @@ namespace Gumball
 
             pressedUI = PrimaryContactInput.IsClickableUnderPointer();
         }
-
-        private bool pressedUI;
-
+        
         private void OnPrimaryContactRelease()
         {
             DoDecelerationTween();
@@ -106,12 +107,17 @@ namespace Gumball
 
             if (PinchInput.IsPinching)
             {
-                velocity = Vector2.zero;
+                SetVelocity(Vector2.zero);
                 return;
             }
 
-            velocity = offset;
-            MoveCamera(offset * Time.deltaTime * movementSpeed);
+            SetVelocity(offset);
+            MoveCamera(velocity);
+        }
+
+        private void SetVelocity(Vector2 newVelocity)
+        {
+            velocity = newVelocity;
         }
 
         private void MoveCamera(Vector2 offset)
@@ -133,18 +139,18 @@ namespace Gumball
 
         private void ModifyZoom(float value)
         {
-            float newDistance = distance - (Time.deltaTime * value);
+            float newDistance = distance - value;
             newDistance = Mathf.Clamp(newDistance, zoomDistanceClamp.Min, zoomDistanceClamp.Max);
             
             distance = newDistance;
-            MoveCamera(velocity * (Time.deltaTime * movementSpeed));
+            MoveCamera(Vector2.zero);
         }
         
         private void DoDecelerationTween()
         {
             decelerationTween?.Kill();
             decelerationTween = DOTween.To(() => velocity, x => velocity = x, Vector2.zero, decelerationDuration)
-                .OnUpdate(() => MoveCamera(velocity * Time.deltaTime * movementSpeed));
+                .OnUpdate(() => MoveCamera(velocity));
         }
         
         private float ClampAngle(float angle, float min, float max)
