@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using System.IO;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -9,16 +10,37 @@ namespace Gumball
     /// <summary>
     /// A tool for identifying builds
     /// </summary>
-    [CreateAssetMenu(menuName = "Gumball/Singletons/Version Manager")]
-    public class VersionManager : SingletonScriptable<VersionManager>
+    public class VersionManager : ScriptableObject
     {
+    
+        private static VersionManager instance;
+    
+        public static VersionManager Instance
+        {
+            get
+            {
+                if (instance == null)
+                    instance = Resources.Load<VersionManager>("Version Manager");
+    
+                if (instance == null)
+                {
+                    instance = CreateInstance<VersionManager>();
+                    #if UNITY_EDITOR
+                    if(!Directory.Exists("Assets/Resources/"))
+                        Directory.CreateDirectory("Assets/Resources/");
+                    AssetDatabase.CreateAsset(instance, "Assets/Resources/Version Manager.asset");
+                    #endif
+                }
+    
+                return instance;
+            }
+        }
 
         /// <summary>
         /// The full formatted build name.
-        /// <remarks>These have full public access, as (for some odd reason) with private setters, the values are null in builds.</remarks>
         /// </summary>
         [SerializeField] public string FullBuildName = "NOT INITIALISED";
-
+        
         [SerializeField] public string ShortBuildName = "NOT INITIALISED";
         [SerializeField] public string ApplicationNameFormatted = "NOT INITIALISED";
         [SerializeField] public string CommitHash = "NOT INITIALISED";

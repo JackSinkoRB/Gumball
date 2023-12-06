@@ -14,15 +14,11 @@ namespace Gumball
 
         private void Awake()
         {
-            label.text = "Loading version...";
-            this.PerformAfterTrue(() => VersionManager.HasLoaded, () =>
-            {
 #if UNITY_EDITOR
-                label.text = $"EDITOR_{VersionManager.Instance.ShortBuildName}";
+            label.text = $"EDITOR_{VersionManager.Instance.ShortBuildName}";
 #else
-                label.text = VersionManager.Instance.FullBuildName;
+            label.text = VersionManager.Instance.FullBuildName;
 #endif
-            });
         }
 
     }

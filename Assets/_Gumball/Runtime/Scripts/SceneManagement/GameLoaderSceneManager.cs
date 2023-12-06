@@ -103,7 +103,6 @@ namespace Gumball
                 //LOAD ALL SINGLETON SCRIPTABLES HERE
                 GlobalLoggers.LoadInstanceAsync(),
                 SettingsManager.LoadInstanceAsync(),
-                VersionManager.LoadInstanceAsync(),
                 DecalManager.LoadInstanceAsync()
             };
             return handles;
