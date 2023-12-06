@@ -13,22 +13,46 @@ namespace Gumball
     {
 
         [Serializable]
-        public struct Resolution
+        public struct ResolutionData
         {
-            public int width;
-            public int height;
-
-            public Resolution(int width, int height)
+            [Serializable]
+            public struct Resolution
             {
-                this.width = width;
-                this.height = height;
+                public int width;
+                public int height;
+
+                public Resolution(int width, int height)
+                {
+                    this.width = width;
+                    this.height = height;
+                }
+            }
+            
+            [SerializeField] private Resolution mobile;
+            [SerializeField] private Resolution pc;
+
+            public ResolutionData(Resolution mobile, Resolution pc)
+            {
+                this.mobile = mobile;
+                this.pc = pc;
+            }
+
+            public Resolution GetResolution()
+            {
+#if UNITY_ANDROID && !UNITY_EDITOR
+                return mobile;               
+#else
+                return pc;
+#endif
             }
         }
         
         private const string textureString = "_BaseMap";
         private static readonly int textureID = Shader.PropertyToID(textureString);
         
-        [SerializeField] private Resolution textureResolution = new(512, 512);
+        [SerializeField] private ResolutionData textureResolution = new(
+            new ResolutionData.Resolution(512, 512), 
+            new ResolutionData.Resolution(512, 512));
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private P3dPaintable paintable;
@@ -52,8 +76,8 @@ namespace Gumball
             meshCollider = meshFilter.gameObject.GetComponent<MeshCollider>(true);
             materialCloner = meshFilter.gameObject.GetComponent<P3dMaterialCloner>(true);
 
-            paintableTexture.Width = textureResolution.width;
-            paintableTexture.Height = textureResolution.height;
+            paintableTexture.Width = textureResolution.GetResolution().width;
+            paintableTexture.Height = textureResolution.GetResolution().height;
             
             materialCloner.enabled = true;
             paintableTexture.enabled = true;
