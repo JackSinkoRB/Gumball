@@ -14,15 +14,14 @@ namespace Gumball
 
         public DecalUICategory[] DecalUICategories => decalUICategories;
 
-        public static LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite, int priority = -1)
+        public static LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture, int priority = -1)
         {
             LiveDecal liveDecal = Instantiate(Instance.liveDecalPrefab.gameObject).GetComponent<LiveDecal>();
-            liveDecal.Initialise(Array.IndexOf(Instance.decalUICategories, category), Array.IndexOf(category.Sprites, sprite));
-            liveDecal.SetSprite(sprite);
+            liveDecal.Initialise(Array.IndexOf(Instance.decalUICategories, category), Array.IndexOf(category.DecalTextures, decalTexture));
+            liveDecal.SetSprite(decalTexture.Sprite);
             DontDestroyOnLoad(liveDecal);
 
-            if (category.CategoryName.Equals("Shapes"))
-                liveDecal.SetColor(Color.gray);
+            liveDecal.SetColor(decalTexture.CanColour ? Color.gray : Color.white);
 
             liveDecal.SetPriority(priority);
             
@@ -68,8 +67,8 @@ namespace Gumball
         private static LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
         {
             DecalUICategory category = Instance.decalUICategories[data.CategoryIndex];
-            Sprite sprite = category.Sprites[data.TextureIndex];
-            LiveDecal liveDecal = CreateLiveDecal(category, sprite, data.Priority);
+            DecalTexture decalTexture = category.DecalTextures[data.TextureIndex];
+            LiveDecal liveDecal = CreateLiveDecal(category, decalTexture, data.Priority);
             liveDecal.UpdatePosition(data.LastKnownPosition.ToVector3(), data.LastKnownHitNormal.ToVector3(), Quaternion.Euler(data.LastKnownRotationEuler.ToVector3()));
             liveDecal.SetScale(data.Scale.ToVector3());
             liveDecal.SetAngle(data.Angle);

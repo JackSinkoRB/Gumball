@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MyBox;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -31,11 +32,16 @@ namespace Gumball
         /// <summary>
         /// The amount the primary position has moved since pressed.
         /// </summary>
-        public static Vector2 OffsetSincePressed;
+        public static Vector2 OffsetSincePressed { get; private set; }
+        /// <summary>
+        /// The amount the primary position has moved since the last frame.
+        /// </summary>
+        public static Vector2 OffsetSinceLastFrame { get; private set; }
 
-        private static Vector2 lastKnownPosition;
+        private static Vector2 lastKnownPositionOnPerformed;
         private static int graphicsUnderPointerLastCached = -1;
         private static readonly List<Graphic> clickablesUnderPointerCached = new();
+        private static Vector2 lastKnownPosition;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void InitialisePreSceneLoad()
@@ -51,24 +57,25 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void InitialisePostSceneLoad()
         {
-            try
+            CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
             {
-                CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
-                {
-                    InputManager.PrimaryContact.started -= OnPressed;
-                    InputManager.PrimaryContact.started += OnPressed;
+                InputManager.PrimaryContact.started -= OnPressed;
+                InputManager.PrimaryContact.started += OnPressed;
 
-                    InputManager.PrimaryContact.canceled -= OnReleased;
-                    InputManager.PrimaryContact.canceled += OnReleased;
+                InputManager.PrimaryContact.canceled -= OnReleased;
+                InputManager.PrimaryContact.canceled += OnReleased;
 
-                    InputManager.PrimaryPosition.performed -= OnPerformed;
-                    InputManager.PrimaryPosition.performed += OnPerformed;
-                });
-            }
-            catch (NullReferenceException)
-            {
-                //scene might not be set up for coroutine helper
-            }
+                InputManager.PrimaryPosition.performed -= OnPerformed;
+                InputManager.PrimaryPosition.performed += OnPerformed;
+
+                CoroutineHelper.onUnityUpdate -= Update;
+                CoroutineHelper.onUnityUpdate += Update;
+            });
+        }
+        
+        private static void Update()
+        {
+            UpdateOffsetSinceLastFrame();
         }
         
         public static void OnPressed(InputAction.CallbackContext context)
@@ -76,8 +83,9 @@ namespace Gumball
             IsPressed = true;
             PositionOnPress = InputManager.PrimaryPosition.ReadValue<Vector2>();
             Position = PositionOnPress;
-            lastKnownPosition = Position;
+            lastKnownPositionOnPerformed = Position;
             OffsetSincePressed = Vector2.zero;
+            OffsetSinceLastFrame = Vector2.zero;
             
             onPress?.Invoke();
         }
@@ -98,19 +106,48 @@ namespace Gumball
             OffsetSincePressed = PositionOnPress - Position;
             
             onPerform?.Invoke();
+
+            Vector2 offsetSinceLastFrame = Position - lastKnownPositionOnPerformed;
+            lastKnownPositionOnPerformed = Position;
             
-            Vector2 offsetSinceLastFrame = Position - lastKnownPosition;
-            lastKnownPosition = Position;
-            if (offsetSinceLastFrame.sqrMagnitude > 0.01f)
+            if (!offsetSinceLastFrame.Approximately(Vector2.zero))
             {
                 if (!IsDragging)
                     OnStartDragging();
 
-                OnDrag(offsetSinceLastFrame);
+                Vector2 offsetNormalised = GetNormalisedScreenPosition(offsetSinceLastFrame);
+                OnDrag(offsetNormalised);
             } else if (IsDragging)
             {
                 OnStopDragging();
             }
+        }
+
+        /// <summary>
+        /// Is a raycastable graphic under the pointer?
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsClickableUnderPointer(Graphic[] exclusions = null)
+        {
+            foreach (Graphic graphic in GetClickableGraphicsUnderPointer())
+            {
+                bool isExcluded = exclusions != null && exclusions.Contains(graphic);
+                if (!isExcluded)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsClickableUnderPointer(Graphic graphic)
+        {
+            foreach (Graphic graphicUnderPointer in GetClickableGraphicsUnderPointer())
+            {
+                if (graphicUnderPointer == graphic)
+                    return true;
+            }
+
+            return false;
         }
         
         private static void OnStartDragging()
@@ -126,26 +163,6 @@ namespace Gumball
         private static void OnStopDragging()
         {
             onDragStop?.Invoke();
-        }
-
-        /// <summary>
-        /// Is a raycastable graphic under the pointer?
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsClickableUnderPointer()
-        {
-            return GetClickableGraphicsUnderPointer().Count > 0;
-        }
-
-        public static bool IsClickableUnderPointer(Graphic graphic)
-        {
-            foreach (Graphic graphicUnderPointer in GetClickableGraphicsUnderPointer())
-            {
-                if (graphicUnderPointer == graphic)
-                    return true;
-            }
-
-            return false;
         }
         
         private static List<Graphic> GetClickableGraphicsUnderPointer()
@@ -164,14 +181,28 @@ namespace Gumball
 
                 foreach (RaycastResult result in raycastResults)
                 {
-                    Graphic graphic = result.gameObject.GetComponent<Graphic>(); 
-                    if (graphic != null)
-                        clickablesUnderPointerCached.Add(graphic);
+                    Graphic graphic = result.gameObject.GetComponent<Graphic>();
+                    if (graphic == null)
+                        continue;
+                    
+                    clickablesUnderPointerCached.Add(graphic);
                 }
                 
             }
             
             return clickablesUnderPointerCached;
+        }
+        
+        private static Vector2 GetNormalisedScreenPosition(Vector2 screenPosition)
+        {
+            return new Vector2(screenPosition.x / Screen.width, screenPosition.y / Screen.height);
+        }
+
+        private static void UpdateOffsetSinceLastFrame()
+        {
+            Vector2 offset = Position - lastKnownPosition;
+            OffsetSinceLastFrame = GetNormalisedScreenPosition(offset);
+            lastKnownPosition = Position;
         }
 
     }

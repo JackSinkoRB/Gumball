@@ -2,37 +2,51 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.VisualScripting;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-[CreateAssetMenu(menuName = "Logging/Logger")]
-public class Logger : ScriptableObject
+namespace Gumball
 {
-
-    [SerializeField] private bool isEnabled = true;
-
-    /// <summary>
-    /// Shortcut to check if the logger exists before logging the message.
-    /// </summary>
-    [Conditional("ENABLE_LOGS")]
-    public static void Log(Logger logger, string message)
+    [CreateAssetMenu(menuName = "Logging/Logger")]
+    public class Logger : ScriptableObject
     {
-        if (logger == null) return;
-        logger.Log(message);
-    }
 
-    [Conditional("ENABLE_LOGS")]
-    public void Log(string message)
-    {
-        if (!isEnabled) return;
-        try
+        [SerializeField] private bool isEnabled = true;
+
+        /// <summary>
+        /// Shortcut to check if the logger exists before logging the message.
+        /// </summary>
+        [Conditional("ENABLE_LOGS")]
+        public static void Log(Logger logger, string message)
         {
-            Debug.Log("[" + name + "] " + message);
+            if (logger == null)
+                return;
+
+            logger.Log(message);
         }
-        catch (Exception)
+
+        [Conditional("ENABLE_LOGS")]
+        public void Log(string message)
         {
-            Debug.LogWarning("Error while logging.");
+            if (!isEnabled)
+                return;
+
+            try
+            {
+                if (!UnityThread.allowsAPI)
+                {
+                    Debug.Log($"[async] {message}");
+                    return;
+                }
+
+                Debug.Log($"[{name}] {message}");
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Error while logging.\n{e.Message}\n{e.StackTrace}");
+            }
         }
+
     }
-    
 }

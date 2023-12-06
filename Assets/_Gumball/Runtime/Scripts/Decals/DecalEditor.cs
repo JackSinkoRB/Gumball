@@ -15,10 +15,6 @@ namespace Gumball
     {
 
         public const int MaxDecalsAllowed = 50;
-        
-        private const int decalLayer = 6;
-        private static readonly LayerMask decalLayerMask = 1 << decalLayer;
-        private static readonly int AlbedoShaderID = Shader.PropertyToID("_Albedo");
 
         public static event Action onSessionStart;
         public static event Action onSessionEnd;
@@ -27,9 +23,7 @@ namespace Gumball
         public event Action<LiveDecal> onDeselectLiveDecal;
         public event Action<LiveDecal> onCreateLiveDecal;
         public event Action<LiveDecal> onDestroyLiveDecal;
-        
-        [Tooltip("The shader that the car body uses. The decal will only be applied to the materials using this shader.")]
-        [SerializeField] private Shader carBodyShader;
+
         [SerializeField] private CarManager currentCar;
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
         [SerializeField] private DecalCameraController cameraController;
@@ -44,7 +38,8 @@ namespace Gumball
         public List<LiveDecal> LiveDecals => liveDecals;
         public LiveDecal CurrentSelected => currentSelected;
         public CarManager CurrentCar => currentCar;
-        
+        public SelectedDecalUI SelectedDecalUI => selectedLiveDecalUI;
+
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -122,9 +117,10 @@ namespace Gumball
             GlobalLoggers.DecalsLogger.Log($"Starting session for {car.gameObject.name} with {liveDecals.Count} saved decals.");
 
             paintableMeshes.Clear();
-            foreach (MeshFilter meshFilter in car.transform.GetComponentsInAllChildren<MeshFilter>())
+            foreach (PaintableMesh paintableMesh in car.transform.GetComponentsInAllChildren<PaintableMesh>())
             {
-                SetMeshPaintable(meshFilter);
+                paintableMeshes.Add(paintableMesh);
+                paintableMesh.EnablePainting();
             }
             
             //disable the car's collider temporarily
@@ -158,7 +154,7 @@ namespace Gumball
                 for (int i = paintableMeshes.Count - 1; i >= 0; i--)
                 {
                     PaintableMesh paintableMesh = paintableMeshes[i];
-                    RemoveMeshPaintable(paintableMesh);
+                    paintableMesh.DisablePainting();
                     paintableMeshes.Remove(paintableMesh);
                 }
             });
@@ -173,9 +169,9 @@ namespace Gumball
             currentCar = null;
         }
 
-        public LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite)
+        public LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture)
         {
-            LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, sprite, priorityCount);
+            LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, decalTexture, priorityCount);
             priorityCount++;
             
             liveDecals.Add(liveDecal);
@@ -221,12 +217,16 @@ namespace Gumball
 
         public void UpdateDecalUnderPointer()
         {
+            Image ringUI = selectedLiveDecalUI.Ring;
+            if (currentSelected != null && PrimaryContactInput.IsClickableUnderPointer(ringUI))
+                return; //keep the current selected
+
             //raycast from the pointer position into the world
             Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
 
             //max raycast distance from the camera to the middle of the car, so it doesn't detect decals on the other side
             float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, currentCar.transform.position);
-            int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, maxRaycastDistance, decalLayerMask);
+            int raycastHits = Physics.RaycastNonAlloc(ray, decalsUnderPointer, maxRaycastDistance, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.LiveDecal));
 
             LiveDecal closestDecal = null;
             float distanceToClosestDecalSqr = Mathf.Infinity;
@@ -259,44 +259,6 @@ namespace Gumball
             if (closestDecal != null)
                 SelectLiveDecal(closestDecal);
             else DeselectLiveDecal();
-        }
-        
-        private void SetMeshPaintable(MeshFilter meshFilter)
-        {
-            MeshRenderer meshRenderer = meshFilter.GetComponent<MeshRenderer>();
-
-            if (!meshRenderer.material.shader.Equals(carBodyShader))
-                return;
-
-            //before resetting the textures, clear the previous texture it has made
-            meshRenderer.sharedMaterial.SetTexture(AlbedoShaderID, null);
-
-            DestroyImmediate(meshFilter.gameObject.GetComponent<P3dPaintableTexture>());
-            
-            P3dPaintable paintable = meshFilter.gameObject.GetComponent<P3dPaintable>(true);
-            P3dPaintableTexture paintableTexture = meshFilter.gameObject.GetComponent<P3dPaintableTexture>(true);
-            MeshCollider meshCollider = meshFilter.gameObject.GetComponent<MeshCollider>(true);
-            P3dMaterialCloner materialCloner = meshFilter.gameObject.GetComponent<P3dMaterialCloner>(true);
-            
-            materialCloner.enabled = true;
-            paintableTexture.enabled = true;
-            meshCollider.enabled = true;
-            paintable.enabled = true;
-
-            //paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
-            paintableTexture.Slot = new P3dSlot(0, "_Albedo"); //car body shader uses albedo
-            
-            PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture, meshCollider);
-            paintableMeshes.Add(paintableMesh);
-        }
-
-        private void RemoveMeshPaintable(PaintableMesh paintableMesh)
-        {
-            Destroy(paintableMesh.MaterialCloner);
-            Destroy(paintableMesh.Paintable);
-            paintableMesh.PaintableTexture.enabled = false;
-            paintableMesh.MeshCollider.enabled = false;
-            paintableMeshes.Remove(paintableMesh);
         }
         
     }

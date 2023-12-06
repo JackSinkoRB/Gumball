@@ -10,6 +10,7 @@ namespace Gumball
     public class SelectedDecalUI : MonoBehaviour
     {
 
+        [SerializeField] private Image ring;
         [SerializeField] private Image invalidDecal;
         [Space(5)]
         [SerializeField] private Image image;
@@ -25,6 +26,7 @@ namespace Gumball
         
         private LiveDecal selectedDecal => DecalEditor.Instance.CurrentSelected;
 
+        public Image Ring => ring;
         public ButtonEvents ScaleRotationHandle => scaleRotationHandle;
 
         private Tween currentFadeTween;

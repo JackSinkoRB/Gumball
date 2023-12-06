@@ -64,7 +64,7 @@ namespace Gumball
             {
                 ApplyCosmeticParts();
                 yield return ApplyWheelSetup();
-                ApplyPaint();
+                //ApplyPaint();
             }
 
             if (updateEngine)

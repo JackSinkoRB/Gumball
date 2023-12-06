@@ -33,6 +33,7 @@ namespace Gumball
             
             //move the car to the origin to be framed by the camera
             PlayerCarManager.Instance.CurrentCar.Rigidbody.velocity = Vector3.zero;
+            PlayerCarManager.Instance.CurrentCar.Rigidbody.angularVelocity = Vector3.zero;
             PlayerCarManager.Instance.CurrentCar.Rigidbody.Move(Vector3.zero, Quaternion.Euler(Vector3.zero));
             
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car, false);

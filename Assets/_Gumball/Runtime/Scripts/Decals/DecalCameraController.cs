@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using MyBox;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,18 +14,25 @@ namespace Gumball
         
         [SerializeField] private Transform target;
         [SerializeField] private Vector3 targetOffset = new(0, 0.5f);
-        [SerializeField] private float distance = 5.0f;
+        
+        [Header("Movement")]
         [SerializeField] private float xSpeed = 0.5f;
         [SerializeField] private float ySpeed = 0.5f;
         [SerializeField] private MinMaxFloat yClamp = new(10, 60);
         [SerializeField] private float decelerationDuration = 0.5f;
-        [SerializeField] private float zoomSpeed = 1;
-
+        [SerializeField] private float decelerationSpeed = 50;
+        
+        [Header("Zoom")]
+        [SerializeField] private float distance = 5.0f;
+        [SerializeField] private float pinchZoomSpeed = 1;
+        [SerializeField] private float keyboardZoomSpeed = 1;
+        [SerializeField] private MinMaxFloat zoomDistanceClamp = new(10, 50);
+        
         private float horizontal;
         private float vertical;
         private Vector2 velocity;
-        
         private Tween decelerationTween;
+        private bool pressedUI;
 
         private void OnEnable()
         {
@@ -59,15 +67,21 @@ namespace Gumball
             
             gameObject.SetActive(false);
         }
-
+        
         private void Update()
         {
             CheckToZoomWithKeyboard();
         }
-        
+
+        private void LateUpdate()
+        {
+            if (PrimaryContactInput.IsPressed)
+                SetVelocity(PrimaryContactInput.OffsetSinceLastFrame);
+        }
+
         private void OnPinch(Vector2 offset)
         {
-            ModifyZoom(offset.x + offset.y);
+            ModifyZoom((offset.x + offset.y) * pinchZoomSpeed);
         }
 
         private void OnPrimaryContactPress()
@@ -78,12 +92,11 @@ namespace Gumball
 
             pressedUI = PrimaryContactInput.IsClickableUnderPointer();
         }
-
-        private bool pressedUI;
-
+        
         private void OnPrimaryContactRelease()
         {
-            DoDecelerationTween();
+            if (!pressedUI)
+                DoDecelerationTween();
         }
         
         private void OnPrimaryContactMove(Vector2 offset)
@@ -96,9 +109,20 @@ namespace Gumball
 
             if (pressedUI)
                 return; //don't move the camera if selecting UI
-            
-            velocity = offset;
-            MoveCamera(offset);
+
+            if (PinchInput.IsPinching)
+            {
+                SetVelocity(Vector2.zero);
+                return;
+            }
+
+            SetVelocity(offset);
+            MoveCamera(velocity);
+        }
+
+        private void SetVelocity(Vector2 newVelocity)
+        {
+            velocity = newVelocity;
         }
 
         private void MoveCamera(Vector2 offset)
@@ -120,16 +144,18 @@ namespace Gumball
 
         private void ModifyZoom(float value)
         {
-            float newDistance = distance - (Time.deltaTime * value * zoomSpeed);
+            float newDistance = distance - value;
+            newDistance = Mathf.Clamp(newDistance, zoomDistanceClamp.Min, zoomDistanceClamp.Max);
+            
             distance = newDistance;
-            MoveCamera(velocity);
+            MoveCamera(Vector2.zero);
         }
         
         private void DoDecelerationTween()
         {
             decelerationTween?.Kill();
             decelerationTween = DOTween.To(() => velocity, x => velocity = x, Vector2.zero, decelerationDuration)
-                .OnUpdate(() => MoveCamera(velocity));
+                .OnUpdate(() => MoveCamera(velocity * Time.deltaTime * decelerationSpeed));
         }
         
         private float ClampAngle(float angle, float min, float max)
@@ -150,14 +176,13 @@ namespace Gumball
         private void CheckToZoomWithKeyboard()
         {
 #if UNITY_EDITOR || !UNITY_ANDROID
-            const float keyboardZoomSpeed = 800f;
             if (Keyboard.current.numpadPlusKey.isPressed)
             {
-                ModifyZoom(keyboardZoomSpeed * Time.deltaTime);
+                ModifyZoom(keyboardZoomSpeed);
             }
             else if (Keyboard.current.numpadMinusKey.isPressed)
             {
-                ModifyZoom(-keyboardZoomSpeed * Time.deltaTime);
+                ModifyZoom(-keyboardZoomSpeed);
             }
 #endif
         }
