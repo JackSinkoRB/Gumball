@@ -15,8 +15,6 @@ namespace Gumball
             TrafficCar = 9
         }
         
-        public const string CanPaintDecalsTag = "CanPaintDecals";
-
         public static LayerMask TrafficCarCollisionLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerVehicle;
 
         public static bool ContainsLayer(this LayerMask layerMask, int layer)

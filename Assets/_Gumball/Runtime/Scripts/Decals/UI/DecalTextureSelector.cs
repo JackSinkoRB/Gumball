@@ -66,14 +66,14 @@ namespace Gumball
             backButton.gameObject.SetActive(true);
 
             PoolPopulatedIcons();
-            foreach (Sprite sprite in selectedCategory.Sprites)
+            foreach (DecalTexture decalTexture in selectedCategory.DecalTextures)
             {
                 TextureOptionUI textureOption = textureOptionPrefab.GetSpareOrCreate<TextureOptionUI>(contentHolder);
-                textureOption.Icon.sprite = sprite;
+                textureOption.Icon.sprite = decalTexture.Sprite;
                 textureOption.transform.SetAsLastSibling();
                 
                 textureOption.Button.onClick.RemoveAllListeners();
-                textureOption.Button.onClick.AddListener(() => OnClickTextureOption(sprite));
+                textureOption.Button.onClick.AddListener(() => OnClickTextureOption(decalTexture));
             }
 
             ResetScrollRect();
@@ -88,9 +88,9 @@ namespace Gumball
             PopulateTextures();
         }
         
-        private void OnClickTextureOption(Sprite sprite)
+        private void OnClickTextureOption(DecalTexture decalTexture)
         {
-            LiveDecal decal = DecalEditor.Instance.CreateLiveDecal(selectedCategory, sprite);
+            LiveDecal decal = DecalEditor.Instance.CreateLiveDecal(selectedCategory, decalTexture);
             DecalEditor.Instance.SelectLiveDecal(decal);
         }
 

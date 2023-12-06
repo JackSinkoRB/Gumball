@@ -16,9 +16,6 @@ namespace Gumball
 
         public const int MaxDecalsAllowed = 50;
 
-        private const string textureString = "_BaseMap";
-        private static readonly int textureID = Shader.PropertyToID(textureString);
-
         public static event Action onSessionStart;
         public static event Action onSessionEnd;
         
@@ -120,11 +117,10 @@ namespace Gumball
             GlobalLoggers.DecalsLogger.Log($"Starting session for {car.gameObject.name} with {liveDecals.Count} saved decals.");
 
             paintableMeshes.Clear();
-            foreach (MeshFilter meshFilter in car.transform.GetComponentsInAllChildren<MeshFilter>())
+            foreach (PaintableMesh paintableMesh in car.transform.GetComponentsInAllChildren<PaintableMesh>())
             {
-                if (!meshFilter.gameObject.tag.Equals(LayersAndTags.CanPaintDecalsTag))
-                    continue;
-                SetMeshPaintable(meshFilter);
+                paintableMeshes.Add(paintableMesh);
+                paintableMesh.EnablePainting();
             }
             
             //disable the car's collider temporarily
@@ -158,7 +154,7 @@ namespace Gumball
                 for (int i = paintableMeshes.Count - 1; i >= 0; i--)
                 {
                     PaintableMesh paintableMesh = paintableMeshes[i];
-                    RemoveMeshPaintable(paintableMesh);
+                    paintableMesh.DisablePainting();
                     paintableMeshes.Remove(paintableMesh);
                 }
             });
@@ -173,9 +169,9 @@ namespace Gumball
             currentCar = null;
         }
 
-        public LiveDecal CreateLiveDecal(DecalUICategory category, Sprite sprite)
+        public LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture)
         {
-            LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, sprite, priorityCount);
+            LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, decalTexture, priorityCount);
             priorityCount++;
             
             liveDecals.Add(liveDecal);
@@ -263,42 +259,6 @@ namespace Gumball
             if (closestDecal != null)
                 SelectLiveDecal(closestDecal);
             else DeselectLiveDecal();
-        }
-        
-        private void SetMeshPaintable(MeshFilter meshFilter)
-        {
-            MeshRenderer meshRenderer = meshFilter.GetComponent<MeshRenderer>();
-            
-            //before resetting the textures, clear the previous texture it has made
-            meshRenderer.sharedMaterial.SetTexture(textureID, null);
-
-            if (meshFilter.gameObject.GetComponent<P3dPaintableTexture>() != null)
-                DestroyImmediate(meshFilter.gameObject.GetComponent<P3dPaintableTexture>());
-            
-            P3dPaintable paintable = meshFilter.gameObject.GetComponent<P3dPaintable>(true);
-            P3dPaintableTexture paintableTexture = meshFilter.gameObject.GetComponent<P3dPaintableTexture>(true);
-            MeshCollider meshCollider = meshFilter.gameObject.GetComponent<MeshCollider>(true);
-            P3dMaterialCloner materialCloner = meshFilter.gameObject.GetComponent<P3dMaterialCloner>(true);
-
-            materialCloner.enabled = true;
-            paintableTexture.enabled = true;
-            meshCollider.enabled = true;
-            paintable.enabled = true;
-
-            //paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
-            paintableTexture.Slot = new P3dSlot(0, textureString); //car body shader uses albedo
-            
-            PaintableMesh paintableMesh = new PaintableMesh(paintable, materialCloner, paintableTexture, meshCollider);
-            paintableMeshes.Add(paintableMesh);
-        }
-
-        private void RemoveMeshPaintable(PaintableMesh paintableMesh)
-        {
-            Destroy(paintableMesh.MaterialCloner);
-            Destroy(paintableMesh.Paintable);
-            paintableMesh.PaintableTexture.enabled = false;
-            paintableMesh.MeshCollider.enabled = false;
-            paintableMeshes.Remove(paintableMesh);
         }
         
     }
