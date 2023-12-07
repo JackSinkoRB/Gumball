@@ -60,11 +60,16 @@ namespace Gumball
             if (isPressed && !IsPressingButton)
                 OnPress();
 
-            if (pointerMustBeOnRect && !isPressed && IsPressingButton)
-                OnRelease();
-
-            if (!pointerMustBeOnRect && !PrimaryContactInput.IsPressed)
-                OnRelease();
+            if (pointerMustBeOnRect)
+            {
+                if (!isPressed && IsPressingButton)
+                    OnRelease();
+            }
+            else
+            {
+                if (!PrimaryContactInput.IsPressed && IsPressingButton)
+                    OnRelease();
+            }
         }
 
         private void OnPress()
