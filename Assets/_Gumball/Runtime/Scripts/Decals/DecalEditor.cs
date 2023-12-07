@@ -93,8 +93,11 @@ namespace Gumball
             Image layerSelectorImage = PanelManager.GetPanel<DecalEditorPanel>().LayerSelector.MagneticScroll.GetComponent<Image>();
             Image scaleRotationHandleImage = selectedLiveDecalUI.ScaleRotationHandle.Button.image;
             
-            if (!PrimaryContactInput.IsClickableUnderPointer(scaleRotationHandleImage)
-                && !PrimaryContactInput.IsClickableUnderPointer(layerSelectorImage))
+            if (!PrimaryContactInput.IsGraphicUnderPointer(scaleRotationHandleImage)
+                && !PrimaryContactInput.IsGraphicUnderPointer(layerSelectorImage)
+                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
+                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().UndoButton.image)
+                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().RedoButton.image))
             {
                 UpdateDecalUnderPointer();
             }
@@ -233,7 +236,7 @@ namespace Gumball
         public void UpdateDecalUnderPointer()
         {
             Image ringUI = selectedLiveDecalUI.Ring;
-            if (currentSelected != null && PrimaryContactInput.IsClickableUnderPointer(ringUI))
+            if (currentSelected != null && PrimaryContactInput.IsGraphicUnderPointer(ringUI))
                 return; //keep the current selected
 
             //raycast from the pointer position into the world

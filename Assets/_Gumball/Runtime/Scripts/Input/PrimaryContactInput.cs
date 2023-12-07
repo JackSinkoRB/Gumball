@@ -127,7 +127,7 @@ namespace Gumball
         /// Is a raycastable graphic under the pointer?
         /// </summary>
         /// <returns></returns>
-        public static bool IsClickableUnderPointer(Graphic[] exclusions = null)
+        public static bool IsGraphicUnderPointer(Graphic[] exclusions = null)
         {
             foreach (Graphic graphic in GetClickableGraphicsUnderPointer())
             {
@@ -139,7 +139,7 @@ namespace Gumball
             return false;
         }
 
-        public static bool IsClickableUnderPointer(Graphic graphic)
+        public static bool IsGraphicUnderPointer(Graphic graphic)
         {
             foreach (Graphic graphicUnderPointer in GetClickableGraphicsUnderPointer())
             {

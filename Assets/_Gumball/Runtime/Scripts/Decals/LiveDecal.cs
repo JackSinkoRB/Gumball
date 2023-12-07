@@ -189,7 +189,7 @@ namespace Gumball
             CalculateClickOffset();
 
             Graphic[] excludeRing = {DecalEditor.Instance.SelectedDecalUI.Ring};
-            isClickableUnderPointerOnPress = PrimaryContactInput.IsClickableUnderPointer(excludeRing);
+            isClickableUnderPointerOnPress = PrimaryContactInput.IsGraphicUnderPointer(excludeRing);
 
             stateBeforeMoving = new DecalStateManager.ModifyStateChange(this);
             stateBeforeDestroying = new DecalStateManager.DestroyStateChange(this);

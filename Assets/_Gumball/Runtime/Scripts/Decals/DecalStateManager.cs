@@ -36,11 +36,13 @@ namespace Gumball
             public override void Undo()
             {
                 DecalEditor.Instance.DisableLiveDecal(liveDecal);
+                DecalEditor.Instance.DeselectLiveDecal();
             }
 
             public override void Redo()
             {
                 liveDecal = DecalEditor.Instance.CreateLiveDecalFromData(data);
+                DecalEditor.Instance.SelectLiveDecal(liveDecal);
             }
         }
         
@@ -58,11 +60,15 @@ namespace Gumball
                 
                 //apply it's original data
                 liveDecal.PopulateWithData(data);
+                
+                DecalEditor.Instance.SelectLiveDecal(liveDecal);
             }
 
             public override void Redo()
             {
                 liveDecal.PopulateWithData(dataBeforeUndo);
+                
+                DecalEditor.Instance.SelectLiveDecal(liveDecal);
             }
         }
         
@@ -75,11 +81,13 @@ namespace Gumball
             public override void Undo()
             {
                 liveDecal = DecalEditor.Instance.CreateLiveDecalFromData(data);
+                DecalEditor.Instance.SelectLiveDecal(liveDecal);
             }
 
             public override void Redo()
             {
                 DecalEditor.Instance.DisableLiveDecal(liveDecal);
+                DecalEditor.Instance.DeselectLiveDecal();
             }
         }
 

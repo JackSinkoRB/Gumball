@@ -12,13 +12,19 @@ namespace Gumball
         [SerializeField] private DecalLayerSelector layerSelector;
         [SerializeField] private Button undoButton;
         [SerializeField] private Button redoButton;
+        [SerializeField] private Button trashButton;
         
         public DecalLayerSelector LayerSelector => layerSelector;
-
+        public Button TrashButton => trashButton;
+        public Button UndoButton => undoButton;
+        public Button RedoButton => redoButton;
+        
         protected override void OnShow()
         {
             base.OnShow();
             
+            DecalEditor.Instance.onSelectLiveDecal += OnSelectDecal;
+            DecalEditor.Instance.onDeselectLiveDecal += OnDeselectDecal;
             DecalStateManager.onUndoStackChange += OnUndoStackChange;
             DecalStateManager.onRedoStackChange += OnRedoStackChange;
 
@@ -30,7 +36,9 @@ namespace Gumball
         protected override void OnHide()
         {
             base.OnHide();
-            
+
+            DecalEditor.Instance.onSelectLiveDecal -= OnSelectDecal;
+            DecalEditor.Instance.onDeselectLiveDecal -= OnDeselectDecal;
             DecalStateManager.onUndoStackChange -= OnUndoStackChange;
             DecalStateManager.onRedoStackChange -= OnRedoStackChange;
         }
@@ -39,6 +47,12 @@ namespace Gumball
         {
             DecalEditor.Instance.EndSession();
             MainSceneManager.LoadMainScene();
+        }
+        
+        public void OnClickTrashButton()
+        {
+            DecalStateManager.LogStateChange(new DecalStateManager.DestroyStateChange(DecalEditor.Instance.CurrentSelected));
+            DecalEditor.Instance.DisableLiveDecal(DecalEditor.Instance.CurrentSelected);
         }
 
         public void OnClickUndoButton()
@@ -59,6 +73,16 @@ namespace Gumball
         private void OnRedoStackChange()
         {
             redoButton.interactable = DecalStateManager.CanRedo;
+        }
+        
+        private void OnSelectDecal(LiveDecal liveDecal)
+        {
+            trashButton.interactable = true;
+        }
+        
+        private void OnDeselectDecal(LiveDecal liveDecal)
+        {
+            trashButton.interactable = false;
         }
         
     }
