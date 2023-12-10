@@ -91,6 +91,7 @@ namespace Gumball
         private void OnClickTextureOption(DecalTexture decalTexture)
         {
             LiveDecal decal = DecalEditor.Instance.CreateLiveDecal(selectedCategory, decalTexture);
+            DecalStateManager.LogStateChange(new DecalStateManager.CreateStateChange(decal));
             DecalEditor.Instance.SelectLiveDecal(decal);
         }
 

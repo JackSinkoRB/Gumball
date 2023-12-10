@@ -27,7 +27,7 @@ namespace Gumball
         [SerializeField] private CarManager currentCar;
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
         [SerializeField] private DecalCameraController cameraController;
-        
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
         [SerializeField, ReadOnly] private int priorityCount;
@@ -93,8 +93,11 @@ namespace Gumball
             Image layerSelectorImage = PanelManager.GetPanel<DecalEditorPanel>().LayerSelector.MagneticScroll.GetComponent<Image>();
             Image scaleRotationHandleImage = selectedLiveDecalUI.ScaleRotationHandle.Button.image;
             
-            if (!PrimaryContactInput.IsClickableUnderPointer(scaleRotationHandleImage)
-                && !PrimaryContactInput.IsClickableUnderPointer(layerSelectorImage))
+            if (!PrimaryContactInput.IsGraphicUnderPointer(scaleRotationHandleImage)
+                && !PrimaryContactInput.IsGraphicUnderPointer(layerSelectorImage)
+                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
+                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().UndoButton.image)
+                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().RedoButton.image))
             {
                 UpdateDecalUnderPointer();
             }
@@ -125,7 +128,7 @@ namespace Gumball
             
             //disable the car's collider temporarily
             PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(false);
-
+            
             onSessionStart?.Invoke();
         }
 
@@ -164,6 +167,8 @@ namespace Gumball
             
             currentCar.Rigidbody.isKinematic = false;
             
+            DecalStateManager.ClearHistory();
+
             onSessionEnd?.Invoke();
 
             currentCar = null;
@@ -174,6 +179,19 @@ namespace Gumball
             LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, decalTexture, priorityCount);
             priorityCount++;
             
+            liveDecals.Add(liveDecal);
+            
+            onCreateLiveDecal?.Invoke(liveDecal);
+
+            return liveDecal;
+        }
+
+        public LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
+        {
+            LiveDecal liveDecal = DecalManager.CreateLiveDecalFromData(data);
+            if (data.Priority > priorityCount)
+                priorityCount = data.Priority + 1;
+
             liveDecals.Add(liveDecal);
             
             onCreateLiveDecal?.Invoke(liveDecal);
@@ -206,19 +224,19 @@ namespace Gumball
             currentSelected = null;
         }
 
-        public void DestroyLiveDecal(LiveDecal liveDecal)
+        public void DisableLiveDecal(LiveDecal liveDecal)
         {
             liveDecals.Remove(liveDecal);
             
             onDestroyLiveDecal?.Invoke(liveDecal);
 
-            Destroy(liveDecal.gameObject);
+            liveDecal.gameObject.Pool();
         }
 
         public void UpdateDecalUnderPointer()
         {
             Image ringUI = selectedLiveDecalUI.Ring;
-            if (currentSelected != null && PrimaryContactInput.IsClickableUnderPointer(ringUI))
+            if (currentSelected != null && PrimaryContactInput.IsGraphicUnderPointer(ringUI))
                 return; //keep the current selected
 
             //raycast from the pointer position into the world
@@ -260,6 +278,6 @@ namespace Gumball
                 SelectLiveDecal(closestDecal);
             else DeselectLiveDecal();
         }
-        
+
     }
 }

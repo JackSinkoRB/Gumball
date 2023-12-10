@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using MyBox;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,17 +35,21 @@ namespace Gumball
         
         private float lastKnownRadius;
         private Vector2 lastClickPosition;
-
+        
+        private DecalStateManager.StateChange stateBeforePressing;
+        
         private void OnEnable()
         {
             scaleRotationHandle.onPress += OnPressScaleRotationHandle;
             scaleRotationHandle.onDrag += OnDragScaleRotationHandle;
+            scaleRotationHandle.onRelease += OnReleaseScaleRotationHandle;
         }
 
         private void OnDisable()
         {
             scaleRotationHandle.onDrag -= OnDragScaleRotationHandle;
             scaleRotationHandle.onPress -= OnPressScaleRotationHandle;
+            scaleRotationHandle.onRelease -= OnReleaseScaleRotationHandle;
         }
 
         public void UpdatePosition()
@@ -76,6 +81,22 @@ namespace Gumball
         {
             lastClickPosition = PrimaryContactInput.Position;
             lastKnownRadius = GetDistanceToCentre(PrimaryContactInput.Position);
+            stateBeforePressing = new DecalStateManager.ModifyStateChange(selectedDecal);
+        }
+
+        private void OnReleaseScaleRotationHandle()
+        {
+            CheckToLogChange();
+        }
+
+        private void CheckToLogChange()
+        {
+            if (stateBeforePressing == null)
+                return;
+            
+            bool positionHasMoved = !PrimaryContactInput.OffsetSincePressed.Approximately(Vector2.zero, 0.001f);
+            if (positionHasMoved)
+                DecalStateManager.LogStateChange(stateBeforePressing);
         }
         
         private void OnDragScaleRotationHandle(Vector2 offset)

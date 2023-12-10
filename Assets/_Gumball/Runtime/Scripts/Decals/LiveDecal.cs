@@ -15,7 +15,7 @@ namespace Gumball
     {
 
         [Serializable]
-        public class LiveDecalData
+        public struct LiveDecalData
         {
             [SerializeField] private int categoryIndex;
             [SerializeField] private int textureIndex;
@@ -69,6 +69,8 @@ namespace Gumball
         private Vector3 lastKnownHitNormal;
         private int priority;
         private bool isClickableUnderPointerOnPress;
+        private DecalStateManager.ModifyStateChange stateBeforeMoving;
+        private DecalStateManager.DestroyStateChange stateBeforeDestroying;
 
         public bool IsValidPosition { get; private set; }
         
@@ -125,6 +127,21 @@ namespace Gumball
         {
             this.categoryIndex = categoryIndex;
             this.textureIndex = textureIndex;
+            
+            SetScale(Vector3.one);
+            SetAngle(0);
+            SetValid();
+        }
+        
+        /// <summary>
+        /// Applies the data to the live decal.
+        /// </summary>
+        public void PopulateWithData(LiveDecalData data)
+        {
+            UpdatePosition(data.LastKnownPosition.ToVector3(), data.LastKnownHitNormal.ToVector3(), Quaternion.Euler(data.LastKnownRotationEuler.ToVector3()));
+            SetScale(data.Scale.ToVector3());
+            SetAngle(data.Angle);
+            SetValid();
         }
         
         /// <summary>
@@ -172,7 +189,10 @@ namespace Gumball
             CalculateClickOffset();
 
             Graphic[] excludeRing = {DecalEditor.Instance.SelectedDecalUI.Ring};
-            isClickableUnderPointerOnPress = PrimaryContactInput.IsClickableUnderPointer(excludeRing);
+            isClickableUnderPointerOnPress = PrimaryContactInput.IsGraphicUnderPointer(excludeRing);
+
+            stateBeforeMoving = new DecalStateManager.ModifyStateChange(this);
+            stateBeforeDestroying = new DecalStateManager.DestroyStateChange(this);
         }
         
         private void OnPrimaryContactPerformed()
@@ -186,21 +206,25 @@ namespace Gumball
 
         private void OnPrimaryContactReleased()
         {
-            if (DecalEditor.Instance.CurrentSelected == this &&
-                !IsValidPosition)
+            if (DecalEditor.Instance.CurrentSelected != this)
+                return;
+            
+            if (!IsValidPosition)
             {
-                RemoveDecal();
+                DecalStateManager.LogStateChange(stateBeforeDestroying);
+                DecalEditor.Instance.DisableLiveDecal(this);
+            }
+            else
+            {
+                bool positionHasMoved = !transform.position.Approximately(stateBeforeMoving.Data.LastKnownPosition.ToVector3(), 0.001f);
+                if (positionHasMoved)
+                    DecalStateManager.LogStateChange(stateBeforeMoving);
             }
         }
 
         private void SetDefaultPosition()
         {
             OnMoveScreenPosition(new Vector2(Screen.width / 2f, Screen.height / 2f));
-        }
-        
-        private void RemoveDecal()
-        {
-            DecalEditor.Instance.DestroyLiveDecal(this);
         }
 
         private void CalculateClickOffset()

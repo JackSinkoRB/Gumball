@@ -16,7 +16,7 @@ namespace Gumball
 
         public static LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture, int priority = -1)
         {
-            LiveDecal liveDecal = Instantiate(Instance.liveDecalPrefab.gameObject).GetComponent<LiveDecal>();
+            LiveDecal liveDecal = Instance.liveDecalPrefab.gameObject.GetSpareOrCreate<LiveDecal>();
             liveDecal.Initialise(Array.IndexOf(Instance.decalUICategories, category), Array.IndexOf(category.DecalTextures, decalTexture));
             liveDecal.SetSprite(decalTexture.Sprite);
             DontDestroyOnLoad(liveDecal);
@@ -64,15 +64,12 @@ namespace Gumball
             return liveDecals;
         }
         
-        private static LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
+        public static LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
         {
             DecalUICategory category = Instance.decalUICategories[data.CategoryIndex];
             DecalTexture decalTexture = category.DecalTextures[data.TextureIndex];
             LiveDecal liveDecal = CreateLiveDecal(category, decalTexture, data.Priority);
-            liveDecal.UpdatePosition(data.LastKnownPosition.ToVector3(), data.LastKnownHitNormal.ToVector3(), Quaternion.Euler(data.LastKnownRotationEuler.ToVector3()));
-            liveDecal.SetScale(data.Scale.ToVector3());
-            liveDecal.SetAngle(data.Angle);
-            liveDecal.SetValid();
+            liveDecal.PopulateWithData(data);
             return liveDecal;
         }
 

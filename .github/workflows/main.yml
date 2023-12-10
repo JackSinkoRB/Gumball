@@ -1,0 +1,53 @@
+name: Test project
+
+on: [push, pull_request]
+
+jobs:
+  testAllModes:
+    name: Test in ${{ matrix.testMode }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        testMode:
+          - playmode
+          - editmode
+    steps:
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Cache
+      - uses: actions/cache@v3
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}
+          restore-keys: |
+            Library-
+
+      # Test
+      - uses: game-ci/unity-test-runner@v4
+        id: tests
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ matrix.testMode }}-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: ${{ matrix.testMode }} Test Results
+          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
+
+      # Output
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Test results for ${{ matrix.testMode }}
+          path: ${{ steps.tests.outputs.artifactsPath }}
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Coverage results for ${{ matrix.testMode }}
+          path: ${{ steps.tests.outputs.coveragePath }}
