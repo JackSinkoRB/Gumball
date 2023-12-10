@@ -46,10 +46,12 @@ namespace Gumball.Runtime.Tests
             const float timeout = 30;
             float elapsedTime = 0;
 
+            Debug.Log("START! Has loaded? " + GameLoaderSceneManager.HasLoaded);
             while (!GameLoaderSceneManager.HasLoaded && elapsedTime < timeout)
             {
                 yield return null;
                 elapsedTime += Time.deltaTime;
+                Debug.Log("Has loaded? " + GameLoaderSceneManager.HasLoaded + " - Elapsed time = " + elapsedTime + "s");
             }
 
             Assert.IsTrue(GameLoaderSceneManager.HasLoaded, "Game did not load within 30 seconds");
