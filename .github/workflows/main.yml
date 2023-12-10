@@ -1,4 +1,4 @@
-name: Test project
+name: Test and build all platforms
 
 on: [push, pull_request]
 
@@ -30,15 +30,14 @@ jobs:
       - uses: game-ci/unity-test-runner@v4
         id: tests
         env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
           testMode: ${{ matrix.testMode }}
           artifactsPath: ${{ matrix.testMode }}-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: ${{ matrix.testMode }} Test Results
-          coverageOptions: 'generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+my.assembly.*'
 
       # Output
       - uses: actions/upload-artifact@v3
@@ -46,8 +45,40 @@ jobs:
         with:
           name: Test results for ${{ matrix.testMode }}
           path: ${{ steps.tests.outputs.artifactsPath }}
-      - uses: actions/upload-artifact@v3
-        if: always()
+  build:
+    needs: testAllModes
+    name: Build for ${{ matrix.targetPlatform }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - iOS
+          - Android
+          - StandaloneWindows
+    steps:
+      # Checkout
+      - uses: actions/checkout@v3
         with:
-          name: Coverage results for ${{ matrix.testMode }}
-          path: ${{ steps.tests.outputs.coveragePath }}
+          lfs: true
+
+      # Cache
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+
+      # Build
+      - uses: game-ci/unity-builder@v2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+
+      # Output
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Build-${{ matrix.targetPlatform }}
+          path: build
