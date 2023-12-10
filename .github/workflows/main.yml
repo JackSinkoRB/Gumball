@@ -27,12 +27,12 @@ jobs:
             Library-
 
       # Test
-      - uses: game-ci/unity-test-runner@v4
+      - uses: game-ci/unity-test-runner@v3
         id: tests
         env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
           testMode: ${{ matrix.testMode }}
           artifactsPath: ${{ matrix.testMode }}-artifacts
