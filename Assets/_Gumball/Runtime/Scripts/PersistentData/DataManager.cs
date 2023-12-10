@@ -9,9 +9,18 @@ namespace Gumball
     {
 
         //construct providers here:
-        public static readonly JsonDataProvider Settings = new("Settings");
-        public static readonly JsonDataProvider Cars = new("Cars");
+        public static JsonDataProvider Settings { get; private set; } = new("Settings");
+        public static JsonDataProvider Cars { get; private set; } = new("Cars");
 
+        /// <summary>
+        /// Enable or disable whether it reads from the test providers, or the real providers.
+        /// </summary>
+        public static void EnableTestProviders(bool enableTestProviders)
+        {
+            Settings = new JsonDataProvider(enableTestProviders ? "Settings_Tests" : "Settings");
+            Cars = new JsonDataProvider(enableTestProviders ? "Cars_Tests" : "Cars");
+        }
+        
         /// <summary>
         /// Force loads all the data from the sources into the providers asynchronously.
         /// </summary>
