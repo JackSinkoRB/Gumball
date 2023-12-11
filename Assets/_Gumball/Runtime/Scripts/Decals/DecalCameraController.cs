@@ -192,7 +192,6 @@ namespace Gumball
             float newDistance = distance - value;
             newDistance = Mathf.Clamp(newDistance, zoomDistanceClamp.Min, zoomDistanceClamp.Max);
             
-            Debug.Log("Zooming");
             distance = newDistance;
             MoveCamera(Vector2.zero, 0.1f);
         }

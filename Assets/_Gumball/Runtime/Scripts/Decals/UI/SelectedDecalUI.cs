@@ -101,6 +101,9 @@ namespace Gumball
         
         private void OnDragScaleRotationHandle(Vector2 offset)
         {
+            if (!scaleRotationHandle.IsPressingButton)
+                return;
+            
             UpdateScale();
             UpdateRotation();
         }

@@ -1,11 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.UI;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
@@ -27,16 +30,19 @@ namespace Gumball
         [SerializeField] private UnityEvent onStopPressing;
 
         [Header("Settings")]
+        [Tooltip("Should it only be pressed when the pointer goes down, or can the pointer go down, and then drag over the button for it to be pressed?")]
+        [SerializeField] private bool canOnlyBePressedOnPointerDown;
         [Tooltip("Should the press be cancelled if the pointer is no longer on top of the selectable?")]
         [SerializeField] private bool pointerMustBeOnRect = true;
 
         [Header("Debugging")]
-        [SerializeField] private bool isPressingButton;
+        [SerializeField, ReadOnly] private bool isPressingButton;
         
         public Button Button => GetComponent<Button>();
         public bool IsPressingButton => isPressingButton;
 
         private Vector2 lastKnownPosition;
+        private ReadOnlyArray<Touch> previousTouches;
 
         private void Update()
         {
@@ -44,18 +50,21 @@ namespace Gumball
             if (IsPressingButton)
                 OnHold();
         }
-
+        
         private void CheckIfButtonIsPressed()
         {
             bool isPressed = false;
             foreach (Touch touch in InputManager.ActiveTouches)
             {
-                if (IsScreenPositionWithinGraphic(Button.image, touch.screenPosition))
+                if (IsScreenPositionWithinGraphic(Button.image, touch.screenPosition)
+                    && (!canOnlyBePressedOnPointerDown || !previousTouches.Contains(touch)))
                 {
                     isPressed = true;
                     break;
                 }
             }
+
+            previousTouches = InputManager.ActiveTouches;
 
             if (isPressed && !IsPressingButton)
                 OnPress();
