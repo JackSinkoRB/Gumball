@@ -20,11 +20,12 @@ namespace Gumball
 
         private enum Stage
         {
-            LOADING_SINGLETON_SCRIPTABLES,
-            LOADING_SAVE_DATA,
-            LOADING_MAINSCENE,
-            LOADING_VEHICLE,
-            FINISHING_ASYNC_TASKS,
+            Checking_for_new_version,
+            Loading_scriptable_singletons,
+            Loading_save_data,
+            Loading_mainscene,
+            Loading_vehicle,
+            Finishing_async_tasks,
         }
 
         [SerializeField] private TextMeshProUGUI debugLabel;
@@ -45,8 +46,8 @@ namespace Gumball
 #if ENABLE_LOGS
             Debug.Log($"{SceneManager.GameLoaderSceneName} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
 #endif
-            
-            currentStage = Stage.LOADING_SINGLETON_SCRIPTABLES;
+
+            currentStage = Stage.Loading_scriptable_singletons;
             Stopwatch stopwatch = Stopwatch.StartNew();
             singletonScriptableHandles = LoadSingletonScriptables();
             yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete());
@@ -54,11 +55,14 @@ namespace Gumball
             Debug.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
             
+            currentStage = Stage.Checking_for_new_version;
+            yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
+            
             stopwatch.Restart();
-            currentStage = Stage.LOADING_SAVE_DATA;
+            currentStage = Stage.Loading_save_data;
             TrackedCoroutine loadSaveDataAsync = new TrackedCoroutine(DataManager.LoadAllAsync());
             
-            currentStage = Stage.LOADING_MAINSCENE;
+            currentStage = Stage.Loading_mainscene;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Additive, true);
             yield return mainSceneHandle;
 #if ENABLE_LOGS
@@ -66,7 +70,7 @@ namespace Gumball
 #endif
             stopwatch.Restart();
 
-            currentStage = Stage.LOADING_VEHICLE;
+            currentStage = Stage.Loading_vehicle;
             Vector3 startingPosition = Vector3.zero;
             Vector3 startingRotation = Vector3.zero;
             carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(startingPosition, startingRotation));
@@ -76,7 +80,7 @@ namespace Gumball
 #endif
             stopwatch.Restart();
 
-            currentStage = Stage.FINISHING_ASYNC_TASKS;
+            currentStage = Stage.Finishing_async_tasks;
             yield return new WaitUntil(() => !loadSaveDataAsync.IsPlaying);
             
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
@@ -121,11 +125,8 @@ namespace Gumball
 #endif
             debugLabel.text = currentStage switch
             {
-                Stage.LOADING_SINGLETON_SCRIPTABLES => "Loading singleton scriptables...",
-                Stage.LOADING_MAINSCENE => $"Loading MainScene... ({(int)(mainSceneHandle.PercentComplete*100f)}%)",
-                Stage.LOADING_VEHICLE => "Loading vehicle...",
-                Stage.FINISHING_ASYNC_TASKS => "Finishing async tasks...",
-                _ => "Loading..."
+                Stage.Loading_mainscene => $"Loading MainScene... ({(int)(mainSceneHandle.PercentComplete*100f)}%)",
+                _ => $"{currentStage.ToString().Replace("_", " ")}..."
             };
         }
         
