@@ -37,8 +37,11 @@ namespace Gumball
         {
             base.OnHide();
 
-            DecalEditor.Instance.onSelectLiveDecal -= OnSelectDecal;
-            DecalEditor.Instance.onDeselectLiveDecal -= OnDeselectDecal;
+            if (DecalEditor.ExistsRuntime)
+            {
+                DecalEditor.Instance.onSelectLiveDecal -= OnSelectDecal;
+                DecalEditor.Instance.onDeselectLiveDecal -= OnDeselectDecal;
+            }
             DecalStateManager.onUndoStackChange -= OnUndoStackChange;
             DecalStateManager.onRedoStackChange -= OnRedoStackChange;
         }

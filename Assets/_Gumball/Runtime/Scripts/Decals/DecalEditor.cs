@@ -85,10 +85,14 @@ namespace Gumball
             selectedLiveDecalUI.UpdatePosition();
         }
 
-        private void OnPrimaryContactPressed()
+        private void OnPrimaryContactReleased()
         {
             if (!PanelManager.PanelExists<DecalEditorPanel>())
                 return; //editor panel isn't open
+            
+            bool pointerWasDragged = !PrimaryContactInput.OffsetSincePressed.Approximately(Vector2.zero, 0.001f);
+            if (pointerWasDragged)
+                return;
             
             Image layerSelectorImage = PanelManager.GetPanel<DecalEditorPanel>().LayerSelector.MagneticScroll.GetComponent<Image>();
             Image scaleRotationHandleImage = selectedLiveDecalUI.ScaleRotationHandle.Button.image;
@@ -105,7 +109,7 @@ namespace Gumball
 
         public void StartSession(CarManager car)
         {
-            PrimaryContactInput.onPress += OnPrimaryContactPressed;
+            PrimaryContactInput.onRelease += OnPrimaryContactReleased;
 
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
 
@@ -136,7 +140,7 @@ namespace Gumball
         {
             GlobalLoggers.DecalsLogger.Log($"Ending session.");
 
-            PrimaryContactInput.onPress -= OnPrimaryContactPressed;
+            PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
 
             DeselectLiveDecal();
             
@@ -212,6 +216,7 @@ namespace Gumball
         public void SelectLiveDecal(LiveDecal liveDecal)
         {
             currentSelected = liveDecal;
+            liveDecal.OnSelect();
             onSelectLiveDecal?.Invoke(liveDecal);
         }
 
@@ -220,6 +225,7 @@ namespace Gumball
             if (currentSelected == null)
                 return; //nothing selected
             
+            currentSelected.OnDeselect();
             onDeselectLiveDecal?.Invoke(currentSelected);
             currentSelected = null;
         }
@@ -235,10 +241,6 @@ namespace Gumball
 
         public void UpdateDecalUnderPointer()
         {
-            Image ringUI = selectedLiveDecalUI.Ring;
-            if (currentSelected != null && PrimaryContactInput.IsGraphicUnderPointer(ringUI))
-                return; //keep the current selected
-
             //raycast from the pointer position into the world
             Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
 

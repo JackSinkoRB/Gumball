@@ -42,6 +42,7 @@ namespace Gumball
         private static int graphicsUnderPointerLastCached = -1;
         private static readonly List<Graphic> clickablesUnderPointerCached = new();
         private static Vector2 lastKnownPosition;
+        private static readonly RaycastHit[] collidersUnderPointer = new RaycastHit[20];
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void InitialisePreSceneLoad()
@@ -123,6 +124,24 @@ namespace Gumball
             }
         }
 
+        public static bool IsColliderUnderPointer(Collider collider, float maxDistance = Mathf.Infinity, LayerMask layerMask = default)
+        {
+            //raycast from the pointer position into the world
+            Ray ray = Camera.main.ScreenPointToRay(Position);
+
+            //max raycast distance from the camera to the middle of the car, so it doesn't detect decals on the other side
+            int raycastHits = Physics.RaycastNonAlloc(ray, collidersUnderPointer, maxDistance, layerMask);
+
+            for (int count = 0; count < raycastHits; count++)
+            {
+                RaycastHit hit = collidersUnderPointer[count];
+                if (hit.collider == collider)
+                    return true;
+            }
+
+            return false;
+        }
+        
         /// <summary>
         /// Is a raycastable graphic under the pointer?
         /// </summary>

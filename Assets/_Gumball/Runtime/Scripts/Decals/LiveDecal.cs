@@ -68,7 +68,7 @@ namespace Gumball
         private Quaternion lastKnownRotation;
         private Vector3 lastKnownHitNormal;
         private int priority;
-        private bool isClickableUnderPointerOnPress;
+        private bool wasClickableUnderPointerOnPress;
         private DecalStateManager.ModifyStateChange stateBeforeMoving;
         private DecalStateManager.DestroyStateChange stateBeforeDestroying;
 
@@ -80,6 +80,7 @@ namespace Gumball
         public Vector3 Scale => paintDecal.Scale;
         public float Angle => paintDecal.Angle;
         public Color Color => paintDecal.Color;
+        public bool WasUnderPointerOnPress { get; private set; }
 
         /// <summary>
         /// Force the decal to be valid.
@@ -105,16 +106,6 @@ namespace Gumball
         {
             SetScale(paintDecal.Scale);
             SetDefaultPosition();
-            PrimaryContactInput.onPress += OnPrimaryContactPressed;
-            PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
-            PrimaryContactInput.onRelease += OnPrimaryContactReleased;
-        }
-
-        private void OnDisable()
-        {
-            PrimaryContactInput.onPress -= OnPrimaryContactPressed;
-            PrimaryContactInput.onPerform -= OnPrimaryContactPerformed;
-            PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
         }
 
         private void LateUpdate()
@@ -131,6 +122,20 @@ namespace Gumball
             SetScale(Vector3.one);
             SetAngle(0);
             SetValid();
+        }
+
+        public void OnSelect()
+        {
+            PrimaryContactInput.onPress += OnPrimaryContactPressed;
+            PrimaryContactInput.onPerform += OnPrimaryContactPerformed;
+            PrimaryContactInput.onRelease += OnPrimaryContactReleased;
+        }
+
+        public void OnDeselect()
+        {
+            PrimaryContactInput.onPress -= OnPrimaryContactPressed;
+            PrimaryContactInput.onPerform -= OnPrimaryContactPerformed;
+            PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
         }
         
         /// <summary>
@@ -189,7 +194,11 @@ namespace Gumball
             CalculateClickOffset();
 
             Graphic[] excludeRing = {DecalEditor.Instance.SelectedDecalUI.Ring};
-            isClickableUnderPointerOnPress = PrimaryContactInput.IsGraphicUnderPointer(excludeRing);
+            wasClickableUnderPointerOnPress = PrimaryContactInput.IsGraphicUnderPointer(excludeRing);
+            
+            float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, PlayerCarManager.Instance.CurrentCar.transform.position);
+            WasUnderPointerOnPress = PrimaryContactInput.IsGraphicUnderPointer(DecalEditor.Instance.SelectedDecalUI.Ring) //check if the ring is first, as it is cached
+                                     || PrimaryContactInput.IsColliderUnderPointer(selectionCollider, maxRaycastDistance, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.LiveDecal));
 
             stateBeforeMoving = new DecalStateManager.ModifyStateChange(this);
             stateBeforeDestroying = new DecalStateManager.DestroyStateChange(this);
@@ -197,16 +206,22 @@ namespace Gumball
         
         private void OnPrimaryContactPerformed()
         {
-            if (DecalEditor.Instance.CurrentSelected == this 
-                && !isClickableUnderPointerOnPress)
-            {
+            if (DecalEditor.Instance.CurrentSelected != this)
+                return;
+
+            if (wasClickableUnderPointerOnPress)
+                return;
+
+            if (WasUnderPointerOnPress)
                 OnMoveScreenPosition(PrimaryContactInput.Position - clickOffset);
-            }
         }
 
         private void OnPrimaryContactReleased()
         {
             if (DecalEditor.Instance.CurrentSelected != this)
+                return;
+
+            if (!WasUnderPointerOnPress)
                 return;
             
             if (!IsValidPosition)
