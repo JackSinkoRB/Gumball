@@ -44,6 +44,7 @@ jobs:
           artifactsPath: ${{ matrix.testMode }}-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: ${{ matrix.testMode }} Test Results
+          customParameters: -nographics
 
       # Output
       - uses: actions/upload-artifact@v3
