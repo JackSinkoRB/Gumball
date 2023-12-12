@@ -212,6 +212,10 @@ namespace Gumball
             if (wasClickableUnderPointerOnPress)
                 return;
 
+            bool pointerWasDragged = !PrimaryContactInput.OffsetSincePressed.Approximately(Vector2.zero, 0.001f);
+            if (!pointerWasDragged)
+                return;
+            
             if (WasUnderPointerOnPress)
                 OnMoveScreenPosition(PrimaryContactInput.Position - clickOffset);
         }
@@ -253,9 +257,18 @@ namespace Gumball
             Ray ray = Camera.main.ScreenPointToRay(screenPosition);
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, raycastLayers))
             {
-                Quaternion rotation = Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Camera.main.transform.up);
+                Quaternion rotation = Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Vector3.up);
                 UpdatePosition(hit.point, hit.normal, rotation);
                 
+                //always facing camera:
+                //UpdatePosition(hit.point, hit.normal, Quaternion.LookRotation(Camera.main.transform.forward, Camera.main.transform.up));
+
+                //just using hit:
+                //UpdatePosition(hit.point, hit.normal, Quaternion.LookRotation(-hit.normal, Vector3.up));
+                
+                //using camera and hit:
+                //UpdatePosition(hit.point, hit.normal, Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Camera.main.transform.up));
+
                 IsValidPosition = hit.collider.GetComponent<P3dPaintable>() != null;
             }
         }
