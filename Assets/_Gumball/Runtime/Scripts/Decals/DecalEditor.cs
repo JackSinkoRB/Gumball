@@ -216,6 +216,9 @@ namespace Gumball
 
         public void SelectLiveDecal(LiveDecal liveDecal)
         {
+            if (currentSelected != null && currentSelected == liveDecal)
+                return; //already selected
+            
             currentSelected = liveDecal;
             liveDecal.OnSelect();
             onSelectLiveDecal?.Invoke(liveDecal);
@@ -278,8 +281,11 @@ namespace Gumball
             }
 
             if (closestDecal != null) {
-                DeselectLiveDecal();
-                SelectLiveDecal(closestDecal);
+                if (currentSelected == null || currentSelected != closestDecal)
+                {
+                    DeselectLiveDecal();
+                    SelectLiveDecal(closestDecal);
+                }
             } else DeselectLiveDecal();
         }
 
