@@ -236,8 +236,11 @@ namespace Gumball
 
         public void DisableLiveDecal(LiveDecal liveDecal)
         {
-            liveDecals.Remove(liveDecal);
+            if (currentSelected != null && currentSelected == liveDecal)
+                DeselectLiveDecal();
             
+            liveDecals.Remove(liveDecal);
+
             onDestroyLiveDecal?.Invoke(liveDecal);
 
             liveDecal.gameObject.Pool();

@@ -89,8 +89,7 @@ namespace Gumball
                 //onSelectComplete gets called when the pointer is no longer down
                 scrollItem.onSelectComplete += () =>
                 {
-                    if (DecalEditor.Instance.CurrentSelected != liveDecal)
-                        DecalEditor.Instance.SelectLiveDecal(liveDecal);
+                    DecalEditor.Instance.SelectLiveDecal(liveDecal);
                 };
 
                 scrollItems.Add(scrollItem);
