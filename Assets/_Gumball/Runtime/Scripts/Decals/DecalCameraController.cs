@@ -11,6 +11,11 @@ namespace Gumball
     public class DecalCameraController : MonoBehaviour
     {
         
+        [Space(5)]
+        [SerializeField] private Vector3 initialCameraPosition;
+        [SerializeField] private Vector3 initialCameraRotation;
+        
+        [Header("Target")]
         [SerializeField] private Transform target;
         [SerializeField, ReadOnly] private Vector3 targetOffset;
         [SerializeField] private Vector3 defaultTargetOffset = new(0, 0.5f);
@@ -36,7 +41,8 @@ namespace Gumball
         private Sequence currentMovementTween;
         private Tween decelerationTween;
         private bool pressedUI;
-
+        private int firstFrame;
+        
         private void OnEnable()
         {
             DecalEditor.onSessionStart += OnSessionStart;
@@ -51,6 +57,8 @@ namespace Gumball
 
         private void OnSessionStart()
         {
+            firstFrame = Time.frameCount;
+            
             PrimaryContactInput.onPress += OnPrimaryContactPress;
             PrimaryContactInput.onDrag += OnPrimaryContactMove;
             PrimaryContactInput.onRelease += OnPrimaryContactRelease;
@@ -60,6 +68,8 @@ namespace Gumball
 
             DecalEditor.Instance.onSelectLiveDecal += OnSelectDecal;
             DecalEditor.Instance.onDeselectLiveDecal += OnDeselectDecal;
+            
+            SetInitialPosition();
         }
 
         private void OnSessionEnd()
@@ -139,6 +149,14 @@ namespace Gumball
         private void SetVelocity(Vector2 newVelocity)
         {
             velocity = newVelocity;
+        }
+        
+        private void SetInitialPosition()
+        {
+            decelerationTween?.Kill();
+            currentMovementTween?.Kill();
+            Camera.main.transform.position = initialCameraPosition;
+            Camera.main.transform.rotation = Quaternion.Euler(initialCameraRotation);
         }
 
         private void MoveCamera(Vector2 offset, float duration = 0)
@@ -222,7 +240,12 @@ namespace Gumball
         
         private void OnDeselectDecal(LiveDecal decalDeselected)
         {
-            SetTarget(DecalEditor.Instance.CurrentCar.transform, defaultTargetOffset);
+            bool isFirstFrame = firstFrame == Time.frameCount;
+            if (!isFirstFrame)
+            {
+                //don't set the camera target if it's the first frame, as the initial position was set
+                SetTarget(DecalEditor.Instance.CurrentCar.transform, defaultTargetOffset);
+            }
         }
         
         private void CheckToDecelerate()
