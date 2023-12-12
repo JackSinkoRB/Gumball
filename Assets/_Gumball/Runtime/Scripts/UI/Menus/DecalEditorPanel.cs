@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,16 +10,23 @@ namespace Gumball
     {
 
         [Header("Decal editor panel")]
-        [SerializeField] private DecalColourSelectorPanel colourSelectorPanel;
         [SerializeField] private Button trashButton;
         [SerializeField] private Button colourButton;
         [SerializeField] private Button undoButton;
         [SerializeField] private Button redoButton;
         
+        [Header("Colour picker")]
+        [SerializeField] private DecalColourSelectorPanel colourSelectorPanel;
+        [SerializeField] private Image colourPickerGlow;
+        [SerializeField] private float colourPickerGlowDuration = 0.1f;
+        
         public Button TrashButton => trashButton;
         public Button ColourButton => colourButton;
 
         public DecalColourSelectorPanel ColourSelectorPanel => colourSelectorPanel;
+
+        private bool colourPickerEnabled;
+        private Tween colourPickerGlowTween;
         
         protected override void OnShow()
         {
@@ -33,10 +41,12 @@ namespace Gumball
             OnUndoStackChange();
             OnRedoStackChange();
             
-            //nothing will be selected, so disable the trash button
+            //nothing will be selected, so disable the buttons
             trashButton.interactable = false;
             colourButton.interactable = false;
-            ColourSelectorPanel.Hide();
+
+            DisableColourPicker();
+            colourPickerGlowTween?.Complete();
         }
 
         protected override void OnHide()
@@ -66,11 +76,11 @@ namespace Gumball
 
         public void OnClickColourButton()
         {
-            if (ColourSelectorPanel.IsShowing)
-                ColourSelectorPanel.Hide();
-            else ColourSelectorPanel.Show();
+            if (colourPickerEnabled)
+                DisableColourPicker();
+            else EnableColourPicker();
         }
-
+        
         public void OnClickUndoButton()
         {
             DecalStateManager.UndoLatestChange();
@@ -97,6 +107,12 @@ namespace Gumball
             
             if (liveDecal.TextureData.CanColour)
                 colourButton.interactable = true;
+
+            if (colourPickerEnabled)
+            {
+                ColourSelectorPanel.Show();
+                ShowColourPickerOutline(true);
+            }
         }
         
         private void OnDeselectDecal(LiveDecal liveDecal)
@@ -105,6 +121,29 @@ namespace Gumball
             
             colourButton.interactable = false;
             ColourSelectorPanel.Hide();
+            ShowColourPickerOutline(false);
+        }
+
+        private void EnableColourPicker()
+        {
+            colourPickerEnabled = true;
+            colourSelectorPanel.Show();
+
+            ShowColourPickerOutline(true);
+        }
+
+        private void DisableColourPicker()
+        {
+            colourPickerEnabled = false;
+            colourSelectorPanel.Hide();
+
+            ShowColourPickerOutline(false);
+        }
+
+        private void ShowColourPickerOutline(bool show)
+        {
+            colourPickerGlowTween?.Kill();
+            colourPickerGlowTween = colourPickerGlow.DOFade(show ? 1 : 0, colourPickerGlowDuration);
         }
         
     }
