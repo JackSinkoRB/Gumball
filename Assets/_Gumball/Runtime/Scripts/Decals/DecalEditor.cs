@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -119,7 +120,7 @@ namespace Gumball
             currentCar.Rigidbody.isKinematic = true;
             
             liveDecals = DecalManager.CreateLiveDecalsFromData(car);
-            this.PerformAtEndOfFrame(DeselectLiveDecal);
+            this.PerformAtEndOfFrame(DeselectLiveDecal); //perform at end of frame as magnetic scroll will select it in LateUpdate()
             
             GlobalLoggers.DecalsLogger.Log($"Starting session for {car.gameObject.name} with {liveDecals.Count} saved decals.");
 
@@ -276,9 +277,10 @@ namespace Gumball
                 GlobalLoggers.DecalsLogger.Log($"Distance to {decal.Priority} = {distanceToDecalSqr}");
             }
 
-            if (closestDecal != null)
+            if (closestDecal != null) {
+                DeselectLiveDecal();
                 SelectLiveDecal(closestDecal);
-            else DeselectLiveDecal();
+            } else DeselectLiveDecal();
         }
 
     }
