@@ -172,16 +172,13 @@ namespace Gumball
             else
             {
                 //keep the camera at the same zoomed amount
-                //actualDistance = distance - (what the distance would be from the camera to the car, minus the distance from the camera to the target)
-                Vector3 carTargetPos = PlayerCarManager.Instance.CurrentCar.transform.position + defaultTargetOffset;
-                Vector3 targetPos = target.transform.position + targetOffset;
-                float distanceFromCameraToCar = Vector3.Distance(Camera.main.transform.position, carTargetPos);
-                Vector3 heightDifference = new Vector3(0, carTargetPos.y - targetPos.y, 0);
-                float distanceFromCameraToTarget = Vector3.Distance(Camera.main.transform.position, targetPos - heightDifference);
-                actualDistance = distance - (distanceFromCameraToCar - distanceFromCameraToTarget);
+                float distanceFromCarToTarget = Vector3.Distance(
+                    PlayerCarManager.Instance.CurrentCar.transform.position + defaultTargetOffset, 
+                    target.transform.position + targetOffset);
+                actualDistance = distance - distanceFromCarToTarget;
             }
 
-            horizontal += offset.x * xSpeed * actualDistance;
+            horizontal += offset.x * xSpeed * actualDistance; //multiply by distance so the closer you are, the slower it rotates
             vertical -= offset.y * ySpeed;
 
             vertical = ClampAngle(vertical, yClamp.Min, yClamp.Max);
@@ -271,6 +268,10 @@ namespace Gumball
                 return;
 
             if (PinchInput.IsPinching)
+                return;
+            
+            bool positionHasMoved = !PrimaryContactInput.OffsetSincePressed.Approximately(Vector2.zero, 0.001f);
+            if (!positionHasMoved)
                 return;
 
             MoveCamera(Vector2.zero, movementTweenDuration);
