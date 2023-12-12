@@ -9,15 +9,16 @@ namespace Gumball
     {
 
         [Header("Decal editor panel")]
-        [SerializeField] private DecalLayerSelector layerSelector;
+        [SerializeField] private DecalColourSelectorPanel colourSelectorPanel;
+        [SerializeField] private Button trashButton;
+        [SerializeField] private Button colourButton;
         [SerializeField] private Button undoButton;
         [SerializeField] private Button redoButton;
-        [SerializeField] private Button trashButton;
         
-        public DecalLayerSelector LayerSelector => layerSelector;
         public Button TrashButton => trashButton;
-        public Button UndoButton => undoButton;
-        public Button RedoButton => redoButton;
+        public Button ColourButton => colourButton;
+
+        public DecalColourSelectorPanel ColourSelectorPanel => colourSelectorPanel;
         
         protected override void OnShow()
         {
@@ -34,6 +35,8 @@ namespace Gumball
             
             //nothing will be selected, so disable the trash button
             trashButton.interactable = false;
+            colourButton.interactable = false;
+            ColourSelectorPanel.Hide();
         }
 
         protected override void OnHide()
@@ -61,6 +64,13 @@ namespace Gumball
             DecalEditor.Instance.DisableLiveDecal(DecalEditor.Instance.CurrentSelected);
         }
 
+        public void OnClickColourButton()
+        {
+            if (ColourSelectorPanel.IsShowing)
+                ColourSelectorPanel.Hide();
+            else ColourSelectorPanel.Show();
+        }
+
         public void OnClickUndoButton()
         {
             DecalStateManager.UndoLatestChange();
@@ -84,11 +94,17 @@ namespace Gumball
         private void OnSelectDecal(LiveDecal liveDecal)
         {
             trashButton.interactable = true;
+            
+            if (liveDecal.TextureData.CanColour)
+                colourButton.interactable = true;
         }
         
         private void OnDeselectDecal(LiveDecal liveDecal)
         {
             trashButton.interactable = false;
+            
+            colourButton.interactable = false;
+            ColourSelectorPanel.Hide();
         }
         
     }

@@ -94,18 +94,13 @@ namespace Gumball
             bool pointerWasDragged = !PrimaryContactInput.OffsetSincePressed.Approximately(Vector2.zero, 0.001f);
             if (pointerWasDragged)
                 return;
-            
-            Image layerSelectorImage = PanelManager.GetPanel<DecalEditorPanel>().LayerSelector.MagneticScroll.GetComponent<Image>();
-            Image scaleRotationHandleImage = selectedLiveDecalUI.ScaleRotationHandle.Button.image;
-            
-            if (!PrimaryContactInput.IsGraphicUnderPointer(scaleRotationHandleImage)
-                && !PrimaryContactInput.IsGraphicUnderPointer(layerSelectorImage)
-                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
-                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().UndoButton.image)
-                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().RedoButton.image))
-            {
-                UpdateDecalUnderPointer();
-            }
+
+            if (PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().ColourButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalColourSelectorPanel>().MagneticScroll.GetComponent<Image>()))
+                return;
+
+            UpdateDecalUnderPointer();
         }
 
         public void StartSession(CarManager car)

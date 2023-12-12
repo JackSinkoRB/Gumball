@@ -17,11 +17,11 @@ namespace Gumball
         public static LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture, int priority = -1)
         {
             LiveDecal liveDecal = Instance.liveDecalPrefab.gameObject.GetSpareOrCreate<LiveDecal>();
-            liveDecal.Initialise(Array.IndexOf(Instance.decalUICategories, category), Array.IndexOf(category.DecalTextures, decalTexture));
-            liveDecal.SetSprite(decalTexture.Sprite);
             DontDestroyOnLoad(liveDecal);
 
-            liveDecal.SetColor(decalTexture.CanColour ? Color.gray : Color.white);
+            liveDecal.Initialise(decalTexture,
+                Array.IndexOf(Instance.decalUICategories, category), 
+                Array.IndexOf(category.DecalTextures, decalTexture));
 
             liveDecal.SetPriority(priority);
             

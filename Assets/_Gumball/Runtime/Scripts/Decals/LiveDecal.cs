@@ -62,7 +62,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private int categoryIndex;
         [SerializeField, ReadOnly] private int textureIndex;
         [SerializeField, ReadOnly] private Sprite sprite;
-        
+
+        private DecalTexture textureData;
         private Vector2 clickOffset;
         private Vector3 lastKnownPosition;
         private Quaternion lastKnownRotation;
@@ -81,6 +82,7 @@ namespace Gumball
         public float Angle => paintDecal.Angle;
         public Color Color => paintDecal.Color;
         public bool WasUnderPointerOnPress { get; private set; }
+        public DecalTexture TextureData => textureData;
 
         /// <summary>
         /// Force the decal to be valid.
@@ -114,11 +116,14 @@ namespace Gumball
                 DrawPreview();
         }
 
-        public void Initialise(int categoryIndex, int textureIndex)
+        public void Initialise(DecalTexture textureData, int categoryIndex, int textureIndex)
         {
+            this.textureData = textureData;
             this.categoryIndex = categoryIndex;
             this.textureIndex = textureIndex;
             
+            SetSprite(textureData.Sprite);
+            SetColor(textureData.CanColour ? Color.gray : Color.white);
             SetScale(Vector3.one);
             SetAngle(0);
             SetValid();
@@ -143,6 +148,7 @@ namespace Gumball
         /// </summary>
         public void PopulateWithData(LiveDecalData data)
         {
+            //TODO: colour
             UpdatePosition(data.LastKnownPosition.ToVector3(), data.LastKnownHitNormal.ToVector3(), Quaternion.Euler(data.LastKnownRotationEuler.ToVector3()));
             SetScale(data.Scale.ToVector3());
             SetAngle(data.Angle);
