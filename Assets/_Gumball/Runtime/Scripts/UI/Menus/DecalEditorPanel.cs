@@ -31,6 +31,9 @@ namespace Gumball
             //starting a new session, so the stacks will have changed
             OnUndoStackChange();
             OnRedoStackChange();
+            
+            //nothing will be selected, so disable the trash button
+            trashButton.interactable = false;
         }
 
         protected override void OnHide()
