@@ -25,6 +25,7 @@ namespace Gumball
             [SerializeField] private SerializedVector3 lastKnownHitNormal;
             [SerializeField] private SerializedVector3 scale;
             [SerializeField] private float angle;
+            [SerializeField] private int colorIndex;
 
             public int CategoryIndex => categoryIndex;
             public int TextureIndex => textureIndex;
@@ -32,10 +33,11 @@ namespace Gumball
             public SerializedVector3 LastKnownPosition => lastKnownPosition;
             public SerializedVector3 LastKnownRotationEuler => lastKnownRotationEuler;
             public SerializedVector3 LastKnownHitNormal => lastKnownHitNormal;
-
+            
             public SerializedVector3 Scale => scale;
             public float Angle => angle;
-
+            public int ColorIndex => colorIndex;
+            
             public LiveDecalData(LiveDecal liveDecal)
             {
                 categoryIndex = liveDecal.categoryIndex;
@@ -46,9 +48,14 @@ namespace Gumball
                 lastKnownHitNormal = liveDecal.lastKnownHitNormal.ToSerializedVector();
                 scale = liveDecal.Scale.ToSerializedVector();
                 angle = liveDecal.Angle;
+                colorIndex = liveDecal.ColorIndex;
             }
         }
         
+        /// <summary>
+        /// The default colour index to use for decals that can be coloured.
+        /// </summary>
+        private const int defaultColourIndex = 4;
         private const float selectionColliderWidth = 0.1f;
         
         [SerializeField] private Collider selectionCollider;
@@ -62,7 +69,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private int categoryIndex;
         [SerializeField, ReadOnly] private int textureIndex;
         [SerializeField, ReadOnly] private Sprite sprite;
-
+        [SerializeField, ReadOnly] private int colorIndex = -1;
+        
         private DecalTexture textureData;
         private Vector2 clickOffset;
         private Vector3 lastKnownPosition;
@@ -83,7 +91,8 @@ namespace Gumball
         public Color Color => paintDecal.Color;
         public bool WasUnderPointerOnPress { get; private set; }
         public DecalTexture TextureData => textureData;
-
+        public int ColorIndex => colorIndex;
+        
         /// <summary>
         /// Force the decal to be valid.
         /// </summary>
@@ -110,6 +119,11 @@ namespace Gumball
             SetDefaultPosition();
         }
 
+        private void OnDisable()
+        {
+            colorIndex = -1; //reset if reused in pool
+        }
+
         private void LateUpdate()
         {
             if (IsValidPosition)
@@ -123,7 +137,11 @@ namespace Gumball
             this.textureIndex = textureIndex;
             
             SetSprite(textureData.Sprite);
-            SetColor(textureData.CanColour ? Color.gray : Color.white);
+            
+            if (textureData.CanColour && colorIndex == -1)
+                colorIndex = defaultColourIndex;
+            SetColor(textureData.CanColour ? DecalEditor.Instance.ColorPalette[colorIndex] : Color.white);
+            
             SetScale(Vector3.one);
             SetAngle(0);
             SetValid();
@@ -148,7 +166,10 @@ namespace Gumball
         /// </summary>
         public void PopulateWithData(LiveDecalData data)
         {
-            //TODO: colour
+            if (textureData.CanColour)
+                SetColorFromIndex(data.ColorIndex);
+            else SetColor(Color.white);
+            
             UpdatePosition(data.LastKnownPosition.ToVector3(), data.LastKnownHitNormal.ToVector3(), Quaternion.Euler(data.LastKnownRotationEuler.ToVector3()));
             SetScale(data.Scale.ToVector3());
             SetAngle(data.Angle);
@@ -188,6 +209,15 @@ namespace Gumball
         public void SetColor(Color color)
         {
             paintDecal.Color = color;
+        }
+        
+        /// <summary>
+        /// Set the color using the index from the color palette.
+        /// </summary>
+        public void SetColorFromIndex(int colorIndex)
+        {
+            this.colorIndex = colorIndex;
+            paintDecal.Color = DecalEditor.Instance.ColorPalette[colorIndex];
         }
 
         public void SetPriority(int priority)

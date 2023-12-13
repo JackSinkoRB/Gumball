@@ -78,7 +78,11 @@ namespace Gumball
         {
             if (colourPickerEnabled)
                 DisableColourPicker();
-            else EnableColourPicker();
+            else
+            {
+                EnableColourPicker();
+                ColourSelectorPanel.Populate(DecalEditor.Instance.CurrentSelected);
+            }
         }
         
         public void OnClickUndoButton()
@@ -104,14 +108,16 @@ namespace Gumball
         private void OnSelectDecal(LiveDecal liveDecal)
         {
             trashButton.interactable = true;
-            
-            if (liveDecal.TextureData.CanColour)
-                colourButton.interactable = true;
 
-            if (colourPickerEnabled)
+            if (liveDecal.TextureData.CanColour)
             {
-                ColourSelectorPanel.Show();
-                ShowColourPickerOutline(true);
+                colourButton.interactable = true;
+                if (colourPickerEnabled)
+                {
+                    ColourSelectorPanel.Show();
+                    ColourSelectorPanel.Populate(liveDecal);
+                    ShowColourPickerOutline(true);
+                }
             }
         }
         

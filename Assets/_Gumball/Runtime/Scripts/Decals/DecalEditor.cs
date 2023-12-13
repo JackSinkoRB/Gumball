@@ -3,12 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using MyBox;
-using PaintIn3D;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -29,6 +30,11 @@ namespace Gumball
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
         [SerializeField] private DecalCameraController cameraController;
 
+        [Header("Colours")]
+        [SerializeField] private Color[] colorPalette;
+        [SerializeField] private int numberOfGrayscaleColors = 10;
+        [SerializeField] private int numberOfRainbowColours = 50;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
         [SerializeField, ReadOnly] private int priorityCount;
@@ -40,6 +46,7 @@ namespace Gumball
         public LiveDecal CurrentSelected => currentSelected;
         public CarManager CurrentCar => currentCar;
         public SelectedDecalUI SelectedDecalUI => selectedLiveDecalUI;
+        public Color[] ColorPalette => colorPalette;
 
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
 
@@ -286,6 +293,34 @@ namespace Gumball
                 }
             } else DeselectLiveDecal();
         }
+        
+#if UNITY_EDITOR
+        /// <summary>
+        /// Use this method to generate an array of colours that can be used as a colour pallete.
+        /// </summary>
+        [ButtonMethod]
+        public void GenerateColours()
+        {
+            List<Color> colors = new List<Color>();
 
+            for (int count = 0; count <= numberOfGrayscaleColors; count++)
+            {
+                float lerpFactor = (float)count / numberOfGrayscaleColors;
+                Color shade = Color.Lerp(Color.black, Color.white, lerpFactor);
+                colors.Add(shade);
+            }
+            
+            for (int count = 0; count < numberOfRainbowColours; count++)
+            {
+                float hue = (float)count / numberOfRainbowColours;
+                Color color = Color.HSVToRGB(hue, 1f, 1f);
+                colors.Add(color);
+            }
+
+            colorPalette = colors.ToArray();
+            EditorUtility.SetDirty(this);
+        }
+#endif
+        
     }
 }
