@@ -88,9 +88,7 @@ namespace Gumball
         /// <summary>
         /// Gets the save key for the specific car in the player's car.
         /// </summary>
-        /// <param name="car"></param>
-        /// <returns></returns>
-        private static string GetDecalsSaveKey(CarManager car)
+        public static string GetDecalsSaveKey(CarManager car)
         {
             //TODO - use actual car ID
             const string carID = "0";

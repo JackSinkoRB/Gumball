@@ -23,16 +23,14 @@ namespace Gumball
                     Stopwatch stopwatch = Stopwatch.StartNew();
                     LoadInstanceAsync();
                     
-                    if (!Application.isPlaying)
-                    {
-                        instance = handle.WaitForCompletion();
-                        stopwatch.Stop();
-                        Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously ({stopwatch.ElapsedMilliseconds}ms)");
-                    }
-                    else
-                    {
-                        throw new NullReferenceException($"Trying to access singleton scriptable {typeof(T).Name}, but it has not loaded yet.");
-                    }
+#if UNITY_EDITOR
+                    instance = handle.WaitForCompletion();
+                    stopwatch.Stop();
+                    Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously ({stopwatch.ElapsedMilliseconds}ms)");
+                    return instance;
+#endif
+
+                    throw new NullReferenceException($"Trying to access singleton scriptable {typeof(T).Name}, but it has not loaded yet.");
                 }
                 return instance;
             }
