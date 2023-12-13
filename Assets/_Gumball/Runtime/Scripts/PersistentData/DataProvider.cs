@@ -13,6 +13,12 @@ namespace Gumball
         
         #region STATIC
 
+        /// <summary>
+        /// Called before all the data is saved to file when the app is exited.
+        /// <remarks>This can be useful for saving data before the app is closed.</remarks>
+        /// </summary>
+        public static event Action onBeforeSaveAllDataOnAppExit;
+        
         private const float timeBetweenAutoSaveInSeconds = 30;
 
         public static bool IsAutoSaveActive => autoSaveCoroutine != null;
@@ -102,6 +108,7 @@ namespace Gumball
 
         private static bool OnQuit()
         {
+            onBeforeSaveAllDataOnAppExit?.Invoke();
             SaveAllSync();
             return true;
         }

@@ -92,6 +92,11 @@ namespace Gumball
         {
             selectedLiveDecalUI.UpdatePosition();
         }
+        
+        private void OnApplicationQuit()
+        {
+            //don't do anything, but keep this function keeps the class alive for when we listen to Application.wantsToQuit (to save the data on exit)
+        }
 
         private void OnPrimaryContactReleased()
         {
@@ -113,7 +118,8 @@ namespace Gumball
         public void StartSession(CarManager car)
         {
             PrimaryContactInput.onRelease += OnPrimaryContactReleased;
-
+            DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
+            
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
 
             currentCar = car;
@@ -144,6 +150,7 @@ namespace Gumball
             GlobalLoggers.DecalsLogger.Log($"Ending session.");
 
             PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
+            DataProvider.onBeforeSaveAllDataOnAppExit -= OnBeforeSaveAllDataOnAppExit;
 
             DeselectLiveDecal();
             
@@ -292,6 +299,12 @@ namespace Gumball
                     SelectLiveDecal(closestDecal);
                 }
             } else DeselectLiveDecal();
+        }
+        
+        private void OnBeforeSaveAllDataOnAppExit()
+        {
+            //save the decal data before app is closed if closing during a session
+            DecalManager.SaveLiveDecalData(currentCar, liveDecals);
         }
         
 #if UNITY_EDITOR
