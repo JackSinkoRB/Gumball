@@ -37,7 +37,6 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
-        [SerializeField, ReadOnly] private int priorityCount;
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
         [Tooltip("Index is the priority")]
         [SerializeField, ReadOnly] private List<LiveDecal> liveDecals = new();
@@ -163,8 +162,7 @@ namespace Gumball
             }
             
             liveDecals.Clear();
-            priorityCount = 0;
-            
+
             //need to wait for the texture to fully apply before removing paintable components
             this.PerformAtEndOfFrame(() =>
             {
@@ -188,10 +186,24 @@ namespace Gumball
             currentCar = null;
         }
 
+        /// <summary>
+        /// Searches through the decals to find the priority of the decal with the highest priority.
+        /// </summary>
+        public int GetHighestPriority()
+        {
+            int highestPriority = 0;
+            foreach (LiveDecal liveDecal in liveDecals)
+            {
+                if (liveDecal.Priority > highestPriority)
+                    highestPriority = liveDecal.Priority;
+            }
+
+            return highestPriority;
+        }
+        
         public LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture)
         {
-            LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, decalTexture, priorityCount);
-            priorityCount++;
+            LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, decalTexture, GetHighestPriority() + 1);
             
             liveDecals.Add(liveDecal);
             
@@ -203,8 +215,6 @@ namespace Gumball
         public LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
         {
             LiveDecal liveDecal = DecalManager.CreateLiveDecalFromData(data);
-            if (data.Priority > priorityCount)
-                priorityCount = data.Priority + 1;
 
             liveDecals.Add(liveDecal);
             

@@ -51,6 +51,8 @@ namespace Gumball
                 colorIndex = liveDecal.ColorIndex;
             }
         }
+
+        public event Action<Color, Color> onColorChanged;
         
         /// <summary>
         /// The default colour index to use for decals that can be coloured.
@@ -206,9 +208,12 @@ namespace Gumball
             selectionCollider.transform.localScale = selectionScale;
         }
 
-        public void SetColor(Color color)
+        private void SetColor(Color color)
         {
+            Color previousColor = paintDecal.Color;
             paintDecal.Color = color;
+            
+            onColorChanged?.Invoke(previousColor, color);
         }
         
         /// <summary>
@@ -217,7 +222,7 @@ namespace Gumball
         public void SetColorFromIndex(int colorIndex)
         {
             this.colorIndex = colorIndex;
-            paintDecal.Color = DecalEditor.Instance.ColorPalette[colorIndex];
+            SetColor(DecalEditor.Instance.ColorPalette[colorIndex]);
         }
 
         public void SetPriority(int priority)
@@ -275,6 +280,24 @@ namespace Gumball
                 if (positionHasMoved)
                     DecalStateManager.LogStateChange(stateBeforeMoving);
             }
+        }
+
+        public List<LiveDecal> GetOverlappingLiveDecals()
+        {
+            List<LiveDecal> overlappingDecals = new List<LiveDecal>();
+            
+            foreach (LiveDecal liveDecal in DecalEditor.Instance.LiveDecals)
+            {
+                if (liveDecal == this)
+                    continue;
+                
+                BoxCollider boxCollider = (BoxCollider) liveDecal.selectionCollider;
+                
+                if (boxCollider.bounds.Intersects(selectionCollider.bounds))
+                    overlappingDecals.Add(liveDecal);
+            }
+
+            return overlappingDecals;
         }
 
         private void SetDefaultPosition()
