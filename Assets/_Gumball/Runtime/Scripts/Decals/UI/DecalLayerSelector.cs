@@ -18,25 +18,34 @@ namespace Gumball
         
         private void OnEnable()
         {
-            DecalEditor.Instance.onCreateLiveDecal += OnCreateLiveDecal;
-            DecalEditor.Instance.onDestroyLiveDecal += OnDestroyLiveDecal;
-            DecalEditor.Instance.onSelectLiveDecal += OnSelectLiveDecal;
-            DecalEditor.Instance.onDeselectLiveDecal += OnDeselectLiveDecal;
+            DecalEditor.onCreateLiveDecal += OnCreateLiveDecal;
+            DecalEditor.onDestroyLiveDecal += OnDestroyLiveDecal;
+            DecalEditor.onSelectLiveDecal += OnSelectLiveDecal;
+            DecalEditor.onDeselectLiveDecal += OnDeselectLiveDecal;
             
             DecalEditor.onSessionStart += OnStartSession;
         }
 
         private void OnDisable()
         {
-            if (DecalEditor.ExistsRuntime)
-            {
-                DecalEditor.Instance.onCreateLiveDecal -= OnCreateLiveDecal;
-                DecalEditor.Instance.onDestroyLiveDecal -= OnDestroyLiveDecal;
-                DecalEditor.Instance.onSelectLiveDecal -= OnSelectLiveDecal;
-                DecalEditor.Instance.onDeselectLiveDecal -= OnDeselectLiveDecal;
+            DecalEditor.onCreateLiveDecal -= OnCreateLiveDecal;
+            DecalEditor.onDestroyLiveDecal -= OnDestroyLiveDecal;
+            DecalEditor.onSelectLiveDecal -= OnSelectLiveDecal;
+            DecalEditor.onDeselectLiveDecal -= OnDeselectLiveDecal;
                 
-                DecalEditor.onSessionStart -= OnStartSession;
-            }
+            DecalEditor.onSessionStart -= OnStartSession;
+        }
+        
+        public void UpdateLayers()
+        {
+            layerAmountLabel.text = $"{DecalEditor.Instance.LiveDecals.Count} / {DecalEditor.MaxDecalsAllowed}";
+            
+            PopulateScroll();
+        }
+        
+        public void SnapToLiveDecal(LiveDecal liveDecal)
+        {
+            magneticScroll.SnapItemToMagnet(liveDecal.Priority - 1);
         }
 
         private void OnStartSession()
@@ -56,7 +65,7 @@ namespace Gumball
         
         private void OnSelectLiveDecal(LiveDecal liveDecal)
         {
-            magneticScroll.SnapItemToMagnet(DecalEditor.Instance.GetPriorityOfLiveDecal(liveDecal));
+            SnapToLiveDecal(liveDecal);
             
             liveDecal.onColorChanged += OnSelectedColourChanged;
         }
@@ -68,22 +77,13 @@ namespace Gumball
 
         private void OnSelectedColourChanged(Color oldColor, Color newColor)
         {
-            magneticScroll.Items[DecalEditor.Instance.CurrentSelected.Priority].CurrentIcon.ImageComponent.color = newColor;
+            magneticScroll.Items[DecalEditor.Instance.CurrentSelected.Priority - 1].CurrentIcon.ImageComponent.color = newColor;
         }
 
-        public void UpdateLayers()
+        public void PopulateScroll()
         {
-            layerAmountLabel.text = $"{DecalEditor.Instance.LiveDecals.Count} / {DecalEditor.MaxDecalsAllowed}";
-            
-            PopulateScroll();
-        }
-
-        private void PopulateScroll()
-        {
-            List<LiveDecal> decalsSorted = DecalEditor.Instance.LiveDecals.OrderBy(liveDecal => liveDecal.Priority).ToList();
-            
             List<ScrollItem> scrollItems = new List<ScrollItem>();
-            foreach (LiveDecal liveDecal in decalsSorted)
+            foreach (LiveDecal liveDecal in DecalEditor.Instance.LiveDecals)
             {
                 ScrollItem scrollItem = new ScrollItem();
                 scrollItem.onLoad += () =>
@@ -91,7 +91,7 @@ namespace Gumball
                     DecalLayerIcon decalLayerIcon = (DecalLayerIcon) scrollItem.CurrentIcon;
                     decalLayerIcon.ImageComponent.sprite = liveDecal.Sprite;
                     decalLayerIcon.ImageComponent.color = liveDecal.Color;
-                    decalLayerIcon.PriorityLabel.text = (liveDecal.Priority + 1).ToString();
+                    decalLayerIcon.PriorityLabel.text = liveDecal.Priority.ToString();
                 };
                 
                 scrollItem.onSelectComplete += () =>
@@ -101,7 +101,7 @@ namespace Gumball
 
                 scrollItems.Add(scrollItem);
             }
-
+            
             magneticScroll.SetItems(scrollItems, magneticScroll.LastSelectedItemIndex);
         }
         

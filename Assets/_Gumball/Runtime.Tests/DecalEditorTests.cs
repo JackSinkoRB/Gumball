@@ -266,6 +266,116 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(angleToUse, liveDecalAfterLoading.Angle);
             Assert.AreEqual(DecalEditor.Instance.ColorPalette[colorIndexToUse], liveDecalAfterLoading.Color);
         }
+
+        [UnityTest]
+        public IEnumerator SendBackwardPriorities()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            
+            const int categoryToUse = 0;
+            DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
+            LiveDecal liveDecal1 = DecalEditor.Instance.CreateLiveDecal(category, category.DecalTextures[0]);
+            LiveDecal liveDecal2 = DecalEditor.Instance.CreateLiveDecal(category, category.DecalTextures[1]);
+            LiveDecal liveDecal3 = DecalEditor.Instance.CreateLiveDecal(category, category.DecalTextures[2]);
+            
+            Assert.AreEqual(1, liveDecal1.Priority);
+            Assert.AreEqual(2, liveDecal2.Priority);
+            Assert.AreEqual(3, liveDecal3.Priority);
+            Assert.AreEqual(liveDecal1, DecalEditor.Instance.LiveDecals[0]);
+            Assert.AreEqual(liveDecal2, DecalEditor.Instance.LiveDecals[1]);
+            Assert.AreEqual(liveDecal3, DecalEditor.Instance.LiveDecals[2]);
+
+            liveDecal3.SendBackwardOrForward(false, liveDecal3.GetOverlappingLiveDecals());
+            
+            Assert.AreEqual(1, liveDecal1.Priority);
+            Assert.AreEqual(2, liveDecal3.Priority);
+            Assert.AreEqual(3, liveDecal2.Priority);
+            Assert.AreEqual(liveDecal1, DecalEditor.Instance.LiveDecals[0]);
+            Assert.AreEqual(liveDecal3, DecalEditor.Instance.LiveDecals[1]);
+            Assert.AreEqual(liveDecal2, DecalEditor.Instance.LiveDecals[2]);
+        }
         
+        [UnityTest]
+        public IEnumerator SendForwardPriorities()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            
+            const int categoryToUse = 0;
+            DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
+            LiveDecal liveDecal1 = DecalEditor.Instance.CreateLiveDecal(category, category.DecalTextures[0]);
+            LiveDecal liveDecal2 = DecalEditor.Instance.CreateLiveDecal(category, category.DecalTextures[1]);
+            LiveDecal liveDecal3 = DecalEditor.Instance.CreateLiveDecal(category, category.DecalTextures[2]);
+            
+            Assert.AreEqual(1, liveDecal1.Priority);
+            Assert.AreEqual(2, liveDecal2.Priority);
+            Assert.AreEqual(3, liveDecal3.Priority);
+            Assert.AreEqual(liveDecal1, DecalEditor.Instance.LiveDecals[0]);
+            Assert.AreEqual(liveDecal2, DecalEditor.Instance.LiveDecals[1]);
+            Assert.AreEqual(liveDecal3, DecalEditor.Instance.LiveDecals[2]);
+
+            liveDecal1.SendBackwardOrForward(true, liveDecal1.GetOverlappingLiveDecals());
+            
+            Assert.AreEqual(1, liveDecal2.Priority);
+            Assert.AreEqual(2, liveDecal1.Priority);
+            Assert.AreEqual(3, liveDecal3.Priority);
+            Assert.AreEqual(liveDecal2, DecalEditor.Instance.LiveDecals[0]);
+            Assert.AreEqual(liveDecal1, DecalEditor.Instance.LiveDecals[1]);
+            Assert.AreEqual(liveDecal3, DecalEditor.Instance.LiveDecals[2]);
+        }
+
+        [UnityTest]
+        public IEnumerator PrioritiesUpdateWithDeleteAndUndo()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+
+            const int categoryToUse = 0;
+            DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
+            LiveDecal liveDecal1 = DecalEditor.Instance.CreateLiveDecal(category, category.DecalTextures[0]);
+            LiveDecal liveDecal2 = DecalEditor.Instance.CreateLiveDecal(category, category.DecalTextures[1]);
+            LiveDecal liveDecal3 = DecalEditor.Instance.CreateLiveDecal(category, category.DecalTextures[2]);
+
+            Assert.AreEqual(1, liveDecal1.Priority);
+            Assert.AreEqual(2, liveDecal2.Priority);
+            Assert.AreEqual(3, liveDecal3.Priority);
+            Assert.AreEqual(liveDecal1, DecalEditor.Instance.LiveDecals[0]);
+            Assert.AreEqual(liveDecal2, DecalEditor.Instance.LiveDecals[1]);
+            Assert.AreEqual(liveDecal3, DecalEditor.Instance.LiveDecals[2]);
+            
+            //delete the second decal and check priorities have updated
+            DecalStateManager.LogStateChange(new DecalStateManager.DestroyStateChange(liveDecal2));
+            DecalEditor.Instance.DisableLiveDecal(liveDecal2);
+            
+            Assert.IsTrue(DecalEditor.Instance.LiveDecals.Contains(liveDecal1));
+            Assert.IsFalse(DecalEditor.Instance.LiveDecals.Contains(liveDecal2));
+            Assert.IsTrue(DecalEditor.Instance.LiveDecals.Contains(liveDecal3));
+            Assert.AreEqual(2, DecalEditor.Instance.LiveDecals.Count);
+            
+            Assert.AreEqual(1, liveDecal1.Priority);
+            Assert.AreEqual(2, liveDecal3.Priority);
+            Assert.AreEqual(liveDecal1, DecalEditor.Instance.LiveDecals[0]);
+            Assert.AreEqual(liveDecal3, DecalEditor.Instance.LiveDecals[1]);
+            
+            DecalStateManager.UndoLatestChange();
+            
+            //ensure the priorities are the same as before:
+            Assert.IsTrue(DecalEditor.Instance.LiveDecals.Contains(liveDecal1));
+            Assert.IsTrue(DecalEditor.Instance.LiveDecals.Contains(liveDecal2));
+            Assert.IsTrue(DecalEditor.Instance.LiveDecals.Contains(liveDecal3));
+            Assert.AreEqual(3, DecalEditor.Instance.LiveDecals.Count);
+            
+            Assert.AreEqual(1, liveDecal1.Priority);
+            Assert.AreEqual(2, liveDecal2.Priority);
+            Assert.AreEqual(3, liveDecal3.Priority);
+            Assert.AreEqual(liveDecal1, DecalEditor.Instance.LiveDecals[0]);
+            Assert.AreEqual(liveDecal2, DecalEditor.Instance.LiveDecals[1]);
+            Assert.AreEqual(liveDecal3, DecalEditor.Instance.LiveDecals[2]);
+        }
+
     }
 }

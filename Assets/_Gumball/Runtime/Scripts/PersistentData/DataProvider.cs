@@ -74,7 +74,7 @@ namespace Gumball
             autoSaveCoroutine = CoroutineHelper.Instance.StartCoroutine(AutoSave());
 
             //listen for quit to force auto save
-            Application.wantsToQuit += OnQuit;
+            Application.quitting += OnQuit;
 
             GlobalLoggers.SaveDataLogger.Log($"Started auto saver.");
         }
@@ -90,7 +90,7 @@ namespace Gumball
             CoroutineHelper.Instance.StopCoroutine(autoSaveCoroutine);
             autoSaveCoroutine = null;
 
-            Application.wantsToQuit -= OnQuit;
+            Application.quitting -= OnQuit;
 
             GlobalLoggers.SaveDataLogger.Log($"Stopped auto saver.");
         }
@@ -106,11 +106,10 @@ namespace Gumball
             }
         }
 
-        private static bool OnQuit()
+        private static void OnQuit()
         {
             onBeforeSaveAllDataOnAppExit?.Invoke();
             SaveAllSync();
-            return true;
         }
 
         #endregion

@@ -66,16 +66,16 @@ namespace Gumball
             
             SetTarget(DecalEditor.Instance.CurrentCar.transform, defaultTargetOffset);
 
-            DecalEditor.Instance.onSelectLiveDecal += OnSelectDecal;
-            DecalEditor.Instance.onDeselectLiveDecal += OnDeselectDecal;
+            DecalEditor.onSelectLiveDecal += OnSelectDecal;
+            DecalEditor.onDeselectLiveDecal += OnDeselectDecal;
             
             SetInitialPosition();
         }
 
         private void OnSessionEnd()
         {
-            DecalEditor.Instance.onSelectLiveDecal -= OnSelectDecal;
-            DecalEditor.Instance.onDeselectLiveDecal -= OnDeselectDecal;
+            DecalEditor.onSelectLiveDecal -= OnSelectDecal;
+            DecalEditor.onDeselectLiveDecal -= OnDeselectDecal;
 
             PrimaryContactInput.onPress -= OnPrimaryContactPress;
             PrimaryContactInput.onDrag -= OnPrimaryContactMove;

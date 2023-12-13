@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,8 +11,11 @@ namespace Gumball
     {
 
         [Header("Decal editor panel")]
+        [SerializeField] private DecalLayerSelector layerSelector;
         [SerializeField] private Button trashButton;
         [SerializeField] private Button colourButton;
+        [SerializeField] private Button sendForwardButton;
+        [SerializeField] private Button sendBackwardButton;
         [SerializeField] private Button undoButton;
         [SerializeField] private Button redoButton;
         
@@ -22,18 +26,21 @@ namespace Gumball
         
         public Button TrashButton => trashButton;
         public Button ColourButton => colourButton;
+        public Button SendForwardButton => sendForwardButton;
+        public Button SendBackwardButton => sendBackwardButton;
 
         public DecalColourSelectorPanel ColourSelectorPanel => colourSelectorPanel;
 
         private bool colourPickerEnabled;
         private Tween colourPickerGlowTween;
-        
+        private List<LiveDecal> overlappingDecals;
+
         protected override void OnShow()
         {
             base.OnShow();
             
-            DecalEditor.Instance.onSelectLiveDecal += OnSelectDecal;
-            DecalEditor.Instance.onDeselectLiveDecal += OnDeselectDecal;
+            DecalEditor.onSelectLiveDecal += OnSelectDecal;
+            DecalEditor.onDeselectLiveDecal += OnDeselectDecal;
             DecalStateManager.onUndoStackChange += OnUndoStackChange;
             DecalStateManager.onRedoStackChange += OnRedoStackChange;
 
@@ -43,6 +50,8 @@ namespace Gumball
             
             //nothing will be selected, so disable the buttons
             trashButton.interactable = false;
+            sendForwardButton.interactable = false;
+            sendBackwardButton.interactable = false;
             colourButton.interactable = false;
 
             DisableColourPicker();
@@ -53,11 +62,9 @@ namespace Gumball
         {
             base.OnHide();
 
-            if (DecalEditor.ExistsRuntime)
-            {
-                DecalEditor.Instance.onSelectLiveDecal -= OnSelectDecal;
-                DecalEditor.Instance.onDeselectLiveDecal -= OnDeselectDecal;
-            }
+            DecalEditor.onSelectLiveDecal -= OnSelectDecal;
+            DecalEditor.onDeselectLiveDecal -= OnDeselectDecal;
+            
             DecalStateManager.onUndoStackChange -= OnUndoStackChange;
             DecalStateManager.onRedoStackChange -= OnRedoStackChange;
         }
@@ -74,6 +81,16 @@ namespace Gumball
             DecalEditor.Instance.DisableLiveDecal(DecalEditor.Instance.CurrentSelected);
         }
 
+        public void OnClickSendForwardButton()
+        {
+            SendBackwardOrForward(true);
+        }
+        
+        public void OnClickSendBackwardButton()
+        {
+            SendBackwardOrForward(false);
+        }
+        
         public void OnClickColourButton()
         {
             if (colourPickerEnabled)
@@ -107,7 +124,11 @@ namespace Gumball
         
         private void OnSelectDecal(LiveDecal liveDecal)
         {
+            liveDecal.onMoved += OnSelectedDecalMoved;
+            
             trashButton.interactable = true;
+            
+            UpdateSendForwardBackwardButtons();
 
             if (liveDecal.TextureData.CanColour)
             {
@@ -121,9 +142,15 @@ namespace Gumball
             }
         }
         
+        //TODO: write tests for decal priorities - the liveDecals list should always be in order of priority, and the decals priorities should go from 1 to X with no breaks in between
+
         private void OnDeselectDecal(LiveDecal liveDecal)
         {
+            liveDecal.onMoved -= OnSelectedDecalMoved;
+
             trashButton.interactable = false;
+            sendForwardButton.interactable = false;
+            sendBackwardButton.interactable = false;
             
             colourButton.interactable = false;
             ColourSelectorPanel.Hide();
@@ -150,6 +177,50 @@ namespace Gumball
         {
             colourPickerGlowTween?.Kill();
             colourPickerGlowTween = colourPickerGlow.DOFade(show ? 1 : 0, colourPickerGlowDuration);
+        }
+        
+        private void OnSelectedDecalMoved()
+        {
+            UpdateSendForwardBackwardButtons();   
+        }
+        
+        private void SendBackwardOrForward(bool isForward)
+        {
+            DecalEditor.Instance.CurrentSelected.SendBackwardOrForward(isForward, overlappingDecals);
+            
+            UpdateSendForwardBackwardButtons();
+            
+            layerSelector.PopulateScroll(); //order has changed, so need to repopulate
+            layerSelector.SnapToLiveDecal(DecalEditor.Instance.CurrentSelected);
+        }
+        
+        private void UpdateSendForwardBackwardButtons()
+        {
+            overlappingDecals = DecalEditor.Instance.CurrentSelected.GetOverlappingLiveDecals();
+
+            bool hasDecalWithHigherPriority = false;
+            bool hasDecalWithLowerPriority = false;
+
+            foreach (LiveDecal decal in overlappingDecals)
+            {
+                if (hasDecalWithHigherPriority && hasDecalWithLowerPriority)
+                    break; //no need to continue
+                
+                if (decal.Priority > DecalEditor.Instance.CurrentSelected.Priority)
+                {
+                    hasDecalWithHigherPriority = true;
+                    continue;
+                }
+                
+                if (decal.Priority < DecalEditor.Instance.CurrentSelected.Priority)
+                {
+                    hasDecalWithLowerPriority = true;
+                    continue;
+                }
+            }
+
+            sendForwardButton.interactable = hasDecalWithHigherPriority;
+            sendBackwardButton.interactable = hasDecalWithLowerPriority;
         }
         
     }

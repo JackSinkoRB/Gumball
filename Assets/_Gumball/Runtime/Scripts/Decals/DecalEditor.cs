@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -21,12 +22,15 @@ namespace Gumball
         public static event Action onSessionStart;
         public static event Action onSessionEnd;
         
-        public event Action<LiveDecal> onSelectLiveDecal;
-        public event Action<LiveDecal> onDeselectLiveDecal;
-        public event Action<LiveDecal> onCreateLiveDecal;
-        public event Action<LiveDecal> onDestroyLiveDecal;
+        public static event Action<LiveDecal> onSelectLiveDecal;
+        public static event Action<LiveDecal> onDeselectLiveDecal;
+        public static event Action<LiveDecal> onCreateLiveDecal;
+        public static event Action<LiveDecal> onDestroyLiveDecal;
+        
+        //these must be static so they are still alive when the application is quitting
+        private static CarManager currentCar;
+        private static List<LiveDecal> liveDecals = new();
 
-        [SerializeField] private CarManager currentCar;
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
         [SerializeField] private DecalCameraController cameraController;
 
@@ -38,8 +42,6 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
-        [Tooltip("Index is the priority")]
-        [SerializeField, ReadOnly] private List<LiveDecal> liveDecals = new();
         
         public List<LiveDecal> LiveDecals => liveDecals;
         public LiveDecal CurrentSelected => currentSelected;
@@ -54,6 +56,13 @@ namespace Gumball
         {
             onSessionStart = null;
             onSessionEnd = null;
+            onSelectLiveDecal = null;
+            onDeselectLiveDecal = null;
+            onCreateLiveDecal = null;
+            onDestroyLiveDecal = null;
+
+            currentCar = null;
+            liveDecals.Clear();
         }
         
         public static void LoadDecalEditor()
@@ -95,6 +104,8 @@ namespace Gumball
         private void OnApplicationQuit()
         {
             //don't do anything, but keep this function keeps the class alive for when we listen to Application.wantsToQuit (to save the data on exit)
+            var carManager = currentCar;
+            var liveDecalsList = liveDecals;
         }
 
         private void OnPrimaryContactReleased()
@@ -108,6 +119,8 @@ namespace Gumball
 
             if (PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
                 || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().ColourButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().SendForwardButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().SendBackwardButton.image)
                 || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalColourSelectorPanel>().MagneticScroll.GetComponent<Image>()))
                 return;
 
@@ -206,6 +219,7 @@ namespace Gumball
             LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, decalTexture, GetHighestPriority() + 1);
             
             liveDecals.Add(liveDecal);
+            OnLiveDecalsListChanged();
             
             onCreateLiveDecal?.Invoke(liveDecal);
 
@@ -216,23 +230,14 @@ namespace Gumball
         {
             LiveDecal liveDecal = DecalManager.CreateLiveDecalFromData(data);
 
-            liveDecals.Add(liveDecal);
-            
+            liveDecals.Insert(data.Priority - 1, liveDecal);
+            OnLiveDecalsListChanged();
+
             onCreateLiveDecal?.Invoke(liveDecal);
 
             return liveDecal;
         }
-
-        public LiveDecal GetLiveDecalByPriority(int priority)
-        {
-            return liveDecals[priority];
-        }
-
-        public int GetPriorityOfLiveDecal(LiveDecal liveDecal)
-        {
-            return liveDecals.IndexOf(liveDecal);
-        }
-
+        
         public void SelectLiveDecal(LiveDecal liveDecal)
         {
             if (currentSelected != null && currentSelected == liveDecal)
@@ -257,15 +262,21 @@ namespace Gumball
         {
             if (currentSelected != null && currentSelected == liveDecal)
                 DeselectLiveDecal();
-            
+
             liveDecals.Remove(liveDecal);
+            OnLiveDecalsListChanged();
 
             onDestroyLiveDecal?.Invoke(liveDecal);
 
             liveDecal.gameObject.Pool();
         }
-
-        public void UpdateDecalUnderPointer()
+        
+        public void OrderDecalsListByPriority()
+        {
+            liveDecals = liveDecals.OrderBy(liveDecal => liveDecal.Priority).ToList();
+        }
+        
+        private void UpdateDecalUnderPointer()
         {
             //raycast from the pointer position into the world
             Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
@@ -315,6 +326,16 @@ namespace Gumball
         {
             //save the decal data before app is closed if closing during a session
             DecalManager.SaveLiveDecalData(currentCar, liveDecals);
+        }
+
+        private void OnLiveDecalsListChanged()
+        {
+            //reassign the priorities based on order in the list
+            for (int index = 0; index < liveDecals.Count; index++)
+            {
+                LiveDecal liveDecal = liveDecals[index];
+                liveDecal.SetPriority(index + 1); 
+            }
         }
         
 #if UNITY_EDITOR

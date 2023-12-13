@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Gumball
@@ -19,11 +20,10 @@ namespace Gumball
             LiveDecal liveDecal = Instance.liveDecalPrefab.gameObject.GetSpareOrCreate<LiveDecal>();
             DontDestroyOnLoad(liveDecal);
 
+            liveDecal.SetPriority(priority);
             liveDecal.Initialise(decalTexture,
                 Array.IndexOf(Instance.decalUICategories, category), 
                 Array.IndexOf(category.DecalTextures, decalTexture));
-
-            liveDecal.SetPriority(priority);
             
             return liveDecal;
         }
@@ -54,14 +54,16 @@ namespace Gumball
         {
             List<LiveDecal> liveDecals = new();
             LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(GetDecalsSaveKey(car), Array.Empty<LiveDecal.LiveDecalData>());
-            
+
             foreach (LiveDecal.LiveDecalData data in liveDecalData)
             {
                 LiveDecal liveDecal = CreateLiveDecalFromData(data);
                 liveDecals.Add(liveDecal);
             }
 
-            return liveDecals;
+            List<LiveDecal> decalsSorted = liveDecals.OrderBy(liveDecal => liveDecal.Priority).ToList();
+
+            return decalsSorted;
         }
         
         public static LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
