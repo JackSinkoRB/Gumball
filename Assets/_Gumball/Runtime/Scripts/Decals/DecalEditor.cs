@@ -16,6 +16,11 @@ namespace Gumball
 {
     public class DecalEditor : Singleton<DecalEditor>
     {
+        
+        /// <summary>
+        /// Is true if tests have started running, and the runtime hasn't yet started
+        /// </summary>
+        public static bool IsRunningTests;
 
         public const int MaxDecalsAllowed = 50;
 
@@ -54,6 +59,8 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RuntimeInitialise()
         {
+            IsRunningTests = false;
+            
             onSessionStart = null;
             onSessionEnd = null;
             onSelectLiveDecal = null;
@@ -324,8 +331,13 @@ namespace Gumball
         
         private void OnBeforeSaveAllDataOnAppExit()
         {
-            //save the decal data before app is closed if closing during a session
-            DecalManager.SaveLiveDecalData(currentCar, liveDecals);
+#if UNITY_EDITOR
+            if (!IsRunningTests) //don't run save if running tests
+#endif
+            {
+                //save the decal data before app is closed if closing during a session
+                DecalManager.SaveLiveDecalData(currentCar, liveDecals);
+            }
         }
 
         private void OnLiveDecalsListChanged()

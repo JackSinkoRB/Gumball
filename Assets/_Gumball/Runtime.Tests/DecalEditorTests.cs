@@ -34,6 +34,7 @@ namespace Gumball.Runtime.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            DecalEditor.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
 
             AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(DecalEditorTestManager.Instance.TestScenePath, new LoadSceneParameters(LoadSceneMode.Single));
