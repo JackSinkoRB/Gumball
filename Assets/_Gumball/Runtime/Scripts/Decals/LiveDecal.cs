@@ -359,6 +359,11 @@ namespace Gumball
 
                 IsValidPosition = hit.collider.GetComponent<P3dPaintable>() != null;
             }
+            else
+            {
+                //TODO: update position?
+                IsValidPosition = false;
+            }
         }
 
         private void DrawPreview()
