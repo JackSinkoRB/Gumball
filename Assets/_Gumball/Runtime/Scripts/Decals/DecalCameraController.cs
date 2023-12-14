@@ -83,6 +83,7 @@ namespace Gumball
             PinchInput.onPinch -= OnPinch;
             
             decelerationTween?.Kill();
+            currentMovementTween?.Kill();
             
             gameObject.SetActive(false);
         }
