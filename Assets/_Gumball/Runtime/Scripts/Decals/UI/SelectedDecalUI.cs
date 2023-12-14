@@ -41,6 +41,8 @@ namespace Gumball
         
         private void OnEnable()
         {
+            PrimaryContactInput.onPress += OnPrimaryContactPress;
+            
             scaleRotationHandle.onPress += OnPressScaleRotationHandle;
             scaleRotationHandle.onDrag += OnDragScaleRotationHandle;
             scaleRotationHandle.onRelease += OnReleaseScaleRotationHandle;
@@ -48,6 +50,8 @@ namespace Gumball
 
         private void OnDisable()
         {
+            PrimaryContactInput.onPress -= OnPrimaryContactPress;
+
             scaleRotationHandle.onDrag -= OnDragScaleRotationHandle;
             scaleRotationHandle.onPress -= OnPressScaleRotationHandle;
             scaleRotationHandle.onRelease -= OnReleaseScaleRotationHandle;
@@ -77,15 +81,18 @@ namespace Gumball
             isFaded = fade;
             this.GetComponent<CanvasGroup>(true).alpha = fade ? fadeWhenModifying : 1;
         }
+
+        private void OnPrimaryContactPress()
+        {
+            Vector2 selectedDecalScreenPosition = Camera.main.WorldToScreenPoint(selectedDecal.transform.position);
+            screenOffsetFromDecalWhenPressed = PrimaryContactInput.Position - selectedDecalScreenPosition;
+        }
         
         private void OnPressScaleRotationHandle()
         {
             lastClickPosition = PrimaryContactInput.Position;
             lastKnownRadius = GetDistanceToCentre(PrimaryContactInput.Position);
             stateBeforePressing = new DecalStateManager.ModifyStateChange(selectedDecal);
-            
-            Vector2 selectedDecalScreenPosition = Camera.main.WorldToScreenPoint(selectedDecal.transform.position);
-            screenOffsetFromDecalWhenPressed = PrimaryContactInput.Position - selectedDecalScreenPosition;
         }
 
         private void OnReleaseScaleRotationHandle()
