@@ -20,7 +20,8 @@ namespace Gumball
         
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
         [SerializeField] private bool alwaysGrounded;
-
+        [SerializeField, ConditionalField(nameof(alwaysGrounded))] private MeshRenderer meshRendererToUseWhenGrounding;
+        
         [Space(10)]
         [Tooltip("When enabled, the terrain is flattened to the bottom of the chunk object.")]
         [SerializeField] private bool keepAtSpecificDistanceFromRoad;
@@ -49,14 +50,12 @@ namespace Gumball
         
         [SerializeField, HideInInspector] private Vector3 lastKnownPositionWhenGrounded;
         
-        private Collider collider => GetComponent<Collider>();
-
         public bool FlattenTerrain => flattenTerrain;
         public float FlattenTerrainRadius => flattenTerrainRadius;
         public float FlattenTerrainBlendRadius => flattenTerrainBlendRadius;
         
-        public Vector3 GetLowestPosition() => collider != null
-            ? collider.ClosestPoint(collider.bounds.center.OffsetY(-int.MaxValue))
+        public Vector3 GetLowestPosition() => meshRendererToUseWhenGrounding != null
+            ? meshRendererToUseWhenGrounding.bounds.ClosestPoint(meshRendererToUseWhenGrounding.bounds.center.OffsetY(-int.MaxValue))
             : transform.position;
         
         private void Initialise()
@@ -107,25 +106,36 @@ namespace Gumball
         {
             Initialise();
 
+            if (chunkBelongsTo == null)
+                return;
+
+            if (!gameObject.scene.IsValid())
+                return;
+
             float offset = 0;
 
             Vector3 originalPosition = transform.position;
-            transform.position = transform.position.SetY(chunkBelongsTo.CurrentTerrain.transform.position.y + 10000);
-            
-            if (Physics.Raycast(GetLowestPosition(), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Terrain)))
-                offset = -hitDown.distance;
+            try
+            {
+                transform.position = transform.position.SetY(chunkBelongsTo.CurrentTerrain.transform.position.y + 10000);
 
-            if (offset == 0)
-            {
-                //wasn't successful
-                transform.position = originalPosition;
+                if (gameObject.scene.GetPhysicsScene().Raycast(GetLowestPosition(), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Terrain)))
+                    offset = -hitDown.distance;
             }
-            else
+            finally
             {
-                //success
-                transform.OffsetY(offset);
-                
-                lastKnownPositionWhenGrounded = transform.position;
+                if (offset == 0)
+                {
+                    //wasn't successful
+                    transform.position = originalPosition;
+                }
+                else
+                {
+                    //success
+                    transform.position = transform.position.OffsetY(offset);
+
+                    lastKnownPositionWhenGrounded = transform.position;
+                }
             }
         }
         
@@ -166,7 +176,7 @@ namespace Gumball
             }
 
             chunkBelongsTo = null;
-            Debug.LogError($"Could not find a chunk that {gameObject.name} belongs to.");
+            Debug.LogWarning($"Could not find a chunk that {gameObject.name} belongs to.");
         }
         
 #endif
