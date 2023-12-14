@@ -253,6 +253,8 @@ namespace Gumball
             LiveDecal nextDecal = decalsSorted[currentIndex + (isForward ? 1 : -1)];
             int nextPriority = nextDecal.Priority;
             
+            DecalStateManager.LogStateChange(new DecalStateManager.SwitchPrioritiesStateChange(this, nextDecal));
+
             //flip the priorities
             SetPriority(nextPriority);
             nextDecal.SetPriority(currentPriority);

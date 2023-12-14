@@ -11,23 +11,73 @@ namespace Gumball
         [Serializable]
         public abstract class StateChange
         {
+            public abstract void Undo();
+            public abstract void Redo();
+        }
+
+        [Serializable]
+        public abstract class SingleDecalStateChange : StateChange
+        {
             [SerializeField] protected LiveDecal liveDecal;
             [SerializeField] protected LiveDecal.LiveDecalData data;
 
             public LiveDecal LiveDecal => liveDecal;
             public LiveDecal.LiveDecalData Data => data;
 
-            protected StateChange(LiveDecal liveDecal)
+            protected SingleDecalStateChange(LiveDecal liveDecal)
             {
                 this.liveDecal = liveDecal;
                 data = new LiveDecal.LiveDecalData(liveDecal);
             }
+        }
+        
+        [Serializable]
+        public class SwitchPrioritiesStateChange : StateChange
+        {
+            [SerializeField] protected LiveDecal liveDecal1;
+            [SerializeField] protected LiveDecal liveDecal2;
+            [SerializeField] protected int priority1;
+            [SerializeField] protected int priority2;
             
-            public abstract void Undo();
-            public abstract void Redo();
+            public LiveDecal LiveDecal1 => liveDecal1;
+            public LiveDecal LiveDecal2 => liveDecal1;
+            public int Priority1 => priority1;
+            public int Priority2 => priority2;
+            
+            public SwitchPrioritiesStateChange(LiveDecal liveDecal1, LiveDecal liveDecal2)
+            {
+                this.liveDecal1 = liveDecal1;
+                this.liveDecal2 = liveDecal2;
+                priority1 = liveDecal1.Priority;
+                priority2 = liveDecal2.Priority;
+            }
+            
+            public override void Undo()
+            {
+                //flip the priorities
+                liveDecal1.SetPriority(priority1);
+                liveDecal2.SetPriority(priority2);
+            
+                //priorities have changed, make sure to reorder the list
+                DecalEditor.Instance.OrderDecalsListByPriority();
+                
+                DecalEditor.Instance.SelectLiveDecal(liveDecal1);
+            }
+
+            public override void Redo()
+            {
+                //flip the priorities
+                liveDecal1.SetPriority(priority2);
+                liveDecal2.SetPriority(priority1);
+            
+                //priorities have changed, make sure to reorder the list
+                DecalEditor.Instance.OrderDecalsListByPriority();
+                
+                DecalEditor.Instance.SelectLiveDecal(liveDecal1);
+            }
         }
 
-        public class CreateStateChange : StateChange
+        public class CreateStateChange : SingleDecalStateChange
         {
             public CreateStateChange(LiveDecal liveDecal) : base(liveDecal)
             {
@@ -46,7 +96,7 @@ namespace Gumball
             }
         }
         
-        public class ModifyStateChange : StateChange
+        public class ModifyStateChange : SingleDecalStateChange
         {
             private LiveDecal.LiveDecalData dataBeforeUndo;
             
@@ -72,7 +122,7 @@ namespace Gumball
             }
         }
         
-        public class DestroyStateChange : StateChange
+        public class DestroyStateChange : SingleDecalStateChange
         {
             public DestroyStateChange(LiveDecal liveDecal) : base(liveDecal)
             {
