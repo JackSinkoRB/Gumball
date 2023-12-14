@@ -735,11 +735,48 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1945940336237512628}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 02faa0bfa06e7734ab7e9377af41fe44,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6255075453475386762}
   m_SourcePrefab: {fileID: 100100000, guid: 02faa0bfa06e7734ab7e9377af41fe44, type: 3}
+--- !u!23 &3302343015142144278 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8919268654337561039, guid: 02faa0bfa06e7734ab7e9377af41fe44,
+    type: 3}
+  m_PrefabInstance: {fileID: 6202544020105406681}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5879842461964455730 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 02faa0bfa06e7734ab7e9377af41fe44,
     type: 3}
   m_PrefabInstance: {fileID: 6202544020105406681}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6544492484705523080 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 02faa0bfa06e7734ab7e9377af41fe44,
+    type: 3}
+  m_PrefabInstance: {fileID: 6202544020105406681}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6255075453475386762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6544492484705523080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  alwaysGrounded: 1
+  meshRendererToUseWhenGrounding: {fileID: 3302343015142144278}
+  keepAtSpecificDistanceFromRoad: 0
+  distanceFromRoad: 10
+  flattenTerrain: 0
+  flattenTerrainRadius: 5
+  flattenTerrainBlendRadius: 20
+  chunkBelongsTo: {fileID: 0}
+  lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}

@@ -25,12 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6095842943860858123}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -0.0215, z: 0}
   m_LocalScale: {x: 0.79769, y: 0.94678, z: 0.69081}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8609408250023405140}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5357387697335915132
 MeshFilter:
@@ -51,6 +52,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -90,6 +92,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8609408250023405140}
+  - component: {fileID: 5199562647173346823}
   m_Layer: 0
   m_Name: Palm_04
   m_TagString: Untagged
@@ -104,11 +107,33 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8948955498758421742}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.53324, z: 0}
   m_LocalScale: {x: 2.1358, y: 2.3974352, z: 2.6460423}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4932858058638732895}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5199562647173346823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8948955498758421742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  alwaysGrounded: 1
+  meshRendererToUseWhenGrounding: {fileID: 3718380000102642066}
+  keepAtSpecificDistanceFromRoad: 0
+  distanceFromRoad: 10
+  flattenTerrain: 0
+  flattenTerrainRadius: 5
+  flattenTerrainBlendRadius: 20
+  chunkBelongsTo: {fileID: 0}
+  lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}

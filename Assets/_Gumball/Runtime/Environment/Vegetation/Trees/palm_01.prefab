@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 11483249568462206}
+  - component: {fileID: 9143257221526320955}
   m_Layer: 0
   m_Name: palm_01
   m_TagString: Untagged
@@ -23,14 +24,36 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 820529626074148804}
+  serializedVersion: 2
   m_LocalRotation: {x: 0.000000081460335, y: 0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -0.21216, z: -0.000000034566}
   m_LocalScale: {x: 1.234, y: 1.1041, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1953054788493519036}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9143257221526320955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820529626074148804}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  alwaysGrounded: 1
+  meshRendererToUseWhenGrounding: {fileID: 5831082155364558138}
+  keepAtSpecificDistanceFromRoad: 0
+  distanceFromRoad: 10
+  flattenTerrain: 0
+  flattenTerrainRadius: 5
+  flattenTerrainBlendRadius: 20
+  chunkBelongsTo: {fileID: 0}
+  lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!1 &5778089562807348794
 GameObject:
   m_ObjectHideFlags: 0
@@ -56,12 +79,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5778089562807348794}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0, y: -0.109, z: 0}
   m_LocalScale: {x: 0.73858184, y: 1, z: 0.66769975}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 11483249568462206}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5811468533030152199
 MeshFilter:
@@ -82,6 +106,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
