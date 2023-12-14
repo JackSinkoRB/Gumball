@@ -282,8 +282,7 @@ namespace Gumball
             if (wasClickableUnderPointerOnPress)
                 return;
 
-            bool pointerWasDragged = !PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.DragThreshold);
-            if (!pointerWasDragged)
+            if (!PrimaryContactInput.HasDraggedSincePressing)
                 return;
             
             if (WasUnderPointerOnPress)

@@ -21,8 +21,15 @@ namespace Gumball
         public static event Action onPerform;
 
         public static bool IsPressed { get; private set; }
+        /// <summary>
+        /// If there has been more movement than the drag threshold since the last frame.
+        /// </summary>
         public static bool IsDragging { get; private set; }
-        
+        /// <summary>
+        /// If there has been more movement than the drag threshold since pressing.
+        /// </summary>
+        public static bool HasDraggedSincePressing => !OffsetSincePressedNormalised.Approximately(Vector2.zero, DragThreshold);
+
         public static Vector2 Position { get; private set; }
         /// <summary>
         /// The position of the press when the primary contact was started.

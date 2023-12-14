@@ -320,13 +320,22 @@ namespace Gumball
                 GlobalLoggers.DecalsLogger.Log($"Distance to {decal.Priority} = {distanceToDecalSqr}");
             }
 
-            if (closestDecal != null) {
-                if (currentSelected == null || currentSelected != closestDecal)
+            if (closestDecal != null)
+            {
+                bool currentSelectedHasChanged = currentSelected == null || currentSelected != closestDecal;
+                
+                if (currentSelectedHasChanged
+                    && (!PrimaryContactInput.IsGraphicUnderPointer(selectedLiveDecalUI.Ring) || !PrimaryContactInput.HasDraggedSincePressing))
                 {
                     DeselectLiveDecal();
                     SelectLiveDecal(closestDecal);
                 }
-            } else DeselectLiveDecal();
+            }
+            else
+            {
+                if (!PrimaryContactInput.IsGraphicUnderPointer(selectedLiveDecalUI.Ring))
+                    DeselectLiveDecal();
+            }
         }
         
         private void OnBeforeSaveAllDataOnAppExit()
