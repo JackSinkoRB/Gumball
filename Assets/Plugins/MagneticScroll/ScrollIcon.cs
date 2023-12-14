@@ -35,6 +35,11 @@ namespace MagneticScrollUtils
 
         public MagneticScroll ScrollBelongsTo => scrollBelongsTo;
 
+        private void OnDisable()
+        {
+            CurrentTween?.Complete();
+        }
+
         /// <summary>
         /// Called when the icon is initialised in a new magnetic scroll.
         /// </summary>
