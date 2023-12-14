@@ -251,7 +251,7 @@ namespace Gumball
             if (pressedUI)
                 return;
 
-            if (currentMovementTween != null && currentMovementTween.IsPlaying())
+            if (currentMovementTween != null && currentMovementTween.IsActive() && currentMovementTween.IsPlaying())
                 return;
             
             if (DecalEditor.Instance.CurrentSelected != null && !DecalEditor.Instance.CurrentSelected.WasUnderPointerOnPress)
