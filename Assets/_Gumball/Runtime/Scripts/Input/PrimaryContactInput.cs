@@ -37,6 +37,10 @@ namespace Gumball
         /// The amount the primary position has moved since the last frame.
         /// </summary>
         public static Vector2 OffsetSinceLastFrame { get; private set; }
+        /// <summary>
+        /// The amount of time passed (in seconds) since the pointer was last pressed.
+        /// </summary>
+        public static float TimeSincePressed { get; private set; }
 
         private static Vector2 lastKnownPositionOnPerformed;
         private static int graphicsUnderPointerLastCached = -1;
@@ -77,6 +81,7 @@ namespace Gumball
         private static void Update()
         {
             UpdateOffsetSinceLastFrame();
+            TimeSincePressed += Time.deltaTime;
         }
         
         public static void OnPressed(InputAction.CallbackContext context)
@@ -87,6 +92,7 @@ namespace Gumball
             lastKnownPositionOnPerformed = Position;
             OffsetSincePressed = Vector2.zero;
             OffsetSinceLastFrame = Vector2.zero;
+            TimeSincePressed = 0;
             
             onPress?.Invoke();
         }
