@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Gumball.Runtime.Tests;
 using NUnit.Framework;
-using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,14 +11,22 @@ using Object = UnityEngine.Object;
 
 namespace MagneticScrollUtils.Tests.Runtime
 {
-    public class MagneticScrollRuntimeTests
+    public class MagneticScrollRuntimeTests : IPrebuildSetup, IPostBuildCleanup
     {
-        
-        private static SceneAsset bootSceneSetting;
 
         private bool isInitialised;
         private MagneticScrollTestSceneManager sceneManager;
 
+        public void Setup()
+        {
+            BootSceneClear.TrySetup();
+        }
+
+        public void Cleanup()
+        {
+            BootSceneClear.TryCleanup();
+        }
+        
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
