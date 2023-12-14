@@ -142,7 +142,11 @@ namespace Gumball
                 SetVelocity(Vector2.zero);
                 return;
             }
-
+            
+            bool positionHasMoved = !PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.PressedThreshold);
+            if (!positionHasMoved)
+                return;
+            
             SetVelocity(offset);
             MoveCamera(velocity);
         }
@@ -260,6 +264,10 @@ namespace Gumball
             if (PinchInput.IsPinching)
                 return;
             
+            bool positionHasMoved = !PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.PressedThreshold);
+            if (!positionHasMoved)
+                return;
+            
             DoDecelerationTween();
         }
 
@@ -271,7 +279,7 @@ namespace Gumball
             if (PinchInput.IsPinching)
                 return;
             
-            bool positionHasMoved = !PrimaryContactInput.OffsetSincePressed.Approximately(Vector2.zero, 0.001f);
+            bool positionHasMoved = !PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.PressedThreshold);
             if (!positionHasMoved)
                 return;
 

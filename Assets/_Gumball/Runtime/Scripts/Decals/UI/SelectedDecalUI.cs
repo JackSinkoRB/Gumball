@@ -94,7 +94,7 @@ namespace Gumball
             if (stateBeforePressing == null)
                 return;
             
-            bool positionHasMoved = !PrimaryContactInput.OffsetSincePressed.Approximately(Vector2.zero, 0.001f);
+            bool positionHasMoved = !PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.DragThreshold);
             if (positionHasMoved)
                 DecalStateManager.LogStateChange(stateBeforePressing);
         }

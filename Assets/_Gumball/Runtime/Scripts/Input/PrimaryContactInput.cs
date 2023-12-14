@@ -31,8 +31,13 @@ namespace Gumball
 
         /// <summary>
         /// The amount the primary position has moved since pressed.
+        /// <remarks>This doesn't use screen position, so the value won't be equal among devices (eg. it will be greater if the screen size is bigger).</remarks>
         /// </summary>
         public static Vector2 OffsetSincePressed { get; private set; }
+        /// <summary>
+        /// The amount the primary position has moved since pressed (normalised with the screen size).
+        /// </summary>
+        public static Vector2 OffsetSincePressedNormalised { get; private set; }
         /// <summary>
         /// The amount the primary position has moved since the last frame.
         /// </summary>
@@ -91,6 +96,7 @@ namespace Gumball
             Position = PositionOnPress;
             lastKnownPositionOnPerformed = Position;
             OffsetSincePressed = Vector2.zero;
+            OffsetSincePressedNormalised = Vector2.zero;
             OffsetSinceLastFrame = Vector2.zero;
             TimeSincePressed = 0;
             
@@ -104,6 +110,16 @@ namespace Gumball
             onRelease?.Invoke();
         }
 
+        /// <summary>
+        /// The amount of normalised offset required for the pointer to be considered to have been 'dragged'.
+        /// </summary>
+        public const float DragThreshold = 0.001f;
+
+        /// <summary>
+        /// The amount of normalised offset allowed for the pointer to be considered to have been 'pressed'.
+        /// </summary>
+        public const float PressedThreshold = 0.01f;
+        
         public static void OnPerformed(InputAction.CallbackContext context)
         {
             if (!IsPressed)
@@ -111,19 +127,19 @@ namespace Gumball
 
             Position = context.ReadValue<Vector2>();
             OffsetSincePressed = PositionOnPress - Position;
-            
+            OffsetSincePressedNormalised = GetNormalisedScreenPosition(OffsetSincePressed);
             onPerform?.Invoke();
 
             Vector2 offsetSinceLastFrame = Position - lastKnownPositionOnPerformed;
             lastKnownPositionOnPerformed = Position;
             
-            if (!offsetSinceLastFrame.Approximately(Vector2.zero))
+            Vector2 offsetSinceLastFrameNormalised = GetNormalisedScreenPosition(offsetSinceLastFrame);
+            if (!offsetSinceLastFrameNormalised.Approximately(Vector2.zero, DragThreshold))
             {
                 if (!IsDragging)
                     OnStartDragging();
 
-                Vector2 offsetNormalised = GetNormalisedScreenPosition(offsetSinceLastFrame);
-                OnDrag(offsetNormalised);
+                OnDrag(offsetSinceLastFrameNormalised);
             } else if (IsDragging)
             {
                 OnStopDragging();

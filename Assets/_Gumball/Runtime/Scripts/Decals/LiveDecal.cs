@@ -107,7 +107,7 @@ namespace Gumball
         
         public void UpdatePosition(Vector3 position, Vector3 hitNormal, Quaternion rotation)
         {
-            bool hasMoved = !lastKnownPosition.Approximately(position, 0.001f);
+            bool hasMoved = !lastKnownPosition.Approximately(position, PrimaryContactInput.DragThreshold);
 
             lastKnownPosition = position;
             lastKnownRotation = rotation;
@@ -282,7 +282,7 @@ namespace Gumball
             if (wasClickableUnderPointerOnPress)
                 return;
 
-            bool pointerWasDragged = !PrimaryContactInput.OffsetSincePressed.Approximately(Vector2.zero, 0.001f);
+            bool pointerWasDragged = !PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.DragThreshold);
             if (!pointerWasDragged)
                 return;
             
@@ -305,7 +305,7 @@ namespace Gumball
             }
             else
             {
-                bool positionHasMoved = !transform.position.Approximately(stateBeforeMoving.Data.LastKnownPosition.ToVector3(), 0.001f);
+                bool positionHasMoved = !transform.position.Approximately(stateBeforeMoving.Data.LastKnownPosition.ToVector3(), PrimaryContactInput.DragThreshold);
                 if (positionHasMoved)
                     DecalStateManager.LogStateChange(stateBeforeMoving);
             }

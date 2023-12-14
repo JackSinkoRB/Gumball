@@ -120,8 +120,8 @@ namespace Gumball
             if (!PanelManager.PanelExists<DecalEditorPanel>())
                 return; //editor panel isn't open
             
-            bool pointerWasDragged = !PrimaryContactInput.OffsetSincePressed.Approximately(Vector2.zero, 0.001f);
-            if (pointerWasDragged)
+            bool pointerWasPressed = PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.PressedThreshold);
+            if (!pointerWasPressed)
                 return;
 
             if (PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
