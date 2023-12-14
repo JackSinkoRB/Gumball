@@ -35,7 +35,8 @@ namespace Gumball
         
         private float lastKnownRadius;
         private Vector2 lastClickPosition;
-        
+        private Vector2 screenOffsetFromDecalWhenPressed;
+
         private DecalStateManager.StateChange stateBeforePressing;
         
         private void OnEnable()
@@ -82,6 +83,9 @@ namespace Gumball
             lastClickPosition = PrimaryContactInput.Position;
             lastKnownRadius = GetDistanceToCentre(PrimaryContactInput.Position);
             stateBeforePressing = new DecalStateManager.ModifyStateChange(selectedDecal);
+            
+            Vector2 selectedDecalScreenPosition = Camera.main.WorldToScreenPoint(selectedDecal.transform.position);
+            screenOffsetFromDecalWhenPressed = PrimaryContactInput.Position - selectedDecalScreenPosition;
         }
 
         private void OnReleaseScaleRotationHandle()
@@ -133,18 +137,23 @@ namespace Gumball
 
         private void MovePosition()
         {
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(selectedDecal.transform.position);
-            transform.position = screenPos;
-            CheckIfValidPosition();
-        }
+            if (selectedDecal.IsValidPosition)
+            {
+                image.color = validColor;
 
-        private void CheckIfValidPosition()
-        {
-            image.color = selectedDecal.IsValidPosition ? validColor : invalidColor;
-            
-            invalidDecal.gameObject.SetActive(!selectedDecal.IsValidPosition);
-            if (!selectedDecal.IsValidPosition)
+                Vector3 screenPos = Camera.main.WorldToScreenPoint(selectedDecal.transform.position);
+                transform.position = screenPos;
+                
+                invalidDecal.gameObject.SetActive(false);
+            }
+            else
+            {
+                image.color = invalidColor;
+                invalidDecal.gameObject.SetActive(true);
                 invalidDecal.sprite = selectedDecal.Sprite;
+
+                transform.position = PrimaryContactInput.Position - screenOffsetFromDecalWhenPressed;
+            }
         }
 
         private float GetDistanceToCentre(Vector2 fromPos)
