@@ -335,6 +335,9 @@ namespace Gumball
             if (!IsRunningTests) //don't run save if running tests
 #endif
             {
+                if (currentCar == null) //there will only be a car if a session was started
+                    return;
+                
                 //save the decal data before app is closed if closing during a session
                 DecalManager.SaveLiveDecalData(currentCar, liveDecals);
             }

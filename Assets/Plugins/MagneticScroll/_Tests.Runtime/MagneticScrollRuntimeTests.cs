@@ -11,24 +11,13 @@ using Object = UnityEngine.Object;
 
 namespace MagneticScrollUtils.Tests.Runtime
 {
-    public class MagneticScrollRuntimeTests : IPrebuildSetup, IPostBuildCleanup
+    public class MagneticScrollRuntimeTests
     {
         
         private static SceneAsset bootSceneSetting;
 
         private bool isInitialised;
         private MagneticScrollTestSceneManager sceneManager;
-
-        public void Setup()
-        {
-            bootSceneSetting = EditorSceneManager.playModeStartScene;
-            EditorSceneManager.playModeStartScene = null;
-        }
-
-        public void Cleanup()
-        {
-            EditorSceneManager.playModeStartScene = bootSceneSetting;
-        }
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
