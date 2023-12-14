@@ -31,17 +31,27 @@ namespace Gumball
 
         /// <summary>
         /// The amount the primary position has moved since pressed.
+        /// <remarks>This doesn't use screen position, so the value won't be equal among devices (eg. it will be greater if the screen size is bigger).</remarks>
         /// </summary>
         public static Vector2 OffsetSincePressed { get; private set; }
+        /// <summary>
+        /// The amount the primary position has moved since pressed (normalised with the screen size).
+        /// </summary>
+        public static Vector2 OffsetSincePressedNormalised { get; private set; }
         /// <summary>
         /// The amount the primary position has moved since the last frame.
         /// </summary>
         public static Vector2 OffsetSinceLastFrame { get; private set; }
+        /// <summary>
+        /// The amount of time passed (in seconds) since the pointer was last pressed.
+        /// </summary>
+        public static float TimeSincePressed { get; private set; }
 
         private static Vector2 lastKnownPositionOnPerformed;
         private static int graphicsUnderPointerLastCached = -1;
         private static readonly List<Graphic> clickablesUnderPointerCached = new();
         private static Vector2 lastKnownPosition;
+        private static readonly RaycastHit[] collidersUnderPointer = new RaycastHit[20];
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void InitialisePreSceneLoad()
@@ -76,6 +86,7 @@ namespace Gumball
         private static void Update()
         {
             UpdateOffsetSinceLastFrame();
+            TimeSincePressed += Time.deltaTime;
         }
         
         public static void OnPressed(InputAction.CallbackContext context)
@@ -85,7 +96,9 @@ namespace Gumball
             Position = PositionOnPress;
             lastKnownPositionOnPerformed = Position;
             OffsetSincePressed = Vector2.zero;
+            OffsetSincePressedNormalised = Vector2.zero;
             OffsetSinceLastFrame = Vector2.zero;
+            TimeSincePressed = 0;
             
             onPress?.Invoke();
         }
@@ -97,6 +110,16 @@ namespace Gumball
             onRelease?.Invoke();
         }
 
+        /// <summary>
+        /// The amount of normalised offset required for the pointer to be considered to have been 'dragged'.
+        /// </summary>
+        public const float DragThreshold = 0.001f;
+
+        /// <summary>
+        /// The amount of normalised offset allowed for the pointer to be considered to have been 'pressed'.
+        /// </summary>
+        public const float PressedThreshold = 0.01f;
+        
         public static void OnPerformed(InputAction.CallbackContext context)
         {
             if (!IsPressed)
@@ -104,25 +127,43 @@ namespace Gumball
 
             Position = context.ReadValue<Vector2>();
             OffsetSincePressed = PositionOnPress - Position;
-            
+            OffsetSincePressedNormalised = GetNormalisedScreenPosition(OffsetSincePressed);
             onPerform?.Invoke();
 
             Vector2 offsetSinceLastFrame = Position - lastKnownPositionOnPerformed;
             lastKnownPositionOnPerformed = Position;
             
-            if (!offsetSinceLastFrame.Approximately(Vector2.zero))
+            Vector2 offsetSinceLastFrameNormalised = GetNormalisedScreenPosition(offsetSinceLastFrame);
+            if (!offsetSinceLastFrameNormalised.Approximately(Vector2.zero, DragThreshold))
             {
                 if (!IsDragging)
                     OnStartDragging();
 
-                Vector2 offsetNormalised = GetNormalisedScreenPosition(offsetSinceLastFrame);
-                OnDrag(offsetNormalised);
+                OnDrag(offsetSinceLastFrameNormalised);
             } else if (IsDragging)
             {
                 OnStopDragging();
             }
         }
 
+        public static bool IsColliderUnderPointer(Collider collider, float maxDistance = Mathf.Infinity, LayerMask layerMask = default)
+        {
+            //raycast from the pointer position into the world
+            Ray ray = Camera.main.ScreenPointToRay(Position);
+
+            //max raycast distance from the camera to the middle of the car, so it doesn't detect decals on the other side
+            int raycastHits = Physics.RaycastNonAlloc(ray, collidersUnderPointer, maxDistance, layerMask);
+
+            for (int count = 0; count < raycastHits; count++)
+            {
+                RaycastHit hit = collidersUnderPointer[count];
+                if (hit.collider == collider)
+                    return true;
+            }
+
+            return false;
+        }
+        
         /// <summary>
         /// Is a raycastable graphic under the pointer?
         /// </summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Gumball
@@ -17,13 +18,12 @@ namespace Gumball
         public static LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture, int priority = -1)
         {
             LiveDecal liveDecal = Instance.liveDecalPrefab.gameObject.GetSpareOrCreate<LiveDecal>();
-            liveDecal.Initialise(Array.IndexOf(Instance.decalUICategories, category), Array.IndexOf(category.DecalTextures, decalTexture));
-            liveDecal.SetSprite(decalTexture.Sprite);
             DontDestroyOnLoad(liveDecal);
 
-            liveDecal.SetColor(decalTexture.CanColour ? Color.gray : Color.white);
-
             liveDecal.SetPriority(priority);
+            liveDecal.Initialise(decalTexture,
+                Array.IndexOf(Instance.decalUICategories, category), 
+                Array.IndexOf(category.DecalTextures, decalTexture));
             
             return liveDecal;
         }
@@ -54,14 +54,16 @@ namespace Gumball
         {
             List<LiveDecal> liveDecals = new();
             LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(GetDecalsSaveKey(car), Array.Empty<LiveDecal.LiveDecalData>());
-            
+
             foreach (LiveDecal.LiveDecalData data in liveDecalData)
             {
                 LiveDecal liveDecal = CreateLiveDecalFromData(data);
                 liveDecals.Add(liveDecal);
             }
 
-            return liveDecals;
+            List<LiveDecal> decalsSorted = liveDecals.OrderBy(liveDecal => liveDecal.Priority).ToList();
+
+            return decalsSorted;
         }
         
         public static LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
@@ -88,9 +90,7 @@ namespace Gumball
         /// <summary>
         /// Gets the save key for the specific car in the player's car.
         /// </summary>
-        /// <param name="car"></param>
-        /// <returns></returns>
-        private static string GetDecalsSaveKey(CarManager car)
+        public static string GetDecalsSaveKey(CarManager car)
         {
             //TODO - use actual car ID
             const string carID = "0";

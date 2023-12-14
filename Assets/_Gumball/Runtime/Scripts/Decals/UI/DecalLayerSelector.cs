@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MagneticScrollUtils;
 using TMPro;
 using UnityEngine;
@@ -17,25 +18,34 @@ namespace Gumball
         
         private void OnEnable()
         {
-            DecalEditor.Instance.onCreateLiveDecal += OnCreateLiveDecal;
-            DecalEditor.Instance.onDestroyLiveDecal += OnDestroyLiveDecal;
-            DecalEditor.Instance.onSelectLiveDecal += OnSelectLiveDecal;
-            DecalEditor.Instance.onDeselectLiveDecal += OnDeselectLiveDecal;
+            DecalEditor.onCreateLiveDecal += OnCreateLiveDecal;
+            DecalEditor.onDestroyLiveDecal += OnDestroyLiveDecal;
+            DecalEditor.onSelectLiveDecal += OnSelectLiveDecal;
+            DecalEditor.onDeselectLiveDecal += OnDeselectLiveDecal;
             
             DecalEditor.onSessionStart += OnStartSession;
         }
 
         private void OnDisable()
         {
-            if (DecalEditor.ExistsRuntime)
-            {
-                DecalEditor.Instance.onCreateLiveDecal -= OnCreateLiveDecal;
-                DecalEditor.Instance.onDestroyLiveDecal -= OnDestroyLiveDecal;
-                DecalEditor.Instance.onSelectLiveDecal -= OnSelectLiveDecal;
-                DecalEditor.Instance.onDeselectLiveDecal -= OnDeselectLiveDecal;
+            DecalEditor.onCreateLiveDecal -= OnCreateLiveDecal;
+            DecalEditor.onDestroyLiveDecal -= OnDestroyLiveDecal;
+            DecalEditor.onSelectLiveDecal -= OnSelectLiveDecal;
+            DecalEditor.onDeselectLiveDecal -= OnDeselectLiveDecal;
                 
-                DecalEditor.onSessionStart -= OnStartSession;
-            }
+            DecalEditor.onSessionStart -= OnStartSession;
+        }
+        
+        public void UpdateLayers()
+        {
+            layerAmountLabel.text = $"{DecalEditor.Instance.LiveDecals.Count} / {DecalEditor.MaxDecalsAllowed}";
+            
+            PopulateScroll();
+        }
+        
+        public void SnapToLiveDecal(LiveDecal liveDecal)
+        {
+            magneticScroll.SnapItemToMagnet(liveDecal.Priority - 1);
         }
 
         private void OnStartSession()
@@ -55,47 +65,43 @@ namespace Gumball
         
         private void OnSelectLiveDecal(LiveDecal liveDecal)
         {
-            magneticScroll.SnapItemToMagnet(DecalEditor.Instance.GetPriorityOfLiveDecal(liveDecal));
+            SnapToLiveDecal(liveDecal);
+            
+            liveDecal.onColorChanged += OnSelectedColourChanged;
         }
 
         private void OnDeselectLiveDecal(LiveDecal liveDecal)
         {
-            
+            liveDecal.onColorChanged -= OnSelectedColourChanged;
         }
 
-        public void UpdateLayers()
+        private void OnSelectedColourChanged(Color oldColor, Color newColor)
         {
-            layerAmountLabel.text = $"{DecalEditor.Instance.LiveDecals.Count} / {DecalEditor.MaxDecalsAllowed}";
-            
-            PopulateScroll();
+            magneticScroll.Items[DecalEditor.Instance.CurrentSelected.Priority - 1].CurrentIcon.ImageComponent.color = newColor;
         }
 
-        private void PopulateScroll()
+        public void PopulateScroll()
         {
             List<ScrollItem> scrollItems = new List<ScrollItem>();
-            for (int index = 0; index < DecalEditor.Instance.LiveDecals.Count; index++)
+            foreach (LiveDecal liveDecal in DecalEditor.Instance.LiveDecals)
             {
-                LiveDecal liveDecal = DecalEditor.Instance.LiveDecals[index];
-                int finalIndex = index;
-   
                 ScrollItem scrollItem = new ScrollItem();
                 scrollItem.onLoad += () =>
                 {
                     DecalLayerIcon decalLayerIcon = (DecalLayerIcon) scrollItem.CurrentIcon;
                     decalLayerIcon.ImageComponent.sprite = liveDecal.Sprite;
-                    decalLayerIcon.PriorityLabel.text = (finalIndex + 1).ToString();
+                    decalLayerIcon.ImageComponent.color = liveDecal.Color;
+                    decalLayerIcon.PriorityLabel.text = liveDecal.Priority.ToString();
                 };
                 
-                //onSelectComplete gets called when the pointer is no longer down
                 scrollItem.onSelectComplete += () =>
                 {
-                    if (DecalEditor.Instance.CurrentSelected != liveDecal)
-                        DecalEditor.Instance.SelectLiveDecal(liveDecal);
+                    DecalEditor.Instance.SelectLiveDecal(liveDecal);
                 };
 
                 scrollItems.Add(scrollItem);
             }
-
+            
             magneticScroll.SetItems(scrollItems, magneticScroll.LastSelectedItemIndex);
         }
         

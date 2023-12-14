@@ -99,7 +99,7 @@ namespace MagneticScrollUtils
         [FormerlySerializedAs("selectIconWhenClicked")]
         [Tooltip("When an icon is clicked, should it snap to the magnet?")]
         [InitializationField, SerializeField] private bool selectIconIfButtonClicked;
-
+        
         [Header("Input")]
 
         [SerializeField] private float scrollSpeed = 1;
@@ -195,7 +195,10 @@ namespace MagneticScrollUtils
         private int selectedItemWhenPointerDown = -1;
         private bool clickedToSelect;
         private bool interactable = true;
-
+        
+        private int lastFrameWhenUpdatedItems;
+        private bool updatedItemsThisFrame => lastFrameWhenUpdatedItems == Time.frameCount;
+        
         private enum SnapToItemDirection
         {
             FORWARD,
@@ -382,6 +385,8 @@ namespace MagneticScrollUtils
 
         public void SetItems(List<ScrollItem> newItems, int itemToSelectIndex = 0)
         {
+            lastFrameWhenUpdatedItems = Time.frameCount;
+            
             items = newItems;
 
             gameObject.SetActive(newItems.Count > 0);
@@ -1134,7 +1139,7 @@ namespace MagneticScrollUtils
             ScrollItem selectedItem = selectedIcon.CurrentItem;
             selectedItem.OnSelect();
             
-            if (!isScrolling && !clickedToSelect)
+            if (!isScrolling && !clickedToSelect && !updatedItemsThisFrame)
                 selectedItem.OnSelectComplete();
             
             lastSelectedItemIndex = items.IndexOf(selectedItem);

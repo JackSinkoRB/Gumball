@@ -69,8 +69,8 @@ namespace MagneticScrollUtils
 
         public void OnClick()
         {
-            OnSelectComplete();
             onClick?.Invoke();
+            OnSelectComplete();
         }
 
     }

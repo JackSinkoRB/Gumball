@@ -12,7 +12,7 @@ namespace MagneticScrollUtils.Tests.Runtime
     public class MagneticScrollTestManager : ScriptableObject
     {
 
-        private static  MagneticScrollTestManager instance;
+        private static MagneticScrollTestManager instance;
         public static MagneticScrollTestManager Instance
         {
             get

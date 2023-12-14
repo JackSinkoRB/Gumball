@@ -8,6 +8,13 @@ using UnityEngine;
 [Serializable]
 public class SlideElement : AnimatedElement
 {
+
+    public enum ScreenPosition
+    {
+        NONE,
+        TOP,
+        BOTTOM
+    }
     
     public RectTransform rectTransform;
 
@@ -15,29 +22,41 @@ public class SlideElement : AnimatedElement
     public Vector3 shownPosition;
 
     [ConditionalField(nameof(doHideAnimation))]
-    public bool hideAtTopOfScreen = true;
+    public ScreenPosition hideOutsideScreen;
 
-    [ConditionalField(new[] { nameof(doHideAnimation), nameof(hideAtTopOfScreen) }, new[] { false, true })]
-    [SerializeField]
-    private Vector2 hiddenPosition = Vector2.up * 1000;
+    [ConditionalField(new[] { nameof(doHideAnimation), nameof(hideOutsideScreen) }, new[] { false, true })]
+    [SerializeField] private Vector2 hiddenPosition;
     public Vector2 HiddenPosition
     {
         get
         {
-            if (!hideAtTopOfScreen)
-                return hiddenPosition;
-
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform,
-                new Vector2(0, Screen.height), null, out var topOfScreenLocal);
-            return new Vector2(0, topOfScreenLocal.y);
+            switch (hideOutsideScreen)
+            {
+                case ScreenPosition.NONE:
+                    return hiddenPosition;
+                case ScreenPosition.TOP:
+                {
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform,
+                        new Vector2(0, Screen.height), null, out var topOfScreenLocal);
+                    return new Vector2(0, topOfScreenLocal.y);
+                }
+                case ScreenPosition.BOTTOM:
+                {
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform,
+                        new Vector2(0, -Screen.height), null, out var topOfScreenLocal);
+                    return new Vector2(0, topOfScreenLocal.y);
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 
     [Space(5)] [ConditionalField(nameof(doShowAnimation))]
-    public Ease showEase = Ease.InOutSine;
+    public Ease showEase;
 
     [ConditionalField(nameof(doHideAnimation))]
-    public Ease hideEase = Ease.InOutSine;
+    public Ease hideEase;
     
     public SlideElement(
         RectTransform rectTransform,
@@ -52,7 +71,7 @@ public class SlideElement : AnimatedElement
         Ease hideEase = Ease.InOutSine,
         bool startHidden = true,
         bool disableWhenHidden = true,
-        bool hideAtTopOfScreen = false,
+        ScreenPosition hideOutsideScreen = ScreenPosition.NONE,
         Vector3 hiddenPosition = default,
         Vector3 shownPosition = default)
     {
@@ -68,7 +87,7 @@ public class SlideElement : AnimatedElement
         this.hideEase = hideEase;
         this.startHidden = startHidden;
         this.disableWhenHidden = disableWhenHidden;
-        this.hideAtTopOfScreen = hideAtTopOfScreen;
+        this.hideOutsideScreen = hideOutsideScreen;
         this.hiddenPosition = hiddenPosition;
         this.shownPosition = shownPosition;
     }
