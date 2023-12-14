@@ -2,8 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using MyBox;
-using PaintIn3D;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
@@ -13,40 +16,60 @@ namespace Gumball
 {
     public class DecalEditor : Singleton<DecalEditor>
     {
+        
+        /// <summary>
+        /// Is true if tests have started running, and the runtime hasn't yet started
+        /// </summary>
+        public static bool IsRunningTests;
 
         public const int MaxDecalsAllowed = 50;
 
         public static event Action onSessionStart;
         public static event Action onSessionEnd;
         
-        public event Action<LiveDecal> onSelectLiveDecal;
-        public event Action<LiveDecal> onDeselectLiveDecal;
-        public event Action<LiveDecal> onCreateLiveDecal;
-        public event Action<LiveDecal> onDestroyLiveDecal;
+        public static event Action<LiveDecal> onSelectLiveDecal;
+        public static event Action<LiveDecal> onDeselectLiveDecal;
+        public static event Action<LiveDecal> onCreateLiveDecal;
+        public static event Action<LiveDecal> onDestroyLiveDecal;
+        
+        //these must be static so they are still alive when the application is quitting
+        private static CarManager currentCar;
+        private static List<LiveDecal> liveDecals = new();
 
-        [SerializeField] private CarManager currentCar;
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
         [SerializeField] private DecalCameraController cameraController;
 
+        [Header("Colours")]
+        [SerializeField] private Color[] colorPalette;
+        [SerializeField] private int numberOfGrayscaleColors = 10;
+        [SerializeField] private int numberOfRainbowColours = 50;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
-        [SerializeField, ReadOnly] private int priorityCount;
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
-        [Tooltip("Index is the priority")]
-        [SerializeField, ReadOnly] private List<LiveDecal> liveDecals = new();
         
         public List<LiveDecal> LiveDecals => liveDecals;
         public LiveDecal CurrentSelected => currentSelected;
         public CarManager CurrentCar => currentCar;
         public SelectedDecalUI SelectedDecalUI => selectedLiveDecalUI;
+        public Color[] ColorPalette => colorPalette;
 
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RuntimeInitialise()
         {
+            IsRunningTests = false;
+            
             onSessionStart = null;
             onSessionEnd = null;
+            onSelectLiveDecal = null;
+            onDeselectLiveDecal = null;
+            onCreateLiveDecal = null;
+            onDestroyLiveDecal = null;
+
+            currentCar = null;
+            liveDecals.Clear();
         }
         
         public static void LoadDecalEditor()
@@ -84,29 +107,38 @@ namespace Gumball
         {
             selectedLiveDecalUI.UpdatePosition();
         }
+        
+        private void OnApplicationQuit()
+        {
+            //don't do anything, but keep this function keeps the class alive for when we listen to Application.wantsToQuit (to save the data on exit)
+            var carManager = currentCar;
+            var liveDecalsList = liveDecals;
+        }
 
-        private void OnPrimaryContactPressed()
+        private void OnPrimaryContactReleased()
         {
             if (!PanelManager.PanelExists<DecalEditorPanel>())
                 return; //editor panel isn't open
             
-            Image layerSelectorImage = PanelManager.GetPanel<DecalEditorPanel>().LayerSelector.MagneticScroll.GetComponent<Image>();
-            Image scaleRotationHandleImage = selectedLiveDecalUI.ScaleRotationHandle.Button.image;
-            
-            if (!PrimaryContactInput.IsGraphicUnderPointer(scaleRotationHandleImage)
-                && !PrimaryContactInput.IsGraphicUnderPointer(layerSelectorImage)
-                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
-                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().UndoButton.image)
-                && !PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().RedoButton.image))
-            {
-                UpdateDecalUnderPointer();
-            }
+            bool pointerWasPressed = PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.PressedThreshold);
+            if (!pointerWasPressed)
+                return;
+
+            if (PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().ColourButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().SendForwardButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().SendBackwardButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalColourSelectorPanel>().MagneticScroll.GetComponent<Image>()))
+                return;
+
+            UpdateDecalUnderPointer();
         }
 
         public void StartSession(CarManager car)
         {
-            PrimaryContactInput.onPress += OnPrimaryContactPressed;
-
+            PrimaryContactInput.onRelease += OnPrimaryContactReleased;
+            DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
+            
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
 
             currentCar = car;
@@ -115,7 +147,7 @@ namespace Gumball
             currentCar.Rigidbody.isKinematic = true;
             
             liveDecals = DecalManager.CreateLiveDecalsFromData(car);
-            this.PerformAtEndOfFrame(DeselectLiveDecal);
+            this.PerformAtEndOfFrame(DeselectLiveDecal); //perform at end of frame as magnetic scroll will select it in LateUpdate()
             
             GlobalLoggers.DecalsLogger.Log($"Starting session for {car.gameObject.name} with {liveDecals.Count} saved decals.");
 
@@ -136,7 +168,8 @@ namespace Gumball
         {
             GlobalLoggers.DecalsLogger.Log($"Ending session.");
 
-            PrimaryContactInput.onPress -= OnPrimaryContactPressed;
+            PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
+            DataProvider.onBeforeSaveAllDataOnAppExit -= OnBeforeSaveAllDataOnAppExit;
 
             DeselectLiveDecal();
             
@@ -149,8 +182,7 @@ namespace Gumball
             }
             
             liveDecals.Clear();
-            priorityCount = 0;
-            
+
             //need to wait for the texture to fully apply before removing paintable components
             this.PerformAtEndOfFrame(() =>
             {
@@ -174,12 +206,27 @@ namespace Gumball
             currentCar = null;
         }
 
+        /// <summary>
+        /// Searches through the decals to find the priority of the decal with the highest priority.
+        /// </summary>
+        public int GetHighestPriority()
+        {
+            int highestPriority = 0;
+            foreach (LiveDecal liveDecal in liveDecals)
+            {
+                if (liveDecal.Priority > highestPriority)
+                    highestPriority = liveDecal.Priority;
+            }
+
+            return highestPriority;
+        }
+        
         public LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture)
         {
-            LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, decalTexture, priorityCount);
-            priorityCount++;
+            LiveDecal liveDecal = DecalManager.CreateLiveDecal(category, decalTexture, GetHighestPriority() + 1);
             
             liveDecals.Add(liveDecal);
+            OnLiveDecalsListChanged();
             
             onCreateLiveDecal?.Invoke(liveDecal);
 
@@ -189,29 +236,22 @@ namespace Gumball
         public LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
         {
             LiveDecal liveDecal = DecalManager.CreateLiveDecalFromData(data);
-            if (data.Priority > priorityCount)
-                priorityCount = data.Priority + 1;
 
-            liveDecals.Add(liveDecal);
-            
+            liveDecals.Insert(data.Priority - 1, liveDecal);
+            OnLiveDecalsListChanged();
+
             onCreateLiveDecal?.Invoke(liveDecal);
 
             return liveDecal;
         }
-
-        public LiveDecal GetLiveDecalByPriority(int priority)
-        {
-            return liveDecals[priority];
-        }
-
-        public int GetPriorityOfLiveDecal(LiveDecal liveDecal)
-        {
-            return liveDecals.IndexOf(liveDecal);
-        }
-
+        
         public void SelectLiveDecal(LiveDecal liveDecal)
         {
+            if (currentSelected != null && currentSelected == liveDecal)
+                return; //already selected
+            
             currentSelected = liveDecal;
+            liveDecal.OnSelect();
             onSelectLiveDecal?.Invoke(liveDecal);
         }
 
@@ -220,25 +260,31 @@ namespace Gumball
             if (currentSelected == null)
                 return; //nothing selected
             
+            currentSelected.OnDeselect();
             onDeselectLiveDecal?.Invoke(currentSelected);
             currentSelected = null;
         }
 
         public void DisableLiveDecal(LiveDecal liveDecal)
         {
+            if (currentSelected != null && currentSelected == liveDecal)
+                DeselectLiveDecal();
+
             liveDecals.Remove(liveDecal);
-            
+            OnLiveDecalsListChanged();
+
             onDestroyLiveDecal?.Invoke(liveDecal);
 
             liveDecal.gameObject.Pool();
         }
-
-        public void UpdateDecalUnderPointer()
+        
+        public void OrderDecalsListByPriority()
         {
-            Image ringUI = selectedLiveDecalUI.Ring;
-            if (currentSelected != null && PrimaryContactInput.IsGraphicUnderPointer(ringUI))
-                return; //keep the current selected
-
+            liveDecals = liveDecals.OrderBy(liveDecal => liveDecal.Priority).ToList();
+        }
+        
+        private void UpdateDecalUnderPointer()
+        {
             //raycast from the pointer position into the world
             Ray ray = Camera.main.ScreenPointToRay(PrimaryContactInput.Position);
 
@@ -274,10 +320,66 @@ namespace Gumball
                 GlobalLoggers.DecalsLogger.Log($"Distance to {decal.Priority} = {distanceToDecalSqr}");
             }
 
-            if (closestDecal != null)
-                SelectLiveDecal(closestDecal);
-            else DeselectLiveDecal();
+            if (closestDecal != null) {
+                if (currentSelected == null || currentSelected != closestDecal)
+                {
+                    DeselectLiveDecal();
+                    SelectLiveDecal(closestDecal);
+                }
+            } else DeselectLiveDecal();
+        }
+        
+        private void OnBeforeSaveAllDataOnAppExit()
+        {
+#if UNITY_EDITOR
+            if (!IsRunningTests) //don't run save if running tests
+#endif
+            {
+                if (currentCar == null) //there will only be a car if a session was started
+                    return;
+                
+                //save the decal data before app is closed if closing during a session
+                DecalManager.SaveLiveDecalData(currentCar, liveDecals);
+            }
         }
 
+        private void OnLiveDecalsListChanged()
+        {
+            //reassign the priorities based on order in the list
+            for (int index = 0; index < liveDecals.Count; index++)
+            {
+                LiveDecal liveDecal = liveDecals[index];
+                liveDecal.SetPriority(index + 1); 
+            }
+        }
+        
+#if UNITY_EDITOR
+        /// <summary>
+        /// Use this method to generate an array of colours that can be used as a colour pallete.
+        /// </summary>
+        [ButtonMethod]
+        public void GenerateColours()
+        {
+            List<Color> colors = new List<Color>();
+
+            for (int count = 0; count <= numberOfGrayscaleColors; count++)
+            {
+                float lerpFactor = (float)count / numberOfGrayscaleColors;
+                Color shade = Color.Lerp(Color.black, Color.white, lerpFactor);
+                colors.Add(shade);
+            }
+            
+            for (int count = 0; count < numberOfRainbowColours; count++)
+            {
+                float hue = (float)count / numberOfRainbowColours;
+                Color color = Color.HSVToRGB(hue, 1f, 1f);
+                colors.Add(color);
+            }
+
+            colorPalette = colors.ToArray();
+            EditorUtility.SetDirty(this);
+        }
+#endif
+        
     }
 }

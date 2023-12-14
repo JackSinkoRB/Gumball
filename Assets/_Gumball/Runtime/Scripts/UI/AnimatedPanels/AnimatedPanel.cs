@@ -29,7 +29,7 @@ public abstract class AnimatedPanel : MonoBehaviour
     private Sequence currentTween;
 
     public bool IsShowing { get; private set; }
-    public bool IsTransitioning => currentTween != null && currentTween.IsPlaying();
+    public bool IsTransitioning => currentTween != null && currentTween.IsActive() && currentTween.IsPlaying();
 
     private void OnDisable()
     {

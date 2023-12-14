@@ -67,7 +67,7 @@ namespace MyBox.Internal
 				return matchAny;
 			}
 
-			bool someValueAssigned = asString != "FALSE" && asString != "0" && asString != "NULL";
+			bool someValueAssigned = asString != "FALSE" && asString != "0" && asString != "NULL" && asString != "NONE";
 			if (someValueAssigned) return !inverse;
 
 			return inverse;
