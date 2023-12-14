@@ -41,6 +41,9 @@ namespace Gumball
             
             DecalEditor.onSelectLiveDecal += OnSelectDecal;
             DecalEditor.onDeselectLiveDecal += OnDeselectDecal;
+            DecalEditor.onCreateLiveDecal += OnCreateDecal;
+            DecalEditor.onDestroyLiveDecal += OnDestroyDecal;
+            
             DecalStateManager.onUndoStackChange += OnUndoStackChange;
             DecalStateManager.onRedoStackChange += OnRedoStackChange;
 
@@ -64,6 +67,8 @@ namespace Gumball
 
             DecalEditor.onSelectLiveDecal -= OnSelectDecal;
             DecalEditor.onDeselectLiveDecal -= OnDeselectDecal;
+            DecalEditor.onCreateLiveDecal -= OnCreateDecal;
+            DecalEditor.onDestroyLiveDecal -= OnDestroyDecal;
             
             DecalStateManager.onUndoStackChange -= OnUndoStackChange;
             DecalStateManager.onRedoStackChange -= OnRedoStackChange;
@@ -120,6 +125,16 @@ namespace Gumball
         private void OnRedoStackChange()
         {
             redoButton.interactable = DecalStateManager.CanRedo;
+        }
+        
+        private void OnCreateDecal(LiveDecal liveDecal)
+        {
+            UpdateSendForwardBackwardButtons();
+        }
+        
+        private void OnDestroyDecal(LiveDecal liveDecal)
+        {
+            UpdateSendForwardBackwardButtons();
         }
         
         private void OnSelectDecal(LiveDecal liveDecal)
