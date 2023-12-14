@@ -60,24 +60,38 @@ namespace Gumball
         
         private void Initialise()
         {
-            if (chunkBelongsTo == null)
-                FindChunkBelongsTo();
-        }
-        
-        private void OnEnable()
-        {
-            Initialise();
-
-            SceneView.duringSceneGui += OnSceneUpdate;
+            //unsubscribe if already subscribed 
+            chunkBelongsTo.onTerrainChanged -= OnTerrainChanged;
             chunkBelongsTo.onTerrainChanged += OnTerrainChanged;
             
             UpdatePosition();
         }
 
+        private void OnEnable()
+        {
+            TryInitialise();
+            SceneView.duringSceneGui += OnSceneUpdate;
+        }
+
+        private void TryInitialise()
+        {
+            if (chunkBelongsTo != null)
+                return;
+            
+            FindChunkBelongsTo();
+            if (chunkBelongsTo == null)
+                return;
+            
+            //good to initialise
+            Initialise();
+        }
+
         private void OnDisable()
         {
             SceneView.duringSceneGui -= OnSceneUpdate;
-            chunkBelongsTo.onTerrainChanged -= OnTerrainChanged;
+
+            if (chunkBelongsTo != null)
+                chunkBelongsTo.onTerrainChanged -= OnTerrainChanged;
         }
         
         private void OnValidate()
@@ -104,14 +118,6 @@ namespace Gumball
         /// </summary>
         public void GroundObject()
         {
-            Initialise();
-
-            if (chunkBelongsTo == null)
-                return;
-
-            if (!gameObject.scene.IsValid())
-                return;
-
             float offset = 0;
 
             Vector3 originalPosition = transform.position;
@@ -141,8 +147,6 @@ namespace Gumball
         
         private void MoveToSpecificDistanceFromRoad()
         {
-            Initialise();
-            
             //get the closest spline
             var (closestSample, distanceToSplineSqr) = chunkBelongsTo.GetClosestSampleOnSpline(transform.position, true);
             
@@ -154,6 +158,14 @@ namespace Gumball
 
         private void UpdatePosition()
         {
+            if (!gameObject.scene.IsValid())
+                return;
+            
+            TryInitialise();
+
+            if (chunkBelongsTo == null)
+                return;
+            
             if (keepAtSpecificDistanceFromRoad)
                 MoveToSpecificDistanceFromRoad();
             
