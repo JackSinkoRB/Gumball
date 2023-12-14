@@ -84,7 +84,9 @@ namespace Gumball
         private bool wasClickableUnderPointerOnPress;
         private DecalStateManager.ModifyStateChange stateBeforeMoving;
         private DecalStateManager.DestroyStateChange stateBeforeDestroying;
-
+        private Bounds boundsTemp;
+        private Bounds boundsToCheckTemp;
+        
         public bool IsValidPosition { get; private set; }
         
         public P3dPaintDecal PaintDecal => paintDecal;
@@ -314,14 +316,22 @@ namespace Gumball
         {
             List<LiveDecal> overlappingDecals = new List<LiveDecal>();
             
+            //because the bounds center doesn't sync until fixed update, create a temporary bounds with the transform position
+            boundsTemp = selectionCollider.bounds;
+            boundsTemp.center = selectionCollider.transform.position;
+            
             foreach (LiveDecal liveDecal in DecalEditor.Instance.LiveDecals)
             {
                 if (liveDecal == this)
                     continue;
                 
                 BoxCollider boxCollider = (BoxCollider) liveDecal.selectionCollider;
+
+                //because the bounds center doesn't sync until fixed update, create a temporary bounds with the transform position
+                boundsToCheckTemp = boxCollider.bounds;
+                boundsToCheckTemp.center = boxCollider.transform.position;
                 
-                if (boxCollider.bounds.Intersects(selectionCollider.bounds))
+                if (boundsToCheckTemp.Intersects(boundsTemp))
                     overlappingDecals.Add(liveDecal);
             }
 
