@@ -94,7 +94,7 @@ namespace Gumball
             Destroy(materialCloner);
             Destroy(paintable);
             paintableTexture.enabled = false;
-            meshCollider.enabled = false;
+            DestroyImmediate(meshCollider);
         }
         
     }
