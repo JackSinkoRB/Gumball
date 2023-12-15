@@ -56,6 +56,8 @@ namespace Gumball
 
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
 
+        private Coroutine disablePaintableMeshesCoroutine;
+        
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RuntimeInitialise()
         {
@@ -108,13 +110,6 @@ namespace Gumball
             selectedLiveDecalUI.UpdatePosition();
         }
         
-        private void OnApplicationQuit()
-        {
-            //don't do anything, but keep this function keeps the class alive for when we listen to Application.wantsToQuit (to save the data on exit)
-            var carManager = currentCar;
-            var liveDecalsList = liveDecals;
-        }
-
         private void OnPrimaryContactReleased()
         {
             if (!PanelManager.PanelExists<DecalEditorPanel>())
@@ -142,6 +137,9 @@ namespace Gumball
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
 
             currentCar = car;
+            
+            if (disablePaintableMeshesCoroutine != null)
+                CoroutineHelper.Instance.StopCoroutine(disablePaintableMeshesCoroutine);
             
             //set the vehicle kinematic
             currentCar.Rigidbody.isKinematic = true;
@@ -183,27 +181,14 @@ namespace Gumball
             
             liveDecals.Clear();
 
-            //need to wait for the texture to fully apply before removing paintable components
-            this.PerformAtEndOfFrame(() =>
-            {
-                for (int i = paintableMeshes.Count - 1; i >= 0; i--)
-                {
-                    PaintableMesh paintableMesh = paintableMeshes[i];
-                    paintableMesh.DisablePainting();
-                    paintableMeshes.Remove(paintableMesh);
-                }
-            });
-
             if (PlayerCarManager.ExistsRuntime)
                 PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
             
-            currentCar.Rigidbody.isKinematic = false;
-            
             DecalStateManager.ClearHistory();
-
+            
             onSessionEnd?.Invoke();
 
-            currentCar = null;
+            SessionCleanup();
         }
 
         /// <summary>
@@ -336,6 +321,23 @@ namespace Gumball
                 if (!PrimaryContactInput.IsGraphicUnderPointer(selectedLiveDecalUI.Ring))
                     DeselectLiveDecal();
             }
+        }
+        
+        private void SessionCleanup()
+        {
+            //need to wait for the texture to fully apply before removing paintable components
+            disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(() =>
+            {
+                for (int i = paintableMeshes.Count - 1; i >= 0; i--)
+                {
+                    PaintableMesh paintableMesh = paintableMeshes[i];
+                    paintableMesh.DisablePainting();
+                    paintableMeshes.Remove(paintableMesh);
+                }
+                
+                currentCar.Rigidbody.isKinematic = false;
+                currentCar = null;
+            });
         }
         
         private void OnBeforeSaveAllDataOnAppExit()
