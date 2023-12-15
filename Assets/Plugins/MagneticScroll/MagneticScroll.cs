@@ -262,7 +262,7 @@ namespace MagneticScrollUtils
 
         public bool CanInfiniteScroll => useInfiniteScroll && isInfiniteScrollEnabled;
 
-        private bool isTweening => icons.Count > 0 && icons[0].CurrentTween != null; //check if the first item is tweening
+        private bool isTweening => icons.Count > 0 && icons[0].CurrentTween != null && icons[0].CurrentTween.IsActive() && icons[0].CurrentTween.IsPlaying(); //check if the first item is tweening
         private bool isMoving => isScrolling || isDecelerating || isTweening;
 
         /// <summary>
@@ -1258,7 +1258,7 @@ namespace MagneticScrollUtils
         private void OnWrap(ScrollIcon icon)
         {
             //check to reset positioning
-            if (isTweening && icons[0].CurrentTween.IsPlaying())
+            if (isTweening)
             {
                 SnapIconToMagnet(iconSnappingToMiddle); //kill the tweens and restart with the new position
             }

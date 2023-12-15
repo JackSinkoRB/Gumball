@@ -37,7 +37,7 @@ namespace MagneticScrollUtils
 
         private void OnDisable()
         {
-            CurrentTween?.Complete();
+            CurrentTween?.Kill();
         }
 
         /// <summary>
