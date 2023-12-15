@@ -122,6 +122,31 @@ namespace Gumball
             }
         }
         
+        public class ColorStateChange : SingleDecalStateChange
+        {
+            private int colorIndexBeforeUndo;
+            
+            public ColorStateChange(LiveDecal liveDecal) : base(liveDecal)
+            {
+            }
+            
+            public override void Undo()
+            {
+                colorIndexBeforeUndo = liveDecal.ColorIndex;
+                
+                liveDecal.SetColorFromIndex(data.ColorIndex);
+                
+                DecalEditor.Instance.SelectLiveDecal(liveDecal);
+            }
+
+            public override void Redo()
+            {
+                liveDecal.SetColorFromIndex(colorIndexBeforeUndo);
+                
+                DecalEditor.Instance.SelectLiveDecal(liveDecal);
+            }
+        }
+        
         public class DestroyStateChange : SingleDecalStateChange
         {
             public DestroyStateChange(LiveDecal liveDecal) : base(liveDecal)
@@ -149,6 +174,8 @@ namespace Gumball
 
         public static bool CanUndo => undoStack.Count > 0;
         public static bool CanRedo => redoStack.Count > 0;
+
+        public static StateChange NextUndoState => undoStack.Count > 0 ? undoStack[^1] : null;
 
         [RuntimeInitializeOnLoadMethod]
         private static void Initialise()

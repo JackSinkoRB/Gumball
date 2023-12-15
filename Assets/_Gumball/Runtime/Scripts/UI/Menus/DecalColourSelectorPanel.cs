@@ -12,7 +12,24 @@ namespace Gumball
 
         [SerializeField] private MagneticScroll magneticScroll;
 
+        private bool hasLoggedColorChangeSinceSelectingDecal;
+
         public MagneticScroll MagneticScroll => magneticScroll;
+        
+        private void OnEnable()
+        {
+            DecalEditor.onSelectLiveDecal += OnSelectLiveDecal;
+        }
+        
+        private void OnDisable()
+        {
+            DecalEditor.onSelectLiveDecal -= OnSelectLiveDecal;
+        }
+
+        private void OnSelectLiveDecal(LiveDecal liveDecal)
+        {
+            hasLoggedColorChangeSinceSelectingDecal = false;
+        }
 
         public void Populate(LiveDecal liveDecal)
         {
@@ -27,6 +44,15 @@ namespace Gumball
 
                 scrollItem.onSelect += () =>
                 {
+                    if (liveDecal.ColorIndex == finalIndex)
+                        return; //already this colour
+
+                    if (!hasLoggedColorChangeSinceSelectingDecal || DecalStateManager.NextUndoState is not DecalStateManager.ColorStateChange)
+                    {
+                        hasLoggedColorChangeSinceSelectingDecal = true;
+                        DecalStateManager.LogStateChange(new DecalStateManager.ColorStateChange(liveDecal));
+                    }
+
                     liveDecal.SetColorFromIndex(finalIndex);
                 };
 
