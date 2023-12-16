@@ -262,7 +262,7 @@ namespace MagneticScrollUtils
 
         public bool CanInfiniteScroll => useInfiniteScroll && isInfiniteScrollEnabled;
 
-        private bool isTweening => icons.Count > 0 && icons[0].CurrentTween != null; //check if the first item is tweening
+        private bool isTweening => icons.Count > 0 && icons[0].CurrentTween != null && icons[0].CurrentTween.IsActive(); //check if the first item is tweening
         private bool isMoving => isScrolling || isDecelerating || isTweening;
 
         /// <summary>

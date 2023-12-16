@@ -84,7 +84,9 @@ namespace Gumball
         private bool wasClickableUnderPointerOnPress;
         private DecalStateManager.ModifyStateChange stateBeforeMoving;
         private DecalStateManager.DestroyStateChange stateBeforeDestroying;
-
+        private Bounds boundsTemp;
+        private Bounds boundsToCheckTemp;
+        
         public bool IsValidPosition { get; private set; }
         
         public P3dPaintDecal PaintDecal => paintDecal;
@@ -251,6 +253,8 @@ namespace Gumball
             LiveDecal nextDecal = decalsSorted[currentIndex + (isForward ? 1 : -1)];
             int nextPriority = nextDecal.Priority;
             
+            DecalStateManager.LogStateChange(new DecalStateManager.SwitchPrioritiesStateChange(this, nextDecal));
+
             //flip the priorities
             SetPriority(nextPriority);
             nextDecal.SetPriority(currentPriority);
@@ -282,8 +286,7 @@ namespace Gumball
             if (wasClickableUnderPointerOnPress)
                 return;
 
-            bool pointerWasDragged = !PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.DragThreshold);
-            if (!pointerWasDragged)
+            if (!PrimaryContactInput.HasDraggedSincePressing)
                 return;
             
             if (WasUnderPointerOnPress)
@@ -315,14 +318,22 @@ namespace Gumball
         {
             List<LiveDecal> overlappingDecals = new List<LiveDecal>();
             
+            //because the bounds center doesn't sync until fixed update, create a temporary bounds with the transform position
+            boundsTemp = selectionCollider.bounds;
+            boundsTemp.center = selectionCollider.transform.position;
+            
             foreach (LiveDecal liveDecal in DecalEditor.Instance.LiveDecals)
             {
                 if (liveDecal == this)
                     continue;
                 
                 BoxCollider boxCollider = (BoxCollider) liveDecal.selectionCollider;
+
+                //because the bounds center doesn't sync until fixed update, create a temporary bounds with the transform position
+                boundsToCheckTemp = boxCollider.bounds;
+                boundsToCheckTemp.center = boxCollider.transform.position;
                 
-                if (boxCollider.bounds.Intersects(selectionCollider.bounds))
+                if (boundsToCheckTemp.Intersects(boundsTemp))
                     overlappingDecals.Add(liveDecal);
             }
 
@@ -358,6 +369,11 @@ namespace Gumball
                 //UpdatePosition(hit.point, hit.normal, Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Camera.main.transform.up));
 
                 IsValidPosition = hit.collider.GetComponent<P3dPaintable>() != null;
+            }
+            else
+            {
+                //TODO: update position?
+                IsValidPosition = false;
             }
         }
 

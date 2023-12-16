@@ -13,13 +13,21 @@ using Object = UnityEngine.Object;
 
 namespace Gumball.Runtime.Tests
 {
-    public class DecalEditorTests
+    public class DecalEditorTests : IPrebuildSetup, IPostBuildCleanup
     {
-        
-        private static SceneAsset bootSceneSetting;
 
         private bool isInitialised;
 
+        public void Setup()
+        {
+            BootSceneClear.TrySetup();
+        }
+
+        public void Cleanup()
+        {
+            BootSceneClear.TryCleanup();
+        }
+        
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {

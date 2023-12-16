@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using Object = System.Object;
 
 namespace Gumball
 {
@@ -19,6 +20,8 @@ namespace Gumball
                 CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
                 {
                     TouchSimulation.Enable();
+                    
+                    UnityEngine.Object.DontDestroyOnLoad(TouchSimulation.instance.gameObject);
 
                     //need to set the device as the current device after enabled
                     InputManager.Instance.PlayerInput.SwitchCurrentControlScheme(InputSystem.devices.First(device => device == Touchscreen.current));
