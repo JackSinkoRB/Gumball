@@ -8,6 +8,7 @@ Shader "RBG/Tree"
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
 		_MainTex("_MainTex", 2D) = "white" {}
 		_ColorTint("Color Tint", Color) = (0.5754717,0.5754717,0.5754717,0)
+		_Clip("Clip", Range( 0 , 1)) = 0.7
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -239,6 +240,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Clip;
 			#ifdef ASE_TESSELLATION
 				float _TessPhongStrength;
 				float _TessValue;
@@ -423,7 +425,7 @@ Shader "RBG/Tree"
 				float3 BakedEmission = 0;
 				float3 Color = ( _ColorTint * ( clampResult40 * ( tex2DNode1 * float4( ase_lightColor.rgb , 0.0 ) ) ) ).rgb;
 				float Alpha = tex2DNode1.a;
-				float AlphaClipThreshold = 0.7;
+				float AlphaClipThreshold = _Clip;
 				float AlphaClipThresholdShadow = 0.5;
 
 				#ifdef _ALPHATEST_ON
@@ -518,6 +520,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Clip;
 			#ifdef ASE_TESSELLATION
 				float _TessPhongStrength;
 				float _TessValue;
@@ -701,7 +704,7 @@ Shader "RBG/Tree"
 				
 
 				float Alpha = tex2DNode1.a;
-				float AlphaClipThreshold = 0.7;
+				float AlphaClipThreshold = _Clip;
 				float AlphaClipThresholdShadow = 0.5;
 
 				#ifdef _ALPHATEST_ON
@@ -778,6 +781,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Clip;
 			#ifdef ASE_TESSELLATION
 				float _TessPhongStrength;
 				float _TessValue;
@@ -941,7 +945,7 @@ Shader "RBG/Tree"
 				
 
 				float Alpha = tex2DNode1.a;
-				float AlphaClipThreshold = 0.7;
+				float AlphaClipThreshold = _Clip;
 
 				#ifdef _ALPHATEST_ON
 					clip(Alpha - AlphaClipThreshold);
@@ -1009,6 +1013,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Clip;
 			#ifdef ASE_TESSELLATION
 				float _TessPhongStrength;
 				float _TessValue;
@@ -1158,7 +1163,7 @@ Shader "RBG/Tree"
 				
 
 				surfaceDescription.Alpha = tex2DNode1.a;
-				surfaceDescription.AlphaClipThreshold = 0.7;
+				surfaceDescription.AlphaClipThreshold = _Clip;
 
 				#if _ALPHATEST_ON
 					float alphaClipThreshold = 0.01f;
@@ -1227,6 +1232,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Clip;
 			#ifdef ASE_TESSELLATION
 				float _TessPhongStrength;
 				float _TessValue;
@@ -1373,7 +1379,7 @@ Shader "RBG/Tree"
 				
 
 				surfaceDescription.Alpha = tex2DNode1.a;
-				surfaceDescription.AlphaClipThreshold = 0.7;
+				surfaceDescription.AlphaClipThreshold = _Clip;
 
 				#if _ALPHATEST_ON
 					float alphaClipThreshold = 0.01f;
@@ -1455,6 +1461,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Clip;
 			#ifdef ASE_TESSELLATION
 				float _TessPhongStrength;
 				float _TessValue;
@@ -1608,7 +1615,7 @@ Shader "RBG/Tree"
 				
 
 				surfaceDescription.Alpha = tex2DNode1.a;
-				surfaceDescription.AlphaClipThreshold = 0.7;
+				surfaceDescription.AlphaClipThreshold = _Clip;
 
 				#if _ALPHATEST_ON
 					clip(surfaceDescription.Alpha - surfaceDescription.AlphaClipThreshold);
@@ -1712,7 +1719,7 @@ Node;AmplifyShaderEditor.TFHCRemapNode;30;115.7543,-187.7934;Inherit;False;5;0;F
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;31;613.8605,26.4087;Inherit;True;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.RangedFloatNode;41;98.61757,29.03924;Inherit;False;Constant;_Float0;Float 0;3;0;Create;True;0;0;0;False;0;False;0.48;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.ColorNode;37;453.1177,-300.4297;Float;False;Property;_ColorTint;Color Tint;1;0;Create;True;0;0;0;False;0;False;0.5754717,0.5754717,0.5754717,0;0.8424165,0.9056604,0.6963332,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;110;796.0056,314.0801;Inherit;False;Constant;_Clip;Clip;2;0;Create;True;0;0;0;False;0;False;0.7;0.03562;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;110;796.0056,314.0801;Inherit;False;Property;_Clip;Clip;2;0;Create;True;0;0;0;False;0;False;0.7;0.7;0;1;0;1;FLOAT;0
 WireConnection;29;0;39;0
 WireConnection;29;1;23;0
 WireConnection;38;0;37;0
@@ -1728,4 +1735,4 @@ WireConnection;30;0;29;0
 WireConnection;31;0;40;0
 WireConnection;31;1;17;0
 ASEEND*/
-//CHKSM=FCDC1D699F6DC20B00527D9A2304312BA455637B
+//CHKSM=8AF164EB89B8EB28F0543F1E83B69EF3574601F7
