@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3144395828900470349}
+  - component: {fileID: 1872973297887486547}
   m_Layer: 5
   m_Name: Telemetry
   m_TagString: Untagged
@@ -32,13 +33,35 @@ RectTransform:
   - {fileID: 2504409966855489089}
   - {fileID: 3684820060922798920}
   m_Father: {fileID: 6557188955257155058}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -150, y: -100}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 1, y: 1}
+--- !u!223 &1872973297887486547
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 984437451510928257}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 1
+  m_AdditionalShaderChannelsFlag: 25
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1 &1365165292833183327
 GameObject:
   m_ObjectHideFlags: 0
@@ -72,7 +95,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2310792560990281635}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -188,6 +210,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
@@ -203,6 +228,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  canOnlyBePressedOnPointerDown: 0
+  pointerMustBeOnRect: 1
+  isPressingButton: 0
 --- !u!1 &1506616969015623836
 GameObject:
   m_ObjectHideFlags: 0
@@ -237,7 +265,6 @@ RectTransform:
   - {fileID: 2865435357488833256}
   - {fileID: 2376331356681831377}
   m_Father: {fileID: 3144395828900470349}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -329,7 +356,6 @@ RectTransform:
   m_Children:
   - {fileID: 3071317378628151855}
   m_Father: {fileID: 3144395828900470349}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -418,7 +444,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3405930844429831306}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -496,7 +521,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2310792560990281635}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
@@ -612,6 +636,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
@@ -627,6 +654,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  canOnlyBePressedOnPointerDown: 0
+  pointerMustBeOnRect: 1
+  isPressingButton: 0
 --- !u!1 &4912107008984136447
 GameObject:
   m_ObjectHideFlags: 0
@@ -660,7 +690,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2310792560990281635}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -776,6 +805,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
@@ -791,6 +823,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  canOnlyBePressedOnPointerDown: 0
+  pointerMustBeOnRect: 1
+  isPressingButton: 0
 --- !u!1 &5121963124623513006
 GameObject:
   m_ObjectHideFlags: 0
@@ -824,7 +859,6 @@ RectTransform:
   - {fileID: 3405930844429831306}
   - {fileID: 7681062576772628162}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -868,7 +902,6 @@ RectTransform:
   - {fileID: 5744862811195761536}
   - {fileID: 3290486789434368176}
   m_Father: {fileID: 6557188955257155058}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -922,7 +955,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2310792560990281635}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1038,6 +1070,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
@@ -1053,6 +1088,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  canOnlyBePressedOnPointerDown: 0
+  pointerMustBeOnRect: 1
+  isPressingButton: 0
 --- !u!1 &6514375824701573704
 GameObject:
   m_ObjectHideFlags: 0
@@ -1086,7 +1124,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2310792560990281635}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
@@ -1202,6 +1239,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
@@ -1217,6 +1257,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  canOnlyBePressedOnPointerDown: 0
+  pointerMustBeOnRect: 1
+  isPressingButton: 0
 --- !u!1 &6979737217325510615
 GameObject:
   m_ObjectHideFlags: 0
@@ -1248,7 +1291,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3405930844429831306}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1326,7 +1368,6 @@ RectTransform:
   m_Children:
   - {fileID: 6064265288868949329}
   m_Father: {fileID: 3144395828900470349}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1420,7 +1461,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3684820060922798920}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1556,7 +1596,6 @@ RectTransform:
   - {fileID: 6232662009719971441}
   - {fileID: 1660774476326287705}
   m_Father: {fileID: 6557188955257155058}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
@@ -1650,7 +1689,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2017343445908824551}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 164.7}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1726,7 +1764,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3684820060922798920}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1863,7 +1900,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2310792560990281635}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
@@ -1979,6 +2015,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
@@ -1994,6 +2033,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  canOnlyBePressedOnPointerDown: 0
+  pointerMustBeOnRect: 1
+  isPressingButton: 0
 --- !u!1 &8918948073197146931
 GameObject:
   m_ObjectHideFlags: 0
@@ -2027,7 +2069,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2310792560990281635}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
@@ -2143,6 +2184,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
@@ -2158,6 +2202,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  canOnlyBePressedOnPointerDown: 0
+  pointerMustBeOnRect: 1
+  isPressingButton: 0
 --- !u!1 &9146973229076443311
 GameObject:
   m_ObjectHideFlags: 0
@@ -2189,7 +2236,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2504409966855489089}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
