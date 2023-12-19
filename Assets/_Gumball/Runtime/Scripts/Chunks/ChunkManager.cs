@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using AYellowpaper.SerializedCollections;
 using MyBox;
 using UnityEngine;
@@ -352,10 +353,13 @@ namespace Gumball
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunkAssetReference);
             yield return handle;
             
+            Stopwatch stopwatch = Stopwatch.StartNew();
             GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), transform);
             instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
-
+            GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to instantiate.");
+            stopwatch.Restart();
+            
             LoadedChunkData loadedChunkData = new LoadedChunkData(chunk, chunkAssetReference, mapIndex);
 
             if (loadDirection == ChunkUtils.LoadDirection.CUSTOM)
@@ -367,7 +371,16 @@ namespace Gumball
             }
 
             ChunkMapData chunkMapData = currentMap.GetChunkData(mapIndex);
+            GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to get chunk data.");
+
+            yield return new WaitForEndOfFrame();
+            stopwatch.Restart();
+
             chunkMapData.ApplyToChunk(chunk);
+            GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to apply chunk data.");
+            
+            yield return new WaitForEndOfFrame();
+            stopwatch.Restart();
 
             //TODO: can this just be unity_editor?
             //should create a copy of the mesh so it doesn't directly edit the saved mesh in runtime
@@ -375,9 +388,14 @@ namespace Gumball
             Mesh meshCopy = Instantiate(meshFilter.sharedMesh);
             chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = meshCopy;
             chunk.CurrentTerrain.GetComponent<MeshCollider>().sharedMesh = meshCopy;
+            
+            GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to update components.");
+            stopwatch.Restart();
 
             onChunkLoad?.Invoke(chunk);
             
+            GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to invoke events.");
+
 #if UNITY_EDITOR
             GlobalLoggers.LoadingLogger.Log($"Chunk loading '{chunkAssetReference.editorAsset.name}' complete.");
 #endif
