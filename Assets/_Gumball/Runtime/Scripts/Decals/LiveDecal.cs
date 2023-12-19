@@ -133,6 +133,7 @@ namespace Gumball
         private void OnDisable()
         {
             colorIndex = -1; //reset if reused in pool
+            OnDeselect();
         }
 
         private void LateUpdate()
