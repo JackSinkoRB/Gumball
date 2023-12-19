@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,13 +12,16 @@ namespace Gumball
     public class TrackedCoroutine
     {
 
+        public event Action onComplete;
+        
         public Coroutine Coroutine { get; private set; }
 
         public bool IsPlaying => Coroutine != null;
 
-        public TrackedCoroutine(IEnumerator action)
+        public TrackedCoroutine(IEnumerator action, Action onComplete = null)
         {
             SetCoroutine(Start(action));
+            this.onComplete = onComplete;
         }
 
         public TrackedCoroutine()
@@ -28,22 +32,25 @@ namespace Gumball
         private IEnumerator Start(IEnumerator action)
         {
             yield return action;
-            Stop();
+            Stop(true);
         }
 
-        public void Stop()
+        public void Stop(bool completed)
         {
             if (Coroutine == null)
                 return;
             
             CoroutineHelper.Instance.StopCoroutine(Coroutine);
             Coroutine = null;
+            
+            if (completed)
+                onComplete?.Invoke();
         }
 
         public void SetCoroutine(IEnumerator action)
         {
             if (Coroutine != null)
-                Stop();
+                Stop(false);
             
             Coroutine = CoroutineHelper.Instance.StartCoroutine(Start(action));
         }
