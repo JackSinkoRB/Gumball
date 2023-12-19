@@ -60,7 +60,7 @@ namespace Gumball
         
         private void Initialise()
         {
-            //unsubscribe if already subscribed 
+            //unsubscribe if already subscribed
             chunkBelongsTo.onTerrainChanged -= OnTerrainChanged;
             chunkBelongsTo.onTerrainChanged += OnTerrainChanged;
             
@@ -70,7 +70,8 @@ namespace Gumball
         private void OnEnable()
         {
             TryInitialise();
-            SceneView.duringSceneGui += OnSceneUpdate;
+            if (!Application.isPlaying)
+                SceneView.duringSceneGui += OnSceneUpdate;
         }
 
         private void TryInitialise()
@@ -96,11 +97,15 @@ namespace Gumball
         
         private void OnValidate()
         {
-            UpdatePosition();
+            if (!Application.isPlaying)
+                UpdatePosition();
         }
 
         private void OnSceneUpdate(SceneView sceneView)
         {
+            if (Application.isPlaying)
+                return;
+            
             Vector3 currentPosition = transform.position;
             if (currentPosition.Approximately(lastKnownPositionWhenGrounded))
                 return;
