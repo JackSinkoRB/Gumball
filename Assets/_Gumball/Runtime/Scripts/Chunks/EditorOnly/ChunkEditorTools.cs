@@ -90,6 +90,45 @@ namespace Gumball
             chunk.CurrentTerrain.GetComponent<MeshCollider>(true);
         }
 
+        [ButtonMethod]
+        public void CombineChildMeshes()
+        {
+            List<MeshFilter> meshFilters = transform.GetComponentsInAllChildren<MeshFilter>();
+            CombineInstance[] combine = new CombineInstance[meshFilters.Count];
+
+            for (int index = 0; index < meshFilters.Count; index++)
+            {
+                MeshFilter meshFilter = meshFilters[index];
+                if (meshFilter.gameObject.HasComponent<SplineMesh>())
+                    continue;
+
+                if (meshFilter.gameObject.name.Contains("Terrain"))
+                    continue;
+                
+                combine[index].mesh = meshFilter.sharedMesh;
+                combine[index].transform = meshFilter.transform.localToWorldMatrix;
+                meshFilter.gameObject.SetActive(false);
+            }
+
+            GameObject singleGameobject = new GameObject("CombinedMeshes");
+            singleGameobject.transform.SetParent(transform);
+            
+            Mesh mesh = new Mesh();
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            
+            mesh.CombineMeshes(combine);
+            
+            //bake the mesh
+            string path = "Assets/SomePath.asset";
+            AssetDatabase.CreateAsset(mesh, path);
+
+            Mesh savedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            
+            singleGameobject.GetComponent<MeshFilter>(true).sharedMesh = savedMesh;
+            singleGameobject.AddComponent<MeshRenderer>();
+            transform.gameObject.SetActive(true);
+        }
+
         #region Show terrain vertices
         private const float timeToShowVertices = 15;
         
