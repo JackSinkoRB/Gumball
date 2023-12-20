@@ -26,7 +26,6 @@ namespace Gumball
         [Space(10)]
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
         [SerializeField] private bool alwaysGrounded;
-        [SerializeField, ConditionalField(nameof(alwaysGrounded))] private MeshRenderer meshRendererToUseWhenGrounding;
         
         [Space(10)]
         [Tooltip("When enabled, the terrain is flattened to the bottom of the chunk object.")]
@@ -77,11 +76,7 @@ namespace Gumball
                 return false;
             }
         }
-        
-        public Vector3 GetLowestPosition() => meshRendererToUseWhenGrounding != null
-            ? meshRendererToUseWhenGrounding.bounds.ClosestPoint(meshRendererToUseWhenGrounding.bounds.center.OffsetY(-int.MaxValue))
-            : transform.position;
-        
+
         private void Initialise()
         {
             //unsubscribe if already subscribed
@@ -156,7 +151,7 @@ namespace Gumball
             {
                 transform.position = transform.position.SetY(chunkBelongsTo.CurrentTerrain.transform.position.y + 10000);
 
-                if (gameObject.scene.GetPhysicsScene().Raycast(GetLowestPosition(), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Terrain)))
+                if (gameObject.scene.GetPhysicsScene().Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Terrain)))
                     offset = -hitDown.distance;
             }
             finally

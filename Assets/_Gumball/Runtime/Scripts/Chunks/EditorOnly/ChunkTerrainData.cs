@@ -271,7 +271,7 @@ namespace Gumball
                 //TODO: for multiple objects, the closest object takes priority
                 
                 float radiusSqr = chunkObject.FlattenTerrainRadius * chunkObject.FlattenTerrainRadius;
-                Vector3 lowestPos = chunkObject.GetLowestPosition();
+                Vector3 lowestPos = chunkObject.transform.position;
                 float distanceToObjectSqr = (lowestPos.FlattenAsVector2() - vertexPosition.FlattenAsVector2()).sqrMagnitude;
                 bool isWithinFlattenRadius = distanceToObjectSqr < radiusSqr;
                 if (isWithinFlattenRadius)
@@ -313,7 +313,7 @@ namespace Gumball
                     continue;
                 
                 float blendRadiusSqr = chunkObject.FlattenTerrainBlendRadius * chunkObject.FlattenTerrainBlendRadius;
-                Vector3 lowestPos = chunkObject.GetLowestPosition();
+                Vector3 lowestPos = chunkObject.transform.position;
                 float distanceToObjectSqr = (lowestPos.FlattenAsVector2() - vertexPosition.FlattenAsVector2()).sqrMagnitude;
                 bool isWithinBlendRadius = distanceToObjectSqr < blendRadiusSqr;
                 if (!isWithinBlendRadius)
@@ -322,7 +322,7 @@ namespace Gumball
                 //desired height offset = desiredHeightDifference * blendPercent
                 float flattenedRadiusSqr = chunkObject.FlattenTerrainRadius * chunkObject.FlattenTerrainRadius;
                 float blendPercent = Mathf.Clamp01((distanceToObjectSqr - flattenedRadiusSqr) / blendRadiusSqr);
-                float flattenedObjectHeight = chunkObject.GetLowestPosition().y;
+                float flattenedObjectHeight = chunkObject.transform.position.y;
                 float blendOffsetDifference = (flattenedObjectHeight - desiredHeight) * (1-blendPercent);
                 desiredHeight += blendOffsetDifference;
             }
