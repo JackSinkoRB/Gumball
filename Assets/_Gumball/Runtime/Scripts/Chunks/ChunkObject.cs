@@ -17,11 +17,11 @@ namespace Gumball
     {
 #if UNITY_EDITOR
 
-        [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
-        [SerializeField] private bool loadSeparately = true;
-
         [Tooltip("Should the object be ignored from the chunk at runtime? eg. if it is just to modify the terrain etc.")]
         [SerializeField] private bool ignoreAtRuntime;
+        
+        [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
+        [SerializeField, ConditionalField(nameof(ignoreAtRuntime), true)] private bool loadSeparately = true;
         
         [Space(10)]
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
@@ -144,31 +144,8 @@ namespace Gumball
         /// </summary>
         public void GroundObject()
         {
-            float offset = 0;
-
-            Vector3 originalPosition = transform.position;
-            try
-            {
-                transform.position = transform.position.SetY(chunkBelongsTo.CurrentTerrain.transform.position.y + 10000);
-
-                if (gameObject.scene.GetPhysicsScene().Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Terrain)))
-                    offset = -hitDown.distance;
-            }
-            finally
-            {
-                if (offset == 0)
-                {
-                    //wasn't successful
-                    transform.position = originalPosition;
-                }
-                else
-                {
-                    //success
-                    transform.position = transform.position.OffsetY(offset);
-
-                    lastKnownPositionWhenGrounded = transform.position;
-                }
-            }
+            ChunkUtils.GroundObject(transform);
+            lastKnownPositionWhenGrounded = transform.position;
         }
         
         private void MoveToSpecificDistanceFromRoad()

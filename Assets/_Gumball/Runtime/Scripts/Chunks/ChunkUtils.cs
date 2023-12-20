@@ -175,6 +175,33 @@ namespace Gumball
 
             return uvs;
         }
+        
+        public static void GroundObject(Transform transform)
+        {
+            float offset = 0;
+
+            Vector3 originalPosition = transform.position;
+            try
+            {
+                transform.position = transform.position.OffsetY(10000);
+
+                if (transform.gameObject.scene.GetPhysicsScene().Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Terrain)))
+                    offset = -hitDown.distance;
+            }
+            finally
+            {
+                if (offset == 0)
+                {
+                    //wasn't successful
+                    transform.position = originalPosition;
+                }
+                else
+                {
+                    //success
+                    transform.position = transform.position.OffsetY(offset);
+                }
+            }
+        }
 
 #if UNITY_EDITOR
         public static void BakeMeshes(Chunk chunk, bool replace = true)
@@ -270,11 +297,16 @@ namespace Gumball
                     continue;
                 
                 string assetKey = assetKeys[index];
-
+                if (assetKey == null)
+                {
+                    Debug.LogError($"Asset key was null for index {index} ({chunkObject.gameObject.name}. Is it a prefab?");
+                    continue;
+                }
+                
                 chunkObject.transform.SetParent(runtimePrefabInstance.transform);
                 
                 List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
-                ChunkObjectData data = new ChunkObjectData(chunkObject.transform.localPosition, chunkObject.transform.localRotation, chunkObject.transform.localScale);
+                ChunkObjectData data = new ChunkObjectData(chunkObject);
                 chunkObjectList.Add(data);
                 chunkObjectData[assetKey] = chunkObjectList;
                 

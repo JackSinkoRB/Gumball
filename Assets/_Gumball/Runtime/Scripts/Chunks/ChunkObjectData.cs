@@ -13,12 +13,14 @@ namespace Gumball
         [SerializeField] private Vector3 localPosition;
         [SerializeField] private Quaternion localRotation;
         [SerializeField] private Vector3 localScale;
+        [SerializeField] private bool alwaysGrounded;
 
-        public ChunkObjectData(Vector3 localPosition, Quaternion localRotation, Vector3 localScale)
+        public ChunkObjectData(ChunkObject chunkObject)
         {
-            this.localPosition = localPosition;
-            this.localRotation = localRotation;
-            this.localScale = localScale;
+            localPosition = chunkObject.transform.localPosition;
+            localRotation = chunkObject.transform.localRotation;
+            localScale = chunkObject.transform.localScale;
+            alwaysGrounded = chunkObject.AlwaysGrounded;
         }
 
         public GameObject LoadIntoChunk(AsyncOperationHandle<GameObject> handle, Chunk chunk)
@@ -27,6 +29,9 @@ namespace Gumball
             chunkObject.transform.localPosition = localPosition;
             chunkObject.transform.localRotation = localRotation;
             chunkObject.transform.localScale = localScale;
+            if (alwaysGrounded)
+                ChunkUtils.GroundObject(chunkObject.transform);
+
             chunkObject.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             return chunkObject;
         }

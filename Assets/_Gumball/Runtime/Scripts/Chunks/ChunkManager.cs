@@ -430,11 +430,6 @@ namespace Gumball
                 foreach (ChunkObjectData chunkObjectData in chunk.ChunkObjectData[assetKey])
                 {
                     GameObject chunkObject = chunkObjectData.LoadIntoChunk(handle, chunk);
-                    ChunkObject chunkObjectComponent = chunkObject.GetComponent<ChunkObject>();
-                    
-                    if (chunkObjectComponent.AlwaysGrounded)
-                        chunkObjectComponent.GroundObject();
-                    
                     GlobalLoggers.LoadingLogger.Log($"Loaded {chunkObject.name} at {stopwatch.ElapsedMilliseconds}ms.");
                 }
             }

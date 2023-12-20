@@ -76,7 +76,7 @@ namespace Gumball
         public void SetChunkObjectData(Dictionary<string, List<ChunkObjectData>> chunkObjectData)
         {
             ChunkObjectData = new SerializedDictionary<string, List<ChunkObjectData>>(chunkObjectData);
-            Debug.Log($"Setting {chunkObjectData.Values.Count} chunk object data for {gameObject.name}");
+            Debug.Log($"Setting {chunkObjectData.Keys.Count} chunk object data for {gameObject.name}");
         }
 
         public void SetTerrain(GameObject terrain)
