@@ -396,6 +396,7 @@ namespace Gumball
             yield return new WaitForEndOfFrame();
             yield return LoadChunkObjects(chunk);
             
+            stopwatch.Restart();
             onChunkLoad?.Invoke(chunk);
             
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to invoke events.");
@@ -408,10 +409,29 @@ namespace Gumball
         private IEnumerator LoadChunkObjects(Chunk chunk)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            foreach (ChunkObjectData chunkObjectData in chunk.ChunkObjectData)
+
+            foreach (string assetKey in chunk.ChunkObjectData.Keys)
             {
-                yield return chunkObjectData.LoadIntoChunk(chunk);
-                GlobalLoggers.LoadingLogger.Log($"Loaded {chunkObjectData.AssetKey} at {stopwatch.ElapsedMilliseconds}ms.");
+                if (assetKey.IsNullOrEmpty())
+                {
+                    Debug.LogError($"Could not load as the asset key is missing.");
+                    continue;
+                }
+
+                GlobalLoggers.LoadingLogger.Log($"Loading handle for {assetKey} at {stopwatch.ElapsedMilliseconds}ms.");
+                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetKey);
+                yield return handle;
+                if (handle.Status != AsyncOperationStatus.Succeeded)
+                {
+                    Debug.LogError($"There was an error loading chunk object with key {assetKey}.");
+                    continue;
+                }
+
+                foreach (ChunkObjectData chunkObjectData in chunk.ChunkObjectData[assetKey])
+                {
+                    GameObject chunkObject = chunkObjectData.LoadIntoChunk(handle, chunk);
+                    GlobalLoggers.LoadingLogger.Log($"Loaded {chunkObject.name} at {stopwatch.ElapsedMilliseconds}ms.");
+                }
             }
         }
         

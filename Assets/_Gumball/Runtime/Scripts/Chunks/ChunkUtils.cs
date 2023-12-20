@@ -231,9 +231,6 @@ namespace Gumball
             List<string> assetKeys = new();
             foreach (ChunkObject chunkObject in chunkObjectsInOriginalChunk)
             {
-                if (!chunkObject.LoadSeparately)
-                    continue;
-                
                 string assetKey = GameObjectUtils.GetAddressableKeyFromGameObject(chunkObject.gameObject);
                 assetKeys.Add(assetKey);
             }
@@ -248,17 +245,39 @@ namespace Gumball
             //find all chunk object references and save the data
             // - then destroy all the chunk objects
             List<ChunkObject> chunkObjects = runtimePrefabInstance.transform.GetComponentsInAllChildren<ChunkObject>();
-            List<ChunkObjectData> chunkObjectData = new();
-
+            Dictionary<string, List<ChunkObjectData>> chunkObjectData = new();
+            
             for (int index = 0; index < chunkObjects.Count; index++)
             {
                 ChunkObject chunkObject = chunkObjects[index];
+
+                if (chunkObject == null || chunkObject.IsChildOfAnotherChunkObject)
+                {
+                    Debug.LogWarning($"Chunk object at index {index} could not be saved as it is a child of another chunk object that was removed.");
+                    continue;
+                }
+
+                if (!chunkObject.isActiveAndEnabled)
+                    continue;
+                
+                if (chunkObject.IgnoreAtRuntime)
+                {
+                    Object.DestroyImmediate(chunkObject.gameObject);
+                    continue;
+                }
                 
                 if (!chunkObject.LoadSeparately)
                     continue;
+                
+                string assetKey = assetKeys[index];
 
                 chunkObject.transform.SetParent(runtimePrefabInstance.transform);
-                chunkObjectData.Add(new ChunkObjectData(assetKeys[index], chunkObject.transform.localPosition, chunkObject.transform.localRotation, chunkObject.transform.localScale));
+                
+                List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
+                ChunkObjectData data = new ChunkObjectData(chunkObject.transform.localPosition, chunkObject.transform.localRotation, chunkObject.transform.localScale);
+                chunkObjectList.Add(data);
+                chunkObjectData[assetKey] = chunkObjectList;
+                
                 Object.DestroyImmediate(chunkObject.gameObject);
             }
 
@@ -271,7 +290,7 @@ namespace Gumball
             }
 
             //update the data
-            runtimePrefabInstance.GetComponent<Chunk>().SetChunkObjectData(chunkObjectData.ToArray());
+            runtimePrefabInstance.GetComponent<Chunk>().SetChunkObjectData(chunkObjectData);
 
             PrefabUtility.SaveAsPrefabAsset(runtimePrefabInstance, newChunkPath);
 

@@ -19,6 +19,9 @@ namespace Gumball
 
         [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
         [SerializeField] private bool loadSeparately = true;
+
+        [Tooltip("Should the object be ignored from the chunk at runtime? eg. if it is just to modify the terrain etc.")]
+        [SerializeField] private bool ignoreAtRuntime;
         
         [Space(10)]
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
@@ -57,6 +60,23 @@ namespace Gumball
         public float FlattenTerrainRadius => flattenTerrainRadius;
         public float FlattenTerrainBlendRadius => flattenTerrainBlendRadius;
         public bool LoadSeparately => loadSeparately;
+        public bool IgnoreAtRuntime => ignoreAtRuntime;
+        public bool AlwaysGrounded => alwaysGrounded;
+        
+        public bool IsChildOfAnotherChunkObject {
+            get
+            {
+                Transform parent = transform.parent;
+                while (parent != null)
+                {
+                    if (parent.GetComponent<ChunkObject>() != null)
+                        return true;
+                    parent = parent.parent;
+                }
+
+                return false;
+            }
+        }
         
         public Vector3 GetLowestPosition() => meshRendererToUseWhenGrounding != null
             ? meshRendererToUseWhenGrounding.bounds.ClosestPoint(meshRendererToUseWhenGrounding.bounds.center.OffsetY(-int.MaxValue))

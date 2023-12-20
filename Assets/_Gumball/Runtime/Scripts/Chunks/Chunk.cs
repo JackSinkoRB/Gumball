@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AYellowpaper.SerializedCollections;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
@@ -69,14 +70,13 @@ namespace Gumball
         
         [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
 
-        [SerializeField] private ChunkObjectData[] chunkObjectData;
+        [SerializedDictionary("AssetKey", "Data")]
+        public SerializedDictionary<string, List<ChunkObjectData>> ChunkObjectData = new();
 
-        public ChunkObjectData[] ChunkObjectData => chunkObjectData;
-        
-        public void SetChunkObjectData(ChunkObjectData[] chunkObjectData)
+        public void SetChunkObjectData(Dictionary<string, List<ChunkObjectData>> chunkObjectData)
         {
-            this.chunkObjectData = chunkObjectData;
-            Debug.Log($"Setting {chunkObjectData.Length} chunk object data for {gameObject.name}");
+            ChunkObjectData = new SerializedDictionary<string, List<ChunkObjectData>>(chunkObjectData);
+            Debug.Log($"Setting {chunkObjectData.Values.Count} chunk object data for {gameObject.name}");
         }
 
         public void SetTerrain(GameObject terrain)

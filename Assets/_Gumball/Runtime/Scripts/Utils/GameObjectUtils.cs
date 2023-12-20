@@ -30,7 +30,7 @@ namespace Gumball
             }
             else
             {
-                GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(gameObject);
+                GameObject prefab = PrefabUtility.GetCorrespondingObjectFromOriginalSource(gameObject);
                 path = AssetDatabase.GetAssetPath(prefab);
             }
 
@@ -45,7 +45,6 @@ namespace Gumball
             string assetPath = GetPathToPrefabAsset(gameObject);
             if (assetPath == null)
             {
-                Debug.LogError($"Could not find prefab asset for {gameObject.name}. Make sure it is a prefab instance or the prefab scene is open.");
                 return null;
             }
 
