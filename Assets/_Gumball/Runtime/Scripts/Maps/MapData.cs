@@ -5,7 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using MyBox;
 #if UNITY_EDITOR
+using System.IO;
 using UnityEditor;
+using UnityEngine.ResourceManagement.ResourceLocations;
 #endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -75,8 +77,10 @@ namespace Gumball
             {
                 AssetReferenceGameObject chunkReference = chunkReferences[index];
                 GlobalLoggers.ChunkLogger.Log($"Loading {chunkReference.editorAsset.name}");
-     
-                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunkReference);
+
+                //check if runtime chunk exists and use it, otherwise use the normal chunk
+                AsyncOperationHandle<GameObject> handle = ChunkUtils.LoadRuntimeChunk(chunkReference);
+                
                 handles[index] = handle;
 
                 int finalIndex = index;

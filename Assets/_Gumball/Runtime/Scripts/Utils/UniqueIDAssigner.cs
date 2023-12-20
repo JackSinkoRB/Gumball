@@ -5,6 +5,7 @@ using MyBox;
 using UnityEngine;
 
 #if UNITY_EDITOR
+using Gumball;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 #endif
@@ -21,6 +22,9 @@ public class UniqueIDAssigner : MonoBehaviour
     [SerializeField] private bool perSceneUniqueness;
     [ReadOnly, SerializeField] private string uniqueID;
 
+    [Tooltip("If enabled, the uniqueID will not be able to change.")]
+    [SerializeField, ReadOnly] private bool isPersistent;
+    
     public string UniqueID
     {
         get
@@ -29,6 +33,11 @@ public class UniqueIDAssigner : MonoBehaviour
                 throw new NullReferenceException($"Object has not been generated an ID: {gameObject.name}");
             return uniqueID;
         }
+    }
+
+    public void SetPersistent(bool isPersistent)
+    {
+        this.isPersistent = isPersistent;
     }
 
 #if UNITY_EDITOR
@@ -45,6 +54,9 @@ public class UniqueIDAssigner : MonoBehaviour
 
     private void TryGenerateNewID()
     {
+        if (isPersistent)
+            return;
+        
         string sceneName = GetSceneName();
 
         bool hasSceneNameAtBeginning = uniqueID != null && 
@@ -117,6 +129,12 @@ public class UniqueIDAssigner : MonoBehaviour
                 if (uniqueIDAssigner == null)
                     continue;
                 
+                if (str.Contains(ChunkUtils.RuntimeChunkSuffix))
+                    continue;
+
+                if (uniqueIDAssigner.isPersistent)
+                    continue;
+
                 uniqueIDAssigner.GenerateNewID();
             }
             

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using MyBox;
 #if UNITY_EDITOR
-using Gumball.Editor;
 using UnityEditor;
 #endif
 using UnityEngine;
@@ -17,7 +16,11 @@ namespace Gumball
     public class ChunkObject : MonoBehaviour
     {
 #if UNITY_EDITOR
+
+        [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
+        [SerializeField] private bool loadSeparately = true;
         
+        [Space(10)]
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
         [SerializeField] private bool alwaysGrounded;
         [SerializeField, ConditionalField(nameof(alwaysGrounded))] private MeshRenderer meshRendererToUseWhenGrounding;
@@ -53,6 +56,7 @@ namespace Gumball
         public bool FlattenTerrain => flattenTerrain;
         public float FlattenTerrainRadius => flattenTerrainRadius;
         public float FlattenTerrainBlendRadius => flattenTerrainBlendRadius;
+        public bool LoadSeparately => loadSeparately;
         
         public Vector3 GetLowestPosition() => meshRendererToUseWhenGrounding != null
             ? meshRendererToUseWhenGrounding.bounds.ClosestPoint(meshRendererToUseWhenGrounding.bounds.center.OffsetY(-int.MaxValue))
@@ -98,7 +102,9 @@ namespace Gumball
         private void OnValidate()
         {
             if (!Application.isPlaying)
+            {
                 UpdatePosition();
+            }
         }
 
         private void OnSceneUpdate(SceneView sceneView)

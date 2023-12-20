@@ -15,7 +15,6 @@ namespace Gumball
 #if UNITY_EDITOR
     [RequireComponent(typeof(ChunkEditorTools))]
 #endif
-    [RequireComponent(typeof(UniqueIDAssigner))]
     public class Chunk : MonoBehaviour
     {
 
@@ -69,6 +68,16 @@ namespace Gumball
         }
         
         [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
+
+        [SerializeField] private ChunkObjectData[] chunkObjectData;
+
+        public ChunkObjectData[] ChunkObjectData => chunkObjectData;
+        
+        public void SetChunkObjectData(ChunkObjectData[] chunkObjectData)
+        {
+            this.chunkObjectData = chunkObjectData;
+            Debug.Log($"Setting {chunkObjectData.Length} chunk object data for {gameObject.name}");
+        }
 
         public void SetTerrain(GameObject terrain)
         {

@@ -1,11 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Dreamteck.Splines;
+using MyBox;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 #if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine.AddressableAssets;
 #endif
 using UnityEngine;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using Object = UnityEngine.Object;
 
 namespace Gumball
 {
@@ -20,8 +29,31 @@ namespace Gumball
         }
 
         public const string TerrainTag = "Terrain";
-        public const string ChunkMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Chunks/";
+        public const string ChunkMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Chunks";
         public const string ChunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
+        public const string RuntimeChunkSuffix = "_runtime";
+        public const string RuntimeChunksPath = "Assets/_Gumball/Runtime/Prefabs/Chunks/Runtime";
+
+        /// <summary>
+        /// Loads the runtime chunk from a chunk reference, or just loads the chunk reference if none exists.
+        /// </summary>
+        public static AsyncOperationHandle<GameObject> LoadRuntimeChunk(AssetReferenceGameObject chunkReference)
+        {
+            AsyncOperationHandle<GameObject> handle;
+            string runtimeChunkAddress = chunkReference.editorAsset.name + RuntimeChunkSuffix;
+            if (AddressableUtils.DoesAddressExist(runtimeChunkAddress)) {
+                handle = Addressables.LoadAssetAsync<GameObject>(runtimeChunkAddress);
+                handle.WaitForCompletion();
+                GlobalLoggers.ChunkLogger.Log($"Found {handle.Result.name} at {runtimeChunkAddress}");
+            }
+            else
+            {
+                GlobalLoggers.ChunkLogger.Log($"No runtime chunk at {runtimeChunkAddress}. Loading normal chunk.");
+                handle = Addressables.LoadAssetAsync<GameObject>(chunkReference);
+            }
+
+            return handle;
+        }
         
 #if UNITY_EDITOR
         /// <summary>
@@ -184,6 +216,81 @@ namespace Gumball
                 GlobalLoggers.ChunkLogger.Log("Baked " + path);
             }
         }
+
+        /// <summary>
+        /// Gets the desired path for the runtime variation of the chunk.
+        /// </summary>
+        public static string GetRuntimeChunkPath(GameObject chunk)
+        {
+            return $"{RuntimeChunksPath}/{chunk.name}{RuntimeChunkSuffix}.prefab";
+        }
+        
+        public static void CreateRuntimeChunk(GameObject originalChunk, string originalChunkPath)
+        {
+            List<ChunkObject> chunkObjectsInOriginalChunk = originalChunk.transform.GetComponentsInAllChildren<ChunkObject>();
+            List<string> assetKeys = new();
+            foreach (ChunkObject chunkObject in chunkObjectsInOriginalChunk)
+            {
+                if (!chunkObject.LoadSeparately)
+                    continue;
+                
+                string assetKey = GameObjectUtils.GetAddressableKeyFromGameObject(chunkObject.gameObject);
+                assetKeys.Add(assetKey);
+            }
+
+            string newChunkPath = GetRuntimeChunkPath(originalChunk);
+            AssetDatabase.CopyAsset(originalChunkPath, newChunkPath);
+            GameObject runtimePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(newChunkPath);
+            GameObject runtimePrefabInstance = Object.Instantiate(runtimePrefab);
+
+            runtimePrefabInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
+            
+            //find all chunk object references and save the data
+            // - then destroy all the chunk objects
+            List<ChunkObject> chunkObjects = runtimePrefabInstance.transform.GetComponentsInAllChildren<ChunkObject>();
+            List<ChunkObjectData> chunkObjectData = new();
+
+            for (int index = 0; index < chunkObjects.Count; index++)
+            {
+                ChunkObject chunkObject = chunkObjects[index];
+                
+                if (!chunkObject.LoadSeparately)
+                    continue;
+
+                chunkObject.transform.SetParent(runtimePrefabInstance.transform);
+                chunkObjectData.Add(new ChunkObjectData(assetKeys[index], chunkObject.transform.localPosition, chunkObject.transform.localRotation, chunkObject.transform.localScale));
+                Object.DestroyImmediate(chunkObject.gameObject);
+            }
+
+            //need to reattach the meshes as the references get lost:
+            SplineMesh[] meshes = runtimePrefabInstance.GetComponent<Chunk>().SplinesMeshes;
+            for (int index = 0; index < meshes.Length; index++)
+            {
+                SplineMesh splineMesh = meshes[index];
+                splineMesh.GetComponent<MeshFilter>().sharedMesh = originalChunk.GetComponent<Chunk>().SplinesMeshes[index].GetComponent<MeshFilter>().sharedMesh;
+            }
+
+            //update the data
+            runtimePrefabInstance.GetComponent<Chunk>().SetChunkObjectData(chunkObjectData.ToArray());
+
+            PrefabUtility.SaveAsPrefabAsset(runtimePrefabInstance, newChunkPath);
+
+            //dispose of instance
+            Object.DestroyImmediate(runtimePrefabInstance);
+            
+            //replace the addressable asset at the original path with this asset
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            
+            const string groupName = "RuntimeChunks";
+            AddressableAssetGroup group = settings.FindGroup(groupName);
+            string guid = AssetDatabase.AssetPathToGUID(newChunkPath);
+            
+            AddressableAssetEntry entry = settings.CreateOrMoveEntry(guid, group);
+            entry.address = $"{Path.GetFileNameWithoutExtension(originalChunkPath)}{RuntimeChunkSuffix}";
+            
+            settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entry, true);
+            AssetDatabase.SaveAssets();
+        }
 #endif
         
         private static void MoveChunkToOther(Chunk chunk1, Chunk chunk2, LoadDirection direction)
@@ -202,5 +309,6 @@ namespace Gumball
             SplineSample chunk1ConnectionPoint = direction == LoadDirection.AFTER ? chunk1.LastSample : chunk1.FirstSample;
             chunk2.transform.position += chunk1ConnectionPoint.position - chunk2ConnectionPoint.position;
         }
+        
     }
 }

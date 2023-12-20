@@ -7,6 +7,7 @@ using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -350,7 +351,7 @@ namespace Gumball
 #if UNITY_EDITOR
             GlobalLoggers.LoadingLogger.Log($"Loading chunk '{chunkAssetReference.editorAsset.name}'...");
 #endif
-            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunkAssetReference);
+            AsyncOperationHandle<GameObject> handle = ChunkUtils.LoadRuntimeChunk(chunkAssetReference);
             yield return handle;
             
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -392,6 +393,9 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to update components.");
             stopwatch.Restart();
 
+            yield return new WaitForEndOfFrame();
+            yield return LoadChunkObjects(chunk);
+            
             onChunkLoad?.Invoke(chunk);
             
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to invoke events.");
@@ -399,6 +403,16 @@ namespace Gumball
 #if UNITY_EDITOR
             GlobalLoggers.LoadingLogger.Log($"Chunk loading '{chunkAssetReference.editorAsset.name}' complete.");
 #endif
+        }
+
+        private IEnumerator LoadChunkObjects(Chunk chunk)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            foreach (ChunkObjectData chunkObjectData in chunk.ChunkObjectData)
+            {
+                yield return chunkObjectData.LoadIntoChunk(chunk);
+                GlobalLoggers.LoadingLogger.Log($"Loaded {chunkObjectData.AssetKey} at {stopwatch.ElapsedMilliseconds}ms.");
+            }
         }
         
         private void UnloadChunk(LoadedChunkData chunkData)
