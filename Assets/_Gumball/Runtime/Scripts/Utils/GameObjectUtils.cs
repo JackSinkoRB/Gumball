@@ -30,7 +30,11 @@ namespace Gumball
             }
             else
             {
-                GameObject prefab = PrefabUtility.GetCorrespondingObjectFromOriginalSource(gameObject);
+                GameObject prefabRoot = PrefabUtility.GetNearestPrefabInstanceRoot(gameObject);
+                if (prefabRoot == null)
+                    return null; //not a prefab
+                
+                GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(prefabRoot);
                 path = AssetDatabase.GetAssetPath(prefab);
             }
 
