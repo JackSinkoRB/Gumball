@@ -18,7 +18,7 @@ namespace Gumball
     [CreateAssetMenu(menuName = "Gumball/Map Data")]
     public class MapData : ScriptableObject
     {
-
+        
         [SerializeField] private int startingChunkIndex;
         [SerializeField] private Vector3 vehicleStartingPosition;
         [SerializeField] private Vector3 vehicleStartingRotation;
@@ -31,11 +31,14 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<int> chunksWithCustomLoadDistance = new();
         [SerializeField, ReadOnly] private ChunkMapData[] chunkData;
+        [SerializeField, ReadOnly] private string[] chunkNames;
 
         public int StartingChunkIndex => startingChunkIndex;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public Vector3 VehicleStartingRotation => vehicleStartingRotation;
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
+        public string[] ChunkNames => chunkNames;
+        
         public List<int> ChunksWithCustomLoadDistance => chunksWithCustomLoadDistance;
         public float ChunkLoadDistance => chunkLoadDistance;
 
@@ -72,14 +75,18 @@ namespace Gumball
 
             AsyncOperationHandle[] handles = new AsyncOperationHandle[chunkReferences.Length];
             Chunk[] chunks = new Chunk[chunkReferences.Length];
-
+            chunkNames = new string[chunkReferences.Length];
+            
             for (int index = 0; index < chunkReferences.Length; index++)
             {
                 AssetReferenceGameObject chunkReference = chunkReferences[index];
                 GlobalLoggers.ChunkLogger.Log($"Loading {chunkReference.editorAsset.name}");
 
+                //update the chunk names
+                chunkNames[index] = chunkReferences[index].editorAsset.name;
+                
                 //check if runtime chunk exists and use it, otherwise use the normal chunk
-                AsyncOperationHandle<GameObject> handle = ChunkUtils.LoadRuntimeChunk(chunkReference);
+                AsyncOperationHandle<GameObject> handle = ChunkUtils.LoadRuntimeChunk(chunkNames[index], chunkReference);
                 
                 handles[index] = handle;
 

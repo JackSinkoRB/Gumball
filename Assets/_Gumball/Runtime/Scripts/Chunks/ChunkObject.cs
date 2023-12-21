@@ -15,8 +15,7 @@ namespace Gumball
     [ExecuteAlways]
     public class ChunkObject : MonoBehaviour
     {
-#if UNITY_EDITOR
-
+        
         [Tooltip("Should the object be ignored from the chunk at runtime? eg. if it is just to modify the terrain etc.")]
         [SerializeField] private bool ignoreAtRuntime;
         
@@ -44,23 +43,24 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(flattenTerrain)), PositiveValueOnly]
         private float flattenTerrainBlendRadius = 20;
 
-        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(flattenTerrain))]
-        public void RecreateTerrain()
-        {
-            chunkBelongsTo.GetComponent<ChunkEditorTools>().RecreateTerrain();
-        }
-
-        [Header("Debugging")]
-        [SerializeField, ReadOnly] private Chunk chunkBelongsTo;
-        
-        [SerializeField, HideInInspector] private Vector3 lastKnownPositionWhenGrounded;
-        
         public bool FlattenTerrain => flattenTerrain;
         public float FlattenTerrainRadius => flattenTerrainRadius;
         public float FlattenTerrainBlendRadius => flattenTerrainBlendRadius;
         public bool LoadSeparately => loadSeparately;
         public bool IgnoreAtRuntime => ignoreAtRuntime;
         public bool AlwaysGrounded => alwaysGrounded;
+        
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private Chunk chunkBelongsTo;
+        
+        [SerializeField, HideInInspector] private Vector3 lastKnownPositionWhenGrounded;
+        
+#if UNITY_EDITOR
+        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(flattenTerrain))]
+        public void RecreateTerrain()
+        {
+            chunkBelongsTo.GetComponent<ChunkEditorTools>().RecreateTerrain();
+        }
         
         public bool IsChildOfAnotherChunkObject {
             get

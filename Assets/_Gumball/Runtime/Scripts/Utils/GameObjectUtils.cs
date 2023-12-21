@@ -4,11 +4,11 @@ using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Settings;
 #endif
 using UnityEngine;
 using MyBox;
-using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.Settings;
 
 namespace Gumball
 {

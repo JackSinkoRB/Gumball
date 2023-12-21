@@ -1,18 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Dreamteck.Splines;
 using MyBox;
+#if UNITY_EDITOR
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
-#if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
-using UnityEditor.SceneManagement;
-using UnityEngine.AddressableAssets;
 #endif
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Object = UnityEngine.Object;
 
@@ -37,19 +35,23 @@ namespace Gumball
         /// <summary>
         /// Loads the runtime chunk from a chunk reference, or just loads the chunk reference if none exists.
         /// </summary>
-        public static AsyncOperationHandle<GameObject> LoadRuntimeChunk(AssetReferenceGameObject chunkReference)
+        public static AsyncOperationHandle<GameObject> LoadRuntimeChunk(string chunkName, AssetReferenceGameObject originalChunkReference = null)
         {
             AsyncOperationHandle<GameObject> handle;
-            string runtimeChunkAddress = chunkReference.editorAsset.name + RuntimeChunkSuffix;
+            string runtimeChunkAddress = chunkName + RuntimeChunkSuffix;
             if (AddressableUtils.DoesAddressExist(runtimeChunkAddress)) {
                 handle = Addressables.LoadAssetAsync<GameObject>(runtimeChunkAddress);
                 handle.WaitForCompletion();
                 GlobalLoggers.ChunkLogger.Log($"Found {handle.Result.name} at {runtimeChunkAddress}");
             }
-            else
+            else if (originalChunkReference != null)
             {
                 GlobalLoggers.ChunkLogger.Log($"No runtime chunk at {runtimeChunkAddress}. Loading normal chunk.");
-                handle = Addressables.LoadAssetAsync<GameObject>(chunkReference);
+                handle = Addressables.LoadAssetAsync<GameObject>(originalChunkReference);
+            }
+            else
+            {
+                throw new NullReferenceException($"Could not find runtime chunk for {chunkName}, and the original chunk reference wasn't supplied.");
             }
 
             return handle;
