@@ -240,7 +240,7 @@ namespace Gumball
             if (!splitHeightData)
                 return heightData;
             
-            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition);
 
             return GetHeightData(vertexPosition, closestSample);
         }
@@ -248,7 +248,7 @@ namespace Gumball
         public float GetDesiredHeightAtPosition(Vector3 vertexPosition)
         {
             float desiredHeight = vertexPosition.y;
-            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition);
 
             //check to flatten under road
             float roadFlattenDistanceSqr = roadFlattenDistance * roadFlattenDistance;

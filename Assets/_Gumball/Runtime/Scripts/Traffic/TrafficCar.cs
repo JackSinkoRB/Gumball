@@ -499,7 +499,7 @@ namespace Gumball
             int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkToUse);
 
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
-            int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
+            int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
             SplineSample closestSample = currentChunk.SplineSamples[closestSplineIndex];
 
             SplineSample? previousSample = null;
@@ -528,7 +528,7 @@ namespace Gumball
 
                     //reset the values
                     previousSample = null;
-                    closestSplineIndex = newChunk.GetClosestSampleIndexOnSpline(transform.position, true).Item1;
+                    closestSplineIndex = newChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
                     closestSample = newChunk.SplineSamples[closestSplineIndex];
                     offset = faceForward ? 1 : -1;
                     continue;

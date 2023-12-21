@@ -133,16 +133,14 @@ namespace Gumball
             return middle;
         }
         
-        public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
+        public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint)
         {
             UpdateSplineSampleData();
             float closestDistanceSqr = Mathf.Infinity;
             SplineSample closestSample = default;
             foreach (SplineSample sample in splineSampleCollection.samples)
             {
-                float distance = flattenTheSpline
-                        ? Vector2.SqrMagnitude(fromPoint.FlattenAsVector2() - sample.position.FlattenAsVector2())
-                        : Vector3.SqrMagnitude(fromPoint - sample.position);
+                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
                 if (distance < closestDistanceSqr)
                 {
                     closestDistanceSqr = distance;
@@ -152,7 +150,7 @@ namespace Gumball
             return (closestSample, closestDistanceSqr);
         }
         
-        public (int, float) GetClosestSampleIndexOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
+        public (int, float) GetClosestSampleIndexOnSpline(Vector3 fromPoint)
         {
             UpdateSplineSampleData();
             float closestDistanceSqr = Mathf.Infinity;
@@ -161,9 +159,7 @@ namespace Gumball
             {
                 SplineSample sample = splineSampleCollection.samples[index];
                 
-                float distance = flattenTheSpline
-                    ? Vector2.SqrMagnitude(fromPoint.FlattenAsVector2() - sample.position.FlattenAsVector2())
-                    : Vector3.SqrMagnitude(fromPoint - sample.position);
+                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
                 if (distance < closestDistanceSqr)
                 {
                     closestDistanceSqr = distance;

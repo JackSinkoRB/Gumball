@@ -70,7 +70,7 @@ namespace Gumball
             if (!chunk.GetComponent<ChunkEditorTools>().TerrainData.MatchRoadHeight)
                 return 0;
             
-            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPositionWorld, true);
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPositionWorld);
             float objectSurroundingRadiusSqr = objectSurroundingRadius * objectSurroundingRadius;
             float objectSurroundingBlendRadiusSqr = objectSurroundingBlendRadius * objectSurroundingBlendRadius;
             float objectSurroundingWeight = 1 - Mathf.Clamp01((distanceToSplineSqr - objectSurroundingRadiusSqr) / objectSurroundingBlendRadiusSqr);

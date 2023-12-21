@@ -142,7 +142,7 @@ namespace Gumball
         private bool IsPositionUnderRoad(Vector3 position, Chunk chunk)
         {
             ChunkEditorTools chunkEditorTools = chunk.GetComponent<ChunkEditorTools>();
-            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(position, true);
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(position);
 
             //check to flatten under road
             float roadFlattenDistanceSqr = chunkEditorTools.TerrainData.RoadFlattenDistance * chunkEditorTools.TerrainData.RoadFlattenDistance;

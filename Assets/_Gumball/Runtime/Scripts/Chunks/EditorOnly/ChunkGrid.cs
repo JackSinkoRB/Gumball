@@ -157,7 +157,7 @@ namespace Gumball
                     }
 
                     float widthAroundRoadSqr = widthAroundRoad * widthAroundRoad;
-                    var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
+                    var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition);
                     if (distanceToSplineSqr > widthAroundRoadSqr)
                     {
                         if (showDebugLines)
