@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using AYellowpaper.SerializedCollections;
 using MyBox;
 using UnityEngine;
@@ -347,11 +348,12 @@ namespace Gumball
         private IEnumerator LoadChunkAsync(int mapIndex, ChunkUtils.LoadDirection loadDirection)
         {
             AssetReferenceGameObject chunkAssetReference = currentMap.ChunkReferences[mapIndex];
+            string chunkName = currentMap.ChunkNames[mapIndex];
             
 #if UNITY_EDITOR
             GlobalLoggers.LoadingLogger.Log($"Loading chunk '{chunkAssetReference.editorAsset.name}'...");
 #endif
-            AsyncOperationHandle<GameObject> handle = ChunkUtils.LoadRuntimeChunk(chunkAssetReference);
+            AsyncOperationHandle<GameObject> handle = ChunkUtils.LoadRuntimeChunk(chunkName, chunkAssetReference);
             yield return handle;
             
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -409,7 +411,10 @@ namespace Gumball
         private IEnumerator LoadChunkObjects(Chunk chunk)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-
+            
+            //load all the chunk object assets
+            Dictionary<string, AsyncOperationHandle<GameObject>> handlesLookup = new();
+            
             foreach (string assetKey in chunk.ChunkObjectData.Keys)
             {
                 if (assetKey.IsNullOrEmpty())
@@ -420,17 +425,30 @@ namespace Gumball
 
                 GlobalLoggers.LoadingLogger.Log($"Loading handle for {assetKey} at {stopwatch.ElapsedMilliseconds}ms.");
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetKey);
-                yield return handle;
-                if (handle.Status != AsyncOperationStatus.Succeeded)
-                {
-                    Debug.LogError($"There was an error loading chunk object with key {assetKey}.");
-                    continue;
-                }
+                handlesLookup[assetKey] = handle;
+            }
 
+            List<AsyncOperationHandle<GameObject>> allHandles = handlesLookup.Values.ToList();
+            yield return new WaitUntil(() => allHandles.TrueForAll(h => h.Status == AsyncOperationStatus.Succeeded));
+
+            stopwatch.Restart();
+            const float maxTimeAllowedPerFrameMs = 1;
+            
+            //instantiate all the instances across multiple frames
+            foreach (string assetKey in chunk.ChunkObjectData.Keys)
+            {
+                AsyncOperationHandle<GameObject> handle = handlesLookup[assetKey];
                 foreach (ChunkObjectData chunkObjectData in chunk.ChunkObjectData[assetKey])
                 {
                     GameObject chunkObject = chunkObjectData.LoadIntoChunk(handle, chunk);
                     GlobalLoggers.LoadingLogger.Log($"Loaded {chunkObject.name} at {stopwatch.ElapsedMilliseconds}ms.");
+                    
+                    if (stopwatch.ElapsedMilliseconds > maxTimeAllowedPerFrameMs)
+                    {
+                        GlobalLoggers.LoadingLogger.Log($"Reached max for this frame, waiting until next frame.");
+                        yield return new WaitForEndOfFrame();
+                        stopwatch.Restart();
+                    }
                 }
             }
         }
