@@ -142,6 +142,9 @@ namespace Gumball
 
             map.OnMapLoad();
             
+            //TODO: load the starting chunk and all other chunk assets, AND ALL THEIR CHUNK OBJECTS asynchronously at the same time
+            // - then once all have finished, instantiate all the chunks, then instantiate all the chunk objects
+            
             //load the first chunk since none are loaded
             loadedChunksIndices = new MinMaxInt(map.StartingChunkIndex, map.StartingChunkIndex);
             yield return LoadChunkAsync(map.StartingChunkIndex, 
@@ -376,13 +379,15 @@ namespace Gumball
             ChunkMapData chunkMapData = currentMap.GetChunkData(mapIndex);
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to get chunk data.");
 
-            yield return new WaitForEndOfFrame();
+            if (!isLoading)
+                yield return new WaitForEndOfFrame();
             stopwatch.Restart();
 
             chunkMapData.ApplyToChunk(chunk);
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to apply chunk data.");
             
-            yield return new WaitForEndOfFrame();
+            if (!isLoading)
+                yield return new WaitForEndOfFrame();
             stopwatch.Restart();
 
             //TODO: can this just be unity_editor?
@@ -395,7 +400,8 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to update components.");
             stopwatch.Restart();
 
-            yield return new WaitForEndOfFrame();
+            if (!isLoading)
+                yield return new WaitForEndOfFrame();
             yield return LoadChunkObjects(chunk);
             
             stopwatch.Restart();
@@ -432,7 +438,7 @@ namespace Gumball
             yield return new WaitUntil(() => allHandles.TrueForAll(h => h.Status == AsyncOperationStatus.Succeeded));
 
             stopwatch.Restart();
-            const float maxTimeAllowedPerFrameMs = 1;
+            const float maxTimeAllowedPerFrameMs = 6;
             
             //instantiate all the instances across multiple frames
             foreach (string assetKey in chunk.ChunkObjectData.Keys)
@@ -443,7 +449,7 @@ namespace Gumball
                     GameObject chunkObject = chunkObjectData.LoadIntoChunk(handle, chunk);
                     GlobalLoggers.LoadingLogger.Log($"Loaded {chunkObject.name} at {stopwatch.ElapsedMilliseconds}ms.");
                     
-                    if (stopwatch.ElapsedMilliseconds > maxTimeAllowedPerFrameMs)
+                    if (!isLoading && stopwatch.ElapsedMilliseconds > maxTimeAllowedPerFrameMs)
                     {
                         GlobalLoggers.LoadingLogger.Log($"Reached max for this frame, waiting until next frame.");
                         yield return new WaitForEndOfFrame();
