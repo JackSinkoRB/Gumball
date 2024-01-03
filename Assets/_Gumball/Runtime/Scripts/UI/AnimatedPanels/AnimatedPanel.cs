@@ -35,8 +35,10 @@ public abstract class AnimatedPanel : MonoBehaviour
     {
         if (IsShowing && !IsTransitioning)
             Hide(instant: true);
+        
+        currentTween?.Kill(); //ensure tween is killed
     }
-
+    
     //shortcuts for unity events:
     public void Show() => Show(null);
     public void Hide() => Hide(false, false, null);
