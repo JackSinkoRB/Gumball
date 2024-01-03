@@ -25,9 +25,6 @@ namespace Gumball
         [SerializeField] private SplineComputer splineComputer;
         [SerializeField] private ChunkTrafficManager trafficManager;
 
-        [Header("Optional")]
-        [SerializeField] private SplineMesh[] splineMeshes;
-
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, true, true)]
         [SerializeField] private bool hasCustomLoadDistance;
@@ -36,6 +33,8 @@ namespace Gumball
         
         [Header("Debugging")]
         [ReadOnly, SerializeField] private GameObject currentTerrain;
+        [Tooltip("A list of child spline meshes. These are automatically assigned when the chunk asset is saved.")]
+        [SerializeField, ReadOnly] private SplineMesh[] splineMeshes;
         [ReadOnly, SerializeField] private ChunkMeshData chunkMeshData;
 
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
@@ -169,6 +168,17 @@ namespace Gumball
 
             return (closestSampleIndex, closestDistanceSqr);
         }
+        
+#if UNITY_EDITOR
+        /// <summary>
+        /// Iterates through children to find SplineMeshes, and caches the references.
+        /// </summary>
+        public void FindSplineMeshes()
+        {
+            splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            GlobalLoggers.ChunkLogger.Log($"Found {splineMeshes.Length} spline meshes under {gameObject.name}.");
+        }
+#endif
 
         private void TryFindExistingTerrain()
         {
