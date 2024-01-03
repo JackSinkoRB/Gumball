@@ -311,7 +311,7 @@ namespace Gumball
                     ? loadedChunksIndices.Max + 1
                     : loadedChunksIndices.Min - 1;
                 
-                if (indexToLoad < 0 || indexToLoad >= currentMap.ChunkReferences.Length)
+                if (indexToLoad < 0 || indexToLoad >= currentMap.RuntimeChunkAssetKeys.Length)
                 {
                     //end of map - no more chunks to load
                     yield break;
@@ -350,13 +350,12 @@ namespace Gumball
         
         private IEnumerator LoadChunkAsync(int mapIndex, ChunkUtils.LoadDirection loadDirection)
         {
-            AssetReferenceGameObject chunkAssetReference = currentMap.ChunkReferences[mapIndex];
-            string chunkName = currentMap.ChunkNames[mapIndex];
+            string chunkAddressableKey = currentMap.RuntimeChunkAssetKeys[mapIndex];
             
 #if UNITY_EDITOR
-            GlobalLoggers.LoadingLogger.Log($"Loading chunk '{chunkAssetReference.editorAsset.name}'...");
+            GlobalLoggers.LoadingLogger.Log($"Loading chunk '{chunkAddressableKey}'...");
 #endif
-            AsyncOperationHandle<GameObject> handle = ChunkUtils.LoadRuntimeChunk(chunkName, chunkAssetReference);
+            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(chunkAddressableKey);
             yield return handle;
             
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -366,7 +365,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to instantiate.");
             stopwatch.Restart();
             
-            LoadedChunkData loadedChunkData = new LoadedChunkData(chunk, chunkAssetReference, mapIndex);
+            LoadedChunkData loadedChunkData = new LoadedChunkData(chunk, chunkAddressableKey, mapIndex);
 
             if (loadDirection == ChunkUtils.LoadDirection.CUSTOM)
             {
@@ -410,7 +409,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to invoke events.");
 
 #if UNITY_EDITOR
-            GlobalLoggers.LoadingLogger.Log($"Chunk loading '{chunkAssetReference.editorAsset.name}' complete.");
+            GlobalLoggers.LoadingLogger.Log($"Chunk loading '{chunkAddressableKey}' complete.");
 #endif
         }
 

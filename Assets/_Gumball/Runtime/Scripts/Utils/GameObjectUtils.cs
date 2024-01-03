@@ -23,7 +23,21 @@ namespace Gumball
         public static string GetPathToPrefabAsset(GameObject gameObject)
         {
             string path;
-            if (PrefabStageUtility.GetCurrentPrefabStage() != null
+            PrefabAssetType assetType = PrefabUtility.GetPrefabAssetType(gameObject);
+            if (assetType is PrefabAssetType.Regular or PrefabAssetType.Variant)
+            {
+                GameObject prefabRoot = PrefabUtility.GetNearestPrefabInstanceRoot(gameObject);
+                if (prefabRoot != null)
+                {
+                    GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(prefabRoot);
+                    path = AssetDatabase.GetAssetPath(prefab);
+                }
+                else
+                {
+                    path = AssetDatabase.GetAssetPath(gameObject);
+                }
+            }
+            else if (PrefabStageUtility.GetCurrentPrefabStage() != null
                 && PrefabStageUtility.GetCurrentPrefabStage().assetPath.Contains(gameObject.name))
             {
                 path = PrefabStageUtility.GetCurrentPrefabStage().assetPath;

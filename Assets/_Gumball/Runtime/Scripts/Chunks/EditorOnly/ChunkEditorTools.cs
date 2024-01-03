@@ -37,7 +37,6 @@ namespace Gumball
             if (prefabName.Equals(gameObject.name) && !isRuntimeChunk)
             {
                 ChunkUtils.BakeMeshes(chunk);
-                ChunkUtils.CreateRuntimeChunk(chunk.gameObject, path);
             }
         }
         

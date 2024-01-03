@@ -10,17 +10,17 @@ namespace Gumball
     public struct LoadedChunkData
     {
         [SerializeField] private Chunk chunk;
-        [SerializeField] private AssetReferenceGameObject assetReference;
+        [SerializeField] private string addressableKey;
         [SerializeField] private int mapIndex;
 
         public Chunk Chunk => chunk;
-        public AssetReferenceGameObject AssetReference => assetReference;
+        public string AddressableKey => addressableKey;
         public int MapIndex => mapIndex;
             
-        public LoadedChunkData(Chunk chunk, AssetReferenceGameObject assetReference, int mapIndex)
+        public LoadedChunkData(Chunk chunk, string addressableKey, int mapIndex)
         {
             this.chunk = chunk;
-            this.assetReference = assetReference;
+            this.addressableKey = addressableKey;
             this.mapIndex = mapIndex;
         }
     }

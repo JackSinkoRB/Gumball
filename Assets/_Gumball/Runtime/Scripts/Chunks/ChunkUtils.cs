@@ -31,31 +31,6 @@ namespace Gumball
         public const string ChunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
         public const string RuntimeChunkSuffix = "_runtime";
         public const string RuntimeChunksPath = "Assets/_Gumball/Runtime/Prefabs/Chunks/Runtime";
-
-        /// <summary>
-        /// Loads the runtime chunk from a chunk reference, or just loads the chunk reference if none exists.
-        /// </summary>
-        public static AsyncOperationHandle<GameObject> LoadRuntimeChunk(string chunkName, AssetReferenceGameObject originalChunkReference = null)
-        {
-            AsyncOperationHandle<GameObject> handle;
-            string runtimeChunkAddress = chunkName + RuntimeChunkSuffix;
-            if (AddressableUtils.DoesAddressExist(runtimeChunkAddress)) {
-                handle = Addressables.LoadAssetAsync<GameObject>(runtimeChunkAddress);
-                handle.WaitForCompletion();
-                GlobalLoggers.ChunkLogger.Log($"Found {handle.Result.name} at {runtimeChunkAddress}");
-            }
-            else if (originalChunkReference != null)
-            {
-                GlobalLoggers.ChunkLogger.Log($"No runtime chunk at {runtimeChunkAddress}. Loading normal chunk.");
-                handle = Addressables.LoadAssetAsync<GameObject>(originalChunkReference);
-            }
-            else
-            {
-                throw new NullReferenceException($"Could not find runtime chunk for {chunkName}, and the original chunk reference wasn't supplied.");
-            }
-
-            return handle;
-        }
         
 #if UNITY_EDITOR
         /// <summary>
@@ -254,8 +229,18 @@ namespace Gumball
             return $"{RuntimeChunksPath}/{chunk.name}{RuntimeChunkSuffix}.prefab";
         }
         
-        public static void CreateRuntimeChunk(GameObject originalChunk, string originalChunkPath)
+        /// <summary>
+        /// Creates a runtime version of the original chunk that is stripped of chunk objects.
+        /// </summary>
+        /// <returns>The addressable runtime key for the runtime chunk.</returns>
+        public static string CreateRuntimeChunk(GameObject originalChunk, bool saveAssetsOnComplete = true)
         {
+            if (originalChunk.name.Contains(RuntimeChunkSuffix))
+            {
+                Debug.LogError($"Cannot create runtime chunk from another runtime chunk ({originalChunk.name}).");
+                return null;
+            }
+            
             List<ChunkObject> chunkObjectsInOriginalChunk = originalChunk.transform.GetComponentsInAllChildren<ChunkObject>();
             List<string> assetKeys = new();
             foreach (ChunkObject chunkObject in chunkObjectsInOriginalChunk)
@@ -264,6 +249,7 @@ namespace Gumball
                 assetKeys.Add(assetKey);
             }
 
+            string originalChunkPath = GameObjectUtils.GetPathToPrefabAsset(originalChunk);
             string newChunkPath = GetRuntimeChunkPath(originalChunk);
             AssetDatabase.CopyAsset(originalChunkPath, newChunkPath);
             GameObject runtimePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(newChunkPath);
@@ -331,7 +317,7 @@ namespace Gumball
             //dispose of instance
             Object.DestroyImmediate(runtimePrefabInstance);
             
-            //replace the addressable asset at the original path with this asset
+            //set the asset as addressable
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             
             const string groupName = "RuntimeChunks";
@@ -339,10 +325,14 @@ namespace Gumball
             string guid = AssetDatabase.AssetPathToGUID(newChunkPath);
             
             AddressableAssetEntry entry = settings.CreateOrMoveEntry(guid, group);
-            entry.address = $"{Path.GetFileNameWithoutExtension(originalChunkPath)}{RuntimeChunkSuffix}";
+            entry.address = $"{originalChunk.name}{RuntimeChunkSuffix}";
             
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entry, true);
-            AssetDatabase.SaveAssets();
+            
+            if (saveAssetsOnComplete)
+                AssetDatabase.SaveAssets();
+            
+            return entry.address;
         }
 #endif
         
