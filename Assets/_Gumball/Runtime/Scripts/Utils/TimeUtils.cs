@@ -7,6 +7,9 @@ using UnityEngine;
 public static class TimeUtils
 {
     
+    public static long CurrentEpochMilliseconds => DateTimeOffset.Now.ToUnixTimeMilliseconds();
+    public static long CurrentEpochSeconds => DateTimeOffset.Now.ToUnixTimeSeconds();
+    
     public const long MillisecondsInSecond = 1000;
     public const long SecondsInAMinute = 60;
     public const long SecondsInAnHour = SecondsInAMinute * 60;
