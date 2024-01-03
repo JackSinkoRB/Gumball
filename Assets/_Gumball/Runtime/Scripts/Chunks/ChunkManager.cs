@@ -141,17 +141,8 @@ namespace Gumball
             CurrentChunks.Clear();
 
             map.OnMapLoad();
-            
-            //TODO: load the starting chunk and all other chunk assets, AND ALL THEIR CHUNK OBJECTS asynchronously at the same time
-            // - then once all have finished, instantiate all the chunks, then instantiate all the chunk objects
-            
-            //load the first chunk since none are loaded
-            loadedChunksIndices = new MinMaxInt(map.StartingChunkIndex, map.StartingChunkIndex);
-            yield return LoadChunkAsync(map.StartingChunkIndex, 
-                map.GetChunkData(map.StartingChunkIndex).HasCustomLoadDistance
-                    ? ChunkUtils.LoadDirection.CUSTOM : ChunkUtils.LoadDirection.AFTER);
-            
-            //load the rest of the chunks in range
+
+            //load the chunks in range
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(map.VehicleStartingPosition));
             yield return distanceLoadingCoroutine.Coroutine;
             
@@ -183,16 +174,38 @@ namespace Gumball
 
         private IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
-            yield return UpdateCustomLoadDistanceChunks(position);
+            TrackedCoroutine firstChunk = null;
+            bool firstChunkNeedsLoading = loadedChunksIndices.Min == 0 && loadedChunksIndices.Max == 0;
+            if (firstChunkNeedsLoading)
+            {
+                //load the first chunk since none are loaded
+                firstChunk = new TrackedCoroutine(LoadFirstChunk());
+            }
+            
+            List<TrackedCoroutine> customLoadChunks = UpdateCustomLoadDistanceChunks(position);
+            List<TrackedCoroutine> chunksBefore = LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
+            List<TrackedCoroutine> chunksAfter = LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
+            
+            yield return new WaitUntil(() => (firstChunk == null || !firstChunk.IsPlaying)
+                                             && customLoadChunks.AreAllComplete()
+                                             && chunksBefore.AreAllComplete()
+                                             && chunksAfter.AreAllComplete());
             
             UnloadChunksAroundPosition(position);
-            
-            yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
-            yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
         }
 
-        private IEnumerator UpdateCustomLoadDistanceChunks(Vector3 position)
+        private IEnumerator LoadFirstChunk()
         {
+            loadedChunksIndices = new MinMaxInt(currentMap.StartingChunkIndex, currentMap.StartingChunkIndex);
+            yield return LoadChunkAsync(currentMap.StartingChunkIndex, 
+                currentMap.GetChunkData(currentMap.StartingChunkIndex).HasCustomLoadDistance
+                    ? ChunkUtils.LoadDirection.CUSTOM : ChunkUtils.LoadDirection.AFTER);
+        }
+
+        private List<TrackedCoroutine> UpdateCustomLoadDistanceChunks(Vector3 position)
+        {
+            List<TrackedCoroutine> trackedCoroutines = new List<TrackedCoroutine>();
+            
             foreach (int chunkIndexWithCustomLoadDistance in currentMap.ChunksWithCustomLoadDistance)
             {
                 ChunkMapData chunkMapData = currentMap.GetChunkData(chunkIndexWithCustomLoadDistance);
@@ -209,7 +222,7 @@ namespace Gumball
                 if (isWithinLoadDistance && !isChunkCustomLoaded)
                 {
                     //load
-                    yield return LoadChunkAsync(chunkIndexWithCustomLoadDistance, ChunkUtils.LoadDirection.CUSTOM);
+                    trackedCoroutines.Add(new TrackedCoroutine(LoadChunkAsync(chunkIndexWithCustomLoadDistance, ChunkUtils.LoadDirection.CUSTOM)));
                 }
                 if (!isWithinLoadDistance && isChunkCustomLoaded)
                 {
@@ -217,6 +230,8 @@ namespace Gumball
                     UnloadChunk(customLoadedData.Value);
                 }
             }
+
+            return trackedCoroutines;
         }
 
         private void UnloadChunksAroundPosition(Vector3 position)
@@ -294,9 +309,11 @@ namespace Gumball
 
             return null;
         }
-
-        private IEnumerator LoadChunksInDirection(Vector3 startingPosition, ChunkUtils.LoadDirection direction)
+        
+        private List<TrackedCoroutine> LoadChunksInDirection(Vector3 startingPosition, ChunkUtils.LoadDirection direction)
         {
+            List<TrackedCoroutine> trackedCoroutines = new List<TrackedCoroutine>();
+            
             float chunkLoadDistanceSqr = currentMap.ChunkLoadDistance * currentMap.ChunkLoadDistance;
             
             Vector3 endOfChunk = direction == ChunkUtils.LoadDirection.AFTER
@@ -314,7 +331,7 @@ namespace Gumball
                 if (indexToLoad < 0 || indexToLoad >= currentMap.RuntimeChunkAssetKeys.Length)
                 {
                     //end of map - no more chunks to load
-                    yield break;
+                    return trackedCoroutines;
                 }
 
                 LoadedChunkData? customLoadedChunk = GetCustomLoadedChunkData(indexToLoad);
@@ -330,7 +347,7 @@ namespace Gumball
                     continue;
                 }
 
-                yield return LoadChunkAsync(indexToLoad, direction);
+                trackedCoroutines.Add(new TrackedCoroutine(LoadChunkAsync(indexToLoad, direction)));
                 RegisterLoadedChunkIndex(indexToLoad); //only register once the chunk has been created
 
                 //update the distance
@@ -338,6 +355,8 @@ namespace Gumball
                 Vector3 furthestPointOnChunk = direction == ChunkUtils.LoadDirection.AFTER ? chunkData.SplineEndPosition : chunkData.SplineStartPosition;
                 distanceToEndOfChunk = Vector3.SqrMagnitude(startingPosition - furthestPointOnChunk);
             }
+
+            return trackedCoroutines;
         }
 
         private void RegisterLoadedChunkIndex(int index)
