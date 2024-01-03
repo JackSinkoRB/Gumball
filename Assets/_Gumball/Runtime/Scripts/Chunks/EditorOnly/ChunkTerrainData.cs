@@ -206,11 +206,12 @@ namespace Gumball
             CalculateMinMaxPerlinHeights();
             
             List<Vector3> verticesWithHeightData = new List<Vector3>();
-
+            ChunkObject[] chunkObjects = chunk.transform.GetComponentsInAllChildren<ChunkObject>().ToArray();
+            
             for (int vertexIndex = 0; vertexIndex < Grid.Vertices.Count; vertexIndex++)
             {
                 Vector3 vertex = Grid.Vertices[vertexIndex];
-                float desiredHeight = GetDesiredHeightAtPosition(vertex);
+                float desiredHeight = GetDesiredHeightAtPosition(vertex, chunkObjects);
                 
                 verticesWithHeightData.Add(new Vector3(vertex.x, desiredHeight, vertex.z));
             }
@@ -245,7 +246,7 @@ namespace Gumball
             return GetHeightData(vertexPosition, closestSample);
         }
 
-        public float GetDesiredHeightAtPosition(Vector3 vertexPosition)
+        public float GetDesiredHeightAtPosition(Vector3 vertexPosition, ChunkObject[] chunkObjects)
         {
             float desiredHeight = vertexPosition.y;
             var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition);
@@ -262,8 +263,7 @@ namespace Gumball
             }
             
             //check to flatten under chunk objects
-            //TODO: GetComponentsInChildren should only be retrieved once for all vertices
-            foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
+            foreach (ChunkObject chunkObject in chunkObjects)
             {
                 if (!chunkObject.FlattenTerrain)
                     continue;
@@ -303,8 +303,7 @@ namespace Gumball
             }
             
             //check to blend with chunk objects 
-            //TODO: GetComponentsInChildren should only be retrieved once for all vertices
-            foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
+            foreach (ChunkObject chunkObject in chunkObjects)
             {
                 if (!chunkObject.FlattenTerrain)
                     continue;
