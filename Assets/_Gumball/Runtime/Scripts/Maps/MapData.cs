@@ -112,7 +112,7 @@ namespace Gumball
                             return;
                         
                         GlobalLoggers.ChunkLogger.Log($"Instantiating {runtimeChunkAssetKeys[finalIndex]}");
-                        GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), ChunkManager.Instance.transform);
+                        GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero));
                         instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
                         Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
                         runtimeChunks[finalIndex] = chunk;
