@@ -29,22 +29,22 @@ namespace Gumball
         [Space(10)]
         [Tooltip("When enabled, the terrain is flattened to the bottom of the chunk object.")]
         [SerializeField] private bool keepAtSpecificDistanceFromRoad;
-        [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
+        [Tooltip("When enabled, the transform is always moved to be X distance away from the road spline.")]
         [SerializeField, ConditionalField(nameof(keepAtSpecificDistanceFromRoad))] private float distanceFromRoad = 10;
         
         [Space(10)]
-        [Tooltip("When enabled, the terrain is flattened to the bottom of the chunk object.")]
+        [Tooltip("When enabled, the terrain is flattened to the chunk object's position.")]
         [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, true, true)]
         [SerializeField] private bool flattenTerrain;
-        [Tooltip("The distance around the transform that is flattened.")]
-        [SerializeField, ConditionalField(nameof(flattenTerrain)), PositiveValueOnly]
-        private float flattenTerrainRadius = 5;
+        [Tooltip("Assign a collider for the terrain to flatten to. If none supplied, it will flatten to the single point of the transform.")]
+        [SerializeField, ConditionalField(nameof(flattenTerrain))]
+        private Collider colliderToFlattenTo;
         [Tooltip("The distance after the flattening for the terrain to be blended with it's original height.")]
         [SerializeField, ConditionalField(nameof(flattenTerrain)), PositiveValueOnly]
         private float flattenTerrainBlendRadius = 20;
 
         public bool FlattenTerrain => flattenTerrain;
-        public float FlattenTerrainRadius => flattenTerrainRadius;
+        public Collider ColliderToFlattenTo => colliderToFlattenTo;
         public float FlattenTerrainBlendRadius => flattenTerrainBlendRadius;
         public bool LoadSeparately => loadSeparately;
         public bool IgnoreAtRuntime => ignoreAtRuntime;
@@ -119,6 +119,18 @@ namespace Gumball
             if (!Application.isPlaying)
             {
                 UpdatePosition();
+                CheckToSetColliderToFlattenTo();
+            }
+        }
+
+        private void CheckToSetColliderToFlattenTo()
+        {
+            //if there is no collider assigned, assign the current collider
+            if (flattenTerrain
+                && colliderToFlattenTo == null
+                && GetComponent<Collider>() != null)
+            {
+                colliderToFlattenTo = GetComponent<Collider>();
             }
         }
 
