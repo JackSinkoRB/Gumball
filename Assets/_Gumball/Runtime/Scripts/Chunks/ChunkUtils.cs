@@ -249,11 +249,8 @@ namespace Gumball
                 assetKeys.Add(assetKey);
             }
 
-            string originalChunkPath = GameObjectUtils.GetPathToPrefabAsset(originalChunk);
             string newChunkPath = GetRuntimeChunkPath(originalChunk);
-            AssetDatabase.CopyAsset(originalChunkPath, newChunkPath);
-            GameObject runtimePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(newChunkPath);
-            GameObject runtimePrefabInstance = Object.Instantiate(runtimePrefab);
+            GameObject runtimePrefabInstance = Object.Instantiate(originalChunk);
 
             runtimePrefabInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
             
