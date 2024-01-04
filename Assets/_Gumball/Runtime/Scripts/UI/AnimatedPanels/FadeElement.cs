@@ -44,7 +44,11 @@ public class FadeElement : AnimatedElement
         Tween tween = canvasGroup.DOFade(0, hideDuration).SetEase(hideEase);
 
         if (disableWhenHidden)
-            tween.OnComplete(() => rectTransform.gameObject.SetActive(false));
+            tween.OnComplete(() =>
+            {
+                if (rectTransform != null) //might be null if app is exiting
+                    rectTransform.gameObject.SetActive(false);
+            });
 
         return tween;
     }

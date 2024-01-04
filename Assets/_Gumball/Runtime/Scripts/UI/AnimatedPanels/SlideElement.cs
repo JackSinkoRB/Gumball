@@ -118,7 +118,11 @@ public class SlideElement : AnimatedElement
         Tween tween = rectTransform.DOAnchorPos(HiddenPosition, hideDuration).SetEase(hideEase);
          
         if (disableWhenHidden)
-            tween.OnComplete(() => rectTransform.gameObject.SetActive(false));
+            tween.OnComplete(() =>
+            {
+                if (rectTransform != null) //might be null if app is exiting
+                    rectTransform.gameObject.SetActive(false);
+            });
 
         return tween;
     }
