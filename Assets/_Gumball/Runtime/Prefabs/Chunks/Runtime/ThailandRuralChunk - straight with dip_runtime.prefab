@@ -31,7 +31,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4215424506864886580}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2851515154190253383
+--- !u!1 &845436103530921067
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -39,10 +39,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6292699054674958807}
-  - component: {fileID: 799633904017414125}
-  - component: {fileID: 8768686341763553220}
-  - component: {fileID: 4504050161813032832}
+  - component: {fileID: 4789246652580859116}
+  - component: {fileID: 7718688219471773798}
+  - component: {fileID: 4146160300579769826}
+  - component: {fileID: 6932472277325586974}
   m_Layer: 7
   m_Name: Terrain
   m_TagString: Terrain
@@ -50,13 +50,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6292699054674958807
+--- !u!4 &4789246652580859116
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2851515154190253383}
+  m_GameObject: {fileID: 845436103530921067}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.11579662, y: -2.7305574, z: 66.886955}
@@ -65,13 +65,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4215424506864886580}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &799633904017414125
+--- !u!23 &7718688219471773798
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2851515154190253383}
+  m_GameObject: {fileID: 845436103530921067}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -107,21 +107,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &8768686341763553220
+--- !u!33 &4146160300579769826
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2851515154190253383}
+  m_GameObject: {fileID: 845436103530921067}
   m_Mesh: {fileID: 4300000, guid: 4220de44204cd3f4f93f0076b3fb13f2, type: 2}
---- !u!64 &4504050161813032832
+--- !u!64 &6932472277325586974
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2851515154190253383}
+  m_GameObject: {fileID: 845436103530921067}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -367,7 +367,7 @@ Transform:
   - {fileID: 2341827207754140331}
   - {fileID: 1941185448618767289}
   - {fileID: 2189608458720869572}
-  - {fileID: 6292699054674958807}
+  - {fileID: 4789246652580859116}
   - {fileID: 1758230207707706712}
   - {fileID: 319232723625004853}
   m_Father: {fileID: 0}
@@ -386,12 +386,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 3346370170913246914}
   trafficManager: {fileID: 1735094810919603357}
+  hasCustomLoadDistance: 1
+  customLoadDistance: 3000
+  currentTerrain: {fileID: 845436103530921067}
   splineMeshes:
   - {fileID: 2782149092118953120}
   - {fileID: 1796123052938692675}
-  hasCustomLoadDistance: 1
-  customLoadDistance: 3000
-  currentTerrain: {fileID: 2851515154190253383}
   chunkMeshData:
     chunk: {fileID: 3071852267969978171}
     vertices:
@@ -5982,7 +5982,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.8141155, z: -0, w: -0.58070296}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 32.309883, y: 4.1259766, z: 6.2450047}
+      - localPosition: {x: 32.309883, y: 4.125, z: 6.2450047}
         localRotation: {x: -0, y: 0.63607824, z: -0, w: -0.77162457}
         localScale: {x: 2.0076003, y: 2.0076, z: 2.0076003}
         alwaysGrounded: 1
@@ -6066,7 +6066,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.77162457, z: -0, w: 0.63607824}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 131.93637, y: 17.007812, z: 29.61649}
+      - localPosition: {x: 131.93637, y: 17.006836, z: 29.61649}
         localRotation: {x: -0, y: 0.77162457, z: -0, w: 0.63607824}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -6082,11 +6082,11 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.77162457, z: -0, w: 0.63607824}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 20.181217, y: -0.10546875, z: 2.3704646}
+      - localPosition: {x: 20.181217, y: -0.10644531, z: 2.3704646}
         localRotation: {x: -0, y: 0.77714604, z: -0, w: -0.6293203}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 32.328693, y: -0.265625, z: 113.87416}
+      - localPosition: {x: 32.328693, y: -0.26660156, z: 113.87416}
         localRotation: {x: -0, y: 0.78260815, z: -0, w: 0.62251467}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -6394,7 +6394,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.25881913, z: -0, w: -0.9659258}
         localScale: {x: 2.8613, y: 2.8613, z: 2.8613}
         alwaysGrounded: 1
-      - localPosition: {x: 33.09401, y: -0.8408203, z: 34.423206}
+      - localPosition: {x: 33.09401, y: -0.8417969, z: 34.423206}
         localRotation: {x: -0, y: 0.9890159, z: -0, w: 0.14780948}
         localScale: {x: 2.8613002, y: 2.8613, z: 2.8613002}
         alwaysGrounded: 1
@@ -6486,7 +6486,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.99691737, z: -0, w: 0.07845909}
         localScale: {x: 2.8613002, y: 2.8613, z: 2.8613002}
         alwaysGrounded: 1
-      - localPosition: {x: 130.32985, y: 15.878906, z: 27.948048}
+      - localPosition: {x: 130.32985, y: 15.87793, z: 27.948048}
         localRotation: {x: -0, y: 0.99691737, z: -0, w: 0.07845909}
         localScale: {x: 2.8613002, y: 2.8613, z: 2.8613002}
         alwaysGrounded: 1
@@ -7186,7 +7186,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.1650476, z: -0, w: 0.9862856}
         localScale: {x: 2.1358, y: 2.3974352, z: 2.6460423}
         alwaysGrounded: 1
-      - localPosition: {x: 33.900463, y: 2.4931643, z: 12.979148}
+      - localPosition: {x: 33.900463, y: 2.4921877, z: 12.979148}
         localRotation: {x: -0, y: 0.24192187, z: -0, w: -0.9702958}
         localScale: {x: 2.1358, y: 2.3974352, z: 2.6460426}
         alwaysGrounded: 1
@@ -7254,7 +7254,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.43837115, z: -0, w: 0.89879405}
         localScale: {x: 2.1357996, y: 2.3974352, z: 2.646042}
         alwaysGrounded: 1
-      - localPosition: {x: 31.79467, y: 0.19140625, z: 82.554504}
+      - localPosition: {x: 31.79467, y: 0.19042969, z: 82.554504}
         localRotation: {x: -0, y: 0.13917312, z: -0, w: 0.9902681}
         localScale: {x: 2.1358001, y: 2.3974352, z: 2.6460423}
         alwaysGrounded: 1
@@ -7412,7 +7412,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.23344538, z: -0, w: -0.9723699}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 127.490746, y: -0.296875, z: 2.6554527}
+      - localPosition: {x: 127.490746, y: -0.29785156, z: 2.6554527}
         localRotation: {x: -0, y: 0.23344538, z: -0, w: -0.9723699}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -7478,7 +7478,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.58778524, z: -0, w: 0.809017}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 33.459743, y: -0.22363281, z: 28.47466}
+      - localPosition: {x: 33.459743, y: -0.22265625, z: 28.47466}
         localRotation: {x: -0, y: 0.2840153, z: -0, w: -0.95881975}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -7700,7 +7700,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.40673658, z: -0, w: -0.9135455}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 31.858181, y: -0.6347656, z: 70.574905}
+      - localPosition: {x: 31.858181, y: -0.63378906, z: 70.574905}
         localRotation: {x: -0, y: 0.5150381, z: -0, w: 0.8571673}
         localScale: {x: 0.9996313, y: 0.99963105, z: 0.9996313}
         alwaysGrounded: 1
@@ -8164,7 +8164,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.15643445, z: -0, w: -0.98768836}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 31.95124, y: -1.9423828, z: 54.83917}
+      - localPosition: {x: 31.95124, y: -1.9433594, z: 54.83917}
         localRotation: {x: -0, y: 0.41469336, z: -0, w: -0.9099612}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -8398,7 +8398,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.96814764, z: -0, w: 0.25037995}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 33.23337, y: 0.4453125, z: 92.639336}
+      - localPosition: {x: 33.23337, y: 0.44433594, z: 92.639336}
         localRotation: {x: -0, y: 0.8141155, z: -0, w: -0.58070296}
         localScale: {x: 0.58457, y: 0.58457, z: 0.58457}
         alwaysGrounded: 1
@@ -8422,11 +8422,11 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.25037995, z: -0, w: -0.9681477}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 33.96, y: -1.6416016, z: 55.9195}
+      - localPosition: {x: 33.96, y: -1.6425781, z: 55.9195}
         localRotation: {x: -0, y: 0.66262007, z: -0, w: 0.7489557}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 30.99, y: -2.1347656, z: 47.46}
+      - localPosition: {x: 30.99, y: -2.1357422, z: 47.46}
         localRotation: {x: -0, y: 0.08715574, z: -0, w: 0.9961947}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -8516,7 +8516,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.7193398, z: -0, w: 0.6946584}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 33.501644, y: 0.6826172, z: 83.82882}
+      - localPosition: {x: 33.501644, y: 0.6816406, z: 83.82882}
         localRotation: {x: -0, y: 0.56640637, z: -0, w: -0.8241262}
         localScale: {x: 0.9922112, y: 0.9922112, z: 0.9922112}
         alwaysGrounded: 1
@@ -8610,7 +8610,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.32556814, z: -0, w: 0.94551855}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 115.44909, y: 0.7392578, z: 3.0926285}
+      - localPosition: {x: 115.44909, y: 0.73828125, z: 3.0926285}
         localRotation: {x: -0, y: 0.32556814, z: -0, w: 0.94551855}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -8626,7 +8626,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.7933533, z: -0, w: -0.6087614}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 33.87055, y: -0.7685547, z: 66.15119}
+      - localPosition: {x: 33.87055, y: -0.76953125, z: 66.15119}
         localRotation: {x: -0, y: 0.9396926, z: -0, w: 0.34202015}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -8676,7 +8676,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.19080903, z: -0, w: -0.9816272}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 107.21613, y: 42.904297, z: 57.817383}
+      - localPosition: {x: 107.21613, y: 42.90332, z: 57.817383}
         localRotation: {x: -0, y: 0.19080903, z: -0, w: -0.9816272}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -8882,7 +8882,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.7880107, z: -0, w: 0.6156615}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 107.54, y: 16.307617, z: 82.52}
+      - localPosition: {x: 107.54, y: 16.308594, z: 82.52}
         localRotation: {x: -0, y: 0.7880107, z: -0, w: 0.6156615}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -8922,11 +8922,11 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.37460658, z: -0, w: 0.92718387}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 82.17, y: 12.958008, z: 41.719845}
+      - localPosition: {x: 82.17, y: 12.958984, z: 41.719845}
         localRotation: {x: -0, y: 0.37460658, z: -0, w: 0.92718387}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 91.5323, y: 23.911133, z: 61.66906}
+      - localPosition: {x: 91.5323, y: 23.91211, z: 61.66906}
         localRotation: {x: -0, y: 0.37460658, z: -0, w: 0.92718387}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -8972,7 +8972,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.86602545, z: -0, w: 0.49999997}
         localScale: {x: 2.1626222, y: 1.6219668, z: 2.1626222}
         alwaysGrounded: 1
-      - localPosition: {x: 31.600458, y: -2.09375, z: 50.534767}
+      - localPosition: {x: 31.600458, y: -2.0927734, z: 50.534767}
         localRotation: {x: -0, y: 0.85716736, z: -0, w: -0.5150381}
         localScale: {x: 2.1626227, y: 1.6219668, z: 2.1626227}
         alwaysGrounded: 1
@@ -9094,7 +9094,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.13917318, z: -0, w: -0.99026805}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 31.303555, y: -0.7832031, z: 29.71147}
+      - localPosition: {x: 31.303555, y: -0.7841797, z: 29.71147}
         localRotation: {x: -0, y: 0.8660254, z: -0, w: -0.50000006}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -9114,7 +9114,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.56640637, z: -0, w: -0.8241262}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 32.18, y: 0.22265625, z: 80.39}
+      - localPosition: {x: 32.18, y: 0.22167969, z: 80.39}
         localRotation: {x: -0, y: 0.56640637, z: -0, w: -0.8241262}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -9178,7 +9178,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.9998477, z: -0, w: 0.017452383}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 33.024025, y: -1.7548828, z: 55.911}
+      - localPosition: {x: 33.024025, y: -1.7558594, z: 55.911}
         localRotation: {x: -0, y: 0.22495104, z: -0, w: 0.97437006}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -9190,7 +9190,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.8141155, z: -0, w: -0.58070296}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: 33.421783, y: 0.016601562, z: 26.00368}
+      - localPosition: {x: 33.421783, y: 0.015625, z: 26.00368}
         localRotation: {x: -0, y: 0.72537446, z: -0, w: -0.68835455}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -9266,7 +9266,7 @@ MonoBehaviour:
         alwaysGrounded: 0
     - Key: Powerpole_Square (5)_ChunkObject
       Value:
-      - localPosition: {x: 32.9, y: -0.15917969, z: 117.9}
+      - localPosition: {x: 32.9, y: -0.16015625, z: 117.9}
         localRotation: {x: -0, y: -0.59670186, z: -0, w: 0.80246305}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
@@ -9382,7 +9382,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.04361953, z: -0, w: -0.99904823}
         localScale: {x: 0.9849211, y: 0.9849211, z: 0.9849211}
         alwaysGrounded: 1
-      - localPosition: {x: 39.729004, y: 0.7548828, z: 118.64107}
+      - localPosition: {x: 39.729004, y: 0.7558594, z: 118.64107}
         localRotation: {x: -0, y: 0.04361953, z: -0, w: -0.99904823}
         localScale: {x: 0.9849211, y: 0.9849211, z: 0.9849211}
         alwaysGrounded: 1
@@ -9390,7 +9390,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.05233596, z: -0, w: 0.9986295}
         localScale: {x: 1.0459628, y: 1.0459628, z: 1.0459628}
         alwaysGrounded: 1
-      - localPosition: {x: 31.521894, y: -0.17675781, z: 76.377945}
+      - localPosition: {x: 31.521894, y: -0.17578125, z: 76.377945}
         localRotation: {x: -0, y: 0.05233596, z: -0, w: 0.9986295}
         localScale: {x: 1.0459628, y: 1.0459628, z: 1.0459628}
         alwaysGrounded: 1
@@ -9504,7 +9504,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.62932044, z: -0, w: 0.777146}
         localScale: {x: 1.0155766, y: 1.0155766, z: 1.0155766}
         alwaysGrounded: 1
-      - localPosition: {x: 33.254745, y: 0.5644531, z: 82.460785}
+      - localPosition: {x: 33.254745, y: 0.56347656, z: 82.460785}
         localRotation: {x: -0, y: 0.62932044, z: -0, w: 0.777146}
         localScale: {x: 1.0155766, y: 1.0155766, z: 1.0155766}
         alwaysGrounded: 1
@@ -9586,7 +9586,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.6018151, z: -0, w: -0.7986355}
         localScale: {x: 1.0136373, y: 1.0136373, z: 1.0136373}
         alwaysGrounded: 1
-      - localPosition: {x: 30.91, y: -0.19042969, z: 117.49}
+      - localPosition: {x: 30.91, y: -0.19140625, z: 117.49}
         localRotation: {x: -0, y: 0.87881714, z: -0, w: -0.47715873}
         localScale: {x: 1.027091, y: 1.0270909, z: 1.027091}
         alwaysGrounded: 1
@@ -9594,7 +9594,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.87881714, z: -0, w: -0.47715873}
         localScale: {x: 1.027091, y: 1.0270909, z: 1.027091}
         alwaysGrounded: 1
-      - localPosition: {x: 31.14, y: -0.38671875, z: 110.99}
+      - localPosition: {x: 31.14, y: -0.3857422, z: 110.99}
         localRotation: {x: -0, y: 0.6087614, z: -0, w: 0.7933533}
         localScale: {x: 1.0225005, y: 1.0225004, z: 1.0225005}
         alwaysGrounded: 1
@@ -9684,7 +9684,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.68835455, z: -0, w: 0.7253744}
         localScale: {x: 1.003313, y: 1.003313, z: 1.003313}
         alwaysGrounded: 1
-      - localPosition: {x: 33, y: -0.08984375, z: 103.52}
+      - localPosition: {x: 33, y: -0.09082031, z: 103.52}
         localRotation: {x: -0, y: 0.68835455, z: -0, w: 0.7253744}
         localScale: {x: 1.003313, y: 1.003313, z: 1.003313}
         alwaysGrounded: 1
@@ -9692,7 +9692,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.63607824, z: -0, w: -0.77162457}
         localScale: {x: 0.95724714, y: 0.9572471, z: 0.95724714}
         alwaysGrounded: 1
-      - localPosition: {x: 32.643547, y: 0.18847656, z: 93.75156}
+      - localPosition: {x: 32.643547, y: 0.18945312, z: 93.75156}
         localRotation: {x: -0, y: 0.63607824, z: -0, w: -0.77162457}
         localScale: {x: 0.95724714, y: 0.9572471, z: 0.95724714}
         alwaysGrounded: 1
@@ -9700,7 +9700,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.41469324, z: -0, w: 0.9099613}
         localScale: {x: 1.0405034, y: 1.0405034, z: 1.0405034}
         alwaysGrounded: 1
-      - localPosition: {x: 32.116226, y: 0.3046875, z: 84.674255}
+      - localPosition: {x: 32.116226, y: 0.30371094, z: 84.674255}
         localRotation: {x: -0, y: 0.41469324, z: -0, w: 0.9099613}
         localScale: {x: 1.0405034, y: 1.0405034, z: 1.0405034}
         alwaysGrounded: 1
@@ -9716,7 +9716,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.8433915, z: -0, w: 0.5372996}
         localScale: {x: 0.9987763, y: 0.99877626, z: 0.9987763}
         alwaysGrounded: 1
-      - localPosition: {x: 17.97, y: -0.09863281, z: 1.2187599}
+      - localPosition: {x: 17.97, y: -0.09765625, z: 1.2187599}
         localRotation: {x: -0, y: 0.9914449, z: -0, w: -0.13052621}
         localScale: {x: 0.9504251, y: 0.9504251, z: 0.9504251}
         alwaysGrounded: 1
@@ -9770,7 +9770,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.9945219, z: -0, w: -0.10452851}
         localScale: {x: 1.009697, y: 1.009697, z: 1.009697}
         alwaysGrounded: 1
-      - localPosition: {x: 31.970238, y: -0.22949219, z: 97.34684}
+      - localPosition: {x: 31.970238, y: -0.22851562, z: 97.34684}
         localRotation: {x: -0, y: 0.9945219, z: -0, w: -0.10452851}
         localScale: {x: 1.009697, y: 1.009697, z: 1.009697}
         alwaysGrounded: 1
@@ -9778,11 +9778,11 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.9099613, z: -0, w: -0.41469324}
         localScale: {x: 1.0060072, y: 1.0060072, z: 1.0060072}
         alwaysGrounded: 1
-      - localPosition: {x: 31.659634, y: -0.0107421875, z: 91.12898}
+      - localPosition: {x: 31.659634, y: -0.009765625, z: 91.12898}
         localRotation: {x: -0, y: 0.9099613, z: -0, w: -0.41469324}
         localScale: {x: 1.0060072, y: 1.0060072, z: 1.0060072}
         alwaysGrounded: 1
-      - localPosition: {x: 31.119232, y: -0.22167969, z: 91.68028}
+      - localPosition: {x: 31.119232, y: -0.22070312, z: 91.68028}
         localRotation: {x: -0, y: 0.9099613, z: -0, w: -0.41469324}
         localScale: {x: 1.0060072, y: 1.0060072, z: 1.0060072}
         alwaysGrounded: 1
@@ -10073,6 +10073,7 @@ MonoBehaviour:
       Min: -14.35121
       Max: 56.120304
   chunkToConnectWith: {fileID: 0}
+  showDebugLines: 0
 --- !u!114 &3346370170913246914
 MonoBehaviour:
   m_ObjectHideFlags: 0

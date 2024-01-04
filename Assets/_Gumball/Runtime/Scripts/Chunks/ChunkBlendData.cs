@@ -31,6 +31,18 @@ namespace Gumball
                 this.firstChunk = firstChunk;
                 this.lastChunk = lastChunk;
 
+                if (firstChunk == null || firstChunk.ChunkMeshData == null || firstChunk.ChunkMeshData.Mesh == null)
+                {
+                    Debug.LogError($"There's an issue with the chunk '{firstChunk.gameObject.name}'. Does the mesh need to be rebaked?");
+                    return;
+                }
+                
+                if (lastChunk == null || lastChunk.ChunkMeshData == null || lastChunk.ChunkMeshData.Mesh == null)
+                {
+                    Debug.LogError($"There's an issue with the chunk '{lastChunk.gameObject.name}'. Does the mesh need to be rebaked?");
+                    return;
+                }
+                
                 firstChunkID = firstChunk.UniqueID;
                 lastChunkID = lastChunk.UniqueID;
 
@@ -64,7 +76,7 @@ namespace Gumball
             }
             catch (Exception e)
             {
-                Debug.LogError($"Error creating blend data between {firstChunk.gameObject.name} and {lastChunk.gameObject.name}\n{e.StackTrace}");
+                Debug.LogError($"Error creating blend data between {firstChunk.gameObject.name} and {lastChunk.gameObject.name}\n{e.Message}\n{e.StackTrace}");
             }
         }
 
@@ -177,7 +189,7 @@ namespace Gumball
         {
             bool isFirstChunk = chunk == firstChunk;
             Chunk otherChunk = isFirstChunk ? lastChunk : firstChunk;
-
+            
             for (var vertexIndex = 0; vertexIndex < chunk.ChunkMeshData.Mesh.vertices.Length; vertexIndex++)
             {
                 ChunkMeshData.Vertex chunkMeshVertex = new ChunkMeshData.Vertex(vertexIndex, chunk.ChunkMeshData.Mesh.vertices[vertexIndex], chunk);
