@@ -23,7 +23,6 @@ namespace Gumball
         private readonly List<List<int>> verticesAsGrid = new();
         private readonly List<Vector3> vertices = new();
         private readonly float timeToStopShowingDebug;
-        private readonly bool showDebugLines;
         
         private int vertexCount;
         private float distanceBetweenVertices;
@@ -38,12 +37,11 @@ namespace Gumball
         public readonly HashSet<int> VerticesAlongFirstTangent = new();
         public readonly HashSet<int> VerticesAlongLastTangent = new();
         
-        public ChunkGrid(Chunk chunk, int resolution, float widthAroundRoad, bool showDebugLines = false)
+        public ChunkGrid(Chunk chunk, int resolution, float widthAroundRoad)
         {
             this.chunk = chunk;
             this.resolution = resolution;
             this.widthAroundRoad = widthAroundRoad;
-            this.showDebugLines = showDebugLines;
 
             timeToStopShowingDebug = Time.realtimeSinceStartup + debugLineDuration;
 
@@ -119,7 +117,8 @@ namespace Gumball
         {
             chunk.UpdateSplineSampleData();
             
-            if (showDebugLines)
+#if UNITY_EDITOR
+            if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
             {
                 Debug.DrawLine(chunk.FirstSample.position.Flatten(), chunk.FirstSample.position.Flatten() + chunk.FirstTangent * GridLength, Color.magenta, debugLineDuration);
                 Debug.DrawLine(chunk.FirstSample.position.Flatten(), chunk.FirstSample.position.Flatten() - chunk.FirstTangent * GridLength, Color.magenta, debugLineDuration);
@@ -127,6 +126,7 @@ namespace Gumball
                 Debug.DrawLine(chunk.LastSample.position.Flatten(), chunk.LastSample.position.Flatten() + chunk.LastTangent * GridLength, Color.magenta, debugLineDuration);
                 Debug.DrawLine(chunk.LastSample.position.Flatten(), chunk.LastSample.position.Flatten() - chunk.LastTangent * GridLength, Color.magenta, debugLineDuration);
             }
+#endif
             
             vertexCount = 0;
             vertices.Clear();
@@ -144,15 +144,19 @@ namespace Gumball
 
                     if (IsBelowTangent(chunk.FirstSample.position.Flatten() - chunk.FirstTangent, chunk.FirstSample.position.Flatten() + chunk.FirstTangent, vertexPosition))
                     {
-                        if (showDebugLines)
+#if UNITY_EDITOR
+                        if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.red, debugLineDuration);
+#endif
                         continue;
                     }
 
                     if (IsAboveTangent(chunk.LastSample.position.Flatten() - chunk.LastTangent, chunk.LastSample.position.Flatten() + chunk.LastTangent, vertexPosition))
                     {
-                        if (showDebugLines)
+#if UNITY_EDITOR
+                        if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.red, debugLineDuration);
+#endif
                         continue;
                     }
 
@@ -160,8 +164,10 @@ namespace Gumball
                     var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition);
                     if (distanceToSplineSqr > widthAroundRoadSqr)
                     {
-                        if (showDebugLines)
+#if UNITY_EDITOR
+                        if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
                             Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 10, Color.cyan, debugLineDuration);
+#endif
                         continue;
                     }
 
@@ -227,13 +233,15 @@ namespace Gumball
                 movingDown = !movingDown;
             }
             
-            if (showDebugLines)
+#if UNITY_EDITOR
+            if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
             {
                 Debug.DrawLine(sample.position.Flatten(), sample.position.Flatten() + tangent * GridLength, Color.yellow, debugLineDuration);
                 Debug.DrawLine(sample.position.Flatten(), sample.position.Flatten() + Vector3.right * GridLength, Color.yellow, debugLineDuration);
                 GlobalLoggers.ChunkLogger.Log(Vector2.SignedAngle(tangent.FlattenAsVector2(), Vector2.right) + " - " + movingRight + ", " + movingLeft + ", " + movingUp + ", " + movingDown);
             }
-            
+#endif
+
             if (movingRight || movingLeft)
             {
                 //using rows
@@ -372,7 +380,8 @@ namespace Gumball
 
         private void ShowDebugLabels()
         {
-            if (!showDebugLines)
+#if UNITY_EDITOR
+            if (!chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
                 return;
             
             float timeLeft = timeToStopShowingDebug - Time.realtimeSinceStartup;
@@ -386,6 +395,7 @@ namespace Gumball
                 Debug.DrawLine(vertexPosition, vertexPosition + Vector3.up * 20, Color.blue);
                 Handles.Label(vertexPosition, vertexIndex.ToString());
             }
+#endif
         }
         
     }

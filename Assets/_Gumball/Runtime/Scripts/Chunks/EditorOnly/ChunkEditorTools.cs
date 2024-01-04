@@ -84,6 +84,18 @@ namespace Gumball
             CheckIfTerrainIsRaycastable();
         }
 
+        /// <summary>
+        /// Iterates over the chunk objects and ensures the colliders to flatten to are on the raycastable layer.
+        /// </summary>
+        public void EnsureChunkObjectsAreOnRaycastLayer()
+        {
+            foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
+            {
+                if (chunkObject.CanFlattenTerrain)
+                    chunkObject.ColliderToFlattenTo.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
+            }
+        }
+        
         private void CheckIfTerrainIsRaycastable()
         {
             if (chunk.CurrentTerrain == null)
@@ -148,7 +160,7 @@ namespace Gumball
         [ButtonMethod]
         public void ShowTerrainGrid()
         {
-            currentGrid = new ChunkGrid(chunk, terrainData.Resolution, terrainData.WidthAroundRoad, true);
+            currentGrid = new ChunkGrid(chunk, terrainData.Resolution, terrainData.WidthAroundRoad);
         }
         
         public void ShowEndsOfSpline()
@@ -413,6 +425,11 @@ namespace Gumball
         }
         
         #endregion
+
+        [SerializeField] private bool showDebugLines;
+
+        public bool ShowDebugLines => showDebugLines;
+        
 #endif
     }
 }

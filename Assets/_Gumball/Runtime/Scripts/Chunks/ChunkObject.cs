@@ -41,14 +41,17 @@ namespace Gumball
         private Collider colliderToFlattenTo;
         [Tooltip("The distance after the flattening for the terrain to be blended with it's original height.")]
         [SerializeField, ConditionalField(nameof(flattenTerrain)), PositiveValueOnly]
-        private float flattenTerrainBlendRadius = 20;
-
-        public bool FlattenTerrain => flattenTerrain;
+        private float flattenTerrainBlendDistance = 20;
+        [SerializeField, ConditionalField(nameof(flattenTerrain))]
+        private AnimationCurve flattenTerrainBlendCurve = AnimationCurve.Linear(0, 1, 1, 0);
+        
         public Collider ColliderToFlattenTo => colliderToFlattenTo;
-        public float FlattenTerrainBlendRadius => flattenTerrainBlendRadius;
+        public float FlattenTerrainBlendDistance => flattenTerrainBlendDistance;
+        public AnimationCurve FlattenTerrainBlendCurve => flattenTerrainBlendCurve;
         public bool LoadSeparately => loadSeparately;
         public bool IgnoreAtRuntime => ignoreAtRuntime;
         public bool AlwaysGrounded => alwaysGrounded;
+        public bool CanFlattenTerrain => isActiveAndEnabled && flattenTerrain && colliderToFlattenTo != null;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunkBelongsTo;

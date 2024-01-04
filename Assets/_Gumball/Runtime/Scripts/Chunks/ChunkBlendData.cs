@@ -94,8 +94,12 @@ namespace Gumball
             }
             
             connections.Add(new VertexConnection(chunkMeshVertexToMove, chunkMeshVertexToMatch));
+
+#if UNITY_EDITOR
+            if (chunkMeshVertexToMove.MeshBelongsTo.Chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
+                Debug.DrawLine(chunkMeshVertexToMove.WorldPosition, desiredPosition, Color.white, 15);
+#endif
             
-            Debug.DrawLine(chunkMeshVertexToMove.WorldPosition, desiredPosition, Color.white, 15);
             chunkMeshVertexToMove.MeshBelongsTo.SetVertexWorldPosition(chunkMeshVertexToMove.Index, desiredPosition);
             chunkMeshVertexToMatch.MeshBelongsTo.SetVertexWorldPosition(chunkMeshVertexToMatch.Index, desiredPosition);
         }
@@ -184,7 +188,11 @@ namespace Gumball
                 //get the end point tangent direction
                 SplineSample endPoint = isFirstChunk ? chunk.LastSample : chunk.FirstSample;
                 Vector3 tangentDirection = isFirstChunk ? -endPoint.forward : endPoint.forward;
-                Debug.DrawLine(endPoint.position, endPoint.position + tangentDirection * 100, isFirstChunk ? Color.red : Color.green, 15);
+                
+#if UNITY_EDITOR
+                if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
+                    Debug.DrawLine(endPoint.position, endPoint.position + tangentDirection * 100, isFirstChunk ? Color.red : Color.green, 15);
+#endif
                 
                 //get the closest end vertex on the other chunk
                 var (closestEndVertex, closestEndVertexDistance) = GetClosestVertex(chunkMeshVertex.WorldPosition, otherChunk.ChunkMeshData.FirstEndVertices);
@@ -196,8 +204,11 @@ namespace Gumball
                     //move the vertex to the closest end vertex to stop overlapping
                     Vector3 closestEndVertexPositionWorld = closestEndVertex.GetCurrentWorldPosition();
                     
-                    Debug.DrawLine(closestEndVertexPositionWorld, chunkMeshVertex.WorldPosition, Color.black, 15);
-
+#if UNITY_EDITOR
+                    if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
+                        Debug.DrawLine(closestEndVertexPositionWorld, chunkMeshVertex.WorldPosition, Color.black, 15);
+#endif
+                    
                     chunk.ChunkMeshData.SetVertexWorldPosition(vertexIndex, closestEndVertexPositionWorld);
                 }
             }

@@ -206,7 +206,10 @@ namespace Gumball
             CalculateMinMaxPerlinHeights();
             
             List<Vector3> verticesWithHeightData = new List<Vector3>();
+            
             ChunkObject[] chunkObjects = chunk.transform.GetComponentsInAllChildren<ChunkObject>().ToArray();
+            //ensure chunk object flattening colliders are on chunk object layer before raycasting
+            chunk.GetComponent<ChunkEditorTools>().EnsureChunkObjectsAreOnRaycastLayer();
             
             for (int vertexIndex = 0; vertexIndex < Grid.Vertices.Count; vertexIndex++)
             {
@@ -261,23 +264,7 @@ namespace Gumball
 
                 return terrainHeightFromRoad - amountToSitUnderRoad;
             }
-            
-            //check to flatten under chunk objects
-            foreach (ChunkObject chunkObject in chunkObjects)
-            {
-                if (!chunkObject.FlattenTerrain)
-                    continue;
 
-                //TODO: for multiple objects, the closest object takes priority
-                
-                float radiusSqr = chunkObject.FlattenTerrainRadius * chunkObject.FlattenTerrainRadius;
-                Vector3 lowestPos = chunkObject.transform.position;
-                float distanceToObjectSqr = (lowestPos.FlattenAsVector2() - vertexPosition.FlattenAsVector2()).sqrMagnitude;
-                bool isWithinFlattenRadius = distanceToObjectSqr < radiusSqr;
-                if (isWithinFlattenRadius)
-                    return lowestPos.y;
-            }
-            
             //check to apply height data
             TerrainHeightData heightDataAtPos = GetHeightData(vertexPosition, closestSample);
             if (!heightDataAtPos.ElevationAmount.Approximately(0))
@@ -301,30 +288,6 @@ namespace Gumball
                 float blendOffsetDifference = (roadHeight - desiredHeight) * (1-blendPercent);
                 desiredHeight += blendOffsetDifference;
             }
-            
-            //check to blend with chunk objects 
-            foreach (ChunkObject chunkObject in chunkObjects)
-            {
-                if (!chunkObject.FlattenTerrain)
-                    continue;
-
-                if (chunkObject.FlattenTerrainBlendRadius <= 0)
-                    continue;
-                
-                float blendRadiusSqr = chunkObject.FlattenTerrainBlendRadius * chunkObject.FlattenTerrainBlendRadius;
-                Vector3 lowestPos = chunkObject.transform.position;
-                float distanceToObjectSqr = (lowestPos.FlattenAsVector2() - vertexPosition.FlattenAsVector2()).sqrMagnitude;
-                bool isWithinBlendRadius = distanceToObjectSqr < blendRadiusSqr;
-                if (!isWithinBlendRadius)
-                    continue;
-                
-                //desired height offset = desiredHeightDifference * blendPercent
-                float flattenedRadiusSqr = chunkObject.FlattenTerrainRadius * chunkObject.FlattenTerrainRadius;
-                float blendPercent = Mathf.Clamp01((distanceToObjectSqr - flattenedRadiusSqr) / blendRadiusSqr);
-                float flattenedObjectHeight = chunkObject.transform.position.y;
-                float blendOffsetDifference = (flattenedObjectHeight - desiredHeight) * (1-blendPercent);
-                desiredHeight += blendOffsetDifference;
-            }
 
             if (matchRoadHeight)
             {
@@ -335,6 +298,13 @@ namespace Gumball
             else
             {
                 desiredHeight += terrainHeightFromRoad;
+            }
+            
+            //check to match chunk object colliders
+            float chunkObjectBlendHeight = GetHeightAtPositionWithChunkObjectBlending(vertexPosition.SetY(desiredHeight), chunkObjects);
+            if (!chunkObjectBlendHeight.Approximately(desiredHeight))
+            {
+                return chunkObjectBlendHeight;
             }
 
             return desiredHeight;
@@ -362,6 +332,73 @@ namespace Gumball
             }
 
             return noiseHeight;
+        }
+        
+        /// <summary>
+        /// Find the chunk objects that affect the height at the desired position to calculate the average of their offsets and apply it to the current position.
+        /// </summary>
+        /// <returns>A new height value that takes the chunk object blending into account.</returns>
+        private float GetHeightAtPositionWithChunkObjectBlending(Vector3 currentPosition, ChunkObject[] chunkObjects)
+        {
+            if (chunkObjects.Length == 0)
+                return currentPosition.y; //no chunk objects to blend with
+            
+            Dictionary<ChunkObject, float> desiredOffsets = new();
+            float sumOfOffsets = 0;
+
+            //raycast upwards from vertex point (minus 10,000 to start at bottom) to see if it's overlapping
+            const int maxChunkObjectsPerPosition = 15;
+            RaycastHit[] hits = new RaycastHit[maxChunkObjectsPerPosition];
+            int numberOfHits = chunk.gameObject.scene.GetPhysicsScene().Raycast(currentPosition.OffsetY(10000), Vector3.down, hits, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkObject));
+            for (int count = 0; count < numberOfHits; count++)
+            {
+                RaycastHit hit = hits[count];
+                ChunkObject chunkObject = hit.transform.GetComponent<ChunkObject>();
+                
+                if (chunkObject == null || !chunkObject.CanFlattenTerrain)
+                    continue;
+                
+                //TODO: draw ray upward from the current position
+                
+                float offset = hit.point.y - currentPosition.y;
+                
+                desiredOffsets[chunkObject] = offset;
+                sumOfOffsets += offset;
+            }
+
+            //check to blend
+            foreach (ChunkObject chunkObject in chunkObjects)
+            {
+                if (desiredOffsets.ContainsKey(chunkObject) || !chunkObject.CanFlattenTerrain || chunkObject.FlattenTerrainBlendDistance <= 0)
+                    continue;
+                
+                float maxDistanceSqr = chunkObject.FlattenTerrainBlendDistance * chunkObject.FlattenTerrainBlendDistance;
+                //get distance from collider to currentPosition
+                var (closestPosition, distanceSqr) = chunkObject.ColliderToFlattenTo.ClosestVertex(currentPosition, true);
+                
+                bool isWithinBlendRadius = distanceSqr <= maxDistanceSqr;
+                if (!isWithinBlendRadius)
+                    continue;
+
+                float blendPercent = distanceSqr / maxDistanceSqr;
+                float blendPercentWithCurve = chunkObject.FlattenTerrainBlendCurve.Evaluate(blendPercent);
+                float blendModifier = Mathf.Clamp01(blendPercentWithCurve); //furthest away = 0 : 1
+                float offset = closestPosition.y - currentPosition.y;
+
+                float offsetWithBlending = offset * blendModifier;
+                
+                desiredOffsets[chunkObject] = offsetWithBlending;
+                sumOfOffsets += offsetWithBlending;
+            }
+
+            if (desiredOffsets.Count == 0)
+                return currentPosition.y; //hasn't changed
+            
+            //calculate the average offset
+            float offsetAverage = sumOfOffsets / desiredOffsets.Count;
+            float newHeight = currentPosition.y + offsetAverage;
+            
+            return newHeight;
         }
         
         private static Material GetDefaultMaterial()

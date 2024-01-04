@@ -12,7 +12,8 @@ namespace Gumball
             LiveDecal = 6,
             Terrain = 7,
             PlayerVehicle = 8,
-            TrafficCar = 9
+            TrafficCar = 9,
+            ChunkObject = 10
         }
         
         public static LayerMask TrafficCarCollisionLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerVehicle;
