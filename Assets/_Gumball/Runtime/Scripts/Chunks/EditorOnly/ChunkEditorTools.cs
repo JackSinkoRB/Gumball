@@ -1,11 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Dreamteck.Splines;
 using MyBox;
 #if UNITY_EDITOR
+using Gumball.Editor;
 using UnityEditor;
 #endif
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Gumball
 {
@@ -17,24 +20,41 @@ namespace Gumball
         private Chunk chunk => GetComponent<Chunk>();
         private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
 
+        [ReadOnly, SerializeField] private Chunk chunkBefore;
+        [ReadOnly, SerializeField] private Chunk chunkAfter;
+
+        [SerializeField, HideInInspector] private bool hasChunkConnected;
+
+        public bool HasChunkConnected => hasChunkConnected;
+        
         private GameObject previousSelection;
         private float timeWhenUnityLastUpdated;
+
+        private bool isRuntimeChunk => name.Contains(ChunkUtils.RuntimeChunkSuffix);
         
-        [InitializeOnLoadMethod]
-        private static void Initialise()
+        private void OnSavePrefab(string prefabName, string path)
         {
-            UniqueIDAssigner.OnAssignID += OnAssignID;
+            if (prefabName.Equals(gameObject.name) && !isRuntimeChunk)
+            {
+                ChunkUtils.BakeMeshes(chunk);
+                chunk.FindSplineMeshes();
+            }
         }
         
         private void OnEnable()
         {
+            SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
+            
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
+            chunk.UpdateSplineSampleData();
         }
 
         private void OnDisable()
         {
             chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
 
+            SaveEditorAssetsEvents.onSavePrefab -= OnSavePrefab;
+            
             Tools.hidden = false;
         }
 
@@ -61,45 +81,34 @@ namespace Gumball
         private void OnValidate()
         {
             CheckToUpdateMeshesImmediately();
+            CheckIfTerrainIsRaycastable();
         }
 
-        private static void OnAssignID(UniqueIDAssigner uniqueIDAssigner, string previousID, string newID)
+        /// <summary>
+        /// Iterates over the chunk objects and ensures the colliders to flatten to are on the raycastable layer.
+        /// </summary>
+        public void EnsureChunkObjectsAreOnRaycastLayer()
         {
-            Chunk chunk = uniqueIDAssigner.GetComponent<Chunk>();
-            if (chunk == null)
-                return;
-            
-            TryDuplicateMeshWithNewID(chunk, previousID, newID);
+            foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
+            {
+                if (chunkObject.CanFlattenTerrain)
+                    chunkObject.ColliderToFlattenTo.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
+            }
         }
-
-        private static void TryDuplicateMeshWithNewID(Chunk chunk, string previousID, string newID)
+        
+        private void CheckIfTerrainIsRaycastable()
         {
             if (chunk.CurrentTerrain == null)
                 return;
 
-            Mesh mesh = chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh;
-            if (mesh == null)
-                return;
-            
-            //save the mesh asset
-            string oldPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{previousID}.asset";
-            string newPath = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{newID}.asset";
-            AssetDatabase.CopyAsset(oldPath, newPath);
-            AssetDatabase.SaveAssets();
-            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
-
-            Mesh duplicatedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(newPath);
-            meshFilter.sharedMesh = duplicatedMesh;
-            
-            PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
-            EditorUtility.SetDirty(meshFilter);
-            AssetDatabase.SaveAssets();
+            chunk.CurrentTerrain.layer = (int)LayersAndTags.Layer.Terrain;
+            chunk.CurrentTerrain.GetComponent<MeshCollider>(true);
         }
-
+        
         #region Show terrain vertices
         private const float timeToShowVertices = 15;
         
-        private float timeLastClickedShowTerrainVertices;
+        private float timeLastClickedShowTerrainVertices = -10000f;
         
         private float timeSinceClickedShowTerrainVertices => Time.realtimeSinceStartup - timeLastClickedShowTerrainVertices;
         
@@ -134,24 +143,24 @@ namespace Gumball
         #endregion
         
         #region Generate terrain
-
-        [Header("Create terrain")]
-        [ReadOnly(nameof(HasConnection)), SerializeField]
-        private ChunkTerrainData terrainData = new();
+        
         [Tooltip("If enabled, the terrain will update whenever a value is changed. Otherwise the CreateTerrain button will need to be used.")]
         [SerializeField] private bool updateImmediately = true;
-
-        [HideInInspector] public bool HasConnection; 
+        
+        [ReadOnly(nameof(hasChunkConnected)), SerializeField]
+        private ChunkTerrainData terrainData = new();
 
         private ChunkGrid currentGrid;
         
         private static bool subscribedToPlayModeStateChanged;
         private static PlayModeStateChange playModeState;
+
+        public ChunkTerrainData TerrainData => terrainData;
         
         [ButtonMethod]
         public void ShowTerrainGrid()
         {
-            currentGrid = new ChunkGrid(chunk, terrainData.Resolution, terrainData.WidthAroundRoad, true);
+            currentGrid = new ChunkGrid(chunk, terrainData.Resolution, terrainData.WidthAroundRoad);
         }
         
         public void ShowEndsOfSpline()
@@ -168,6 +177,27 @@ namespace Gumball
         }
         
         [ButtonMethod]
+        public void DrawMeshEdgeNormals()
+        {
+            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.FirstEndVertices)
+            {
+                DrawNormal(vertex.Index, Color.red);
+            }
+            
+            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.LastEndVertices)
+            {
+                DrawNormal(vertex.Index, Color.blue);
+            }
+
+            void DrawNormal(int vertexIndex, Color color)
+            {
+                const float distance = 5;
+                const float duration = 120;
+                Debug.DrawRay(chunk.ChunkMeshData.GetCurrentVertexWorldPosition(vertexIndex), chunk.ChunkMeshData.Mesh.normals[vertexIndex] * distance, color, duration);
+            }
+        }
+        
+        [ButtonMethod()]
         public void CreateTerrain()
         {
             GameObject newTerrain = terrainData.Create(chunk);
@@ -204,7 +234,7 @@ namespace Gumball
             if (timeSinceUnityUpdated < 1) //likely recompiling
                 return;
 
-            if (chunk.IsAutomaticTerrainRecreationDisabled || chunk.HasChunkConnected)
+            if (chunk.IsAutomaticTerrainRecreationDisabled || hasChunkConnected)
                 return;
             
             bool justSelected = previousSelection != gameObject && Selection.activeGameObject == gameObject;
@@ -220,7 +250,7 @@ namespace Gumball
                 return;
             
             if (playModeState is PlayModeStateChange.ExitingEditMode or PlayModeStateChange.ExitingPlayMode
-                || (Application.isPlaying && !LoadingSceneManager.HasLoaded))
+                || (Application.isPlaying && !GameLoaderSceneManager.HasLoaded))
                 return;
 
             if (chunk.CurrentTerrain == null)
@@ -228,19 +258,14 @@ namespace Gumball
             
             EditorApplication.delayCall -= RecreateTerrain;
             EditorApplication.delayCall += RecreateTerrain;
-            
-            EditorApplication.delayCall -= () => ChunkUtils.BakeRoadMesh(chunk);
-            EditorApplication.delayCall += () => ChunkUtils.BakeRoadMesh(chunk);
         }
         
         /// <summary>
         /// Force the terrain to be recreated.
         /// </summary>
-        private void RecreateTerrain()
+        public void RecreateTerrain()
         {
-            Chunk connectedAfter = chunk.ChunkAfter;
-            Chunk connectedBefore = chunk.ChunkBefore;
-            chunk.DisconnectAll();
+            DisconnectAll();
             
             GlobalLoggers.ChunkLogger.Log($"Recreating terrain for '{chunk.name}'");
             Material[] previousMaterials = chunk.CurrentTerrain.GetComponent<MeshRenderer>().sharedMaterials;
@@ -251,10 +276,22 @@ namespace Gumball
             GameObject newTerrain = terrainData.Create(chunk, previousMaterials);
             chunk.SetTerrain(newTerrain);
             
-            if (connectedBefore != null)
-                ChunkUtils.ConnectChunks(connectedBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(connectedBefore, chunk));
-            if (connectedAfter != null)
-                ChunkUtils.ConnectChunks(chunk, connectedAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, connectedAfter));
+            if (chunkBefore != null)
+                ChunkUtils.ConnectChunks(chunkBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunkBefore, chunk));
+            if (chunkAfter != null)
+                ChunkUtils.ConnectChunks(chunk, chunkAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, chunkAfter));
+
+            UnbakeSplineMeshes();
+        }
+
+        private void UnbakeSplineMeshes()
+        {
+            foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
+            {
+                if (!splineMesh.gameObject.activeSelf)
+                    continue;
+                splineMesh.Unbake();
+            }
         }
         
         #endregion
@@ -262,6 +299,82 @@ namespace Gumball
         #region Connect to a chunk
         [Header("Connect")]
         [SerializeField] private Chunk chunkToConnectWith;
+
+        public void OnConnectChunkBefore(Chunk chunk)
+        {
+            OnConnectChunk();
+            chunkBefore = chunk;
+        }
+        
+        public void OnConnectChunkAfter(Chunk chunk)
+        {
+            OnConnectChunk();
+            chunkAfter = chunk;
+        }
+
+        private void OnConnectChunk()
+        {
+            
+        }
+
+        private void OnDisconnectChunk()
+        {
+            if (!hasChunkConnected)
+                transform.rotation = Quaternion.Euler(Vector3.zero); //reset rotation
+        }
+        
+        
+        public void DisconnectAll(bool canUndo = false)
+        {
+            if (canUndo)
+            {
+                List<Object> objectsToRecord = new List<Object>();
+
+                objectsToRecord.Add(transform);
+                objectsToRecord.Add(chunk.CurrentTerrain.GetComponent<MeshFilter>());
+
+                if (chunkAfter != null)
+                {
+                    objectsToRecord.Add(chunkAfter);
+                    if (chunkAfter.GetComponent<ChunkEditorTools>().chunkBefore != null)
+                        objectsToRecord.Add(chunkAfter.GetComponent<ChunkEditorTools>().chunkBefore);
+                }
+
+                if (chunkBefore != null)
+                {
+                    objectsToRecord.Add(chunkBefore);
+                    if (chunkAfter.GetComponent<ChunkEditorTools>().chunkAfter != null)
+                        objectsToRecord.Add(chunkAfter.GetComponent<ChunkEditorTools>().chunkAfter);
+                }
+                
+                Undo.RecordObjects(objectsToRecord.ToArray(), "Disconnect Chunk");
+            }
+
+            OnDisconnectChunkAfter();
+            OnDisconnectChunkBefore();
+        }
+
+        public void OnDisconnectChunkBefore()
+        {
+            if (chunkBefore == null)
+                return;
+
+            Chunk previousChunk = chunkBefore;
+            chunkBefore = null;
+            previousChunk.GetComponent<ChunkEditorTools>().OnDisconnectChunkAfter();
+            OnDisconnectChunk();
+        }
+
+        public void OnDisconnectChunkAfter()
+        {
+            if (chunkAfter == null)
+                return;
+            
+            Chunk previousChunk = chunkAfter;
+            chunkAfter = null;
+            previousChunk.GetComponent<ChunkEditorTools>().OnDisconnectChunkBefore();
+            OnDisconnectChunk();
+        }
 
         /// <summary>
         /// Connect the chunk with the specified chunk.
@@ -272,7 +385,7 @@ namespace Gumball
             if (chunkToConnectWith == null)
                 throw new NullReferenceException($"There is no '{nameof(chunkToConnectWith)}' value set in the inspector.");
             
-            if (chunk.HasChunkConnected)
+            if (hasChunkConnected)
                 throw new InvalidOperationException("This chunk is already connected. Disconnect the chunk first.");
 
             ChunkUtils.ConnectChunksWithNewBlendData(chunkToConnectWith, chunk, ChunkUtils.LoadDirection.AFTER, true);
@@ -281,14 +394,14 @@ namespace Gumball
         [ButtonMethod]
         public void Disconnect()
         {
-            if (!chunk.HasChunkConnected)
+            if (!hasChunkConnected)
             {
                 Debug.Log("This chunk is already disconnected.");
                 return;
             }
 
-            Chunk[] affectedChunks = { chunk, chunk.ChunkAfter, chunk.ChunkBefore};
-            chunk.DisconnectAll(true);
+            Chunk[] affectedChunks = { chunk, chunkAfter, chunkBefore};
+            DisconnectAll(true);
             foreach (Chunk affectedChunk in affectedChunks)
             {
                 if (affectedChunk != null)
@@ -308,10 +421,15 @@ namespace Gumball
             if (Selection.activeGameObject != gameObject)
                 return;
             
-            Tools.hidden = chunk.HasChunkConnected;
+            Tools.hidden = hasChunkConnected;
         }
         
         #endregion
+
+        [SerializeField] private bool showDebugLines;
+
+        public bool ShowDebugLines => showDebugLines;
+        
 #endif
     }
 }

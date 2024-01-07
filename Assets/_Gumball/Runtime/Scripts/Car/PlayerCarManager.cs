@@ -27,7 +27,7 @@ namespace Gumball
                 
             yield return CurrentCar.Customisation.ApplyVehicleChanges(defaultCarData);
 
-            CameraController.Instance.SetTarget(CurrentCar.transform);
+            DecalManager.ApplyDecalDataToCar(CurrentCar);
 
             onComplete?.Invoke();
             onCurrentCarChanged?.Invoke(CurrentCar);

@@ -4,16 +4,22 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class VersionNumberObject : MonoBehaviour
+namespace Gumball
 {
-    
-    private void Awake()
+    [RequireComponent(typeof(TextMeshProUGUI))]
+    public class VersionNumberObject : MonoBehaviour
     {
+
+        private TextMeshProUGUI label => GetComponent<TextMeshProUGUI>();
+
+        private void Awake()
+        {
 #if UNITY_EDITOR
-        GetComponent<TextMeshProUGUI>().text = "EDITOR";
+            label.text = $"EDITOR_{VersionManager.Instance.ShortBuildName}";
 #else
-        GetComponent<TextMeshProUGUI>().text = VersionManager.Instance.FullBuildName;
+            label.text = VersionManager.Instance.FullBuildName;
 #endif
+        }
+
     }
-    
 }

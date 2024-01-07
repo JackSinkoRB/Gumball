@@ -27,6 +27,8 @@ namespace Gumball
                  "\nThe further the CoG is towards the rear of the car, the more the car tends to oversteer." +
                  "\nIf this is not set, the center of mass is calculated from the colliders.")]
         [SerializeField] private Transform centerOfMass;
+
+        [SerializeField] private GameObject colliders;
         
         [SerializeField] private TyreCompound tyreCompound = TyreCompound.Street;
 
@@ -63,6 +65,7 @@ namespace Gumball
         [Tooltip("How long it takes to fully release the throttle when the wheels are spinning.")]
         [SerializeField] private float throttleReleaseTimeNoTraction = 0.1f;
 
+        [Header("Driving assists")]
         [Tooltip("Prevents the powered wheels from applying more torque if they are slipping.")]
         [SerializeField] private bool hasTractionControl = true;
 
@@ -71,30 +74,41 @@ namespace Gumball
         
         [Tooltip("Detects oversteer and understeer, and applies the brakes to the opposite corner wheel to correct it.")]
         [SerializeField] private bool hasStabilityControl = true;
+        [Tooltip("The max speed for the stabilityControlBrakingModifier check.")]
+        [ConditionalField(nameof(hasStabilityControl)), SerializeField]
+        private float stabilityControlBrakingModifierMax = 250;
+
+        [Tooltip("The amount of braking to apply for stability control, depending on the current speed of the car.")]
+        [ConditionalField(nameof(hasStabilityControl)), SerializeField]
+        private AnimationCurve stabilityControlBrakingModifier;
+        [Tooltip("When the car is slipping, how much of the torque should be balanced between the slipping wheels?")]
+        [SerializeField, Range(0, 1)] private float stabilityControlTorqueModifier = 0.5f;
         
         /// <summary>
         /// The amount of slip required to trigger traction control.
         /// </summary>
         private const float tractionControlSlipTrigger = 0.2f;
-
-        // These values determine how fast steering value is changed when the steering keys are pressed or released.
-        // Getting these right is important to make the car controllable, as keyboard input does not allow analogue input.
-
+        
         [Header("Steering")]
         [Tooltip("Higher value means it's faster to turn the steering wheel.")]
-        [SerializeField] private float maxSteerSpeed = 2.5f;
+        [SerializeField] private float maxSteerSpeed = 2;
         [Tooltip("Higher value means it's faster to turn the steering wheel.")]
-        [SerializeField] private float minSteerSpeed = 0.5f;
+        [SerializeField] private float minSteerSpeed = 0.35f;
         [Tooltip("Higher value means it's faster to turn the steering wheel.")]
-        [SerializeField] private float maxSteerReleaseSpeed = 10f;
+        [SerializeField] private float maxSteerReleaseSpeed = 10;
         [Tooltip("Higher value means it's faster to turn the steering wheel.")]
-        [SerializeField] private float minSteerReleaseSpeed = 3f;
+        [SerializeField] private float minSteerReleaseSpeed = 35;
         [Tooltip("The speed (in km/h) that the car must be going to be at minSteerSpeed.")]
-        [SerializeField] private float speedForMinSteerSpeed = 200;
+        [SerializeField] private float speedForMinSteerSpeed = 250;
 
         [ReadOnly, SerializeField] private Rigidbody rigidBody;
+        public Rigidbody Rigidbody => rigidBody;
+        
         private bool isReversing;
         private bool clutchIn;
+
+        public GameObject Colliders => colliders;
+        
         /// <summary>
         /// The speed that the rigidbody is moving (in m/s).
         /// </summary>
@@ -125,6 +139,16 @@ namespace Gumball
             }
         }
 
+        private void OnEnable()
+        {
+            SettingsManager.Instance.onGearboxSettingChanged += OnGearboxSettingChanged;
+        }
+        
+        private void OnDisable()
+        {
+            SettingsManager.Instance.onGearboxSettingChanged -= OnGearboxSettingChanged;
+        }
+
         private void Start()
         {
             rigidBody = GetComponent<Rigidbody>();
@@ -136,6 +160,27 @@ namespace Gumball
             {
                 wheel.manager = this;
             }
+
+            SetGearboxFromSettings();
+        }
+        
+        /// <summary>
+        /// Gets the wheel's slip percentage, in comparison to another wheel.
+        /// </summary>
+        /// <returns>2 float values that add up to 1.</returns>
+        public (float, float) GetSlipPercentage(bool isRear)
+        {
+            Wheel leftWheel = isRear ? RearLeftWheel : FrontLeftWheel;
+            Wheel rightWheel = isRear ? RearRightWheel : FrontRightWheel;
+            
+            float leftSlipRatio = Mathf.Abs(leftWheel.slipRatio);
+            float rightSlipRatio = Mathf.Abs(rightWheel.slipRatio);
+            float combined = leftSlipRatio + rightSlipRatio;
+                
+            float leftPercent = leftSlipRatio / combined;
+            float rightPercent = rightSlipRatio / combined;
+
+            return (leftPercent, rightPercent);
         }
 
         public void StabilityControlCheck()
@@ -170,39 +215,50 @@ namespace Gumball
             bool hasUndersteer = Mathf.Abs(frontSlipAngleAverage) > 0.1f && Mathf.Abs(frontSlipAngleAverage) > Mathf.Abs(rearSlipAngleAverage);
             bool hasOversteer = Mathf.Abs(rearSlipAngleAverage) > 0.1f && Mathf.Abs(rearSlipAngleAverage) > Mathf.Abs(frontSlipAngleAverage);
 
+            //reset in case there's no under or oversteer
+            RearLeftWheel.SetDriveTorqueSlipModifier(0);
+            RearRightWheel.SetDriveTorqueSlipModifier(0);
+            FrontLeftWheel.SetDriveTorqueSlipModifier(0);
+            FrontRightWheel.SetDriveTorqueSlipModifier(0);
+            
             if (hasUndersteer)
             {
-                StabilityControlOn = true;
-                
-                //get the slip ratios of the front 2 wheels
-                //apply brakes to rear wheels depending on the percentage
-                float leftSlipRatio = Mathf.Abs(FrontLeftWheel.slipRatio);
-                float rightSlipRatio = Mathf.Abs(FrontRightWheel.slipRatio);
-                float combined = leftSlipRatio + rightSlipRatio;
-                
-                float leftPercent = leftSlipRatio / combined;
-                float rightPercent = rightSlipRatio / combined;
-
-                RearLeftWheel.stabilityControlBraking = leftPercent;
-                RearRightWheel.stabilityControlBraking = rightPercent;
+                ApplyStabilityControl(false);
             }
             
             if (hasOversteer)
             {
-                StabilityControlOn = true;
-                
-                //get the slip ratios of the rear 2 wheels
-                //apply brakes to front wheels depending on the percentage
-                float leftSlipRatio = Mathf.Abs(RearLeftWheel.slipRatio);
-                float rightSlipRatio = Mathf.Abs(RearRightWheel.slipRatio);
-                float combined = leftSlipRatio + rightSlipRatio;
-                
-                float leftPercent = leftSlipRatio / combined;
-                float rightPercent = rightSlipRatio / combined;
-
-                FrontLeftWheel.stabilityControlBraking = rightPercent;
-                FrontRightWheel.stabilityControlBraking = leftPercent;
+                ApplyStabilityControl(true);
             }
+        }
+
+        private void ApplyStabilityControl(bool isRear)
+        {
+            StabilityControlOn = true;
+
+            Wheel leftWheel = isRear ? RearLeftWheel : FrontLeftWheel;
+            Wheel rightWheel = isRear ? RearRightWheel : FrontRightWheel;
+            
+            //get the slip ratios of the rear 2 wheels
+            //apply brakes to front wheels depending on the percentage
+            var (leftPercent, rightPercent) = GetSlipPercentage(isRear);
+
+            //slow down the wheel that is spinning more by applying brakes
+            float speedModifier = Mathf.Clamp01(Speed / stabilityControlBrakingModifierMax);
+            leftWheel.stabilityControlBraking = leftPercent * stabilityControlBrakingModifier.Evaluate(speedModifier);
+            rightWheel.stabilityControlBraking = rightPercent * stabilityControlBrakingModifier.Evaluate(speedModifier);
+                
+            //balance the wheel's torque (acts like a differential would)
+            leftWheel.SetDriveTorqueSlipModifier(GetDriveTorqueSlipModifier(leftPercent));
+            rightWheel.SetDriveTorqueSlipModifier(GetDriveTorqueSlipModifier(rightPercent));
+        }
+
+        private float GetDriveTorqueSlipModifier(float slipPercent)
+        {
+            //if slipPercent = 0.5, value = 0
+            //if slipPercent = 1, value = 1
+            //if slipPercent = 0, value = -1
+            return Mathf.Lerp(1, -1, slipPercent) * stabilityControlTorqueModifier;
         }
 
         private void CalculateSpeed()
@@ -456,6 +512,16 @@ namespace Gumball
             CurrentSteering = Mathf.Lerp(CurrentSteering, desiredSteering, Time.deltaTime * CurrentSteerSpeed);
             if (isCorrecting)
                 CurrentSteering = Mathf.Clamp(CurrentSteering, 0, -Mathf.Sign(InputManager.SteeringInput) * 1);
+        }
+        
+        private void SetGearboxFromSettings()
+        {
+            drivetrain.automatic = SettingsManager.GearboxSetting == 0;
+        }
+        
+        private void OnGearboxSettingChanged(int newValue)
+        {
+            drivetrain.automatic = newValue == 0;
         }
     }
 }

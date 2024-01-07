@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
@@ -143,6 +144,13 @@ namespace Gumball
         float counterForce;
         public CarManager manager;
         public ParticleSystem Smoke;
+        
+        private float driveTorqueSlipModifier;
+
+        public void SetDriveTorqueSlipModifier(float percent)
+        {
+            driveTorqueSlipModifier = percent;
+        }
 
         float CalcLongitudinalForce(float Fz, float slip)
         {
@@ -298,13 +306,18 @@ namespace Gumball
                 slipRes = 1;
             float invSlipRes = (1.0f / (float)slipRes);
 
+            //simulate a differential if wheels are slipping
+            //if wheel is slipping, reduce it's torque
+            //if other wheel is slipping, increase it's torque
+            float torqueSlipModifier = driveTorque * driveTorqueSlipModifier;
+            
             braking = brakePedal + stabilityControlBraking;
             float totalInertia = inertia + drivetrainInertia;
-            float driveAngularDelta = driveTorque * Time.deltaTime * invSlipRes / totalInertia;
+            float driveAngularDelta = (driveTorque + torqueSlipModifier) * Time.deltaTime * invSlipRes / totalInertia;
             float totalFrictionTorque = brakeFrictionTorque * braking + handbrakeFrictionTorque * handbrake +
                                         frictionTorque + driveFrictionTorque;
             float frictionAngularDelta = totalFrictionTorque * Time.deltaTime * invSlipRes / totalInertia;
-
+            
             Vector3 totalForce = Vector3.zero;
             float newAngle = maxSteeringAngle * steering;
             for (int i = 0; i < slipRes; i++)

@@ -36,46 +36,80 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void RuntimeInitialise()
         {
-            CoroutineHelper.Instance.PerformAfterTrue(() => ExistsRuntime, () =>
+            try
             {
-                Steering = new VirtualInputActionFloat(Instance.GetOrCacheAction("Steering"));
-                Accelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Accelerate"));
-                Decelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Decelerate"));
-                Handbrake = new VirtualInputActionButton(Instance.GetOrCacheAction("Handbrake"));
-                ShiftUp = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftUp"));
-                ShiftDown = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftDown"));
-            });
+                CoroutineHelper.Instance.PerformAfterTrue(() => ExistsRuntime, () =>
+                {
+                    Steering = new VirtualInputActionFloat(Instance.GetOrCacheAction("Steering"));
+                    Accelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Accelerate"));
+                    Decelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Decelerate"));
+                    Handbrake = new VirtualInputActionButton(Instance.GetOrCacheAction("Handbrake"));
+                    ShiftUp = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftUp"));
+                    ShiftDown = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftDown"));
+                });
+            }
+            catch (NullReferenceException)
+            {
+                //CoroutineHelper might not exist in the scene
+            }
         }
         
-        [SerializeField] private InputActionAsset controls;
+        [SerializeField] private PlayerInput playerInput;
 
         private readonly Dictionary<string, InputAction> actionsCached = new();
+        private readonly Dictionary<ActionMapType, InputActionMap> actionsMapsCached = new();
 
+        public PlayerInput PlayerInput => playerInput;
+        
         protected override void Initialise()
         {
             base.Initialise();
             
+            EnableActionMap(ActionMapType.General);
             EnhancedTouchSupport.Enable();
         }
 
-        private void OnDisable()
+        protected override void OnInstanceDisabled()
         {
+            base.OnInstanceDisabled();
+            
             EnhancedTouchSupport.Disable();
+        }
+
+        private void Update()
+        {
+            PinchInput.CheckForPinch();
         }
 
         private InputAction GetOrCacheAction(string action)
         {
             if (!actionsCached.ContainsKey(action))
-                actionsCached[action] = controls.FindAction(action);
+                actionsCached[action] = playerInput.actions.FindAction(action);
         
             return actionsCached[action];
         }
 
-        public void SetActionMap(ActionMapType actionMapType)
+        private InputActionMap GetActionMap(ActionMapType type)
         {
-            InputActionMap actionMap = controls.FindActionMap(actionMapType.ToString());
-            actionMap.Enable();
+            if (!actionsMapsCached.ContainsKey(type))
+            {
+                //cache it
+                actionsMapsCached[type] = playerInput.actions.FindActionMap(type.ToString());
+            }
+
+            return actionsMapsCached[type];
         }
-        
+
+        public void EnableActionMap(ActionMapType type, bool enable = true)
+        {
+            InputActionMap map = GetActionMap(type);
+            if (enable)
+                map.Enable();
+            else map.Disable();
+            
+            if (GlobalLoggers.HasLoaded)
+                GlobalLoggers.InputLogger.Log($"{(enable ? "Enabled" : "Disabled")} action map {type.ToString()}");
+        }
+
     }
 }

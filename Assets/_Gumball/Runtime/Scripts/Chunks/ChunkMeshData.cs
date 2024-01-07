@@ -60,11 +60,14 @@ namespace Gumball
         [SerializeField, ReadOnly] private Vector3[] vertices;
         [SerializeField, ReadOnly] private List<Vertex> lastEndVertices;
         [SerializeField, ReadOnly] private List<Vertex> firstEndVertices;
-
+        [SerializeField, ReadOnly] private SerializableColor[] vertexColors;
+        
         public Chunk Chunk => chunk;
         public MeshFilter MeshFilter => chunk.CurrentTerrain.GetComponent<MeshFilter>();
+        public MeshCollider MeshCollider => chunk.CurrentTerrain.GetComponent<MeshCollider>();
         public Mesh Mesh => MeshFilter.sharedMesh;
         public Vector3[] Vertices => vertices;
+        public SerializableColor[] VertexColors => vertexColors;
         public ReadOnlyCollection<Vertex> LastEndVertices => lastEndVertices.AsReadOnly();
         public ReadOnlyCollection<Vertex> FirstEndVertices => firstEndVertices.AsReadOnly();
         
@@ -108,23 +111,27 @@ namespace Gumball
 
             meshToUse.RecalculateTangents();
             meshToUse.RecalculateNormals();
-            //meshToUse.SetNormals(CalculateNormals());
             meshToUse.RecalculateBounds();
             
-            MeshFilter.sharedMesh = meshToUse; //set the mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
+            MeshFilter.sharedMesh = meshToUse;
+            MeshCollider.sharedMesh = meshToUse;
         }
 
-        private Vector3[] CalculateNormals()
+        public void UpdateVertexColors(SerializableColor[] colors)
         {
-            //TODO:
-            //1. recalculate the normals like normal, but if the vertex is an end vertex, get the opposite end vertex
-            //2. could calculate normals based on the vertex height
-            //3. allow for 1 extra row of vertices after the tangent, but don't let them be seen
-
-            Vector3[] vertexNormals = new Vector3[vertices.Length];
-            return vertexNormals;
+            vertexColors = colors;
+            MeshFilter.sharedMesh.colors = vertexColors.ToColors();
         }
         
+#if UNITY_EDITOR
+        public Color[] CalculateVertexColors()
+        {
+            TerrainTextureBlendSettings terrainBlendSettings = chunk.GetComponent<ChunkEditorTools>().TerrainData.TextureBlendSettings;
+            Color[] colors = terrainBlendSettings.GetVertexColors(chunk, new List<Vector3>(vertices), MeshFilter.transform, Mesh);
+            return colors;
+        }
+#endif
+
         private void FindVerticesOnTangents()
         {
             Quaternion previousRotation = chunk.transform.rotation;
@@ -135,12 +142,20 @@ namespace Gumball
             //get the vertices on each chunks tangent
             Vector3 lastPoint = chunk.LastSample.position;
             lastEndVertices = GetVerticesOnTangent(lastPoint - chunk.LastTangent, lastPoint + chunk.LastTangent);
-            Debug.DrawLine(lastPoint - chunk.LastTangent * 200, lastPoint + chunk.LastTangent * 200, Color.magenta, 15);
+
+#if UNITY_EDITOR
+            if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
+                Debug.DrawLine(lastPoint - chunk.LastTangent * 200, lastPoint + chunk.LastTangent * 200, Color.magenta, 15);
+#endif
             GlobalLoggers.ChunkLogger.Log($"Found {lastEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
 
             Vector3 firstPoint = chunk.FirstSample.position;
             firstEndVertices = GetVerticesOnTangent(firstPoint - chunk.FirstTangent, firstPoint + chunk.FirstTangent);
-            Debug.DrawLine(firstPoint - chunk.FirstTangent * 200, firstPoint + chunk.FirstTangent * 200, Color.magenta, 15);
+            
+#if UNITY_EDITOR
+            if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
+                Debug.DrawLine(firstPoint - chunk.FirstTangent * 200, firstPoint + chunk.FirstTangent * 200, Color.magenta, 15);
+#endif
             GlobalLoggers.ChunkLogger.Log($"Found {firstEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
 
             chunk.transform.rotation = previousRotation;
@@ -155,12 +170,18 @@ namespace Gumball
                 Vector3 vertexPosition = Mesh.vertices[vertexIndex];
                 Vector3 vertexPositionWorld = MeshFilter.transform.TransformPoint(vertexPosition);
 
-                Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 10, Color.yellow, 15);
+#if UNITY_EDITOR
+                if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
+                    Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 10, Color.yellow, 15);
+#endif
 
                 if (IsPointOnTangent(vertexPositionWorld, tangentStart, tangentEnd))
                 {
                     verticesOnTangent.Add(new Vertex(vertexIndex, vertexPosition, chunk));
-                    Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 20, Color.magenta, 15);
+#if UNITY_EDITOR
+                    if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
+                        Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 20, Color.magenta, 15);
+#endif
                 }
             }
 

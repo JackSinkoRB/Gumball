@@ -30,7 +30,8 @@ namespace Gumball
         [Tooltip("An additional modifier to the elevation settings.")]
         public AnimationCurve ElevationModifier = AnimationCurve.Linear(0, 0, 1, 1);
         
-        public float Scale = 100;
+        public Vector2 Scale = new(150,150);
+        public Vector2 Offset = Vector2.zero;
 
         public bool IsFlat => ElevationAmount.Approximately(0);
 

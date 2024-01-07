@@ -134,9 +134,6 @@ namespace Gumball
             playerDrivetrain.powerRPM = powerRpm;
             playerDrivetrain.maxPower = (totalTorque * maxRpm) / 5252;
             playerDrivetrain.enableTurbo = isCurrentlyTurbo;
-            CarCustomisation customisation = playerDrivetrain.GetComponent<CarCustomisation>();
-            customisation.SetVehicleClass(playerDrivetrain.maxPower);
-            CarCustomisation.CalculateVehicleClass(playerDrivetrain.maxPower);
         }
 
         void SetPart(PartDetails[] details, int selected)

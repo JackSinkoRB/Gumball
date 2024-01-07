@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AYellowpaper.SerializedCollections;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
 using Object = UnityEngine.Object;
 #if UNITY_EDITOR
+using Gumball.Editor;
 using UnityEditor;
 #endif
 
@@ -14,39 +16,46 @@ namespace Gumball
 #if UNITY_EDITOR
     [RequireComponent(typeof(ChunkEditorTools))]
 #endif
-    [RequireComponent(typeof(UniqueIDAssigner))]
     public class Chunk : MonoBehaviour
     {
-        
-        [SerializeField] private SplineComputer splineComputer;
-        [SerializeField] private SplineMesh roadMesh;
-        
-        [Header("Modify")]
-        [PositiveValueOnly, SerializeField] private float terrainBlendDistance = 50;
 
+        public event Action onTerrainChanged;
+        
+        [Header("Required")]
+        [SerializeField] private SplineComputer splineComputer;
+        [SerializeField] private ChunkTrafficManager trafficManager;
+
+        [Header("Modify")]
+        [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, true, true)]
+        [SerializeField] private bool hasCustomLoadDistance;
+        [Tooltip("The distance that the player must be within for the chunk to be loaded.")]
+        [ConditionalField(nameof(hasCustomLoadDistance)), SerializeField] private float customLoadDistance = 3000;
+        
         [Header("Debugging")]
-        [ReadOnly, SerializeField] private Chunk chunkBefore;
-        [ReadOnly, SerializeField] private Chunk chunkAfter;
         [ReadOnly, SerializeField] private GameObject currentTerrain;
+        [Tooltip("A list of child spline meshes. These are automatically assigned when the chunk asset is saved.")]
+        [SerializeField, ReadOnly] private SplineMesh[] splineMeshes;
+        [ReadOnly, SerializeField] private ChunkMeshData chunkMeshData;
 
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
 
+        public ChunkMeshData ChunkMeshData => chunkMeshData;
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
-        public SplineMesh RoadMesh => roadMesh;
+        public SplineMesh[] SplinesMeshes => splineMeshes;
+        public SplineSample[] SplineSamples => splineSampleCollection.samples;
 
-        public Chunk ChunkBefore => chunkBefore;
-        public Chunk ChunkAfter => chunkAfter;
-        public bool HasChunkConnected => chunkBefore != null || chunkAfter != null;
-
-        public ChunkMeshData ChunkMeshData;
         public bool IsAutomaticTerrainRecreationDisabled { get; private set; }
         public SplineSample FirstSample { get; private set; }
         public SplineSample LastSample { get; private set; }
         public Vector3 FirstTangent { get; private set; }
         public Vector3 LastTangent { get; private set; }
-        public float TerrainBlendDistance => terrainBlendDistance;
 
+        public bool HasCustomLoadDistance => hasCustomLoadDistance;
+        public float CustomLoadDistance => customLoadDistance;
+
+        public ChunkTrafficManager TrafficManager => trafficManager;
+        
         public GameObject CurrentTerrain
         {
             get
@@ -58,12 +67,22 @@ namespace Gumball
             }
         }
         
-        private readonly SampleCollection splineSampleCollection = new();
+        [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
+
+        [SerializedDictionary("AssetKey", "Data")]
+        public SerializedDictionary<string, List<ChunkObjectData>> ChunkObjectData = new();
+
+        public void SetChunkObjectData(Dictionary<string, List<ChunkObjectData>> chunkObjectData)
+        {
+            ChunkObjectData = new SerializedDictionary<string, List<ChunkObjectData>>(chunkObjectData);
+            Debug.Log($"Setting {chunkObjectData.Keys.Count} chunk object data for {gameObject.name}");
+        }
 
         public void SetTerrain(GameObject terrain)
         {
             currentTerrain = terrain;
             UpdateChunkMeshData();
+            onTerrainChanged?.Invoke();
         }
         
         public void UpdateChunkMeshData()
@@ -71,11 +90,11 @@ namespace Gumball
             DisableAutomaticTerrainRecreation(true);
             if (CurrentTerrain == null)
             {
-                ChunkMeshData = null;
+                chunkMeshData = null;
                 return;
             }
 
-            ChunkMeshData = new ChunkMeshData(this);
+            chunkMeshData = new ChunkMeshData(this);
             DisableAutomaticTerrainRecreation(false);
         }
 
@@ -105,83 +124,6 @@ namespace Gumball
             LastTangent = LastSample.right.Flatten();
         }
 
-        public void OnConnectChunkBefore(Chunk chunk)
-        {
-            OnConnectChunk();
-            chunkBefore = chunk;
-        }
-        
-        public void OnConnectChunkAfter(Chunk chunk)
-        {
-            OnConnectChunk();
-            chunkAfter = chunk;
-        }
-
-        private void OnConnectChunk()
-        {
-            
-        }
-
-        private void OnDisconnectChunk()
-        {
-            if (!HasChunkConnected)
-                transform.rotation = Quaternion.Euler(Vector3.zero); //reset rotation
-        }
-
-        public void DisconnectAll(bool canUndo = false)
-        {
-#if UNITY_EDITOR
-            if (canUndo)
-            {
-                List<Object> objectsToRecord = new List<Object>();
-
-                objectsToRecord.Add(transform);
-                objectsToRecord.Add(CurrentTerrain.GetComponent<MeshFilter>());
-
-                if (chunkAfter != null)
-                {
-                    objectsToRecord.Add(chunkAfter);
-                    if (chunkAfter.chunkBefore != null)
-                        objectsToRecord.Add(chunkAfter.chunkBefore);
-                }
-
-                if (chunkBefore != null)
-                {
-                    objectsToRecord.Add(chunkBefore);
-                    if (chunkBefore.chunkAfter != null)
-                        objectsToRecord.Add(chunkBefore.chunkAfter);
-                }
-                
-                Undo.RecordObjects(objectsToRecord.ToArray(), "Disconnect Chunk");
-            }
-#endif
-            
-            OnDisconnectChunkAfter();
-            OnDisconnectChunkBefore();
-        }
-
-        public void OnDisconnectChunkBefore()
-        {
-            if (chunkBefore == null)
-                return;
-
-            Chunk previousChunk = chunkBefore;
-            chunkBefore = null;
-            previousChunk.OnDisconnectChunkAfter();
-            OnDisconnectChunk();
-        }
-
-        public void OnDisconnectChunkAfter()
-        {
-            if (chunkAfter == null)
-                return;
-            
-            Chunk previousChunk = chunkAfter;
-            chunkAfter = null;
-            previousChunk.OnDisconnectChunkBefore();
-            OnDisconnectChunk();
-        }
-
         public Vector3 GetCenterOfSpline()
         {
             float splineLength = splineComputer.CalculateLength();
@@ -189,24 +131,54 @@ namespace Gumball
             Vector3 middle = splineComputer.EvaluatePosition(travel);
             return middle;
         }
-
-        public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint, bool flattenTheSpline = false)
+        
+        public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint)
         {
-            float closestDistance = Mathf.Infinity;
+            UpdateSplineSampleData();
+            float closestDistanceSqr = Mathf.Infinity;
             SplineSample closestSample = default;
             foreach (SplineSample sample in splineSampleCollection.samples)
             {
-                float distance = flattenTheSpline
-                        ? Vector2.SqrMagnitude(fromPoint.FlattenAsVector2() - sample.position.FlattenAsVector2())
-                        : Vector3.SqrMagnitude(fromPoint - sample.position);
-                if (distance < closestDistance)
+                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
+                if (distance < closestDistanceSqr)
                 {
-                    closestDistance = distance;
+                    closestDistanceSqr = distance;
                     closestSample = sample;
                 }
             }
-            return (closestSample, Mathf.Sqrt(closestDistance));
+            return (closestSample, closestDistanceSqr);
         }
+        
+        public (int, float) GetClosestSampleIndexOnSpline(Vector3 fromPoint)
+        {
+            UpdateSplineSampleData();
+            float closestDistanceSqr = Mathf.Infinity;
+            int closestSampleIndex = -1;
+            for (int index = 0; index < splineSampleCollection.samples.Length; index++)
+            {
+                SplineSample sample = splineSampleCollection.samples[index];
+                
+                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
+                if (distance < closestDistanceSqr)
+                {
+                    closestDistanceSqr = distance;
+                    closestSampleIndex = index;
+                }
+            }
+
+            return (closestSampleIndex, closestDistanceSqr);
+        }
+        
+#if UNITY_EDITOR
+        /// <summary>
+        /// Iterates through children to find SplineMeshes, and caches the references.
+        /// </summary>
+        public void FindSplineMeshes()
+        {
+            splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            GlobalLoggers.ChunkLogger.Log($"Found {splineMeshes.Length} spline meshes under {gameObject.name}.");
+        }
+#endif
 
         private void TryFindExistingTerrain()
         {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEditor;
@@ -14,26 +15,40 @@ namespace Gumball
     {
 
         private const string defaultTerrainMaterialPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
-
-        [SerializeField] private bool matchRoadHeight = true;
-        [PositiveValueOnly, SerializeField, ConditionalField(nameof(matchRoadHeight), true)] private float terrainHeight;
-        [Space(5)]
-        [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
+        
         [PositiveValueOnly, SerializeField] private int resolution = 100;
+        [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 50;
+
+        [Header("Road")]
+        [Tooltip("Should the terrain match the road's height? Or should it be above (eg. a highway overpass)?")]
+        [SerializeField] private bool matchRoadHeight = true;
+        [SerializeField, ConditionalField(nameof(matchRoadHeight), true)] private float terrainHeightFromRoad;
+        [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
         [PositiveValueOnly, SerializeField] private float roadFlattenDistance = 15;
         [PositiveValueOnly, SerializeField] private float roadBlendDistance = 20;
-
+        [Tooltip("Let it sit under the road just enough so it doesn't clip.")]
+        [PositiveValueOnly, SerializeField] private float amountToSitUnderRoad = 0.2f;
+        
+        [Header("Height")]
+        [Tooltip("Should each side of the road have their own height data?")]
+        [SerializeField] private bool splitHeightData;
         [SerializeField] private TerrainHeightData heightData;
+        [ConditionalField(nameof(splitHeightData)), SerializeField] private TerrainHeightData heightDataOther;
+        [Space(5)]
+        [SerializeField] private TerrainTextureBlendSettings textureBlendSettings;
+
+        [SerializeField, HideInInspector] private Chunk chunk;
+        [SerializeField, HideInInspector] private MinMaxFloat perlinHeight;
 
         public float WidthAroundRoad => widthAroundRoad;
+        public float RoadFlattenDistance => roadFlattenDistance;
+        public bool MatchRoadHeight => matchRoadHeight;
         public int Resolution => resolution;
+        public float ChunkBlendDistance => chunkBlendDistance;
+        public TerrainTextureBlendSettings TextureBlendSettings => textureBlendSettings;
+        
         public ChunkGrid Grid { get; private set; }
-        
-        private Chunk chunk;
 
-        private float maxPerlinHeight;
-        private float minPerlinHeight;
-        
         public GameObject Create(Chunk chunkToUse, Material[] materialsToUse = null)
         {
             chunk = chunkToUse;
@@ -53,6 +68,7 @@ namespace Gumball
             terrain.transform.SetParent(chunk.transform);
             terrain.transform.position = Grid.GridCenter;
             terrain.tag = ChunkUtils.TerrainTag;
+            terrain.layer = (int) LayersAndTags.Layer.Terrain;
             
             //apply materials
             MeshRenderer meshRenderer = terrain.AddComponent<MeshRenderer>();
@@ -80,11 +96,17 @@ namespace Gumball
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
             
+            //set the vertex colours AFTER calculating normals
+            Color[] vertexColors = textureBlendSettings.GetVertexColors(chunk, verticesWithHeightData, terrain.transform, mesh);
+            mesh.SetColors(vertexColors);
+
             //save the mesh asset
-            string path = $"{ChunkUtils.TerrainMeshAssetFolderPath}/{ChunkUtils.TerrainMeshPrefix}{chunk.UniqueID}.asset";
+            string chunkDirectory = $"{ChunkUtils.ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
+            string path = $"{chunkDirectory}/{meshFilter.gameObject.name}.asset";
             if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                 AssetDatabase.DeleteAsset(path);
-            
+            if (!Directory.Exists(chunkDirectory))
+                Directory.CreateDirectory(chunkDirectory);
             AssetDatabase.CreateAsset(mesh, path);
             Mesh newMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
             
@@ -93,8 +115,9 @@ namespace Gumball
             EditorUtility.SetDirty(meshFilter);
             AssetDatabase.SaveAssets();
 
-            ChunkUtils.CleanupUnusedMeshes(chunk);
-
+            //add a collider
+            terrain.AddComponent<MeshCollider>().sharedMesh = newMesh;
+            
             return terrain;
         }
 
@@ -160,18 +183,19 @@ namespace Gumball
 
         private void CalculateMinMaxPerlinHeights()
         {
-            maxPerlinHeight = Mathf.NegativeInfinity;
-            minPerlinHeight = Mathf.Infinity;
+            perlinHeight.Max = Mathf.NegativeInfinity;
+            perlinHeight.Min = Mathf.Infinity;
             
-            foreach (Vector3 vertex in Grid.Vertices)
+            foreach (Vector3 vertexPosition in Grid.Vertices)
             {
-                float perlinHeight = GetPerlinHeightForVertex(vertex);
+                TerrainHeightData heightDataAtPos = GetHeightData(vertexPosition);
+                float actualPerlinHeight = GetPerlinHeightForVertex(vertexPosition, heightDataAtPos);
                 
                 //check if it is highest or lowest
-                if (perlinHeight > maxPerlinHeight)
-                    maxPerlinHeight = perlinHeight;
-                if (perlinHeight < minPerlinHeight)
-                    minPerlinHeight = perlinHeight;
+                if (actualPerlinHeight > perlinHeight.Max)
+                    perlinHeight.Max = actualPerlinHeight;
+                if (actualPerlinHeight < perlinHeight.Min)
+                    perlinHeight.Min = actualPerlinHeight;
             }
         }
         
@@ -182,56 +206,87 @@ namespace Gumball
             CalculateMinMaxPerlinHeights();
             
             List<Vector3> verticesWithHeightData = new List<Vector3>();
-
+            
+            ChunkObject[] chunkObjects = chunk.transform.GetComponentsInAllChildren<ChunkObject>().ToArray();
+            //ensure chunk object flattening colliders are on chunk object layer before raycasting
+            chunk.GetComponent<ChunkEditorTools>().EnsureChunkObjectsAreOnRaycastLayer();
+            
             for (int vertexIndex = 0; vertexIndex < Grid.Vertices.Count; vertexIndex++)
             {
                 Vector3 vertex = Grid.Vertices[vertexIndex];
-                float desiredHeight = GetDesiredHeightForVertex(vertexIndex);
+                float desiredHeight = GetDesiredHeightAtPosition(vertex, chunkObjects);
                 
                 verticesWithHeightData.Add(new Vector3(vertex.x, desiredHeight, vertex.z));
             }
 
             return verticesWithHeightData;
         }
-        
-        private float GetDesiredHeightForVertex(int vertexIndex)
-        {
-            Vector3 vertexPosition = Grid.Vertices[vertexIndex];
 
+        /// <summary>
+        /// Gets the specific height settings at the given position.
+        /// </summary>
+        private TerrainHeightData GetHeightData(Vector3 vertexPosition, SplineSample closestSplineSample)
+        {
+            if (!splitHeightData)
+                return heightData;
+
+            Vector3 rightTangent = closestSplineSample.right;
+            Vector3 leftTangent = -closestSplineSample.right;
+            
+            float distanceToRightTangent = (vertexPosition - closestSplineSample.position + rightTangent).sqrMagnitude;
+            float distanceToLeftTangent = (vertexPosition - closestSplineSample.position + leftTangent).sqrMagnitude;
+
+            return distanceToRightTangent < distanceToLeftTangent ? heightData : heightDataOther;
+        }
+
+        private TerrainHeightData GetHeightData(Vector3 vertexPosition)
+        {
+            if (!splitHeightData)
+                return heightData;
+            
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition);
+
+            return GetHeightData(vertexPosition, closestSample);
+        }
+
+        public float GetDesiredHeightAtPosition(Vector3 vertexPosition, ChunkObject[] chunkObjects)
+        {
             float desiredHeight = vertexPosition.y;
-            var (closestSample, distanceToSpline) = chunk.GetClosestSampleOnSpline(vertexPosition, true);
+            var (closestSample, distanceToSplineSqr) = chunk.GetClosestSampleOnSpline(vertexPosition);
 
             //check to flatten under road
-            bool canFlattenUnderRoad = distanceToSpline < roadFlattenDistance;
+            float roadFlattenDistanceSqr = roadFlattenDistance * roadFlattenDistance;
+            bool canFlattenUnderRoad = distanceToSplineSqr < roadFlattenDistanceSqr;
             if (canFlattenUnderRoad)
             {
-                const float amountToSitUnderRoad = 0.5f; //let it sit just under the road, so it doesn't clip
-                
                 if (matchRoadHeight)
                     return closestSample.position.y - amountToSitUnderRoad;
 
-                return terrainHeight - amountToSitUnderRoad;
+                return terrainHeightFromRoad - amountToSitUnderRoad;
             }
 
             //check to apply height data
-            if (!heightData.ElevationAmount.Approximately(0))
+            TerrainHeightData heightDataAtPos = GetHeightData(vertexPosition, closestSample);
+            if (!heightDataAtPos.ElevationAmount.Approximately(0))
             {
                 //use perlin:
-                desiredHeight = GetPerlinHeightForVertex(vertexPosition);
-                
+                desiredHeight = GetPerlinHeightForVertex(vertexPosition, heightDataAtPos);
+
                 //multiply by the modifier, depending on the height percent
-                float difference = desiredHeight < 0 ? minPerlinHeight : maxPerlinHeight;
+                float difference = desiredHeight < 0 ? perlinHeight.Min : perlinHeight.Max;
                 float heightPercent = desiredHeight / difference;
-                desiredHeight *= heightData.ElevationModifier.Evaluate(heightPercent);
+                desiredHeight *= heightDataAtPos.ElevationModifier.Evaluate(heightPercent);
             }
-            
+
             //check to blend with the road
-            bool canBlendWithRoad = roadBlendDistance > 0 && distanceToSpline < (roadFlattenDistance + roadBlendDistance);
+            float roadBlendDistanceSqr = roadBlendDistance * roadBlendDistance;
+            bool canBlendWithRoad = roadBlendDistance > 0 && distanceToSplineSqr < (roadFlattenDistanceSqr + roadBlendDistanceSqr);
             if (canBlendWithRoad)
             {
-                float blendPercent = Mathf.Clamp01((distanceToSpline - roadFlattenDistance) / roadBlendDistance);
-                float desiredHeightDifference = vertexPosition.y + desiredHeight;
-                desiredHeight = vertexPosition.y + (desiredHeightDifference * blendPercent);
+                float blendPercent = Mathf.Clamp01((distanceToSplineSqr - roadFlattenDistanceSqr) / roadBlendDistanceSqr);
+                float roadHeight = 0; //TODO - use vertex position at the road position instead
+                float blendOffsetDifference = (roadHeight - desiredHeight) * (1-blendPercent);
+                desiredHeight += blendOffsetDifference;
             }
 
             if (matchRoadHeight)
@@ -242,22 +297,29 @@ namespace Gumball
             }
             else
             {
-                desiredHeight += terrainHeight;
+                desiredHeight += terrainHeightFromRoad;
+            }
+            
+            //check to match chunk object colliders
+            float chunkObjectBlendHeight = GetHeightAtPositionWithChunkObjectBlending(vertexPosition.SetY(desiredHeight), chunkObjects);
+            if (!chunkObjectBlendHeight.Approximately(desiredHeight))
+            {
+                return chunkObjectBlendHeight;
             }
 
             return desiredHeight;
         }
 
-        private float GetPerlinHeightForVertex(Vector3 vertexPosition)
+        private float GetPerlinHeightForVertex(Vector3 vertexPosition, TerrainHeightData heightDataAtPos)
         {
             float noiseHeight = 0;
-            foreach (TerrainHeightData.Octave octave in heightData.GetOctaves())
+            foreach (TerrainHeightData.Octave octave in heightDataAtPos.GetOctaves())
             {
                 //use the vertex LOCAL position instead of global
                 Vector3 localVertexPosition = chunk.transform.InverseTransformPoint(vertexPosition);
                 
-                float perlinX = localVertexPosition.x / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().x;
-                float perlinY = localVertexPosition.z / heightData.Scale * octave.Frequency + heightData.GetRandomPerlinOffset().y;
+                float perlinX = localVertexPosition.x / heightDataAtPos.Scale.x * octave.Frequency + heightDataAtPos.GetRandomPerlinOffset().x + heightDataAtPos.Offset.x;
+                float perlinY = localVertexPosition.z / heightDataAtPos.Scale.y * octave.Frequency + heightDataAtPos.GetRandomPerlinOffset().y + heightDataAtPos.Offset.y;
                 
                 float perlinValue = Mathf.PerlinNoise(perlinX, perlinY);
                 
@@ -265,11 +327,78 @@ namespace Gumball
                 //if ElevationPercent = 1, it should = perlinValue (between 0 and 1)
                 //if ElevationPercent = -1, it should = -perlinValue (between 0 and -1)
                 //if ElevationPercent = 0, it should = perlinValue * 2 - 1 (between -1 and 1)
-                float elevationPerlinValue = (heightData.ElevationPercent * perlinValue) + (1 - Mathf.Abs(heightData.ElevationPercent)) * (perlinValue * 2 - 1);
+                float elevationPerlinValue = (heightDataAtPos.ElevationPercent * perlinValue) + (1 - Mathf.Abs(heightDataAtPos.ElevationPercent)) * (perlinValue * 2 - 1);
                 noiseHeight += elevationPerlinValue * octave.Amplitude;
             }
 
             return noiseHeight;
+        }
+        
+        /// <summary>
+        /// Find the chunk objects that affect the height at the desired position to calculate the average of their offsets and apply it to the current position.
+        /// </summary>
+        /// <returns>A new height value that takes the chunk object blending into account.</returns>
+        private float GetHeightAtPositionWithChunkObjectBlending(Vector3 currentPosition, ChunkObject[] chunkObjects)
+        {
+            if (chunkObjects.Length == 0)
+                return currentPosition.y; //no chunk objects to blend with
+            
+            Dictionary<ChunkObject, float> desiredOffsets = new();
+            float sumOfOffsets = 0;
+
+            //raycast upwards from vertex point (minus 10,000 to start at bottom) to see if it's overlapping
+            const int maxChunkObjectsPerPosition = 15;
+            RaycastHit[] hits = new RaycastHit[maxChunkObjectsPerPosition];
+            int numberOfHits = chunk.gameObject.scene.GetPhysicsScene().Raycast(currentPosition.OffsetY(10000), Vector3.down, hits, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkObject));
+            for (int count = 0; count < numberOfHits; count++)
+            {
+                RaycastHit hit = hits[count];
+                ChunkObject chunkObject = hit.transform.GetComponent<ChunkObject>();
+                
+                if (chunkObject == null || !chunkObject.CanFlattenTerrain)
+                    continue;
+                
+                //TODO: draw ray upward from the current position
+                
+                float offset = hit.point.y - currentPosition.y;
+                
+                desiredOffsets[chunkObject] = offset;
+                sumOfOffsets += offset;
+            }
+
+            //check to blend
+            foreach (ChunkObject chunkObject in chunkObjects)
+            {
+                if (desiredOffsets.ContainsKey(chunkObject) || !chunkObject.CanFlattenTerrain || chunkObject.FlattenTerrainBlendDistance <= 0)
+                    continue;
+                
+                float maxDistanceSqr = chunkObject.FlattenTerrainBlendDistance * chunkObject.FlattenTerrainBlendDistance;
+                //get distance from collider to currentPosition
+                var (closestPosition, distanceSqr) = chunkObject.ColliderToFlattenTo.ClosestVertex(currentPosition, true);
+                
+                bool isWithinBlendRadius = distanceSqr <= maxDistanceSqr;
+                if (!isWithinBlendRadius)
+                    continue;
+
+                float blendPercent = distanceSqr / maxDistanceSqr;
+                float blendPercentWithCurve = chunkObject.FlattenTerrainBlendCurve.Evaluate(blendPercent);
+                float blendModifier = Mathf.Clamp01(blendPercentWithCurve); //furthest away = 0 : 1
+                float offset = closestPosition.y - currentPosition.y;
+
+                float offsetWithBlending = offset * blendModifier;
+                
+                desiredOffsets[chunkObject] = offsetWithBlending;
+                sumOfOffsets += offsetWithBlending;
+            }
+
+            if (desiredOffsets.Count == 0)
+                return currentPosition.y; //hasn't changed
+            
+            //calculate the average offset
+            float offsetAverage = sumOfOffsets / desiredOffsets.Count;
+            float newHeight = currentPosition.y + offsetAverage;
+            
+            return newHeight;
         }
         
         private static Material GetDefaultMaterial()

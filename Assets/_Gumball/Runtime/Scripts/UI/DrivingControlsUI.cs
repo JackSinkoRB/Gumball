@@ -19,6 +19,9 @@ namespace Gumball
         {
             PlayerCarManager.Instance.onCurrentCarChanged += OnCarChanged;
             Drivetrain.onGearChanged += OnGearChanged;
+            SettingsManager.Instance.onGearboxSettingChanged += OnGearboxSettingChanged;
+
+            OnGearboxSettingChanged(SettingsManager.GearboxSetting);
         }
 
         private void OnDisable()
@@ -26,25 +29,30 @@ namespace Gumball
             if (PlayerCarManager.ExistsRuntime)
                 PlayerCarManager.Instance.onCurrentCarChanged -= OnCarChanged;
             Drivetrain.onGearChanged -= OnGearChanged;
+            SettingsManager.Instance.onGearboxSettingChanged -= OnGearboxSettingChanged;
         }
 
         private void OnCarChanged(CarManager newCar)
         {
-            bool isManual = !newCar.drivetrain.automatic;
-            
-            gearUpButton.gameObject.SetActive(isManual);
-            gearDownButton.gameObject.SetActive(isManual);
-            
-            if (isManual)
-                OnGearChanged(-1, newCar.drivetrain.Gear); //initialise the gear UI
+            OnGearChanged(-1, newCar.drivetrain.Gear); //initialise the gear UI
+        }
+
+        private void OnGearboxSettingChanged(int newValue)
+        {
+            bool isAutomatic = newValue == 0;
+            gearUpButton.gameObject.SetActive(!isAutomatic);
+            gearDownButton.gameObject.SetActive(!isAutomatic);
         }
         
         private void OnGearChanged(int previousgear, int newgear)
         {
             Drivetrain drivetrain = PlayerCarManager.Instance.CurrentCar.drivetrain;
             
-            gearDownButton.interactable = drivetrain.Gear > 1;
-            gearUpButton.interactable = drivetrain.Gear < drivetrain.gearRatios.Length - 1;
+            if (!drivetrain.automatic)
+            {
+                gearDownButton.interactable = drivetrain.Gear > 1;
+                gearUpButton.interactable = drivetrain.Gear < drivetrain.gearRatios.Length - 1;
+            }
         }
 
         public void OnPressAccelerateButton(bool isPressed)
