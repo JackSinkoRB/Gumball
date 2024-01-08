@@ -74,7 +74,7 @@ namespace Gumball
             liveDecals.Clear();
         }
         
-        public static void LoadDecalEditor()
+        public static void LoadEditor()
         {
             CoroutineHelper.Instance.StartCoroutine(LoadDecalEditorIE());
         }
