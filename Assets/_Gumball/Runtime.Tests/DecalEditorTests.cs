@@ -54,7 +54,7 @@ namespace Gumball.Runtime.Tests
         {
             CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(
                 Vector3.zero, 
-                Vector3.zero, 
+                Quaternion.Euler(Vector3.zero), 
                     () => isInitialised = true));
         }
         

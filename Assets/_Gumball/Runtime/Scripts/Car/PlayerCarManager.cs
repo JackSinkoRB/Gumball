@@ -17,12 +17,12 @@ namespace Gumball
 
         public CarManager CurrentCar { get; private set; }
 
-        public IEnumerator SpawnCar(Vector3 position, Vector3 rotation, Action onComplete = null)
+        public IEnumerator SpawnCar(Vector3 position, Quaternion rotation, Action onComplete = null)
         {
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(defaultCarData.assetReference);
             yield return handle;
 
-            CurrentCar = Instantiate(handle.Result, position, Quaternion.Euler(rotation), transform).GetComponent<CarManager>();
+            CurrentCar = Instantiate(handle.Result, position, rotation, transform).GetComponent<CarManager>();
             CurrentCar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
                 
             yield return CurrentCar.Customisation.ApplyVehicleChanges(defaultCarData);

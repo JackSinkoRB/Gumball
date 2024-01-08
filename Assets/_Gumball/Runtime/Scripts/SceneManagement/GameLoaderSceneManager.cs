@@ -31,6 +31,9 @@ namespace Gumball
 
         [SerializeField] private TextMeshProUGUI debugLabel;
 
+        [SerializeField] private Vector3 driverStartingPosition;
+        [SerializeField] private Vector3 driverStartingRotation;
+        
         private Stage currentStage;
         private AsyncOperationHandle[] singletonScriptableHandles;
         private AsyncOperationHandle<SceneInstance> mainSceneHandle;
@@ -73,7 +76,7 @@ namespace Gumball
 
             currentStage = Stage.Loading_vehicle;
             Vector3 carStartingPosition = Vector3.zero;
-            Vector3 carStartingRotation = Vector3.zero;
+            Quaternion carStartingRotation = Quaternion.Euler(Vector3.zero);
             carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(carStartingPosition, carStartingRotation));
             yield return carLoadCoroutine;
 #if ENABLE_LOGS
@@ -82,7 +85,7 @@ namespace Gumball
             stopwatch.Restart();
             
             currentStage = Stage.Loading_driver_avatar;
-            driverAvatarLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(AvatarManager.Instance.SpawnAvatar());
+            driverAvatarLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(AvatarManager.Instance.SpawnAvatar(driverStartingPosition, Quaternion.Euler(driverStartingRotation)));
             yield return driverAvatarLoadCoroutine;
 #if ENABLE_LOGS
             Debug.Log($"Driver avatar loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");

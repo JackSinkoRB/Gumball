@@ -26,7 +26,10 @@ namespace Gumball
             set => DataManager.Avatar.Set(currentBodyTypeKey, value);
         }
 
-        public IEnumerator Initialise()
+        /// <summary>
+        /// Spawns the avatar's body with applied cosmetics using the data from the save data.
+        /// </summary>
+        public IEnumerator SpawnBodyAndCosmetics()
         {
             DontDestroyOnLoad(gameObject);
             
@@ -34,12 +37,6 @@ namespace Gumball
             yield return currentBody.ApplyCosmeticsFromSaveData();
         }
         
-        public IEnumerator ChangeBodyType(AvatarBodyType bodyType)
-        {
-            savedBodyType = bodyType;
-            yield return Initialise();
-        }
-
         private IEnumerator SpawnBody()
         {
             AssetReferenceGameObject currentBodyReference = savedBodyType == AvatarBodyType.MALE ? maleBodyReference : femaleBodyReference;

@@ -18,15 +18,15 @@ namespace Gumball
 
         public Avatar CurrentAvatar => currentAvatar;
         
-        public IEnumerator SpawnAvatar()
+        public IEnumerator SpawnAvatar(Vector3 position, Quaternion rotation)
         {
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(avatarPrefab);
             yield return handle;
 
-            currentAvatar = Instantiate(handle.Result).GetComponent<Avatar>();
+            currentAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
             currentAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
 
-            yield return currentAvatar.Initialise();
+            yield return currentAvatar.SpawnBodyAndCosmetics();
         }
         
     }
