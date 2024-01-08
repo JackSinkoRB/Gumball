@@ -11,6 +11,7 @@ namespace Gumball
         //construct providers here:
         public static JsonDataProvider Settings { get; private set; } = new("Settings");
         public static JsonDataProvider Cars { get; private set; } = new("Cars");
+        public static JsonDataProvider Avatar { get; private set; } = new("Avatar");
 
         /// <summary>
         /// Enable or disable whether it reads from the test providers, or the real providers.
@@ -19,6 +20,7 @@ namespace Gumball
         {
             Settings = new JsonDataProvider(enableTestProviders ? "Settings_Tests" : "Settings");
             Cars = new JsonDataProvider(enableTestProviders ? "Cars_Tests" : "Cars");
+            Avatar = new JsonDataProvider(enableTestProviders ? "Avatar_Tests" : "Avatar");
         }
         
         /// <summary>
@@ -31,6 +33,7 @@ namespace Gumball
             //add any data providers here, and then finally wait for all to be complete
             Settings.LoadFromSourceAsync();
             Cars.LoadFromSourceAsync();
+            Avatar.LoadFromSourceAsync();
             yield return new WaitUntil(() => Settings.IsLoaded && Cars.IsLoaded);
             onComplete?.Invoke();
         }
@@ -43,12 +46,14 @@ namespace Gumball
             GlobalLoggers.SaveDataLogger.Log("Loading all providers from source (synchronously).");
             Settings.LoadFromSourceSync();
             Cars.LoadFromSourceSync();
+            Avatar.LoadFromSourceSync();
         }
 
         public static void RemoveAllData()
         {
             Settings.RemoveFromSource();
             Cars.RemoveFromSource();
+            Avatar.RemoveFromSource();
         }
         
     }

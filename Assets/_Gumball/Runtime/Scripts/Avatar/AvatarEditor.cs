@@ -12,10 +12,10 @@ namespace Gumball
 
         public static void LoadEditor()
         {
-            CoroutineHelper.Instance.StartCoroutine(LoadDecalEditorIE());
+            CoroutineHelper.Instance.StartCoroutine(LoadEditorIE());
         }
         
-        private static IEnumerator LoadDecalEditorIE()
+        private static IEnumerator LoadEditorIE()
         {
             PanelManager.GetPanel<LoadingPanel>().Show();
 
@@ -23,8 +23,7 @@ namespace Gumball
             yield return Addressables.LoadSceneAsync(SceneManager.AvatarEditorSceneName, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.AvatarEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
-
-            // Instance.cameraController.gameObject.SetActive(true);
+            
             Instance.StartSession();
             
             PanelManager.GetPanel<LoadingPanel>().Hide();

@@ -25,6 +25,7 @@ namespace Gumball
             Loading_save_data,
             Loading_mainscene,
             Loading_vehicle,
+            Loading_driver_avatar,
             Finishing_async_tasks,
         }
 
@@ -34,7 +35,7 @@ namespace Gumball
         private AsyncOperationHandle[] singletonScriptableHandles;
         private AsyncOperationHandle<SceneInstance> mainSceneHandle;
         private Coroutine carLoadCoroutine;
-        private Coroutine mapLoadCoroutine;
+        private Coroutine driverAvatarLoadCoroutine;
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
             
@@ -71,12 +72,20 @@ namespace Gumball
             stopwatch.Restart();
 
             currentStage = Stage.Loading_vehicle;
-            Vector3 startingPosition = Vector3.zero;
-            Vector3 startingRotation = Vector3.zero;
-            carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(startingPosition, startingRotation));
+            Vector3 carStartingPosition = Vector3.zero;
+            Vector3 carStartingRotation = Vector3.zero;
+            carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(carStartingPosition, carStartingRotation));
             yield return carLoadCoroutine;
 #if ENABLE_LOGS
             Debug.Log($"Vehicle loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+#endif
+            stopwatch.Restart();
+            
+            currentStage = Stage.Loading_driver_avatar;
+            driverAvatarLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(AvatarManager.Instance.SpawnAvatar());
+            yield return driverAvatarLoadCoroutine;
+#if ENABLE_LOGS
+            Debug.Log($"Driver avatar loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
             stopwatch.Restart();
 
@@ -107,7 +116,8 @@ namespace Gumball
                 //LOAD ALL SINGLETON SCRIPTABLES HERE
                 GlobalLoggers.LoadInstanceAsync(),
                 SettingsManager.LoadInstanceAsync(),
-                DecalManager.LoadInstanceAsync()
+                DecalManager.LoadInstanceAsync(),
+                AvatarManager.LoadInstanceAsync()
             };
             return handles;
         }
