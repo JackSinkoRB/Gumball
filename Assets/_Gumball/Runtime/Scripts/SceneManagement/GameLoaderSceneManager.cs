@@ -24,21 +24,17 @@ namespace Gumball
             Loading_scriptable_singletons,
             Loading_save_data,
             Loading_mainscene,
+            Waiting_for_save_data_to_load,
             Loading_vehicle,
             Loading_driver_avatar,
-            Finishing_async_tasks,
+            Loading_vehicle_and_drivers,
         }
 
         [SerializeField] private TextMeshProUGUI debugLabel;
 
-        [SerializeField] private Vector3 driverStartingPosition;
-        [SerializeField] private Vector3 driverStartingRotation;
-        
         private Stage currentStage;
         private AsyncOperationHandle[] singletonScriptableHandles;
         private AsyncOperationHandle<SceneInstance> mainSceneHandle;
-        private Coroutine carLoadCoroutine;
-        private Coroutine driverAvatarLoadCoroutine;
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
             
@@ -62,38 +58,38 @@ namespace Gumball
             currentStage = Stage.Checking_for_new_version;
             yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
             
-            stopwatch.Restart();
             currentStage = Stage.Loading_save_data;
             TrackedCoroutine loadSaveDataAsync = new TrackedCoroutine(DataManager.LoadAllAsync());
             
+            stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Additive, true);
             yield return mainSceneHandle;
 #if ENABLE_LOGS
             Debug.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
+            
             stopwatch.Restart();
-
+            currentStage = Stage.Waiting_for_save_data_to_load;
+            yield return new WaitUntil(() => !loadSaveDataAsync.IsPlaying);
+#if ENABLE_LOGS
+            Debug.Log($"Took additional {stopwatch.Elapsed.ToPrettyString(true)} to load the save data");
+#endif
+            
+            stopwatch.Restart();
             currentStage = Stage.Loading_vehicle;
             Vector3 carStartingPosition = Vector3.zero;
             Quaternion carStartingRotation = Quaternion.Euler(Vector3.zero);
-            carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(carStartingPosition, carStartingRotation));
-            yield return carLoadCoroutine;
-#if ENABLE_LOGS
-            Debug.Log($"Vehicle loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
-            stopwatch.Restart();
+            TrackedCoroutine carLoadCoroutine = new TrackedCoroutine(PlayerCarManager.Instance.SpawnCar(carStartingPosition, carStartingRotation));
             
             currentStage = Stage.Loading_driver_avatar;
-            driverAvatarLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(AvatarManager.Instance.SpawnDriver(driverStartingPosition, Quaternion.Euler(driverStartingRotation)));
-            yield return driverAvatarLoadCoroutine;
-#if ENABLE_LOGS
-            Debug.Log($"Driver avatar loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
-            stopwatch.Restart();
+            TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation));
 
-            currentStage = Stage.Finishing_async_tasks;
-            yield return new WaitUntil(() => !loadSaveDataAsync.IsPlaying);
+            currentStage = Stage.Loading_vehicle_and_drivers;
+            yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying);
+#if ENABLE_LOGS
+            Debug.Log($"Vehicle and driver loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+#endif
             
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS

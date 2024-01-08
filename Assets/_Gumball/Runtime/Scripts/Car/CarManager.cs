@@ -163,6 +163,13 @@ namespace Gumball
 
             SetGearboxFromSettings();
         }
+
+        public void Teleport(Vector3 position, Quaternion rotation)
+        {
+            Rigidbody.velocity = Vector3.zero;
+            Rigidbody.angularVelocity = Vector3.zero;
+            Rigidbody.Move(position, rotation);
+        }
         
         /// <summary>
         /// Gets the wheel's slip percentage, in comparison to another wheel.

@@ -38,6 +38,12 @@ namespace Gumball
         public string SaveKey => saveKey;
         public AvatarBody CurrentBody => currentBody;
 
+        public void Teleport(Vector3 position, Quaternion rotation)
+        {
+            transform.position = position;
+            transform.rotation = rotation;
+        }
+        
         /// <summary>
         /// Spawns the avatar's body with applied cosmetics using the data from the save data.
         /// </summary>

@@ -10,6 +10,7 @@ namespace Gumball
     public class AvatarEditor : Singleton<AvatarEditor>
     {
 
+        #region STATIC
         public static void LoadEditor()
         {
             CoroutineHelper.Instance.StartCoroutine(LoadEditorIE());
@@ -28,10 +29,16 @@ namespace Gumball
             
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
+        #endregion
+
+        [SerializeField] private Vector3 startingPosition;
+        [SerializeField] private Vector3 startingRotationEuler;
 
         public void StartSession()
         {
             PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(false);
+            
+            AvatarManager.Instance.DriverAvatar.Teleport(startingPosition, Quaternion.Euler(startingRotationEuler));
         }
 
         public void EndSession()
