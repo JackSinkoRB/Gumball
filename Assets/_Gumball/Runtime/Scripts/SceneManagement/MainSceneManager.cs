@@ -14,8 +14,14 @@ namespace Gumball
         [SerializeField] private Vector3 driverStandingPosition;
         [SerializeField] private Vector3 driverStandingRotationEuler;
 
+        [SerializeField] private Vector3 coDriverStandingPosition;
+        [SerializeField] private Vector3 coDriverStandingRotationEuler;
+        
         public Vector3 DriverStandingPosition => driverStandingPosition;
         public Quaternion DriverStandingRotation => Quaternion.Euler(driverStandingRotationEuler);
+        
+        public Vector3 CoDriverStandingPosition => coDriverStandingPosition;
+        public Quaternion CoDriverStandingRotation => Quaternion.Euler(coDriverStandingRotationEuler);
         
         private void Start()
         {
@@ -40,9 +46,10 @@ namespace Gumball
             //move the car to the origin to be framed by the camera
             PlayerCarManager.Instance.CurrentCar.Teleport(Vector3.zero, Quaternion.Euler(Vector3.zero));
             
-            //move the driver avatar
+            //move the avatars
             AvatarManager.Instance.DriverAvatar.Teleport(Instance.driverStandingPosition, Instance.DriverStandingRotation);
-            
+            AvatarManager.Instance.CoDriverAvatar.Teleport(Instance.coDriverStandingPosition, Instance.CoDriverStandingRotation);
+
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car, false);
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
 

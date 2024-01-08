@@ -8,7 +8,7 @@ namespace Gumball
     public abstract class AvatarCosmetic : MonoBehaviour
     {
         
-        [SerializeField] private int defaultIndex;
+        [SerializeField, InitializationField] private int defaultIndex;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected Avatar avatarBelongsTo;

@@ -17,9 +17,11 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Avatar driverAvatar;
+        [SerializeField, ReadOnly] private Avatar coDriverAvatar;
 
         public Avatar DriverAvatar => driverAvatar;
-        
+        public Avatar CoDriverAvatar => coDriverAvatar;
+
         public IEnumerator SpawnDriver(Vector3 position, Quaternion rotation)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -32,6 +34,21 @@ namespace Gumball
             yield return driverAvatar.SpawnBody();
 #if ENABLE_LOGS
             Debug.Log($"Driver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
+#endif
+        }
+        
+        public IEnumerator SpawnCoDriver(Vector3 position, Quaternion rotation)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(avatarPrefab);
+            yield return handle;
+
+            coDriverAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
+            coDriverAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+
+            yield return coDriverAvatar.SpawnBody();
+#if ENABLE_LOGS
+            Debug.Log($"CoDriver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
         }
         

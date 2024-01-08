@@ -26,7 +26,7 @@ namespace Gumball
             Loading_mainscene,
             Waiting_for_save_data_to_load,
             Loading_vehicle,
-            Loading_driver_avatar,
+            Loading_avatars,
             Loading_vehicle_and_drivers,
         }
 
@@ -82,9 +82,11 @@ namespace Gumball
             Quaternion carStartingRotation = Quaternion.Euler(Vector3.zero);
             TrackedCoroutine carLoadCoroutine = new TrackedCoroutine(PlayerCarManager.Instance.SpawnCar(carStartingPosition, carStartingRotation));
             
-            currentStage = Stage.Loading_driver_avatar;
+            currentStage = Stage.Loading_avatars;
             TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation));
+            TrackedCoroutine coDriverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnCoDriver(MainSceneManager.Instance.CoDriverStandingPosition, MainSceneManager.Instance.CoDriverStandingRotation));
 
+            
             currentStage = Stage.Loading_vehicle_and_drivers;
             yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying);
 #if ENABLE_LOGS

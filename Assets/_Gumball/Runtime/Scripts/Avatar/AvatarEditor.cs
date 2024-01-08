@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +11,9 @@ namespace Gumball
     public class AvatarEditor : Singleton<AvatarEditor>
     {
 
+        public static event Action onSessionStart;
+        public static event Action onSessionEnd;
+        
         #region STATIC
         public static void LoadEditor()
         {
@@ -33,12 +37,15 @@ namespace Gumball
 
         [SerializeField] private Vector3 startingPosition;
         [SerializeField] private Vector3 startingRotationEuler;
-
+        
+        public Avatar CurrentSelectedAvatar { get; private set; }
+        
         public void StartSession()
         {
             PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(false);
-            
-            AvatarManager.Instance.DriverAvatar.Teleport(startingPosition, Quaternion.Euler(startingRotationEuler));
+
+            CurrentSelectedAvatar = AvatarManager.Instance.DriverAvatar; //always start with driver selected
+            CurrentSelectedAvatar.Teleport(startingPosition, Quaternion.Euler(startingRotationEuler));
         }
 
         public void EndSession()
