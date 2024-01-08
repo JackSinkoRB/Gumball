@@ -85,7 +85,7 @@ namespace Gumball
             stopwatch.Restart();
             
             currentStage = Stage.Loading_driver_avatar;
-            driverAvatarLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(AvatarManager.Instance.SpawnAvatar(driverStartingPosition, Quaternion.Euler(driverStartingRotation)));
+            driverAvatarLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(AvatarManager.Instance.SpawnDriver(driverStartingPosition, Quaternion.Euler(driverStartingRotation)));
             yield return driverAvatarLoadCoroutine;
 #if ENABLE_LOGS
             Debug.Log($"Driver avatar loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");

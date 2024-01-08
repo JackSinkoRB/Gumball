@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using CC;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -10,15 +11,20 @@ namespace Gumball
     public class Avatar : MonoBehaviour
     {
 
+        /// <summary>
+        /// If the body type hasn't been saved, default to this body type.
+        /// </summary>
         private const AvatarBodyType defaultBodyType = AvatarBodyType.MALE;
-
-        private const string currentBodyTypeKey = "CurrentBodyType";
         
         [SerializeField] private AssetReferenceGameObject femaleBodyReference;
         [SerializeField] private AssetReferenceGameObject maleBodyReference;
 
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private AvatarBodyCosmetics currentBody;
+        [SerializeField, ReadOnly] private AvatarBody currentBody;
+        [Tooltip("A unique key for the save data relating to this avatar.")]
+        [SerializeField, ReadOnly] private string saveKey;
+        
+        private string currentBodyTypeKey => $"{saveKey}.CurrentBodyType";
         
         private AvatarBodyType savedBodyType
         {
@@ -27,25 +33,26 @@ namespace Gumball
         }
 
         /// <summary>
+        /// A unique key for the save data relating to this avatar.
+        /// </summary>
+        public string SaveKey => saveKey;
+        public AvatarBody CurrentBody => currentBody;
+
+        /// <summary>
         /// Spawns the avatar's body with applied cosmetics using the data from the save data.
         /// </summary>
-        public IEnumerator SpawnBodyAndCosmetics()
+        public IEnumerator SpawnBody()
         {
             DontDestroyOnLoad(gameObject);
             
-            yield return SpawnBody();
-            yield return currentBody.ApplyCosmeticsFromSaveData();
-        }
-        
-        private IEnumerator SpawnBody()
-        {
             AssetReferenceGameObject currentBodyReference = savedBodyType == AvatarBodyType.MALE ? maleBodyReference : femaleBodyReference;
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(currentBodyReference);
             yield return handle;
 
-            currentBody = Instantiate(handle.Result, transform).GetComponent<AvatarBodyCosmetics>();
+            currentBody = Instantiate(handle.Result, transform).GetComponent<AvatarBody>();
             currentBody.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            currentBody.Initialise(this);
         }
-
+        
     }
 }

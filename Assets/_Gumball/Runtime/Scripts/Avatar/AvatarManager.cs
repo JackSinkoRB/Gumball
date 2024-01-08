@@ -14,19 +14,19 @@ namespace Gumball
         [SerializeField] private AssetReferenceGameObject avatarPrefab;
         
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private Avatar currentAvatar;
+        [SerializeField, ReadOnly] private Avatar driverAvatar;
 
-        public Avatar CurrentAvatar => currentAvatar;
+        public Avatar DriverAvatar => driverAvatar;
         
-        public IEnumerator SpawnAvatar(Vector3 position, Quaternion rotation)
+        public IEnumerator SpawnDriver(Vector3 position, Quaternion rotation)
         {
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(avatarPrefab);
             yield return handle;
 
-            currentAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
-            currentAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            driverAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
+            driverAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
 
-            yield return currentAvatar.SpawnBodyAndCosmetics();
+            yield return driverAvatar.SpawnBody();
         }
         
     }
