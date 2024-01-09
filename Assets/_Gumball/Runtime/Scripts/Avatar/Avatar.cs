@@ -21,10 +21,8 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AvatarBody currentBody;
-        [Tooltip("A unique key for the save data relating to this avatar.")]
-        [SerializeField, ReadOnly] private string saveKey;
-        
-        private string currentBodyTypeKey => $"{saveKey}.CurrentBodyType";
+
+        private string currentBodyTypeKey => $"{SaveKey}.CurrentBodyType";
         
         private AvatarBodyType savedBodyType
         {
@@ -35,7 +33,7 @@ namespace Gumball
         /// <summary>
         /// A unique key for the save data relating to this avatar.
         /// </summary>
-        public string SaveKey => saveKey;
+        public string SaveKey => gameObject.name;
         public AvatarBody CurrentBody => currentBody;
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -58,6 +56,14 @@ namespace Gumball
             currentBody = Instantiate(handle.Result, transform).GetComponent<AvatarBody>();
             currentBody.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             currentBody.Initialise(this);
+        }
+
+        public void SaveCurrentBody()
+        {
+            foreach (AvatarCosmetic cosmetic in currentBody.Cosmetics)
+            {
+                cosmetic.SaveData();
+            }
         }
         
     }

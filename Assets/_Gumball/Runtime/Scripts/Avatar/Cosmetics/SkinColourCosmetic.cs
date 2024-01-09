@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MagneticScrollUtils;
 using MyBox;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ namespace Gumball
         private static readonly int SkinTintProperty = Shader.PropertyToID("_Skin_Tint");
         
         [SerializeField] private Color[] colors;
+        [SerializeField] private Sprite circleSprite;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Material[] materialsToEffectCached;
@@ -36,6 +38,17 @@ namespace Gumball
 
                 return materialsToEffectCached;
             }
+        }
+        
+        public override int GetMaxIndex() => colors.Length - 1;
+
+        public override void OnCreateScrollItem(ScrollItem scrollItem, int index)
+        {
+            scrollItem.onLoad += () =>
+            {
+                scrollItem.CurrentIcon.ImageComponent.sprite = circleSprite;
+                scrollItem.CurrentIcon.ImageComponent.color = colors[index];
+            };
         }
 
         protected override void OnApplyCosmetic(int index)

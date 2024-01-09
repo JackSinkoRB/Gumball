@@ -13,6 +13,11 @@ namespace Gumball
 
         public static event Action onSessionStart;
         public static event Action onSessionEnd;
+
+        /// <summary>
+        /// Called when switching between driver and co-driver.
+        /// </summary>
+        public static event Action<Avatar> onSelectedAvatarChanged; 
         
         #region STATIC
         public static void LoadEditor()
@@ -35,22 +40,58 @@ namespace Gumball
         }
         #endregion
 
-        [SerializeField] private Vector3 startingPosition;
-        [SerializeField] private Vector3 startingRotationEuler;
+        [SerializeField] private Vector3 driverStartingPosition;
+        [SerializeField] private Vector3 driverStartingRotationEuler;
+        
+        [SerializeField] private Vector3 coDriverStartingPosition;
+        [SerializeField] private Vector3 coDriverStartingRotationEuler;
         
         public Avatar CurrentSelectedAvatar { get; private set; }
         
         public void StartSession()
         {
+            DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
+
             PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(false);
 
-            CurrentSelectedAvatar = AvatarManager.Instance.DriverAvatar; //always start with driver selected
-            CurrentSelectedAvatar.Teleport(startingPosition, Quaternion.Euler(startingRotationEuler));
+            SelectAvatar(true); //always start with driver selected
+            
+            AvatarManager.Instance.DriverAvatar.Teleport(driverStartingPosition, Quaternion.Euler(driverStartingRotationEuler));
+            AvatarManager.Instance.CoDriverAvatar.Teleport(coDriverStartingPosition, Quaternion.Euler(coDriverStartingRotationEuler));
+            
+            onSessionStart?.Invoke();
         }
 
         public void EndSession()
         {
+            DataProvider.onBeforeSaveAllDataOnAppExit -= OnBeforeSaveAllDataOnAppExit;
+            
             PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(true);
+
+            SaveAvatars();
+
+            onSessionEnd?.Invoke();
+        }
+
+        public void SelectAvatar(bool driver)
+        {
+            CurrentSelectedAvatar = driver ? AvatarManager.Instance.DriverAvatar : AvatarManager.Instance.CoDriverAvatar;
+            onSelectedAvatarChanged?.Invoke(CurrentSelectedAvatar);
+            
+            //TODO: reset selected category/cosmetic
+            //TODO: camera select
+        }
+
+        private void OnBeforeSaveAllDataOnAppExit()
+        { 
+            SaveAvatars();
+        }
+        
+        private void SaveAvatars()
+        {
+            AvatarManager.Instance.DriverAvatar.SaveCurrentBody();
+            AvatarManager.Instance.CoDriverAvatar.SaveCurrentBody();
+            GlobalLoggers.SaveDataLogger.Log("Saved avatar data");
         }
         
     }

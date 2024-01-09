@@ -85,10 +85,9 @@ namespace Gumball
             currentStage = Stage.Loading_avatars;
             TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation));
             TrackedCoroutine coDriverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnCoDriver(MainSceneManager.Instance.CoDriverStandingPosition, MainSceneManager.Instance.CoDriverStandingRotation));
-
             
             currentStage = Stage.Loading_vehicle_and_drivers;
-            yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying);
+            yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying && !coDriverAvatarLoadCoroutine.IsPlaying);
 #if ENABLE_LOGS
             Debug.Log($"Vehicle and driver loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif

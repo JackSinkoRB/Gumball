@@ -30,7 +30,8 @@ namespace Gumball
 
             driverAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
             driverAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-
+            driverAvatar.gameObject.name = "DriverAvatar";
+            
             yield return driverAvatar.SpawnBody();
 #if ENABLE_LOGS
             Debug.Log($"Driver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
@@ -45,6 +46,7 @@ namespace Gumball
 
             coDriverAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
             coDriverAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            coDriverAvatar.gameObject.name = "CoDriverAvatar";
 
             yield return coDriverAvatar.SpawnBody();
 #if ENABLE_LOGS

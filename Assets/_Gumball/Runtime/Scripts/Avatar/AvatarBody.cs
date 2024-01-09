@@ -16,6 +16,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private Avatar avatarBelongsTo;
 
         public AvatarBodyType BodyType => bodyType;
+        public AvatarCosmetic[] Cosmetics => cosmetics;
         
         public void Initialise(Avatar avatar)
         {
