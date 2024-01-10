@@ -31,8 +31,12 @@ namespace Gumball
             driverAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
             driverAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             driverAvatar.gameObject.name = "DriverAvatar";
+            DontDestroyOnLoad(driverAvatar.gameObject);
+
+            yield return driverAvatar.SpawnBody(driverAvatar.SavedBodyType);
             
-            yield return driverAvatar.SpawnBody();
+            driverAvatar.ChangeBodyType(driverAvatar.SavedBodyType);
+            
 #if ENABLE_LOGS
             Debug.Log($"Driver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
@@ -47,8 +51,12 @@ namespace Gumball
             coDriverAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
             coDriverAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             coDriverAvatar.gameObject.name = "CoDriverAvatar";
-
-            yield return coDriverAvatar.SpawnBody();
+            DontDestroyOnLoad(coDriverAvatar.gameObject);
+            
+            yield return coDriverAvatar.SpawnBody(coDriverAvatar.SavedBodyType);
+            
+            coDriverAvatar.ChangeBodyType(coDriverAvatar.SavedBodyType);
+            
 #if ENABLE_LOGS
             Debug.Log($"CoDriver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif

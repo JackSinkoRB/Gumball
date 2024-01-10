@@ -11,21 +11,14 @@ namespace Gumball
 
         [SerializeField, InitializationField] private AvatarCosmeticCategory category;
         [SerializeField, InitializationField] private Sprite icon;
-        [SerializeField, InitializationField] private int defaultIndex;
+        [SerializeField, InitializationField] protected int defaultIndex;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected Avatar avatarBelongsTo;
         [SerializeField, ReadOnly] protected int currentIndex;
         
-        private string dataSaveKey => $"{avatarBelongsTo.SaveKey}.CosmeticsData.{avatarBelongsTo.CurrentBody.BodyType}.{gameObject.name}";
-        
-        private int savedIndex
-        {
-            get => DataManager.Avatar.Get(dataSaveKey, defaultIndex);
-            set => DataManager.Avatar.Set(dataSaveKey, value);
-        }
+        private string dataSaveKey => $"{avatarBelongsTo.SaveKey}.CosmeticsData.{avatarBelongsTo.CurrentBodyType.ToString()}.{gameObject.name}";
 
-        public string Name => gameObject.name;
         public AvatarCosmeticCategory Category => category;
         public Sprite Icon => icon;
         public int CurrentIndex => currentIndex;
@@ -33,9 +26,6 @@ namespace Gumball
         public void Initialise(Avatar avatar)
         {
             avatarBelongsTo = avatar;
-            
-            //load the saved data
-            Apply(savedIndex);
         }
 
         /// <summary>
@@ -43,13 +33,21 @@ namespace Gumball
         /// </summary>
         public void Apply(int index)
         {
+            if (currentIndex == index)
+                return; //already selected
+            
             currentIndex = index;
             OnApplyCosmetic(index);
         }
-        
-        public void SaveData()
+
+        public virtual int GetSavedIndex()
         {
-            savedIndex = currentIndex;
+            return DataManager.Avatar.Get(dataSaveKey, defaultIndex);
+        }
+        
+        public virtual void SaveIndex()
+        {
+            DataManager.Avatar.Set(dataSaveKey, currentIndex);
         }
 
         public abstract int GetMaxIndex();

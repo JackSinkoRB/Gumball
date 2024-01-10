@@ -11,15 +11,17 @@ namespace Gumball
     public class AvatarEditor : Singleton<AvatarEditor>
     {
 
+        #region STATIC
+        
         public static event Action onSessionStart;
         public static event Action onSessionEnd;
 
+        public delegate void OnSelectedAvatarChangedDelegate(Avatar oldAvatar, Avatar newAvatar);
         /// <summary>
         /// Called when switching between driver and co-driver.
         /// </summary>
-        public static event Action<Avatar> onSelectedAvatarChanged; 
+        public static event OnSelectedAvatarChangedDelegate onSelectedAvatarChanged; 
         
-        #region STATIC
         public static void LoadEditor()
         {
             CoroutineHelper.Instance.StartCoroutine(LoadEditorIE());
@@ -34,9 +36,20 @@ namespace Gumball
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.AvatarEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
-            Instance.StartSession();
+            yield return Instance.StartSession();
             
             PanelManager.GetPanel<LoadingPanel>().Hide();
+        }
+        
+        public static void SaveCurrentAvatarBody()
+        {
+            Avatar driver = AvatarManager.Instance.DriverAvatar;
+            driver.SaveBodyCosmetics(driver.CurrentBodyType == AvatarBodyType.MALE ? driver.CurrentMaleBody : driver.CurrentFemaleBody);
+
+            Avatar coDriver = AvatarManager.Instance.CoDriverAvatar;
+            coDriver.SaveBodyCosmetics(coDriver.CurrentBodyType == AvatarBodyType.MALE ? coDriver.CurrentMaleBody : coDriver.CurrentFemaleBody);
+            
+            GlobalLoggers.SaveDataLogger.Log("Saved avatar body data");
         }
         #endregion
 
@@ -48,7 +61,7 @@ namespace Gumball
         
         public Avatar CurrentSelectedAvatar { get; private set; }
         
-        public void StartSession()
+        public IEnumerator StartSession()
         {
             DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
 
@@ -58,6 +71,11 @@ namespace Gumball
             
             AvatarManager.Instance.DriverAvatar.Teleport(driverStartingPosition, Quaternion.Euler(driverStartingRotationEuler));
             AvatarManager.Instance.CoDriverAvatar.Teleport(coDriverStartingPosition, Quaternion.Euler(coDriverStartingRotationEuler));
+
+            //load all the body types for driver and co-driver so they can be switched instantly
+            TrackedCoroutine driverBodyLoading = new TrackedCoroutine(AvatarManager.Instance.DriverAvatar.EnsureAllBodiesExist());
+            TrackedCoroutine coDriverBodyLoading = new TrackedCoroutine(AvatarManager.Instance.CoDriverAvatar.EnsureAllBodiesExist());
+            yield return new WaitUntil(() => !driverBodyLoading.IsPlaying && !coDriverBodyLoading.IsPlaying);
             
             onSessionStart?.Invoke();
         }
@@ -68,15 +86,27 @@ namespace Gumball
             
             PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(true);
 
-            SaveAvatars();
+            SaveCurrentAvatarBody();
+
+            CurrentSelectedAvatar = null;
+            
+            //only keep the body type that we use
+            AvatarManager.Instance.DriverAvatar.DestroyAllBodyTypesExceptCurrent();
+            AvatarManager.Instance.CoDriverAvatar.DestroyAllBodyTypesExceptCurrent();
 
             onSessionEnd?.Invoke();
         }
 
         public void SelectAvatar(bool driver)
         {
-            CurrentSelectedAvatar = driver ? AvatarManager.Instance.DriverAvatar : AvatarManager.Instance.CoDriverAvatar;
-            onSelectedAvatarChanged?.Invoke(CurrentSelectedAvatar);
+            Avatar newAvatar = driver ? AvatarManager.Instance.DriverAvatar : AvatarManager.Instance.CoDriverAvatar;
+            
+            if (CurrentSelectedAvatar == newAvatar)
+                return; //already selected
+
+            Avatar oldAvatar = CurrentSelectedAvatar;
+            CurrentSelectedAvatar = newAvatar;
+            onSelectedAvatarChanged?.Invoke(oldAvatar, CurrentSelectedAvatar);
             
             //TODO: reset selected category/cosmetic
             //TODO: camera select
@@ -84,15 +114,8 @@ namespace Gumball
 
         private void OnBeforeSaveAllDataOnAppExit()
         { 
-            SaveAvatars();
+            SaveCurrentAvatarBody();
         }
-        
-        private void SaveAvatars()
-        {
-            AvatarManager.Instance.DriverAvatar.SaveCurrentBody();
-            AvatarManager.Instance.CoDriverAvatar.SaveCurrentBody();
-            GlobalLoggers.SaveDataLogger.Log("Saved avatar data");
-        }
-        
+
     }
 }

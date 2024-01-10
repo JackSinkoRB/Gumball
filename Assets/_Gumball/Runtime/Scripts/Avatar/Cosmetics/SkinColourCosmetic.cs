@@ -14,29 +14,21 @@ namespace Gumball
         
         [SerializeField] private Color[] colors;
         [SerializeField] private Sprite circleSprite;
-        
-        [Header("Debugging")]
-        [SerializeField, ReadOnly] private Material[] materialsToEffectCached;
 
-        private Material[] materialsToEffect
+        private HashSet<Material> materialsToEffect
         {
             get
             {
-                if (materialsToEffectCached == null || materialsToEffectCached.Length == 0)
+                HashSet<Material> materials = new HashSet<Material>();
+                foreach (SkinnedMeshRenderer mesh in avatarBelongsTo.CurrentBody.GetComponentsInChildren<SkinnedMeshRenderer>())
                 {
-                    List<Material> materials = new List<Material>();
-                    foreach (SkinnedMeshRenderer mesh in avatarBelongsTo.GetComponentsInChildren<SkinnedMeshRenderer>())
+                    foreach (Material material in mesh.materials)
                     {
-                        foreach (Material material in mesh.materials)
-                        {
-                            materials.Add(material);
-                        }
+                        materials.Add(material);
                     }
-
-                    materialsToEffectCached = materials.ToArray();
                 }
 
-                return materialsToEffectCached;
+                return materials;
             }
         }
         
@@ -48,6 +40,10 @@ namespace Gumball
             {
                 scrollItem.CurrentIcon.ImageComponent.sprite = circleSprite;
                 scrollItem.CurrentIcon.ImageComponent.color = colors[index];
+            };
+            scrollItem.onSelect += () =>
+            {
+                Apply(index);
             };
         }
 
@@ -68,7 +64,7 @@ namespace Gumball
                 newIndex = 0;
             
             Apply(newIndex);
-            SaveData();
+            SaveIndex();
         }
 #endif
 

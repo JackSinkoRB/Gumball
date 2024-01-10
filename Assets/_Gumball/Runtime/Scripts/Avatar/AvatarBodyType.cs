@@ -6,6 +6,7 @@ namespace Gumball
 {
     public enum AvatarBodyType
     {
+        NONE,
         FEMALE,
         MALE
     }

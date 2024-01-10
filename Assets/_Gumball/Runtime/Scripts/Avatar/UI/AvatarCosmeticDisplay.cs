@@ -20,16 +20,15 @@ namespace Gumball
                 for (int index = 0; index <= cosmetic.GetMaxIndex(); index++)
                 {
                     ScrollItem scrollItem = new ScrollItem();
-                    int finalIndex = index;
 
-                    cosmetic.OnCreateScrollItem(scrollItem, finalIndex);
-                    scrollItem.onSelect += () => cosmetic.Apply(finalIndex);
+                    cosmetic.OnCreateScrollItem(scrollItem, index);
 
                     scrollItems.Add(scrollItem);
                 }
             }
 
-            magneticScroll.SetItems(scrollItems, cosmetic.CurrentIndex);
+            int startIndex = cosmetic == null ? 0 : cosmetic.GetSavedIndex();
+            magneticScroll.SetItems(scrollItems, startIndex);
         }
         
     }
