@@ -27,6 +27,9 @@ namespace Gumball
 
         private void OnBodyTypeChanged(Avatar avatar, AvatarBodyType previousbodytype, AvatarBodyType newbodytype)
         {
+            if (!AvatarEditor.Instance.SessionInProgress)
+                return;
+            
             AvatarEditor.SaveCurrentAvatarBody();
             SelectCategory(AvatarCosmeticCategory.Character); //repopulate the magnetic scrolls as using different data for different body
         }

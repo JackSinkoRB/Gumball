@@ -37,9 +37,7 @@ namespace Gumball
             
             driverAvatar.ChangeBodyType(driverAvatar.SavedBodyType);
             
-#if ENABLE_LOGS
-            Debug.Log($"Driver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
+            GlobalLoggers.AvatarLogger.Log($"Driver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
         }
         
         public IEnumerator SpawnCoDriver(Vector3 position, Quaternion rotation)
@@ -57,9 +55,7 @@ namespace Gumball
             
             coDriverAvatar.ChangeBodyType(coDriverAvatar.SavedBodyType);
             
-#if ENABLE_LOGS
-            Debug.Log($"CoDriver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
+            GlobalLoggers.AvatarLogger.Log($"CoDriver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
         }
         
     }

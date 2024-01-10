@@ -44,10 +44,12 @@ namespace Gumball
         public static void SaveCurrentAvatarBody()
         {
             Avatar driver = AvatarManager.Instance.DriverAvatar;
-            driver.SaveBodyCosmetics(driver.CurrentBodyType == AvatarBodyType.MALE ? driver.CurrentMaleBody : driver.CurrentFemaleBody);
+            if (driver.CurrentBodyType != AvatarBodyType.NONE)
+                driver.SaveBodyCosmetics(driver.CurrentBodyType == AvatarBodyType.MALE ? driver.CurrentMaleBody : driver.CurrentFemaleBody);
 
             Avatar coDriver = AvatarManager.Instance.CoDriverAvatar;
-            coDriver.SaveBodyCosmetics(coDriver.CurrentBodyType == AvatarBodyType.MALE ? coDriver.CurrentMaleBody : coDriver.CurrentFemaleBody);
+            if (coDriver.CurrentBodyType != AvatarBodyType.NONE)
+                coDriver.SaveBodyCosmetics(coDriver.CurrentBodyType == AvatarBodyType.MALE ? coDriver.CurrentMaleBody : coDriver.CurrentFemaleBody);
             
             GlobalLoggers.SaveDataLogger.Log("Saved avatar body data");
         }
@@ -61,11 +63,16 @@ namespace Gumball
         
         public Avatar CurrentSelectedAvatar { get; private set; }
         
+        public bool SessionInProgress { get; private set; }
+        
         public IEnumerator StartSession()
         {
+            SessionInProgress = true;
+            
             DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
 
-            PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(false);
+            if (PlayerCarManager.ExistsRuntime && PlayerCarManager.Instance.CurrentCar != null)
+                PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(false);
 
             SelectAvatar(true); //always start with driver selected
             
@@ -95,6 +102,7 @@ namespace Gumball
             AvatarManager.Instance.CoDriverAvatar.DestroyAllBodyTypesExceptCurrent();
 
             onSessionEnd?.Invoke();
+            SessionInProgress = false;
         }
 
         public void SelectAvatar(bool driver)
