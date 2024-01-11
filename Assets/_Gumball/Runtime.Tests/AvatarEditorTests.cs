@@ -136,6 +136,9 @@ namespace Gumball.Runtime.Tests
             AvatarEditor.Instance.EndSession();
 
             Assert.AreEqual(bodyTypeCosmetic.Options[indexToUse].Type, avatarToCheck.CurrentBody.BodyType);
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, bodyTypeCosmetic.GetSavedIndex());
         }
         
         [UnityTest]
@@ -164,6 +167,9 @@ namespace Gumball.Runtime.Tests
             }
             
             Assert.IsTrue(allMaterialsHaveColour);
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, skinCosmetic.GetSavedIndex());
         }
         
         [UnityTest]
@@ -192,6 +198,9 @@ namespace Gumball.Runtime.Tests
             }
             
             Assert.IsTrue(allMaterialsHaveFreckles);
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, frecklesCosmetic.GetSavedIndex());
         }
         
         [UnityTest]
@@ -214,6 +223,9 @@ namespace Gumball.Runtime.Tests
             string nameOfItemInList = upperBodyCosmetic.Items[indexToUse].Prefab.editorAsset.name;
             string nameOfCurrentItem = upperBodyCosmetic.CurrentItem.name.Replace("(Clone)", "");
             Assert.IsTrue(nameOfItemInList.Equals(nameOfCurrentItem));
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, upperBodyCosmetic.GetSavedIndex());
         }
 
     }
