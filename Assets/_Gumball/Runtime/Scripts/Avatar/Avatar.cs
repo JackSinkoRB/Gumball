@@ -17,7 +17,7 @@ namespace Gumball
         /// <summary>
         /// If the body type hasn't been saved, default to this body type.
         /// </summary>
-        private const AvatarBodyType defaultBodyType = AvatarBodyType.MALE;
+        public const AvatarBodyType DefaultBodyType = AvatarBodyType.MALE;
         
         [SerializeField] private AssetReferenceGameObject femaleBodyReference;
         [SerializeField] private AssetReferenceGameObject maleBodyReference;
@@ -31,7 +31,7 @@ namespace Gumball
         
         public AvatarBodyType SavedBodyType
         {
-            get => DataManager.Avatar.Get(savedBodyTypeKey, defaultBodyType);
+            get => DataManager.Avatar.Get(savedBodyTypeKey, DefaultBodyType);
             set => DataManager.Avatar.Set(savedBodyTypeKey, value);
         }
         
@@ -49,7 +49,7 @@ namespace Gumball
             transform.position = position;
             transform.rotation = rotation;
         }
-        
+
         /// <summary>
         /// Spawns the avatar body with applied cosmetics.
         /// </summary>
@@ -124,6 +124,12 @@ namespace Gumball
             AvatarBody bodyToDestroy = currentBodyType == AvatarBodyType.MALE ? CurrentFemaleBody : CurrentMaleBody;
             if (bodyToDestroy == null)
                 return; //already destroyed
+
+            //set reference null immediately, as it won't be destroyed until end of frame
+            if (currentBodyType == AvatarBodyType.MALE)
+                CurrentFemaleBody = null;
+            if (currentBodyType == AvatarBodyType.FEMALE)
+                CurrentMaleBody = null;
             
             Destroy(bodyToDestroy.gameObject);
         }

@@ -91,7 +91,8 @@ namespace Gumball
         {
             DataProvider.onBeforeSaveAllDataOnAppExit -= OnBeforeSaveAllDataOnAppExit;
             
-            PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(true);
+            if (PlayerCarManager.ExistsRuntime && PlayerCarManager.Instance.CurrentCar != null)
+                PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(true);
 
             SaveCurrentAvatarBody();
 

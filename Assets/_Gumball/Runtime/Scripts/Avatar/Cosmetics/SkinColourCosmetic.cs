@@ -10,12 +10,14 @@ namespace Gumball
     public class SkinColourCosmetic : AvatarCosmetic
     {
 
-        private static readonly int SkinTintProperty = Shader.PropertyToID("_Skin_Tint");
+        public static readonly int SkinTintProperty = Shader.PropertyToID("_Skin_Tint");
         
         [SerializeField] private Color[] colors;
         [SerializeField] private Sprite circleSprite;
 
-        private HashSet<Material> materialsToEffect
+        public Color[] Colors => colors;
+
+        public HashSet<Material> MaterialsToEffect
         {
             get
             {
@@ -24,7 +26,8 @@ namespace Gumball
                 {
                     foreach (Material material in mesh.materials)
                     {
-                        materials.Add(material);
+                        if (material.HasProperty(SkinTintProperty))
+                            materials.Add(material);
                     }
                 }
 
@@ -49,7 +52,7 @@ namespace Gumball
 
         protected override void OnApplyCosmetic(int index)
         {
-            foreach (Material material in materialsToEffect)
+            foreach (Material material in MaterialsToEffect)
             {
                 material.SetColor(SkinTintProperty, colors[index].WithAlphaSetTo(1));
             }

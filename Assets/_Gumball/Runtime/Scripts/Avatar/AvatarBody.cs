@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,17 @@ namespace Gumball
             }
 
             GroupCosmeticsByCategory();
+        }
+        
+        public T GetCosmetic<T>() where T : AvatarCosmetic
+        {
+            foreach (AvatarCosmetic cosmetic in cosmetics)
+            {
+                if (cosmetic.GetType() == typeof(T))
+                    return (T) cosmetic;
+            }
+
+            throw new NullReferenceException($"There is no cosmetic of type {typeof(T)}");
         }
 
         public void LoadCosmetics()

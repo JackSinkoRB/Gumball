@@ -11,7 +11,7 @@ namespace Gumball
     {
         
         [Serializable]
-        private struct BodyTypeCosmeticIcon
+        public struct BodyTypeCosmeticIcon
         {
             [SerializeField] private AvatarBodyType type;
             [SerializeField] private Sprite icon;
@@ -23,6 +23,8 @@ namespace Gumball
         [SerializeField] private BodyTypeCosmeticIcon[] options;
 
         public override int GetMaxIndex() => options.Length - 1;
+
+        public BodyTypeCosmeticIcon[] Options => options;
 
         public override void OnCreateScrollItem(ScrollItem scrollItem, int index)
         {
