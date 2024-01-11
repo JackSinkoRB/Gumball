@@ -220,6 +220,7 @@ GameObject:
   - component: {fileID: 7283663679954047468}
   - component: {fileID: 4375827994888972354}
   - component: {fileID: 5938830651094421651}
+  - component: {fileID: 8226082543091190731}
   m_Layer: 5
   m_Name: Cosmetics
   m_TagString: Untagged
@@ -285,6 +286,19 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8226082543091190731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1435952708951132572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowMaskGraphic: 1
 --- !u!1 &1719391416418070357
 GameObject:
   m_ObjectHideFlags: 0
@@ -2352,9 +2366,7 @@ GameObject:
   - component: {fileID: 6839995775789357222}
   - component: {fileID: 6451693002001596193}
   - component: {fileID: 7684501183619067142}
-  - component: {fileID: 3175745812348794345}
-  - component: {fileID: 6754237253368143507}
-  - component: {fileID: 3423504221232191063}
+  - component: {fileID: 3319574426429479751}
   m_Layer: 0
   m_Name: Magnetic Scroll (HORIZONTAL)
   m_TagString: Untagged
@@ -2379,7 +2391,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0.010002136}
-  m_SizeDelta: {x: 400, y: 120}
+  m_SizeDelta: {x: 1140, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2285772477997022067
 CanvasRenderer:
@@ -2477,8 +2489,8 @@ MonoBehaviour:
     type: 3}
   preDefinedItems:
     Value: []
-  numberOfIcons: 5
-  spacingBetweenIcons: -50
+  numberOfIcons: 7
+  spacingBetweenIcons: 50
   clickableAreaPadding:
     m_Left: 0
     m_Right: 0
@@ -2495,10 +2507,7 @@ MonoBehaviour:
   onSelectIcon:
     m_PersistentCalls:
       m_Calls: []
-  effects:
-  - {fileID: 3175745812348794345}
-  - {fileID: 6754237253368143507}
-  - {fileID: 3423504221232191063}
+  effects: []
   useOutlineEffect: 0
   outlineEffectImage: {fileID: 0}
   outlineEffectMinScale: 0.5
@@ -2529,7 +2538,7 @@ MonoBehaviour:
   lastSelectedItemIndex: 0
   lastSelectedIconIndex: 0
   closestIconToMagnetIndex: -1
---- !u!114 &3175745812348794345
+--- !u!114 &3319574426429479751
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2538,151 +2547,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 7392070283946805923}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee854a1130706f14f8557b6d5362b615, type: 3}
+  m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visualOffsetEffectCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: -100
-      inSlope: 554.93884
-      outSlope: 554.93884
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.085001074
-    - serializedVersion: 3
-      time: 0.49999383
-      value: 0.00040725386
-      inSlope: 1.4999886
-      outSlope: 1.4999886
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 100
-      inSlope: 668.7628
-      outSlope: 668.7628
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.09999867
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
---- !u!114 &6754237253368143507
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7392070283946805923}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25eb75da4f3f4004686e87d6b5dcaeb2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scaleAxis: 0
-  scaleEffectCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0.4
-      inSlope: 1.2
-      outSlope: 1.2
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.5
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0.4
-      inSlope: -1.2
-      outSlope: -1.2
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
---- !u!114 &3423504221232191063
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7392070283946805923}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4759cf556ef27f8478b00b07dc25006b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  alphaCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 10.060997
-      outSlope: 10.060997
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.05
-      value: 0.50304985
-      inSlope: 2.294929
-      outSlope: 2.294929
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.120370366
-    - serializedVersion: 3
-      time: 0.5
-      value: 1
-      inSlope: -0.0033887625
-      outSlope: -0.0033887625
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.95
-      value: 0.5
-      inSlope: -2.3113198
-      outSlope: -2.3113198
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.11111114
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: -9.999998
-      outSlope: -9.999998
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  m_ShowMaskGraphic: 1
 --- !u!1 &8098087336028146396
 GameObject:
   m_ObjectHideFlags: 0
