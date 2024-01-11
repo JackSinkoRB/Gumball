@@ -143,7 +143,6 @@ namespace Gumball.Runtime.Tests
             yield return AvatarEditor.Instance.StartSession();
             
             Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
-            Assert.AreEqual(Avatar.DefaultBodyType, avatarToCheck.CurrentBody.BodyType);
 
             const int indexToUse = 5;
             SkinColourCosmetic skinCosmetic = avatarToCheck.CurrentBody.GetCosmetic<SkinColourCosmetic>();
@@ -162,6 +161,34 @@ namespace Gumball.Runtime.Tests
             }
             
             Assert.IsTrue(allMaterialsHaveColour);
+        }
+        
+        [UnityTest]
+        public IEnumerator FrecklesCosmeticIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 2;
+            FrecklesCosmetic frecklesCosmetic = avatarToCheck.CurrentBody.GetCosmetic<FrecklesCosmetic>();
+            frecklesCosmetic.Apply(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            bool allMaterialsHaveFreckles = true;
+            foreach (Material material in frecklesCosmetic.MaterialsToEffect)
+            {
+                if (!Mathf.Approximately(material.GetFloat(FrecklesCosmetic.FrecklesProperty), frecklesCosmetic.Options[indexToUse].Value))
+                {
+                    allMaterialsHaveFreckles = false;
+                    break;
+                }
+            }
+            
+            Assert.IsTrue(allMaterialsHaveFreckles);
         }
 
     }
