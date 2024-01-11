@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using AYellowpaper.SerializedCollections;
+using CC;
 using MyBox;
 using UnityEngine;
 
@@ -12,6 +12,7 @@ namespace Gumball
     {
         
         [SerializeField] private AvatarBodyType bodyType;
+        [SerializeField] private CharacterCustomization customiser;
         [SerializeField] private Transform cosmeticsHolder;
 
         [Header("Debugging")]
@@ -20,6 +21,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private Material[] attachedMaterialsCached;
         
         public AvatarBodyType BodyType => bodyType;
+        public CharacterCustomization Customiser => customiser;
         public AvatarCosmetic[] Cosmetics => cosmetics;
 
         public Dictionary<AvatarCosmeticCategory, List<AvatarCosmetic>> CosmeticsGrouped { get; } = new();

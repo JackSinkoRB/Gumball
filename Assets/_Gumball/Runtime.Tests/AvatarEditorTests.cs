@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Quaternion = UnityEngine.Quaternion;
@@ -189,6 +192,28 @@ namespace Gumball.Runtime.Tests
             }
             
             Assert.IsTrue(allMaterialsHaveFreckles);
+        }
+        
+        [UnityTest]
+        public IEnumerator UpperBodyCosmeticIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 2;
+            UpperBodyCosmetic upperBodyCosmetic = avatarToCheck.CurrentBody.GetCosmetic<UpperBodyCosmetic>();
+            upperBodyCosmetic.Apply(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            Assert.IsNotNull(upperBodyCosmetic.CurrentItem);
+            
+            string nameOfItemInList = upperBodyCosmetic.Items[indexToUse].Prefab.editorAsset.name;
+            string nameOfCurrentItem = upperBodyCosmetic.CurrentItem.name.Replace("(Clone)", "");
+            Assert.IsTrue(nameOfItemInList.Equals(nameOfCurrentItem));
         }
 
     }

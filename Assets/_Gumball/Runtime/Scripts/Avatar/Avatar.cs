@@ -43,7 +43,7 @@ namespace Gumball
 
         public AvatarBody CurrentMaleBody { get; private set; }
         public AvatarBody CurrentFemaleBody { get; private set; }
-
+        
         public void Teleport(Vector3 position, Quaternion rotation)
         {
             transform.position = position;

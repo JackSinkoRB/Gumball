@@ -29,6 +29,11 @@ namespace Gumball
             AvatarEditor.Instance.SelectAvatar(false);
         }
 
+        public void OnClickCharacterCategory()
+        {
+            cosmeticSelector.SelectCategory(AvatarCosmeticCategory.Character);
+        }
+        
         public void OnClickApparelCategory()
         {
             cosmeticSelector.SelectCategory(AvatarCosmeticCategory.Apparel);

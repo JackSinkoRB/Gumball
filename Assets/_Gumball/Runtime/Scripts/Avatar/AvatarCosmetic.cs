@@ -13,9 +13,8 @@ namespace Gumball
         [SerializeField, InitializationField] private Sprite icon;
         [SerializeField, InitializationField] protected int defaultIndex;
         
-        [Header("Debugging")]
-        [SerializeField, ReadOnly] protected Avatar avatarBelongsTo;
-        [SerializeField, ReadOnly] protected int currentIndex;
+        [Foldout("Debugging"), SerializeField, ReadOnly] protected Avatar avatarBelongsTo;
+        [Foldout("Debugging"), SerializeField, ReadOnly] protected int currentIndex = -1;
         
         private string dataSaveKey => $"{avatarBelongsTo.SaveKey}.CosmeticsData.{avatarBelongsTo.CurrentBodyType.ToString()}.{gameObject.name}";
 
@@ -23,7 +22,7 @@ namespace Gumball
         public Sprite Icon => icon;
         public int CurrentIndex => currentIndex;
         
-        public void Initialise(Avatar avatar)
+        public virtual void Initialise(Avatar avatar)
         {
             avatarBelongsTo = avatar;
         }
