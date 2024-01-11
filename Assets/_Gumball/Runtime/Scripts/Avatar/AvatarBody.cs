@@ -17,12 +17,34 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Avatar avatarBelongsTo;
         [SerializeField, ReadOnly] private AvatarCosmetic[] cosmetics;
+        [SerializeField, ReadOnly] private Material[] attachedMaterialsCached;
         
         public AvatarBodyType BodyType => bodyType;
         public AvatarCosmetic[] Cosmetics => cosmetics;
 
         public Dictionary<AvatarCosmeticCategory, List<AvatarCosmetic>> CosmeticsGrouped { get; } = new();
 
+        public Material[] AttachedMaterials
+        {
+            get
+            {
+                if (attachedMaterialsCached == null || attachedMaterialsCached.Length == 0)
+                {
+                    HashSet<Material> attachedMaterials = new();
+                    foreach (SkinnedMeshRenderer mesh in GetComponentsInChildren<SkinnedMeshRenderer>())
+                    {
+                        foreach (Material material in mesh.materials)
+                        {
+                            attachedMaterials.Add(material);
+                        }
+                    }
+
+                    attachedMaterialsCached = attachedMaterials.ToArray();
+                }
+
+                return attachedMaterialsCached;
+            }
+        }
         public void Initialise(Avatar avatar)
         {
             avatarBelongsTo = avatar;

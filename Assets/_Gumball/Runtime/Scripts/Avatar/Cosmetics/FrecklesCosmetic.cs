@@ -30,13 +30,10 @@ namespace Gumball
             get
             {
                 HashSet<Material> materials = new HashSet<Material>();
-                foreach (SkinnedMeshRenderer mesh in avatarBelongsTo.CurrentBody.GetComponentsInChildren<SkinnedMeshRenderer>())
+                foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
                 {
-                    foreach (Material material in mesh.materials)
-                    {
-                        if (material.HasProperty(FrecklesProperty))
-                            materials.Add(material);
-                    }
+                    if (material.HasProperty(FrecklesProperty))
+                        materials.Add(material);
                 }
 
                 return materials;
