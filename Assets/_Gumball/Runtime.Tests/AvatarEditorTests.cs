@@ -128,17 +128,21 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(Avatar.DefaultBodyType, avatarToCheck.CurrentBody.BodyType);
 
             const int indexToUse = 1;
-            BodyTypeCosmetic bodyTypeCosmetic = avatarToCheck.CurrentBody.GetCosmetic<BodyTypeCosmetic>();
-            bodyTypeCosmetic.Apply(indexToUse);
+            BodyTypeCosmetic bodyTypeCosmeticBefore = avatarToCheck.CurrentBody.GetCosmetic<BodyTypeCosmetic>();
+            bodyTypeCosmeticBefore.Apply(indexToUse);
 
-            Assert.AreEqual(bodyTypeCosmetic.Options[indexToUse].Type, avatarToCheck.CurrentBody.BodyType);
+            Assert.AreEqual(bodyTypeCosmeticBefore.Options[indexToUse].Type, avatarToCheck.CurrentBody.BodyType);
 
             AvatarEditor.Instance.EndSession();
 
-            Assert.AreEqual(bodyTypeCosmetic.Options[indexToUse].Type, avatarToCheck.CurrentBody.BodyType);
+            BodyTypeCosmetic bodyTypeCosmeticAfter = avatarToCheck.CurrentBody.GetCosmetic<BodyTypeCosmetic>();
+            Assert.AreEqual(bodyTypeCosmeticAfter.Options[indexToUse].Type, avatarToCheck.CurrentBody.BodyType);
             
             //ensure it is saved in persistent data
-            Assert.AreEqual(indexToUse, bodyTypeCosmetic.GetSavedIndex());
+            Assert.AreEqual(indexToUse, bodyTypeCosmeticAfter.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, bodyTypeCosmeticAfter.CurrentIndex);
         }
         
         [UnityTest]
