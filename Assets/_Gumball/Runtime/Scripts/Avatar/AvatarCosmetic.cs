@@ -53,7 +53,7 @@ namespace Gumball
             OnApplyCosmetic(index);
             
             if (IsColorable)
-                ApplyColor(currentColorIndex == -1 ? GetSavedColourIndex() : currentColorIndex);
+                ApplyColor(currentColorIndex == -1 ? GetSavedColourIndex() : currentColorIndex, true);
         }
 
         public virtual int GetSavedIndex()
@@ -81,9 +81,9 @@ namespace Gumball
 
         public abstract void OnCreateScrollItem(ScrollItem scrollItem, int index);
         
-        public void ApplyColor(int index)
+        public void ApplyColor(int index, bool force = false)
         {
-            if (currentColorIndex == index)
+            if (currentColorIndex == index && !force)
                 return; //already selected
             
             currentColorIndex = index;
