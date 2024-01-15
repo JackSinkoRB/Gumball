@@ -67,6 +67,37 @@ namespace Gumball
                 Apply(index);
             };
         }
+        
+        public override HashSet<Material> GetMaterialsWithColorProperty()
+        {
+            HashSet<Material> materials = base.GetMaterialsWithColorProperty();
+
+            if (currentItem == null)
+                return materials;
+            
+            //also add any materials on the current item
+            
+            foreach (Transform child in currentItem.transform.GetComponentsInAllChildren<Transform>())
+            {
+                SkinnedMeshRenderer meshRenderer = child.GetComponent<SkinnedMeshRenderer>();
+                if (meshRenderer == null)
+                    continue;
+                
+                foreach (Material material in meshRenderer.materials)
+                {
+                    foreach (string property in colorMaterialProperties)
+                    {
+                        if (material.HasProperty(property))
+                        {
+                            materials.Add(material);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return materials;
+        }
 
         protected override void OnApplyCosmetic(int index)
         {

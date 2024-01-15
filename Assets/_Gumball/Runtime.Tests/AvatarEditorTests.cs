@@ -271,7 +271,7 @@ namespace Gumball.Runtime.Tests
         }
 
         [UnityTest]
-        public IEnumerator ColorIsPersistent()
+        public IEnumerator HairColorIsPersistent()
         {
             yield return new WaitUntil(() => isInitialised);
 
@@ -280,7 +280,6 @@ namespace Gumball.Runtime.Tests
             Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
 
             const int indexToUse = 5;
-            //just use the hair cosmetic for testing
             HairCosmetic hairCosmetic = avatarToCheck.CurrentBody.GetCosmetic<HairCosmetic>();
             hairCosmetic.ApplyColor(indexToUse);
             
@@ -306,6 +305,44 @@ namespace Gumball.Runtime.Tests
             
             //ensure it is current
             Assert.AreEqual(indexToUse, hairCosmetic.CurrentColorIndex);
+        }
+        
+        [UnityTest]
+        public IEnumerator ApparelColorIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 5;
+            //just use the upper body cosmetic for testing
+            UpperBodyCosmetic upperBodyCosmetic = avatarToCheck.CurrentBody.GetCosmetic<UpperBodyCosmetic>();
+            upperBodyCosmetic.ApplyColor(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            bool allMaterialsHaveColour = true;
+            foreach (Material material in upperBodyCosmetic.GetMaterialsWithColorProperty())
+            {
+                foreach (string property in upperBodyCosmetic.ColorMaterialProperties)
+                {
+                    if (material.GetColor(property) != upperBodyCosmetic.Colors[indexToUse])
+                    {
+                        allMaterialsHaveColour = false;
+                        break;
+                    }
+                }
+            }
+            
+            Assert.IsTrue(allMaterialsHaveColour);
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, upperBodyCosmetic.GetSavedColourIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, upperBodyCosmetic.CurrentColorIndex);
         }
 
     }
