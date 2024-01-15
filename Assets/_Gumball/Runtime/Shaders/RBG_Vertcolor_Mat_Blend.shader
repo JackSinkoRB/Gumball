@@ -4,11 +4,11 @@ Shader "RBG/Terrain_02"
 {
 	Properties
 	{
-		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
-		_red_UV4_Trim("red_UV4_Trim", 2D) = "white" {}
-		_Green_UV3_Tile("Green_UV3_Tile", 2D) = "white" {}
-		_Blue_UV3_Tile("Blue_UV3_Tile", 2D) = "white" {}
+		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
+		_red_UV3_Trim("red_UV3_Trim", 2D) = "white" {}
+		_Green_UV2_Tile("Green_UV2_Tile", 2D) = "white" {}
+		_Blue_UV2_Tile("Blue_UV2_Tile", 2D) = "white" {}
 		_RedNormal("RedNormal", 2D) = "bump" {}
 		_GreenNormal("GreenNormal", 2D) = "bump" {}
 		_NormalBlue("NormalBlue", 2D) = "bump" {}
@@ -16,7 +16,11 @@ Shader "RBG/Terrain_02"
 		_ExtraGlossinesValue("ExtraGlossinesValue", Range( 0 , 1)) = 0
 		_OverallColor("OverallColor", Color) = (0,0,0,0)
 		_NoiseEffectGrain("NoiseEffectGrain", 2D) = "white" {}
+		_Skids_UV0("Skids_UV0", 2D) = "white" {}
 		_Normal_Strength("Normal_Strength", Range( 0 , 3)) = 1
+		_Skids_Str("Skids_Str", Range( 0 , 2)) = 2
+		[HideInInspector] _texcoord3( "", 2D ) = "white" {}
+		[HideInInspector] _texcoord4( "", 2D ) = "white" {}
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -267,6 +271,7 @@ Shader "RBG/Terrain_02"
 				float4 texcoord : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
@@ -288,19 +293,22 @@ Shader "RBG/Terrain_02"
 				#endif
 				float4 ase_texcoord8 : TEXCOORD8;
 				float4 ase_color : COLOR;
+				float4 ase_texcoord9 : TEXCOORD9;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float4 _red_UV4_Trim_ST;
-			float4 _Green_UV3_Tile_ST;
-			float4 _Blue_UV3_Tile_ST;
+			float4 _Skids_UV0_ST;
+			float4 _red_UV3_Trim_ST;
+			float4 _Green_UV2_Tile_ST;
+			float4 _Blue_UV2_Tile_ST;
 			float4 _OverallColor;
 			float4 _RedNormal_ST;
 			float4 _GreenNormal_ST;
 			float4 _NormalBlue_ST;
 			float4 _NoiseEffectGrain_ST;
+			float _Skids_Str;
 			float _Normal_Strength;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
@@ -334,9 +342,10 @@ Shader "RBG/Terrain_02"
 				int _PassValue;
 			#endif
 
-			sampler2D _red_UV4_Trim;
-			sampler2D _Green_UV3_Tile;
-			sampler2D _Blue_UV3_Tile;
+			sampler2D _Skids_UV0;
+			sampler2D _red_UV3_Trim;
+			sampler2D _Green_UV2_Tile;
+			sampler2D _Blue_UV2_Tile;
 			sampler2D _RedNormal;
 			sampler2D _GreenNormal;
 			sampler2D _NormalBlue;
@@ -352,10 +361,12 @@ Shader "RBG/Terrain_02"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 				o.ase_texcoord8.xy = v.texcoord.xy;
+				o.ase_texcoord8.zw = v.ase_texcoord3.xy;
 				o.ase_color = v.ase_color;
+				o.ase_texcoord9.xy = v.texcoord2.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord8.zw = 0;
+				o.ase_texcoord9.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
@@ -430,6 +441,7 @@ Shader "RBG/Terrain_02"
 				float4 texcoord : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -452,6 +464,8 @@ Shader "RBG/Terrain_02"
 				o.texcoord = v.texcoord;
 				o.texcoord1 = v.texcoord1;
 				o.texcoord2 = v.texcoord2;
+				o.texcoord = v.texcoord;
+				o.ase_texcoord3 = v.ase_texcoord3;
 				o.ase_color = v.ase_color;
 				return o;
 			}
@@ -495,6 +509,8 @@ Shader "RBG/Terrain_02"
 				o.texcoord = patch[0].texcoord * bary.x + patch[1].texcoord * bary.y + patch[2].texcoord * bary.z;
 				o.texcoord1 = patch[0].texcoord1 * bary.x + patch[1].texcoord1 * bary.y + patch[2].texcoord1 * bary.z;
 				o.texcoord2 = patch[0].texcoord2 * bary.x + patch[1].texcoord2 * bary.y + patch[2].texcoord2 * bary.z;
+				o.texcoord = patch[0].texcoord * bary.x + patch[1].texcoord * bary.y + patch[2].texcoord * bary.z;
+				o.ase_texcoord3 = patch[0].ase_texcoord3 * bary.x + patch[1].ase_texcoord3 * bary.y + patch[2].ase_texcoord3 * bary.z;
 				o.ase_color = patch[0].ase_color * bary.x + patch[1].ase_color * bary.y + patch[2].ase_color * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
@@ -557,22 +573,25 @@ Shader "RBG/Terrain_02"
 
 				WorldViewDirection = SafeNormalize( WorldViewDirection );
 
-				float2 uv_red_UV4_Trim = IN.ase_texcoord8.xy * _red_UV4_Trim_ST.xy + _red_UV4_Trim_ST.zw;
-				float4 tex2DNode2 = tex2D( _red_UV4_Trim, uv_red_UV4_Trim );
-				float2 uv_Green_UV3_Tile = IN.ase_texcoord8.xy * _Green_UV3_Tile_ST.xy + _Green_UV3_Tile_ST.zw;
-				float4 tex2DNode7 = tex2D( _Green_UV3_Tile, uv_Green_UV3_Tile );
-				float2 uv_Blue_UV3_Tile = IN.ase_texcoord8.xy * _Blue_UV3_Tile_ST.xy + _Blue_UV3_Tile_ST.zw;
-				float4 tex2DNode10 = tex2D( _Blue_UV3_Tile, uv_Blue_UV3_Tile );
+				float2 uv_Skids_UV0 = IN.ase_texcoord8.xy * _Skids_UV0_ST.xy + _Skids_UV0_ST.zw;
+				float4 temp_cast_0 = (tex2D( _Skids_UV0, uv_Skids_UV0 ).r).xxxx;
+				float2 uv3_red_UV3_Trim = IN.ase_texcoord8.zw * _red_UV3_Trim_ST.xy + _red_UV3_Trim_ST.zw;
+				float4 tex2DNode2 = tex2D( _red_UV3_Trim, uv3_red_UV3_Trim );
+				float2 uv2_Green_UV2_Tile = IN.ase_texcoord9.xy * _Green_UV2_Tile_ST.xy + _Green_UV2_Tile_ST.zw;
+				float4 tex2DNode7 = tex2D( _Green_UV2_Tile, uv2_Green_UV2_Tile );
+				float2 uv2_Blue_UV2_Tile = IN.ase_texcoord9.xy * _Blue_UV2_Tile_ST.xy + _Blue_UV2_Tile_ST.zw;
+				float4 tex2DNode10 = tex2D( _Blue_UV2_Tile, uv2_Blue_UV2_Tile );
+				float4 lerpResult122 = lerp( temp_cast_0 , ( ( ( tex2DNode2 * IN.ase_color.r ) + ( tex2DNode7 * IN.ase_color.g ) + ( tex2DNode10 * IN.ase_color.b ) ) * _OverallColor ) , _Skids_Str);
 				
-				float2 uv_RedNormal = IN.ase_texcoord8.xy * _RedNormal_ST.xy + _RedNormal_ST.zw;
-				float3 unpack16 = UnpackNormalScale( tex2D( _RedNormal, uv_RedNormal ), _Normal_Strength );
+				float2 uv3_RedNormal = IN.ase_texcoord8.zw * _RedNormal_ST.xy + _RedNormal_ST.zw;
+				float3 unpack16 = UnpackNormalScale( tex2D( _RedNormal, uv3_RedNormal ), _Normal_Strength );
 				unpack16.z = lerp( 1, unpack16.z, saturate(_Normal_Strength) );
-				float2 uv_GreenNormal = IN.ase_texcoord8.xy * _GreenNormal_ST.xy + _GreenNormal_ST.zw;
-				float3 unpack87 = UnpackNormalScale( tex2D( _GreenNormal, uv_GreenNormal ), _Normal_Strength );
+				float2 uv2_GreenNormal = IN.ase_texcoord9.xy * _GreenNormal_ST.xy + _GreenNormal_ST.zw;
+				float3 unpack87 = UnpackNormalScale( tex2D( _GreenNormal, uv2_GreenNormal ), _Normal_Strength );
 				unpack87.z = lerp( 1, unpack87.z, saturate(_Normal_Strength) );
 				float3 lerpResult92 = lerp( ( unpack16 * IN.ase_color.r ) , unpack87 , IN.ase_color.g);
-				float2 uv_NormalBlue = IN.ase_texcoord8.xy * _NormalBlue_ST.xy + _NormalBlue_ST.zw;
-				float3 unpack88 = UnpackNormalScale( tex2D( _NormalBlue, uv_NormalBlue ), _Normal_Strength );
+				float2 uv2_NormalBlue = IN.ase_texcoord9.xy * _NormalBlue_ST.xy + _NormalBlue_ST.zw;
+				float3 unpack88 = UnpackNormalScale( tex2D( _NormalBlue, uv2_NormalBlue ), _Normal_Strength );
 				unpack88.z = lerp( 1, unpack88.z, saturate(_Normal_Strength) );
 				float3 lerpResult93 = lerp( lerpResult92 , unpack88 , IN.ase_color.b);
 				
@@ -581,7 +600,7 @@ Shader "RBG/Terrain_02"
 				float2 uv_NoiseEffectGrain = IN.ase_texcoord8.xy * _NoiseEffectGrain_ST.xy + _NoiseEffectGrain_ST.zw;
 				
 
-				float3 BaseColor = ( ( ( tex2DNode2 * IN.ase_color.r ) + ( tex2DNode7 * IN.ase_color.g ) + ( tex2DNode10 * IN.ase_color.b ) ) * _OverallColor ).rgb;
+				float3 BaseColor = lerpResult122.rgb;
 				float3 Normal = lerpResult93;
 				float3 Emission = 0;
 				float3 Specular = 0.5;
@@ -896,14 +915,16 @@ Shader "RBG/Terrain_02"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float4 _red_UV4_Trim_ST;
-			float4 _Green_UV3_Tile_ST;
-			float4 _Blue_UV3_Tile_ST;
+			float4 _Skids_UV0_ST;
+			float4 _red_UV3_Trim_ST;
+			float4 _Green_UV2_Tile_ST;
+			float4 _Blue_UV2_Tile_ST;
 			float4 _OverallColor;
 			float4 _RedNormal_ST;
 			float4 _GreenNormal_ST;
 			float4 _NormalBlue_ST;
 			float4 _NoiseEffectGrain_ST;
+			float _Skids_Str;
 			float _Normal_Strength;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
@@ -1209,14 +1230,16 @@ Shader "RBG/Terrain_02"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float4 _red_UV4_Trim_ST;
-			float4 _Green_UV3_Tile_ST;
-			float4 _Blue_UV3_Tile_ST;
+			float4 _Skids_UV0_ST;
+			float4 _red_UV3_Trim_ST;
+			float4 _Green_UV2_Tile_ST;
+			float4 _Blue_UV2_Tile_ST;
 			float4 _OverallColor;
 			float4 _RedNormal_ST;
 			float4 _GreenNormal_ST;
 			float4 _NormalBlue_ST;
 			float4 _NoiseEffectGrain_ST;
+			float _Skids_Str;
 			float _Normal_Strength;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
@@ -1469,6 +1492,7 @@ Shader "RBG/Terrain_02"
 				float4 texcoord0 : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
@@ -1488,19 +1512,22 @@ Shader "RBG/Terrain_02"
 				#endif
 				float4 ase_texcoord4 : TEXCOORD4;
 				float4 ase_color : COLOR;
+				float4 ase_texcoord5 : TEXCOORD5;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float4 _red_UV4_Trim_ST;
-			float4 _Green_UV3_Tile_ST;
-			float4 _Blue_UV3_Tile_ST;
+			float4 _Skids_UV0_ST;
+			float4 _red_UV3_Trim_ST;
+			float4 _Green_UV2_Tile_ST;
+			float4 _Blue_UV2_Tile_ST;
 			float4 _OverallColor;
 			float4 _RedNormal_ST;
 			float4 _GreenNormal_ST;
 			float4 _NormalBlue_ST;
 			float4 _NoiseEffectGrain_ST;
+			float _Skids_Str;
 			float _Normal_Strength;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
@@ -1534,9 +1561,10 @@ Shader "RBG/Terrain_02"
 				int _PassValue;
 			#endif
 
-			sampler2D _red_UV4_Trim;
-			sampler2D _Green_UV3_Tile;
-			sampler2D _Blue_UV3_Tile;
+			sampler2D _Skids_UV0;
+			sampler2D _red_UV3_Trim;
+			sampler2D _Green_UV2_Tile;
+			sampler2D _Blue_UV2_Tile;
 
 
 			
@@ -1548,10 +1576,12 @@ Shader "RBG/Terrain_02"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 				o.ase_texcoord4.xy = v.texcoord0.xy;
+				o.ase_texcoord4.zw = v.ase_texcoord3.xy;
 				o.ase_color = v.ase_color;
+				o.ase_texcoord5.xy = v.texcoord2.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord4.zw = 0;
+				o.ase_texcoord5.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
@@ -1603,6 +1633,7 @@ Shader "RBG/Terrain_02"
 				float4 texcoord0 : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -1624,6 +1655,7 @@ Shader "RBG/Terrain_02"
 				o.texcoord0 = v.texcoord0;
 				o.texcoord1 = v.texcoord1;
 				o.texcoord2 = v.texcoord2;
+				o.ase_texcoord3 = v.ase_texcoord3;
 				o.ase_color = v.ase_color;
 				return o;
 			}
@@ -1666,6 +1698,7 @@ Shader "RBG/Terrain_02"
 				o.texcoord0 = patch[0].texcoord0 * bary.x + patch[1].texcoord0 * bary.y + patch[2].texcoord0 * bary.z;
 				o.texcoord1 = patch[0].texcoord1 * bary.x + patch[1].texcoord1 * bary.y + patch[2].texcoord1 * bary.z;
 				o.texcoord2 = patch[0].texcoord2 * bary.x + patch[1].texcoord2 * bary.y + patch[2].texcoord2 * bary.z;
+				o.ase_texcoord3 = patch[0].ase_texcoord3 * bary.x + patch[1].ase_texcoord3 * bary.y + patch[2].ase_texcoord3 * bary.z;
 				o.ase_color = patch[0].ase_color * bary.x + patch[1].ase_color * bary.y + patch[2].ase_color * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
@@ -1703,15 +1736,18 @@ Shader "RBG/Terrain_02"
 					#endif
 				#endif
 
-				float2 uv_red_UV4_Trim = IN.ase_texcoord4.xy * _red_UV4_Trim_ST.xy + _red_UV4_Trim_ST.zw;
-				float4 tex2DNode2 = tex2D( _red_UV4_Trim, uv_red_UV4_Trim );
-				float2 uv_Green_UV3_Tile = IN.ase_texcoord4.xy * _Green_UV3_Tile_ST.xy + _Green_UV3_Tile_ST.zw;
-				float4 tex2DNode7 = tex2D( _Green_UV3_Tile, uv_Green_UV3_Tile );
-				float2 uv_Blue_UV3_Tile = IN.ase_texcoord4.xy * _Blue_UV3_Tile_ST.xy + _Blue_UV3_Tile_ST.zw;
-				float4 tex2DNode10 = tex2D( _Blue_UV3_Tile, uv_Blue_UV3_Tile );
+				float2 uv_Skids_UV0 = IN.ase_texcoord4.xy * _Skids_UV0_ST.xy + _Skids_UV0_ST.zw;
+				float4 temp_cast_0 = (tex2D( _Skids_UV0, uv_Skids_UV0 ).r).xxxx;
+				float2 uv3_red_UV3_Trim = IN.ase_texcoord4.zw * _red_UV3_Trim_ST.xy + _red_UV3_Trim_ST.zw;
+				float4 tex2DNode2 = tex2D( _red_UV3_Trim, uv3_red_UV3_Trim );
+				float2 uv2_Green_UV2_Tile = IN.ase_texcoord5.xy * _Green_UV2_Tile_ST.xy + _Green_UV2_Tile_ST.zw;
+				float4 tex2DNode7 = tex2D( _Green_UV2_Tile, uv2_Green_UV2_Tile );
+				float2 uv2_Blue_UV2_Tile = IN.ase_texcoord5.xy * _Blue_UV2_Tile_ST.xy + _Blue_UV2_Tile_ST.zw;
+				float4 tex2DNode10 = tex2D( _Blue_UV2_Tile, uv2_Blue_UV2_Tile );
+				float4 lerpResult122 = lerp( temp_cast_0 , ( ( ( tex2DNode2 * IN.ase_color.r ) + ( tex2DNode7 * IN.ase_color.g ) + ( tex2DNode10 * IN.ase_color.b ) ) * _OverallColor ) , _Skids_Str);
 				
 
-				float3 BaseColor = ( ( ( tex2DNode2 * IN.ase_color.r ) + ( tex2DNode7 * IN.ase_color.g ) + ( tex2DNode10 * IN.ase_color.b ) ) * _OverallColor ).rgb;
+				float3 BaseColor = lerpResult122.rgb;
 				float3 Emission = 0;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
@@ -1776,7 +1812,9 @@ Shader "RBG/Terrain_02"
 				float4 vertex : POSITION;
 				float3 ase_normal : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
+				float4 ase_texcoord2 : TEXCOORD2;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -1791,19 +1829,22 @@ Shader "RBG/Terrain_02"
 				#endif
 				float4 ase_texcoord2 : TEXCOORD2;
 				float4 ase_color : COLOR;
+				float4 ase_texcoord3 : TEXCOORD3;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float4 _red_UV4_Trim_ST;
-			float4 _Green_UV3_Tile_ST;
-			float4 _Blue_UV3_Tile_ST;
+			float4 _Skids_UV0_ST;
+			float4 _red_UV3_Trim_ST;
+			float4 _Green_UV2_Tile_ST;
+			float4 _Blue_UV2_Tile_ST;
 			float4 _OverallColor;
 			float4 _RedNormal_ST;
 			float4 _GreenNormal_ST;
 			float4 _NormalBlue_ST;
 			float4 _NoiseEffectGrain_ST;
+			float _Skids_Str;
 			float _Normal_Strength;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
@@ -1837,9 +1878,10 @@ Shader "RBG/Terrain_02"
 				int _PassValue;
 			#endif
 
-			sampler2D _red_UV4_Trim;
-			sampler2D _Green_UV3_Tile;
-			sampler2D _Blue_UV3_Tile;
+			sampler2D _Skids_UV0;
+			sampler2D _red_UV3_Trim;
+			sampler2D _Green_UV2_Tile;
+			sampler2D _Blue_UV2_Tile;
 
 
 			
@@ -1851,10 +1893,12 @@ Shader "RBG/Terrain_02"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO( o );
 
 				o.ase_texcoord2.xy = v.ase_texcoord.xy;
+				o.ase_texcoord2.zw = v.ase_texcoord3.xy;
 				o.ase_color = v.ase_color;
+				o.ase_texcoord3.xy = v.ase_texcoord2.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord2.zw = 0;
+				o.ase_texcoord3.zw = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
@@ -1897,7 +1941,9 @@ Shader "RBG/Terrain_02"
 				float4 vertex : INTERNALTESSPOS;
 				float3 ase_normal : NORMAL;
 				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
+				float4 ase_texcoord2 : TEXCOORD2;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
@@ -1916,7 +1962,9 @@ Shader "RBG/Terrain_02"
 				o.vertex = v.vertex;
 				o.ase_normal = v.ase_normal;
 				o.ase_texcoord = v.ase_texcoord;
+				o.ase_texcoord3 = v.ase_texcoord3;
 				o.ase_color = v.ase_color;
+				o.ase_texcoord2 = v.ase_texcoord2;
 				return o;
 			}
 
@@ -1956,7 +2004,9 @@ Shader "RBG/Terrain_02"
 				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
 				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
 				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				o.ase_texcoord3 = patch[0].ase_texcoord3 * bary.x + patch[1].ase_texcoord3 * bary.y + patch[2].ase_texcoord3 * bary.z;
 				o.ase_color = patch[0].ase_color * bary.x + patch[1].ase_color * bary.y + patch[2].ase_color * bary.z;
+				o.ase_texcoord2 = patch[0].ase_texcoord2 * bary.x + patch[1].ase_texcoord2 * bary.y + patch[2].ase_texcoord2 * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
@@ -1993,15 +2043,18 @@ Shader "RBG/Terrain_02"
 					#endif
 				#endif
 
-				float2 uv_red_UV4_Trim = IN.ase_texcoord2.xy * _red_UV4_Trim_ST.xy + _red_UV4_Trim_ST.zw;
-				float4 tex2DNode2 = tex2D( _red_UV4_Trim, uv_red_UV4_Trim );
-				float2 uv_Green_UV3_Tile = IN.ase_texcoord2.xy * _Green_UV3_Tile_ST.xy + _Green_UV3_Tile_ST.zw;
-				float4 tex2DNode7 = tex2D( _Green_UV3_Tile, uv_Green_UV3_Tile );
-				float2 uv_Blue_UV3_Tile = IN.ase_texcoord2.xy * _Blue_UV3_Tile_ST.xy + _Blue_UV3_Tile_ST.zw;
-				float4 tex2DNode10 = tex2D( _Blue_UV3_Tile, uv_Blue_UV3_Tile );
+				float2 uv_Skids_UV0 = IN.ase_texcoord2.xy * _Skids_UV0_ST.xy + _Skids_UV0_ST.zw;
+				float4 temp_cast_0 = (tex2D( _Skids_UV0, uv_Skids_UV0 ).r).xxxx;
+				float2 uv3_red_UV3_Trim = IN.ase_texcoord2.zw * _red_UV3_Trim_ST.xy + _red_UV3_Trim_ST.zw;
+				float4 tex2DNode2 = tex2D( _red_UV3_Trim, uv3_red_UV3_Trim );
+				float2 uv2_Green_UV2_Tile = IN.ase_texcoord3.xy * _Green_UV2_Tile_ST.xy + _Green_UV2_Tile_ST.zw;
+				float4 tex2DNode7 = tex2D( _Green_UV2_Tile, uv2_Green_UV2_Tile );
+				float2 uv2_Blue_UV2_Tile = IN.ase_texcoord3.xy * _Blue_UV2_Tile_ST.xy + _Blue_UV2_Tile_ST.zw;
+				float4 tex2DNode10 = tex2D( _Blue_UV2_Tile, uv2_Blue_UV2_Tile );
+				float4 lerpResult122 = lerp( temp_cast_0 , ( ( ( tex2DNode2 * IN.ase_color.r ) + ( tex2DNode7 * IN.ase_color.g ) + ( tex2DNode10 * IN.ase_color.b ) ) * _OverallColor ) , _Skids_Str);
 				
 
-				float3 BaseColor = ( ( ( tex2DNode2 * IN.ase_color.r ) + ( tex2DNode7 * IN.ase_color.g ) + ( tex2DNode10 * IN.ase_color.b ) ) * _OverallColor ).rgb;
+				float3 BaseColor = lerpResult122.rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 
@@ -2074,8 +2127,9 @@ Shader "RBG/Terrain_02"
 				float4 vertex : POSITION;
 				float3 ase_normal : NORMAL;
 				float4 ase_tangent : TANGENT;
-				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
+				float4 ase_texcoord2 : TEXCOORD2;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
@@ -2098,14 +2152,16 @@ Shader "RBG/Terrain_02"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float4 _red_UV4_Trim_ST;
-			float4 _Green_UV3_Tile_ST;
-			float4 _Blue_UV3_Tile_ST;
+			float4 _Skids_UV0_ST;
+			float4 _red_UV3_Trim_ST;
+			float4 _Green_UV2_Tile_ST;
+			float4 _Blue_UV2_Tile_ST;
 			float4 _OverallColor;
 			float4 _RedNormal_ST;
 			float4 _GreenNormal_ST;
 			float4 _NormalBlue_ST;
 			float4 _NoiseEffectGrain_ST;
+			float _Skids_Str;
 			float _Normal_Strength;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
@@ -2152,11 +2208,9 @@ Shader "RBG/Terrain_02"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				o.ase_texcoord5.xy = v.ase_texcoord.xy;
+				o.ase_texcoord5.xy = v.ase_texcoord3.xy;
 				o.ase_color = v.ase_color;
-				
-				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord5.zw = 0;
+				o.ase_texcoord5.zw = v.ase_texcoord2.xy;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
 				#else
@@ -2202,8 +2256,9 @@ Shader "RBG/Terrain_02"
 				float4 vertex : INTERNALTESSPOS;
 				float3 ase_normal : NORMAL;
 				float4 ase_tangent : TANGENT;
-				float4 ase_texcoord : TEXCOORD0;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
+				float4 ase_texcoord2 : TEXCOORD2;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
@@ -2222,8 +2277,9 @@ Shader "RBG/Terrain_02"
 				o.vertex = v.vertex;
 				o.ase_normal = v.ase_normal;
 				o.ase_tangent = v.ase_tangent;
-				o.ase_texcoord = v.ase_texcoord;
+				o.ase_texcoord3 = v.ase_texcoord3;
 				o.ase_color = v.ase_color;
+				o.ase_texcoord2 = v.ase_texcoord2;
 				return o;
 			}
 
@@ -2263,8 +2319,9 @@ Shader "RBG/Terrain_02"
 				o.vertex = patch[0].vertex * bary.x + patch[1].vertex * bary.y + patch[2].vertex * bary.z;
 				o.ase_normal = patch[0].ase_normal * bary.x + patch[1].ase_normal * bary.y + patch[2].ase_normal * bary.z;
 				o.ase_tangent = patch[0].ase_tangent * bary.x + patch[1].ase_tangent * bary.y + patch[2].ase_tangent * bary.z;
-				o.ase_texcoord = patch[0].ase_texcoord * bary.x + patch[1].ase_texcoord * bary.y + patch[2].ase_texcoord * bary.z;
+				o.ase_texcoord3 = patch[0].ase_texcoord3 * bary.x + patch[1].ase_texcoord3 * bary.y + patch[2].ase_texcoord3 * bary.z;
 				o.ase_color = patch[0].ase_color * bary.x + patch[1].ase_color * bary.y + patch[2].ase_color * bary.z;
+				o.ase_texcoord2 = patch[0].ase_texcoord2 * bary.x + patch[1].ase_texcoord2 * bary.y + patch[2].ase_texcoord2 * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
 				for (int i = 0; i < 3; ++i)
@@ -2314,15 +2371,15 @@ Shader "RBG/Terrain_02"
 					#endif
 				#endif
 
-				float2 uv_RedNormal = IN.ase_texcoord5.xy * _RedNormal_ST.xy + _RedNormal_ST.zw;
-				float3 unpack16 = UnpackNormalScale( tex2D( _RedNormal, uv_RedNormal ), _Normal_Strength );
+				float2 uv3_RedNormal = IN.ase_texcoord5.xy * _RedNormal_ST.xy + _RedNormal_ST.zw;
+				float3 unpack16 = UnpackNormalScale( tex2D( _RedNormal, uv3_RedNormal ), _Normal_Strength );
 				unpack16.z = lerp( 1, unpack16.z, saturate(_Normal_Strength) );
-				float2 uv_GreenNormal = IN.ase_texcoord5.xy * _GreenNormal_ST.xy + _GreenNormal_ST.zw;
-				float3 unpack87 = UnpackNormalScale( tex2D( _GreenNormal, uv_GreenNormal ), _Normal_Strength );
+				float2 uv2_GreenNormal = IN.ase_texcoord5.zw * _GreenNormal_ST.xy + _GreenNormal_ST.zw;
+				float3 unpack87 = UnpackNormalScale( tex2D( _GreenNormal, uv2_GreenNormal ), _Normal_Strength );
 				unpack87.z = lerp( 1, unpack87.z, saturate(_Normal_Strength) );
 				float3 lerpResult92 = lerp( ( unpack16 * IN.ase_color.r ) , unpack87 , IN.ase_color.g);
-				float2 uv_NormalBlue = IN.ase_texcoord5.xy * _NormalBlue_ST.xy + _NormalBlue_ST.zw;
-				float3 unpack88 = UnpackNormalScale( tex2D( _NormalBlue, uv_NormalBlue ), _Normal_Strength );
+				float2 uv2_NormalBlue = IN.ase_texcoord5.zw * _NormalBlue_ST.xy + _NormalBlue_ST.zw;
+				float3 unpack88 = UnpackNormalScale( tex2D( _NormalBlue, uv2_NormalBlue ), _Normal_Strength );
 				unpack88.z = lerp( 1, unpack88.z, saturate(_Normal_Strength) );
 				float3 lerpResult93 = lerp( lerpResult92 , unpack88 , IN.ase_color.b);
 				
@@ -2464,6 +2521,7 @@ Shader "RBG/Terrain_02"
 				float4 texcoord : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
@@ -2485,19 +2543,22 @@ Shader "RBG/Terrain_02"
 				#endif
 				float4 ase_texcoord8 : TEXCOORD8;
 				float4 ase_color : COLOR;
+				float4 ase_texcoord9 : TEXCOORD9;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float4 _red_UV4_Trim_ST;
-			float4 _Green_UV3_Tile_ST;
-			float4 _Blue_UV3_Tile_ST;
+			float4 _Skids_UV0_ST;
+			float4 _red_UV3_Trim_ST;
+			float4 _Green_UV2_Tile_ST;
+			float4 _Blue_UV2_Tile_ST;
 			float4 _OverallColor;
 			float4 _RedNormal_ST;
 			float4 _GreenNormal_ST;
 			float4 _NormalBlue_ST;
 			float4 _NoiseEffectGrain_ST;
+			float _Skids_Str;
 			float _Normal_Strength;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
@@ -2531,9 +2592,10 @@ Shader "RBG/Terrain_02"
 				int _PassValue;
 			#endif
 
-			sampler2D _red_UV4_Trim;
-			sampler2D _Green_UV3_Tile;
-			sampler2D _Blue_UV3_Tile;
+			sampler2D _Skids_UV0;
+			sampler2D _red_UV3_Trim;
+			sampler2D _Green_UV2_Tile;
+			sampler2D _Blue_UV2_Tile;
 			sampler2D _RedNormal;
 			sampler2D _GreenNormal;
 			sampler2D _NormalBlue;
@@ -2551,10 +2613,12 @@ Shader "RBG/Terrain_02"
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 				o.ase_texcoord8.xy = v.texcoord.xy;
+				o.ase_texcoord8.zw = v.ase_texcoord3.xy;
 				o.ase_color = v.ase_color;
+				o.ase_texcoord9.xy = v.texcoord2.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord8.zw = 0;
+				o.ase_texcoord9.zw = 0;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
 				#else
@@ -2623,6 +2687,7 @@ Shader "RBG/Terrain_02"
 				float4 texcoord : TEXCOORD0;
 				float4 texcoord1 : TEXCOORD1;
 				float4 texcoord2 : TEXCOORD2;
+				float4 ase_texcoord3 : TEXCOORD3;
 				float4 ase_color : COLOR;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -2645,6 +2710,8 @@ Shader "RBG/Terrain_02"
 				o.texcoord = v.texcoord;
 				o.texcoord1 = v.texcoord1;
 				o.texcoord2 = v.texcoord2;
+				o.texcoord = v.texcoord;
+				o.ase_texcoord3 = v.ase_texcoord3;
 				o.ase_color = v.ase_color;
 				return o;
 			}
@@ -2688,6 +2755,8 @@ Shader "RBG/Terrain_02"
 				o.texcoord = patch[0].texcoord * bary.x + patch[1].texcoord * bary.y + patch[2].texcoord * bary.z;
 				o.texcoord1 = patch[0].texcoord1 * bary.x + patch[1].texcoord1 * bary.y + patch[2].texcoord1 * bary.z;
 				o.texcoord2 = patch[0].texcoord2 * bary.x + patch[1].texcoord2 * bary.y + patch[2].texcoord2 * bary.z;
+				o.texcoord = patch[0].texcoord * bary.x + patch[1].texcoord * bary.y + patch[2].texcoord * bary.z;
+				o.ase_texcoord3 = patch[0].ase_texcoord3 * bary.x + patch[1].ase_texcoord3 * bary.y + patch[2].ase_texcoord3 * bary.z;
 				o.ase_color = patch[0].ase_color * bary.x + patch[1].ase_color * bary.y + patch[2].ase_color * bary.z;
 				#if defined(ASE_PHONG_TESSELLATION)
 				float3 pp[3];
@@ -2749,22 +2818,25 @@ Shader "RBG/Terrain_02"
 
 				WorldViewDirection = SafeNormalize( WorldViewDirection );
 
-				float2 uv_red_UV4_Trim = IN.ase_texcoord8.xy * _red_UV4_Trim_ST.xy + _red_UV4_Trim_ST.zw;
-				float4 tex2DNode2 = tex2D( _red_UV4_Trim, uv_red_UV4_Trim );
-				float2 uv_Green_UV3_Tile = IN.ase_texcoord8.xy * _Green_UV3_Tile_ST.xy + _Green_UV3_Tile_ST.zw;
-				float4 tex2DNode7 = tex2D( _Green_UV3_Tile, uv_Green_UV3_Tile );
-				float2 uv_Blue_UV3_Tile = IN.ase_texcoord8.xy * _Blue_UV3_Tile_ST.xy + _Blue_UV3_Tile_ST.zw;
-				float4 tex2DNode10 = tex2D( _Blue_UV3_Tile, uv_Blue_UV3_Tile );
+				float2 uv_Skids_UV0 = IN.ase_texcoord8.xy * _Skids_UV0_ST.xy + _Skids_UV0_ST.zw;
+				float4 temp_cast_0 = (tex2D( _Skids_UV0, uv_Skids_UV0 ).r).xxxx;
+				float2 uv3_red_UV3_Trim = IN.ase_texcoord8.zw * _red_UV3_Trim_ST.xy + _red_UV3_Trim_ST.zw;
+				float4 tex2DNode2 = tex2D( _red_UV3_Trim, uv3_red_UV3_Trim );
+				float2 uv2_Green_UV2_Tile = IN.ase_texcoord9.xy * _Green_UV2_Tile_ST.xy + _Green_UV2_Tile_ST.zw;
+				float4 tex2DNode7 = tex2D( _Green_UV2_Tile, uv2_Green_UV2_Tile );
+				float2 uv2_Blue_UV2_Tile = IN.ase_texcoord9.xy * _Blue_UV2_Tile_ST.xy + _Blue_UV2_Tile_ST.zw;
+				float4 tex2DNode10 = tex2D( _Blue_UV2_Tile, uv2_Blue_UV2_Tile );
+				float4 lerpResult122 = lerp( temp_cast_0 , ( ( ( tex2DNode2 * IN.ase_color.r ) + ( tex2DNode7 * IN.ase_color.g ) + ( tex2DNode10 * IN.ase_color.b ) ) * _OverallColor ) , _Skids_Str);
 				
-				float2 uv_RedNormal = IN.ase_texcoord8.xy * _RedNormal_ST.xy + _RedNormal_ST.zw;
-				float3 unpack16 = UnpackNormalScale( tex2D( _RedNormal, uv_RedNormal ), _Normal_Strength );
+				float2 uv3_RedNormal = IN.ase_texcoord8.zw * _RedNormal_ST.xy + _RedNormal_ST.zw;
+				float3 unpack16 = UnpackNormalScale( tex2D( _RedNormal, uv3_RedNormal ), _Normal_Strength );
 				unpack16.z = lerp( 1, unpack16.z, saturate(_Normal_Strength) );
-				float2 uv_GreenNormal = IN.ase_texcoord8.xy * _GreenNormal_ST.xy + _GreenNormal_ST.zw;
-				float3 unpack87 = UnpackNormalScale( tex2D( _GreenNormal, uv_GreenNormal ), _Normal_Strength );
+				float2 uv2_GreenNormal = IN.ase_texcoord9.xy * _GreenNormal_ST.xy + _GreenNormal_ST.zw;
+				float3 unpack87 = UnpackNormalScale( tex2D( _GreenNormal, uv2_GreenNormal ), _Normal_Strength );
 				unpack87.z = lerp( 1, unpack87.z, saturate(_Normal_Strength) );
 				float3 lerpResult92 = lerp( ( unpack16 * IN.ase_color.r ) , unpack87 , IN.ase_color.g);
-				float2 uv_NormalBlue = IN.ase_texcoord8.xy * _NormalBlue_ST.xy + _NormalBlue_ST.zw;
-				float3 unpack88 = UnpackNormalScale( tex2D( _NormalBlue, uv_NormalBlue ), _Normal_Strength );
+				float2 uv2_NormalBlue = IN.ase_texcoord9.xy * _NormalBlue_ST.xy + _NormalBlue_ST.zw;
+				float3 unpack88 = UnpackNormalScale( tex2D( _NormalBlue, uv2_NormalBlue ), _Normal_Strength );
 				unpack88.z = lerp( 1, unpack88.z, saturate(_Normal_Strength) );
 				float3 lerpResult93 = lerp( lerpResult92 , unpack88 , IN.ase_color.b);
 				
@@ -2773,7 +2845,7 @@ Shader "RBG/Terrain_02"
 				float2 uv_NoiseEffectGrain = IN.ase_texcoord8.xy * _NoiseEffectGrain_ST.xy + _NoiseEffectGrain_ST.zw;
 				
 
-				float3 BaseColor = ( ( ( tex2DNode2 * IN.ase_color.r ) + ( tex2DNode7 * IN.ase_color.g ) + ( tex2DNode10 * IN.ase_color.b ) ) * _OverallColor ).rgb;
+				float3 BaseColor = lerpResult122.rgb;
 				float3 Normal = lerpResult93;
 				float3 Emission = 0;
 				float3 Specular = 0.5;
@@ -2938,14 +3010,16 @@ Shader "RBG/Terrain_02"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float4 _red_UV4_Trim_ST;
-			float4 _Green_UV3_Tile_ST;
-			float4 _Blue_UV3_Tile_ST;
+			float4 _Skids_UV0_ST;
+			float4 _red_UV3_Trim_ST;
+			float4 _Green_UV2_Tile_ST;
+			float4 _Blue_UV2_Tile_ST;
 			float4 _OverallColor;
 			float4 _RedNormal_ST;
 			float4 _GreenNormal_ST;
 			float4 _NormalBlue_ST;
 			float4 _NoiseEffectGrain_ST;
+			float _Skids_Str;
 			float _Normal_Strength;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
@@ -3186,14 +3260,16 @@ Shader "RBG/Terrain_02"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float4 _red_UV4_Trim_ST;
-			float4 _Green_UV3_Tile_ST;
-			float4 _Blue_UV3_Tile_ST;
+			float4 _Skids_UV0_ST;
+			float4 _red_UV3_Trim_ST;
+			float4 _Green_UV2_Tile_ST;
+			float4 _Blue_UV2_Tile_ST;
 			float4 _OverallColor;
 			float4 _RedNormal_ST;
 			float4 _GreenNormal_ST;
 			float4 _NormalBlue_ST;
 			float4 _NoiseEffectGrain_ST;
+			float _Skids_Str;
 			float _Normal_Strength;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
@@ -3388,7 +3464,6 @@ Shader "RBG/Terrain_02"
 }
 /*ASEBEGIN
 Version=19201
-Node;AmplifyShaderEditor.RangedFloatNode;12;915.0157,-138.4896;Float;False;Constant;_Metallic;Metallic;5;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;105;1854.503,-44.54574;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;107;1854.503,-44.54574;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;108;1854.503,-44.54574;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;True;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;;0;0;Standard;0;False;0
@@ -3400,51 +3475,44 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;113;1854.503,-44.54574;Floa
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;114;1854.503,-44.54574;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;106;1854.503,-63.54574;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/Terrain_02;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
 Node;AmplifyShaderEditor.SimpleSubtractOpNode;101;721.6017,343.9617;Inherit;True;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;98;-2666.189,73.40233;Inherit;False;Property;_Normal_Strength;Normal_Strength;10;0;Create;True;0;0;0;False;0;False;1;1.242;0;3;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;8;-506.8705,-637.7835;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;5;-262.2265,-666.8779;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.ColorNode;54;69.32343,-279.2785;Float;False;Property;_OverallColor;OverallColor;8;0;Create;True;0;0;0;False;0;False;0,0,0,0;1,1,1,0;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;55;593.105,-464.4909;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;89;-187.3032,1139.715;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.LerpOp;93;228.6968,1267.715;Inherit;True;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.LerpOp;92;36.69685,1171.715;Inherit;False;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.RangedFloatNode;21;-29.60374,527.2148;Float;False;Property;_ExtraGlossinesValue;ExtraGlossinesValue;7;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;98;-2666.189,73.40233;Inherit;False;Property;_Normal_Strength;Normal_Strength;12;0;Create;True;0;0;0;False;0;False;1;1.242;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;51;303.8103,522.447;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.SamplerNode;50;-30.58903,613.3751;Inherit;True;Property;_NoiseEffectGrain;NoiseEffectGrain;9;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;75;-507.7426,65.53105;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;53;-146.9228,-0.7006668;Float;False;Property;_GlossinesValue;GlossinesValue;6;0;Create;True;0;0;0;False;0;False;0;0;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;26;-313.6555,149.6078;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;27;-77.17583,186.8526;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;99;246.6762,127.2375;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.VertexColorNode;102;-1416.095,867.3129;Inherit;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;16;-1480.095,-300.6877;Inherit;True;Property;_RedNormal;RedNormal;3;0;Create;True;0;0;0;False;0;False;-1;None;f3c400a3509738246b088656d3b3da3f;True;0;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;7;-1464.095,-28.68755;Inherit;True;Property;_Green_UV3_Tile;Green_UV3_Tile;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;87;-1480.095,163.3125;Inherit;True;Property;_GreenNormal;GreenNormal;4;0;Create;True;0;0;0;False;0;False;-1;None;3a8d2d61ba64f404781616855341c8f1;True;0;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;10;-1480.095,451.3121;Inherit;True;Property;_Blue_UV3_Tile;Blue_UV3_Tile;2;0;Create;True;0;0;0;False;0;False;-1;None;50e9aa931727c5a4989aafe5d689296f;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;88;-1480.095,643.3129;Inherit;True;Property;_NormalBlue;NormalBlue;5;0;Create;True;0;0;0;False;0;False;-1;None;9abb7062482965a40a5bcb80c80f0785;True;0;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;2;-1480.095,-476.6879;Inherit;True;Property;_red_UV4_Trim;red_UV4_Trim;0;0;Create;True;0;0;0;False;0;False;-1;None;23d63906f4cab5e43ae54f176a91dead;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;9;-414.2726,-350.9481;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SimpleAddOpNode;14;-77.37508,-462.2662;Inherit;False;3;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;COLOR;0,0,0,0;False;1;COLOR;0
-WireConnection;106;0;55;0
+Node;AmplifyShaderEditor.RangedFloatNode;53;-146.9228,-0.7006668;Float;False;Property;_GlossinesValue;GlossinesValue;7;0;Create;True;0;0;0;False;0;False;0;0;0;3;0;1;FLOAT;0
+Node;AmplifyShaderEditor.ColorNode;54;62.32343,-312.2785;Float;False;Property;_OverallColor;OverallColor;9;0;Create;True;0;0;0;False;0;False;0,0,0,0;1,1,1,0;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.RangedFloatNode;12;1142.065,30.51579;Float;False;Constant;_Metallic;Metallic;5;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;2;-1480.095,-476.6879;Inherit;True;Property;_red_UV3_Trim;red_UV3_Trim;0;0;Create;True;0;0;0;False;0;False;-1;None;23d63906f4cab5e43ae54f176a91dead;True;3;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SamplerNode;7;-1478.396,-35.18755;Inherit;True;Property;_Green_UV2_Tile;Green_UV2_Tile;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;2;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SamplerNode;87;-1480.095,163.3125;Inherit;True;Property;_GreenNormal;GreenNormal;4;0;Create;True;0;0;0;False;0;False;-1;None;3a8d2d61ba64f404781616855341c8f1;True;2;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SamplerNode;10;-1480.095,451.3121;Inherit;True;Property;_Blue_UV2_Tile;Blue_UV2_Tile;2;0;Create;True;0;0;0;False;0;False;-1;None;50e9aa931727c5a4989aafe5d689296f;True;2;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SamplerNode;50;-37.58903,609.3751;Inherit;True;Property;_NoiseEffectGrain;NoiseEffectGrain;10;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.RangedFloatNode;21;-29.60374,516.2148;Float;False;Property;_ExtraGlossinesValue;ExtraGlossinesValue;8;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;89;-531.7256,780.901;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.SamplerNode;16;-1482.124,-273.5797;Inherit;True;Property;_RedNormal;RedNormal;3;0;Create;True;0;0;0;False;0;False;-1;None;f3c400a3509738246b088656d3b3da3f;True;3;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.LerpOp;92;4.598317,884.6528;Inherit;False;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;8;-498.8853,-664.4009;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;5;-467.1807,-488.5411;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleAddOpNode;14;-53.41929,-468.9206;Inherit;False;3;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;9;-443.5518,-340.3011;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.LerpOp;93;337.1383,1078.931;Inherit;True;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.SamplerNode;88;-1480.095,643.3129;Inherit;True;Property;_NormalBlue;NormalBlue;5;0;Create;True;0;0;0;False;0;False;-1;None;9abb7062482965a40a5bcb80c80f0785;True;2;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.LerpOp;122;997.5473,-791.4848;Inherit;True;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;55;556.4921,-602.2031;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;123;511.7997,-388.0947;Float;False;Property;_Skids_Str;Skids_Str;13;0;Create;True;0;0;0;False;0;False;2;0.8091814;0;2;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;115;170.7822,-883.2142;Inherit;True;Property;_Skids_UV0;Skids_UV0;11;0;Create;True;0;0;0;False;0;False;-1;None;23d63906f4cab5e43ae54f176a91dead;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SamplerNode;119;354.2536,1382.734;Inherit;True;Property;_Normal_Large_Scale;Normal_Large_Scale;6;0;Create;True;0;0;0;False;0;False;-1;None;9abb7062482965a40a5bcb80c80f0785;True;2;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.RangedFloatNode;120;16.32634,1435.986;Float;False;Property;_Normal_Lrg_Str;Normal_Lrg_Str;14;0;Create;True;0;0;0;False;0;False;1;0;0;4;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;118;1323.082,724.1355;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;1;FLOAT3;0
+WireConnection;106;0;122;0
 WireConnection;106;1;93;0
 WireConnection;106;3;12;0
 WireConnection;106;4;101;0
 WireConnection;101;0;99;0
 WireConnection;101;1;51;0
-WireConnection;8;0;7;0
-WireConnection;8;1;102;2
-WireConnection;5;0;2;0
-WireConnection;5;1;102;1
-WireConnection;55;0;14;0
-WireConnection;55;1;54;0
-WireConnection;89;0;16;0
-WireConnection;89;1;102;1
-WireConnection;93;0;92;0
-WireConnection;93;1;88;0
-WireConnection;93;2;102;3
-WireConnection;92;0;89;0
-WireConnection;92;1;87;0
-WireConnection;92;2;102;2
 WireConnection;51;0;21;0
 WireConnection;51;1;50;1
 WireConnection;75;0;2;4
@@ -3457,13 +3525,33 @@ WireConnection;27;1;10;4
 WireConnection;27;2;102;3
 WireConnection;99;0;53;0
 WireConnection;99;1;27;0
-WireConnection;16;5;98;0
 WireConnection;87;5;98;0
-WireConnection;88;5;98;0
-WireConnection;9;0;10;0
-WireConnection;9;1;102;3
+WireConnection;89;0;16;0
+WireConnection;89;1;102;1
+WireConnection;16;5;98;0
+WireConnection;92;0;89;0
+WireConnection;92;1;87;0
+WireConnection;92;2;102;2
+WireConnection;8;0;7;0
+WireConnection;8;1;102;2
+WireConnection;5;0;2;0
+WireConnection;5;1;102;1
 WireConnection;14;0;5;0
 WireConnection;14;1;8;0
 WireConnection;14;2;9;0
+WireConnection;9;0;10;0
+WireConnection;9;1;102;3
+WireConnection;93;0;92;0
+WireConnection;93;1;88;0
+WireConnection;93;2;102;3
+WireConnection;88;5;98;0
+WireConnection;122;0;115;1
+WireConnection;122;1;55;0
+WireConnection;122;2;123;0
+WireConnection;55;0;14;0
+WireConnection;55;1;54;0
+WireConnection;119;5;120;0
+WireConnection;118;0;93;0
+WireConnection;118;1;119;0
 ASEEND*/
-//CHKSM=235AECFDFD9A592A0B267279EA6BA00ABFB75AB9
+//CHKSM=61869F1BBCAAD43B9430CF6CFD26C4B4C3088215
