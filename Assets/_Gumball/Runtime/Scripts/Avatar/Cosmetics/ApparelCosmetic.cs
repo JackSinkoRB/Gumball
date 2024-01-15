@@ -140,7 +140,7 @@ namespace Gumball
 
         private void SetFootOffset(ApparelItemData itemData)
         {
-            if (itemData.FootOffset.HeightOffset < 0)
+            if (!itemData.FootOffset.IsUsed)
                 return;
             
             //TODO: the bones can be cached in the avatar
