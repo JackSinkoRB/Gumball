@@ -174,6 +174,9 @@ namespace Gumball.Runtime.Tests
             
             //ensure it is saved in persistent data
             Assert.AreEqual(indexToUse, skinCosmetic.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, skinCosmetic.CurrentIndex);
         }
         
         [UnityTest]
@@ -205,6 +208,9 @@ namespace Gumball.Runtime.Tests
             
             //ensure it is saved in persistent data
             Assert.AreEqual(indexToUse, frecklesCosmetic.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, frecklesCosmetic.CurrentIndex);
         }
         
         [UnityTest]
@@ -231,6 +237,37 @@ namespace Gumball.Runtime.Tests
             
             //ensure it is saved in persistent data
             Assert.AreEqual(indexToUse, upperBodyCosmetic.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, upperBodyCosmetic.CurrentIndex);
+        }
+        
+        [UnityTest]
+        public IEnumerator HairCosmeticIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 3;
+            HairCosmetic hairCosmetic = avatarToCheck.CurrentBody.GetCosmetic<HairCosmetic>();
+            hairCosmetic.Apply(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            Assert.IsNotNull(hairCosmetic.CurrentItem);
+            
+            string nameOfItemInList = hairCosmetic.Items[indexToUse].Prefab.editorAsset.name;
+            string nameOfCurrentItem = hairCosmetic.CurrentItem.name.Replace("(Clone)", "");
+            Assert.IsTrue(nameOfItemInList.Equals(nameOfCurrentItem));
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, hairCosmetic.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, hairCosmetic.CurrentIndex);
         }
 
     }
