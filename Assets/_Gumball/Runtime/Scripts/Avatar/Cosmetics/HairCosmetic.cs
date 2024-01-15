@@ -83,7 +83,7 @@ namespace Gumball
             }
         }
 
-        protected override HashSet<Material> GetMaterialsWithColorProperty()
+        public override HashSet<Material> GetMaterialsWithColorProperty()
         {
             HashSet<Material> materials = base.GetMaterialsWithColorProperty();
 

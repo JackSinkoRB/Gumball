@@ -31,6 +31,7 @@ namespace Gumball
         public string DisplayName => displayName;
         public Sprite Icon => icon;
         public bool IsColorable => isColorable && colors != null && colors.Value != null && colors.Value.Length > 0;
+        public string[] ColorMaterialProperties => colorMaterialProperties;
         public Color[] Colors => colors.Value;
         public int CurrentIndex => currentIndex;
         public int CurrentColorIndex => currentColorIndex;
@@ -88,19 +89,8 @@ namespace Gumball
             currentColorIndex = index;
             OnApplyColor(colors.Value[currentColorIndex]);
         }
-        
-        public void OnApplyColor(Color color)
-        {
-            foreach (Material material in GetMaterialsWithColorProperty())
-            {
-                foreach (string property in colorMaterialProperties)
-                {
-                    material.SetColor(property, color);
-                }
-            }
-        }
-        
-        protected virtual HashSet<Material> GetMaterialsWithColorProperty()
+
+        public virtual HashSet<Material> GetMaterialsWithColorProperty()
         {
             HashSet<Material> materials = new HashSet<Material>();
             foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
@@ -119,6 +109,17 @@ namespace Gumball
         }
         
         protected abstract void OnApplyCosmetic(int index);
+        
+        private void OnApplyColor(Color color)
+        {
+            foreach (Material material in GetMaterialsWithColorProperty())
+            {
+                foreach (string property in colorMaterialProperties)
+                {
+                    material.SetColor(property, color);
+                }
+            }
+        }
 
     }
 }

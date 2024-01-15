@@ -270,5 +270,43 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(indexToUse, hairCosmetic.CurrentIndex);
         }
 
+        [UnityTest]
+        public IEnumerator ColorIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 5;
+            //just use the hair cosmetic for testing
+            HairCosmetic hairCosmetic = avatarToCheck.CurrentBody.GetCosmetic<HairCosmetic>();
+            hairCosmetic.ApplyColor(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            bool allMaterialsHaveColour = true;
+            foreach (Material material in hairCosmetic.GetMaterialsWithColorProperty())
+            {
+                foreach (string property in hairCosmetic.ColorMaterialProperties)
+                {
+                    if (material.GetColor(property) != hairCosmetic.Colors[indexToUse])
+                    {
+                        allMaterialsHaveColour = false;
+                        break;
+                    }
+                }
+            }
+            
+            Assert.IsTrue(allMaterialsHaveColour);
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, hairCosmetic.GetSavedColourIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, hairCosmetic.CurrentColorIndex);
+        }
+
     }
 }
