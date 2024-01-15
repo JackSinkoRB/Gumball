@@ -34,22 +34,7 @@ namespace Gumball
 
         public List<HairItemData> Items => items;
         public GameObject CurrentItem => currentItem;
-        
-        public HashSet<Material> MaterialsWithShadowMap
-        {
-            get
-            {
-                HashSet<Material> materials = new HashSet<Material>();
-                foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
-                {
-                    if (material.HasProperty(shadowMapProperty))
-                        materials.Add(material);
-                }
 
-                return materials;
-            }
-        }
-        
         public override int GetMaxIndex()
         {
             return items.Count - 1;
@@ -97,7 +82,35 @@ namespace Gumball
                 SetShadowMap(itemData);
             }
         }
-        
+
+        protected override HashSet<Material> GetMaterialsWithColorProperty()
+        {
+            HashSet<Material> materials = base.GetMaterialsWithColorProperty();
+
+            //also add any materials on the current item
+            
+            foreach (Transform child in currentItem.transform.GetComponentsInAllChildren<Transform>())
+            {
+                SkinnedMeshRenderer meshRenderer = child.GetComponent<SkinnedMeshRenderer>();
+                if (meshRenderer == null)
+                    continue;
+                
+                foreach (Material material in meshRenderer.materials)
+                {
+                    foreach (string property in colorMaterialProperties)
+                    {
+                        if (material.HasProperty(property))
+                        {
+                            materials.Add(material);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return materials;
+        }
+
         private GameObject InstantiatePrefab(AssetReferenceGameObject prefab)
         {
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(prefab);
@@ -146,10 +159,22 @@ namespace Gumball
         
         private void SetShadowMap(HairItemData itemData)
         {
-            foreach (Material material in MaterialsWithShadowMap)
+            foreach (Material material in GetMaterialsWithShadowMap())
             {
                 material.SetTexture(shadowMapProperty, itemData.ShadowMap);
             }
+        }
+        
+        private HashSet<Material> GetMaterialsWithShadowMap()
+        {
+            HashSet<Material> materials = new HashSet<Material>();
+            foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
+            {
+                if (material.HasProperty(shadowMapProperty))
+                    materials.Add(material);
+            }
+
+            return materials;
         }
         
     }

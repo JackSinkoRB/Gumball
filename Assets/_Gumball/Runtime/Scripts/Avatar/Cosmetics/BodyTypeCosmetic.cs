@@ -49,7 +49,7 @@ namespace Gumball
             return defaultIndex;
         }
 
-        public override void SaveIndex()
+        public override void Save()
         {
             avatarBelongsTo.SavedBodyType = options[defaultIndex].Type;
         }
@@ -63,7 +63,7 @@ namespace Gumball
                 newIndex = 0;
             
             Apply(newIndex);
-            SaveIndex();
+            Save();
         }
 #endif
 

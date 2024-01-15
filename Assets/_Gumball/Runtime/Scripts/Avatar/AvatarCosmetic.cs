@@ -14,16 +14,27 @@ namespace Gumball
         [SerializeField, InitializationField] private Sprite icon;
         [SerializeField, InitializationField] protected int defaultIndex;
         
+        [Space(5)]
+        [SerializeField, InitializationField] private bool isColorable;
+        [SerializeField, InitializationField] protected string[] colorMaterialProperties;
+        [SerializeField, InitializationField, ConditionalField(nameof(isColorable))] protected int defaultColorIndex;
+        [SerializeField, ConditionalField(nameof(isColorable))] private CollectionWrapperColor colors;
+
         [Foldout("Debugging"), SerializeField, ReadOnly] protected Avatar avatarBelongsTo;
         [Foldout("Debugging"), SerializeField, ReadOnly] protected int currentIndex = -1;
-        
-        private string dataSaveKey => $"{avatarBelongsTo.SaveKey}.CosmeticsData.{avatarBelongsTo.CurrentBodyType.ToString()}.{gameObject.name}";
-        
+        [Foldout("Debugging"), SerializeField, ReadOnly] protected int currentColorIndex = -1;
+
+        private string saveKey => $"{avatarBelongsTo.SaveKey}.CosmeticsData.{avatarBelongsTo.CurrentBodyType.ToString()}.{displayName}";
+        private string colourSaveKey => $"{saveKey}.Colour";
+
         public AvatarCosmeticCategory Category => category;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
+        public bool IsColorable => isColorable && colors != null && colors.Value != null && colors.Value.Length > 0;
+        public Color[] Colors => colors.Value;
         public int CurrentIndex => currentIndex;
-        
+        public int CurrentColorIndex => currentColorIndex;
+
         public virtual void Initialise(Avatar avatar)
         {
             avatarBelongsTo = avatar;
@@ -39,22 +50,74 @@ namespace Gumball
             
             currentIndex = index;
             OnApplyCosmetic(index);
+            
+            if (IsColorable)
+                ApplyColor(currentColorIndex == -1 ? GetSavedColourIndex() : currentColorIndex);
         }
 
         public virtual int GetSavedIndex()
         {
-            return DataManager.Avatar.Get(dataSaveKey, defaultIndex);
+            return DataManager.Avatar.Get(saveKey, defaultIndex);
         }
         
-        public virtual void SaveIndex()
+        public int GetSavedColourIndex()
         {
-            DataManager.Avatar.Set(dataSaveKey, currentIndex);
+            return DataManager.Avatar.Get(colourSaveKey, defaultColorIndex);
+        }
+        
+        public virtual void Save()
+        {
+            DataManager.Avatar.Set(saveKey, currentIndex);
+            DataManager.Avatar.Set(colourSaveKey, currentColorIndex);
         }
 
         public abstract int GetMaxIndex();
 
-        public abstract void OnCreateScrollItem(ScrollItem scrollItem, int index);
+        public int GetMaxColorIndex()
+        {
+            return Colors.Length - 1;
+        }
 
+        public abstract void OnCreateScrollItem(ScrollItem scrollItem, int index);
+        
+        public void ApplyColor(int index)
+        {
+            if (currentColorIndex == index)
+                return; //already selected
+            
+            currentColorIndex = index;
+            OnApplyColor(colors.Value[currentColorIndex]);
+        }
+        
+        public void OnApplyColor(Color color)
+        {
+            foreach (Material material in GetMaterialsWithColorProperty())
+            {
+                foreach (string property in colorMaterialProperties)
+                {
+                    material.SetColor(property, color);
+                }
+            }
+        }
+        
+        protected virtual HashSet<Material> GetMaterialsWithColorProperty()
+        {
+            HashSet<Material> materials = new HashSet<Material>();
+            foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
+            {
+                foreach (string property in colorMaterialProperties)
+                {
+                    if (material.HasProperty(property))
+                    {
+                        materials.Add(material);
+                        break;
+                    }
+                }
+            }
+            
+            return materials;
+        }
+        
         protected abstract void OnApplyCosmetic(int index);
 
     }

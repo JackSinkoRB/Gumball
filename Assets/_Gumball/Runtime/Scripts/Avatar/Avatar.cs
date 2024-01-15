@@ -93,7 +93,7 @@ namespace Gumball
         {
             foreach (AvatarCosmetic cosmetic in body.Cosmetics)
             {
-                cosmetic.SaveIndex();
+                cosmetic.Save();
             }
         }
         

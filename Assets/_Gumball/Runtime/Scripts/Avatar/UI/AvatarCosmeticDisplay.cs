@@ -13,6 +13,8 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI titleLabel;
         [SerializeField] private MagneticScroll magneticScroll;
 
+        private AvatarColourPanel colourPanel => PanelManager.GetPanel<AvatarEditorPanel>().ColourPanel;
+
         public void PopulateCosmeticOptions(AvatarCosmetic cosmetic)
         {
             titleLabel.text = cosmetic.DisplayName;
@@ -33,6 +35,16 @@ namespace Gumball
 
             int startIndex = cosmetic == null ? 0 : cosmetic.CurrentIndex == -1 ? cosmetic.GetSavedIndex() : cosmetic.CurrentIndex;
             magneticScroll.SetItems(scrollItems, startIndex);
+
+            if (cosmetic.IsColorable)
+            {
+                colourPanel.Show();
+                colourPanel.Populate(cosmetic);
+            }
+            else
+            {
+                PanelManager.GetPanel<AvatarEditorPanel>().ColourPanel.Hide();
+            }
         }
         
     }

@@ -161,9 +161,9 @@ namespace Gumball.Runtime.Tests
             AvatarEditor.Instance.EndSession();
 
             bool allMaterialsHaveColour = true;
-            foreach (Material material in skinCosmetic.MaterialsToEffect)
+            foreach (Material material in skinCosmetic.GetMaterialsToEffect())
             {
-                if (material.GetColor(SkinColourCosmetic.SkinTintProperty) != skinCosmetic.Colors[indexToUse])
+                if (material.GetColor(SkinColourCosmetic.SkinTintProperty) != skinCosmetic.SkinColors[indexToUse])
                 {
                     allMaterialsHaveColour = false;
                     break;

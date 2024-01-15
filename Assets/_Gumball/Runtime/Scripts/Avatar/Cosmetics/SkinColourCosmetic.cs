@@ -12,34 +12,19 @@ namespace Gumball
 
         public static readonly int SkinTintProperty = Shader.PropertyToID("_Skin_Tint");
         
-        [SerializeField] private Color[] colors;
+        [SerializeField] private Color[] skinColors;
         [SerializeField] private Sprite circleSprite;
 
-        public Color[] Colors => colors;
+        public Color[] SkinColors => skinColors;
 
-        public HashSet<Material> MaterialsToEffect
-        {
-            get
-            {
-                HashSet<Material> materials = new HashSet<Material>();
-                foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
-                {
-                    if (material.HasProperty(SkinTintProperty))
-                        materials.Add(material);
-                }
-
-                return materials;
-            }
-        }
-        
-        public override int GetMaxIndex() => colors.Length - 1;
+        public override int GetMaxIndex() => skinColors.Length - 1;
 
         public override void OnCreateScrollItem(ScrollItem scrollItem, int index)
         {
             scrollItem.onLoad += () =>
             {
                 scrollItem.CurrentIcon.ImageComponent.sprite = circleSprite;
-                scrollItem.CurrentIcon.ImageComponent.color = colors[index];
+                scrollItem.CurrentIcon.ImageComponent.color = skinColors[index];
             };
             scrollItem.onSelect += () =>
             {
@@ -47,24 +32,36 @@ namespace Gumball
             };
         }
 
-        protected override void OnApplyCosmetic(int index)
+        public HashSet<Material> GetMaterialsToEffect()
         {
-            foreach (Material material in MaterialsToEffect)
+            HashSet<Material> materials = new HashSet<Material>();
+            foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
             {
-                material.SetColor(SkinTintProperty, colors[index].WithAlphaSetTo(1));
+                if (material.HasProperty(SkinTintProperty))
+                    materials.Add(material);
             }
+
+            return materials;
         }
         
+        protected override void OnApplyCosmetic(int index)
+        {
+            foreach (Material material in GetMaterialsToEffect())
+            {
+                material.SetColor(SkinTintProperty, skinColors[index].WithAlphaSetTo(1));
+            }
+        }
+
 #if UNITY_EDITOR
         [ButtonMethod]
         public void SetNextTesting()
         {
             int newIndex = currentIndex + 1;
-            if (newIndex >= colors.Length)
+            if (newIndex >= skinColors.Length)
                 newIndex = 0;
             
             Apply(newIndex);
-            SaveIndex();
+            Save();
         }
 #endif
 

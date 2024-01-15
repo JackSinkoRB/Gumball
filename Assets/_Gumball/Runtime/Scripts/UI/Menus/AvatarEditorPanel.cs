@@ -9,9 +9,11 @@ namespace Gumball
 
         [SerializeField] private AvatarCosmeticSelector cosmeticSelector;
         [SerializeField] private AvatarCosmeticDisplay cosmeticDisplay;
+        [SerializeField] private AvatarColourPanel colourPanel;
 
         public AvatarCosmeticSelector CosmeticSelector => cosmeticSelector;
         public AvatarCosmeticDisplay CosmeticDisplay => cosmeticDisplay;
+        public AvatarColourPanel ColourPanel => colourPanel;
 
         public void OnClickBackButton()
         {
