@@ -2,17 +2,21 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MagneticScrollUtils;
+using TMPro;
 using UnityEngine;
 
 namespace Gumball
 {
     public class AvatarCosmeticDisplay : MonoBehaviour
     {
-        
+
+        [SerializeField] private TextMeshProUGUI titleLabel;
         [SerializeField] private MagneticScroll magneticScroll;
 
         public void PopulateCosmeticOptions(AvatarCosmetic cosmetic)
         {
+            titleLabel.text = cosmetic.DisplayName;
+            
             List<ScrollItem> scrollItems = new List<ScrollItem>();
 
             if (cosmetic != null)

@@ -10,6 +10,7 @@ namespace Gumball
     {
 
         [SerializeField, InitializationField] private AvatarCosmeticCategory category;
+        [SerializeField, InitializationField] private string displayName = "NOT ASSIGNED";
         [SerializeField, InitializationField] private Sprite icon;
         [SerializeField, InitializationField] protected int defaultIndex;
         
@@ -17,8 +18,9 @@ namespace Gumball
         [Foldout("Debugging"), SerializeField, ReadOnly] protected int currentIndex = -1;
         
         private string dataSaveKey => $"{avatarBelongsTo.SaveKey}.CosmeticsData.{avatarBelongsTo.CurrentBodyType.ToString()}.{gameObject.name}";
-
+        
         public AvatarCosmeticCategory Category => category;
+        public string DisplayName => displayName;
         public Sprite Icon => icon;
         public int CurrentIndex => currentIndex;
         
