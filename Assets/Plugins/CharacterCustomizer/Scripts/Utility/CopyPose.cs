@@ -6,15 +6,16 @@ namespace CC
 {
     public class CopyPose : MonoBehaviour
     {
+        
         private Transform[] SourceHierarchy;
         private Transform[] TargetHierarchy;
         public List<Transform> SourceBones = new List<Transform>();
         public List<Transform> TargetBones = new List<Transform>();
-
-        private void Start()
+        
+        public void Initialise(Transform body)
         {
             //Get bone hierarchies
-            foreach (Transform child in transform.parent)
+            foreach (Transform child in body)
             {
                 if (child.gameObject.name == "root")
                 {
@@ -40,8 +41,8 @@ namespace CC
                 }
             }
         }
-
-        private void Update()
+        
+        private void LateUpdate()
         {
             //Copy bone transform
             for (int i = 0; i < SourceBones.Count; i++)

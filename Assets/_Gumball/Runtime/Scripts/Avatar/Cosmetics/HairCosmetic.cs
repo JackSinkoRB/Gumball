@@ -10,46 +10,46 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Gumball
 {
-    public abstract class ApparelCosmetic : AvatarCosmetic
+    public class HairCosmetic : AvatarCosmetic
     {
 
         [Serializable]
-        public struct ApparelItemData
+        public struct HairItemData
         {
             [SerializeField] private AssetReferenceGameObject prefab;
             [SerializeField] private Sprite icon;
-            [SerializeField] private Texture2D mask;
-            [SerializeField] private FootOffset footOffset;
+            [SerializeField] private Texture2D shadowMap;
+            [SerializeField] private bool addCopyPose;
 
             public AssetReferenceGameObject Prefab => prefab;
             public Sprite Icon => icon;
-            public Texture2D Mask => mask;
-            public FootOffset FootOffset => footOffset;
+            public Texture2D ShadowMap => shadowMap;
+            public bool AddCopyPose => addCopyPose;
         }
-
-        [SerializeField] private List<ApparelItemData> items = new();
-        [SerializeField] private string maskProperty;
-
+        
+        [SerializeField] private List<HairItemData> items = new();
+        [SerializeField] private string shadowMapProperty;
+        
         [Foldout("Debugging"), SerializeField, ReadOnly] private GameObject currentItem;
 
-        public List<ApparelItemData> Items => items;
+        public List<HairItemData> Items => items;
         public GameObject CurrentItem => currentItem;
         
-        public HashSet<Material> MaterialsWithMask
+        public HashSet<Material> MaterialsWithShadowMap
         {
             get
             {
                 HashSet<Material> materials = new HashSet<Material>();
                 foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
                 {
-                    if (material.HasProperty(maskProperty))
+                    if (material.HasProperty(shadowMapProperty))
                         materials.Add(material);
                 }
 
                 return materials;
             }
         }
-
+        
         public override int GetMaxIndex()
         {
             return items.Count - 1;
@@ -74,7 +74,7 @@ namespace Gumball
             if (currentItem != null)
                 Destroy(currentItem);
 
-            ApparelItemData itemData = items[index];
+            HairItemData itemData = items[index];
             if (itemData.Prefab.RuntimeKeyIsValid())
             {
                 //instantiate the mesh
@@ -84,20 +84,20 @@ namespace Gumball
                 AddBlendShapes(currentItem);
                 
                 //assign bones
-                AssignBones(currentItem);
+                AssignBones(currentItem, itemData.AddCopyPose);
                 
-                //set foot offset
-                SetFootOffset(itemData);
-                
-                //set the mask textures
-                SetMasks(itemData);
+                //set the shadow map texture
+                SetShadowMap(itemData);
             }
             else
             {
                 currentItem = null;
+                
+                //remove the shadow map
+                SetShadowMap(itemData);
             }
         }
-
+        
         private GameObject InstantiatePrefab(AssetReferenceGameObject prefab)
         {
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(prefab);
@@ -108,7 +108,7 @@ namespace Gumball
 
             return item;
         }
-
+        
         private void AddBlendShapes(GameObject item)
         {
             //Add blendshape managers and update shapes
@@ -122,9 +122,15 @@ namespace Gumball
                 }
             }
         }
-
-        private void AssignBones(GameObject item)
+        
+        private void AssignBones(GameObject item, bool addCopyPose)
         {
+            if (addCopyPose)
+            {
+                item.AddComponent<CopyPose>().Initialise(avatarBelongsTo.CurrentBody.transform);
+                return;
+            }
+            
             foreach (SkinnedMeshRenderer mesh in item.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
                 var MyBones = new Transform[mesh.bones.Length];
@@ -137,26 +143,14 @@ namespace Gumball
                 mesh.bones = MyBones;
             }
         }
-
-        private void SetFootOffset(ApparelItemData itemData)
+        
+        private void SetShadowMap(HairItemData itemData)
         {
-            if (itemData.FootOffset.HeightOffset < 0)
-                return;
-            
-            //TODO: the bones can be cached in the avatar
-            foreach (TransformBone component in avatarBelongsTo.GetComponentsInChildren<TransformBone>())
+            foreach (Material material in MaterialsWithShadowMap)
             {
-                component.SetOffset(itemData.FootOffset);
+                material.SetTexture(shadowMapProperty, itemData.ShadowMap);
             }
         }
-
-        private void SetMasks(ApparelItemData itemData)
-        {
-            foreach (Material material in MaterialsWithMask)
-            {
-                material.SetTexture(maskProperty, itemData.Mask);
-            }
-        }
-
+        
     }
 }
