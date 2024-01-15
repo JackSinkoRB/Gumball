@@ -27,7 +27,7 @@ namespace Gumball
                 }
             }
 
-            int startIndex = cosmetic == null ? 0 : cosmetic.GetSavedIndex();
+            int startIndex = cosmetic == null ? 0 : cosmetic.CurrentIndex == -1 ? cosmetic.GetSavedIndex() : cosmetic.CurrentIndex;
             magneticScroll.SetItems(scrollItems, startIndex);
         }
         
