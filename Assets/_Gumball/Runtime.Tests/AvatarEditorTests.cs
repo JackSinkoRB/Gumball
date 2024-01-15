@@ -204,7 +204,7 @@ namespace Gumball.Runtime.Tests
         }
         
         [UnityTest]
-        public IEnumerator UpperBodyCosmeticIsPersistent()
+        public IEnumerator ApparelCosmeticIsPersistent()
         {
             yield return new WaitUntil(() => isInitialised);
 
@@ -213,6 +213,7 @@ namespace Gumball.Runtime.Tests
             Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
 
             const int indexToUse = 2;
+            //just use the upper body cosmetic for testing
             UpperBodyCosmetic upperBodyCosmetic = avatarToCheck.CurrentBody.GetCosmetic<UpperBodyCosmetic>();
             upperBodyCosmetic.Apply(indexToUse);
             
