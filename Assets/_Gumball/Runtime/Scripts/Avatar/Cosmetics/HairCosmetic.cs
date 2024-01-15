@@ -87,6 +87,9 @@ namespace Gumball
         {
             HashSet<Material> materials = base.GetMaterialsWithColorProperty();
 
+            if (currentItem == null)
+                return materials;
+            
             //also add any materials on the current item
             
             foreach (Transform child in currentItem.transform.GetComponentsInAllChildren<Transform>())
