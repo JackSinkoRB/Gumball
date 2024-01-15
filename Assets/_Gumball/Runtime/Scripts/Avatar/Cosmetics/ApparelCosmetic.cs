@@ -85,7 +85,7 @@ namespace Gumball
                 
                 foreach (Material material in meshRenderer.materials)
                 {
-                    foreach (string property in colorMaterialProperties)
+                    foreach (string property in ColorMaterialProperties)
                     {
                         if (material.HasProperty(property))
                         {

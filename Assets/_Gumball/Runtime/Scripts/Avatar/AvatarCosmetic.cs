@@ -14,9 +14,9 @@ namespace Gumball
         [SerializeField, InitializationField] private Sprite icon;
         [SerializeField, InitializationField] protected int defaultIndex;
         
-        [Space(5)]
+        [Header("Colours")]
         [SerializeField, InitializationField] private bool isColorable;
-        [SerializeField, InitializationField] protected string[] colorMaterialProperties;
+        [SerializeField, InitializationField, ConditionalField(nameof(isColorable))] protected CollectionWrapperString colorMaterialProperties;
         [SerializeField, InitializationField, ConditionalField(nameof(isColorable))] protected int defaultColorIndex;
         [SerializeField, ConditionalField(nameof(isColorable))] private CollectionWrapperColor colors;
 
@@ -31,7 +31,7 @@ namespace Gumball
         public string DisplayName => displayName;
         public Sprite Icon => icon;
         public bool IsColorable => isColorable && colors != null && colors.Value != null && colors.Value.Length > 0;
-        public string[] ColorMaterialProperties => colorMaterialProperties;
+        public string[] ColorMaterialProperties => colorMaterialProperties.Value;
         public Color[] Colors => colors.Value;
         public int CurrentIndex => currentIndex;
         public int CurrentColorIndex => currentColorIndex;
@@ -95,7 +95,7 @@ namespace Gumball
             HashSet<Material> materials = new HashSet<Material>();
             foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
             {
-                foreach (string property in colorMaterialProperties)
+                foreach (string property in ColorMaterialProperties)
                 {
                     if (material.HasProperty(property))
                     {
@@ -114,7 +114,7 @@ namespace Gumball
         {
             foreach (Material material in GetMaterialsWithColorProperty())
             {
-                foreach (string property in colorMaterialProperties)
+                foreach (string property in ColorMaterialProperties)
                 {
                     material.SetColor(property, color);
                 }
