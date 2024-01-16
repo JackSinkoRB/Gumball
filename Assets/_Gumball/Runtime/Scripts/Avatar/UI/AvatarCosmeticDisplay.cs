@@ -10,11 +10,19 @@ namespace Gumball
     public class AvatarCosmeticDisplay : MonoBehaviour
     {
 
+        public static event Action<AvatarCosmetic> onSelectCosmetic;
+        
         [SerializeField] private TextMeshProUGUI titleLabel;
         [SerializeField] private MagneticScroll magneticScroll;
 
         private AvatarColourPanel colourPanel => PanelManager.GetPanel<AvatarEditorPanel>().ColourPanel;
 
+        [RuntimeInitializeOnLoadMethod]
+        private static void RuntimeInitialise()
+        {
+            onSelectCosmetic = null;
+        }
+        
         public void PopulateCosmeticOptions(AvatarCosmetic cosmetic)
         {
             titleLabel.text = cosmetic.DisplayName;
@@ -39,6 +47,8 @@ namespace Gumball
             magneticScroll.SetItems(scrollItems, startIndex);
 
             CheckToShowColourPanel(cosmetic);
+            
+            onSelectCosmetic?.Invoke(cosmetic);
         }
 
         private void CheckToShowColourPanel(AvatarCosmetic cosmetic)

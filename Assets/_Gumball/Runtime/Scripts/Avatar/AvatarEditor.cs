@@ -55,15 +55,19 @@ namespace Gumball
         }
         #endregion
 
+        [SerializeField] private AvatarCameraController cameraController;
+            
+        [Space(5)]
         [SerializeField] private Vector3 driverStartingPosition;
         [SerializeField] private Vector3 driverStartingRotationEuler;
-        
+
+        [Space(5)]
         [SerializeField] private Vector3 coDriverStartingPosition;
         [SerializeField] private Vector3 coDriverStartingRotationEuler;
         
         public Avatar CurrentSelectedAvatar { get; private set; }
-        
         public bool SessionInProgress { get; private set; }
+        public AvatarCameraController CameraController => cameraController;
         
         public IEnumerator StartSession()
         {

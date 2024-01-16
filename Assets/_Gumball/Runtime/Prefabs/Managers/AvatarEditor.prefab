@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroy: 1
+  cameraController: {fileID: 6525731567286137882}
   driverStartingPosition: {x: 0, y: 0, z: 0}
   driverStartingRotationEuler: {x: 0, y: 180, z: 0}
   coDriverStartingPosition: {x: -3, y: 0, z: 1.5}
@@ -94,8 +95,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7602ceb76550ef849835ee8ba3802048, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialCameraPosition: {x: 0, y: 1.3, z: -3}
-  initialCameraRotation: {x: 9, y: 0, z: 0}
-  target: {fileID: 0}
-  targetOffset: {x: 0, y: 0, z: 0}
-  defaultTargetOffset: {x: 0, y: 0, z: 0}
+  cameraTweenDuration: 0.5
+  cameraEase: 9
+  fullBodyPosition:
+    position: {x: 0, y: 1.3, z: -3}
+    rotationEuler: {x: 9, y: 0, z: 0}
+  headPosition:
+    position: {x: 0, y: 1.7, z: -0.58}
+    rotationEuler: {x: 5, y: 0, z: 0}
+  upperBodyPosition:
+    position: {x: 0, y: 1.45, z: -2.2}
+    rotationEuler: {x: 9, y: 0, z: 0}
+  lowerBodyPosition:
+    position: {x: 0, y: 1.02, z: -2.2}
+    rotationEuler: {x: 9, y: 0, z: 0}
+  feetPosition:
+    position: {x: -0.07, y: 0.35, z: -1.08}
+    rotationEuler: {x: 9, y: 0, z: 0}

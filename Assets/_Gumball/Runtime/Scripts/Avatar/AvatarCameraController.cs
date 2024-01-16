@@ -1,6 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using MyBox;
+using DG.Tweening;
 using UnityEngine;
 
 namespace Gumball
@@ -8,49 +9,89 @@ namespace Gumball
     public class AvatarCameraController : MonoBehaviour
     {
 
-        [SerializeField] private Vector3 initialCameraPosition;
-        [SerializeField] private Vector3 initialCameraRotation;
+        public enum CameraPositionType
+        {
+            FULL_BODY,
+            HEAD,
+            UPPER_BODY,
+            LOWER_BODY,
+            FEET
+        }
+
+        [Serializable]
+        public struct CameraPosition
+        {
+            [SerializeField] private Vector3 position;
+            [SerializeField] private Vector3 rotationEuler;
+
+            public Vector3 Position => position;
+            public Vector3 RotationEuler => rotationEuler;
+            public Quaternion Rotation => Quaternion.Euler(rotationEuler);
+        }
+
+        [SerializeField] private float cameraTweenDuration = 0.4f;
+        [SerializeField] private Ease cameraEase = Ease.InOutSine;
         
-        [Header("Target")]
-        [SerializeField, ReadOnly] private Transform target;
-        [SerializeField, ReadOnly] private Vector3 targetOffset;
-        [SerializeField] private Vector3 defaultTargetOffset = new(0, 0.5f);
+        [Header("Camera positions")]
+        [SerializeField] private CameraPosition fullBodyPosition;
+        [SerializeField] private CameraPosition headPosition;
+        [SerializeField] private CameraPosition upperBodyPosition;
+        [SerializeField] private CameraPosition lowerBodyPosition;
+        [SerializeField] private CameraPosition feetPosition;
+
+        private Sequence currentTween;
         
         private void OnEnable()
         {
-            AvatarEditor.onSessionStart += OnSessionStart;
-            AvatarEditor.onSessionEnd += OnSessionEnd;
+            AvatarCosmeticDisplay.onSelectCosmetic += OnSelectCosmetic;
+            
+            SetPosition(CameraPositionType.FULL_BODY, true);
         }
         
         private void OnDisable()
         {
-            AvatarEditor.onSessionStart -= OnSessionStart;
-            AvatarEditor.onSessionEnd -= OnSessionEnd;
-        }
-        
-        public void SetTarget(Transform target, Vector2 offset)
-        {
-            this.target = target;
-            targetOffset = offset;
-            //MoveCamera(Vector2.zero, movementTweenDuration);
+            AvatarCosmeticDisplay.onSelectCosmetic -= OnSelectCosmetic;
         }
 
-        private void OnSessionStart()
-        {
-            SetTarget(AvatarEditor.Instance.CurrentSelectedAvatar.transform, defaultTargetOffset);
-            SetInitialPosition();
-        }
+        public void SetPosition(CameraPositionType type, bool instant = false) => SetPosition(GetCameraPositionFromType(type), instant);
 
-        private void OnSessionEnd()
+        public void SetPosition(CameraPosition cameraPosition, bool instant = false)
         {
+            currentTween?.Kill();
+
+            Tween positionTween = Camera.main.transform
+                .DOMove(cameraPosition.Position, cameraTweenDuration)
+                .SetEase(cameraEase);
             
+            Tween rotationTween = Camera.main.transform
+                .DORotate(cameraPosition.RotationEuler, cameraTweenDuration)
+                .SetEase(cameraEase);
+            
+            currentTween = DOTween.Sequence()
+                .Join(positionTween)
+                .Join(rotationTween);
+            
+            if (instant)
+                currentTween.Complete();
         }
         
-        private void SetInitialPosition()
+        private void OnSelectCosmetic(AvatarCosmetic cosmetic)
         {
-            Camera.main.transform.position = initialCameraPosition;
-            Camera.main.transform.rotation = Quaternion.Euler(initialCameraRotation);
+            SetPosition(cosmetic.CameraPosition);
         }
-        
+
+        private CameraPosition GetCameraPositionFromType(CameraPositionType type)
+        {
+            return type switch
+            {
+                CameraPositionType.FULL_BODY => fullBodyPosition,
+                CameraPositionType.HEAD => headPosition,
+                CameraPositionType.UPPER_BODY => upperBodyPosition,
+                CameraPositionType.LOWER_BODY => lowerBodyPosition,
+                CameraPositionType.FEET => feetPosition,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, $"Unknown position type {type.ToString()}")
+            };
+        }
+
     }
 }

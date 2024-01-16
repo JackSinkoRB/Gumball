@@ -13,6 +13,7 @@ namespace Gumball
         [SerializeField, InitializationField] private string displayName = "NOT ASSIGNED";
         [SerializeField, InitializationField] private Sprite icon;
         [SerializeField, InitializationField] protected int defaultIndex;
+        [SerializeField] private AvatarCameraController.CameraPositionType cameraPosition;
 
         [Foldout("Debugging"), SerializeField, ReadOnly] protected Avatar avatarBelongsTo;
         [Foldout("Debugging"), SerializeField, ReadOnly] protected int currentIndex = -1;
@@ -23,6 +24,7 @@ namespace Gumball
         public string DisplayName => displayName;
         public Sprite Icon => icon;
         public int CurrentIndex => currentIndex;
+        public AvatarCameraController.CameraPositionType CameraPosition => cameraPosition;
 
         public virtual void Initialise(Avatar avatar)
         {
