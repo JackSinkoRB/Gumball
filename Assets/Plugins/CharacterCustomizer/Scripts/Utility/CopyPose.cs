@@ -40,11 +40,17 @@ namespace CC
                     TargetBones.Add(targetBone);
                 }
             }
+            
+            CopyBones();
         }
         
         private void LateUpdate()
         {
-            //Copy bone transform
+            CopyBones();
+        }
+
+        private void CopyBones()
+        {
             for (int i = 0; i < SourceBones.Count; i++)
             {
                 TargetBones[i].localPosition = SourceBones[i].localPosition;
@@ -52,5 +58,6 @@ namespace CC
                 TargetBones[i].localScale = SourceBones[i].localScale;
             }
         }
+        
     }
 }
