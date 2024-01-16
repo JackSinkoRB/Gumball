@@ -10,49 +10,86 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Gumball
 {
-    public abstract class ApparelCosmetic : AvatarCosmetic
+    /// <summary>
+    /// A cosmetic that has an item that attaches to the avatar.
+    /// </summary>
+    public abstract class ItemCosmetic : AvatarCosmetic
     {
 
         [Serializable]
-        public struct ApparelItemData
+        public struct ItemData
         {
             [SerializeField] private AssetReferenceGameObject prefab;
             [SerializeField] private Sprite icon;
             [SerializeField] private Texture2D mask;
+            [SerializeField] private bool addCopyPose;
             [SerializeField] private FootOffset footOffset;
+            [SerializeField] private Colorable colorable;
 
             public AssetReferenceGameObject Prefab => prefab;
             public Sprite Icon => icon;
             public Texture2D Mask => mask;
+            public bool AddCopyPose => addCopyPose;
             public FootOffset FootOffset => footOffset;
+            public Colorable Colorable => colorable;
         }
 
-        [SerializeField] private List<ApparelItemData> items = new();
+        [Serializable]
+        public struct Colorable
+        {
+            [SerializeField, InitializationField] private bool isColorable;
+            [SerializeField, InitializationField, ConditionalField(nameof(isColorable))] private int defaultColorIndex;
+            [SerializeField, InitializationField, ConditionalField(nameof(isColorable))] private CollectionWrapperString colorMaterialProperties;
+            [SerializeField, ConditionalField(nameof(isColorable))] private CollectionWrapperColor colors;
+            
+            public bool IsColorable => isColorable;
+            public int DefaultColorIndex => defaultColorIndex;
+            public string[] ColorMaterialProperties => colorMaterialProperties.Value;
+            public Color[] Colors => colors.Value;
+        }
+        
+        [SerializeField] private List<ItemData> items = new();
         [SerializeField] private string maskProperty;
 
-        [Foldout("Debugging"), SerializeField, ReadOnly] private GameObject currentItem;
+        [Foldout("Debugging"), SerializeField, ReadOnly]
+        private GameObject currentItem;
+        [Foldout("Debugging"), SerializeField, ReadOnly]
+        private int currentColorIndex = -1;
 
-        public List<ApparelItemData> Items => items;
+        public List<ItemData> Items => items;
+        public ItemData CurrentItemData => currentIndex == -1 ? items[defaultIndex] : items[currentIndex];
         public GameObject CurrentItem => currentItem;
+        public int CurrentColorIndex => currentColorIndex;
         
-        public HashSet<Material> MaterialsWithMask
+        private string colorSaveKey => $"{saveKey}.SelectedColorIndex";
+        
+        public HashSet<Material> GetMaterialsWithMask()
         {
-            get
+            HashSet<Material> materials = new HashSet<Material>();
+            foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
             {
-                HashSet<Material> materials = new HashSet<Material>();
-                foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
-                {
-                    if (material.HasProperty(maskProperty))
-                        materials.Add(material);
-                }
-
-                return materials;
+                if (material.HasProperty(maskProperty))
+                    materials.Add(material);
             }
+
+            return materials;
         }
 
         public override int GetMaxIndex()
         {
             return items.Count - 1;
+        }
+
+        public override void Save()
+        {
+            base.Save();
+            
+            DataManager.Avatar.Set(colorSaveKey, currentColorIndex);
+        }
+        
+        public int GetSavedColorIndex()
+        {
+            return DataManager.Avatar.Get(colorSaveKey, -1);
         }
 
         public override void OnCreateScrollItem(ScrollItem scrollItem, int index)
@@ -67,11 +104,22 @@ namespace Gumball
                 Apply(index);
             };
         }
-        
-        public override HashSet<Material> GetMaterialsWithColorProperty()
-        {
-            HashSet<Material> materials = base.GetMaterialsWithColorProperty();
 
+        public HashSet<Material> GetMaterialsWithColorProperty()
+        {
+            HashSet<Material> materials = new HashSet<Material>();
+            foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
+            {
+                foreach (string property in CurrentItemData.Colorable.ColorMaterialProperties)
+                {
+                    if (material.HasProperty(property))
+                    {
+                        materials.Add(material);
+                        break;
+                    }
+                }
+            }
+            
             if (currentItem == null)
                 return materials;
             
@@ -85,7 +133,7 @@ namespace Gumball
                 
                 foreach (Material material in meshRenderer.materials)
                 {
-                    foreach (string property in ColorMaterialProperties)
+                    foreach (string property in CurrentItemData.Colorable.ColorMaterialProperties)
                     {
                         if (material.HasProperty(property))
                         {
@@ -105,7 +153,8 @@ namespace Gumball
             if (currentItem != null)
                 Destroy(currentItem);
 
-            ApparelItemData itemData = items[index];
+            ItemData itemData = items[index];
+            
             if (itemData.Prefab.RuntimeKeyIsValid())
             {
                 //instantiate the mesh
@@ -115,18 +164,21 @@ namespace Gumball
                 AddBlendShapes(currentItem);
                 
                 //assign bones
-                AssignBones(currentItem);
+                AssignBones(currentItem, itemData.AddCopyPose);
                 
                 //set foot offset
                 SetFootOffset(itemData);
-                
-                //set the mask textures
-                SetMasks(itemData);
             }
             else
             {
                 currentItem = null;
             }
+            
+            //set the mask textures
+            SetMasks(itemData);
+            
+            //set the colour
+            ApplyDefaultColor(itemData);
         }
 
         private GameObject InstantiatePrefab(AssetReferenceGameObject prefab)
@@ -154,8 +206,14 @@ namespace Gumball
             }
         }
 
-        private void AssignBones(GameObject item)
+        private void AssignBones(GameObject item, bool addCopyPose)
         {
+            if (addCopyPose)
+            {
+                item.AddComponent<CopyPose>().Initialise(avatarBelongsTo.CurrentBody.transform);
+                return;
+            }
+            
             foreach (SkinnedMeshRenderer mesh in item.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
                 var MyBones = new Transform[mesh.bones.Length];
@@ -169,7 +227,7 @@ namespace Gumball
             }
         }
 
-        private void SetFootOffset(ApparelItemData itemData)
+        private void SetFootOffset(ItemData itemData)
         {
             if (!itemData.FootOffset.IsUsed)
                 return;
@@ -181,11 +239,42 @@ namespace Gumball
             }
         }
 
-        private void SetMasks(ApparelItemData itemData)
+        private void SetMasks(ItemData itemData)
         {
-            foreach (Material material in MaterialsWithMask)
+            foreach (Material material in GetMaterialsWithMask())
             {
                 material.SetTexture(maskProperty, itemData.Mask);
+            }
+        }
+
+        private void ApplyDefaultColor(ItemData itemData)
+        {
+            if (!itemData.Colorable.IsColorable)
+                return;
+
+            if (currentColorIndex == -1)
+                currentColorIndex = GetSavedColorIndex();
+
+            if (currentColorIndex == -1
+                || currentColorIndex >= itemData.Colorable.Colors.Length)
+                currentColorIndex = itemData.Colorable.DefaultColorIndex;
+
+            ApplyColor(currentColorIndex);
+        }
+
+        public void ApplyColor(int index)
+        {
+            if (!CurrentItemData.Colorable.IsColorable)
+                return;
+            
+            currentColorIndex = index;
+
+            foreach (Material material in GetMaterialsWithColorProperty())
+            {
+                foreach (string property in CurrentItemData.Colorable.ColorMaterialProperties)
+                {
+                    material.SetColor(property, CurrentItemData.Colorable.Colors[index]);
+                }
             }
         }
 

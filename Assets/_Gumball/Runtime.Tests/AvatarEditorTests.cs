@@ -214,7 +214,7 @@ namespace Gumball.Runtime.Tests
         }
         
         [UnityTest]
-        public IEnumerator ApparelCosmeticIsPersistent()
+        public IEnumerator ItemCosmeticIsPersistent()
         {
             yield return new WaitUntil(() => isInitialised);
 
@@ -241,56 +241,28 @@ namespace Gumball.Runtime.Tests
             //ensure it is current
             Assert.AreEqual(indexToUse, upperBodyCosmetic.CurrentIndex);
         }
+
+        [UnityTest]
+        public IEnumerator ItemColorIsPersistentHair()
+        {
+            yield return new WaitUntil(() => isInitialised);
         
-        [UnityTest]
-        public IEnumerator HairCosmeticIsPersistent()
-        {
-            yield return new WaitUntil(() => isInitialised);
-
             yield return AvatarEditor.Instance.StartSession();
             
             Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
-
-            const int indexToUse = 3;
-            HairCosmetic hairCosmetic = avatarToCheck.CurrentBody.GetCosmetic<HairCosmetic>();
-            hairCosmetic.Apply(indexToUse);
-            
-            AvatarEditor.Instance.EndSession();
-
-            Assert.IsNotNull(hairCosmetic.CurrentItem);
-            
-            string nameOfItemInList = hairCosmetic.Items[indexToUse].Prefab.editorAsset.name;
-            string nameOfCurrentItem = hairCosmetic.CurrentItem.name.Replace("(Clone)", "");
-            Assert.IsTrue(nameOfItemInList.Equals(nameOfCurrentItem));
-            
-            //ensure it is saved in persistent data
-            Assert.AreEqual(indexToUse, hairCosmetic.GetSavedIndex());
-            
-            //ensure it is current
-            Assert.AreEqual(indexToUse, hairCosmetic.CurrentIndex);
-        }
-
-        [UnityTest]
-        public IEnumerator HairColorIsPersistent()
-        {
-            yield return new WaitUntil(() => isInitialised);
-
-            yield return AvatarEditor.Instance.StartSession();
-            
-            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
-
+        
             const int indexToUse = 5;
             HairCosmetic hairCosmetic = avatarToCheck.CurrentBody.GetCosmetic<HairCosmetic>();
             hairCosmetic.ApplyColor(indexToUse);
             
             AvatarEditor.Instance.EndSession();
-
+        
             bool allMaterialsHaveColour = true;
             foreach (Material material in hairCosmetic.GetMaterialsWithColorProperty())
             {
-                foreach (string property in hairCosmetic.ColorMaterialProperties)
+                foreach (string property in hairCosmetic.CurrentItemData.Colorable.ColorMaterialProperties)
                 {
-                    if (material.GetColor(property) != hairCosmetic.Colors[indexToUse])
+                    if (material.GetColor(property) != hairCosmetic.CurrentItemData.Colorable.Colors[indexToUse])
                     {
                         allMaterialsHaveColour = false;
                         break;
@@ -301,49 +273,11 @@ namespace Gumball.Runtime.Tests
             Assert.IsTrue(allMaterialsHaveColour);
             
             //ensure it is saved in persistent data
-            Assert.AreEqual(indexToUse, hairCosmetic.GetSavedColourIndex());
+            Assert.AreEqual(indexToUse, hairCosmetic.GetSavedColorIndex());
             
             //ensure it is current
             Assert.AreEqual(indexToUse, hairCosmetic.CurrentColorIndex);
         }
         
-        [UnityTest]
-        public IEnumerator ApparelColorIsPersistent()
-        {
-            yield return new WaitUntil(() => isInitialised);
-
-            yield return AvatarEditor.Instance.StartSession();
-            
-            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
-
-            const int indexToUse = 5;
-            //just use the upper body cosmetic for testing
-            UpperBodyCosmetic upperBodyCosmetic = avatarToCheck.CurrentBody.GetCosmetic<UpperBodyCosmetic>();
-            upperBodyCosmetic.ApplyColor(indexToUse);
-            
-            AvatarEditor.Instance.EndSession();
-
-            bool allMaterialsHaveColour = true;
-            foreach (Material material in upperBodyCosmetic.GetMaterialsWithColorProperty())
-            {
-                foreach (string property in upperBodyCosmetic.ColorMaterialProperties)
-                {
-                    if (material.GetColor(property) != upperBodyCosmetic.Colors[indexToUse])
-                    {
-                        allMaterialsHaveColour = false;
-                        break;
-                    }
-                }
-            }
-            
-            Assert.IsTrue(allMaterialsHaveColour);
-            
-            //ensure it is saved in persistent data
-            Assert.AreEqual(indexToUse, upperBodyCosmetic.GetSavedColourIndex());
-            
-            //ensure it is current
-            Assert.AreEqual(indexToUse, upperBodyCosmetic.CurrentColorIndex);
-        }
-
     }
 }

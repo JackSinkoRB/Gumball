@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class FootwearCosmetic : ApparelCosmetic
+    public class FootwearCosmetic : ItemCosmetic
     {
 
         

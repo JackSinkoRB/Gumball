@@ -26,9 +26,11 @@ namespace Gumball
                 for (int index = 0; index <= cosmetic.GetMaxIndex(); index++)
                 {
                     ScrollItem scrollItem = new ScrollItem();
-
+                    
                     cosmetic.OnCreateScrollItem(scrollItem, index);
-
+                    
+                    scrollItem.onSelect += () => CheckToShowColourPanel(cosmetic);
+                    
                     scrollItems.Add(scrollItem);
                 }
             }
@@ -36,14 +38,21 @@ namespace Gumball
             int startIndex = cosmetic == null ? 0 : cosmetic.CurrentIndex == -1 ? cosmetic.GetSavedIndex() : cosmetic.CurrentIndex;
             magneticScroll.SetItems(scrollItems, startIndex);
 
-            if (cosmetic.IsColorable)
+            CheckToShowColourPanel(cosmetic);
+        }
+
+        private void CheckToShowColourPanel(AvatarCosmetic cosmetic)
+        {
+            if (cosmetic is ItemCosmetic itemCosmetic
+                && itemCosmetic.CurrentItemData.Colorable.IsColorable
+                && itemCosmetic.CurrentItemData.Colorable.Colors.Length > 1) //require at least 2 colors for it to show
             {
                 colourPanel.Show();
-                colourPanel.Populate(cosmetic);
+                colourPanel.Populate(itemCosmetic);
             }
             else
             {
-                PanelManager.GetPanel<AvatarEditorPanel>().ColourPanel.Hide();
+                colourPanel.Hide();
             }
         }
         
