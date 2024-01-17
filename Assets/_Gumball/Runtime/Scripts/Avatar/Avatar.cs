@@ -76,6 +76,9 @@ namespace Gumball
             if (newBodyType == CurrentBodyType)
                 return; //already assigned
 
+            //save before changing
+            AvatarEditor.SaveCurrentAvatarBody();
+
             AvatarBody previousBody = currentBodyType == AvatarBodyType.MALE ? CurrentMaleBody : CurrentFemaleBody;
             currentBodyType = newBodyType;
             
