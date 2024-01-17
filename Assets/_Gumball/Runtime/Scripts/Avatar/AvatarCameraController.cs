@@ -21,12 +21,16 @@ namespace Gumball
         [Serializable]
         public struct CameraPosition
         {
-            [SerializeField] private Vector3 position;
-            [SerializeField] private Vector3 rotationEuler;
+            [SerializeField] private Vector3 positionMale;
+            [SerializeField] private Vector3 rotationEulerMale;
 
-            public Vector3 Position => position;
-            public Vector3 RotationEuler => rotationEuler;
-            public Quaternion Rotation => Quaternion.Euler(rotationEuler);
+            [SerializeField] private Vector3 positionFemale;
+            [SerializeField] private Vector3 rotationEulerFemale;
+
+            private bool useMalePosition => AvatarEditor.Instance.CurrentSelectedAvatar.CurrentBodyType == AvatarBodyType.MALE;
+            
+            public Vector3 Position => useMalePosition ? positionMale : positionFemale;
+            public Vector3 RotationEuler => useMalePosition ? rotationEulerMale : rotationEulerFemale;
         }
 
         [SerializeField] private float cameraTweenDuration = 0.4f;
@@ -43,14 +47,14 @@ namespace Gumball
         
         private void OnEnable()
         {
+            AvatarEditor.onSessionStart += OnSessionStart;
             AvatarCosmeticDisplay.onSelectCosmetic += OnSelectCosmetic;
-            
-            SetPosition(CameraPositionType.FULL_BODY, true);
         }
-        
+
         private void OnDisable()
         {
             AvatarCosmeticDisplay.onSelectCosmetic -= OnSelectCosmetic;
+            AvatarEditor.onSessionStart -= OnSessionStart;
         }
 
         public void SetPosition(CameraPositionType type, bool instant = false) => SetPosition(GetCameraPositionFromType(type), instant);
@@ -58,7 +62,7 @@ namespace Gumball
         public void SetPosition(CameraPosition cameraPosition, bool instant = false)
         {
             currentTween?.Kill();
-
+            
             Tween positionTween = Camera.main.transform
                 .DOMove(cameraPosition.Position, cameraTweenDuration)
                 .SetEase(cameraEase);
@@ -73,6 +77,11 @@ namespace Gumball
             
             if (instant)
                 currentTween.Complete();
+        }
+        
+        private void OnSessionStart()
+        {
+            SetPosition(CameraPositionType.FULL_BODY, true);
         }
         
         private void OnSelectCosmetic(AvatarCosmetic cosmetic)
