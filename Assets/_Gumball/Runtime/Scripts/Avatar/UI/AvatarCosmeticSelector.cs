@@ -1,17 +1,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using AYellowpaper.SerializedCollections;
 using MagneticScrollUtils;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Gumball
 {
     public class AvatarCosmeticSelector : MonoBehaviour
     {
 
-        [SerializeField] private AvatarEditorPanel editorPanel;
+        [SerializeField] private AvatarCosmeticDisplay cosmeticDisplay;
         [SerializeField] private MagneticScroll magneticScroll;
+
+        [Space(5)]
+        [SerializeField] private Button bodyCategoryButton;
+        [SerializeField] private Button apparelCategoryButton;
+        [SerializeField] private Color categoryButtonColorSelected;
+        [SerializeField] private Color categoryButtonColorUnselected;
         
         private void OnEnable()
         {
@@ -24,18 +30,15 @@ namespace Gumball
             AvatarEditor.onSelectedAvatarChanged -= OnSelectedAvatarChanged;
             Avatar.onChangeBodyType -= OnBodyTypeChanged;
         }
-
-        private void OnBodyTypeChanged(Avatar avatar, AvatarBodyType previousbodytype, AvatarBodyType newbodytype)
+        
+        public void OnClickBodyCategory()
         {
-            if (!AvatarEditor.Instance.SessionInProgress)
-                return;
-            
-            SelectCategory(AvatarCosmeticCategory.Character); //repopulate the magnetic scrolls as using different data for different body
+            SelectCategory(AvatarCosmeticCategory.Body);
         }
-
-        private void OnSelectedAvatarChanged(Avatar oldAvatar, Avatar newAvatar)
+        
+        public void OnClickApparelCategory()
         {
-            SelectCategory(AvatarCosmeticCategory.Character);
+            SelectCategory(AvatarCosmeticCategory.Apparel);
         }
 
         public void SelectCategory(AvatarCosmeticCategory category)
@@ -49,8 +52,7 @@ namespace Gumball
                 {
                     ScrollItem scrollItem = new ScrollItem();
                     scrollItem.onLoad += () => scrollItem.CurrentIcon.ImageComponent.sprite = cosmetic.Icon;
-                    scrollItem.onSelectComplete += () => editorPanel.CosmeticDisplay.PopulateCosmeticOptions(cosmetic);
-
+                    scrollItem.onSelectComplete += () => cosmeticDisplay.PopulateCosmeticOptions(cosmetic);
                     scrollItems.Add(scrollItem);
                 }
             }
@@ -59,7 +61,28 @@ namespace Gumball
 
             //also populate the first cosmetic for the category
             AvatarCosmetic firstCosmeticInCategory = cosmetics.ContainsKey(category) && cosmetics[category].Count > 0 ? cosmetics[category][0] : null;
-            editorPanel.CosmeticDisplay.PopulateCosmeticOptions(firstCosmeticInCategory);
+            cosmeticDisplay.PopulateCosmeticOptions(firstCosmeticInCategory);
+
+            SetButtonSelected(category);
+        }
+        
+        private void OnBodyTypeChanged(Avatar avatar, AvatarBodyType previousbodytype, AvatarBodyType newbodytype)
+        {
+            if (!AvatarEditor.Instance.SessionInProgress)
+                return;
+            
+            SelectCategory(AvatarCosmeticCategory.Body); //repopulate the magnetic scrolls as using different data for different body
+        }
+
+        private void OnSelectedAvatarChanged(Avatar oldAvatar, Avatar newAvatar)
+        {
+            SelectCategory(AvatarCosmeticCategory.Body);
+        }
+
+        private void SetButtonSelected(AvatarCosmeticCategory category)
+        {
+            bodyCategoryButton.image.color = category == AvatarCosmeticCategory.Body ? categoryButtonColorSelected : categoryButtonColorUnselected;
+            apparelCategoryButton.image.color = category == AvatarCosmeticCategory.Apparel ? categoryButtonColorSelected : categoryButtonColorUnselected;
         }
 
     }

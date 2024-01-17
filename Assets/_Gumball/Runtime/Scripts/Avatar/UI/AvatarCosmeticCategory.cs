@@ -8,7 +8,7 @@ namespace Gumball
     public enum AvatarCosmeticCategory
     {
         None,
-        Character,
+        Body,
         Apparel
     }
 }

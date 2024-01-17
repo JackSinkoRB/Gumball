@@ -93,16 +93,16 @@ namespace Gumball.Runtime.Tests
             Assert.IsNotNull(AvatarManager.Instance.CoDriverAvatar);
             
             //ensure they have the default body type as none has been set
-            Assert.AreEqual(Avatar.DefaultBodyType, AvatarManager.Instance.DriverAvatar.CurrentBody.BodyType);
-            Assert.AreEqual(Avatar.DefaultBodyType, AvatarManager.Instance.CoDriverAvatar.CurrentBody.BodyType);
+            Assert.AreEqual(AvatarManager.DefaultDriverBodyType, AvatarManager.Instance.DriverAvatar.CurrentBody.BodyType);
+            Assert.AreEqual(AvatarManager.DefaultCoDriverBodyType, AvatarManager.Instance.CoDriverAvatar.CurrentBody.BodyType);
 
-            AvatarBody driverBody = Avatar.DefaultBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.DriverAvatar.CurrentMaleBody : AvatarManager.Instance.DriverAvatar.CurrentFemaleBody;
-            AvatarBody driverBodyNotUsed = Avatar.DefaultBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.DriverAvatar.CurrentFemaleBody : AvatarManager.Instance.DriverAvatar.CurrentMaleBody;
+            AvatarBody driverBody = AvatarManager.DefaultDriverBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.DriverAvatar.CurrentMaleBody : AvatarManager.Instance.DriverAvatar.CurrentFemaleBody;
+            AvatarBody driverBodyNotUsed = AvatarManager.DefaultDriverBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.DriverAvatar.CurrentFemaleBody : AvatarManager.Instance.DriverAvatar.CurrentMaleBody;
             Assert.IsNotNull(driverBody);
             Assert.IsNull(driverBodyNotUsed);
             
-            AvatarBody coDriverBody = Avatar.DefaultBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.CoDriverAvatar.CurrentMaleBody : AvatarManager.Instance.CoDriverAvatar.CurrentFemaleBody;
-            AvatarBody coDriverBodyNotUsed = Avatar.DefaultBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.CoDriverAvatar.CurrentFemaleBody : AvatarManager.Instance.CoDriverAvatar.CurrentMaleBody;
+            AvatarBody coDriverBody = AvatarManager.DefaultCoDriverBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.CoDriverAvatar.CurrentMaleBody : AvatarManager.Instance.CoDriverAvatar.CurrentFemaleBody;
+            AvatarBody coDriverBodyNotUsed = AvatarManager.DefaultCoDriverBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.CoDriverAvatar.CurrentFemaleBody : AvatarManager.Instance.CoDriverAvatar.CurrentMaleBody;
             Assert.IsNotNull(coDriverBody);
             Assert.IsNull(coDriverBodyNotUsed);
         }
@@ -125,7 +125,7 @@ namespace Gumball.Runtime.Tests
             yield return AvatarEditor.Instance.StartSession();
             
             Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
-            Assert.AreEqual(Avatar.DefaultBodyType, avatarToCheck.CurrentBody.BodyType);
+            Assert.AreEqual(AvatarManager.DefaultDriverBodyType, avatarToCheck.CurrentBody.BodyType);
 
             const int indexToUse = 1;
             BodyTypeCosmetic bodyTypeCosmeticBefore = avatarToCheck.CurrentBody.GetCosmetic<BodyTypeCosmetic>();

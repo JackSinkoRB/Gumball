@@ -5,13 +5,15 @@ using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
     [CreateAssetMenu(menuName = "Gumball/Singletons/Avatar Manager")]
     public class AvatarManager : SingletonScriptable<AvatarManager>
     {
+
+        public const AvatarBodyType DefaultDriverBodyType = AvatarBodyType.MALE;
+        public const AvatarBodyType DefaultCoDriverBodyType = AvatarBodyType.FEMALE;
         
         [SerializeField] private AssetReferenceGameObject avatarPrefab;
         
@@ -30,11 +32,12 @@ namespace Gumball
 
             driverAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
             driverAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            driverAvatar.Initialise(DefaultDriverBodyType);
             driverAvatar.gameObject.name = "DriverAvatar";
             DontDestroyOnLoad(driverAvatar.gameObject);
-
-            yield return driverAvatar.SpawnBody(driverAvatar.SavedBodyType);
             
+            yield return driverAvatar.SpawnBody(driverAvatar.SavedBodyType);
+
             driverAvatar.ChangeBodyType(driverAvatar.SavedBodyType);
             
             GlobalLoggers.AvatarLogger.Log($"Driver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
@@ -48,6 +51,7 @@ namespace Gumball
 
             coDriverAvatar = Instantiate(handle.Result, position, rotation).GetComponent<Avatar>();
             coDriverAvatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            coDriverAvatar.Initialise(DefaultCoDriverBodyType);
             coDriverAvatar.gameObject.name = "CoDriverAvatar";
             DontDestroyOnLoad(coDriverAvatar.gameObject);
             

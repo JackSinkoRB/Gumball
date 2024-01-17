@@ -12,11 +12,10 @@ namespace Gumball
 
         public static event Action<AvatarCosmetic> onSelectCosmetic;
         
+        [SerializeField] private AvatarColourPanel colourPanel;
         [SerializeField] private TextMeshProUGUI titleLabel;
         [SerializeField] private MagneticScroll magneticScroll;
-
-        private AvatarColourPanel colourPanel => PanelManager.GetPanel<AvatarEditorPanel>().ColourPanel;
-
+        
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
         {

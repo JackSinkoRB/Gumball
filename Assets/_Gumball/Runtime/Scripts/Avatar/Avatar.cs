@@ -17,7 +17,7 @@ namespace Gumball
         /// <summary>
         /// If the body type hasn't been saved, default to this body type.
         /// </summary>
-        public const AvatarBodyType DefaultBodyType = AvatarBodyType.MALE;
+        private AvatarBodyType defaultBodyType;
         
         [SerializeField] private AssetReferenceGameObject femaleBodyReference;
         [SerializeField] private AssetReferenceGameObject maleBodyReference;
@@ -31,10 +31,10 @@ namespace Gumball
         
         public AvatarBodyType SavedBodyType
         {
-            get => DataManager.Avatar.Get(savedBodyTypeKey, DefaultBodyType);
+            get => DataManager.Avatar.Get(savedBodyTypeKey, defaultBodyType);
             set => DataManager.Avatar.Set(savedBodyTypeKey, value);
         }
-        
+
         /// <summary>
         /// A unique key for the save data relating to this avatar.
         /// </summary>
@@ -43,6 +43,11 @@ namespace Gumball
 
         public AvatarBody CurrentMaleBody { get; private set; }
         public AvatarBody CurrentFemaleBody { get; private set; }
+
+        public void Initialise(AvatarBodyType defaultBodyType)
+        {
+            this.defaultBodyType = defaultBodyType;
+        }
         
         public void Teleport(Vector3 position, Quaternion rotation)
         {

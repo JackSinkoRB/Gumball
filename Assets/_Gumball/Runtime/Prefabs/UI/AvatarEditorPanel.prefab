@@ -275,8 +275,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3eac41125cf49364392129e09b73701f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  editorPanel: {fileID: 349377438525632895}
+  cosmeticDisplay: {fileID: 7674949373963378639}
   magneticScroll: {fileID: 7684501183619067142}
+  bodyCategoryButton: {fileID: 8173591873764815416}
+  apparelCategoryButton: {fileID: 3229877934944877013}
+  categoryButtonColorSelected: {r: 0.3019608, g: 0.3019608, b: 0.3019608, a: 0.77254903}
+  categoryButtonColorUnselected: {r: 0.50980395, g: 0.50980395, b: 0.50980395, a: 0.77254903}
 --- !u!1 &1754723514141175451
 GameObject:
   m_ObjectHideFlags: 0
@@ -411,9 +415,6 @@ MonoBehaviour:
   disableWhenHidden: 1
   fadeElements: []
   slideElements: []
-  cosmeticSelector: {fileID: 292248200842724796}
-  cosmeticDisplay: {fileID: 7674949373963378639}
-  colourPanel: {fileID: 7785273358940238113}
 --- !u!1 &1832985116794723408
 GameObject:
   m_ObjectHideFlags: 0
@@ -611,8 +612,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 349377438525632895}
-        m_TargetAssemblyTypeName: Gumball.AvatarEditorPanel, Gumball
+      - m_Target: {fileID: 4430155718545625337}
+        m_TargetAssemblyTypeName: Gumball.AvatarCharacterSelector, Gumball
         m_MethodName: OnClickDriverSwitch
         m_Mode: 1
         m_Arguments:
@@ -632,6 +633,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6839237607996628623}
+  - component: {fileID: 4430155718545625337}
   m_Layer: 5
   m_Name: Driver/CoDriver Switch
   m_TagString: Untagged
@@ -660,6 +662,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 100}
   m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &4430155718545625337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2124561341055935150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17b90de273c4e514795d33156747f34f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  driverButton: {fileID: 6122922880495126343}
+  coDriverButton: {fileID: 6813261640113897820}
+  buttonColorSelected: {r: 0.3019608, g: 0.3019608, b: 0.3019608, a: 0.77254903}
+  buttonColorUnselected: {r: 0.50980395, g: 0.50980395, b: 0.50980395, a: 0.77254903}
 --- !u!1 &2696081109539553969
 GameObject:
   m_ObjectHideFlags: 0
@@ -673,7 +691,7 @@ GameObject:
   - component: {fileID: 2923307488734876448}
   - component: {fileID: 8173591873764815416}
   m_Layer: 5
-  m_Name: CharacterCategory
+  m_Name: BodyCategory
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -781,9 +799,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 349377438525632895}
-        m_TargetAssemblyTypeName: Gumball.AvatarEditorPanel, Gumball
-        m_MethodName: OnClickCharacterCategory
+      - m_Target: {fileID: 292248200842724796}
+        m_TargetAssemblyTypeName: Gumball.AvatarCosmeticSelector, Gumball
+        m_MethodName: OnClickBodyCategory
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -843,6 +861,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36c9f25a4cdeec34ba9e9d50028c89ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  colourPanel: {fileID: 7785273358940238113}
   titleLabel: {fileID: 4850030981778584311}
   magneticScroll: {fileID: 8292261275245744001}
 --- !u!1 &3379647558976017073
@@ -1517,12 +1536,12 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 5539929203574887557}
+  m_TargetGraphic: {fileID: 5484425765147711972}
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 349377438525632895}
-        m_TargetAssemblyTypeName: Gumball.AvatarEditorPanel, Gumball
+      - m_Target: {fileID: 4430155718545625337}
+        m_TargetAssemblyTypeName: Gumball.AvatarCharacterSelector, Gumball
         m_MethodName: OnClickCoDriverSwitch
         m_Mode: 1
         m_Arguments:
@@ -2154,7 +2173,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Character
+  m_text: Body
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2509,12 +2528,12 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 2923307488734876448}
+  m_TargetGraphic: {fileID: 1078634491726318241}
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 349377438525632895}
-        m_TargetAssemblyTypeName: Gumball.AvatarEditorPanel, Gumball
+      - m_Target: {fileID: 292248200842724796}
+        m_TargetAssemblyTypeName: Gumball.AvatarCosmeticSelector, Gumball
         m_MethodName: OnClickApparelCategory
         m_Mode: 1
         m_Arguments:

@@ -79,9 +79,6 @@ namespace Gumball
                 PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(false);
 
             SelectAvatar(true); //always start with driver selected
-            
-            AvatarManager.Instance.DriverAvatar.Teleport(driverStartingPosition, Quaternion.Euler(driverStartingRotationEuler));
-            AvatarManager.Instance.CoDriverAvatar.Teleport(coDriverStartingPosition, Quaternion.Euler(coDriverStartingRotationEuler));
 
             //load all the body types for driver and co-driver so they can be switched instantly
             TrackedCoroutine driverBodyLoading = new TrackedCoroutine(AvatarManager.Instance.DriverAvatar.EnsureAllBodiesExist());
@@ -117,12 +114,22 @@ namespace Gumball
             if (CurrentSelectedAvatar == newAvatar)
                 return; //already selected
 
+            SaveCurrentAvatarBody();
+
+            if (driver)
+            {
+                AvatarManager.Instance.DriverAvatar.Teleport(driverStartingPosition, Quaternion.Euler(driverStartingRotationEuler));
+                AvatarManager.Instance.CoDriverAvatar.Teleport(coDriverStartingPosition, Quaternion.Euler(coDriverStartingRotationEuler));
+            }
+            else
+            {
+                AvatarManager.Instance.DriverAvatar.Teleport(coDriverStartingPosition, Quaternion.Euler(coDriverStartingRotationEuler));
+                AvatarManager.Instance.CoDriverAvatar.Teleport(driverStartingPosition, Quaternion.Euler(driverStartingRotationEuler));
+            }
+
             Avatar oldAvatar = CurrentSelectedAvatar;
             CurrentSelectedAvatar = newAvatar;
             onSelectedAvatarChanged?.Invoke(oldAvatar, CurrentSelectedAvatar);
-            
-            //TODO: reset selected category/cosmetic
-            //TODO: camera select
         }
 
         private void OnBeforeSaveAllDataOnAppExit()
