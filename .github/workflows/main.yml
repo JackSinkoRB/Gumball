@@ -9,7 +9,21 @@ on:
       - develop
 
 jobs:
+  setup:
+    name: Setup
+    runs-on: self-hosted
+
+    steps:
+      # Ensure Git LFS is installed
+      - name: Install Git LFS
+        run: sudo apt-get update && sudo apt-get install git-lfs
+
+      # Ensure Docker is installed
+      - name: Install Docker
+        run: sudo apt-get update && sudo apt-get install -y docker.io
+
   testAllModes:
+    needs: setup
     name: Test in ${{ matrix.testMode }}
     runs-on: self-hosted
     strategy:
@@ -19,14 +33,6 @@ jobs:
           - playmode
           - editmode
     steps:
-
-      # Ensure Git LFS is installed
-      - name: Install Git LFS
-        run: sudo apt-get update && sudo apt-get install git-lfs
-
-      # Ensure Docker is installed
-      - name: Install Docker
-        run: sudo apt-get update && sudo apt-get install -y docker.io
 
       # Checkout
       - uses: actions/checkout@v4
