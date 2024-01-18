@@ -9,9 +9,23 @@ on:
       - develop
 
 jobs:
+  setup:
+    name: Setup
+    runs-on: self-hosted
+
+    steps:
+      # Ensure Git LFS is installed
+      - name: Install Git LFS
+        run: sudo apt-get update && sudo apt-get install git-lfs
+
+      # Ensure Docker is installed
+      - name: Install Docker
+        run: sudo apt-get update && sudo apt-get install -y docker.io
+
   testAllModes:
+    needs: setup
     name: Test in ${{ matrix.testMode }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -19,6 +33,7 @@ jobs:
           - playmode
           - editmode
     steps:
+
       # Checkout
       - uses: actions/checkout@v4
         with:
@@ -51,46 +66,46 @@ jobs:
         if: always()
         with:
           name: Test results for ${{ matrix.testMode }}
-          path: ${{ steps.tests.outputs.artifactsPath }}
+          path: artifacts
 
-build:
-  needs: testAllModes
-  name: Build for ${{ matrix.targetPlatform }}
-  runs-on: ubuntu-latest
-  strategy:
-    fail-fast: false
-    matrix:
-      targetPlatform:
-        - iOS
-        - Android
-        - StandaloneWindows
-  steps:
-    # Checkout
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        lfs: true
+  build:
+    needs: testAllModes
+    name: Build for ${{ matrix.targetPlatform }}
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - Android
+          - StandaloneWindows
+    steps:
 
-    # Cache
-    - uses: actions/cache@v3
-      with:
-        path: Library
-        key: Library-${{ matrix.targetPlatform }}
-        restore-keys: Library-
-    - if: matrix.targetPlatform == 'Android'
-      uses: jlumbroso/free-disk-space@v1.3.1
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
 
-    # Build
-    - uses: game-ci/unity-builder@v4
-      env:
-        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-        UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-      with:
-        targetPlatform: ${{ matrix.targetPlatform }}
+      # Cache
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: Library-
+      - if: matrix.targetPlatform == 'Android'
+        uses: jlumbroso/free-disk-space@v1.3.1
 
-    # Output
-    - uses: actions/upload-artifact@v3
-      with:
-        name: Build-${{ matrix.targetPlatform }}
-        path: build/${{ matrix.targetPlatform }}
+      # Build
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+
+      # Output
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Build-${{ matrix.targetPlatform }}
+          path: builds/${{ matrix.targetPlatform }}
