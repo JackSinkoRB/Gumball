@@ -54,6 +54,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: ${{ matrix.testMode }} Test Results
           customParameters: -nographics
+          dockerMemory: 3GB
 
       # Output
       - uses: actions/upload-artifact@v3
