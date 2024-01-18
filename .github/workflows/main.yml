@@ -66,7 +66,7 @@ jobs:
         if: always()
         with:
           name: Test results for ${{ matrix.testMode }}
-          path: artifacts
+          path: ${{ matrix.testMode }}-artifacts
 
   build:
     needs: testAllModes
