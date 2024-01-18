@@ -26,7 +26,7 @@ jobs:
 
       # Ensure Docker is installed
       - name: Install Docker
-        run: sudo apt-get update && sudo apt-get install -y docker.io && sudo usermod -aG docker $USER
+        run: sudo apt-get update && sudo apt-get install -y docker.io
 
       # Checkout
       - uses: actions/checkout@v4
@@ -60,7 +60,7 @@ jobs:
         if: always()
         with:
           name: Test results for ${{ matrix.testMode }}
-          path: ${{ steps.tests.outputs.artifactsPath }}
+          path: artifacts
 
   build:
     needs: testAllModes
@@ -103,4 +103,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: Build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
+          path: builds/${{ matrix.targetPlatform }}
