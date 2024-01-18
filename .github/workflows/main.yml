@@ -28,11 +28,9 @@ jobs:
       - name: Install Docker
         run: sudo apt-get update && sudo apt-get install -y docker.io
 
-      # Set ownership of directories and files
-      - name: Set ownership
-        run: |
-          sudo chown -R $USER:$USER /home/ubuntu/actions-runner/_work/_actions/game-ci/unity-test-runner/v4/dist/BlankProject
-          sudo chmod -R 755 /home/ubuntu/actions-runner/_work/_actions/game-ci/unity-test-runner/v4/dist/BlankProject
+      # Check user is root user
+      - name: Check user
+        run: whoami
 
       # Checkout
       - uses: actions/checkout@v4
