@@ -11,12 +11,11 @@ namespace Gumball
     public class DecalCameraController : MonoBehaviour
     {
         
-        [Space(5)]
         [SerializeField] private Vector3 initialCameraPosition;
         [SerializeField] private Vector3 initialCameraRotation;
         
         [Header("Target")]
-        [SerializeField] private Transform target;
+        [SerializeField, ReadOnly] private Transform target;
         [SerializeField, ReadOnly] private Vector3 targetOffset;
         [SerializeField] private Vector3 defaultTargetOffset = new(0, 0.5f);
         [SerializeField] private Vector3 decalTargetOffset = new(0, -1f);

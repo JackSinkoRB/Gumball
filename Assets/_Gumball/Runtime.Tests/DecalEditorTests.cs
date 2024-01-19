@@ -34,7 +34,7 @@ namespace Gumball.Runtime.Tests
             DecalEditor.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
 
-            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(DecalEditorTestManager.Instance.TestScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.DecalEditorScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadMainScene.completed += OnSceneLoadComplete;
         }
 
@@ -54,7 +54,7 @@ namespace Gumball.Runtime.Tests
         {
             CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(
                 Vector3.zero, 
-                Vector3.zero, 
+                Quaternion.Euler(Vector3.zero), 
                     () => isInitialised = true));
         }
         

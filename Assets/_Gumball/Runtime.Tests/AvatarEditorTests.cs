@@ -1,0 +1,283 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Numerics;
+using NUnit.Framework;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
+
+namespace Gumball.Runtime.Tests
+{
+    public class AvatarEditorTests : IPrebuildSetup, IPostBuildCleanup
+    {
+
+        private bool isInitialised;
+
+        public void Setup()
+        {
+            BootSceneClear.TrySetup();
+        }
+
+        public void Cleanup()
+        {
+            BootSceneClear.TryCleanup();
+        }
+        
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            DataManager.EnableTestProviders(true);
+
+            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.AvatarEditorScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            loadMainScene.completed += OnSceneLoadComplete;
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            DataManager.EnableTestProviders(false);
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            DataManager.RemoveAllData();
+        }
+        
+        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
+        {
+            CoroutineHelper.Instance.StartCoroutine(SpawnAvatars());
+        }
+
+        private IEnumerator SpawnAvatars()
+        {
+            TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver(Vector3.zero, Quaternion.Euler(Vector3.zero)));
+            TrackedCoroutine coDriverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnCoDriver(Vector3.zero, Quaternion.Euler(Vector3.zero)));
+            
+            yield return new WaitUntil(() => !driverAvatarLoadCoroutine.IsPlaying && !coDriverAvatarLoadCoroutine.IsPlaying);
+            
+            isInitialised = true;
+        }
+        
+        [UnityTest]
+        public IEnumerator AvatarEditorIsSetup()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            Assert.IsTrue(AvatarEditor.ExistsRuntime);
+        }
+        
+        [UnityTest]
+        public IEnumerator AllDriversAndBodiesExistDuringEditorButNotOutside()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Assert.IsNotNull(AvatarManager.Instance.DriverAvatar);
+            Assert.IsNotNull(AvatarManager.Instance.CoDriverAvatar);
+            
+            Assert.IsNotNull(AvatarManager.Instance.DriverAvatar.CurrentMaleBody);
+            Assert.IsNotNull(AvatarManager.Instance.DriverAvatar.CurrentFemaleBody);
+            Assert.IsNotNull(AvatarManager.Instance.CoDriverAvatar.CurrentMaleBody);
+            Assert.IsNotNull(AvatarManager.Instance.CoDriverAvatar.CurrentFemaleBody);
+            
+            AvatarEditor.Instance.EndSession();
+            
+            Assert.IsNotNull(AvatarManager.Instance.DriverAvatar);
+            Assert.IsNotNull(AvatarManager.Instance.CoDriverAvatar);
+            
+            //ensure they have the default body type as none has been set
+            Assert.AreEqual(AvatarManager.DefaultDriverBodyType, AvatarManager.Instance.DriverAvatar.CurrentBody.BodyType);
+            Assert.AreEqual(AvatarManager.DefaultCoDriverBodyType, AvatarManager.Instance.CoDriverAvatar.CurrentBody.BodyType);
+
+            AvatarBody driverBody = AvatarManager.DefaultDriverBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.DriverAvatar.CurrentMaleBody : AvatarManager.Instance.DriverAvatar.CurrentFemaleBody;
+            AvatarBody driverBodyNotUsed = AvatarManager.DefaultDriverBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.DriverAvatar.CurrentFemaleBody : AvatarManager.Instance.DriverAvatar.CurrentMaleBody;
+            Assert.IsNotNull(driverBody);
+            Assert.IsNull(driverBodyNotUsed);
+            
+            AvatarBody coDriverBody = AvatarManager.DefaultCoDriverBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.CoDriverAvatar.CurrentMaleBody : AvatarManager.Instance.CoDriverAvatar.CurrentFemaleBody;
+            AvatarBody coDriverBodyNotUsed = AvatarManager.DefaultCoDriverBodyType == AvatarBodyType.MALE ? AvatarManager.Instance.CoDriverAvatar.CurrentFemaleBody : AvatarManager.Instance.CoDriverAvatar.CurrentMaleBody;
+            Assert.IsNotNull(coDriverBody);
+            Assert.IsNull(coDriverBodyNotUsed);
+        }
+
+        [UnityTest]
+        public IEnumerator StartWithDriverSelected()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Assert.AreEqual(AvatarManager.Instance.DriverAvatar, AvatarEditor.Instance.CurrentSelectedAvatar);
+        }
+        
+        [UnityTest]
+        public IEnumerator BodyTypeCosmeticIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+            Assert.AreEqual(AvatarManager.DefaultDriverBodyType, avatarToCheck.CurrentBody.BodyType);
+
+            const int indexToUse = 1;
+            BodyTypeCosmetic bodyTypeCosmeticBefore = avatarToCheck.CurrentBody.GetCosmetic<BodyTypeCosmetic>();
+            bodyTypeCosmeticBefore.Apply(indexToUse);
+
+            Assert.AreEqual(bodyTypeCosmeticBefore.Options[indexToUse].Type, avatarToCheck.CurrentBody.BodyType);
+
+            AvatarEditor.Instance.EndSession();
+
+            BodyTypeCosmetic bodyTypeCosmeticAfter = avatarToCheck.CurrentBody.GetCosmetic<BodyTypeCosmetic>();
+            Assert.AreEqual(bodyTypeCosmeticAfter.Options[indexToUse].Type, avatarToCheck.CurrentBody.BodyType);
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, bodyTypeCosmeticAfter.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, bodyTypeCosmeticAfter.CurrentIndex);
+        }
+        
+        [UnityTest]
+        public IEnumerator SkinCosmeticIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 5;
+            SkinColourCosmetic skinCosmetic = avatarToCheck.CurrentBody.GetCosmetic<SkinColourCosmetic>();
+            skinCosmetic.Apply(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            bool allMaterialsHaveColour = true;
+            foreach (Material material in skinCosmetic.GetMaterialsToEffect())
+            {
+                if (material.GetColor(SkinColourCosmetic.SkinTintProperty) != skinCosmetic.SkinColors[indexToUse])
+                {
+                    allMaterialsHaveColour = false;
+                    break;
+                }
+            }
+            
+            Assert.IsTrue(allMaterialsHaveColour);
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, skinCosmetic.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, skinCosmetic.CurrentIndex);
+        }
+        
+        [UnityTest]
+        public IEnumerator FrecklesCosmeticIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 2;
+            FrecklesCosmetic frecklesCosmetic = avatarToCheck.CurrentBody.GetCosmetic<FrecklesCosmetic>();
+            frecklesCosmetic.Apply(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            bool allMaterialsHaveFreckles = true;
+            foreach (Material material in frecklesCosmetic.MaterialsToEffect)
+            {
+                if (!Mathf.Approximately(material.GetFloat(FrecklesCosmetic.FrecklesProperty), frecklesCosmetic.Options[indexToUse].Value))
+                {
+                    allMaterialsHaveFreckles = false;
+                    break;
+                }
+            }
+            
+            Assert.IsTrue(allMaterialsHaveFreckles);
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, frecklesCosmetic.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, frecklesCosmetic.CurrentIndex);
+        }
+        
+        [UnityTest]
+        public IEnumerator ItemCosmeticIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 2;
+            //just use the upper body cosmetic for testing
+            UpperBodyCosmetic upperBodyCosmetic = avatarToCheck.CurrentBody.GetCosmetic<UpperBodyCosmetic>();
+            upperBodyCosmetic.Apply(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            Assert.IsNotNull(upperBodyCosmetic.CurrentItem);
+            
+            string nameOfItemInList = upperBodyCosmetic.Items[indexToUse].Prefab.editorAsset.name;
+            string nameOfCurrentItem = upperBodyCosmetic.CurrentItem.name.Replace("(Clone)", "");
+            Assert.IsTrue(nameOfItemInList.Equals(nameOfCurrentItem));
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, upperBodyCosmetic.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, upperBodyCosmetic.CurrentIndex);
+        }
+
+        [UnityTest]
+        public IEnumerator ItemColorIsPersistentHair()
+        {
+            yield return new WaitUntil(() => isInitialised);
+        
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+        
+            const int indexToUse = 5;
+            HairCosmetic hairCosmetic = avatarToCheck.CurrentBody.GetCosmetic<HairCosmetic>();
+            hairCosmetic.ApplyColor(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+        
+            bool allMaterialsHaveColour = true;
+            foreach (Material material in hairCosmetic.GetMaterialsWithColorProperty())
+            {
+                foreach (string property in hairCosmetic.CurrentItemData.Colorable.ColorMaterialProperties)
+                {
+                    if (material.GetColor(property) != hairCosmetic.CurrentItemData.Colorable.Colors[indexToUse])
+                    {
+                        allMaterialsHaveColour = false;
+                        break;
+                    }
+                }
+            }
+            
+            Assert.IsTrue(allMaterialsHaveColour);
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, hairCosmetic.GetSavedColorIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, hairCosmetic.CurrentColorIndex);
+        }
+        
+    }
+}

@@ -14,7 +14,6 @@ namespace Gumball
         [SerializeField] private GameObject textureOptionPrefab;
         [SerializeField] private GameObject categoryOptionPrefab;
         [SerializeField] private Transform contentHolder;
-        [SerializeField] private Scrollbar horizontalScrollBar;
         [SerializeField] private Button backButton;
 
         [Header("Debugging")]
