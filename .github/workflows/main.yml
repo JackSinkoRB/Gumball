@@ -60,6 +60,14 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: ${{ matrix.testMode }} Test Results
           customParameters: -nographics
+          dockerMemoryLimit: 3800m
+
+      # Output
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: Test results for ${{ matrix.testMode }}
+          path: ${{ matrix.testMode }}-artifacts
 
   build:
     needs: testAllModes
