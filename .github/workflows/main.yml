@@ -60,8 +60,6 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: ${{ matrix.testMode }} Test Results
           customParameters: -nographics
-          dockerMemoryLimit: 3500m
-          dockerCpuLimit: 1
 
       # Output
       - uses: actions/upload-artifact@v3
@@ -105,8 +103,6 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
-          dockerMemoryLimit: 3500m
-          dockerCpuLimit: 1
 
       # Output
       - uses: actions/upload-artifact@v3
