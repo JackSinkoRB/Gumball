@@ -22,6 +22,10 @@ jobs:
       - name: Install Docker
         run: sudo apt-get update && sudo apt-get install -y docker.io
 
+      # Ensure Git is installed
+      - name: Install Git
+        run: sudo apt-get update && sudo apt-get install git
+
   testAllModes:
     needs: setup
     name: Test in ${{ matrix.testMode }}
