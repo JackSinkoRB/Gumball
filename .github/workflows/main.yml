@@ -44,7 +44,7 @@ jobs:
           lfs: true
 
       # Cache
-      - uses: actions/cache@v3
+      - uses: maxnowack/local-cache@v1
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
@@ -92,7 +92,7 @@ jobs:
           lfs: true
 
       # Cache
-      - uses: actions/cache@v3
+      - uses: maxnowack/local-cache@v1
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
