@@ -17,7 +17,7 @@ public static class GitUtility
 #if UNITY_EDITOR_WIN
             FileName = "git.exe",
 #else //linux/headless mode git path:
-            FileName = "/usr/bin/git"
+            FileName = "/usr/bin/git",
 #endif
             CreateNoWindow = true,
             WorkingDirectory = gitPath
