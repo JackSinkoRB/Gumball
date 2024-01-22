@@ -14,7 +14,11 @@ public static class GitUtility
         {
             UseShellExecute = false,
             RedirectStandardOutput = true,
+#if UNITY_EDITOR_WIN
             FileName = "git.exe",
+#else //linux/headless mode git path:
+            FileName = "/usr/bin/git"
+#endif
             CreateNoWindow = true,
             WorkingDirectory = gitPath
         };
