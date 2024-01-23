@@ -52,6 +52,7 @@ namespace Gumball
                 return attachedMaterialsCached;
             }
         }
+        
         public void Initialise(Avatar avatar)
         {
             avatarBelongsTo = avatar;
@@ -83,6 +84,18 @@ namespace Gumball
             {
                 cosmetic.Apply(cosmetic.GetSavedIndex());
             }
+        }
+
+        public HashSet<Material> GetMaterialsWithProperty(string property)
+        {
+            HashSet<Material> materials = new HashSet<Material>();
+            foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
+            {
+                if (material.HasProperty(property))
+                    materials.Add(material);
+            }
+
+            return materials;
         }
         
         /// <summary>

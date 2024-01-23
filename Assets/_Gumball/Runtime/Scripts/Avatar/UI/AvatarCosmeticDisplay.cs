@@ -52,12 +52,11 @@ namespace Gumball
 
         private void CheckToShowColourPanel(AvatarCosmetic cosmetic)
         {
-            if (cosmetic is ItemCosmetic itemCosmetic
-                && itemCosmetic.CurrentItemData.Colorable.IsColorable
-                && itemCosmetic.CurrentItemData.Colorable.Colors.Length > 1) //require at least 2 colors for it to show
+            ColorableCosmeticOption? colorable = AvatarCosmetic.GetColorable(cosmetic);
+            if (colorable != null)
             {
                 colourPanel.Show();
-                colourPanel.Populate(itemCosmetic);
+                colourPanel.Populate(cosmetic, colorable.Value);
             }
             else
             {

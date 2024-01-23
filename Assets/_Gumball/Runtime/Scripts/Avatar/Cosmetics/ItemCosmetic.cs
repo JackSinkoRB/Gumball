@@ -24,30 +24,16 @@ namespace Gumball
             [SerializeField] private Texture2D mask;
             [SerializeField] private bool addCopyPose;
             [SerializeField] private FootOffset footOffset;
-            [SerializeField] private Colorable colorable;
+            [SerializeField] private ColorableCosmeticOption colorable;
 
             public AssetReferenceGameObject Prefab => prefab;
             public Sprite Icon => icon;
             public Texture2D Mask => mask;
             public bool AddCopyPose => addCopyPose;
             public FootOffset FootOffset => footOffset;
-            public Colorable Colorable => colorable;
+            public ColorableCosmeticOption Colorable => colorable;
         }
 
-        [Serializable]
-        public struct Colorable
-        {
-            [SerializeField, InitializationField] private bool isColorable;
-            [SerializeField, InitializationField, ConditionalField(nameof(isColorable))] private int defaultColorIndex;
-            [SerializeField, InitializationField, ConditionalField(nameof(isColorable))] private CollectionWrapperString colorMaterialProperties;
-            [SerializeField, ConditionalField(nameof(isColorable))] private CollectionWrapperColor colors;
-            
-            public bool IsColorable => isColorable;
-            public int DefaultColorIndex => defaultColorIndex;
-            public string[] ColorMaterialProperties => colorMaterialProperties.Value;
-            public Color[] Colors => colors.Value;
-        }
-        
         [SerializeField] private List<ItemData> items = new();
         [SerializeField] private string maskProperty;
 
@@ -62,18 +48,6 @@ namespace Gumball
         public int CurrentColorIndex => currentColorIndex;
         
         private string colorSaveKey => $"{saveKey}.SelectedColorIndex";
-        
-        public HashSet<Material> GetMaterialsWithMask()
-        {
-            HashSet<Material> materials = new HashSet<Material>();
-            foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
-            {
-                if (material.HasProperty(maskProperty))
-                    materials.Add(material);
-            }
-
-            return materials;
-        }
 
         public override int GetMaxIndex()
         {
@@ -241,7 +215,7 @@ namespace Gumball
 
         private void SetMasks(ItemData itemData)
         {
-            foreach (Material material in GetMaterialsWithMask())
+            foreach (Material material in avatarBelongsTo.CurrentBody.GetMaterialsWithProperty(maskProperty))
             {
                 material.SetTexture(maskProperty, itemData.Mask);
             }

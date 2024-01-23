@@ -12,14 +12,12 @@ namespace Gumball
         [SerializeField] private MagneticScroll magneticScroll;
         [SerializeField] private Sprite circleIcon;
         
-        public void Populate(ItemCosmetic itemCosmetic)
+        public void Populate(AvatarCosmetic cosmetic, ColorableCosmeticOption colorable)
         {
             List<ScrollItem> scrollItems = new List<ScrollItem>();
 
-            if (itemCosmetic != null)
+            if (cosmetic != null)
             {
-                ItemCosmetic.Colorable colorable = itemCosmetic.CurrentItemData.Colorable;
-                
                 for (int index = 0; index < colorable.Colors.Length; index++)
                 {
                     ScrollItem scrollItem = new ScrollItem();
@@ -33,14 +31,14 @@ namespace Gumball
                     };
                     scrollItem.onSelect += () =>
                     {
-                        itemCosmetic.ApplyColor(finalIndex);
+                        AvatarCosmetic.ApplyColorIndex(cosmetic, finalIndex);
                     };
 
                     scrollItems.Add(scrollItem);
                 }
             }
             
-            magneticScroll.SetItems(scrollItems, itemCosmetic.CurrentColorIndex);
+            magneticScroll.SetItems(scrollItems, AvatarCosmetic.GetCurrentColorIndex(cosmetic));
         }
         
     }
