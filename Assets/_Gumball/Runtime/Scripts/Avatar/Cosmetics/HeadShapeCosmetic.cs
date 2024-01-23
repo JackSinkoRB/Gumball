@@ -16,6 +16,9 @@ namespace Gumball
             [SerializeField] private string property;
             [SerializeField] private float value;
 
+            public string Property => property;
+            public float Value => value;
+            
             public void Apply(AvatarBody body)
             {
                 body.SetBlendshape(property, value);
