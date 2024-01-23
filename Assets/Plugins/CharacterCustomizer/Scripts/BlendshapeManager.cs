@@ -48,7 +48,7 @@ namespace CC
             return mesh.GetBlendShapeWeight(index);
         }
         
-        private void ParseBlendshapes()
+        public void ParseBlendshapes()
         {
             mesh = gameObject.GetComponent<SkinnedMeshRenderer>();
 

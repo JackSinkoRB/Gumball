@@ -37,10 +37,10 @@ namespace CC
         public void Initialize()
         {
             //Add a blendshape manager script to every mesh
-            // foreach (var mesh in gameObject.GetComponentsInChildren<SkinnedMeshRenderer>())
-            // {
-            //     //mesh.gameObject.AddComponent<BlendshapeManager>().ParseBlendshapes();
-            // }
+            foreach (var mesh in gameObject.GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                mesh.gameObject.AddComponent<BlendshapeManager>().ParseBlendshapes();
+            }
 
             //Adds an empty hair object for each hair table
             for (int i = 0; i < HairTables.Count; i++)
@@ -262,7 +262,7 @@ namespace CC
                     foreach (var mesh in HairObject.GetComponentsInChildren<SkinnedMeshRenderer>())
                     {
                         var manager = mesh.gameObject.AddComponent<BlendshapeManager>();
-                        //manager.ParseBlendshapes();
+                        manager.ParseBlendshapes();
                         foreach (var shapeData in StoredCharacterData.Blendshapes)
                         {
                             manager.SetBlendshape(shapeData.propertyName, shapeData.floatValue);
@@ -332,7 +332,7 @@ namespace CC
                     foreach (var mesh in ApparelObject.GetComponentsInChildren<SkinnedMeshRenderer>())
                     {
                         var manager = mesh.gameObject.AddComponent<BlendshapeManager>();
-                        //manager.ParseBlendshapes();
+                        manager.ParseBlendshapes();
                         foreach (var shapeData in StoredCharacterData.Blendshapes)
                         {
                             manager.SetBlendshape(shapeData.propertyName, shapeData.floatValue);
