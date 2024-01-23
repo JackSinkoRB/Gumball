@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
 namespace CC
 {
+    [Obsolete]
     public class CharacterCustomization : MonoBehaviour
     {
         public SkinnedMeshRenderer MainMesh;
@@ -35,10 +37,10 @@ namespace CC
         public void Initialize()
         {
             //Add a blendshape manager script to every mesh
-            foreach (var mesh in gameObject.GetComponentsInChildren<SkinnedMeshRenderer>())
-            {
-                mesh.gameObject.AddComponent<BlendshapeManager>().parseBlendshapes();
-            }
+            // foreach (var mesh in gameObject.GetComponentsInChildren<SkinnedMeshRenderer>())
+            // {
+            //     //mesh.gameObject.AddComponent<BlendshapeManager>().ParseBlendshapes();
+            // }
 
             //Adds an empty hair object for each hair table
             for (int i = 0; i < HairTables.Count; i++)
@@ -260,10 +262,10 @@ namespace CC
                     foreach (var mesh in HairObject.GetComponentsInChildren<SkinnedMeshRenderer>())
                     {
                         var manager = mesh.gameObject.AddComponent<BlendshapeManager>();
-                        manager.parseBlendshapes();
+                        //manager.ParseBlendshapes();
                         foreach (var shapeData in StoredCharacterData.Blendshapes)
                         {
-                            manager.setBlendshape(shapeData.propertyName, shapeData.floatValue);
+                            manager.SetBlendshape(shapeData.propertyName, shapeData.floatValue);
                         }
                     }
 
@@ -330,10 +332,10 @@ namespace CC
                     foreach (var mesh in ApparelObject.GetComponentsInChildren<SkinnedMeshRenderer>())
                     {
                         var manager = mesh.gameObject.AddComponent<BlendshapeManager>();
-                        manager.parseBlendshapes();
+                        //manager.ParseBlendshapes();
                         foreach (var shapeData in StoredCharacterData.Blendshapes)
                         {
-                            manager.setBlendshape(shapeData.propertyName, shapeData.floatValue);
+                            manager.SetBlendshape(shapeData.propertyName, shapeData.floatValue);
                         }
                     }
 
@@ -427,7 +429,7 @@ namespace CC
                 {
                     foreach (var manager in gameObject.GetComponentsInChildren<BlendshapeManager>())
                     {
-                        manager.setBlendshape(name, value);
+                        manager.SetBlendshape(name, value);
                     }
                 }
 

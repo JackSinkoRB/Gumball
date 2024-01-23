@@ -24,7 +24,6 @@ namespace Gumball
         private SkinnedMeshRenderer[] skinnedMeshRenderersCached => skinnedMeshRenderers ??= gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
         
         private BlendshapeManager[] blendShapeManagers;
-        private BlendshapeManager[] blendShapeManagersCached => blendShapeManagers ??= gameObject.GetComponentsInChildren<BlendshapeManager>();
         
         public AvatarBodyType BodyType => bodyType;
         public CharacterCustomization Customiser => customiser;
@@ -57,7 +56,6 @@ namespace Gumball
         {
             avatarBelongsTo = avatar;
 
-            ParseBlendshapes();
             FindCosmetics();
 
             foreach (AvatarCosmetic cosmetic in cosmetics)
@@ -86,13 +84,37 @@ namespace Gumball
                 cosmetic.Apply(cosmetic.GetSavedIndex());
             }
         }
+        
+        /// <summary>
+        /// Gets and caches all of the blend shape managers on the avatar body.
+        /// </summary>
+        /// <returns></returns>
+        public BlendshapeManager[] GetBlendShapeManagers()
+        {
+            if (blendShapeManagers == null || blendShapeManagers.Length == 0)
+                InitialiseBlendShapeManagers();
 
+            return blendShapeManagers;
+        }
+        
         public void SetBlendshape(string propertyName, float value)
         {
-            foreach (BlendshapeManager manager in blendShapeManagersCached)
+            foreach (BlendshapeManager manager in GetBlendShapeManagers())
             {
-                manager.setBlendshape(propertyName, value);
+                manager.SetBlendshape(propertyName, value);
             }
+        }
+
+        private void InitialiseBlendShapeManagers()
+        {
+            HashSet<BlendshapeManager> managers = new();
+            
+            foreach (SkinnedMeshRenderer mesh in skinnedMeshRenderersCached)
+            {
+                managers.Add(mesh.gameObject.AddComponent<BlendshapeManager>());
+            }
+
+            blendShapeManagers = managers.ToArray();
         }
 
         private void FindCosmetics()
@@ -119,14 +141,6 @@ namespace Gumball
                 
                 avatarCosmeticsForCategory.Add(cosmetic);
                 CosmeticsGrouped[category] = avatarCosmeticsForCategory;
-            }
-        }
-
-        private void ParseBlendshapes()
-        {
-            foreach (SkinnedMeshRenderer mesh in skinnedMeshRenderersCached)
-            {
-                mesh.gameObject.AddComponent<BlendshapeManager>().parseBlendshapes();
             }
         }
 

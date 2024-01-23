@@ -199,10 +199,9 @@ namespace Gumball
             foreach (SkinnedMeshRenderer mesh in item.GetComponentsInChildren<SkinnedMeshRenderer>())
             {
                 BlendshapeManager manager = mesh.gameObject.AddComponent<BlendshapeManager>();
-                manager.parseBlendshapes();
                 foreach (CC_Property shapeData in avatarBelongsTo.CurrentBody.Customiser.StoredCharacterData.Blendshapes)
                 {
-                    manager.setBlendshape(shapeData.propertyName, shapeData.floatValue);
+                    manager.SetBlendshape(shapeData.propertyName, shapeData.floatValue);
                 }
             }
         }
