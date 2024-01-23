@@ -274,7 +274,7 @@ namespace Gumball.Runtime.Tests
         }
         
         [UnityTest]
-        public IEnumerator HeadShapeCosmeticIsPersistent()
+        public IEnumerator BlendShapeCosmeticIsPersistent()
         {
             yield return new WaitUntil(() => isInitialised);
 
@@ -283,6 +283,7 @@ namespace Gumball.Runtime.Tests
             Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
 
             const int indexToUse = 4;
+            //just use head shape
             HeadShapeCosmetic headShapeCosmetic = avatarToCheck.CurrentBody.GetCosmetic<HeadShapeCosmetic>();
             headShapeCosmetic.Apply(indexToUse);
             
@@ -291,7 +292,7 @@ namespace Gumball.Runtime.Tests
             BlendshapeManager[] managers = avatarToCheck.CurrentBody.GetBlendShapeManagers();
             Assert.IsTrue(managers != null && managers.Length > 0);
 
-            foreach (HeadShapeCosmetic.PropertyModifier propertyModifier in headShapeCosmetic.Options[indexToUse].PropertyModifiers)
+            foreach (BlendShapeCosmetic.PropertyModifier propertyModifier in headShapeCosmetic.Options[indexToUse].PropertyModifiers)
             {
                 float actualValue = managers[0].GetBlendshape(propertyModifier.Property);
                 float desiredValue = propertyModifier.Value * BlendshapeManager.BlendShapeValueModifier;
