@@ -20,6 +20,12 @@ namespace Gumball
         [SerializeField, ReadOnly] private AvatarCosmetic[] cosmetics;
         [SerializeField, ReadOnly] private Material[] attachedMaterialsCached;
         
+        private SkinnedMeshRenderer[] skinnedMeshRenderers;
+        private SkinnedMeshRenderer[] skinnedMeshRenderersCached => skinnedMeshRenderers ??= gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+        
+        private BlendshapeManager[] blendShapeManagers;
+        private BlendshapeManager[] blendShapeManagersCached => blendShapeManagers ??= gameObject.GetComponentsInChildren<BlendshapeManager>();
+        
         public AvatarBodyType BodyType => bodyType;
         public CharacterCustomization Customiser => customiser;
         public AvatarCosmetic[] Cosmetics => cosmetics;
@@ -33,7 +39,7 @@ namespace Gumball
                 if (attachedMaterialsCached == null || attachedMaterialsCached.Length == 0)
                 {
                     HashSet<Material> attachedMaterials = new();
-                    foreach (SkinnedMeshRenderer mesh in GetComponentsInChildren<SkinnedMeshRenderer>())
+                    foreach (SkinnedMeshRenderer mesh in skinnedMeshRenderersCached)
                     {
                         foreach (Material material in mesh.materials)
                         {
@@ -51,6 +57,7 @@ namespace Gumball
         {
             avatarBelongsTo = avatar;
 
+            ParseBlendshapes();
             FindCosmetics();
 
             foreach (AvatarCosmetic cosmetic in cosmetics)
@@ -80,6 +87,14 @@ namespace Gumball
             }
         }
 
+        public void SetBlendshape(string propertyName, float value)
+        {
+            foreach (BlendshapeManager manager in blendShapeManagersCached)
+            {
+                manager.setBlendshape(propertyName, value);
+            }
+        }
+
         private void FindCosmetics()
         {
             HashSet<AvatarCosmetic> cosmeticsFound = new();
@@ -104,6 +119,14 @@ namespace Gumball
                 
                 avatarCosmeticsForCategory.Add(cosmetic);
                 CosmeticsGrouped[category] = avatarCosmeticsForCategory;
+            }
+        }
+
+        private void ParseBlendshapes()
+        {
+            foreach (SkinnedMeshRenderer mesh in skinnedMeshRenderersCached)
+            {
+                mesh.gameObject.AddComponent<BlendshapeManager>().parseBlendshapes();
             }
         }
 
