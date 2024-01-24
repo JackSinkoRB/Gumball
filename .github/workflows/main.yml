@@ -102,7 +102,7 @@ jobs:
 
       # Build
       - uses: game-ci/unity-builder@v4
-      id: buildStep
+        id: buildStep
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -113,6 +113,18 @@ jobs:
           dockerCpuLimit: 2
           versioning: Semantic
           buildName: 'Gumball-${{ matrix.targetPlatform }}-${{ steps.buildStep.outputs.buildVersion }}'
+
+      # Zip Build Files
+      #- if: matrix.targetPlatform == 'StandaloneWindows'
+      #  uses: montudor/action-zip@v1.0.0
+      #  with:
+      #    args: zip -qq -r dir.zip dir
+
+      # Move Build Files
+      #- name: Move Build Files
+      #  run: |
+      #    mkdir -p var/www/html/${{ matrix.targetPlatform }}
+      #    mv *.${{ matrix.targetPlatform }}.zip var/www/html/${{ matrix.targetPlatform }}
 
       # Output
       #- uses: actions/upload-artifact@v4
