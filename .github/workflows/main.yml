@@ -67,11 +67,11 @@ jobs:
           dockerCpuLimit: 2
 
       # Output
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Test results for ${{ matrix.testMode }}
-          path: ${{ matrix.testMode }}-artifacts
+      #- uses: actions/upload-artifact@v4
+      #  if: always()
+      #  with:
+      #    name: Test results for ${{ matrix.testMode }}
+      #    path: ${{ matrix.testMode }}-artifacts
 
   build:
     needs: testAllModes
@@ -97,8 +97,8 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
           restore-keys: Library-
-      - if: matrix.targetPlatform == 'Android'
-        uses: jlumbroso/free-disk-space@v1.3.1
+      #- if: matrix.targetPlatform == 'Android'
+      #  uses: jlumbroso/free-disk-space@v1.3.1
 
       # Build
       - uses: game-ci/unity-builder@v4
@@ -112,8 +112,8 @@ jobs:
           dockerCpuLimit: 2
 
       # Output
-      - uses: actions/upload-artifact@v4
-        with:
-          name: Build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
-          if-no-files-found: error
+      #- uses: actions/upload-artifact@v4
+      #  with:
+      #    name: Build-${{ matrix.targetPlatform }}
+      #    path: build/${{ matrix.targetPlatform }}
+      #    if-no-files-found: error
