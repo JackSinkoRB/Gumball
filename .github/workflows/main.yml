@@ -115,7 +115,9 @@ jobs:
 
       # Zip Build Files
       - name: Zip Build Files
-        run: zip -r Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}
+        run: |
+          find build/${{ matrix.targetPlatform }} -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
+          zip -r Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}
 
       # Move Build Files
       - name: Move Build Files
