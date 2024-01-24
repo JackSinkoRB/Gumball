@@ -38,6 +38,14 @@ jobs:
           - editmode
     steps:
 
+      # Send Discord notification
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@0.3.2
+        with:
+          args: 'Test notification for {{ EVENT_PAYLOAD.repository.full_name }}.'
+
       # Checkout
       - uses: actions/checkout@v4
         with:
@@ -114,15 +122,12 @@ jobs:
           buildName: 'Gumball'
 
       # Zip Build Files
-      - uses: montudor/action-zip@v1.0.0
-        with:
-          args: -r -9 Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}/*
+      - name: Zip Build Files
+        run: zip -r Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}
 
       # Move Build Files
       - name: Move Build Files
-        run: |
-          mkdir -p var/www/html/${{ matrix.targetPlatform }}
-          mv Gumball-${{ matrix.targetPlatform }}.zip var/www/html/${{ matrix.targetPlatform }}
+        run: mv Gumball-${{ matrix.targetPlatform }}.zip var/www/html
 
       # Output
       #- uses: actions/upload-artifact@v4
@@ -130,3 +135,18 @@ jobs:
       #    name: Build-${{ matrix.targetPlatform }}
       #    path: build/${{ matrix.targetPlatform }}
       #    if-no-files-found: error
+
+  share:
+    needs: build
+    name: Share
+    runs-on: self-hosted
+
+    steps:
+
+      # Send Discord notification
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@0.3.2
+        with:
+          args: '{{ EVENT_PAYLOAD.repository.full_name }} has a new build available.\n\nAndroid download: http://178.16.143.69/Gumball-Android.zip\n\nWindows download: http://178.16.143.69/Gumball-StandaloneWindows.zip'
