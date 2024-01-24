@@ -74,12 +74,12 @@ namespace Gumball
             liveDecals.Clear();
         }
         
-        public static void LoadDecalEditor()
+        public static void LoadEditor()
         {
-            CoroutineHelper.Instance.StartCoroutine(LoadDecalEditorIE());
+            CoroutineHelper.Instance.StartCoroutine(LoadEditorIE());
         }
         
-        private static IEnumerator LoadDecalEditorIE()
+        private static IEnumerator LoadEditorIE()
         {
             PanelManager.GetPanel<LoadingPanel>().Show();
 

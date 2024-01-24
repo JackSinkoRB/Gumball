@@ -14,15 +14,4 @@ namespace Gumball
         public string CategoryName => categoryName;
         public DecalTexture[] DecalTextures => decalTextures;
     }
-
-    [Serializable]
-    public class DecalTexture
-    {
-        [SerializeField] private Sprite sprite;
-        [SerializeField] private bool canColour;
-
-        public Sprite Sprite => sprite;
-        public bool CanColour => canColour;
-    }
-
 }

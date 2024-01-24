@@ -8,8 +8,20 @@ using UnityEngine.SceneManagement;
 
 namespace Gumball
 {
-    public class MainSceneManager : MonoBehaviour
+    public class MainSceneManager : Singleton<MainSceneManager>
     {
+
+        [SerializeField] private Vector3 driverStandingPosition;
+        [SerializeField] private Vector3 driverStandingRotationEuler;
+
+        [SerializeField] private Vector3 coDriverStandingPosition;
+        [SerializeField] private Vector3 coDriverStandingRotationEuler;
+        
+        public Vector3 DriverStandingPosition => driverStandingPosition;
+        public Quaternion DriverStandingRotation => Quaternion.Euler(driverStandingRotationEuler);
+        
+        public Vector3 CoDriverStandingPosition => coDriverStandingPosition;
+        public Quaternion CoDriverStandingRotation => Quaternion.Euler(coDriverStandingRotationEuler);
         
         private void Start()
         {
@@ -32,10 +44,12 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             
             //move the car to the origin to be framed by the camera
-            PlayerCarManager.Instance.CurrentCar.Rigidbody.velocity = Vector3.zero;
-            PlayerCarManager.Instance.CurrentCar.Rigidbody.angularVelocity = Vector3.zero;
-            PlayerCarManager.Instance.CurrentCar.Rigidbody.Move(Vector3.zero, Quaternion.Euler(Vector3.zero));
+            PlayerCarManager.Instance.CurrentCar.Teleport(Vector3.zero, Quaternion.Euler(Vector3.zero));
             
+            //move the avatars
+            AvatarManager.Instance.DriverAvatar.Teleport(Instance.driverStandingPosition, Instance.DriverStandingRotation);
+            AvatarManager.Instance.CoDriverAvatar.Teleport(Instance.coDriverStandingPosition, Instance.CoDriverStandingRotation);
+
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car, false);
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
 

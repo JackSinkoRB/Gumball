@@ -42,5 +42,20 @@ namespace Gumball
             return null; //no component
         }
 
+        public static Transform FindChildByName(this Transform parent, string name)
+        {
+            if (parent.name == name)
+                return parent.transform;
+            
+            foreach (Transform child in parent)
+            {
+                Transform childOfChild = child.FindChildByName(name);
+                if (childOfChild != null)
+                    return childOfChild;
+            }
+            
+            return null;
+        }
+        
     }
 }

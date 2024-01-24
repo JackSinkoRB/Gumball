@@ -20,7 +20,12 @@ namespace Gumball
 
         public void LoadDecalEditor()
         {
-            DecalEditor.LoadDecalEditor();
+            DecalEditor.LoadEditor();
+        }
+
+        public void LoadAvatarEditor()
+        {
+            AvatarEditor.LoadEditor();
         }
         
     }

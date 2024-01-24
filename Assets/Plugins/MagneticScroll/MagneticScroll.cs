@@ -1070,6 +1070,9 @@ namespace MagneticScrollUtils
                 maxDistance = GetSpacingBetweenIcons(ClosestIconToMagnetIndex, iconIndexMovingTo) / 2;
             }
 
+            if (maxDistance == 0)
+                return 0;
+
             float existingPos = IsHorizontal ? outlineEffectImage.rectTransform.anchoredPosition.x : outlineEffectImage.rectTransform.anchoredPosition.y;
             float centre = IsHorizontal ? (scrollMinPos / 2).x : (scrollMinPos / 2).y;
             float percent = 1 - (Mathf.Abs(existingPos - centre) / maxDistance);

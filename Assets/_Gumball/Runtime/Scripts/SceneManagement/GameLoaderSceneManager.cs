@@ -24,8 +24,10 @@ namespace Gumball
             Loading_scriptable_singletons,
             Loading_save_data,
             Loading_mainscene,
+            Waiting_for_save_data_to_load,
             Loading_vehicle,
-            Finishing_async_tasks,
+            Loading_avatars,
+            Loading_vehicle_and_drivers,
         }
 
         [SerializeField] private TextMeshProUGUI debugLabel;
@@ -33,8 +35,6 @@ namespace Gumball
         private Stage currentStage;
         private AsyncOperationHandle[] singletonScriptableHandles;
         private AsyncOperationHandle<SceneInstance> mainSceneHandle;
-        private Coroutine carLoadCoroutine;
-        private Coroutine mapLoadCoroutine;
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
             
@@ -58,30 +58,39 @@ namespace Gumball
             currentStage = Stage.Checking_for_new_version;
             yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
             
-            stopwatch.Restart();
             currentStage = Stage.Loading_save_data;
             TrackedCoroutine loadSaveDataAsync = new TrackedCoroutine(DataManager.LoadAllAsync());
             
+            stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Additive, true);
             yield return mainSceneHandle;
 #if ENABLE_LOGS
             Debug.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
+            
             stopwatch.Restart();
-
-            currentStage = Stage.Loading_vehicle;
-            Vector3 startingPosition = Vector3.zero;
-            Vector3 startingRotation = Vector3.zero;
-            carLoadCoroutine = CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(startingPosition, startingRotation));
-            yield return carLoadCoroutine;
-#if ENABLE_LOGS
-            Debug.Log($"Vehicle loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
-            stopwatch.Restart();
-
-            currentStage = Stage.Finishing_async_tasks;
+            currentStage = Stage.Waiting_for_save_data_to_load;
             yield return new WaitUntil(() => !loadSaveDataAsync.IsPlaying);
+#if ENABLE_LOGS
+            Debug.Log($"Took additional {stopwatch.Elapsed.ToPrettyString(true)} to load the save data");
+#endif
+            
+            stopwatch.Restart();
+            currentStage = Stage.Loading_vehicle;
+            Vector3 carStartingPosition = Vector3.zero;
+            Quaternion carStartingRotation = Quaternion.Euler(Vector3.zero);
+            TrackedCoroutine carLoadCoroutine = new TrackedCoroutine(PlayerCarManager.Instance.SpawnCar(carStartingPosition, carStartingRotation));
+            
+            currentStage = Stage.Loading_avatars;
+            TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation));
+            TrackedCoroutine coDriverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnCoDriver(MainSceneManager.Instance.CoDriverStandingPosition, MainSceneManager.Instance.CoDriverStandingRotation));
+            
+            currentStage = Stage.Loading_vehicle_and_drivers;
+            yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying && !coDriverAvatarLoadCoroutine.IsPlaying);
+#if ENABLE_LOGS
+            Debug.Log($"Vehicle and driver loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+#endif
             
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
@@ -107,7 +116,8 @@ namespace Gumball
                 //LOAD ALL SINGLETON SCRIPTABLES HERE
                 GlobalLoggers.LoadInstanceAsync(),
                 SettingsManager.LoadInstanceAsync(),
-                DecalManager.LoadInstanceAsync()
+                DecalManager.LoadInstanceAsync(),
+                AvatarManager.LoadInstanceAsync()
             };
             return handles;
         }
