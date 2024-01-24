@@ -292,7 +292,7 @@ namespace Gumball.Runtime.Tests
             BlendshapeManager[] managers = avatarToCheck.CurrentBody.GetBlendShapeManagers();
             Assert.IsTrue(managers != null && managers.Length > 0);
 
-            foreach (BlendShapeCosmetic.PropertyModifier propertyModifier in headShapeCosmetic.Options[indexToUse].PropertyModifiers)
+            foreach (BlendshapeCosmetic.PropertyModifier propertyModifier in headShapeCosmetic.Options[indexToUse].PropertyModifiers)
             {
                 float actualValue = managers[0].GetBlendshape(propertyModifier.Property);
                 float desiredValue = propertyModifier.Value * BlendshapeManager.BlendShapeValueModifier;
@@ -306,6 +306,41 @@ namespace Gumball.Runtime.Tests
             
             //ensure it is current
             Assert.AreEqual(indexToUse, headShapeCosmetic.CurrentIndex);
+        }
+        
+        [UnityTest]
+        public IEnumerator BlendShapeColorIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+        
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+        
+            const int indexToUse = 5;
+            //just use mouth as blendshape cosmetic
+            MouthCosmetic mouthCosmetic = avatarToCheck.CurrentBody.GetCosmetic<MouthCosmetic>();
+            mouthCosmetic.ApplyColor(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+        
+            foreach (string colorProperty in mouthCosmetic.Colorable.ColorMaterialProperties)
+            {
+                foreach (Material material in avatarToCheck.CurrentBody.GetMaterialsWithProperty(colorProperty))
+                {
+                    Color actualColor = material.GetColor(colorProperty);
+                    Color desiredColor = mouthCosmetic.Colorable.Colors[indexToUse];
+                    
+                    if (actualColor != desiredColor)
+                        Assert.Fail($"{colorProperty} ({actualColor}) doesn't match (should be {desiredColor})");
+                }
+            }
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, mouthCosmetic.GetSavedColorIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, mouthCosmetic.CurrentColorIndex);
         }
         
     }
