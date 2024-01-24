@@ -23,7 +23,6 @@ namespace Gumball
         {
             scrollItem.onLoad += () =>
             {
-                scrollItem.CurrentIcon.ImageComponent.enabled = true;
                 scrollItem.CurrentIcon.ImageComponent.sprite = circleSprite;
                 scrollItem.CurrentIcon.ImageComponent.color = skinColors[index];
             };

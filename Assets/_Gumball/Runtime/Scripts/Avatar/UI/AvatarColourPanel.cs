@@ -25,7 +25,6 @@ namespace Gumball
                     int finalIndex = index;
                     scrollItem.onLoad += () =>
                     {
-                        scrollItem.CurrentIcon.ImageComponent.enabled = true;
                         scrollItem.CurrentIcon.ImageComponent.sprite = circleIcon;
                         scrollItem.CurrentIcon.ImageComponent.color = colorable.Colors[finalIndex];
                     };

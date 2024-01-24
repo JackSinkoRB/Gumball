@@ -179,7 +179,7 @@ namespace Gumball.Runtime.Tests
         }
         
         [UnityTest]
-        public IEnumerator FrecklesCosmeticIsPersistent()
+        public IEnumerator PropertyCosmeticIsPersistent()
         {
             yield return new WaitUntil(() => isInitialised);
 
@@ -188,14 +188,15 @@ namespace Gumball.Runtime.Tests
             Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
 
             const int indexToUse = 2;
+            //just use freckles cosmetic for testing
             FrecklesCosmetic frecklesCosmetic = avatarToCheck.CurrentBody.GetCosmetic<FrecklesCosmetic>();
             frecklesCosmetic.Apply(indexToUse);
             
             AvatarEditor.Instance.EndSession();
 
-            foreach (Material material in frecklesCosmetic.MaterialsToEffect)
+            foreach (Material material in avatarToCheck.CurrentBody.GetMaterialsWithProperty(frecklesCosmetic.Property))
             {
-                float actualValue = material.GetFloat(FrecklesCosmetic.FrecklesProperty);
+                float actualValue = material.GetFloat(frecklesCosmetic.Property);
                 float desiredValue = frecklesCosmetic.Options[indexToUse].Value;
                 
                 if (!actualValue.Approximately(desiredValue))

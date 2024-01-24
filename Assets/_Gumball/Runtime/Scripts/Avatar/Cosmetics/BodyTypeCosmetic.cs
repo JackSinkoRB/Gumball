@@ -30,9 +30,8 @@ namespace Gumball
         {
             scrollItem.onLoad += () =>
             {
-                scrollItem.CurrentIcon.ImageComponent.enabled = true;
-                scrollItem.CurrentIcon.ImageComponent.color = Color.white;
                 scrollItem.CurrentIcon.ImageComponent.sprite = options[index].Icon;
+                scrollItem.CurrentIcon.ImageComponent.color = options[index].Icon == null ? Color.white.WithAlphaSetTo(0) : Color.white;
             };
             scrollItem.onSelect += () =>
             {
