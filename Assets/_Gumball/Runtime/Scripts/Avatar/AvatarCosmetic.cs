@@ -22,7 +22,7 @@ namespace Gumball
                 ItemCosmetic itemCosmetic 
                     when itemCosmetic.CurrentItemData.Colorable.IsColorable && itemCosmetic.CurrentItemData.Colorable.Colors.Length > 1 
                     => itemCosmetic.CurrentItemData.Colorable,
-                EyesCosmetic eyesCosmetic => eyesCosmetic.Colorable,
+                ColorableBlendshapeCosmetic blendshapeCosmetic => blendshapeCosmetic.Colorable,
                 _ => null //return null if not colorable
             };
         }
@@ -37,8 +37,8 @@ namespace Gumball
                 case ItemCosmetic itemCosmetic:
                     itemCosmetic.ApplyColor(index);
                     break;
-                case EyesCosmetic eyesCosmetic:
-                    eyesCosmetic.ApplyColor(index);
+                case ColorableBlendshapeCosmetic blendshapeCosmetic:
+                    blendshapeCosmetic.ApplyColor(index);
                     break;
             }
         }
@@ -55,7 +55,7 @@ namespace Gumball
             return cosmetic switch
             {
                 ItemCosmetic itemCosmetic => itemCosmetic.CurrentColorIndex,
-                EyesCosmetic eyesCosmetic => eyesCosmetic.CurrentColorIndex,
+                ColorableBlendshapeCosmetic blendshapeCosmetic => blendshapeCosmetic.CurrentColorIndex,
                 _ => -1 //should not reach here
             };
         }

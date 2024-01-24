@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class HeadShapeCosmetic : BlendShapeCosmetic
+    public class HeadShapeCosmetic : BlendshapeCosmetic
     {
         
         

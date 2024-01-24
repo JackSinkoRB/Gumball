@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public abstract class BlendShapeCosmetic : AvatarCosmetic
+    public abstract class BlendshapeCosmetic : AvatarCosmetic
     {
 
         [Serializable]
