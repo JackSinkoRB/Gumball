@@ -133,9 +133,20 @@ jobs:
     name: Deploy
     runs-on: self-hosted
     steps:
+
+      # Get short commit hash
+      - uses: benjlevesque/short-sha@v2.1
+        id: short-sha
+        with:
+          length: 7
+
       # Send Discord notification
       - name: Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_EMBEDS: '[{ "title":"Gumball has a new build available.", "footer":{"text":"**Download**: [Android](http://178.16.143.69/Gumball-Android.zip) | [Windows](http://178.16.143.69/Gumball-StandaloneWindows.zip)\n\nCommit: *${{ github.sha }}*/nLast change: *${{github.event.head_commit.message}}*\nCommitted by ${{github.event.head_commit.author.name}}"} }]'
+          DISCORD_EMBEDS: '[{ "title":"Gumball has a new build available.", "fields": [
+          { "name": "Android", "value": "[Download](http://178.16.143.69/Gumball-Android.zip)", "inline": true },
+          { "name": "Windows", "value": "[Download](http://178.16.143.69/Gumball-StandaloneWindows.zip)", "inline": true },
+          { "name": "Last commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}}) - *${{github.event.head_commit.message}}*" }]
+          , "footer":{"text":"Committed by ${{github.event.head_commit.author.name}}"} }]'
         uses: Ilshidur/action-discord@0.3.2
