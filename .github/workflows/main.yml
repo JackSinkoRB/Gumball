@@ -13,16 +13,7 @@ jobs:
     name: Setup
     runs-on: self-hosted
 
-    # Attempt to change the cache folder to a shared folder
-    env:
-      RUNNER_TOOL_CACHE: /root/shared-tools
-
     steps:
-
-      # Ensure cache folder exists
-      - name: Create cache folder
-        run: mkdir -p $RUNNER_TOOL_CACHE
-
       # Ensure Git LFS is installed
       - name: Install Git LFS
         run: sudo apt-get update && sudo apt-get install git-lfs
@@ -45,14 +36,7 @@ jobs:
         testMode:
           - playmode
           - editmode
-
-    # Attempt to change the cache folder to a shared folder
-    env:
-      RUNNER_TOOL_CACHE: /root/shared-tools
-
     steps:
-
-      - run: echo "$RUNNER_TOOL_CACHE"
 
       # Checkout
       - uses: actions/checkout@v4
@@ -60,7 +44,7 @@ jobs:
           lfs: true
 
       # Cache
-      - uses: maxnowack/local-cache@v1
+      - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
@@ -92,11 +76,6 @@ jobs:
         targetPlatform:
           - Android
           - StandaloneWindows
-
-    # Attempt to change the cache folder to a shared folder
-    env:
-      RUNNER_TOOL_CACHE: /root/shared-tools
-
     steps:
 
       # Checkout
@@ -106,7 +85,7 @@ jobs:
           lfs: true
 
       # Cache
-      - uses: maxnowack/local-cache@v1
+      - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
