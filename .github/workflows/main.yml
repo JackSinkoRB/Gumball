@@ -26,6 +26,11 @@ jobs:
       - name: Install Git
         run: sudo apt-get update && sudo apt-get install git
 
+      # Checkout
+      - uses: JackSinkoRB/checkout@main
+        with:
+          lfs: false
+
   testAllModes:
     needs: setup
     name: Test in ${{ matrix.testMode }}
@@ -37,11 +42,6 @@ jobs:
           - playmode
           - editmode
     steps:
-
-      # Checkout
-      - uses: JackSinkoRB/checkout@main
-        with:
-          lfs: true
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -77,12 +77,6 @@ jobs:
           - Android
           - StandaloneWindows
     steps:
-
-      # Checkout
-      - uses: JackSinkoRB/checkout@main
-        with:
-          fetch-depth: 0
-          lfs: true
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
