@@ -66,6 +66,10 @@ jobs:
           dockerMemoryLimit: 7500m
           dockerCpuLimit: 2
 
+      # Delete library folder to save space
+      - name: Free space
+        run: rm -rf Library
+
   build:
     needs: testAllModes
     name: Build for ${{ matrix.targetPlatform }}
@@ -113,6 +117,10 @@ jobs:
       # Move Build Files
       - name: Move Build Files
         run: mv Gumball-${{ matrix.targetPlatform }}.zip /var/www/html
+
+      # Delete library folder to save space
+      - name: Free space
+        run: rm -rf Library
 
   deploy:
     needs: build
