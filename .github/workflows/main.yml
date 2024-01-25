@@ -45,6 +45,11 @@ jobs:
         testMode:
           - playmode
           - editmode
+
+    # Attempt to change the cache folder to a shared folder
+    env:
+      RUNNER_TOOL_CACHE: /root/shared-tools
+
     steps:
 
       - run: echo "$RUNNER_TOOL_CACHE"
@@ -87,6 +92,11 @@ jobs:
         targetPlatform:
           - Android
           - StandaloneWindows
+
+    # Attempt to change the cache folder to a shared folder
+    env:
+      RUNNER_TOOL_CACHE: /root/shared-tools
+
     steps:
 
       # Checkout
