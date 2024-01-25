@@ -47,6 +47,8 @@ jobs:
           - editmode
     steps:
 
+      - run: echo "$RUNNER_TOOL_CACHE"
+
       # Checkout
       - uses: actions/checkout@v4
         with:
