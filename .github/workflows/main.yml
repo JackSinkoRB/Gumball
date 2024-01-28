@@ -9,7 +9,7 @@ on:
       - develop
 
 concurrency:
-  group: ${{ github.head_ref || github.ref_name }} 
+  group: ${{ github.repository }}
   cancel-in-progress: false
 
 jobs:
@@ -118,6 +118,10 @@ jobs:
       - name: Move Build Files
         run: mv Gumball-${{ matrix.targetPlatform }}.zip /var/www/html
 
+      # Delete build folder to save space
+      - name: Delete build folder
+        run: rm -rf build
+
   deploy:
     needs: build
     name: Deploy
@@ -140,18 +144,3 @@ jobs:
           { "name": "Last commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}}) - *${{github.event.head_commit.message}}*" }]
           , "footer":{"text":"Committed by ${{github.event.head_commit.author.name}}"} }]'
         uses: Ilshidur/action-discord@0.3.2
-
-  cleanup:
-    name: Cleanup
-    needs: [testAllModes, build]
-    if: always()
-    runs-on: self-hosted
-    steps:
-
-      # Delete library folder to save space
-      - name: Delete library folder
-        run: rm -rf Library
-
-      # Delete build folder to save space
-      - name: Delete build folder
-        run: rm -rf build
