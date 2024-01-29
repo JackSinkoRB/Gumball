@@ -7,24 +7,24 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class PropertyCosmetic : AvatarCosmetic
+    public class TexturePropertyCosmetic : AvatarCosmetic
     {
         
         [Serializable]
-        public struct PropertyCosmeticIcon
+        public struct TexturePropertyCosmeticIcon
         {
-            [SerializeField] private float value;
+            [SerializeField] private Texture value;
             [SerializeField] private Sprite icon;
 
-            public float Value => value;
+            public Texture Value => value;
             public Sprite Icon => icon;
         }
 
         [SerializeField] private string property;
-        [SerializeField] private PropertyCosmeticIcon[] options;
+        [SerializeField] private TexturePropertyCosmeticIcon[] options;
         
         public string Property => property;
-        public PropertyCosmeticIcon[] Options => options;
+        public TexturePropertyCosmeticIcon[] Options => options;
         
         public override int GetMaxIndex()
         {
@@ -48,7 +48,7 @@ namespace Gumball
         {
             foreach (Material material in avatarBelongsTo.CurrentBody.GetMaterialsWithProperty(property))
             {
-                material.SetFloat(property, options[index].Value);
+                material.SetTexture(property, options[index].Value);
             }
         }
         
