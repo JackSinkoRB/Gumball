@@ -49,7 +49,7 @@ namespace Gumball
                 {
                     ScrollItem scrollItem = new ScrollItem();
                     scrollItem.onLoad += () => scrollItem.CurrentIcon.ImageComponent.sprite = cosmetic.Icon;
-                    scrollItem.onSelect += () => cosmeticDisplay.PopulateCosmeticOptions(cosmetic);
+                    scrollItem.onSelectComplete += () => cosmeticDisplay.PopulateCosmeticOptions(cosmetic);
                     scrollItems.Add(scrollItem);
                 }
             }
