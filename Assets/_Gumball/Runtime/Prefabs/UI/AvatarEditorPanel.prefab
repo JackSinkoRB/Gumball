@@ -283,7 +283,7 @@ MonoBehaviour:
   buttonColorUnselected: {r: 0.49019608, g: 0.49019608, b: 0.49019608, a: 0.5803922}
   opacitySelected: 1
   opacityUnselected: 0.4
-  cosmeticDisplay: {fileID: 7674949373963378639}
+  cosmeticPanel: {fileID: 7674949373963378639}
   magneticScroll: {fileID: 7684501183619067142}
 --- !u!1 &1754723514141175451
 GameObject:
@@ -844,7 +844,7 @@ GameObject:
   - component: {fileID: 9011939480025899611}
   - component: {fileID: 7674949373963378639}
   m_Layer: 5
-  m_Name: CosmeticDisplay
+  m_Name: CosmeticPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -883,6 +883,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36c9f25a4cdeec34ba9e9d50028c89ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isAddedToPanelStack: 1
+  ignoreTimescale: 1
+  disableWhenHidden: 1
+  fadeElements:
+  - ignoreTimescale: 0
+    startHidden: 0
+    disableWhenHidden: 0
+    doShowAnimation: 1
+    doHideAnimation: 1
+    showDelay: 0
+    hideDelay: 0
+    showDuration: 0.1
+    hideDuration: 0.2
+    rectTransform: {fileID: 9011939480025899611}
+    showEase: 4
+    hideEase: 4
+  - ignoreTimescale: 0
+    startHidden: 0
+    disableWhenHidden: 0
+    doShowAnimation: 1
+    doHideAnimation: 1
+    showDelay: 0
+    hideDelay: 0
+    showDuration: 0.2
+    hideDuration: 0.2
+    rectTransform: {fileID: 6787059568358775146}
+    showEase: 4
+    hideEase: 4
+  slideElements: []
   colourPanel: {fileID: 7785273358940238113}
   titleLabel: {fileID: 4850030981778584311}
   magneticScroll: {fileID: 8292261275245744001}
@@ -3107,7 +3136,7 @@ GameObject:
   - component: {fileID: 5534298952109316250}
   - component: {fileID: 7785273358940238113}
   m_Layer: 5
-  m_Name: ColourDisplay
+  m_Name: ColourPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3149,7 +3178,19 @@ MonoBehaviour:
   isAddedToPanelStack: 1
   ignoreTimescale: 1
   disableWhenHidden: 1
-  fadeElements: []
+  fadeElements:
+  - ignoreTimescale: 0
+    startHidden: 0
+    disableWhenHidden: 0
+    doShowAnimation: 1
+    doHideAnimation: 1
+    showDelay: 0
+    hideDelay: 0
+    showDuration: 0.1
+    hideDuration: 0.2
+    rectTransform: {fileID: 5534298952109316250}
+    showEase: 4
+    hideEase: 4
   slideElements: []
   magneticScroll: {fileID: 99348538992203550}
   circleIcon: {fileID: 21300000, guid: d961bb3aea3321646821aab07df87bd5, type: 3}

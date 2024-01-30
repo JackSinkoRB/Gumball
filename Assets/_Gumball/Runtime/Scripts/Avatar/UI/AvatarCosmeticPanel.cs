@@ -7,23 +7,34 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class AvatarCosmeticDisplay : MonoBehaviour
+    public class AvatarCosmeticPanel : AnimatedPanel
     {
 
-        public static event Action<AvatarCosmetic> onSelectCosmetic;
-        
         [SerializeField] private AvatarColourPanel colourPanel;
         [SerializeField] private TextMeshProUGUI titleLabel;
         [SerializeField] private MagneticScroll magneticScroll;
-        
-        [RuntimeInitializeOnLoadMethod]
-        private static void RuntimeInitialise()
+
+        public AvatarCosmetic SelectedCosmetic { get; private set; }
+
+        protected override void OnShow()
         {
-            onSelectCosmetic = null;
+            base.OnShow();
+
+            CheckToShowColourPanel(SelectedCosmetic);
         }
-        
+
+        protected override void OnHide()
+        {
+            base.OnHide();
+            
+            SelectedCosmetic = null;
+            colourPanel.Hide();
+        }
+
         public void PopulateCosmeticOptions(AvatarCosmetic cosmetic)
         {
+            SelectedCosmetic = cosmetic;
+            
             titleLabel.text = cosmetic.DisplayName;
             
             List<ScrollItem> scrollItems = new List<ScrollItem>();
@@ -46,8 +57,6 @@ namespace Gumball
             magneticScroll.SetItems(scrollItems, startIndex);
 
             CheckToShowColourPanel(cosmetic);
-            
-            onSelectCosmetic?.Invoke(cosmetic);
         }
 
         private void CheckToShowColourPanel(AvatarCosmetic cosmetic)

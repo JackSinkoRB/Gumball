@@ -48,13 +48,15 @@ namespace Gumball
         private void OnEnable()
         {
             AvatarEditor.onSessionStart += OnSessionStart;
-            AvatarCosmeticDisplay.onSelectCosmetic += OnSelectCosmetic;
+            AvatarCosmeticSelector.onSelectCosmetic += OnSelectCosmetic;
+            AvatarCosmeticSelector.onDeselectCosmetic += OnDeselectCosmetic;
         }
 
         private void OnDisable()
         {
-            AvatarCosmeticDisplay.onSelectCosmetic -= OnSelectCosmetic;
             AvatarEditor.onSessionStart -= OnSessionStart;
+            AvatarCosmeticSelector.onSelectCosmetic -= OnSelectCosmetic;
+            AvatarCosmeticSelector.onDeselectCosmetic -= OnDeselectCosmetic; 
         }
 
         public void SetPosition(CameraPositionType type, bool instant = false) => SetPosition(GetCameraPositionFromType(type), instant);
@@ -87,6 +89,11 @@ namespace Gumball
         private void OnSelectCosmetic(AvatarCosmetic cosmetic)
         {
             SetPosition(cosmetic.CameraPosition);
+        }
+        
+        private void OnDeselectCosmetic()
+        {
+            SetPosition(CameraPositionType.FULL_BODY);
         }
 
         private CameraPosition GetCameraPositionFromType(CameraPositionType type)
