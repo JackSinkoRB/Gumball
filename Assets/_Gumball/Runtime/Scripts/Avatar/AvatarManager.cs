@@ -24,6 +24,14 @@ namespace Gumball
         public Avatar DriverAvatar => driverAvatar;
         public Avatar CoDriverAvatar => coDriverAvatar;
 
+        public void HideAvatars(bool hide)
+        {
+            if (driverAvatar != null)
+                driverAvatar.gameObject.SetActive(!hide);
+            if (driverAvatar != null)
+                coDriverAvatar.gameObject.SetActive(!hide);
+        }
+        
         public IEnumerator SpawnDriver(Vector3 position, Quaternion rotation)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();

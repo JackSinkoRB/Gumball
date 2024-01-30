@@ -136,6 +136,8 @@ namespace Gumball
             
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
 
+            AvatarManager.Instance.HideAvatars(true);
+
             currentCar = car;
             
             if (disablePaintableMeshesCoroutine != null)
@@ -171,6 +173,8 @@ namespace Gumball
 
             DeselectLiveDecal();
             
+            AvatarManager.Instance.HideAvatars(false);
+
             DecalManager.SaveLiveDecalData(currentCar, liveDecals);
 
             foreach (LiveDecal liveDecal in liveDecals)
