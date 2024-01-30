@@ -177,39 +177,7 @@ namespace Gumball.Runtime.Tests
             //ensure it is current
             Assert.AreEqual(indexToUse, skinCosmetic.CurrentIndex);
         }
-        
-        [UnityTest]
-        public IEnumerator PropertyCosmeticIsPersistent()
-        {
-            yield return new WaitUntil(() => isInitialised);
 
-            yield return AvatarEditor.Instance.StartSession();
-            
-            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
-
-            const int indexToUse = 2;
-            //just use freckles cosmetic for testing
-            FrecklesCosmetic frecklesCosmetic = avatarToCheck.CurrentBody.GetCosmetic<FrecklesCosmetic>();
-            frecklesCosmetic.Apply(indexToUse);
-            
-            AvatarEditor.Instance.EndSession();
-
-            foreach (Material material in avatarToCheck.CurrentBody.GetMaterialsWithProperty(frecklesCosmetic.Property))
-            {
-                float actualValue = material.GetFloat(frecklesCosmetic.Property);
-                float desiredValue = frecklesCosmetic.Options[indexToUse].Value;
-                
-                if (!actualValue.Approximately(desiredValue))
-                    Assert.Fail($"{material.name} ({actualValue}) doesn't match (should be {desiredValue})");
-            }
-            
-            //ensure it is saved in persistent data
-            Assert.AreEqual(indexToUse, frecklesCosmetic.GetSavedIndex());
-            
-            //ensure it is current
-            Assert.AreEqual(indexToUse, frecklesCosmetic.CurrentIndex);
-        }
-        
         [UnityTest]
         public IEnumerator ItemCosmeticIsPersistent()
         {
@@ -257,6 +225,9 @@ namespace Gumball.Runtime.Tests
         
             foreach (Material material in hairCosmetic.GetMaterialsWithColorProperty())
             {
+                if (hairCosmetic.CurrentItemData.Colorable.CanIgnoreMaterial(material))
+                    continue;
+                
                 foreach (string property in hairCosmetic.CurrentItemData.Colorable.ColorMaterialProperties)
                 {
                     Color actualColor = material.GetColor(property);
@@ -329,6 +300,9 @@ namespace Gumball.Runtime.Tests
             {
                 foreach (Material material in avatarToCheck.CurrentBody.GetMaterialsWithProperty(colorProperty))
                 {
+                    if (mouthCosmetic.Colorable.CanIgnoreMaterial(material))
+                        continue;
+                    
                     Color actualColor = material.GetColor(colorProperty);
                     Color desiredColor = mouthCosmetic.Colorable.Colors[indexToUse];
                     
@@ -342,6 +316,70 @@ namespace Gumball.Runtime.Tests
             
             //ensure it is current
             Assert.AreEqual(indexToUse, mouthCosmetic.CurrentColorIndex);
+        }
+        
+        [UnityTest]
+        public IEnumerator FloatPropertyCosmeticIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 2;
+            //just use freckles cosmetic for testing
+            FrecklesCosmetic frecklesCosmetic = avatarToCheck.CurrentBody.GetCosmetic<FrecklesCosmetic>();
+            frecklesCosmetic.Apply(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            foreach (Material material in avatarToCheck.CurrentBody.GetMaterialsWithProperty(frecklesCosmetic.Property))
+            {
+                float actualValue = material.GetFloat(frecklesCosmetic.Property);
+                float desiredValue = frecklesCosmetic.Options[indexToUse].Value;
+                
+                if (!actualValue.Approximately(desiredValue))
+                    Assert.Fail($"{material.name} ({actualValue}) doesn't match (should be {desiredValue})");
+            }
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, frecklesCosmetic.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, frecklesCosmetic.CurrentIndex);
+        }
+        
+        [UnityTest]
+        public IEnumerator TexturePropertyCosmeticIsPersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            yield return AvatarEditor.Instance.StartSession();
+            
+            Avatar avatarToCheck = AvatarEditor.Instance.CurrentSelectedAvatar;
+
+            const int indexToUse = 2;
+            //just use makeup cosmetic for testing
+            MakeupCosmetic makeupCosmetic = avatarToCheck.CurrentBody.GetCosmetic<MakeupCosmetic>();
+            makeupCosmetic.Apply(indexToUse);
+            
+            AvatarEditor.Instance.EndSession();
+
+            foreach (Material material in avatarToCheck.CurrentBody.GetMaterialsWithProperty(makeupCosmetic.Property))
+            {
+                Texture actualTexture = material.GetTexture(makeupCosmetic.Property);
+                Texture desiredTexture = makeupCosmetic.Options[indexToUse].Value;
+                
+                if (actualTexture != desiredTexture)
+                    Assert.Fail($"{material.name} ({actualTexture.name}) doesn't match (should be {desiredTexture.name})");
+            }
+            
+            //ensure it is saved in persistent data
+            Assert.AreEqual(indexToUse, makeupCosmetic.GetSavedIndex());
+            
+            //ensure it is current
+            Assert.AreEqual(indexToUse, makeupCosmetic.CurrentIndex);
         }
         
     }

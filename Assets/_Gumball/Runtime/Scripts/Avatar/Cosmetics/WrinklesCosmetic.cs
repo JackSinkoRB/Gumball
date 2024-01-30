@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class WrinklesCosmetic : PropertyCosmetic
+    public class WrinklesCosmetic : FloatPropertyCosmetic
     {
         
 

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8711568420583151672}
   - component: {fileID: 8759035123575683350}
   m_Layer: 5
-  m_Name: Label
+  m_Name: CoDriverLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -275,12 +275,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3eac41125cf49364392129e09b73701f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  leftButton: {fileID: 8173591873764815416}
+  rightButton: {fileID: 3229877934944877013}
+  leftLabel: {fileID: 1486215067297806576}
+  rightLabel: {fileID: 2595157966248678966}
+  buttonColorSelected: {r: 0.21568628, g: 0.21568628, b: 0.21568628, a: 0.9372549}
+  buttonColorUnselected: {r: 0.49019608, g: 0.49019608, b: 0.49019608, a: 0.5803922}
+  opacitySelected: 1
+  opacityUnselected: 0.4
   cosmeticDisplay: {fileID: 7674949373963378639}
   magneticScroll: {fileID: 7684501183619067142}
-  bodyCategoryButton: {fileID: 8173591873764815416}
-  apparelCategoryButton: {fileID: 3229877934944877013}
-  categoryButtonColorSelected: {r: 0.3019608, g: 0.3019608, b: 0.3019608, a: 0.77254903}
-  categoryButtonColorUnselected: {r: 0.50980395, g: 0.50980395, b: 0.50980395, a: 0.77254903}
 --- !u!1 &1754723514141175451
 GameObject:
   m_ObjectHideFlags: 0
@@ -565,7 +569,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 0.77254903}
+  m_Color: {r: 0.122641504, g: 0.122641504, b: 0.122641504, a: 0.77254903}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -628,7 +632,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4430155718545625337}
         m_TargetAssemblyTypeName: Gumball.AvatarCharacterSelector, Gumball
-        m_MethodName: OnClickDriverSwitch
+        m_MethodName: OnClickLeftSwitch
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -688,10 +692,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17b90de273c4e514795d33156747f34f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  driverButton: {fileID: 6122922880495126343}
-  coDriverButton: {fileID: 6813261640113897820}
-  buttonColorSelected: {r: 0.3019608, g: 0.3019608, b: 0.3019608, a: 0.77254903}
-  buttonColorUnselected: {r: 0.50980395, g: 0.50980395, b: 0.50980395, a: 0.77254903}
+  leftButton: {fileID: 6122922880495126343}
+  rightButton: {fileID: 6813261640113897820}
+  leftLabel: {fileID: 4225686305168105198}
+  rightLabel: {fileID: 8759035123575683350}
+  buttonColorSelected: {r: 0.21698111, g: 0.21698111, b: 0.21698111, a: 0.9372549}
+  buttonColorUnselected: {r: 0.49019608, g: 0.49019608, b: 0.49019608, a: 0.5803922}
+  opacitySelected: 1
+  opacityUnselected: 0.4
 --- !u!1 &2696081109539553969
 GameObject:
   m_ObjectHideFlags: 0
@@ -815,7 +823,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 292248200842724796}
         m_TargetAssemblyTypeName: Gumball.AvatarCosmeticSelector, Gumball
-        m_MethodName: OnClickBodyCategory
+        m_MethodName: OnClickLeftSwitch
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1089,7 +1097,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   direction: 1
   populatesAtRuntime: 1
-  scrollIconPrefab: {fileID: 4261956282435876961, guid: 241c69d4990d47e49afc36b250eb89eb,
+  scrollIconPrefab: {fileID: 3915556926016603052, guid: 241c69d4990d47e49afc36b250eb89eb,
     type: 3}
   preDefinedItems:
     Value: []
@@ -1493,7 +1501,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.509434, g: 0.509434, b: 0.509434, a: 0.77254903}
+  m_Color: {r: 0.7924528, g: 0.7924528, b: 0.7924528, a: 0.25490198}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1556,7 +1564,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4430155718545625337}
         m_TargetAssemblyTypeName: Gumball.AvatarCharacterSelector, Gumball
-        m_MethodName: OnClickCoDriverSwitch
+        m_MethodName: OnClickRightSwitch
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1578,7 +1586,7 @@ GameObject:
   - component: {fileID: 4410339211664116484}
   - component: {fileID: 2595157966248678966}
   m_Layer: 5
-  m_Name: Label
+  m_Name: ApparelLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1836,7 +1844,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   direction: 1
   populatesAtRuntime: 1
-  scrollIconPrefab: {fileID: 4261956282435876961, guid: 241c69d4990d47e49afc36b250eb89eb,
+  scrollIconPrefab: {fileID: 3915556926016603052, guid: 241c69d4990d47e49afc36b250eb89eb,
     type: 3}
   preDefinedItems:
     Value: []
@@ -2134,7 +2142,7 @@ GameObject:
   - component: {fileID: 7675072577786856039}
   - component: {fileID: 1486215067297806576}
   m_Layer: 5
-  m_Name: Label
+  m_Name: BodyLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2548,7 +2556,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 292248200842724796}
         m_TargetAssemblyTypeName: Gumball.AvatarCosmeticSelector, Gumball
-        m_MethodName: OnClickApparelCategory
+        m_MethodName: OnClickRightSwitch
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2570,7 +2578,7 @@ GameObject:
   - component: {fileID: 8295702497402257248}
   - component: {fileID: 4225686305168105198}
   m_Layer: 5
-  m_Name: Label
+  m_Name: DriverLabel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

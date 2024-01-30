@@ -3,22 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using MagneticScrollUtils;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class AvatarCosmeticSelector : MonoBehaviour
+    public class AvatarCosmeticSelector : SwitchButton
     {
 
         [SerializeField] private AvatarCosmeticDisplay cosmeticDisplay;
         [SerializeField] private MagneticScroll magneticScroll;
 
-        [Space(5)]
-        [SerializeField] private Button bodyCategoryButton;
-        [SerializeField] private Button apparelCategoryButton;
-        [SerializeField] private Color categoryButtonColorSelected;
-        [SerializeField] private Color categoryButtonColorUnselected;
-        
         private void OnEnable()
         {
             AvatarEditor.onSelectedAvatarChanged += OnSelectedAvatarChanged;
@@ -30,14 +23,18 @@ namespace Gumball
             AvatarEditor.onSelectedAvatarChanged -= OnSelectedAvatarChanged;
             Avatar.onChangeBodyType -= OnBodyTypeChanged;
         }
-        
-        public void OnClickBodyCategory()
+
+        public override void OnClickLeftSwitch()
         {
+            base.OnClickLeftSwitch();
+            
             SelectCategory(AvatarCosmeticCategory.Body);
         }
-        
-        public void OnClickApparelCategory()
+
+        public override void OnClickRightSwitch()
         {
+            base.OnClickRightSwitch();
+            
             SelectCategory(AvatarCosmeticCategory.Apparel);
         }
 
@@ -63,7 +60,7 @@ namespace Gumball
             AvatarCosmetic firstCosmeticInCategory = cosmetics.ContainsKey(category) && cosmetics[category].Count > 0 ? cosmetics[category][0] : null;
             cosmeticDisplay.PopulateCosmeticOptions(firstCosmeticInCategory);
 
-            SetButtonSelected(category);
+            SetButtonSelected(category == AvatarCosmeticCategory.Body);
         }
         
         private void OnBodyTypeChanged(Avatar avatar, AvatarBodyType previousbodytype, AvatarBodyType newbodytype)
@@ -77,12 +74,6 @@ namespace Gumball
         private void OnSelectedAvatarChanged(Avatar oldAvatar, Avatar newAvatar)
         {
             SelectCategory(AvatarCosmeticCategory.Body);
-        }
-
-        private void SetButtonSelected(AvatarCosmeticCategory category)
-        {
-            bodyCategoryButton.image.color = category == AvatarCosmeticCategory.Body ? categoryButtonColorSelected : categoryButtonColorUnselected;
-            apparelCategoryButton.image.color = category == AvatarCosmeticCategory.Apparel ? categoryButtonColorSelected : categoryButtonColorUnselected;
         }
 
     }

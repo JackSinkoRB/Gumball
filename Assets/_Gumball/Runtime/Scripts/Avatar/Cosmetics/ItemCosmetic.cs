@@ -84,6 +84,9 @@ namespace Gumball
             HashSet<Material> materials = new HashSet<Material>();
             foreach (Material material in avatarBelongsTo.CurrentBody.AttachedMaterials)
             {
+                if (CurrentItemData.Colorable.CanIgnoreMaterial(material))
+                    continue;
+                
                 foreach (string property in CurrentItemData.Colorable.ColorMaterialProperties)
                 {
                     if (material.HasProperty(property))
@@ -107,6 +110,9 @@ namespace Gumball
                 
                 foreach (Material material in meshRenderer.materials)
                 {
+                    if (CurrentItemData.Colorable.CanIgnoreMaterial(material))
+                        continue;
+                    
                     foreach (string property in CurrentItemData.Colorable.ColorMaterialProperties)
                     {
                         if (material.HasProperty(property))
@@ -244,6 +250,9 @@ namespace Gumball
 
             foreach (Material material in GetMaterialsWithColorProperty())
             {
+                if (CurrentItemData.Colorable.CanIgnoreMaterial(material))
+                    continue;
+                
                 foreach (string property in CurrentItemData.Colorable.ColorMaterialProperties)
                 {
                     material.SetColor(property, CurrentItemData.Colorable.Colors[index]);
