@@ -225,6 +225,9 @@ namespace Gumball.Runtime.Tests
         
             foreach (Material material in hairCosmetic.GetMaterialsWithColorProperty())
             {
+                if (hairCosmetic.CurrentItemData.Colorable.CanIgnoreMaterial(material))
+                    continue;
+                
                 foreach (string property in hairCosmetic.CurrentItemData.Colorable.ColorMaterialProperties)
                 {
                     Color actualColor = material.GetColor(property);
@@ -297,6 +300,9 @@ namespace Gumball.Runtime.Tests
             {
                 foreach (Material material in avatarToCheck.CurrentBody.GetMaterialsWithProperty(colorProperty))
                 {
+                    if (mouthCosmetic.Colorable.CanIgnoreMaterial(material))
+                        continue;
+                    
                     Color actualColor = material.GetColor(colorProperty);
                     Color desiredColor = mouthCosmetic.Colorable.Colors[indexToUse];
                     

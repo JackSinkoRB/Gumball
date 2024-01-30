@@ -57,6 +57,9 @@ namespace Gumball
             {
                 foreach (Material material in avatarBelongsTo.CurrentBody.GetMaterialsWithProperty(colorProperty))
                 {
+                    if (colorable.CanIgnoreMaterial(material))
+                        continue;
+                    
                     material.SetColor(colorProperty, colorable.Colors[index]);
                 }
             }
