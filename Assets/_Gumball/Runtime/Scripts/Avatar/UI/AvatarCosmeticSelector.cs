@@ -28,14 +28,14 @@ namespace Gumball
         {
             AvatarEditor.onSelectedAvatarChanged += OnSelectedAvatarChanged;
             Avatar.onChangeBodyType += OnBodyTypeChanged;
-            PrimaryContactInput.onPress += OnPress;
+            PrimaryContactInput.onRelease += OnPressRelease;
         }
 
         private void OnDisable()
         {
             AvatarEditor.onSelectedAvatarChanged -= OnSelectedAvatarChanged;
             Avatar.onChangeBodyType -= OnBodyTypeChanged;
-            PrimaryContactInput.onPress -= OnPress;
+            PrimaryContactInput.onRelease -= OnPressRelease;
         }
 
         public override void OnClickLeftSwitch()
@@ -91,7 +91,7 @@ namespace Gumball
             onDeselectCosmetic?.Invoke();
         }
         
-        private void OnPress()
+        private void OnPressRelease()
         {
             CheckToDeselectCosmetics();
         }
