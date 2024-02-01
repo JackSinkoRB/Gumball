@@ -16,11 +16,6 @@ namespace Gumball
             randomCarVariant.Initialise(chunk);
             return randomCarVariant;
         }
-        
-        //car changes speed etc. if it changes chunk
-        // - each car needs to know it's chunk
-        // - if no chunk, despawn
-        
-        
+
     }
 }

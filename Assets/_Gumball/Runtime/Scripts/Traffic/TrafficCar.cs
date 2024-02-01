@@ -66,6 +66,9 @@ namespace Gumball
             isInitialised = true;
             this.currentChunk = currentChunk;
 
+            //spawn at max speed
+            SetMaxSpeed();
+            
             timeSinceCollision = Mathf.Infinity;
             gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
             DelayedUpdate();
@@ -247,6 +250,16 @@ namespace Gumball
             {
                 carCollider.enabled = false;
             }
+        }
+
+        /// <summary>
+        /// Sets the car's speed to max speed, and stops accelerating or decelerating.
+        /// </summary>
+        private void SetMaxSpeed()
+        {
+            float newDesiredSpeed = currentChunk.TrafficManager.SpeedLimitKmh;
+            desiredSpeed = newDesiredSpeed;
+            speed = newDesiredSpeed;
         }
 
         private void OnStartMoving()
