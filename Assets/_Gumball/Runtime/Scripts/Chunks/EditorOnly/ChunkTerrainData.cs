@@ -17,7 +17,7 @@ namespace Gumball
         private const string defaultTerrainMaterialPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
         
         [PositiveValueOnly, SerializeField] private int resolution = 100;
-        [PositiveValueOnly, SerializeField] private int resolutionLowLOD = 25;
+        [PositiveValueOnly, SerializeField] private int resolutionLowLOD = 20;
         [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 50;
 
         [Header("Road")]
