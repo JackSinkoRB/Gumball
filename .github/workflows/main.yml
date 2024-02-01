@@ -29,7 +29,7 @@ jobs:
             COUNT=$(( $(echo "$COMMITS" | jq length) ))
             COMMIT_MESSAGES=""
             for ((i=0; i<$COUNT; i++)); do
-              COMMIT_MESSAGES+="env.COMMITS[$i].message\n"
+              COMMIT_MESSAGES+="env.COMMITS[$i].message\n\n"
             done
           else
             COUNT=1
