@@ -46,8 +46,8 @@ namespace Gumball
                 {
                     chunk1, chunk2,
                     chunk2.transform,
-                    chunk1.CurrentTerrain.GetComponent<MeshFilter>(),
-                    chunk2.CurrentTerrain.GetComponent<MeshFilter>()
+                    chunk1.TerrainHighLOD.GetComponent<MeshFilter>(),
+                    chunk2.TerrainHighLOD.GetComponent<MeshFilter>()
                 }, "Connect Chunk");
             }
             
@@ -94,8 +94,8 @@ namespace Gumball
                 {
                     chunk1, chunk2,
                     chunk2.transform,
-                    chunk1.CurrentTerrain.GetComponent<MeshFilter>(),
-                    chunk2.CurrentTerrain.GetComponent<MeshFilter>()
+                    chunk1.TerrainHighLOD.GetComponent<MeshFilter>(),
+                    chunk2.TerrainHighLOD.GetComponent<MeshFilter>()
                 }, "Connect Chunk");
             }
 #endif
@@ -306,6 +306,9 @@ namespace Gumball
                 splineMesh.GetComponent<MeshFilter>().sharedMesh = originalChunk.GetComponent<Chunk>().SplinesMeshes[index].GetComponent<MeshFilter>().sharedMesh;
             }
 
+            //create raycast detector object
+            runtimePrefabInstance.GetComponent<Chunk>().TryCreateChunkDetector();
+            
             //update the data
             runtimePrefabInstance.GetComponent<Chunk>().SetChunkObjectData(chunkObjectData);
 

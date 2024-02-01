@@ -17,6 +17,7 @@ namespace Gumball
         private const string defaultTerrainMaterialPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
         
         [PositiveValueOnly, SerializeField] private int resolution = 100;
+        [PositiveValueOnly, SerializeField] private int resolutionLowLOD = 25;
         [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 50;
 
         [Header("Road")]
@@ -47,26 +48,37 @@ namespace Gumball
         public float ChunkBlendDistance => chunkBlendDistance;
         public TerrainTextureBlendSettings TextureBlendSettings => textureBlendSettings;
         
+        public ChunkGrid GridLowLOD { get; private set; }
         public ChunkGrid Grid { get; private set; }
 
-        public GameObject Create(Chunk chunkToUse, Material[] materialsToUse = null)
+        public Dictionary<Chunk.TerrainLOD, GameObject> Create(Chunk chunkToUse, Material[] materialsToUse = null)
         {
             chunk = chunkToUse;
             UpdateGrid();
-            return GenerateTerrainMeshFromGrid(materialsToUse);
+
+            Dictionary<Chunk.TerrainLOD, GameObject> terrains = new()
+            {
+                [Chunk.TerrainLOD.LOW] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.LOW, materialsToUse),
+                [Chunk.TerrainLOD.HIGH] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.HIGH, materialsToUse)
+            };
+            
+            return terrains;
         }
 
         private void UpdateGrid()
         {
+            GridLowLOD = new ChunkGrid(chunk, resolutionLowLOD, widthAroundRoad);
             Grid = new ChunkGrid(chunk, resolution, widthAroundRoad);
         }
         
-        private GameObject GenerateTerrainMeshFromGrid(Material[] materialsToAssign = null)
+        private GameObject GenerateTerrainMeshFromGrid(Chunk.TerrainLOD lod, Material[] materialsToAssign = null)
         {
+            ChunkGrid grid = lod == Chunk.TerrainLOD.HIGH ? Grid : GridLowLOD;
+            
             //create the gameobject
-            GameObject terrain = new GameObject("Terrain");
+            GameObject terrain = new GameObject($"Terrain-{lod.ToString()}");
             terrain.transform.SetParent(chunk.transform);
-            terrain.transform.position = Grid.GridCenter;
+            terrain.transform.position = grid.GridCenter;
             terrain.tag = ChunkUtils.TerrainTag;
             terrain.layer = (int) LayersAndTags.Layer.Terrain;
             
@@ -81,15 +93,15 @@ namespace Gumball
             Mesh mesh = new Mesh();
 
             //apply height data
-            List<Vector3> verticesWithHeightData = ApplyHeightDataToVertices();
+            List<Vector3> verticesWithHeightData = ApplyHeightDataToVertices(grid);
 
             //offset the vertices so the origin is (0,0,0)
             for (int i = 0; i < verticesWithHeightData.Count; i++)
-                verticesWithHeightData[i] -= Grid.GridCenter;
+                verticesWithHeightData[i] -= grid.GridCenter;
 
             //setup the mesh
             mesh.SetVertices(verticesWithHeightData);
-            mesh.SetTriangles(CreateTrianglesFromGrid(), 0);
+            mesh.SetTriangles(CreateTrianglesFromGrid(grid), 0);
             mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(verticesWithHeightData, terrain.transform));
             
             //apply the changes to the mesh
@@ -116,28 +128,29 @@ namespace Gumball
             AssetDatabase.SaveAssets();
 
             //add a collider
-            terrain.AddComponent<MeshCollider>().sharedMesh = newMesh;
+            if (lod == Chunk.TerrainLOD.HIGH)
+                terrain.AddComponent<MeshCollider>().sharedMesh = newMesh;
             
             return terrain;
         }
 
-        private List<int> CreateTrianglesFromGrid()
+        private List<int> CreateTrianglesFromGrid(ChunkGrid grid)
         {
             List<int> triangleIndexes = new List<int>();
             
             //iterate over all the columns
-            for (int column = 0; column < Grid.GetNumberOfColumns(); column++)
+            for (int column = 0; column < grid.GetNumberOfColumns(); column++)
             {
-                for (int row = 0; row < Grid.GetNumberOfRows(); row++)
+                for (int row = 0; row < grid.GetNumberOfRows(); row++)
                 {
-                    int vertexIndex = Grid.GetVertexIndexAt(column, row);
+                    int vertexIndex = grid.GetVertexIndexAt(column, row);
                     if (vertexIndex == -1)
                         continue;
                     
-                    int vertexIndexAbove = Grid.GetVertexAbove(column, row);
-                    int vertexIndexBelow = Grid.GetVertexBelow(column, row);
-                    int vertexIndexOnRight = Grid.GetVertexOnRight(column, row);
-                    int vertexIndexOnLeft = Grid.GetVertexOnLeft(column, row);
+                    int vertexIndexAbove = grid.GetVertexAbove(column, row);
+                    int vertexIndexBelow = grid.GetVertexBelow(column, row);
+                    int vertexIndexOnRight = grid.GetVertexOnRight(column, row);
+                    int vertexIndexOnLeft = grid.GetVertexOnLeft(column, row);
 
                     bool hasVertexAbove = vertexIndexAbove != -1;
                     bool hasVertexBelow = vertexIndexBelow != -1;
@@ -181,12 +194,12 @@ namespace Gumball
             return triangleIndexes;
         }
 
-        private void CalculateMinMaxPerlinHeights()
+        private void CalculateMinMaxPerlinHeights(ChunkGrid grid)
         {
             perlinHeight.Max = Mathf.NegativeInfinity;
             perlinHeight.Min = Mathf.Infinity;
             
-            foreach (Vector3 vertexPosition in Grid.Vertices)
+            foreach (Vector3 vertexPosition in grid.Vertices)
             {
                 TerrainHeightData heightDataAtPos = GetHeightData(vertexPosition);
                 float actualPerlinHeight = GetPerlinHeightForVertex(vertexPosition, heightDataAtPos);
@@ -199,11 +212,11 @@ namespace Gumball
             }
         }
         
-        private List<Vector3> ApplyHeightDataToVertices()
+        private List<Vector3> ApplyHeightDataToVertices(ChunkGrid grid)
         {
             //need to calculate the perlin values FIRST, and then get the highest and lowest
             //then apply the modifier to the desiredHeights (only the ones that USE the perlin)
-            CalculateMinMaxPerlinHeights();
+            CalculateMinMaxPerlinHeights(grid);
             
             List<Vector3> verticesWithHeightData = new List<Vector3>();
             
@@ -211,9 +224,9 @@ namespace Gumball
             //ensure chunk object flattening colliders are on chunk object layer before raycasting
             chunk.GetComponent<ChunkEditorTools>().EnsureChunkObjectsAreOnRaycastLayer();
             
-            for (int vertexIndex = 0; vertexIndex < Grid.Vertices.Count; vertexIndex++)
+            for (int vertexIndex = 0; vertexIndex < grid.Vertices.Count; vertexIndex++)
             {
-                Vector3 vertex = Grid.Vertices[vertexIndex];
+                Vector3 vertex = grid.Vertices[vertexIndex];
                 float desiredHeight = GetDesiredHeightAtPosition(vertex, chunkObjects);
                 
                 verticesWithHeightData.Add(new Vector3(vertex.x, desiredHeight, vertex.z));

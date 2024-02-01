@@ -63,8 +63,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private SerializableColor[] vertexColors;
         
         public Chunk Chunk => chunk;
-        public MeshFilter MeshFilter => chunk.CurrentTerrain.GetComponent<MeshFilter>();
-        public MeshCollider MeshCollider => chunk.CurrentTerrain.GetComponent<MeshCollider>();
+        public MeshFilter MeshFilter => chunk.TerrainHighLOD.GetComponent<MeshFilter>();
+        public MeshCollider MeshCollider => chunk.TerrainHighLOD.GetComponent<MeshCollider>();
         public Mesh Mesh => MeshFilter.sharedMesh;
         public Vector3[] Vertices => vertices;
         public SerializableColor[] VertexColors => vertexColors;

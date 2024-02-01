@@ -43,6 +43,23 @@ namespace Gumball
         private readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private float timeSinceLastLoadCheck;
 
+        //TODO CACHE EACH FRAME ONLY
+        /// <returns>The chunk the player is on, else null if it can't be found.</returns>
+        public Chunk GetChunkPlayerIsOn()
+        {
+            if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
+            {
+                Debug.LogWarning("Can't get the chunk the player is in because the current car doesn't exist.");
+                return null;
+            }
+            
+            //raycast down to terrain
+            if (!Physics.Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
+                return null;
+
+            return hitDown.transform.parent.GetComponent<Chunk>();
+        }
+        
         /// <summary>
         /// Returns whether the chunk is within the load distance radius. Can be false if the chunk is custom loaded.
         /// </summary>
@@ -130,7 +147,8 @@ namespace Gumball
                     return data.MapIndex;
             }
 
-            throw new ArgumentException($"The chunk {chunk.name} is not currently loaded.");
+            Debug.LogWarning($"The chunk {chunk.name} is not currently loaded.");
+            return -1;
         }
         
         public IEnumerator LoadMap(MapData map)
@@ -410,10 +428,10 @@ namespace Gumball
 
             //TODO: can this just be unity_editor?
             //should create a copy of the mesh so it doesn't directly edit the saved mesh in runtime
-            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
+            MeshFilter meshFilter = chunk.TerrainHighLOD.GetComponent<MeshFilter>();
             Mesh meshCopy = Instantiate(meshFilter.sharedMesh);
-            chunk.CurrentTerrain.GetComponent<MeshFilter>().sharedMesh = meshCopy;
-            chunk.CurrentTerrain.GetComponent<MeshCollider>().sharedMesh = meshCopy;
+            chunk.TerrainHighLOD.GetComponent<MeshFilter>().sharedMesh = meshCopy;
+            chunk.TerrainHighLOD.GetComponent<MeshCollider>().sharedMesh = meshCopy;
             
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to update components.");
             stopwatch.Restart();
