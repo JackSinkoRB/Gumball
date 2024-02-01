@@ -33,7 +33,7 @@ jobs:
             done
           else
             COUNT=1
-            COMMIT_MESSAGES="$(echo "$COMMITS" | jq -r .[0].message) | sed ':a;N;$!ba;s/\n/\\n/g')"$'\n'
+            COMMIT_MESSAGES="Commit 1: >-\n  $(echo "$COMMIT_MESSAGES" | jq -r .[0].message)\n"
           fi
           echo "fetch-depth=$COUNT" >> "$GITHUB_OUTPUT"
           echo "commit-messages=$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
