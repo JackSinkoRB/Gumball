@@ -24,6 +24,12 @@ jobs:
         with:
           lfs: true
 
+      # Get short commit hash
+      - uses: benjlevesque/short-sha@v2.1
+        id: short-sha
+        with:
+          length: 7
+
       # Get all the commits
       - name: Calculate fetch-depth and get commit messages
         id: pre-checkout
@@ -32,7 +38,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
             COUNT=$(( $(echo "$COMMITS" | jq length) ))
-            COMMIT_MESSAGES="Latest: [${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}})\\n"
+            COMMIT_MESSAGES=""
             for ((i=0; i<$COUNT; i++)); do
               COMMIT_MESSAGES+="$((i+1)). $(echo "$COMMITS" | jq -r .[$i].message)\\n"
             done
@@ -42,12 +48,6 @@ jobs:
           fi
           echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"
           echo "commit-messages=$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
-
-      # Get short commit hash
-      - uses: benjlevesque/short-sha@v2.1
-        id: short-sha
-        with:
-          length: 7
 
       # Send Discord notification
       - name: Discord notification
@@ -59,6 +59,7 @@ jobs:
               "fields": [
                 { "name": "Android", "value": "[Download](http://178.16.143.69/Gumball-Android.zip)", "inline": true },
                 { "name": "Windows", "value": "[Download](http://178.16.143.69/Gumball-StandaloneWindows.zip)", "inline": true },
+                { "name": "Latest commit", "value": "SHA: [${{ env.SHA }}]" 
                 { "name": "Commits (${{ steps.pre-checkout.outputs.number-of-commits }})", "value": "${{ steps.pre-checkout.outputs.commit-messages }}" }
               ],
               "footer": {"text": "Committed by ${{github.event.head_commit.author.name}}"}
