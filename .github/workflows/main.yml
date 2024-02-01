@@ -29,11 +29,11 @@ jobs:
             COUNT=$(( $(echo "$COMMITS" | jq length) ))
             COMMIT_MESSAGES=""
             for ((i=0; i<$COUNT; i++)); do
-              COMMIT_MESSAGES+="env.COMMITS[$i].message\n"
+              COMMIT_MESSAGES+="$(echo "$COMMITS" | jq -r .[$i].message)"$'\n'
             done
           else
             COUNT=1
-            COMMIT_MESSAGES="env.COMMITS[0].message\n"
+            COMMIT_MESSAGES="$(echo "$COMMITS" | jq -r .[0].message)"$'\n'
           fi
           echo "fetch-depth=$COUNT" >> "$GITHUB_OUTPUT"
           echo "commit-messages=$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
