@@ -52,7 +52,7 @@ jobs:
           { "name": "Android", "value": "[Download](http://178.16.143.69/Gumball-Android.zip)", "inline": true },
           { "name": "Windows", "value": "[Download](http://178.16.143.69/Gumball-StandaloneWindows.zip)", "inline": true },
           { "name": "Last commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}}) - *${{github.event.head_commit.message}}*" },
-          { "name": "Number of commits", "value": "**" }]
+          { "name": "Number of commits", "value": "*${{ steps.pre-checkout.outputs.fetch-depth }}*" }]
           , "footer":{"text":"Committed by ${{github.event.head_commit.author.name}}"} }]'
         uses: Ilshidur/action-discord@0.3.2
 
