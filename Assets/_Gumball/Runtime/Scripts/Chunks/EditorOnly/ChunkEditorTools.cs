@@ -98,11 +98,11 @@ namespace Gumball
         
         private void CheckIfTerrainIsRaycastable()
         {
-            if (chunk.CurrentTerrain == null)
+            if (chunk.TerrainHighLOD == null)
                 return;
 
-            chunk.CurrentTerrain.layer = (int)LayersAndTags.Layer.Terrain;
-            chunk.CurrentTerrain.GetComponent<MeshCollider>(true);
+            chunk.TerrainHighLOD.layer = (int)LayersAndTags.Layer.Terrain;
+            chunk.TerrainHighLOD.GetComponent<MeshCollider>(true);
         }
         
         #region Show terrain vertices
@@ -123,7 +123,7 @@ namespace Gumball
             if (timeSinceClickedShowTerrainVertices > timeToShowVertices)
                 return;
 
-            MeshFilter meshFilter = chunk.CurrentTerrain.GetComponent<MeshFilter>();
+            MeshFilter meshFilter = chunk.TerrainHighLOD.GetComponent<MeshFilter>();
             if (meshFilter == null)
                 return;
 
@@ -197,15 +197,13 @@ namespace Gumball
             }
         }
         
-        [ButtonMethod()]
+        [ButtonMethod]
         public void CreateTerrain()
         {
-            GameObject newTerrain = terrainData.Create(chunk);
-            chunk.SetTerrain(newTerrain);
+            RecreateTerrainLODs();
             currentGrid = terrainData.Grid;
-            
-            Selection.SetActiveObjectWithContext(newTerrain, chunk);
-            Undo.RegisterCreatedObjectUndo(newTerrain, "Create Terrain");
+
+            Selection.SetActiveObjectWithContext(chunk.TerrainHighLOD, chunk);
         }
         
         [InitializeOnLoadMethod]
@@ -253,7 +251,7 @@ namespace Gumball
                 || (Application.isPlaying && !GameLoaderSceneManager.HasLoaded))
                 return;
 
-            if (chunk.CurrentTerrain == null)
+            if (chunk.TerrainHighLOD == null)
                 return;
             
             EditorApplication.delayCall -= RecreateTerrain;
@@ -268,13 +266,13 @@ namespace Gumball
             DisconnectAll();
             
             GlobalLoggers.ChunkLogger.Log($"Recreating terrain for '{chunk.name}'");
-            Material[] previousMaterials = chunk.CurrentTerrain.GetComponent<MeshRenderer>().sharedMaterials;
-            DestroyImmediate(chunk.CurrentTerrain);
+            Material[] previousMaterials = chunk.TerrainHighLOD.GetComponent<MeshRenderer>().sharedMaterials;
+            DestroyImmediate(chunk.TerrainHighLOD);
+            DestroyImmediate(chunk.TerrainLowLOD);
 
             chunk.SplineComputer.RebuildImmediate();
-            
-            GameObject newTerrain = terrainData.Create(chunk, previousMaterials);
-            chunk.SetTerrain(newTerrain);
+
+            RecreateTerrainLODs();
             
             if (chunkBefore != null)
                 ChunkUtils.ConnectChunks(chunkBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunkBefore, chunk));
@@ -282,6 +280,18 @@ namespace Gumball
                 ChunkUtils.ConnectChunks(chunk, chunkAfter, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunk, chunkAfter));
 
             UnbakeSplineMeshes();
+        }
+
+        private void RecreateTerrainLODs()
+        {
+            Dictionary<Chunk.TerrainLOD, GameObject> newTerrain = terrainData.Create(chunk);
+            foreach (Chunk.TerrainLOD key in newTerrain.Keys)
+            {
+                GameObject terrain = newTerrain[key];
+                chunk.SetTerrain(key, terrain);
+            }
+            
+            chunk.SwitchTerrainLOD(Chunk.TerrainLOD.HIGH);
         }
 
         private void UnbakeSplineMeshes()
@@ -331,7 +341,7 @@ namespace Gumball
                 List<Object> objectsToRecord = new List<Object>();
 
                 objectsToRecord.Add(transform);
-                objectsToRecord.Add(chunk.CurrentTerrain.GetComponent<MeshFilter>());
+                objectsToRecord.Add(chunk.TerrainHighLOD.GetComponent<MeshFilter>());
 
                 if (chunkAfter != null)
                 {

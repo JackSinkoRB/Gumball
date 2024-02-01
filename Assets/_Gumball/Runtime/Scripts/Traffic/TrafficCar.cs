@@ -497,7 +497,11 @@ namespace Gumball
 
             Chunk chunkToUse = currentChunk;
             int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkToUse);
-
+            
+            bool isChunkLoaded = chunkIndex >= 0;
+            if (!isChunkLoaded)
+                return null; //current chunk isn't loaded
+            
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
             int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
             SplineSample closestSample = currentChunk.SplineSamples[closestSplineIndex];
