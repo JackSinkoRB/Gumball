@@ -19,6 +19,11 @@ jobs:
     runs-on: self-hosted
     steps:
 
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
       # Get all the commits
       - name: Calculate fetch-depth and get commit messages
         id: pre-checkout
@@ -27,21 +32,16 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "push" ]]; then
             COUNT=$(( $(echo "$COMMITS" | jq length) ))
-            COMMIT_MESSAGES=""
+            COMMIT_MESSAGES="Latest: [${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}})\\n"
             for ((i=0; i<$COUNT; i++)); do
-              COMMIT_MESSAGES+="$(echo "$COMMITS" | jq -r .[$i].message)\\n"
+              COMMIT_MESSAGES+="$((i+1)). $(echo "$COMMITS" | jq -r .[$i].message)\\n"
             done
           else
             COUNT=1
             COMMIT_MESSAGES="$(echo "$COMMITS" | jq -r .[0].message)\\n"
           fi
-          echo "fetch-depth=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"
           echo "commit-messages=$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
-
-      # Checkout
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
 
       # Get short commit hash
       - uses: benjlevesque/short-sha@v2.1
@@ -59,9 +59,7 @@ jobs:
               "fields": [
                 { "name": "Android", "value": "[Download](http://178.16.143.69/Gumball-Android.zip)", "inline": true },
                 { "name": "Windows", "value": "[Download](http://178.16.143.69/Gumball-StandaloneWindows.zip)", "inline": true },
-                { "name": "Last commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}}) - *${{github.event.head_commit.message}}*" },
-                { "name": "Number of commits", "value": "*${{ steps.pre-checkout.outputs.fetch-depth }}*" },
-                { "name": "Commits", "value": "*${{ steps.pre-checkout.outputs.commit-messages }}*" }
+                { "name": "Commits (${{ steps.pre-checkout.outputs.number-of-commits }})", "value": "${{ steps.pre-checkout.outputs.commit-messages }}" }
               ],
               "footer": {"text": "Committed by ${{github.event.head_commit.author.name}}"}
             }]
