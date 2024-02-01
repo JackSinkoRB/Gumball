@@ -59,7 +59,7 @@ jobs:
               "fields": [
                 { "name": "Android", "value": "[Download](http://178.16.143.69/Gumball-Android.zip)", "inline": true },
                 { "name": "Windows", "value": "[Download](http://178.16.143.69/Gumball-StandaloneWindows.zip)", "inline": true },
-                { "name": "Latest commit", "value": "SHA: [${{ env.SHA }}]" 
+                { "name": "Latest commit", "value": "SHA: [${{ env.SHA }}]" },
                 { "name": "Commits (${{ steps.pre-checkout.outputs.number-of-commits }})", "value": "${{ steps.pre-checkout.outputs.commit-messages }}" }
               ],
               "footer": {"text": "Committed by ${{github.event.head_commit.author.name}}"}
