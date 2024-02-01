@@ -29,14 +29,16 @@ jobs:
             COUNT=$(( $(echo "$COMMITS" | jq length) ))
             COMMIT_MESSAGES=""
             for ((i=0; i<$COUNT; i++)); do
-              COMMIT_MESSAGES+="Commit $((i+1)): >-\n  $(echo "$COMMIT_MESSAGES" | jq -r .[$i].message)\n"
+              COMMIT_MESSAGES+="$(echo "$COMMITS" | jq -r .[$i].message)"$'\a'
             done
           else
             COUNT=1
-            COMMIT_MESSAGES="Commit 1: >-\n  $(echo "$COMMIT_MESSAGES" | jq -r .[0].message)\n"
+            COMMIT_MESSAGES="$(echo "$COMMITS" | jq -r .[0].message)"$'\n'
           fi
           echo "fetch-depth=$COUNT" >> "$GITHUB_OUTPUT"
-          echo "commit-messages=$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
+          echo 'commit-messages<<EOF' >> $GITHUB_OUTPUT
+          echo "$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
+          echo 'EOF' >> $GITHUB_OUTPUT
 
       # Checkout
       - uses: actions/checkout@v4
