@@ -474,7 +474,7 @@ namespace Gumball
             yield return new WaitUntil(() => allHandles.TrueForAll(h => h.Status == AsyncOperationStatus.Succeeded));
 
             stopwatch.Restart();
-            const float maxTimeAllowedPerFrameMs = 6;
+            const float maxTimeAllowedPerFrameMs = 4;
             
             //instantiate all the instances across multiple frames
             foreach (string assetKey in chunk.ChunkObjectData.Keys)
