@@ -66,7 +66,6 @@ namespace Gumball
         [SerializeField] private P3dPaintDecal paintDecal;
 
         [Header("Settings")]
-        [SerializeField] private LayerMask raycastLayers; //TODO - vehicle only
         [SerializeField] private MinMaxVector3 minMaxScale = new(0.1f * Vector3.one, 3.5f * Vector3.one);
 
         [Header("Debugging")]
@@ -355,7 +354,7 @@ namespace Gumball
         private void OnMoveScreenPosition(Vector2 screenPosition)
         {
             Ray ray = Camera.main.ScreenPointToRay(screenPosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, raycastLayers))
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.PaintableMesh)))
             {
                 Quaternion rotation = Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Vector3.up);
                 UpdatePosition(hit.point, hit.normal, rotation);
