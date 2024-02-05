@@ -106,7 +106,7 @@ namespace Gumball
             if (isActivated)
             {
                 RotateWheels();
-                if (!recoveringFromCollision)
+                if (!recoveringFromCollision && speed > 0.01f)
                     TurnFrontWheels();
             }
         }
