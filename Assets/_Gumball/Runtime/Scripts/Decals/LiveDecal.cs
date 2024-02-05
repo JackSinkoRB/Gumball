@@ -78,7 +78,7 @@ namespace Gumball
         private DecalTexture textureData;
         private Vector2 clickOffset;
         private Vector3 lastKnownPosition;
-        private Quaternion lastKnownRotation;
+        private Quaternion lastKnownRotation = Quaternion.Euler(Vector3.zero);
         private Vector3 lastKnownHitNormal;
         private bool wasClickableUnderPointerOnPress;
         private DecalStateManager.ModifyStateChange stateBeforeMoving;
