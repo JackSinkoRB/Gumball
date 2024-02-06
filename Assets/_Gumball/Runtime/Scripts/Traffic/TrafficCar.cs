@@ -66,7 +66,7 @@ namespace Gumball
 
         private float timeSinceCollision => Time.realtimeSinceStartup - timeOfLastCollision;
         private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
-        private bool faceForward => currentChunk.TrafficManager.DriveOnLeft && currentLaneDistance < 0;
+        private bool faceForward => currentChunk.TrafficManager.GetLaneDirection(currentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
         private Rigidbody rigidbody => GetComponent<Rigidbody>();
 
         public void Initialise(Chunk currentChunk)
@@ -74,11 +74,18 @@ namespace Gumball
             isInitialised = true;
             this.currentChunk = currentChunk;
 
+            TrafficCarSpawner.TrackCar(this);
+            
             //spawn at max speed
             SetMaxSpeed();
             
             gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
             DelayedUpdate();
+        }
+
+        private void OnDisable()
+        {
+            TrafficCarSpawner.UntrackCar(this);
         }
 
         private void Update()
@@ -578,7 +585,11 @@ namespace Gumball
                         return null;
                     }
                     
-                    Chunk newChunk = ChunkManager.Instance.GetLoadedChunkByMapIndex(chunkIndex);
+                    LoadedChunkData? loadedChunkData = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(chunkIndex);
+                    if (loadedChunkData == null)
+                        return null;
+                    
+                    Chunk newChunk = loadedChunkData.Value.Chunk;
                     chunkToUse = newChunk;
                     if (newChunk.TrafficManager == null)
                         return null; //no traffic manager

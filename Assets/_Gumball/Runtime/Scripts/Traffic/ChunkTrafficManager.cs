@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
@@ -10,6 +11,16 @@ namespace Gumball
     public class ChunkTrafficManager : MonoBehaviour
     {
 
+        /// <summary>
+        /// The direction of travel, where forward is moving into chunks with higher index, and backward is moving into chunks with lower index.
+        /// </summary>
+        public enum LaneDirection
+        {
+            NONE,
+            FORWARD,
+            BACKWARD
+        }
+        
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
         
@@ -18,15 +29,17 @@ namespace Gumball
         [SerializeField] private float speedLimitKmh = 40;
         [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
         [SerializeField] private int density = 100;
-        [SerializeField] private float[] laneDistances;
-
+        [SerializeField, InitializationField] private float[] laneDistances;
+        [SerializeField, ReadOnly] private float[] laneDistancesForwardCached;
+        [SerializeField, ReadOnly] private float[] laneDistancesBackwardCached;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunk;
 
         public Chunk Chunk => chunk;
-        public bool DriveOnLeft => driveOnLeft;
         public float SpeedLimitKmh => speedLimitKmh;
-        
+        public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLength / density);
+
         //have a distance for spawning cars (based on chunk distance, not car distance)
         //have an activation distance - if not activated, rigidbody is kinematic and collider is disabled
         
@@ -46,12 +59,10 @@ namespace Gumball
         private void OnEnable()
         {
             ChunkManager.Instance.onChunkLoad += OnChunkLoad;
-            
-            //if no lanes, just create one in the centre
-            if (laneDistances.Length == 0)
-                laneDistances = new[] { 0f };
+
+            InitialiseLanes();
         }
-        
+
         private void OnDisable()
         {
             ChunkManager.Instance.onChunkLoad -= OnChunkLoad;
@@ -68,19 +79,25 @@ namespace Gumball
         /// </summary>
         private void InitialiseCars()
         {
-            float splineLength = chunk.SplineComputer.CalculateLength();
-            int numberOfCars = Mathf.RoundToInt(splineLength / density);
-            for (int count = 0; count < numberOfCars; count++)
+            for (int count = 0; count < NumberOfCarsToSpawn; count++)
             {
                 SpawnCarInRandomPosition();
             }
         }
 
-        private void SpawnCarInRandomPosition()
+        public LaneDirection GetLaneDirection(float laneDistance)
+        {
+            if (driveOnLeft)
+                return laneDistance < 0 ? LaneDirection.FORWARD : LaneDirection.BACKWARD;
+            return laneDistance < 0 ? LaneDirection.BACKWARD : LaneDirection.FORWARD;
+        }
+
+        public void SpawnCarInRandomPosition(LaneDirection direction = LaneDirection.NONE)
         {
             MinMaxFloat randomLaneOffset = new(-0.5f, 0.5f);
 
-            float randomLaneDistance = laneDistances.GetRandom();
+            float randomLaneDistance = GetRandomLaneDistance(direction);
+            
             var (position, rotation) = GetLanePosition(chunk.SplineSamples.GetRandom(), randomLaneDistance);
             TrafficCar car = TrafficCarSpawner.Instance.SpawnCar(chunk, position, rotation);
             car.SetLaneDistance(randomLaneDistance + randomLaneOffset.RandomInRange());
@@ -94,6 +111,53 @@ namespace Gumball
             Quaternion rotation = Quaternion.LookRotation(driveOnLeft && laneDistance < 0 ? splineSample.forward : -splineSample.forward);
             
             return (finalPos, rotation);
+        }
+        
+        private float GetRandomLaneDistance(LaneDirection direction)
+        {
+            if (laneDistancesBackwardCached.Length == 0 || laneDistancesForwardCached.Length == 0)
+                Debug.LogError("Here: " + chunk.gameObject.name);
+            
+            return direction switch
+            {
+                LaneDirection.NONE => laneDistances.GetRandom(),
+                LaneDirection.FORWARD => laneDistancesForwardCached.GetRandom(),
+                LaneDirection.BACKWARD => laneDistancesBackwardCached.GetRandom(),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+        
+        private void InitialiseLanes()
+        {
+            //if no lanes, just create one in the centre
+            if (laneDistances.Length == 0)
+                laneDistances = new[] { 0f };
+            
+            CacheLaneDistances();
+        }
+        
+        /// <summary>
+        /// Splits the lane distances into forward and backward arrays.
+        /// </summary>
+        private void CacheLaneDistances()
+        {
+            HashSet<float> laneDistancesForward = new();
+            HashSet<float> laneDistancesBackward = new();
+
+            foreach (float lane in laneDistances)
+            {
+                if (GetLaneDirection(lane) == LaneDirection.FORWARD)
+                    laneDistancesForward.Add(lane);
+                if (GetLaneDirection(lane) == LaneDirection.BACKWARD)
+                    laneDistancesBackward.Add(lane);
+            }
+
+            //copy to the cached array
+            laneDistancesForwardCached = new float[laneDistancesForward.Count];
+            laneDistancesForward.CopyTo(laneDistancesForwardCached);
+
+            laneDistancesBackwardCached = new float[laneDistancesBackward.Count];
+            laneDistancesBackward.CopyTo(laneDistancesBackwardCached);
         }
 
 #if UNITY_EDITOR
