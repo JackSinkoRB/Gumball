@@ -42,27 +42,34 @@ namespace Gumball
         /// </summary>
         public IReadOnlyCollection<LoadedChunkData> CurrentChunks => currentChunks.AsReadOnly();
 
-        public bool HasLoaded { get; private set; }
         private readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private float timeSinceLastLoadCheck;
+        private Chunk chunkPlayerIsOnCached;
+        private int lastFramePlayerChunkWasCached = -1;
         
+        public bool HasLoaded { get; private set; }
         public MinMaxInt LoadedChunksIndices => loadedChunksIndices;
-        
-        //TODO CACHE EACH FRAME ONLY
+
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk GetChunkPlayerIsOn()
         {
-            if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
+            if (lastFramePlayerChunkWasCached != Time.frameCount)
             {
-                Debug.LogWarning("Can't get the chunk the player is in because the current car doesn't exist.");
-                return null;
+                lastFramePlayerChunkWasCached = Time.frameCount;
+                
+                if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
+                {
+                    Debug.LogWarning("Can't get the chunk the player is in because the current car doesn't exist.");
+                    chunkPlayerIsOnCached = null;
+                }
+
+                //raycast down to terrain
+                if (Physics.Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
+                    chunkPlayerIsOnCached = hitDown.transform.parent.GetComponent<Chunk>();
+                else chunkPlayerIsOnCached = null;
             }
             
-            //raycast down to terrain
-            if (!Physics.Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
-                return null;
-
-            return hitDown.transform.parent.GetComponent<Chunk>();
+            return chunkPlayerIsOnCached;
         }
         
         /// <summary>

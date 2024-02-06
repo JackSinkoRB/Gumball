@@ -41,8 +41,6 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunk;
-
-        private readonly Collider[] radiusCheckColliders = new Collider[1];
         
         public Chunk Chunk => chunk;
         public float SpeedLimitKmh => speedLimitKmh;
