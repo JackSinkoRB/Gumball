@@ -313,6 +313,12 @@ namespace Gumball
             if (chunkDetector != null)
                 return; //already exists
 
+            if (terrainLowLOD == null || terrainHighLOD == null)
+            {
+                Debug.LogWarning($"Could not create chunk detector for {gameObject.name} because it is missing a terrain.");
+                return;
+            }
+            
             chunkDetector = new GameObject("ChunkDetector");
             chunkDetector.gameObject.layer = (int) LayersAndTags.Layer.ChunkDetector;
             chunkDetector.transform.SetParent(transform);

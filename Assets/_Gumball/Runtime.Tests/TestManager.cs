@@ -27,9 +27,11 @@ namespace Gumball.Runtime.Tests
 
         [SerializeField] private SceneAsset decalEditorScene;
         [SerializeField] private SceneAsset avatarEditorScene;
-        
+        [SerializeField] private SceneAsset chunkTestingScene;
+
         public string DecalEditorScenePath => AssetDatabase.GetAssetPath(decalEditorScene);
         public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
+        public string ChunkTestingScenePath => AssetDatabase.GetAssetPath(chunkTestingScene);
 
     }
 }
