@@ -8,11 +8,11 @@ namespace Gumball
     public static class RaycastHitSorter
     {
 
-        public static void SortRaycastHitsByDistance(RaycastHit[] hits)
+        public static void SortRaycastHitsByDistance(RaycastHit[] hits, int numberOfHits)
         {
             int validHitsCount = 0;
 
-            for (int i = 0; i < hits.Length; i++)
+            for (int i = 0; i < numberOfHits; i++)
             {
                 RaycastHit hit = hits[i];
 

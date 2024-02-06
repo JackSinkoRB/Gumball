@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Dreamteck.Splines;
+#if UNITY_EDITOR
+using Gumball.Editor;
+#endif
 using MyBox;
 using UnityEngine;
 
@@ -14,7 +17,9 @@ namespace Gumball
         private const float timeBetweenDelayedUpdates = 1;
         private const float carActivationRange = 100;
         private const float collisionRecoverDuration = 5;
-
+        private const float blockedPathDetectorDistance = 20;
+        private const float desiredDistanceToBlockage = 5;
+        
         [SerializeField] private Transform[] frontWheels;
         [SerializeField] private Transform[] wheels;
         [Space(5)]
@@ -34,7 +39,9 @@ namespace Gumball
         [SerializeField] private float timeToAccelerateTo60 = 10;
         [Tooltip("The time (in seconds) it takes to go from 60 to 0.")]
         [SerializeField] private float timeToDecelerateFrom60 = 5;
-        
+        [Tooltip("The time (in seconds) it takes to go from 60 to 0 when there's an obstacle ahead.")]
+        [SerializeField] private float emergencyBrakeTimeFrom60 = 2.5f;
+
         [Header("Debugging")]
         [SerializeField] private bool debug;
         [SerializeField, ReadOnly] private bool isInitialised;
@@ -49,26 +56,39 @@ namespace Gumball
         [SerializeField, ReadOnly] private float timeSinceAccelerating;
         [SerializeField, ReadOnly] private bool isDecelerating;
         [SerializeField, ReadOnly]  private float timeSinceDecelerating;
-        [Space(5)]
-        [SerializeField, ReadOnly] private float timeSinceCollision;
         [SerializeField, ReadOnly] private bool inCollision;
-
+        [SerializeField, ReadOnly] private bool isPathBlocked;
+        [SerializeField, ReadOnly] private float distanceToBlockage;
+        
         private readonly List<Collision> collisions = new();
+        private float timeOfLastCollision = -Mathf.Infinity;
         private float timeSinceLastDelayedUpdate;
-        private float currentLaneDistance;
+        private readonly RaycastHit[] blockingObjects = new RaycastHit[10];
 
+        private float timeSinceCollision => Time.realtimeSinceStartup - timeOfLastCollision;
         private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
-        private bool faceForward => currentChunk.TrafficManager.DriveOnLeft && currentLaneDistance < 0;
+        private bool faceForward => currentChunk.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
         private Rigidbody rigidbody => GetComponent<Rigidbody>();
+        
+        public float CurrentLaneDistance { get; private set; }
 
         public void Initialise(Chunk currentChunk)
         {
             isInitialised = true;
             this.currentChunk = currentChunk;
 
-            timeSinceCollision = Mathf.Infinity;
+            TrafficCarSpawner.TrackCar(this);
+            
+            //spawn at max speed
+            SetMaxSpeed();
+            
             gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
             DelayedUpdate();
+        }
+
+        private void OnDisable()
+        {
+            TrafficCarSpawner.UntrackCar(this);
         }
 
         private void Update()
@@ -83,7 +103,6 @@ namespace Gumball
                 return;
             }
             
-            CollisionFreezeCheck();
             TryDelayedUpdate();
         }
 
@@ -97,7 +116,7 @@ namespace Gumball
             if (isActivated)
             {
                 RotateWheels();
-                if (!recoveringFromCollision)
+                if (!recoveringFromCollision && speed > 0.01f)
                     TurnFrontWheels();
             }
         }
@@ -110,7 +129,7 @@ namespace Gumball
 
         public void SetLaneDistance(float laneDistance)
         {
-            currentLaneDistance = laneDistance;
+            CurrentLaneDistance = laneDistance;
         }
 
         private void OnCollisionEnter(Collision collision)
@@ -124,6 +143,8 @@ namespace Gumball
             {
                 OnCollisionStart();
             }
+
+            timeOfLastCollision = Time.realtimeSinceStartup; //reset collision time
             
             collisions.Add(collision);
 
@@ -155,17 +176,6 @@ namespace Gumball
         private void OnCollisionEnd()
         {
             inCollision = false;
-        }
-        
-        private void CollisionFreezeCheck()
-        {
-            if (inCollision)
-            {
-                timeSinceCollision = 0;
-                return;
-            }
-
-            timeSinceCollision += Time.deltaTime;
         }
 
         private void FreezeRangeCheck()
@@ -247,6 +257,16 @@ namespace Gumball
             {
                 carCollider.enabled = false;
             }
+        }
+
+        /// <summary>
+        /// Sets the car's speed to max speed, and stops accelerating or decelerating.
+        /// </summary>
+        private void SetMaxSpeed()
+        {
+            float newDesiredSpeed = currentChunk.TrafficManager.SpeedLimitKmh;
+            desiredSpeed = newDesiredSpeed;
+            speed = newDesiredSpeed;
         }
 
         private void OnStartMoving()
@@ -340,6 +360,38 @@ namespace Gumball
                     OnStopAccelerating();
             }
         }
+
+        private bool CheckIfPathIsBlocked()
+        {
+            if (!isActivated)
+                return false;
+
+            BoxCollider carCollider = GetComponent<BoxCollider>();
+            Vector3 boxCastHalfExtents = carCollider.size / 2f;
+            int hits = Physics.BoxCastNonAlloc(transform.TransformPoint(carCollider.center.OffsetZ(carCollider.size.z)), boxCastHalfExtents, transform.forward, blockingObjects, transform.rotation, blockedPathDetectorDistance, LayersAndTags.TrafficCarCollisionLayers);
+
+            RaycastHitSorter.SortRaycastHitsByDistance(blockingObjects, hits);
+
+            Collider actualHit = null;
+            
+            //don't include the car's own collider
+            for (int index = 0; index < hits; index++)
+            {
+                RaycastHit hit = blockingObjects[index];
+                if (!ReferenceEquals(hit.transform.gameObject, gameObject.transform.gameObject))
+                {
+                    actualHit = hit.collider;
+                    distanceToBlockage = hit.distance;
+                    break;
+                }
+            }
+
+#if UNITY_EDITOR
+            BoxCastUtils.DrawBoxCastBox(transform.TransformPoint(carCollider.center.OffsetZ(carCollider.size.z)), boxCastHalfExtents, transform.rotation, transform.forward, blockedPathDetectorDistance, actualHit != null ? Color.magenta : Color.gray);
+#endif
+            
+            return actualHit != null;
+        }
         
         private void Move()
         {
@@ -350,14 +402,25 @@ namespace Gumball
                 return;
             }
 
-            float newDesiredSpeed = currentChunk.TrafficManager.SpeedLimitKmh;
-            if (!newDesiredSpeed.Approximately(desiredSpeed))
+            isPathBlocked = CheckIfPathIsBlocked();
+            if (isPathBlocked)
             {
-                OnChangeDesiredSpeed(newDesiredSpeed);
+                //if distance to blockage is greater than stopped distance, set to slow speed, else 0
+                const float slowSpeed = 25;
+                float decelerationSpeed = distanceToBlockage > desiredDistanceToBlockage ? Mathf.Clamp01(distanceToBlockage / blockedPathDetectorDistance) * slowSpeed : 0;
+                OnChangeDesiredSpeed(decelerationSpeed);
             }
-            
+            else
+            {
+                float newDesiredSpeed = currentChunk.TrafficManager.SpeedLimitKmh;
+                if (!newDesiredSpeed.Approximately(desiredSpeed))
+                {
+                    OnChangeDesiredSpeed(newDesiredSpeed);
+                }
+            }
+
             float accelerationTime = ((desiredSpeed - speedBeforeAccelerating)/60f) * timeToAccelerateTo60;
-            float decelerationTime = ((speedBeforeDecelerating - desiredSpeed)/60f) * timeToDecelerateFrom60;
+            float decelerationTime = ((speedBeforeDecelerating - desiredSpeed)/60f) * (isPathBlocked ? emergencyBrakeTimeFrom60 : timeToDecelerateFrom60);
             
             if (isAccelerating)
             {
@@ -444,7 +507,7 @@ namespace Gumball
             if (splineSampleAhead == null)
                 return; //no more chunks
             
-            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance);
+            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
             Vector3 directionAhead = (position - transform.position).normalized;
             
             Debug.DrawLine(transform.position, position, Color.blue);
@@ -480,7 +543,7 @@ namespace Gumball
             if (splineSampleAhead == null)
                 return null; //no more chunks loaded
             
-            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance);
+            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
 
             return (splineSampleAhead.Value.Item2, position, rotation);
         }
@@ -525,7 +588,11 @@ namespace Gumball
                         return null;
                     }
                     
-                    Chunk newChunk = ChunkManager.Instance.GetLoadedChunkByMapIndex(chunkIndex);
+                    LoadedChunkData? loadedChunkData = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(chunkIndex);
+                    if (loadedChunkData == null)
+                        return null;
+                    
+                    Chunk newChunk = loadedChunkData.Value.Chunk;
                     chunkToUse = newChunk;
                     if (newChunk.TrafficManager == null)
                         return null; //no traffic manager

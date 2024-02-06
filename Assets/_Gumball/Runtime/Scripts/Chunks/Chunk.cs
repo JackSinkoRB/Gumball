@@ -49,7 +49,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private SplineMesh[] splineMeshes;
         [SerializeField, ReadOnly] private ChunkMeshData chunkMeshData;
         [SerializeField, ReadOnly] private GameObject chunkDetector;
-
+        [SerializeField, ReadOnly] private float splineLengthCached = -1;
+        
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
 
         public ChunkMeshData ChunkMeshData => chunkMeshData;
@@ -57,7 +58,6 @@ namespace Gumball
         public SplineComputer SplineComputer => splineComputer;
         public SplineMesh[] SplinesMeshes => splineMeshes;
         public SplineSample[] SplineSamples => splineSampleCollection.samples;
-        public float TerrainHighLODDistance => terrainHighLODDistance;
         
         public bool IsAutomaticTerrainRecreationDisabled { get; private set; }
         public SplineSample FirstSample { get; private set; }
@@ -69,6 +69,20 @@ namespace Gumball
         public float CustomLoadDistance => customLoadDistance;
 
         public ChunkTrafficManager TrafficManager => trafficManager;
+        
+        /// <summary>
+        /// Uses a cached value, or calculates and caches the spline's length using the spline computer.
+        /// </summary>
+        public float SplineLength
+        {
+            get
+            {
+                if (splineLengthCached < 0)
+                    splineLengthCached = splineComputer.CalculateLength();
+
+                return splineLengthCached;
+            }
+        }
         
         public GameObject TerrainLowLOD
         {
