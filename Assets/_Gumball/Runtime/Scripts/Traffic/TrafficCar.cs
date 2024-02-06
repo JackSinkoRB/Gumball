@@ -63,13 +63,14 @@ namespace Gumball
         private readonly List<Collision> collisions = new();
         private float timeOfLastCollision = -Mathf.Infinity;
         private float timeSinceLastDelayedUpdate;
-        private float currentLaneDistance;
         private readonly RaycastHit[] blockingObjects = new RaycastHit[10];
 
         private float timeSinceCollision => Time.realtimeSinceStartup - timeOfLastCollision;
         private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
-        private bool faceForward => currentChunk.TrafficManager.GetLaneDirection(currentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
+        private bool faceForward => currentChunk.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
         private Rigidbody rigidbody => GetComponent<Rigidbody>();
+        
+        public float CurrentLaneDistance { get; private set; }
 
         public void Initialise(Chunk currentChunk)
         {
@@ -128,7 +129,7 @@ namespace Gumball
 
         public void SetLaneDistance(float laneDistance)
         {
-            currentLaneDistance = laneDistance;
+            CurrentLaneDistance = laneDistance;
         }
 
         private void OnCollisionEnter(Collision collision)
@@ -506,7 +507,7 @@ namespace Gumball
             if (splineSampleAhead == null)
                 return; //no more chunks
             
-            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance);
+            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
             Vector3 directionAhead = (position - transform.position).normalized;
             
             Debug.DrawLine(transform.position, position, Color.blue);
@@ -542,7 +543,7 @@ namespace Gumball
             if (splineSampleAhead == null)
                 return null; //no more chunks loaded
             
-            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance);
+            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
 
             return (splineSampleAhead.Value.Item2, position, rotation);
         }

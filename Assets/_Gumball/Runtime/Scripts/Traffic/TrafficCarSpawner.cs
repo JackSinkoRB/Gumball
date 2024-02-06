@@ -13,6 +13,8 @@ namespace Gumball
         #region STATIC
         private static readonly HashSet<TrafficCar> currentCars = new();
         
+        public static IReadOnlyCollection<TrafficCar> CurrentCars => currentCars;
+
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
         {
@@ -63,8 +65,9 @@ namespace Gumball
 
         private void CheckToSpawnCars()
         {
-            //update: check how many cars there should be, and how many there are currently
-
+            if (!ChunkManager.Instance.HasLoaded)
+                return;
+            
             lastSpawnCheckTime = Time.realtimeSinceStartup;
             
             int numberOfCars = currentCars.Count;

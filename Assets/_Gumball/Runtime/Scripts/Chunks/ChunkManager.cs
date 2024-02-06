@@ -42,7 +42,7 @@ namespace Gumball
         /// </summary>
         public IReadOnlyCollection<LoadedChunkData> CurrentChunks => currentChunks.AsReadOnly();
 
-        private bool isLoading;
+        public bool HasLoaded { get; private set; }
         private readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private float timeSinceLastLoadCheck;
         
@@ -162,7 +162,7 @@ namespace Gumball
         public IEnumerator LoadMap(MapData map)
         {
             GlobalLoggers.LoadingLogger.Log($"Loading map '{map.name}'");
-            isLoading = true;
+            HasLoaded = false;
             currentMap = map;
             currentChunks.Clear();
 
@@ -172,7 +172,7 @@ namespace Gumball
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(map.VehicleStartingPosition));
             yield return distanceLoadingCoroutine.Coroutine;
             
-            isLoading = false;
+            HasLoaded = true;
         }
 
         private void LateUpdate()
@@ -448,14 +448,14 @@ namespace Gumball
             ChunkMapData chunkMapData = currentMap.GetChunkData(mapIndex);
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to get chunk data.");
 
-            if (!isLoading)
+            if (HasLoaded)
                 yield return new WaitForEndOfFrame();
             stopwatch.Restart();
 
             chunkMapData.ApplyToChunk(chunk);
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to apply chunk data.");
             
-            if (!isLoading)
+            if (HasLoaded)
                 yield return new WaitForEndOfFrame();
             stopwatch.Restart();
 
@@ -469,7 +469,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to update components.");
             stopwatch.Restart();
 
-            if (!isLoading)
+            if (HasLoaded)
                 yield return new WaitForEndOfFrame();
             yield return LoadChunkObjects(chunk);
             
@@ -518,7 +518,7 @@ namespace Gumball
                     GameObject chunkObject = chunkObjectData.LoadIntoChunk(handle, chunk);
                     GlobalLoggers.LoadingLogger.Log($"Loaded {chunkObject.name} at {stopwatch.ElapsedMilliseconds}ms.");
                     
-                    if (!isLoading && stopwatch.ElapsedMilliseconds > maxTimeAllowedPerFrameMs)
+                    if (HasLoaded && stopwatch.ElapsedMilliseconds > maxTimeAllowedPerFrameMs)
                     {
                         GlobalLoggers.LoadingLogger.Log($"Reached max for this frame, waiting until next frame.");
                         yield return new WaitForEndOfFrame();

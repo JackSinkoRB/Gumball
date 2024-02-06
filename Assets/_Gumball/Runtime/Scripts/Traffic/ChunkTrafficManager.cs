@@ -21,6 +21,12 @@ namespace Gumball
             BACKWARD
         }
         
+        /// <summary>
+        /// The minimum distance around a position required to not have an obstacle in order to spawn a car.
+        /// </summary>
+        private const float minDistanceRequiredToSpawn = 10f;
+        private readonly MinMaxFloat randomLaneOffset = new(-0.5f, 0.5f);
+
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
         
@@ -36,20 +42,12 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunk;
 
+        private readonly Collider[] radiusCheckColliders = new Collider[1];
+        
         public Chunk Chunk => chunk;
         public float SpeedLimitKmh => speedLimitKmh;
         public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLength / density);
 
-        //have a distance for spawning cars (based on chunk distance, not car distance)
-        //have an activation distance - if not activated, rigidbody is kinematic and collider is disabled
-        
-        
-        //all cars spawn initially based on settings - all move at relative speed to the chunk speed limit - with acceleration/deceleration (eg. 60kms)
-        
-        //number of desired cars is combination of all the currentChunks desired cars
-        
-        //detect when car no longer has a chunk under it - and despawn it
-        
         private void OnValidate()
         {
             if (chunk == null)
@@ -94,13 +92,26 @@ namespace Gumball
 
         public void SpawnCarInRandomPosition(LaneDirection direction = LaneDirection.NONE)
         {
-            MinMaxFloat randomLaneOffset = new(-0.5f, 0.5f);
-
-            float randomLaneDistance = GetRandomLaneDistance(direction);
+            const int maxAttempts = 5;
             
-            var (position, rotation) = GetLanePosition(chunk.SplineSamples.GetRandom(), randomLaneDistance);
-            TrafficCar car = TrafficCarSpawner.Instance.SpawnCar(chunk, position, rotation);
-            car.SetLaneDistance(randomLaneDistance + randomLaneOffset.RandomInRange());
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                float randomLaneDistance = GetRandomLaneDistance(direction);
+
+                var (position, rotation) = GetLanePosition(chunk.SplineSamples.GetRandom(), randomLaneDistance);
+                
+                if (!CanSpawnCarAtPosition(position, randomLaneDistance))
+                {
+                    bool isLastAttempt = attempt == maxAttempts - 1;
+                    if (isLastAttempt)
+                        Debug.LogWarning($"Could not find free position for traffic car spawn after {maxAttempts} attempts.");
+                    continue;
+                }
+
+                TrafficCar car = TrafficCarSpawner.Instance.SpawnCar(chunk, position, rotation);
+                car.SetLaneDistance(randomLaneDistance + randomLaneOffset.RandomInRange());
+                break;
+            }
         }
         
         public (Vector3, Quaternion) GetLanePosition(SplineSample splineSample, float laneDistance)
@@ -111,6 +122,30 @@ namespace Gumball
             Quaternion rotation = Quaternion.LookRotation(driveOnLeft && laneDistance < 0 ? splineSample.forward : -splineSample.forward);
             
             return (finalPos, rotation);
+        }
+        
+        private bool CanSpawnCarAtPosition(Vector3 position, float laneDistance)
+        {
+            const float minDistanceSqr = minDistanceRequiredToSpawn * minDistanceRequiredToSpawn;
+
+            //loop over all cars and get distance to their position
+            foreach (TrafficCar trafficCar in TrafficCarSpawner.CurrentCars)
+            {
+                bool isSameLane = Mathf.Abs(trafficCar.CurrentLaneDistance - laneDistance) > randomLaneOffset.Max;
+                if (isSameLane)
+                    continue; //not in same lane
+                
+                float distanceSqr = Vector3.SqrMagnitude(position - trafficCar.transform.position);
+                if (distanceSqr <= minDistanceSqr)
+                    return false;
+            }
+
+            //get distance to the player car
+            float distanceToPlayerSqr = Vector3.SqrMagnitude(position - PlayerCarManager.Instance.CurrentCar.transform.position);
+            if (distanceToPlayerSqr <= minDistanceSqr)
+                return false;
+            
+            return true;
         }
         
         private float GetRandomLaneDistance(LaneDirection direction)

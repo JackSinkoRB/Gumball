@@ -37,10 +37,22 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
             GlobalLoggers.LoadingLogger.Log($"Map loading started...");
 
+            //freeze the car
+            Rigidbody currentCarRigidbody = PlayerCarManager.Instance.CurrentCar.Rigidbody;
+            currentCarRigidbody.velocity = Vector3.zero;
+            currentCarRigidbody.angularVelocity = Vector3.zero;
+            currentCarRigidbody.isKinematic = true;
+
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
             yield return Addressables.LoadSceneAsync(SceneManager.MapDrivingSceneName, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MapDrivingSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            
+            //move the car to the right position
+            Vector3 startingPosition = map.VehicleStartingPosition;
+            Vector3 startingRotation = map.VehicleStartingRotation;
+            currentCarRigidbody.Move(startingPosition, Quaternion.Euler(startingRotation));
+            GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {startingPosition}");
             
             //load the map chunks
             Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
@@ -48,15 +60,8 @@ namespace Gumball
             chunkLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map '{map.name}' in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
-            //move the vehicle to the right position
-            Rigidbody currentCarRigidbody = PlayerCarManager.Instance.CurrentCar.Rigidbody;
-            currentCarRigidbody.velocity = Vector3.zero;
-            currentCarRigidbody.angularVelocity = Vector3.zero;
+            //set car rigidbody as dynamic
             currentCarRigidbody.isKinematic = false;
-            Vector3 startingPosition = ChunkManager.Instance.CurrentMap.VehicleStartingPosition;
-            Vector3 startingRotation = ChunkManager.Instance.CurrentMap.VehicleStartingRotation;
-            currentCarRigidbody.Move(startingPosition, Quaternion.Euler(startingRotation));
-            GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {startingPosition}");
 
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car);
 
