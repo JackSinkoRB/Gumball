@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Dreamteck.Splines;
+#if UNITY_EDITOR
 using Gumball.Editor;
+#endif
 using MyBox;
 using UnityEngine;
 
