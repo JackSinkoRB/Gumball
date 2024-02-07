@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using MyBox;
@@ -40,8 +41,9 @@ namespace Gumball
         /// A list of the current loaded chunks, in order of map index.
         /// <remarks>Does NOT include custom loaded chunks.</remarks>
         /// </summary>
-        public IReadOnlyCollection<LoadedChunkData> CurrentChunks => currentChunks.AsReadOnly();
-
+        public ReadOnlyCollection<LoadedChunkData> CurrentChunks => currentChunks.AsReadOnly();
+        public ReadOnlyCollection<LoadedChunkData> CurrentCustomLoadedChunks => currentCustomLoadedChunks.AsReadOnly();
+        
         private readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private float timeSinceLastLoadCheck;
         private Chunk chunkPlayerIsOnCached;
@@ -205,7 +207,7 @@ namespace Gumball
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
         }
 
-        private IEnumerator LoadChunksAroundPosition(Vector3 position)
+        public IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
             TrackedCoroutine firstChunk = null;
             bool firstChunkNeedsLoading = loadingOrLoadedChunksIndices.Min == 0 && loadingOrLoadedChunksIndices.Max == 0;
