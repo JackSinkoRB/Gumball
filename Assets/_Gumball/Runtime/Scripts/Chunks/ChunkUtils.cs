@@ -30,7 +30,7 @@ namespace Gumball
         public const string ChunkMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Chunks";
         public const string ChunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
         public const string RuntimeChunkSuffix = "_runtime";
-        public const string RuntimeChunksPath = "Assets/_Gumball/Runtime/Prefabs/Chunks/Runtime";
+        public const string RuntimeChunksPath = "Assets/_Gumball/Runtime/Prefabs/Chunks/_Runtime";
         
 #if UNITY_EDITOR
         /// <summary>
