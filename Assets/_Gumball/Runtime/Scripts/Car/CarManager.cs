@@ -282,11 +282,15 @@ namespace Gumball
         {
             
         }
-        
+
+        private void FixedUpdate()
+        {
+            CalculateSteering();
+        }
+
         private void Update()
         {
             CalculateSpeed();
-            CalculateSteering();
             CalculateThrottle();
             CalculateHandbrake();
 
