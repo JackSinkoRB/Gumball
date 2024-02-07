@@ -27,9 +27,9 @@ namespace Gumball.Runtime.Tests
         public void OneTimeSetUp()
         {
             DataManager.EnableTestProviders(true);
-
-            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.ChunkTestingScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadMainScene.completed += OnSceneLoadComplete;
+            
+            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.BootScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            loadMainScene.completed += OnBootSceneLoadComplete;
         }
 
         [OneTimeTearDown]
@@ -43,10 +43,34 @@ namespace Gumball.Runtime.Tests
         {
             DataManager.RemoveAllData();
         }
-        
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
+
+        [TearDown]
+        public void TearDown()
         {
+            isInitialised = false;
+        }
+        
+        private void OnBootSceneLoadComplete(AsyncOperation asyncOperation)
+        {
+            CoroutineHelper.Instance.StartCoroutine(LoadMap());
+        }
+        
+        private IEnumerator LoadMap()
+        {
+            yield return new WaitUntil(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MainSceneName));
             
+            MapDrivingSceneManager.LoadMapDrivingScene(TestManager.Instance.ChunkTestingMap);
+            
+            yield return new WaitUntil(() => ChunkManager.Instance.HasLoaded);
+            
+            isInitialised = true;
+        }
+        
+        [UnityTest]
+        public IEnumerator ChunksStartLoaded()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            Assert.IsTrue(ChunkManager.ExistsRuntime);
         }
         
     }
