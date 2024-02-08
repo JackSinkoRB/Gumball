@@ -137,10 +137,15 @@ namespace Gumball.Runtime.Tests
 
             Vector3 startOfChunk7 = map.GetChunkData(7).Position;
             PlayerCarManager.Instance.CurrentCar.Teleport(startOfChunk7, Quaternion.Euler(Vector3.zero));
-
-            yield return ChunkManager.Instance.LoadChunksAroundPosition(startOfChunk7);
-
-            Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(ChunkManager.Instance.GetChunkPlayerIsOn()));
+            yield return new WaitForFixedUpdate();
+            
+            ChunkManager.Instance.DoLoadingCheck(true);
+            
+            yield return ChunkManager.Instance.DistanceLoadingCoroutine.Coroutine;
+            
+            Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
+            Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkPlayerIsOn));
+            
             Assert.AreEqual(new MinMaxInt(1, 10), ChunkManager.Instance.LoadedChunksIndices);
 
             Assert.AreEqual(9, ChunkManager.Instance.CurrentChunks.Count);

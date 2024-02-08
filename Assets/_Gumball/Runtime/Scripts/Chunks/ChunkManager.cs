@@ -51,7 +51,8 @@ namespace Gumball
         
         public bool HasLoaded { get; private set; }
         public MinMaxInt LoadedChunksIndices => loadedChunksIndices;
-
+        public TrackedCoroutine DistanceLoadingCoroutine => distanceLoadingCoroutine;
+        
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk GetChunkPlayerIsOn()
         {
@@ -190,7 +191,7 @@ namespace Gumball
                 DoLoadingCheck();
         }
 
-        private void DoLoadingCheck()
+        public void DoLoadingCheck(bool force = false)
         {
             if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
                 return;
@@ -198,16 +199,19 @@ namespace Gumball
             if (distanceLoadingCoroutine.IsPlaying)
                 return;
 
-            timeSinceLastLoadCheck += Time.deltaTime;
-            if (timeSinceLastLoadCheck < timeBetweenLoadingChecks)
-                return;
+            if (!force)
+            {
+                timeSinceLastLoadCheck += Time.deltaTime;
+                if (timeSinceLastLoadCheck < timeBetweenLoadingChecks)
+                    return;
+            }
 
             //can perform loading check
             timeSinceLastLoadCheck = 0;
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
         }
 
-        public IEnumerator LoadChunksAroundPosition(Vector3 position)
+        private IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
             TrackedCoroutine firstChunk = null;
             bool firstChunkNeedsLoading = loadingOrLoadedChunksIndices.Min == 0 && loadingOrLoadedChunksIndices.Max == 0;
