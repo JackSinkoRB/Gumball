@@ -17,7 +17,8 @@ namespace Gumball
         
         public event Action<Chunk> onChunkLoad;
         public event Action<Chunk> onChunkUnload;
-        
+        public event Action<Chunk, GameObject> onChunkObjectLoad;
+
         private const float timeBetweenLoadingChecks = 0.5f;
 
         [Header("Settings")]
@@ -525,6 +526,10 @@ namespace Gumball
                 foreach (ChunkObjectData chunkObjectData in chunk.ChunkObjectData[assetKey])
                 {
                     GameObject chunkObject = chunkObjectData.LoadIntoChunk(handle, chunk);
+
+                    //initialise if power pole
+                    ChunkPowerpoleManager.OnLoadChunkObject(chunk, chunkObject);
+
                     GlobalLoggers.LoadingLogger.Log($"Loaded {chunkObject.name} at {stopwatch.ElapsedMilliseconds}ms.");
                     
                     if (HasLoaded && stopwatch.ElapsedMilliseconds > maxTimeAllowedPerFrameMs)
@@ -539,6 +544,7 @@ namespace Gumball
         
         private void UnloadChunk(LoadedChunkData chunkData)
         {
+            chunkData.Chunk.OnChunkUnload();
             onChunkUnload?.Invoke(chunkData.Chunk);
             currentChunks.Remove(chunkData);
             Destroy(chunkData.Chunk.gameObject);

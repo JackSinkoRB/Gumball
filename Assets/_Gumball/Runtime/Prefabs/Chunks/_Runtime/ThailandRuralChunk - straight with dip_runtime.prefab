@@ -88,6 +88,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4307824039227818001}
+  - {fileID: 4986865041581227367}
   - {fileID: 4323926210511568809}
   - {fileID: 6771104729001723156}
   - {fileID: 3706103898263936222}
@@ -114,6 +115,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 2097733361353418484}
   trafficManager: {fileID: 4545419741417920531}
+  powerpoleManager: {fileID: 6899280842942080235}
   hasCustomLoadDistance: 1
   customLoadDistance: 3000
   terrainHighLODDistance: 150
@@ -4410,6 +4412,7 @@ MonoBehaviour:
       chunkBelongsTo: {fileID: 275947375384914350}
     vertexColors: []
   chunkDetector: {fileID: 267059134799836057}
+  splineLengthCached: -1
   splineSampleCollection:
     samples:
     - position: {x: 0, y: 0, z: 0}
@@ -8748,7 +8751,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: 0.9426415, z: -0, w: -0.33380687}
         localScale: {x: 2.1626225, y: 1.6219668, z: 2.1626225}
         alwaysGrounded: 1
-      - localPosition: {x: 100.26191, y: 30.78125, z: 66.987686}
+      - localPosition: {x: 100.26191, y: 30.782227, z: 66.987686}
         localRotation: {x: -0, y: 0.9426415, z: -0, w: -0.33380687}
         localScale: {x: 2.1626225, y: 1.6219668, z: 2.1626225}
         alwaysGrounded: 1
@@ -20106,6 +20109,53 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8463623488294400632}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5610361133444384182
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4986865041581227367}
+  - component: {fileID: 6899280842942080235}
+  m_Layer: 0
+  m_Name: PowerpoleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4986865041581227367
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610361133444384182}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8463623488294400632}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6899280842942080235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5610361133444384182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 864857ba070456847b0bacafe74f440c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunk: {fileID: 0}
+  poles:
+    _serializedList: []
 --- !u!1 &7521382171530512695
 GameObject:
   m_ObjectHideFlags: 0
@@ -27063,6 +27113,8 @@ MonoBehaviour:
   - -7.5
   - 7.5
   - 12.5
+  laneDistancesForwardCached: []
+  laneDistancesBackwardCached: []
   chunk: {fileID: 275947375384914350}
 --- !u!1 &9130983604959339676
 GameObject:

@@ -8927,6 +8927,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8045768700981845778}
+  - {fileID: 3571178764261987083}
   - {fileID: 8453419884587172001}
   - {fileID: 7157502875690308364}
   - {fileID: 1476293383558805296}
@@ -8953,6 +8954,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 3051245161164908146}
   trafficManager: {fileID: 5195411063066913720}
+  powerpoleManager: {fileID: 2050208080926926369}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   terrainHighLODDistance: 150
@@ -12908,6 +12910,7 @@ MonoBehaviour:
       chunkBelongsTo: {fileID: 3494559188653880969}
     vertexColors: []
   chunkDetector: {fileID: 7418630732531057940}
+  splineLengthCached: -1
   splineSampleCollection:
     samples:
     - position: {x: 0, y: 0, z: 0}
@@ -15976,6 +15979,53 @@ MonoBehaviour:
   perSceneUniqueness: 1
   uniqueID: Prefab_02399ae7-09e6-4090-9c6c-0487c035fd99
   isPersistent: 1
+--- !u!1 &6115942104836003032
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3571178764261987083}
+  - component: {fileID: 2050208080926926369}
+  m_Layer: 0
+  m_Name: PowerpoleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3571178764261987083
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6115942104836003032}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3995122340477179213}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2050208080926926369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6115942104836003032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 864857ba070456847b0bacafe74f440c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunk: {fileID: 0}
+  poles:
+    _serializedList: []
 --- !u!1 &6360229760855217216
 GameObject:
   m_ObjectHideFlags: 0
@@ -16059,6 +16109,8 @@ MonoBehaviour:
   - -7.5
   - 7.5
   - 12.5
+  laneDistancesForwardCached: []
+  laneDistancesBackwardCached: []
   chunk: {fileID: 3494559188653880969}
 --- !u!1 &7418630732531057940
 GameObject:

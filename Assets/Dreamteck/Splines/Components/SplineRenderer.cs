@@ -34,7 +34,7 @@ namespace Dreamteck.Splines
         private int _slices = 1;
 
         private int _currentFrame = 0;
-        private Vector3 _vertexDirection = Vector3.up;
+        public Vector3 _vertexDirection = Vector3.up;
         private bool _orthographic = false;
         private bool _init = false;
 

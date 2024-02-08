@@ -52,6 +52,7 @@ namespace Gumball
         public bool IgnoreAtRuntime => ignoreAtRuntime;
         public bool AlwaysGrounded => alwaysGrounded;
         public bool CanFlattenTerrain => isActiveAndEnabled && flattenTerrain && colliderToFlattenTo != null;
+        public Chunk Chunk => chunkBelongsTo;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunkBelongsTo;
