@@ -18,6 +18,7 @@ namespace Gumball
         public event Action<Chunk> onChunkLoad;
         public event Action<Chunk> onChunkUnload;
         public event Action<Chunk, GameObject> onChunkObjectLoad;
+        public event Action<LoadedChunkData> onChunkBecomeAccessibleAndLoaded;
 
         private const float timeBetweenLoadingChecks = 0.5f;
 
@@ -80,7 +81,7 @@ namespace Gumball
         /// </summary>
         public bool IsChunkWithinLoadRadius(int chunkMapIndex)
         {
-            return chunkMapIndex >= loadingOrLoadedChunksIndices.Min && chunkMapIndex <= loadingOrLoadedChunksIndices.Max;
+            return chunkMapIndex >= loadedChunksIndices.Min && chunkMapIndex <= loadedChunksIndices.Max;
         }
         
         /// <summary>
@@ -392,6 +393,8 @@ namespace Gumball
                     Vector3 furthestPointOnCustomLoadedChunk = direction == ChunkUtils.LoadDirection.AFTER ? customLoadedChunkData.SplineEndPosition : customLoadedChunkData.SplineStartPosition;
                     distanceToEndOfChunk = Vector3.SqrMagnitude(startingPosition - furthestPointOnCustomLoadedChunk);
 
+                    onChunkBecomeAccessibleAndLoaded?.Invoke(customLoadedChunk.Value);
+                    
                     RegisterLoadedChunkIndex(indexToLoad);
                     RegisterLoadingOrLoadedChunkIndex(indexToLoad);
                     continue;
@@ -485,7 +488,9 @@ namespace Gumball
             
             stopwatch.Restart();
             onChunkLoad?.Invoke(chunk);
-            
+            if (CanPlayerAccessChunk(chunk))
+                onChunkBecomeAccessibleAndLoaded?.Invoke(loadedChunkData);
+
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to invoke events.");
 
 #if UNITY_EDITOR

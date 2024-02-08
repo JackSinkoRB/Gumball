@@ -35,12 +35,12 @@ namespace Gumball
 
             chunk = transform.parent.GetComponent<Chunk>();
             
-            ChunkManager.Instance.onChunkLoad += OnChunkLoad;
+            ChunkManager.Instance.onChunkBecomeAccessibleAndLoaded += OnChunkBecomeAccessibleAndLoaded;
         }
 
         private void OnDisable()
         {
-            ChunkManager.Instance.onChunkLoad -= OnChunkLoad;
+            ChunkManager.Instance.onChunkBecomeAccessibleAndLoaded -= OnChunkBecomeAccessibleAndLoaded;
         }
 
         public void TrackPoleInChunk(Powerpole pole)
@@ -58,20 +58,21 @@ namespace Gumball
             polesInGroup.Add(pole);
         }
         
-        private void OnChunkLoad(Chunk loadedChunk)
+        private void OnChunkBecomeAccessibleAndLoaded(LoadedChunkData loadedChunkData)
         {
-            if (chunk != loadedChunk)
+            if (chunk != loadedChunkData.Chunk)
                 return;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             SortPolesByDistance();
             ConnectLinesInChunk();
-            Debug.Log("Took: " + stopwatch.ElapsedMilliseconds + "ms");
-
-            int previousChunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(loadedChunk) - 1;
+            
+            int previousChunkIndex = loadedChunkData.MapIndex - 1;
             LoadedChunkData? previousChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(previousChunkIndex);
             if (previousChunk != null)
                 ConnectToAnotherChunk(previousChunk.Value.Chunk);
+            
+            GlobalLoggers.LoadingLogger.Log($"Took: {stopwatch.ElapsedMilliseconds}ms to set up powerlines for {loadedChunkData.Chunk.gameObject.name}");
         }
 
         /// <summary>
@@ -107,8 +108,21 @@ namespace Gumball
         {
             if (otherChunk.PowerpoleManager == null)
                 return;
-            
-            
+
+            foreach (Powerpole.PowerpolePosition position in poles.Keys)
+            {
+                if (!otherChunk.PowerpoleManager.poles.ContainsKey(position))
+                    continue; //nothing to connect to
+                
+                List<Powerpole> polesAtPosition = poles[position];
+                List<Powerpole> otherPolesAtPosition = otherChunk.PowerpoleManager.poles[position];
+
+                //connect first pole to last pole on previous chunk
+                Powerpole pole = polesAtPosition[0];
+                Powerpole previousPole = otherPolesAtPosition[^1];
+
+                pole.ConnectLines(previousPole);
+            }
         }
 
     }
