@@ -17,19 +17,10 @@ namespace Gumball
         [SerializeField, ReadOnly] private Chunk chunk;
         [SerializeField, ReadOnly] private List<PowerpoleLine> currentLines = new();
 
-        private bool isInitialised;
-        
-        private void Awake()
-        {
-            if (!isInitialised)
-            {
-                isInitialised = true;
-                chunk = transform.FindComponentInParents<ChunkObject>().Chunk;
-            }
-        }
-
         private void OnEnable()
         {
+            chunk = transform.FindComponentInParents<Chunk>();
+            
             //whenever the chunk is unloaded, pool the lines
             chunk.onChunkUnload += PoolLines;
         }

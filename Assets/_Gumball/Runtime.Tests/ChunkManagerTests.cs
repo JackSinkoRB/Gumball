@@ -130,7 +130,7 @@ namespace Gumball.Runtime.Tests
         }
         
         [UnityTest]
-        [Order(4)]
+        [Order(5)]
         public IEnumerator ChunksLoadAfterMovingCar()
         {
             yield return new WaitUntil(() => isInitialised);

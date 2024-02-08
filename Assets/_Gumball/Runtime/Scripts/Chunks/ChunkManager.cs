@@ -155,6 +155,9 @@ namespace Gumball
         /// <exception cref="ArgumentOutOfRangeException">If the chunk is not currently loaded.</exception>
         public int GetMapIndexOfLoadedChunk(Chunk chunk)
         {
+            if (chunk == null)
+                throw new NullReferenceException("Cannot get map index because the chunk is null.");
+            
             foreach (LoadedChunkData data in currentChunks)
             {
                 if (data.Chunk.Equals(chunk))

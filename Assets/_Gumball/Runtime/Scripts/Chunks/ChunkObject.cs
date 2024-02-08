@@ -102,7 +102,7 @@ namespace Gumball
             if (chunkBelongsTo != null)
                 return;
             
-            FindChunkBelongsTo();
+            chunkBelongsTo = transform.FindComponentInParents<Chunk>();
             if (chunkBelongsTo == null)
                 return;
             
@@ -190,24 +190,6 @@ namespace Gumball
             
             if (alwaysGrounded)
                 GroundObject();
-        }
-        
-        private void FindChunkBelongsTo()
-        {
-            Transform parent = transform.parent;
-            while (parent != null)
-            {
-                Chunk chunk = parent.GetComponent<Chunk>();
-                if (chunk != null)
-                {
-                    chunkBelongsTo = chunk;
-                    return;
-                }
-                parent = parent.parent;
-            }
-
-            chunkBelongsTo = null;
-            Debug.LogWarning($"Could not find a chunk that {gameObject.name} belongs to.");
         }
         
 #endif
