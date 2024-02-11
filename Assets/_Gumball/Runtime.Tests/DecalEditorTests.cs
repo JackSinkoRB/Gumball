@@ -49,6 +49,12 @@ namespace Gumball.Runtime.Tests
         {
             DataManager.RemoveAllData();
         }
+
+        [TearDown]
+        public void TearDown()
+        {
+            DecalEditor.Instance.EndSession();
+        }
         
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {

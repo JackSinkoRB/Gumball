@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -45,6 +46,7 @@ namespace Gumball
         [SerializeField] private int numberOfRainbowColours = 50;
         
         [Header("Debugging")]
+        [SerializeField, ReadOnly] private bool isSessionActive;
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
         
@@ -131,6 +133,12 @@ namespace Gumball
 
         public void StartSession(CarManager car)
         {
+            if (isSessionActive)
+            {
+                Debug.LogWarning("Cannot start decal session, because one has already been started.");
+                return;
+            }
+
             PrimaryContactInput.onRelease += OnPrimaryContactReleased;
             DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
             
@@ -161,11 +169,15 @@ namespace Gumball
             //disable the car's collider temporarily
             PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(false);
             
+            isSessionActive = true;
             onSessionStart?.Invoke();
         }
 
         public void EndSession()
         {
+            if (!isSessionActive)
+                return;
+            
             GlobalLoggers.DecalsLogger.Log($"Ending session.");
 
             PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
@@ -190,6 +202,7 @@ namespace Gumball
             
             DecalStateManager.ClearHistory();
             
+            isSessionActive = false;
             onSessionEnd?.Invoke();
 
             SessionCleanup();

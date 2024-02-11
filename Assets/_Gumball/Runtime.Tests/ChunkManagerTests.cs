@@ -47,12 +47,6 @@ namespace Gumball.Runtime.Tests
         {
             DataManager.RemoveAllData();
         }
-
-        [TearDown]
-        public void TearDown()
-        {
-            
-        }
         
         private void OnBootSceneLoadComplete(AsyncOperation asyncOperation)
         {
