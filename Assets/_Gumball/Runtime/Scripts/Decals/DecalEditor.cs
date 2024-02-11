@@ -205,7 +205,21 @@ namespace Gumball
             isSessionActive = false;
             onSessionEnd?.Invoke();
 
-            SessionCleanup();
+            //need to wait for the texture to fully apply before removing paintable components
+            disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(SessionCleanup);
+        }
+        
+        public void SessionCleanup()
+        {
+            for (int i = paintableMeshes.Count - 1; i >= 0; i--)
+            {
+                PaintableMesh paintableMesh = paintableMeshes[i];
+                paintableMesh.DisablePainting();
+                paintableMeshes.Remove(paintableMesh);
+            }
+                
+            currentCar.Rigidbody.isKinematic = false;
+            currentCar = null;
         }
 
         /// <summary>
@@ -339,24 +353,7 @@ namespace Gumball
                     DeselectLiveDecal();
             }
         }
-        
-        private void SessionCleanup()
-        {
-            //need to wait for the texture to fully apply before removing paintable components
-            disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(() =>
-            {
-                for (int i = paintableMeshes.Count - 1; i >= 0; i--)
-                {
-                    PaintableMesh paintableMesh = paintableMeshes[i];
-                    paintableMesh.DisablePainting();
-                    paintableMeshes.Remove(paintableMesh);
-                }
-                
-                currentCar.Rigidbody.isKinematic = false;
-                currentCar = null;
-            });
-        }
-        
+
         private void OnBeforeSaveAllDataOnAppExit()
         {
 #if UNITY_EDITOR
