@@ -1,5 +1,52 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1278959170454154190
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1327175019784604436}
+  - component: {fileID: 8533324951730883405}
+  m_Layer: 0
+  m_Name: PowerpoleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1327175019784604436
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1278959170454154190}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9020645816277914530}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8533324951730883405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1278959170454154190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 864857ba070456847b0bacafe74f440c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunk: {fileID: 0}
+  poles:
+    _serializedList: []
 --- !u!1 &5083568473406873803
 GameObject:
   m_ObjectHideFlags: 0
@@ -8645,6 +8692,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8635441822699926625}
+  - {fileID: 1327175019784604436}
   - {fileID: 8349020717844841411}
   - {fileID: 8896882228473474952}
   m_Father: {fileID: 0}
@@ -8663,9 +8711,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 281317726593344272}
   trafficManager: {fileID: 5394604281453706136}
+  powerpoleManager: {fileID: 8533324951730883405}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
-  currentTerrain: {fileID: 0}
+  terrainHighLODDistance: 150
+  currentLOD: 0
+  terrainHighLOD: {fileID: 0}
+  terrainLowLOD: {fileID: 0}
   splineMeshes:
   - {fileID: 5756927941350047989}
   - {fileID: 9070973588725972983}
@@ -8675,6 +8727,8 @@ MonoBehaviour:
     lastEndVertices: []
     firstEndVertices: []
     vertexColors: []
+  chunkDetector: {fileID: 0}
+  splineLengthCached: -1
   splineSampleCollection:
     samples:
     - position: {x: 0, y: 0, z: 0}
@@ -9299,6 +9353,7 @@ MonoBehaviour:
   updateImmediately: 1
   terrainData:
     resolution: 100
+    resolutionLowLOD: 20
     chunkBlendDistance: 25
     matchRoadHeight: 1
     terrainHeightFromRoad: 0
@@ -10216,6 +10271,8 @@ MonoBehaviour:
   laneDistances:
   - -2.6
   - 2.6
+  laneDistancesForwardCached: []
+  laneDistancesBackwardCached: []
   chunk: {fileID: 6459624903785862660}
 --- !u!1 &8623244286810635614
 GameObject:

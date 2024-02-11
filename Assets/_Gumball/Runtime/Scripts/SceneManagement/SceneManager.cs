@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class SceneManager : Singleton<SceneManager>
+    public class SceneManager : PersistentSingleton<SceneManager>
     {
         
         public const string BootSceneName = "BootScene";

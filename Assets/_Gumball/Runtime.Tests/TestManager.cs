@@ -25,11 +25,26 @@ namespace Gumball.Runtime.Tests
             }
         }
 
+        [SerializeField] private SceneAsset bootScene;
         [SerializeField] private SceneAsset decalEditorScene;
         [SerializeField] private SceneAsset avatarEditorScene;
         
+        [Header("Chunks")]
+        [SerializeField] private MapData chunkTestingMap;
+        [SerializeField] private AssetReferenceGameObject testChunkPrefabA;
+        [SerializeField] private AssetReferenceGameObject testChunkPrefabB;
+        [SerializeField] private AssetReferenceGameObject testChunkPrefabC;
+        [SerializeField] private AssetReferenceGameObject testChunkPrefabCustomLoad;
+
         public string DecalEditorScenePath => AssetDatabase.GetAssetPath(decalEditorScene);
         public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
+        public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
+        
+        public MapData ChunkTestingMap => chunkTestingMap;
+        public AssetReferenceGameObject TestChunkPrefabA => testChunkPrefabA;
+        public AssetReferenceGameObject TestChunkPrefabB => testChunkPrefabB;
+        public AssetReferenceGameObject TestChunkPrefabC => testChunkPrefabC;
+        public AssetReferenceGameObject TestChunkPrefabCustomLoad => testChunkPrefabCustomLoad;
 
     }
 }

@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using SceneManager = UnityEngine.SceneManagement.SceneManager;
 
-public class PanelManager : Singleton<PanelManager>
+public class PanelManager : PersistentSingleton<PanelManager>
 {
 
     [SerializeField, ReadOnly] private List<AnimatedPanel> panelStack = new();
@@ -26,6 +26,8 @@ public class PanelManager : Singleton<PanelManager>
         
         SceneManager.activeSceneChanged -= OnSceneChange;
         SceneManager.activeSceneChanged += OnSceneChange;
+
+        CreatePanelLookup();
     }
 
     private void OnSceneChange(Scene oldScene, Scene newScene)

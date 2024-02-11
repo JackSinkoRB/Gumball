@@ -14,7 +14,8 @@ namespace Gumball
             PlayerVehicle = 8,
             TrafficCar = 9,
             ChunkObject = 10,
-            ChunkDetector = 11
+            ChunkDetector = 11,
+            PaintableMesh = 12
         }
         
         public static LayerMask TrafficCarCollisionLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerVehicle;

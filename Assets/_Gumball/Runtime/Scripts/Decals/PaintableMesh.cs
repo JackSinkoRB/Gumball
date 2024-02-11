@@ -60,6 +60,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private P3dPaintableTexture paintableTexture;
         [SerializeField, ReadOnly] private MeshCollider meshCollider;
 
+        private int initialLayer;
         private MeshRenderer meshRenderer => GetComponent<MeshRenderer>();
         private MeshFilter meshFilter => GetComponent<MeshFilter>();
         
@@ -83,6 +84,10 @@ namespace Gumball
             paintableTexture.enabled = true;
             meshCollider.enabled = true;
             paintable.enabled = true;
+            
+            //set the PaintableMesh layer for raycasting in decal editor
+            initialLayer = meshFilter.gameObject.layer;
+            meshFilter.gameObject.layer = (int) LayersAndTags.Layer.PaintableMesh;
 
             paintableTexture.Slot = new P3dSlot(0, textureString); //car body shader uses albedo
             
@@ -91,6 +96,8 @@ namespace Gumball
 
         public void DisablePainting()
         {
+            meshFilter.gameObject.layer = initialLayer;
+            
             Destroy(materialCloner);
             Destroy(paintable);
             paintableTexture.enabled = false;

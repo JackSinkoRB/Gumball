@@ -35,6 +35,10 @@ namespace Gumball
         [SerializeField, ReadOnly] private List<int> chunksWithCustomLoadDistance = new();
         [SerializeField, ReadOnly] private ChunkMapData[] chunkData;
 
+#if UNITY_EDITOR
+        public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
+#endif
+
         public int StartingChunkIndex => startingChunkIndex;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public Vector3 VehicleStartingRotation => vehicleStartingRotation;

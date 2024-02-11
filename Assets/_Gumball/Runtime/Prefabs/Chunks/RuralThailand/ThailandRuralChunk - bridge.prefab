@@ -8386,6 +8386,8 @@ MonoBehaviour:
   - -7.5
   - 7.5
   - 12.5
+  laneDistancesForwardCached: []
+  laneDistancesBackwardCached: []
   chunk: {fileID: 8139357221447906197}
 --- !u!1 &5680398972407322811
 GameObject:
@@ -31897,6 +31899,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   splineComputer: {fileID: 1184479275315945760}
   trafficManager: {fileID: 6102728473630700752}
+  powerpoleManager: {fileID: 0}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   terrainHighLODDistance: 150
@@ -35853,6 +35856,7 @@ MonoBehaviour:
       chunkBelongsTo: {fileID: 8139357221447906197}
     vertexColors: []
   chunkDetector: {fileID: 0}
+  splineLengthCached: -1
   splineSampleCollection:
     samples:
     - position: {x: 0, y: 0, z: 0}
@@ -39045,12 +39049,12 @@ PrefabInstance:
     - target: {fileID: 7358563631059810098, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.z
-      value: -64.29715
+      value: -64.297195
       objectReference: {fileID: 0}
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.24777675
+      value: 0.24777842
       objectReference: {fileID: 0}
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
@@ -39060,7 +39064,7 @@ PrefabInstance:
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 105.355545
+      value: 105.35559
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -51804,12 +51808,12 @@ PrefabInstance:
     - target: {fileID: 7358563631059810098, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.z
-      value: -64.29708
+      value: -64.29713
       objectReference: {fileID: 0}
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.24777436
+      value: 0.24777603
       objectReference: {fileID: 0}
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
@@ -51819,7 +51823,7 @@ PrefabInstance:
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 105.35548
+      value: 105.35552
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
