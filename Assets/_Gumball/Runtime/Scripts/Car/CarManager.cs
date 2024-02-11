@@ -166,8 +166,11 @@ namespace Gumball
 
         public void Teleport(Vector3 position, Quaternion rotation)
         {
-            Rigidbody.velocity = Vector3.zero;
-            Rigidbody.angularVelocity = Vector3.zero;
+            if (!Rigidbody.isKinematic)
+            {
+                Rigidbody.velocity = Vector3.zero;
+                Rigidbody.angularVelocity = Vector3.zero;
+            }
             Rigidbody.Move(position, rotation);
         }
         

@@ -71,6 +71,9 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             Assert.IsTrue(ChunkManager.ExistsRuntime);
+
+            //yield return new WaitUntil(CarDoesntHaveMeshCollider);
+            Assert.IsTrue(CarDoesntHaveMeshCollider());
             
             Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().SplineLength);
             Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().SplineLength);
@@ -79,12 +82,20 @@ namespace Gumball.Runtime.Tests
 
             Assert.AreEqual(500, map.ChunkLoadDistance);
         }
+
+        private bool CarDoesntHaveMeshCollider()
+        {
+            List<MeshCollider> meshColliders = PlayerCarManager.Instance.CurrentCar.transform.GetComponentsInAllChildren<MeshCollider>();
+            return meshColliders.Count == 0;
+        }
         
         [UnityTest]
         [Order(1)]
         public IEnumerator OnlyLoadChunksInLoadDistance()
         {
             yield return new WaitUntil(() => isInitialised);
+            
+            Assert.IsTrue(CarDoesntHaveMeshCollider());
 
             float carDistance = map.VehicleStartingPosition.z;
             Assert.AreEqual(Mathf.CeilToInt((map.ChunkLoadDistance + carDistance) / chunkSplineLengths), ChunkManager.Instance.CurrentChunks.Count);
