@@ -126,10 +126,9 @@ namespace Gumball.Runtime.Tests
         public IEnumerator ChunksLoadAfterMovingCar()
         {
             yield return new WaitUntil(() => isInitialised);
-
-            const float heightOffset = 5;
-            Vector3 startOfChunk7 = map.GetChunkData(7).Position.OffsetY(heightOffset);
-            PlayerCarManager.Instance.CurrentCar.Teleport(startOfChunk7, Quaternion.Euler(Vector3.zero));
+            
+            Vector3 newPosition = new Vector3(0, 5, 705); //start of chunk 7
+            PlayerCarManager.Instance.CurrentCar.Teleport(newPosition, Quaternion.Euler(Vector3.zero));
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
 
             ChunkManager.Instance.DoLoadingCheck(true);
