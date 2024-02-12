@@ -214,7 +214,12 @@ namespace Gumball
                 return;
 
             if (distanceLoadingCoroutine.IsPlaying)
-                return;
+            {
+                if (force)
+                    distanceLoadingCoroutine.Stop(false);
+                else
+                    return;
+            }
 
             if (!force)
             {
