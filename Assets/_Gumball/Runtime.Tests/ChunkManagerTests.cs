@@ -61,6 +61,7 @@ namespace Gumball.Runtime.Tests
             
             yield return new WaitUntil(() => ChunkManager.Instance.HasLoaded);
             yield return new WaitForEndOfFrame();
+            DecalEditor.Instance.SessionCleanup();
             
             isInitialised = true;
         }
