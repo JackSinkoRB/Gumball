@@ -74,11 +74,13 @@ namespace Gumball
                     Debug.LogWarning("Can't get the chunk the player is in because the current car doesn't exist.");
                     chunkPlayerIsOnCached = null;
                 }
-
-                //raycast down to terrain
-                if (Physics.Raycast(PlayerCarManager.Instance.CurrentCar.Rigidbody.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
-                    chunkPlayerIsOnCached = hitDown.transform.parent.GetComponent<Chunk>();
-                else chunkPlayerIsOnCached = null;
+                else
+                {
+                    //raycast down to terrain
+                    if (Physics.Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
+                        chunkPlayerIsOnCached = hitDown.transform.parent.GetComponent<Chunk>();
+                    else chunkPlayerIsOnCached = null;
+                }
             }
             
             return chunkPlayerIsOnCached;

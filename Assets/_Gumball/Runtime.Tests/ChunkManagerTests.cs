@@ -127,8 +127,10 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
             
-            Vector3 newPosition = new Vector3(0, 5, 705); //start of chunk 7
-            PlayerCarManager.Instance.CurrentCar.Teleport(newPosition, Quaternion.Euler(Vector3.zero));
+            const float heightOffset = 5;
+            const float zOffset = 10;
+            Vector3 startOfChunk7 = map.GetChunkData(7).Position.OffsetY(heightOffset).OffsetZ(zOffset);
+            PlayerCarManager.Instance.CurrentCar.Teleport(startOfChunk7, Quaternion.Euler(Vector3.zero));
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
 
             ChunkManager.Instance.DoLoadingCheck(true);
@@ -137,8 +139,8 @@ namespace Gumball.Runtime.Tests
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
             yield return new WaitForFixedUpdate();
 
-            Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn(true);
-            GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.Rigidbody.position}");
+            Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
+            GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");
             Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkPlayerIsOn));
             
             Assert.AreEqual(2, ChunkManager.Instance.AccessibleChunksIndices.Min);
