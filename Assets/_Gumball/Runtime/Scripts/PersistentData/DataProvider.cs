@@ -129,19 +129,22 @@ namespace Gumball
 
         public async void LoadFromSourceAsync(Action onComplete = null)
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
             await Task.Run(LoadFromSource);
-            stopwatch.Stop();
-
-            IsLoaded = true;
-            GlobalLoggers.SaveDataLogger.Log($"Loaded from source '{identifier}' (async - {stopwatch.ElapsedMilliseconds}ms)");
+            
             onComplete?.Invoke();
         }
 
         public void LoadFromSourceSync()
         {
-            LoadFromSource();
-            IsLoaded = true;
+            lock (accessLock)
+            {
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                LoadFromSource();
+                stopwatch.Stop();
+
+                IsLoaded = true;
+                GlobalLoggers.SaveDataLogger.Log($"Loaded from source '{identifier}' ({stopwatch.ElapsedMilliseconds}ms)");
+            }
         }
 
         public bool HasKey(string key)
@@ -198,29 +201,39 @@ namespace Gumball
         /// <summary>
         /// Remove all values and do any cleanup from the source.
         /// </summary>
-        public virtual void RemoveFromSource()
+        public void RemoveFromSource()
         {
-            currentValues.Clear();
-            IsLoaded = false;
-            RemoveDirty();
-            GlobalLoggers.SaveDataLogger.Log($"Removed all keys from {identifier}.");
+            lock (accessLock)
+            {
+                currentValues.Clear();
+                IsLoaded = false;
+                RemoveDirty();
+                
+                OnRemoveFromSource();
+                
+                GlobalLoggers.SaveDataLogger.Log($"Removed all keys from {identifier}.");
+            }
         }
-
+        
         /// <summary>
         /// Forces a synchronous reload.
         /// </summary>
         public void ReloadFromSource()
         {
-            CheckIfLoaded();
+            lock (accessLock)
+            {
+                CheckIfLoaded();
 
-            RemoveDirty();
-            LoadFromSource();
+                RemoveDirty();
+                LoadFromSource();
+            }
         }
 
         public abstract bool SourceHasValue();
         protected abstract void SaveToSource();
         protected abstract void LoadFromSource();
-
+        protected abstract void OnRemoveFromSource();
+        
         private async void SaveToSourceAsync(Action onComplete = null)
         {
 #if UNITY_EDITOR
@@ -228,6 +241,7 @@ namespace Gumball
                 return; //don't save to source
 #endif
 
+            
             Stopwatch stopwatch = Stopwatch.StartNew();
             await Task.Run(SaveOrRemoveFromSource);
             stopwatch.Stop();
