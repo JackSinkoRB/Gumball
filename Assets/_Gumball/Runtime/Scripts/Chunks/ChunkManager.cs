@@ -51,17 +51,23 @@ namespace Gumball
         private float timeSinceLastLoadCheck;
         private Chunk chunkPlayerIsOnCached;
         private int lastFramePlayerChunkWasCached = -1;
+        private int fixedUpdateCount;
         
         public bool HasLoaded { get; private set; }
         public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
         public TrackedCoroutine DistanceLoadingCoroutine => distanceLoadingCoroutine;
-        
-        /// <returns>The chunk the player is on, else null if it can't be found.</returns>
-        public Chunk GetChunkPlayerIsOn()
+
+        private void FixedUpdate()
         {
-            if (lastFramePlayerChunkWasCached != Time.frameCount)
+            fixedUpdateCount++;
+        }
+
+        /// <returns>The chunk the player is on, else null if it can't be found.</returns>
+        public Chunk GetChunkPlayerIsOn(bool force = false)
+        {
+            if (lastFramePlayerChunkWasCached != fixedUpdateCount)
             {
-                lastFramePlayerChunkWasCached = Time.frameCount;
+                lastFramePlayerChunkWasCached = fixedUpdateCount;
                 
                 if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
                 {
@@ -70,7 +76,7 @@ namespace Gumball
                 }
 
                 //raycast down to terrain
-                if (Physics.Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
+                if (Physics.Raycast(PlayerCarManager.Instance.CurrentCar.Rigidbody.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
                     chunkPlayerIsOnCached = hitDown.transform.parent.GetComponent<Chunk>();
                 else chunkPlayerIsOnCached = null;
             }
