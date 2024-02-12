@@ -116,6 +116,8 @@ namespace Gumball
 
         protected readonly string identifier;
         protected Dictionary<string, object> currentValues = new();
+        
+        private readonly object accessLock = new();
 
         public bool IsLoaded { get; private set; }
         public bool IsDirty => dirtyProviders.Contains(this);
@@ -239,14 +241,17 @@ namespace Gumball
         /// </summary>
         private void SaveOrRemoveFromSource()
         {
-            if (currentValues.Count == 0)
+            lock (accessLock)
             {
-                //nothing left
-                RemoveFromSource();
-                return;
-            }
+                if (currentValues.Count == 0)
+                {
+                    //nothing left
+                    RemoveFromSource();
+                    return;
+                }
 
-            SaveToSource();
+                SaveToSource();
+            }
         }
 
         private void SetDirty()
