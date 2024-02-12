@@ -141,15 +141,17 @@ namespace Gumball.Runtime.Tests
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
             yield return new WaitForFixedUpdate();
 
+            Assert.AreEqual(2, ChunkManager.Instance.AccessibleChunksIndices.Min);
+            Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
+            
+            Assert.AreEqual(8, ChunkManager.Instance.CurrentChunks.Count);
+            Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
+            
+            //chunk player is on:
             Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
             GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");
             Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkPlayerIsOn));
             
-            Assert.AreEqual(2, ChunkManager.Instance.AccessibleChunksIndices.Min);
-            Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
-
-            Assert.AreEqual(8, ChunkManager.Instance.CurrentChunks.Count);
-            Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[0].Chunk.UniqueID);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[1].Chunk.UniqueID);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[2].Chunk.UniqueID);
