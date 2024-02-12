@@ -43,8 +43,8 @@ namespace Gumball
         /// </summary>
         public static void ApplyDecalDataToCar(CarManager car)
         {
-            DecalEditor.Instance.StartSession(car);
-            DecalEditor.Instance.EndSession();
+            //DecalEditor.Instance.StartSession(car);
+            //DecalEditor.Instance.EndSession();
         }
 
         /// <summary>
