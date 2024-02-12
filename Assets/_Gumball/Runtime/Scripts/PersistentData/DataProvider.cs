@@ -129,7 +129,7 @@ namespace Gumball
 
         public async void LoadFromSourceAsync(Action onComplete = null)
         {
-            await Task.Run(LoadFromSource);
+            await Task.Run(LoadFromSourceSync);
             
             onComplete?.Invoke();
         }
