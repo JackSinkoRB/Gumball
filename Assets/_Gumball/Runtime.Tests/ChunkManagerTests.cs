@@ -130,8 +130,10 @@ namespace Gumball.Runtime.Tests
             const float heightOffset = 5;
             const float zOffset = 10;
             Vector3 startOfChunk7 = map.GetChunkData(7).Position.OffsetY(heightOffset).OffsetZ(zOffset);
-            PlayerCarManager.Instance.CurrentCar.Teleport(startOfChunk7, Quaternion.Euler(Vector3.zero));
+            
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
+            PlayerCarManager.Instance.CurrentCar.Teleport(startOfChunk7, Quaternion.Euler(Vector3.zero));
+            yield return new WaitForFixedUpdate();
 
             ChunkManager.Instance.DoLoadingCheck(true);
             

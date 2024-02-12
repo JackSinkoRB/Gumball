@@ -51,23 +51,17 @@ namespace Gumball
         private float timeSinceLastLoadCheck;
         private Chunk chunkPlayerIsOnCached;
         private int lastFramePlayerChunkWasCached = -1;
-        private int fixedUpdateCount;
         
         public bool HasLoaded { get; private set; }
         public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
         public TrackedCoroutine DistanceLoadingCoroutine => distanceLoadingCoroutine;
 
-        private void FixedUpdate()
-        {
-            fixedUpdateCount++;
-        }
-
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
-        public Chunk GetChunkPlayerIsOn(bool force = false)
+        public Chunk GetChunkPlayerIsOn()
         {
-            if (lastFramePlayerChunkWasCached != fixedUpdateCount || force)
+            if (lastFramePlayerChunkWasCached != Time.frameCount)
             {
-                lastFramePlayerChunkWasCached = fixedUpdateCount;
+                lastFramePlayerChunkWasCached = Time.frameCount;
                 
                 if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
                 {
