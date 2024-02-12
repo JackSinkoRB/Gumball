@@ -48,8 +48,12 @@ namespace Gumball
         public ReadOnlyCollection<LoadedChunkData> CurrentCustomLoadedChunks => currentCustomLoadedChunks.AsReadOnly();
         public ReadOnlyCollection<LoadedChunkData> ChunksWaitingToBeAccessible => chunksWaitingToBeAccessible.AsReadOnly();
 
-        private readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private float timeSinceLastLoadCheck;
+        private readonly TrackedCoroutine distanceLoadingCoroutine = new();
+        private List<TrackedCoroutine> customChunkLoading = new();
+        private List<TrackedCoroutine> chunksBeforeLoading = new();
+        private List<TrackedCoroutine> chunksAfterLoading = new();
+        
         private Chunk chunkPlayerIsOnCached;
         private int lastFramePlayerChunkWasCached = -1;
         
@@ -162,7 +166,6 @@ namespace Gumball
         /// Get the map index of the supplied chunk.
         /// <remarks>The chunk must be loaded.</remarks>
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">If the chunk is not currently loaded.</exception>
         public int GetMapIndexOfLoadedChunk(Chunk chunk)
         {
             if (chunk == null)
@@ -208,16 +211,19 @@ namespace Gumball
 
         public void DoLoadingCheck(bool force = false)
         {
+            GlobalLoggers.ChunkLogger.Log("Doing loading check 1");
             if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
                 return;
+            GlobalLoggers.ChunkLogger.Log("Doing loading check 2");
 
             if (distanceLoadingCoroutine.IsPlaying)
             {
                 if (force)
-                    distanceLoadingCoroutine.Stop(false);
+                    CancelCurrentLoading();
                 else
                     return;
             }
+            GlobalLoggers.ChunkLogger.Log("Doing loading check 3");
 
             if (!force)
             {
@@ -225,6 +231,7 @@ namespace Gumball
                 if (timeSinceLastLoadCheck < timeBetweenLoadingChecks)
                     return;
             }
+            GlobalLoggers.ChunkLogger.Log("Doing loading check 4");
 
             //can perform loading check
             timeSinceLastLoadCheck = 0;
@@ -233,6 +240,8 @@ namespace Gumball
 
         private IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
+            GlobalLoggers.ChunkLogger.Log($"Doing loading check 5 - {position}");
+            
             TrackedCoroutine firstChunk = null;
             bool firstChunkNeedsLoading = loadingOrLoadedChunksIndices.Min == 0 && loadingOrLoadedChunksIndices.Max == 0;
             if (firstChunkNeedsLoading)
@@ -241,16 +250,32 @@ namespace Gumball
                 firstChunk = new TrackedCoroutine(LoadFirstChunk());
             }
             
-            List<TrackedCoroutine> customLoadChunks = UpdateCustomLoadDistanceChunks(position);
-            List<TrackedCoroutine> chunksBefore = LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
-            List<TrackedCoroutine> chunksAfter = LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
+            customChunkLoading = UpdateCustomLoadDistanceChunks(position);
+            chunksBeforeLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
+            chunksAfterLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
             
             yield return new WaitUntil(() => (firstChunk == null || !firstChunk.IsPlaying)
-                                             && customLoadChunks.AreAllComplete()
-                                             && chunksBefore.AreAllComplete()
-                                             && chunksAfter.AreAllComplete());
+                                             && customChunkLoading.AreAllComplete()
+                                             && chunksBeforeLoading.AreAllComplete()
+                                             && chunksAfterLoading.AreAllComplete());
             
+            GlobalLoggers.ChunkLogger.Log($"Loading check completed!");
+
             UnloadChunksAroundPosition(position);
+            
+            GlobalLoggers.ChunkLogger.Log($"Unloading check completed!");
+        }
+
+        private void CancelCurrentLoading()
+        {
+            distanceLoadingCoroutine.Stop(false);
+            
+            foreach (TrackedCoroutine trackedCoroutine in customChunkLoading)
+                trackedCoroutine.Stop(false);
+            foreach (TrackedCoroutine trackedCoroutine in chunksBeforeLoading)
+                trackedCoroutine.Stop(false);
+            foreach (TrackedCoroutine trackedCoroutine in chunksAfterLoading)
+                trackedCoroutine.Stop(false);
         }
 
         private IEnumerator LoadFirstChunk()
