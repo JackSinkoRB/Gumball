@@ -71,7 +71,7 @@ namespace Gumball
                 else
                 {
                     //raycast down to terrain
-                    if (Physics.Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
+                    if (PlayerCarManager.Instance.CurrentCar.gameObject.scene.GetPhysicsScene().Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
                         chunkPlayerIsOnCached = hitDown.transform.parent.GetComponent<Chunk>();
                     else chunkPlayerIsOnCached = null;
                 }
