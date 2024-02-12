@@ -60,6 +60,7 @@ namespace Gumball.Runtime.Tests
             MapDrivingSceneManager.LoadMapDrivingScene(map);
             
             yield return new WaitUntil(() => ChunkManager.Instance.HasLoaded);
+            yield return new WaitForEndOfFrame();
             
             isInitialised = true;
         }
