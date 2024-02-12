@@ -59,6 +59,7 @@ namespace Gumball
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk GetChunkPlayerIsOn()
         {
+            Debug.Log($"Trying to get chunk player is on - {lastFramePlayerChunkWasCached} / {Time.frameCount}");
             if (lastFramePlayerChunkWasCached != Time.frameCount)
             {
                 lastFramePlayerChunkWasCached = Time.frameCount;
@@ -70,10 +71,18 @@ namespace Gumball
                 }
                 else
                 {
+                    GlobalLoggers.ChunkLogger.Log($"Raycasting down from {PlayerCarManager.Instance.CurrentCar.transform.position} to find chunk player is on.");
                     //raycast down to terrain
                     if (PlayerCarManager.Instance.CurrentCar.gameObject.scene.GetPhysicsScene().Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
+                    {
+                        GlobalLoggers.ChunkLogger.Log($"Hit at {hitDown.point}. Parent is {(hitDown.transform.parent == null ? "null" : hitDown.transform.parent.name)}");
                         chunkPlayerIsOnCached = hitDown.transform.parent.GetComponent<Chunk>();
-                    else chunkPlayerIsOnCached = null;
+                    }
+                    else
+                    {
+                        GlobalLoggers.ChunkLogger.Log("No hit");
+                        chunkPlayerIsOnCached = null;
+                    }
                 }
             }
             
