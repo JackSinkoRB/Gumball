@@ -113,11 +113,12 @@ namespace Gumball.Runtime.Tests
         
         [UnityTest]
         [Order(4)]
-        public IEnumerator LoadedChunksIndices()
+        public IEnumerator AccessibleChunksIndices()
         {
             yield return new WaitUntil(() => isInitialised);
             
-            Assert.AreEqual(new MinMaxInt(0, 5), ChunkManager.Instance.AccessibleChunksIndices);
+            Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
+            Assert.AreEqual(5, ChunkManager.Instance.AccessibleChunksIndices.Max);
         }
         
         [UnityTest]
@@ -125,31 +126,34 @@ namespace Gumball.Runtime.Tests
         public IEnumerator ChunksLoadAfterMovingCar()
         {
             yield return new WaitUntil(() => isInitialised);
-        
-            Vector3 startOfChunk7 = map.GetChunkData(7).Position;
+
+            const float heightOffset = 5;
+            Vector3 startOfChunk7 = map.GetChunkData(7).Position.OffsetY(heightOffset);
             PlayerCarManager.Instance.CurrentCar.Teleport(startOfChunk7, Quaternion.Euler(Vector3.zero));
-            yield return new WaitForFixedUpdate();
-            
+            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
+
             ChunkManager.Instance.DoLoadingCheck(true);
             
             yield return ChunkManager.Instance.DistanceLoadingCoroutine.Coroutine;
-            
+            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
+            yield return new WaitForFixedUpdate();
+
             Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
             Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkPlayerIsOn));
             
-            Assert.AreEqual(new MinMaxInt(1, 10), ChunkManager.Instance.AccessibleChunksIndices);
-        
-            Assert.AreEqual(9, ChunkManager.Instance.CurrentChunks.Count);
+            Assert.AreEqual(2, ChunkManager.Instance.AccessibleChunksIndices.Min);
+            Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
+
+            Assert.AreEqual(8, ChunkManager.Instance.CurrentChunks.Count);
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[0].Chunk.UniqueID);
+            Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[0].Chunk.UniqueID);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[1].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[2].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[3].Chunk.UniqueID);
+            Assert.AreEqual(TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[2].Chunk.UniqueID);
+            Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[3].Chunk.UniqueID);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[4].Chunk.UniqueID);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[5].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[6].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[7].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[8].Chunk.UniqueID);
+            Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[6].Chunk.UniqueID);
+            Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[7].Chunk.UniqueID);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabCustomLoad.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentCustomLoadedChunks[0].Chunk.UniqueID);
         }
         

@@ -214,7 +214,7 @@ namespace Gumball
 
             //can perform loading check
             timeSinceLastLoadCheck = 0;
-            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
+            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.Rigidbody.position));
         }
 
         private IEnumerator LoadChunksAroundPosition(Vector3 position)
