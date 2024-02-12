@@ -49,7 +49,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isSessionActive;
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
-        
+
         public List<LiveDecal> LiveDecals => liveDecals;
         public LiveDecal CurrentSelected => currentSelected;
         public CarManager CurrentCar => currentCar;
@@ -173,7 +173,7 @@ namespace Gumball
             onSessionStart?.Invoke();
         }
 
-        public void EndSession()
+        public void EndSession(bool runCleanupInstantly = false)
         {
             if (!isSessionActive)
                 return;
@@ -206,7 +206,9 @@ namespace Gumball
             onSessionEnd?.Invoke();
 
             //need to wait for the texture to fully apply before removing paintable components
-            disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(SessionCleanup);
+            if (runCleanupInstantly)
+                SessionCleanup();
+            else disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(SessionCleanup);
         }
         
         public void SessionCleanup()
@@ -217,7 +219,7 @@ namespace Gumball
                 paintableMesh.DisablePainting();
                 paintableMeshes.Remove(paintableMesh);
             }
-                
+
             currentCar.Rigidbody.isKinematic = false;
             currentCar = null;
         }

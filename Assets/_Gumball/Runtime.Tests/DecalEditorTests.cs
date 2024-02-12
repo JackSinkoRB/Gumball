@@ -42,6 +42,7 @@ namespace Gumball.Runtime.Tests
         public void OneTimeTearDown()
         {
             DataManager.EnableTestProviders(false);
+            Object.DestroyImmediate(PlayerCarManager.Instance.CurrentCar);
         }
 
         [SetUp]
@@ -53,8 +54,7 @@ namespace Gumball.Runtime.Tests
         [TearDown]
         public void TearDown()
         {
-            DecalEditor.Instance.EndSession();
-            DecalEditor.Instance.SessionCleanup(); //need to run cleanup instantly as coroutine won't complete at end of frame
+            DecalEditor.Instance.EndSession(true);
         }
         
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)
