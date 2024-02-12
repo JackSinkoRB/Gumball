@@ -32,8 +32,8 @@ namespace Gumball.Runtime.Tests
         {
             DataManager.EnableTestProviders(true);
             
-            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.BootScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadMainScene.completed += OnBootSceneLoadComplete;
+            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.MapDrivingScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            loadMainScene.completed += OnSceneLoadComplete;
         }
 
         [OneTimeTearDown]
@@ -48,20 +48,15 @@ namespace Gumball.Runtime.Tests
             DataManager.RemoveAllData();
         }
         
-        private void OnBootSceneLoadComplete(AsyncOperation asyncOperation)
+        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            CoroutineHelper.Instance.StartCoroutine(LoadMap());
+            CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
         
-        private IEnumerator LoadMap()
+        private IEnumerator Initialise()
         {
-            yield return new WaitUntil(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MainSceneName));
-            
-            MapDrivingSceneManager.LoadMapDrivingScene(map);
-            
-            yield return new WaitUntil(() => ChunkManager.Instance.HasLoaded);
-            yield return new WaitForEndOfFrame();
-            DecalEditor.Instance.SessionCleanup();
+            yield return PlayerCarManager.Instance.SpawnCar(Vector3.zero, Quaternion.Euler(Vector3.zero));
+            yield return MapDrivingSceneManager.SetupMapDrivingScene(map);
             
             isInitialised = true;
         }

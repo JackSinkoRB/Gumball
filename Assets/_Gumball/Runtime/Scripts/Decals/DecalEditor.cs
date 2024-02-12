@@ -173,7 +173,7 @@ namespace Gumball
             onSessionStart?.Invoke();
         }
 
-        public void EndSession(bool runCleanupInstantly = false)
+        public void EndSession()
         {
             if (!isSessionActive)
                 return;
@@ -206,12 +206,10 @@ namespace Gumball
             onSessionEnd?.Invoke();
 
             //need to wait for the texture to fully apply before removing paintable components
-            if (runCleanupInstantly)
-                SessionCleanup();
-            else disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(SessionCleanup);
+            disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(SessionCleanup);
         }
         
-        public void SessionCleanup()
+        private void SessionCleanup()
         {
             for (int i = paintableMeshes.Count - 1; i >= 0; i--)
             {
@@ -220,8 +218,11 @@ namespace Gumball
                 paintableMeshes.Remove(paintableMesh);
             }
 
-            currentCar.Rigidbody.isKinematic = false;
-            currentCar = null;
+            if (CurrentCar != null)
+            {
+                currentCar.Rigidbody.isKinematic = false;
+                currentCar = null;
+            }
         }
 
         /// <summary>
