@@ -54,19 +54,19 @@ namespace Gumball
 
         private void OnEnable()
         {
-            ChunkManager.Instance.onChunkLoad += OnChunkLoad;
+            ChunkManager.Instance.onChunkLoadedAndReady += OnChunkLoadedAndReady;
 
             InitialiseLanes();
         }
 
         private void OnDisable()
         {
-            ChunkManager.Instance.onChunkLoad -= OnChunkLoad;
+            ChunkManager.Instance.onChunkLoadedAndReady -= OnChunkLoadedAndReady;
         }
 
-        private void OnChunkLoad(Chunk loadedChunk)
+        private void OnChunkLoadedAndReady(LoadedChunkData data)
         {
-            if (loadedChunk == chunk)
+            if (data.Chunk == chunk)
                 InitialiseCars();
         }
 

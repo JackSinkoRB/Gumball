@@ -15,10 +15,10 @@ namespace Gumball
     public class ChunkManager : Singleton<ChunkManager>
     {
         
-        public event Action<Chunk> onChunkLoad;
+        public event Action<LoadedChunkData> onChunkLoadedAndReady;
         public event Action<Chunk> onChunkUnload;
         public event Action<Chunk, GameObject> onChunkObjectLoad;
-        public event Action<LoadedChunkData> onChunkBecomeAccessibleAndLoaded;
+        public event Action<LoadedChunkData> onChunkBecomeAccessible;
 
         private const float timeBetweenLoadingChecks = 0.5f;
 
@@ -30,8 +30,9 @@ namespace Gumball
         [ReadOnly, SerializeField] private MapData currentMap;
         [Tooltip("The range of chunk indexes (in terms of the map data) that are currently loaded OR in the loading process.")]
         [ReadOnly, SerializeField] private MinMaxInt loadingOrLoadedChunksIndices;
-        [Tooltip("The range of chunk indexes (in terms of the map data) that are currently loaded.")]
-        [ReadOnly, SerializeField] private MinMaxInt loadedChunksIndices;
+        [Tooltip("The range of chunk indexes (in terms of the map data) that are currently loaded and accessible for the player to reach (ie. all chunks are connecting and the player is on one).")]
+        [ReadOnly, SerializeField] private MinMaxInt accessibleChunksIndices = new(-1,-1);
+        [SerializeField, ReadOnly] private List<LoadedChunkData> chunksWaitingToBeAccessible = new();
         [ReadOnly, SerializeField] private List<LoadedChunkData> currentCustomLoadedChunks = new();
         [Tooltip("A list of the current loaded chunks, in order of map index.\nDoes NOT include custom loaded chunks.")]
         [SerializeField] private List<LoadedChunkData> currentChunks = new();
@@ -52,7 +53,7 @@ namespace Gumball
         private int lastFramePlayerChunkWasCached = -1;
         
         public bool HasLoaded { get; private set; }
-        public MinMaxInt LoadedChunksIndices => loadedChunksIndices;
+        public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
         public TrackedCoroutine DistanceLoadingCoroutine => distanceLoadingCoroutine;
         
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
@@ -82,7 +83,7 @@ namespace Gumball
         /// </summary>
         public bool IsChunkWithinLoadRadius(int chunkMapIndex)
         {
-            return chunkMapIndex >= loadedChunksIndices.Min && chunkMapIndex <= loadedChunksIndices.Max;
+            return chunkMapIndex >= accessibleChunksIndices.Min && chunkMapIndex <= accessibleChunksIndices.Max;
         }
         
         /// <summary>
@@ -104,7 +105,7 @@ namespace Gumball
             if (IsChunkWithinLoadRadius(chunk))
                 return true;
 
-            int chunkAheadIndex = loadedChunksIndices.Max + 1;
+            int chunkAheadIndex = accessibleChunksIndices.Max + 1;
             while (chunkAheadIndex <= currentChunkMapIndex)
             {
                 if (chunkAheadIndex == currentChunkMapIndex)
@@ -116,7 +117,7 @@ namespace Gumball
                 chunkAheadIndex++;
             }
             
-            int chunkBehindIndex = loadedChunksIndices.Min - 1;
+            int chunkBehindIndex = accessibleChunksIndices.Min - 1;
             while (chunkBehindIndex >= currentChunkMapIndex)
             {
                 if (chunkBehindIndex == currentChunkMapIndex)
@@ -300,15 +301,15 @@ namespace Gumball
                     chunksToUnload.Add(chunkAheadIndex);
 
                 loadingOrLoadedChunksIndices.Max--;
-                if (loadedChunksIndices.Max > loadingOrLoadedChunksIndices.Max)
-                    loadedChunksIndices.Max = loadingOrLoadedChunksIndices.Max;
+                if (accessibleChunksIndices.Max > loadingOrLoadedChunksIndices.Max)
+                    accessibleChunksIndices.Max = loadingOrLoadedChunksIndices.Max;
 
                 //check if next chunk is custom loaded, and ignore it
                 while (GetCustomLoadedChunkData(loadingOrLoadedChunksIndices.Max) != null)
                 {
                     loadingOrLoadedChunksIndices.Max--;
-                    if (loadedChunksIndices.Max > loadingOrLoadedChunksIndices.Max)
-                        loadedChunksIndices.Max = loadingOrLoadedChunksIndices.Max;
+                    if (accessibleChunksIndices.Max > loadingOrLoadedChunksIndices.Max)
+                        accessibleChunksIndices.Max = loadingOrLoadedChunksIndices.Max;
                 }
             }
             
@@ -329,15 +330,15 @@ namespace Gumball
                     chunksToUnload.Add(chunkBehindIndex);
                 
                 loadingOrLoadedChunksIndices.Min++;
-                if (loadedChunksIndices.Min < loadingOrLoadedChunksIndices.Min)
-                    loadedChunksIndices.Min = loadingOrLoadedChunksIndices.Min;
+                if (accessibleChunksIndices.Min < loadingOrLoadedChunksIndices.Min)
+                    accessibleChunksIndices.Min = loadingOrLoadedChunksIndices.Min;
                 
                 //check if next chunk is custom loaded, and ignore it
                 while (GetCustomLoadedChunkData(loadingOrLoadedChunksIndices.Min) != null)
                 {
                     loadingOrLoadedChunksIndices.Min++;
-                    if (loadedChunksIndices.Min < loadingOrLoadedChunksIndices.Min)
-                        loadedChunksIndices.Min = loadingOrLoadedChunksIndices.Min;
+                    if (accessibleChunksIndices.Min < loadingOrLoadedChunksIndices.Min)
+                        accessibleChunksIndices.Min = loadingOrLoadedChunksIndices.Min;
                 }
             }
 
@@ -374,8 +375,8 @@ namespace Gumball
             float chunkLoadDistanceSqr = currentMap.ChunkLoadDistance * currentMap.ChunkLoadDistance;
             
             Vector3 endOfChunk = direction == ChunkUtils.LoadDirection.AFTER
-                ? currentMap.GetChunkData(loadedChunksIndices.Max).SplineEndPosition
-                : currentMap.GetChunkData(loadedChunksIndices.Min).SplineStartPosition;
+                ? currentMap.GetChunkData(loadingOrLoadedChunksIndices.Max).SplineEndPosition
+                : currentMap.GetChunkData(loadingOrLoadedChunksIndices.Min).SplineStartPosition;
             
             float distanceToEndOfChunk = Vector3.SqrMagnitude(startingPosition - endOfChunk);
             while (distanceToEndOfChunk < chunkLoadDistanceSqr)
@@ -399,10 +400,7 @@ namespace Gumball
                     ChunkMapData customLoadedChunkData = currentMap.GetChunkData(indexToLoad);
                     Vector3 furthestPointOnCustomLoadedChunk = direction == ChunkUtils.LoadDirection.AFTER ? customLoadedChunkData.SplineEndPosition : customLoadedChunkData.SplineStartPosition;
                     distanceToEndOfChunk = Vector3.SqrMagnitude(startingPosition - furthestPointOnCustomLoadedChunk);
-
-                    onChunkBecomeAccessibleAndLoaded?.Invoke(customLoadedChunk.Value);
                     
-                    RegisterLoadedChunkIndex(indexToLoad);
                     RegisterLoadingOrLoadedChunkIndex(indexToLoad);
                     continue;
                 }
@@ -427,12 +425,12 @@ namespace Gumball
                 loadingOrLoadedChunksIndices.Min = index;
         }
 
-        private void RegisterLoadedChunkIndex(int index)
+        private void RegisterAccessibleChunkIndex(int index)
         {
-            if (index > loadedChunksIndices.Max)
-                loadedChunksIndices.Max = index;
-            if (index < loadedChunksIndices.Min)
-                loadedChunksIndices.Min = index;
+            if (index > accessibleChunksIndices.Max)
+                accessibleChunksIndices.Max = index;
+            if (index < accessibleChunksIndices.Min || accessibleChunksIndices.Min < 0)
+                accessibleChunksIndices.Min = index;
         }
         
         private IEnumerator LoadChunkAsync(int mapIndex, ChunkUtils.LoadDirection loadDirection)
@@ -451,9 +449,6 @@ namespace Gumball
             Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to instantiate.");
             stopwatch.Restart();
-            
-            if (mapIndex == loadedChunksIndices.Max + 1 || mapIndex == loadedChunksIndices.Min - 1)
-                RegisterLoadedChunkIndex(mapIndex);
             
             LoadedChunkData loadedChunkData = new LoadedChunkData(chunk, chunkAddressableKey, mapIndex);
 
@@ -494,9 +489,7 @@ namespace Gumball
             yield return LoadChunkObjects(chunk);
             
             stopwatch.Restart();
-            onChunkLoad?.Invoke(chunk);
-            if (CanPlayerAccessChunk(chunk))
-                onChunkBecomeAccessibleAndLoaded?.Invoke(loadedChunkData);
+            OnChunkLoadedAndReady(loadedChunkData);
 
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to invoke events.");
 
@@ -505,6 +498,46 @@ namespace Gumball
 #endif
         }
 
+        /// <summary>
+        /// Called when the chunk is completely loaded and ready (ie. terrain has been applied, chunk objects have spawned etc.).
+        /// </summary>
+        private void OnChunkLoadedAndReady(LoadedChunkData loadedChunkData)
+        {
+            //check if the chunk is now accessible, and if it has made any other chunks accessible ahead
+            GlobalLoggers.ChunkLogger.Log($"Chunk {loadedChunkData.Chunk.gameObject.name} loaded at map index {loadedChunkData.MapIndex}.");
+
+            onChunkLoadedAndReady?.Invoke(loadedChunkData);
+
+            //check if it's accessible, and load any other connected chunks waiting to be accessible:
+            bool isAccessible = false;
+            LoadedChunkData dataToUse = loadedChunkData;
+            while (dataToUse.MapIndex == accessibleChunksIndices.Max + 1 || dataToUse.MapIndex == accessibleChunksIndices.Min - 1)
+            {
+                isAccessible = true;
+                RegisterAccessibleChunkIndex(dataToUse.MapIndex);
+                onChunkBecomeAccessible?.Invoke(dataToUse);
+
+                GlobalLoggers.ChunkLogger.Log($"Chunk {loadedChunkData.Chunk.gameObject.name} became accessible at map index {loadedChunkData.MapIndex}.");
+    
+                //remove from waiting list
+                if (chunksWaitingToBeAccessible.Contains(dataToUse))
+                    chunksWaitingToBeAccessible.Remove(dataToUse);
+                
+                //check chunks ahead:
+                foreach (LoadedChunkData waitingChunk in chunksWaitingToBeAccessible)
+                {
+                    if (waitingChunk.MapIndex == accessibleChunksIndices.Max + 1 || waitingChunk.MapIndex == accessibleChunksIndices.Min - 1)
+                    {
+                        dataToUse = waitingChunk;
+                        break;
+                    }
+                }
+            }
+            
+            if (!isAccessible)
+                chunksWaitingToBeAccessible.Add(loadedChunkData);
+        }
+        
         private IEnumerator LoadChunkObjects(Chunk chunk)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();

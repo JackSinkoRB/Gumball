@@ -35,12 +35,12 @@ namespace Gumball
 
             chunk = transform.parent.GetComponent<Chunk>();
             
-            ChunkManager.Instance.onChunkBecomeAccessibleAndLoaded += OnChunkBecomeAccessibleAndLoaded;
+            ChunkManager.Instance.onChunkBecomeAccessible += OnChunkBecomeAccessible;
         }
 
         private void OnDisable()
         {
-            ChunkManager.Instance.onChunkBecomeAccessibleAndLoaded -= OnChunkBecomeAccessibleAndLoaded;
+            ChunkManager.Instance.onChunkBecomeAccessible -= OnChunkBecomeAccessible;
         }
 
         public void TrackPoleInChunk(Powerpole pole)
@@ -58,7 +58,7 @@ namespace Gumball
             polesInGroup.Add(pole);
         }
         
-        private void OnChunkBecomeAccessibleAndLoaded(LoadedChunkData loadedChunkData)
+        private void OnChunkBecomeAccessible(LoadedChunkData loadedChunkData)
         {
             if (chunk != loadedChunkData.Chunk)
                 return;

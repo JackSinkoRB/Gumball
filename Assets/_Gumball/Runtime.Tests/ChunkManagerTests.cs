@@ -132,7 +132,7 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
             
-            Assert.AreEqual(new MinMaxInt(0, 5), ChunkManager.Instance.LoadedChunksIndices);
+            Assert.AreEqual(new MinMaxInt(0, 5), ChunkManager.Instance.AccessibleChunksIndices);
         }
         
         [UnityTest]
@@ -152,7 +152,7 @@ namespace Gumball.Runtime.Tests
             Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
             Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkPlayerIsOn));
             
-            Assert.AreEqual(new MinMaxInt(1, 10), ChunkManager.Instance.LoadedChunksIndices);
+            Assert.AreEqual(new MinMaxInt(1, 10), ChunkManager.Instance.AccessibleChunksIndices);
 
             Assert.AreEqual(9, ChunkManager.Instance.CurrentChunks.Count);
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
