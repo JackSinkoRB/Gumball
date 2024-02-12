@@ -211,10 +211,8 @@ namespace Gumball
 
         public void DoLoadingCheck(bool force = false)
         {
-            GlobalLoggers.ChunkLogger.Log("Doing loading check 1");
             if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
                 return;
-            GlobalLoggers.ChunkLogger.Log("Doing loading check 2");
 
             if (distanceLoadingCoroutine.IsPlaying)
             {
@@ -223,7 +221,6 @@ namespace Gumball
                 else
                     return;
             }
-            GlobalLoggers.ChunkLogger.Log("Doing loading check 3");
 
             if (!force)
             {
