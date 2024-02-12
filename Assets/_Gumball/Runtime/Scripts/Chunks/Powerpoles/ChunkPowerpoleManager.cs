@@ -106,14 +106,24 @@ namespace Gumball
 
         private void ConnectToAnotherChunk(Chunk otherChunk)
         {
+            GlobalLoggers.PowerlineLogger.Log($"Connecting {chunk.gameObject.name} ({ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunk)}) with {otherChunk.gameObject.name} ({ChunkManager.Instance.GetMapIndexOfLoadedChunk(otherChunk)})");
+
             if (otherChunk.PowerpoleManager == null)
+            {
+                GlobalLoggers.PowerlineLogger.Log("'otherChunk' is missing a PowerpoleManager.");
                 return;
+            }
 
             foreach (Powerpole.PowerpolePosition position in poles.Keys)
             {
+                GlobalLoggers.PowerlineLogger.Log($" - Checking {position.ToString()}");
+
                 if (!otherChunk.PowerpoleManager.poles.ContainsKey(position))
+                {
+                    GlobalLoggers.PowerlineLogger.Log("   - Nothing to connect with");
                     continue; //nothing to connect to
-                
+                }
+
                 List<Powerpole> polesAtPosition = poles[position];
                 List<Powerpole> otherPolesAtPosition = otherChunk.PowerpoleManager.poles[position];
 
@@ -121,6 +131,8 @@ namespace Gumball
                 Powerpole pole = polesAtPosition[0];
                 Powerpole previousPole = otherPolesAtPosition[^1];
 
+                GlobalLoggers.PowerlineLogger.Log($" - Connecting pole at {pole.ClosestSplineIndex} with pole at {previousPole.ClosestSplineIndex}");
+                
                 pole.ConnectLines(previousPole);
             }
         }
