@@ -65,7 +65,7 @@ namespace Gumball
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk GetChunkPlayerIsOn(bool force = false)
         {
-            if (lastFramePlayerChunkWasCached != fixedUpdateCount)
+            if (lastFramePlayerChunkWasCached != fixedUpdateCount || force)
             {
                 lastFramePlayerChunkWasCached = fixedUpdateCount;
                 

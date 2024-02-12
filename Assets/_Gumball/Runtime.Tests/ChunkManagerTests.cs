@@ -137,7 +137,7 @@ namespace Gumball.Runtime.Tests
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
             yield return new WaitForFixedUpdate();
 
-            Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
+            Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn(true);
             GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.Rigidbody.position}");
             Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkPlayerIsOn));
             
