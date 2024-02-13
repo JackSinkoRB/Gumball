@@ -151,7 +151,8 @@ namespace Gumball.Runtime.Tests
             GlobalLoggers.ChunkLogger.Log($"Moving for ChunksLoadAfterMovingCar 1");
             var coroutine = CoroutineHelper.Instance.StartCoroutine(MoveAndLoadAroundPosition(new Vector3(0, 5, 710)));
             yield return coroutine;
-            GlobalLoggers.ChunkLogger.Log($"Coroutine is still running? = {(coroutine == null)} - IsLoadingChunks? {ChunkManager.Instance.IsLoadingChunks}");
+            GlobalLoggers.ChunkLogger.Log($"Coroutine is still running? = {(coroutine != null)} - IsLoadingChunks? {ChunkManager.Instance.IsLoadingChunks}");
+            yield return new WaitUntil(() => !ChunkManager.Instance.IsLoadingChunks);
             Assert.IsTrue(ChunkManager.ExistsRuntime);
 
             GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");

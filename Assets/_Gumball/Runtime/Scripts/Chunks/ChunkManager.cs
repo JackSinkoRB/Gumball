@@ -176,30 +176,35 @@ namespace Gumball
             IsLoadingChunks = true; //ensure only 1 loading check at a time
             GlobalLoggers.ChunkLogger.Log($"Doing loading check 5 - {position}");
             
-            //TrackedCoroutine firstChunk = null;
+            TrackedCoroutine firstChunk = null;
             bool firstChunkNeedsLoading = loadingOrLoadedChunksIndices.Min == 0 && loadingOrLoadedChunksIndices.Max == 0;
             if (firstChunkNeedsLoading)
             {
                 //load the first chunk since none are loaded
-                yield return LoadFirstChunk();
+                firstChunk = new TrackedCoroutine(LoadFirstChunk());
             }
             
             GlobalLoggers.ChunkLogger.Log($"Doing loading check 6 - including first chunk? {firstChunkNeedsLoading}");
 
-            // customChunkLoading = UpdateCustomLoadDistanceChunks(position);
-            // chunksBeforeLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
-            // chunksAfterLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
+            UpdateCustomLoadDistanceChunks(position);
+            LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
+            LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
             
             GlobalLoggers.ChunkLogger.Log($"Doing loading check 7");
-            //
-            // yield return new WaitUntil(() => (firstChunk == null || !firstChunk.IsPlaying)
-            //                                  && customChunkLoading.AreAllComplete()
-            //                                  && chunksBeforeLoading.AreAllComplete()
-            //                                  && chunksAfterLoading.AreAllComplete());
+            
+            yield return new WaitUntil(() =>
+            {
+                if (timeSinceLastMessage > 1)
+                {
+                    timeOfLastMessage = Time.realtimeSinceStartup;
+                    GlobalLoggers.ChunkLogger.Log($"Loading check running coroutine");
+                }
 
-            yield return UpdateCustomLoadDistanceChunks(position);
-            yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
-            yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
+                return (firstChunk == null || !firstChunk.IsPlaying)
+                       && customChunkLoading.AreAllComplete()
+                       && chunksBeforeLoading.AreAllComplete()
+                       && chunksAfterLoading.AreAllComplete();
+            });
             
             GlobalLoggers.ChunkLogger.Log($"Loading check completed!");
 
@@ -211,6 +216,9 @@ namespace Gumball
             
             IsLoadingChunks = false;
         }
+
+        private float timeOfLastMessage;
+        private float timeSinceLastMessage => Time.realtimeSinceStartup - timeOfLastMessage;
         
         private IEnumerator LoadFirstChunk()
         {
@@ -220,8 +228,9 @@ namespace Gumball
                     ? ChunkUtils.LoadDirection.CUSTOM : ChunkUtils.LoadDirection.AFTER);
         }
 
-        private IEnumerator UpdateCustomLoadDistanceChunks(Vector3 position)
+        private void UpdateCustomLoadDistanceChunks(Vector3 position)
         {
+            customChunkLoading.Clear();
             
             foreach (int chunkIndexWithCustomLoadDistance in currentMap.ChunksWithCustomLoadDistance)
             {
@@ -239,7 +248,7 @@ namespace Gumball
                 if (isWithinLoadDistance && !isChunkCustomLoaded)
                 {
                     //load
-                    yield return LoadChunkAsync(chunkIndexWithCustomLoadDistance, ChunkUtils.LoadDirection.CUSTOM);
+                    customChunkLoading.Add(new TrackedCoroutine(LoadChunkAsync(chunkIndexWithCustomLoadDistance, ChunkUtils.LoadDirection.CUSTOM)));
                 }
                 if (!isWithinLoadDistance && isChunkCustomLoaded)
                 {
@@ -420,9 +429,12 @@ namespace Gumball
             return null;
         }
         
-        private IEnumerator LoadChunksInDirection(Vector3 startingPosition, ChunkUtils.LoadDirection direction)
+        private void LoadChunksInDirection(Vector3 startingPosition, ChunkUtils.LoadDirection direction)
         {
-            List<TrackedCoroutine> trackedCoroutines = new List<TrackedCoroutine>();
+            if (direction == ChunkUtils.LoadDirection.BEFORE)
+                chunksBeforeLoading.Clear();
+            if (direction == ChunkUtils.LoadDirection.AFTER)
+                chunksAfterLoading.Clear();
             
             float chunkLoadDistanceSqr = currentMap.ChunkLoadDistance * currentMap.ChunkLoadDistance;
             
@@ -441,7 +453,7 @@ namespace Gumball
                 if (indexToLoad < 0 || indexToLoad >= currentMap.RuntimeChunkAssetKeys.Length)
                 {
                     //end of map - no more chunks to load
-                    break;
+                    return;
                 }
 
                 LoadedChunkData? customLoadedChunk = GetCustomLoadedChunkData(indexToLoad);
@@ -457,14 +469,17 @@ namespace Gumball
                     continue;
                 }
 
+                if (direction == ChunkUtils.LoadDirection.BEFORE)
+                    chunksBeforeLoading.Add(new TrackedCoroutine(LoadChunkAsync(indexToLoad, direction)));
+                if (direction == ChunkUtils.LoadDirection.AFTER)
+                    chunksAfterLoading.Add(new TrackedCoroutine(LoadChunkAsync(indexToLoad, direction)));
+
                 RegisterLoadingOrLoadedChunkIndex(indexToLoad);
 
                 //update the distance
                 ChunkMapData chunkData = currentMap.GetChunkData(indexToLoad);
                 Vector3 furthestPointOnChunk = direction == ChunkUtils.LoadDirection.AFTER ? chunkData.SplineEndPosition : chunkData.SplineStartPosition;
                 distanceToEndOfChunk = Vector3.SqrMagnitude(startingPosition - furthestPointOnChunk);
-
-                yield return LoadChunkAsync(indexToLoad, direction);
             }
         }
 
