@@ -220,9 +220,8 @@ namespace Gumball
                     ? ChunkUtils.LoadDirection.CUSTOM : ChunkUtils.LoadDirection.AFTER);
         }
 
-        private List<TrackedCoroutine> UpdateCustomLoadDistanceChunks(Vector3 position)
+        private IEnumerator UpdateCustomLoadDistanceChunks(Vector3 position)
         {
-            List<TrackedCoroutine> trackedCoroutines = new List<TrackedCoroutine>();
             
             foreach (int chunkIndexWithCustomLoadDistance in currentMap.ChunksWithCustomLoadDistance)
             {
@@ -240,7 +239,7 @@ namespace Gumball
                 if (isWithinLoadDistance && !isChunkCustomLoaded)
                 {
                     //load
-                    trackedCoroutines.Add(new TrackedCoroutine(LoadChunkAsync(chunkIndexWithCustomLoadDistance, ChunkUtils.LoadDirection.CUSTOM)));
+                    yield return LoadChunkAsync(chunkIndexWithCustomLoadDistance, ChunkUtils.LoadDirection.CUSTOM);
                 }
                 if (!isWithinLoadDistance && isChunkCustomLoaded)
                 {
@@ -248,8 +247,6 @@ namespace Gumball
                     UnloadChunk(customLoadedData.Value);
                 }
             }
-
-            return trackedCoroutines;
         }
 
         private bool IsChunkWithinLoadDistance(Vector3 loadPosition, int mapIndex, ChunkUtils.LoadDirection direction)
@@ -423,7 +420,7 @@ namespace Gumball
             return null;
         }
         
-        private List<TrackedCoroutine> LoadChunksInDirection(Vector3 startingPosition, ChunkUtils.LoadDirection direction)
+        private IEnumerator LoadChunksInDirection(Vector3 startingPosition, ChunkUtils.LoadDirection direction)
         {
             List<TrackedCoroutine> trackedCoroutines = new List<TrackedCoroutine>();
             
@@ -444,7 +441,7 @@ namespace Gumball
                 if (indexToLoad < 0 || indexToLoad >= currentMap.RuntimeChunkAssetKeys.Length)
                 {
                     //end of map - no more chunks to load
-                    return trackedCoroutines;
+                    break;
                 }
 
                 LoadedChunkData? customLoadedChunk = GetCustomLoadedChunkData(indexToLoad);
@@ -460,16 +457,15 @@ namespace Gumball
                     continue;
                 }
 
-                trackedCoroutines.Add(new TrackedCoroutine(LoadChunkAsync(indexToLoad, direction)));
                 RegisterLoadingOrLoadedChunkIndex(indexToLoad);
 
                 //update the distance
                 ChunkMapData chunkData = currentMap.GetChunkData(indexToLoad);
                 Vector3 furthestPointOnChunk = direction == ChunkUtils.LoadDirection.AFTER ? chunkData.SplineEndPosition : chunkData.SplineStartPosition;
                 distanceToEndOfChunk = Vector3.SqrMagnitude(startingPosition - furthestPointOnChunk);
-            }
 
-            return trackedCoroutines;
+                yield return LoadChunkAsync(indexToLoad, direction);
+            }
         }
 
         private void RegisterLoadingOrLoadedChunkIndex(int index)
