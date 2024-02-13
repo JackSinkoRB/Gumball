@@ -130,12 +130,9 @@ namespace Gumball.Runtime.Tests
         {
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
             PlayerCarManager.Instance.CurrentCar.Teleport(position, Quaternion.Euler(Vector3.zero));
-            yield return new WaitForFixedUpdate();
 
             ChunkManager.Instance.HasLoaded = false; //don't slow down loading
             yield return ChunkManager.Instance.LoadChunksAroundPosition(position);
-            
-            GlobalLoggers.ChunkLogger.Log($"Finished loading check! {ChunkManager.Instance.IsLoadingChunks}");
             
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
             yield return new WaitForFixedUpdate();
@@ -149,18 +146,7 @@ namespace Gumball.Runtime.Tests
 
             Assert.AreEqual(1, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
             
-            GlobalLoggers.ChunkLogger.Log($"Moving for ChunksLoadAfterMovingCar 1");
-            var coroutine = CoroutineHelper.Instance.StartCoroutine(MoveAndLoadAroundPosition(new Vector3(0, 5, 710)));
-            yield return coroutine;
-            GlobalLoggers.ChunkLogger.Log($"Coroutine is still running? = {(coroutine != null)} - IsLoadingChunks? {ChunkManager.Instance.IsLoadingChunks}");
-            yield return new WaitUntil(() => !ChunkManager.Instance.IsLoadingChunks);
-            while (ChunkManager.Instance.IsLoadingChunks)
-                yield return null;
-            
-            GlobalLoggers.ChunkLogger.Log($"Coroutine is still running? = {(coroutine != null)} - IsLoadingChunks? {ChunkManager.Instance.IsLoadingChunks}");
-            Assert.IsTrue(ChunkManager.ExistsRuntime);
-
-            GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");
+            yield return MoveAndLoadAroundPosition(new Vector3(0, 5, 710));
             
             Assert.AreEqual(8, ChunkManager.Instance.CurrentChunks.Count);
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
@@ -180,10 +166,7 @@ namespace Gumball.Runtime.Tests
             //make sure the custom loaded chunk is no longer waiting to be accessible
             Assert.AreEqual(0, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
             
-            GlobalLoggers.ChunkLogger.Log($"Moving for ChunksLoadAfterMovingCar 2");
             yield return MoveAndLoadAroundPosition(map.VehicleStartingPosition);
-            
-            GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");
             
             Assert.AreEqual(6, ChunkManager.Instance.CurrentChunks.Count);
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);

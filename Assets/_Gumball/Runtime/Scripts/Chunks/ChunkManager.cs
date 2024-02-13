@@ -55,7 +55,6 @@ namespace Gumball
         public bool IsLoadingChunks { get; private set; }
         public MinMaxInt LoadingOrLoadedChunksIndices => loadingOrLoadedChunksIndices;
         public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
-        public TrackedCoroutine DistanceLoadingCoroutine => distanceLoadingCoroutine;
 
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk GetChunkPlayerIsOn()
@@ -72,7 +71,7 @@ namespace Gumball
                 else
                 {
                     //raycast down to terrain
-                    if (PlayerCarManager.Instance.CurrentCar.gameObject.scene.GetPhysicsScene().Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
+                    if (Physics.Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
                     {
                         chunkPlayerIsOnCached = hitDown.transform.parent.GetComponent<Chunk>();
                     }
@@ -138,10 +137,8 @@ namespace Gumball
             map.OnMapLoad();
 
             //load the chunks in range
-            GlobalLoggers.ChunkLogger.Log("Initial loading check!");
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(map.VehicleStartingPosition));
             yield return distanceLoadingCoroutine.Coroutine;
-            GlobalLoggers.ChunkLogger.Log("Initial loading check completed!");
 
             HasLoaded = true;
         }
@@ -163,9 +160,7 @@ namespace Gumball
             timeSinceLastLoadCheck += Time.deltaTime;
             if (timeSinceLastLoadCheck < timeBetweenLoadingChecks)
                 return;
-
-            GlobalLoggers.ChunkLogger.Log("Doing loading check 4");
-
+            
             //can perform loading check
             timeSinceLastLoadCheck = 0;
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
@@ -174,7 +169,6 @@ namespace Gumball
         public IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
             IsLoadingChunks = true;
-            GlobalLoggers.ChunkLogger.Log($"Doing loading check 5 - {position}");
             
             TrackedCoroutine firstChunk = null;
             bool firstChunkNeedsLoading = loadingOrLoadedChunksIndices.Min == 0 && loadingOrLoadedChunksIndices.Max == 0;
@@ -184,41 +178,20 @@ namespace Gumball
                 firstChunk = new TrackedCoroutine(LoadFirstChunk());
             }
             
-            GlobalLoggers.ChunkLogger.Log($"Doing loading check 6 - including first chunk? {firstChunkNeedsLoading}");
-
             UpdateCustomLoadDistanceChunks(position);
             LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
             LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
             
-            GlobalLoggers.ChunkLogger.Log($"Doing loading check 7");
-            
-            yield return new WaitUntil(() =>
-            {
-                if (timeSinceLastMessage > 1)
-                {
-                    timeOfLastMessage = Time.realtimeSinceStartup;
-                    GlobalLoggers.ChunkLogger.Log($"Loading check running coroutine - {(firstChunk == null || !firstChunk.IsPlaying)} {customChunkLoading.AreAllComplete()}({customChunkLoading.Count}) {chunksBeforeLoading.AreAllComplete()}({chunksBeforeLoading.Count}) {chunksAfterLoading.AreAllComplete()}({chunksAfterLoading.Count})");
-                }
-
-                return (firstChunk == null || !firstChunk.IsPlaying)
+            yield return new WaitUntil(() => (firstChunk == null || !firstChunk.IsPlaying)
                        && customChunkLoading.AreAllComplete()
                        && chunksBeforeLoading.AreAllComplete()
-                       && chunksAfterLoading.AreAllComplete();
-            });
+                       && chunksAfterLoading.AreAllComplete());
             
-            GlobalLoggers.ChunkLogger.Log($"Loading check completed!");
-
             UnloadChunksAroundPosition(position);
-
-            GlobalLoggers.ChunkLogger.Log($"Unloading check completed!");
-
             UpdateChunksAccessibility();
             
             IsLoadingChunks = false;
         }
-
-        private float timeOfLastMessage;
-        private float timeSinceLastMessage => Time.realtimeSinceStartup - timeOfLastMessage;
         
         private IEnumerator LoadFirstChunk()
         {
