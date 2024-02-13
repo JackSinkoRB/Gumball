@@ -125,19 +125,6 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
             Assert.AreEqual(5, ChunkManager.Instance.AccessibleChunksIndices.Max);
         }
-
-        private IEnumerator MoveAndLoadAroundPosition(Vector3 position)
-        {
-            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
-            PlayerCarManager.Instance.CurrentCar.Teleport(position, Quaternion.Euler(Vector3.zero));
-            yield return new WaitForFixedUpdate();
-            
-            ChunkManager.Instance.HasLoaded = false; //don't slow down loading
-            yield return ChunkManager.Instance.LoadChunksAroundPosition(position);
-            
-            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
-            yield return new WaitForFixedUpdate();
-        }
         
         [UnityTest]
         [Order(5)]
@@ -222,6 +209,19 @@ namespace Gumball.Runtime.Tests
             
             Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
             Assert.AreEqual(5, ChunkManager.Instance.AccessibleChunksIndices.Max);
+        }
+        
+        private IEnumerator MoveAndLoadAroundPosition(Vector3 position)
+        {
+            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
+            PlayerCarManager.Instance.CurrentCar.Teleport(position, Quaternion.Euler(Vector3.zero));
+            yield return new WaitForFixedUpdate();
+            
+            ChunkManager.Instance.HasLoaded = false; //don't slow down loading
+            yield return ChunkManager.Instance.LoadChunksAroundPosition(position);
+            
+            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
+            yield return new WaitForFixedUpdate();
         }
 
     }

@@ -333,18 +333,16 @@ namespace Gumball
         {
             foreach (LoadedChunkData loadedChunkData in currentCustomLoadedChunks)
             {
-                if (!loadedChunkData.Chunk.IsFullyLoaded)
-                {
-                    SetChunkAccessible(loadedChunkData, false);
-                    continue;
-                }
-
                 SetChunkAccessible(loadedChunkData, IsCustomChunkAccessible(loadedChunkData));
             }
         }
 
         private bool IsCustomChunkAccessible(LoadedChunkData loadedChunkData)
         {
+            bool isWithinLoadRange = loadedChunkData.MapIndex <= loadingOrLoadedChunksIndices.Max && loadedChunkData.MapIndex >= loadingOrLoadedChunksIndices.Min;
+            if (loadedChunkData.Chunk.IsFullyLoaded && isWithinLoadRange)
+                return true;
+            
             //check if it's connected ahead
             for (int index = loadingOrLoadedChunksIndices.Max + 1; index <= loadedChunkData.MapIndex; index++)
             {
