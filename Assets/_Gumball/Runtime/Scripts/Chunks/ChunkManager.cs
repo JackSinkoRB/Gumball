@@ -82,7 +82,6 @@ namespace Gumball
                     }
                     else
                     {
-                        GlobalLoggers.ChunkLogger.Log($"No hit at {PlayerCarManager.Instance.CurrentCar.transform.position}");
                         chunkPlayerIsOnCached = null;
                     }
                 }
