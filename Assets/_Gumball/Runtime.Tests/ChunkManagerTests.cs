@@ -153,6 +153,9 @@ namespace Gumball.Runtime.Tests
             yield return coroutine;
             GlobalLoggers.ChunkLogger.Log($"Coroutine is still running? = {(coroutine != null)} - IsLoadingChunks? {ChunkManager.Instance.IsLoadingChunks}");
             yield return new WaitUntil(() => !ChunkManager.Instance.IsLoadingChunks);
+            while (ChunkManager.Instance.IsLoadingChunks)
+                yield return null;
+            
             GlobalLoggers.ChunkLogger.Log($"Coroutine is still running? = {(coroutine != null)} - IsLoadingChunks? {ChunkManager.Instance.IsLoadingChunks}");
             Assert.IsTrue(ChunkManager.ExistsRuntime);
 
