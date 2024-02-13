@@ -35,12 +35,12 @@ namespace Gumball
 
             chunk = transform.parent.GetComponent<Chunk>();
             
-            ChunkManager.Instance.onChunkBecomeAccessible += OnChunkBecomeAccessible;
+            chunk.onBecomeAccessible += OnChunkBecomeAccessible;
         }
 
         private void OnDisable()
         {
-            ChunkManager.Instance.onChunkBecomeAccessible -= OnChunkBecomeAccessible;
+            chunk.onBecomeAccessible -= OnChunkBecomeAccessible;
         }
 
         public void TrackPoleInChunk(Powerpole pole)
@@ -58,21 +58,19 @@ namespace Gumball
             polesInGroup.Add(pole);
         }
         
-        private void OnChunkBecomeAccessible(LoadedChunkData loadedChunkData)
+        private void OnChunkBecomeAccessible()
         {
-            if (chunk != loadedChunkData.Chunk)
-                return;
-
             Stopwatch stopwatch = Stopwatch.StartNew();
             SortPolesByDistance();
             ConnectLinesInChunk();
-            
-            int previousChunkIndex = loadedChunkData.MapIndex - 1;
+
+            int currentIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunk);
+            int previousChunkIndex = currentIndex - 1;
             LoadedChunkData? previousChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(previousChunkIndex);
             if (previousChunk != null)
                 ConnectToAnotherChunk(previousChunk.Value.Chunk);
             
-            GlobalLoggers.LoadingLogger.Log($"Took: {stopwatch.ElapsedMilliseconds}ms to set up powerlines for {loadedChunkData.Chunk.gameObject.name}");
+            GlobalLoggers.LoadingLogger.Log($"Took: {stopwatch.ElapsedMilliseconds}ms to set up powerlines for {chunk.gameObject.name}");
         }
 
         /// <summary>

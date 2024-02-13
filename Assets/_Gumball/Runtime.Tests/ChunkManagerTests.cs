@@ -100,7 +100,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[4].Chunk.UniqueID);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[5].Chunk.UniqueID);
         }
-        
+
         [UnityTest]
         [Order(3)]
         public IEnumerator CustomLoadedChunk()
@@ -109,13 +109,18 @@ namespace Gumball.Runtime.Tests
             
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabCustomLoad.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentCustomLoadedChunks[0].Chunk.UniqueID);
+            //make sure the custom loaded chunk is waiting to be accessible
+            Assert.AreEqual(1, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
         }
         
         [UnityTest]
         [Order(4)]
-        public IEnumerator AccessibleChunksIndices()
+        public IEnumerator ChunkIndices()
         {
             yield return new WaitUntil(() => isInitialised);
+            
+            Assert.AreEqual(0, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Min);
+            Assert.AreEqual(5, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
             
             Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
             Assert.AreEqual(5, ChunkManager.Instance.AccessibleChunksIndices.Max);
@@ -141,30 +146,90 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
 
+            Assert.AreEqual(1, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
+            
             GlobalLoggers.ChunkLogger.Log($"Moving for ChunksLoadAfterMovingCar 1");
             yield return MoveAndLoadAroundPosition(new Vector3(0, 5, 710));
 
             GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");
-            Assert.AreEqual(2, ChunkManager.Instance.AccessibleChunksIndices.Min);
-            Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
             
             Assert.AreEqual(8, ChunkManager.Instance.CurrentChunks.Count);
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
             
+            Assert.AreEqual(2, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Min);
+            Assert.AreEqual(9, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
+            
+            Assert.AreEqual(2, ChunkManager.Instance.AccessibleChunksIndices.Min);
+            Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
+
             //chunk player is on:
             Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(ChunkManager.Instance.GetChunkPlayerIsOn()));
             
-            //check chunk order is correct:
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[0].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[1].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[2].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[3].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[4].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[5].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[6].Chunk.UniqueID);
-            Assert.AreEqual(TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[7].Chunk.UniqueID);
+            //check that the custom loaded chunk is the correct chunk
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabCustomLoad.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentCustomLoadedChunks[0].Chunk.UniqueID);
+            
+            //make sure the custom loaded chunk is no longer waiting to be accessible
+            Assert.AreEqual(0, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
+            
+            GlobalLoggers.ChunkLogger.Log($"Moving for ChunksLoadAfterMovingCar 2");
+            yield return MoveAndLoadAroundPosition(map.VehicleStartingPosition);
+            
+            GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");
+            
+            Assert.AreEqual(6, ChunkManager.Instance.CurrentChunks.Count);
+            Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
+            
+            Assert.AreEqual(0, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Min);
+            Assert.AreEqual(5, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
+            
+            Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
+            Assert.AreEqual(5, ChunkManager.Instance.AccessibleChunksIndices.Max);
+
+            //chunk player is on:
+            Assert.AreEqual(0, ChunkManager.Instance.GetMapIndexOfLoadedChunk(ChunkManager.Instance.GetChunkPlayerIsOn()));
         }
-        
+
+        [UnityTest]
+        [Order(6)]
+        public IEnumerator CustomLoadedChunkAccessibility()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            //ensure chunks are in correct position
+            Assert.AreEqual(6, ChunkManager.Instance.CurrentChunks.Count);
+
+            Assert.AreEqual(0, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Min);
+            Assert.AreEqual(5, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
+            
+            Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
+            Assert.AreEqual(5, ChunkManager.Instance.AccessibleChunksIndices.Max);
+            
+            Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
+            //make sure the custom loaded chunk is waiting to be accessible
+            Assert.AreEqual(1, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
+            
+            yield return MoveAndLoadAroundPosition(new Vector3(0, 5, 410));
+            
+            //not waiting anymore
+            Assert.AreEqual(0, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
+            
+            Assert.AreEqual(0, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Min);
+            Assert.AreEqual(9, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
+            
+            Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
+            Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
+            
+            yield return MoveAndLoadAroundPosition(map.VehicleStartingPosition);
+
+            //waiting again
+            Assert.AreEqual(1, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
+            
+            Assert.AreEqual(0, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Min);
+            Assert.AreEqual(5, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
+            
+            Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
+            Assert.AreEqual(5, ChunkManager.Instance.AccessibleChunksIndices.Max);
+        }
+
     }
 }

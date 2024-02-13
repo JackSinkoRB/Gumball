@@ -15,11 +15,6 @@ namespace Gumball
     public class ChunkManager : Singleton<ChunkManager>
     {
         
-        public event Action<LoadedChunkData> onChunkLoadedAndReady;
-        public event Action<Chunk> onChunkUnload;
-        public event Action<Chunk, GameObject> onChunkObjectLoad;
-        public event Action<LoadedChunkData> onChunkBecomeAccessible;
-
         private const float timeBetweenLoadingChecks = 0.5f;
 
         [Header("Settings")]
@@ -30,8 +25,7 @@ namespace Gumball
         [ReadOnly, SerializeField] private MapData currentMap;
         [Tooltip("The range of chunk indexes (in terms of the map data) that are currently loaded OR in the loading process.")]
         [ReadOnly, SerializeField] private MinMaxInt loadingOrLoadedChunksIndices;
-        [Tooltip("The range of chunk indexes (in terms of the map data) that are currently loaded and accessible for the player to reach (ie. all chunks are connecting and the player is on one).")]
-        [ReadOnly, SerializeField] private MinMaxInt accessibleChunksIndices = new(-1,-1);
+        [ReadOnly, SerializeField] private MinMaxInt accessibleChunksIndices;
         [SerializeField, ReadOnly] private List<LoadedChunkData> chunksWaitingToBeAccessible = new();
         [ReadOnly, SerializeField] private List<LoadedChunkData> currentCustomLoadedChunks = new();
         [Tooltip("A list of the current loaded chunks, in order of map index.\nDoes NOT include custom loaded chunks.")]
@@ -58,6 +52,7 @@ namespace Gumball
         private int lastFramePlayerChunkWasCached = -1;
         
         public bool HasLoaded { get; private set; }
+        public MinMaxInt LoadingOrLoadedChunksIndices => loadingOrLoadedChunksIndices;
         public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
         public TrackedCoroutine DistanceLoadingCoroutine => distanceLoadingCoroutine;
 
@@ -88,60 +83,6 @@ namespace Gumball
             }
             
             return chunkPlayerIsOnCached;
-        }
-        
-        /// <summary>
-        /// Returns whether the chunk is within the load distance radius. Can be false if the chunk is custom loaded.
-        /// </summary>
-        public bool IsChunkWithinLoadRadius(int chunkMapIndex)
-        {
-            return chunkMapIndex >= accessibleChunksIndices.Min && chunkMapIndex <= accessibleChunksIndices.Max;
-        }
-        
-        /// <summary>
-        /// Returns whether the chunk is within the load distance radius. Can be false if the chunk is custom loaded.
-        /// </summary>
-        public bool IsChunkWithinLoadRadius(Chunk chunk)
-        {
-            int chunkMapIndex = GetMapIndexOfLoadedChunk(chunk);
-            return IsChunkWithinLoadRadius(chunkMapIndex);
-        }
-
-        /// <summary>
-        /// Returns whether the chunk is accessible to the player (ie. is connected with the chunks that the player is near).
-        /// </summary>
-        public bool CanPlayerAccessChunk(Chunk chunk)
-        {
-            int currentChunkMapIndex = GetMapIndexOfLoadedChunk(chunk);
-
-            if (IsChunkWithinLoadRadius(chunk))
-                return true;
-
-            int chunkAheadIndex = accessibleChunksIndices.Max + 1;
-            while (chunkAheadIndex <= currentChunkMapIndex)
-            {
-                if (chunkAheadIndex == currentChunkMapIndex)
-                    return true;
-                
-                if (GetLoadedChunkDataByMapIndex(chunkAheadIndex) == null)
-                    break;
-
-                chunkAheadIndex++;
-            }
-            
-            int chunkBehindIndex = accessibleChunksIndices.Min - 1;
-            while (chunkBehindIndex >= currentChunkMapIndex)
-            {
-                if (chunkBehindIndex == currentChunkMapIndex)
-                    return true;
-                
-                if (GetLoadedChunkDataByMapIndex(chunkBehindIndex) == null)
-                    break;
-
-                chunkBehindIndex++;
-            }
-
-            return false;
         }
 
         public LoadedChunkData? GetLoadedChunkDataByMapIndex(int chunkMapIndex)
@@ -266,9 +207,11 @@ namespace Gumball
             GlobalLoggers.ChunkLogger.Log($"Loading check completed!");
 
             UnloadChunksAroundPosition(position);
-            
+
             GlobalLoggers.ChunkLogger.Log($"Unloading check completed!");
 
+            UpdateChunksAccessibility();
+            
             IsDoingLoadingCheck = false;
         }
 
@@ -326,81 +269,163 @@ namespace Gumball
             return trackedCoroutines;
         }
 
+        private bool IsChunkWithinLoadDistance(Vector3 loadPosition, int mapIndex, ChunkUtils.LoadDirection direction)
+        {
+            float chunkLoadDistanceSqr = currentMap.ChunkLoadDistance * currentMap.ChunkLoadDistance;
+            
+            ChunkMapData chunkData = currentMap.GetChunkData(mapIndex);
+            Vector3 chunkPosition = direction == ChunkUtils.LoadDirection.AFTER ? chunkData.SplineStartPosition : chunkData.SplineEndPosition;
+            
+            float distanceToChunk = Vector3.SqrMagnitude(loadPosition - chunkPosition);
+            return distanceToChunk <= chunkLoadDistanceSqr;
+        }
+
         private void UnloadChunksAroundPosition(Vector3 position)
         {
-            List<int> chunksToUnload = new List<int>();
-            float chunkLoadDistanceSqr = currentMap.ChunkLoadDistance * currentMap.ChunkLoadDistance;
-
             //check to unload chunks ahead
+            bool isCustomLoadedOnEndAhead = true;
             for (int chunkAheadIndex = loadingOrLoadedChunksIndices.Max; chunkAheadIndex >= loadingOrLoadedChunksIndices.Min; chunkAheadIndex--)
             {
-                ChunkMapData chunkData = currentMap.GetChunkData(chunkAheadIndex);
-                Vector3 chunkPosition = chunkData.SplineStartPosition;
-
-                float distanceToChunk = Vector3.SqrMagnitude(position - chunkPosition);
-                if (distanceToChunk <= chunkLoadDistanceSqr)
+                LoadedChunkData? customLoadedChunk = GetCustomLoadedChunkData(chunkAheadIndex);
+                bool isCustomLoaded = customLoadedChunk != null;
+                if (isCustomLoaded)
                 {
-                    //is good!
-                    break;
+                    if (isCustomLoadedOnEndAhead)
+                        loadingOrLoadedChunksIndices.Max--; //don't have custom loaded chunks on the end
+                    continue; //uses own unload check
+                }
+
+                isCustomLoadedOnEndAhead = false; //no longer on the end
+
+                if (IsChunkWithinLoadDistance(position, chunkAheadIndex, ChunkUtils.LoadDirection.AFTER))
+                    break; //can end here
+
+                LoadedChunkData? loadedChunkData = GetLoadedChunkDataByMapIndex(chunkAheadIndex);
+                if (loadedChunkData == null)
+                {
+                    Debug.LogWarning($"There's null chunk data within the loading range ({loadingOrLoadedChunksIndices.Min} to {loadingOrLoadedChunksIndices.Max}) at index {chunkAheadIndex}");
+                    continue;
                 }
                 
-                if (!chunkData.HasCustomLoadDistance)
-                    chunksToUnload.Add(chunkAheadIndex);
-
+                UnloadChunk(loadedChunkData.Value);
+                
                 loadingOrLoadedChunksIndices.Max--;
-                if (accessibleChunksIndices.Max > loadingOrLoadedChunksIndices.Max)
-                    accessibleChunksIndices.Max = loadingOrLoadedChunksIndices.Max;
-
-                //check if next chunk is custom loaded, and ignore it
-                while (GetCustomLoadedChunkData(loadingOrLoadedChunksIndices.Max) != null)
-                {
-                    loadingOrLoadedChunksIndices.Max--;
-                    if (accessibleChunksIndices.Max > loadingOrLoadedChunksIndices.Max)
-                        accessibleChunksIndices.Max = loadingOrLoadedChunksIndices.Max;
-                }
             }
             
             //check to unload chunks behind
+            bool isCustomLoadedOnEndBehind = true;
             for (int chunkBehindIndex = loadingOrLoadedChunksIndices.Min; chunkBehindIndex < loadingOrLoadedChunksIndices.Max; chunkBehindIndex++)
             {
-                ChunkMapData chunkData = currentMap.GetChunkData(chunkBehindIndex);
-                Vector3 chunkPosition = chunkData.SplineEndPosition;
-                
-                float distanceToChunk = Vector3.SqrMagnitude(position - chunkPosition);
-                if (distanceToChunk <= chunkLoadDistanceSqr)
+                LoadedChunkData? customLoadedChunk = GetCustomLoadedChunkData(chunkBehindIndex);
+                bool isCustomLoaded = customLoadedChunk != null;
+                if (isCustomLoaded)
                 {
-                    //is good!
-                    break;
+                    if (isCustomLoadedOnEndBehind)
+                        loadingOrLoadedChunksIndices.Min++; //don't have custom loaded chunks on the end
+                    continue; //uses own unload check
                 }
-                
-                if (!chunkData.HasCustomLoadDistance)
-                    chunksToUnload.Add(chunkBehindIndex);
-                
-                loadingOrLoadedChunksIndices.Min++;
-                if (accessibleChunksIndices.Min < loadingOrLoadedChunksIndices.Min)
-                    accessibleChunksIndices.Min = loadingOrLoadedChunksIndices.Min;
-                
-                //check if next chunk is custom loaded, and ignore it
-                while (GetCustomLoadedChunkData(loadingOrLoadedChunksIndices.Min) != null)
-                {
-                    loadingOrLoadedChunksIndices.Min++;
-                    if (accessibleChunksIndices.Min < loadingOrLoadedChunksIndices.Min)
-                        accessibleChunksIndices.Min = loadingOrLoadedChunksIndices.Min;
-                }
-            }
 
-            foreach (int indexToRemove in chunksToUnload)
-            {
-                if (currentChunks.Count == 1)
-                    break; //keep at least 1 chunk
+                isCustomLoadedOnEndBehind = false; //no longer on the end
                 
-                LoadedChunkData? chunkData = GetLoadedChunkDataByMapIndex(indexToRemove);
-                if (chunkData == null)
+                if (IsChunkWithinLoadDistance(position, chunkBehindIndex, ChunkUtils.LoadDirection.BEFORE))
+                    break; //can end here
+
+                LoadedChunkData? loadedChunkData = GetLoadedChunkDataByMapIndex(chunkBehindIndex);
+                if (loadedChunkData == null)
                 {
-                    Debug.LogError($"Trying to unload chunk at index {indexToRemove}, although it isn't loaded.");
+                    Debug.LogWarning($"There's null chunk data within the loading range ({loadingOrLoadedChunksIndices.Min} to {loadingOrLoadedChunksIndices.Max}) at index {chunkBehindIndex}");
                     continue;
                 }
-                UnloadChunk(chunkData.Value);
+                
+                UnloadChunk(loadedChunkData.Value);
+
+                loadingOrLoadedChunksIndices.Min++;
+            }
+        }
+
+        private void UpdateChunksAccessibility()
+        {
+            accessibleChunksIndices.Min = int.MaxValue;
+            accessibleChunksIndices.Max = int.MinValue;
+            
+            UpdateNormalChunksAccessibility();
+            UpdateCustomChunksAccessibility();
+        }
+        
+        private void UpdateNormalChunksAccessibility()
+        {
+            foreach (LoadedChunkData loadedChunkData in currentChunks)
+            {
+                if (!loadedChunkData.Chunk.IsFullyLoaded)
+                {
+                    SetChunkAccessible(loadedChunkData, false);
+                    continue;
+                }
+                
+                bool isWithinLoadRange = loadedChunkData.MapIndex <= loadingOrLoadedChunksIndices.Max && loadedChunkData.MapIndex >= loadingOrLoadedChunksIndices.Min;
+                SetChunkAccessible(loadedChunkData, isWithinLoadRange);
+            }
+        }
+        
+        private void UpdateCustomChunksAccessibility()
+        {
+            foreach (LoadedChunkData loadedChunkData in currentCustomLoadedChunks)
+            {
+                if (!loadedChunkData.Chunk.IsFullyLoaded)
+                {
+                    SetChunkAccessible(loadedChunkData, false);
+                    continue;
+                }
+
+                SetChunkAccessible(loadedChunkData, IsCustomChunkAccessible(loadedChunkData));
+            }
+        }
+
+        private bool IsCustomChunkAccessible(LoadedChunkData loadedChunkData)
+        {
+            //check if it's connected ahead
+            for (int index = loadingOrLoadedChunksIndices.Max + 1; index <= loadedChunkData.MapIndex; index++)
+            {
+                bool isCustomLoaded = GetCustomLoadedChunkData(index) != null;
+                if (!isCustomLoaded)
+                    break;
+
+                if (index == loadedChunkData.MapIndex)
+                    return true;
+            }
+                
+            //check if it's connected behind
+            for (int index = loadingOrLoadedChunksIndices.Min - 1; index >= loadedChunkData.MapIndex; index--)
+            {
+                bool isCustomLoaded = GetCustomLoadedChunkData(index) != null;
+                if (!isCustomLoaded)
+                    break;
+
+                if (index == loadedChunkData.MapIndex)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private void SetChunkAccessible(LoadedChunkData loadedChunkData, bool accessible)
+        {
+            if (accessible)
+            {
+                RegisterAccessibleChunkIndex(loadedChunkData.MapIndex);
+                
+                if (!loadedChunkData.Chunk.IsAccessible)
+                {
+                    //becoming accessible
+                    loadedChunkData.Chunk.OnBecomeAccessible();
+                    chunksWaitingToBeAccessible.Remove(loadedChunkData);
+                }
+            }
+            else if (loadedChunkData.Chunk.IsAccessible)
+            {
+                //becoming inaccessible
+                loadedChunkData.Chunk.OnBecomeInaccessible();
+                chunksWaitingToBeAccessible.Add(loadedChunkData);
             }
         }
 
@@ -476,7 +501,7 @@ namespace Gumball
         {
             if (index > accessibleChunksIndices.Max)
                 accessibleChunksIndices.Max = index;
-            if (index < accessibleChunksIndices.Min || accessibleChunksIndices.Min < 0)
+            if (index < accessibleChunksIndices.Min)
                 accessibleChunksIndices.Min = index;
         }
         
@@ -498,7 +523,7 @@ namespace Gumball
             stopwatch.Restart();
             
             LoadedChunkData loadedChunkData = new LoadedChunkData(chunk, chunkAddressableKey, mapIndex);
-
+            
             if (loadDirection == ChunkUtils.LoadDirection.CUSTOM)
             {
                 currentCustomLoadedChunks.Add(loadedChunkData);
@@ -506,6 +531,8 @@ namespace Gumball
             {
                 currentChunks.Add(loadedChunkData);
             }
+            
+            chunksWaitingToBeAccessible.Add(loadedChunkData);
 
             ChunkMapData chunkMapData = currentMap.GetChunkData(mapIndex);
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to get chunk data.");
@@ -553,36 +580,7 @@ namespace Gumball
             //check if the chunk is now accessible, and if it has made any other chunks accessible ahead
             GlobalLoggers.ChunkLogger.Log($"Chunk {loadedChunkData.Chunk.gameObject.name} loaded at map index {loadedChunkData.MapIndex}.");
 
-            onChunkLoadedAndReady?.Invoke(loadedChunkData);
-
-            //check if it's accessible, and load any other connected chunks waiting to be accessible:
-            bool isAccessible = false;
-            LoadedChunkData dataToUse = loadedChunkData;
-            while (dataToUse.MapIndex == accessibleChunksIndices.Max + 1 || dataToUse.MapIndex == accessibleChunksIndices.Min - 1)
-            {
-                isAccessible = true;
-                RegisterAccessibleChunkIndex(dataToUse.MapIndex);
-                onChunkBecomeAccessible?.Invoke(dataToUse);
-
-                GlobalLoggers.ChunkLogger.Log($"Chunk {loadedChunkData.Chunk.gameObject.name} became accessible at map index {loadedChunkData.MapIndex}.");
-    
-                //remove from waiting list
-                if (chunksWaitingToBeAccessible.Contains(dataToUse))
-                    chunksWaitingToBeAccessible.Remove(dataToUse);
-                
-                //check chunks ahead:
-                foreach (LoadedChunkData waitingChunk in chunksWaitingToBeAccessible)
-                {
-                    if (waitingChunk.MapIndex == accessibleChunksIndices.Max + 1 || waitingChunk.MapIndex == accessibleChunksIndices.Min - 1)
-                    {
-                        dataToUse = waitingChunk;
-                        break;
-                    }
-                }
-            }
-            
-            if (!isAccessible)
-                chunksWaitingToBeAccessible.Add(loadedChunkData);
+            loadedChunkData.Chunk.OnFullyLoaded();
         }
         
         private IEnumerator LoadChunkObjects(Chunk chunk)
@@ -637,10 +635,10 @@ namespace Gumball
         private void UnloadChunk(LoadedChunkData chunkData)
         {
             chunkData.Chunk.OnChunkUnload();
-            onChunkUnload?.Invoke(chunkData.Chunk);
             currentChunks.Remove(chunkData);
             Destroy(chunkData.Chunk.gameObject);
             currentCustomLoadedChunks.Remove(chunkData);
+            chunksWaitingToBeAccessible.Remove(chunkData);
         }
         
     }

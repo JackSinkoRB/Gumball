@@ -188,8 +188,8 @@ namespace Gumball
                 return;
             }
 #endif
-            
-            bool shouldBeFrozen = !ChunkManager.Instance.CanPlayerAccessChunk(currentChunk);
+
+            bool shouldBeFrozen = !currentChunk.IsAccessible;
             if (!isFrozen && shouldBeFrozen)
                 Freeze();
 
@@ -582,15 +582,12 @@ namespace Gumball
                     //get the next chunk
                     chunkIndex = faceForward ? chunkIndex + 1 : chunkIndex - 1;
                     
-                    if (!ChunkManager.Instance.IsChunkWithinLoadRadius(chunkIndex))
+                    LoadedChunkData? loadedChunkData = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(chunkIndex);
+                    if (loadedChunkData == null)
                     {
                         //no more loaded chunks
                         return null;
                     }
-                    
-                    LoadedChunkData? loadedChunkData = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(chunkIndex);
-                    if (loadedChunkData == null)
-                        return null;
                     
                     Chunk newChunk = loadedChunkData.Value.Chunk;
                     chunkToUse = newChunk;
