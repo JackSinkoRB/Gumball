@@ -197,9 +197,11 @@ namespace Gumball
             map.OnMapLoad();
 
             //load the chunks in range
+            GlobalLoggers.ChunkLogger.Log("Initial loading check!");
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(map.VehicleStartingPosition));
             yield return distanceLoadingCoroutine.Coroutine;
-            
+            GlobalLoggers.ChunkLogger.Log("Initial loading check completed!");
+
             HasLoaded = true;
         }
 
@@ -209,6 +211,8 @@ namespace Gumball
                 DoLoadingCheck();
         }
 
+        public bool IsDoingLoadingCheck;
+        
         public void DoLoadingCheck(bool force = false)
         {
             if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
@@ -228,6 +232,8 @@ namespace Gumball
                 if (timeSinceLastLoadCheck < timeBetweenLoadingChecks)
                     return;
             }
+
+            IsDoingLoadingCheck = true;
             GlobalLoggers.ChunkLogger.Log("Doing loading check 4");
 
             //can perform loading check
@@ -247,6 +253,8 @@ namespace Gumball
                 firstChunk = new TrackedCoroutine(LoadFirstChunk());
             }
             
+            GlobalLoggers.ChunkLogger.Log($"Doing loading check 6 - including first chunk? {firstChunkNeedsLoading}");
+
             customChunkLoading = UpdateCustomLoadDistanceChunks(position);
             chunksBeforeLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
             chunksAfterLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
@@ -261,10 +269,14 @@ namespace Gumball
             UnloadChunksAroundPosition(position);
             
             GlobalLoggers.ChunkLogger.Log($"Unloading check completed!");
+
+            IsDoingLoadingCheck = false;
         }
 
         private void CancelCurrentLoading()
         {
+            GlobalLoggers.ChunkLogger.Log($"Cancelling current loading check");
+
             distanceLoadingCoroutine.Stop(false);
             
             foreach (TrackedCoroutine trackedCoroutine in customChunkLoading)

@@ -120,27 +120,31 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
             Assert.AreEqual(5, ChunkManager.Instance.AccessibleChunksIndices.Max);
         }
+
+        private IEnumerator MoveAndLoadAroundPosition(Vector3 position)
+        {
+            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
+            PlayerCarManager.Instance.CurrentCar.Teleport(position, Quaternion.Euler(Vector3.zero));
+            yield return new WaitForFixedUpdate();
+
+            ChunkManager.Instance.DoLoadingCheck(true);
+
+            yield return new WaitUntil(() => !ChunkManager.Instance.IsDoingLoadingCheck);
+            
+            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
+            yield return new WaitForFixedUpdate();
+        }
         
         [UnityTest]
         [Order(5)]
         public IEnumerator ChunksLoadAfterMovingCar()
         {
             yield return new WaitUntil(() => isInitialised);
-            
-            const float heightOffset = 5;
-            const float zOffset = 10;
-            Vector3 startOfChunk7 = map.GetChunkData(7).Position.OffsetY(heightOffset).OffsetZ(zOffset);
-            
-            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
-            PlayerCarManager.Instance.CurrentCar.Teleport(startOfChunk7, Quaternion.Euler(Vector3.zero));
-            yield return new WaitForFixedUpdate();
 
-            ChunkManager.Instance.DoLoadingCheck(true);
-            
-            yield return ChunkManager.Instance.DistanceLoadingCoroutine.Coroutine;
-            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
-            yield return new WaitForFixedUpdate();
+            GlobalLoggers.ChunkLogger.Log($"Moving for ChunksLoadAfterMovingCar 1");
+            yield return MoveAndLoadAroundPosition(new Vector3(0, 5, 710));
 
+            GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");
             Assert.AreEqual(2, ChunkManager.Instance.AccessibleChunksIndices.Min);
             Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
             
@@ -148,10 +152,9 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
             
             //chunk player is on:
-            Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
-            GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");
-            Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkPlayerIsOn));
+            Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(ChunkManager.Instance.GetChunkPlayerIsOn()));
             
+            //check chunk order is correct:
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[0].Chunk.UniqueID);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[1].Chunk.UniqueID);
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentChunks[2].Chunk.UniqueID);
