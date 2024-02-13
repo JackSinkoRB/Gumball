@@ -43,7 +43,7 @@ namespace Gumball
         public ReadOnlyCollection<LoadedChunkData> ChunksWaitingToBeAccessible => chunksWaitingToBeAccessible.AsReadOnly();
 
         private float timeSinceLastLoadCheck;
-        private readonly TrackedCoroutine distanceLoadingCoroutine = new();
+        public readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private List<TrackedCoroutine> customChunkLoading = new();
         private List<TrackedCoroutine> chunksBeforeLoading = new();
         private List<TrackedCoroutine> chunksAfterLoading = new();
@@ -153,27 +153,18 @@ namespace Gumball
 
         public bool IsDoingLoadingCheck;
         
-        public void DoLoadingCheck(bool force = false)
+        private void DoLoadingCheck()
         {
             if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
                 return;
 
-            if (distanceLoadingCoroutine.IsPlaying)
-            {
-                if (force)
-                    CancelCurrentLoading();
-                else
-                    return;
-            }
+            if (IsDoingLoadingCheck)
+                return;
 
-            if (!force)
-            {
-                timeSinceLastLoadCheck += Time.deltaTime;
-                if (timeSinceLastLoadCheck < timeBetweenLoadingChecks)
-                    return;
-            }
+            timeSinceLastLoadCheck += Time.deltaTime;
+            if (timeSinceLastLoadCheck < timeBetweenLoadingChecks)
+                return;
 
-            IsDoingLoadingCheck = true;
             GlobalLoggers.ChunkLogger.Log("Doing loading check 4");
 
             //can perform loading check
@@ -181,8 +172,9 @@ namespace Gumball
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
         }
 
-        private IEnumerator LoadChunksAroundPosition(Vector3 position)
+        public IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
+            IsDoingLoadingCheck = true;
             GlobalLoggers.ChunkLogger.Log($"Doing loading check 5 - {position}");
             
             TrackedCoroutine firstChunk = null;
@@ -214,21 +206,7 @@ namespace Gumball
             
             IsDoingLoadingCheck = false;
         }
-
-        private void CancelCurrentLoading()
-        {
-            GlobalLoggers.ChunkLogger.Log($"Cancelling current loading check");
-
-            distanceLoadingCoroutine.Stop(false);
-            
-            foreach (TrackedCoroutine trackedCoroutine in customChunkLoading)
-                trackedCoroutine.Stop(false);
-            foreach (TrackedCoroutine trackedCoroutine in chunksBeforeLoading)
-                trackedCoroutine.Stop(false);
-            foreach (TrackedCoroutine trackedCoroutine in chunksAfterLoading)
-                trackedCoroutine.Stop(false);
-        }
-
+        
         private IEnumerator LoadFirstChunk()
         {
             loadingOrLoadedChunksIndices = new MinMaxInt(currentMap.StartingChunkIndex, currentMap.StartingChunkIndex);
