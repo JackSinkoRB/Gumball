@@ -132,6 +132,7 @@ namespace Gumball.Runtime.Tests
             PlayerCarManager.Instance.CurrentCar.Teleport(position, Quaternion.Euler(Vector3.zero));
             yield return new WaitForFixedUpdate();
 
+            ChunkManager.Instance.HasLoaded = false; //don't slow down loading
             yield return ChunkManager.Instance.LoadChunksAroundPosition(position);
             
             GlobalLoggers.ChunkLogger.Log($"Finished loading check! {ChunkManager.Instance.IsLoadingChunks}");

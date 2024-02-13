@@ -44,14 +44,14 @@ namespace Gumball
 
         private float timeSinceLastLoadCheck;
         public readonly TrackedCoroutine distanceLoadingCoroutine = new();
-        private List<TrackedCoroutine> customChunkLoading = new();
-        private List<TrackedCoroutine> chunksBeforeLoading = new();
-        private List<TrackedCoroutine> chunksAfterLoading = new();
+        private readonly List<TrackedCoroutine> customChunkLoading = new();
+        private readonly List<TrackedCoroutine> chunksBeforeLoading = new();
+        private readonly List<TrackedCoroutine> chunksAfterLoading = new();
         
         private Chunk chunkPlayerIsOnCached;
         private int lastFramePlayerChunkWasCached = -1;
-        
-        public bool HasLoaded { get; private set; }
+
+        public bool HasLoaded;
         public bool IsLoadingChunks { get; private set; }
         public MinMaxInt LoadingOrLoadedChunksIndices => loadingOrLoadedChunksIndices;
         public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
