@@ -157,7 +157,7 @@ namespace Gumball
             if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
                 return;
 
-            if (IsLoadingChunks)
+            if (IsLoadingChunks) //ensure only 1 loading check at a time
                 return;
 
             timeSinceLastLoadCheck += Time.deltaTime;
@@ -173,7 +173,7 @@ namespace Gumball
 
         public IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
-            IsLoadingChunks = true; //ensure only 1 loading check at a time
+            IsLoadingChunks = true;
             GlobalLoggers.ChunkLogger.Log($"Doing loading check 5 - {position}");
             
             TrackedCoroutine firstChunk = null;
@@ -197,7 +197,7 @@ namespace Gumball
                 if (timeSinceLastMessage > 1)
                 {
                     timeOfLastMessage = Time.realtimeSinceStartup;
-                    GlobalLoggers.ChunkLogger.Log($"Loading check running coroutine");
+                    GlobalLoggers.ChunkLogger.Log($"Loading check running coroutine - {(firstChunk == null || !firstChunk.IsPlaying)} {customChunkLoading.AreAllComplete()}({customChunkLoading.Count}) {chunksBeforeLoading.AreAllComplete()}({chunksBeforeLoading.Count}) {chunksAfterLoading.AreAllComplete()}({chunksAfterLoading.Count})");
                 }
 
                 return (firstChunk == null || !firstChunk.IsPlaying)
