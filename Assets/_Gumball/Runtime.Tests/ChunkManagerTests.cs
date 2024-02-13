@@ -135,7 +135,8 @@ namespace Gumball.Runtime.Tests
             ChunkManager.Instance.DoLoadingCheck(true);
 
             yield return new WaitUntil(() => !ChunkManager.Instance.IsDoingLoadingCheck);
-            
+            GlobalLoggers.ChunkLogger.Log($"Finished loading check! {ChunkManager.Instance.IsDoingLoadingCheck}");
+
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
             yield return new WaitForFixedUpdate();
         }
