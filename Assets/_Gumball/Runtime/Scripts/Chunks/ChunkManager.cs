@@ -176,26 +176,30 @@ namespace Gumball
             IsLoadingChunks = true; //ensure only 1 loading check at a time
             GlobalLoggers.ChunkLogger.Log($"Doing loading check 5 - {position}");
             
-            TrackedCoroutine firstChunk = null;
+            //TrackedCoroutine firstChunk = null;
             bool firstChunkNeedsLoading = loadingOrLoadedChunksIndices.Min == 0 && loadingOrLoadedChunksIndices.Max == 0;
             if (firstChunkNeedsLoading)
             {
                 //load the first chunk since none are loaded
-                firstChunk = new TrackedCoroutine(LoadFirstChunk());
+                yield return LoadFirstChunk();
             }
             
             GlobalLoggers.ChunkLogger.Log($"Doing loading check 6 - including first chunk? {firstChunkNeedsLoading}");
 
-            customChunkLoading = UpdateCustomLoadDistanceChunks(position);
-            chunksBeforeLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
-            chunksAfterLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
+            // customChunkLoading = UpdateCustomLoadDistanceChunks(position);
+            // chunksBeforeLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
+            // chunksAfterLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
             
             GlobalLoggers.ChunkLogger.Log($"Doing loading check 7");
-            
-            yield return new WaitUntil(() => (firstChunk == null || !firstChunk.IsPlaying)
-                                             && customChunkLoading.AreAllComplete()
-                                             && chunksBeforeLoading.AreAllComplete()
-                                             && chunksAfterLoading.AreAllComplete());
+            //
+            // yield return new WaitUntil(() => (firstChunk == null || !firstChunk.IsPlaying)
+            //                                  && customChunkLoading.AreAllComplete()
+            //                                  && chunksBeforeLoading.AreAllComplete()
+            //                                  && chunksAfterLoading.AreAllComplete());
+
+            yield return UpdateCustomLoadDistanceChunks(position);
+            yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
+            yield return LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
             
             GlobalLoggers.ChunkLogger.Log($"Loading check completed!");
 
