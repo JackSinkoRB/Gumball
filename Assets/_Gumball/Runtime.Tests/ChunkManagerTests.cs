@@ -134,9 +134,8 @@ namespace Gumball.Runtime.Tests
 
             yield return ChunkManager.Instance.LoadChunksAroundPosition(position);
             
-            yield return new WaitUntil(() => !ChunkManager.Instance.IsDoingLoadingCheck);
-            GlobalLoggers.ChunkLogger.Log($"Finished loading check! {ChunkManager.Instance.IsDoingLoadingCheck}");
-
+            GlobalLoggers.ChunkLogger.Log($"Finished loading check! {ChunkManager.Instance.IsLoadingChunks}");
+            
             PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
             yield return new WaitForFixedUpdate();
         }
@@ -150,7 +149,10 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(1, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
             
             GlobalLoggers.ChunkLogger.Log($"Moving for ChunksLoadAfterMovingCar 1");
-            yield return MoveAndLoadAroundPosition(new Vector3(0, 5, 710));
+            var coroutine = CoroutineHelper.Instance.StartCoroutine(MoveAndLoadAroundPosition(new Vector3(0, 5, 710)));
+            yield return coroutine;
+            GlobalLoggers.ChunkLogger.Log($"Coroutine is still running? = {(coroutine == null)} - IsLoadingChunks? {ChunkManager.Instance.IsLoadingChunks}");
+            Assert.IsTrue(ChunkManager.ExistsRuntime);
 
             GlobalLoggers.ChunkLogger.Log($"Player's position = {PlayerCarManager.Instance.CurrentCar.transform.position}");
             

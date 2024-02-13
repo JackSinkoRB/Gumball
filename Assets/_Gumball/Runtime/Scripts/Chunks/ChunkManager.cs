@@ -52,6 +52,7 @@ namespace Gumball
         private int lastFramePlayerChunkWasCached = -1;
         
         public bool HasLoaded { get; private set; }
+        public bool IsLoadingChunks { get; private set; }
         public MinMaxInt LoadingOrLoadedChunksIndices => loadingOrLoadedChunksIndices;
         public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
         public TrackedCoroutine DistanceLoadingCoroutine => distanceLoadingCoroutine;
@@ -150,15 +151,13 @@ namespace Gumball
             if (currentMap != null)
                 DoLoadingCheck();
         }
-
-        public bool IsDoingLoadingCheck;
         
         private void DoLoadingCheck()
         {
             if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
                 return;
 
-            if (IsDoingLoadingCheck)
+            if (IsLoadingChunks)
                 return;
 
             timeSinceLastLoadCheck += Time.deltaTime;
@@ -174,7 +173,7 @@ namespace Gumball
 
         public IEnumerator LoadChunksAroundPosition(Vector3 position)
         {
-            IsDoingLoadingCheck = true;
+            IsLoadingChunks = true; //ensure only 1 loading check at a time
             GlobalLoggers.ChunkLogger.Log($"Doing loading check 5 - {position}");
             
             TrackedCoroutine firstChunk = null;
@@ -191,6 +190,8 @@ namespace Gumball
             chunksBeforeLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.BEFORE);
             chunksAfterLoading = LoadChunksInDirection(position, ChunkUtils.LoadDirection.AFTER);
             
+            GlobalLoggers.ChunkLogger.Log($"Doing loading check 7");
+            
             yield return new WaitUntil(() => (firstChunk == null || !firstChunk.IsPlaying)
                                              && customChunkLoading.AreAllComplete()
                                              && chunksBeforeLoading.AreAllComplete()
@@ -204,7 +205,7 @@ namespace Gumball
 
             UpdateChunksAccessibility();
             
-            IsDoingLoadingCheck = false;
+            IsLoadingChunks = false;
         }
         
         private IEnumerator LoadFirstChunk()
