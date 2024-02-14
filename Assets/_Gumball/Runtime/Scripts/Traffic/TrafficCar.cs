@@ -14,7 +14,7 @@ namespace Gumball
     public class TrafficCar : MonoBehaviour
     {
         
-        private const float timeBetweenDelayedUpdates = 1;
+        private const float timeBetweenActivationChecks = 1;
         private const float carActivationRange = 100;
         private const float collisionRecoverDuration = 5;
         private const float blockedPathDetectorDistance = 20;
@@ -59,7 +59,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool inCollision;
         [SerializeField, ReadOnly] private bool isPathBlocked;
         [SerializeField, ReadOnly] private float distanceToBlockage;
-        
+
+        private readonly Cooldown activationCheckCooldown = new(timeBetweenActivationChecks);
         private readonly List<Collision> collisions = new();
         private float timeOfLastCollision = -Mathf.Infinity;
         private float timeSinceLastDelayedUpdate;
@@ -76,26 +77,36 @@ namespace Gumball
         {
             isInitialised = true;
             this.currentChunk = currentChunk;
-
+            
+            currentChunk.onBecomeAccessible += OnChunkBecomeAccessible;
+            currentChunk.onBecomeInaccessible += OnChunkBecomeInaccessible;
+            
             TrafficCarSpawner.TrackCar(this);
             
             //spawn at max speed
             SetMaxSpeed();
             
             gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
-            DelayedUpdate();
+            
+            ActivationRangeCheck();
         }
 
         private void OnDisable()
         {
+            if (!isInitialised)
+                return; //didn't get a chance to initialise
+            
             TrafficCarSpawner.UntrackCar(this);
+            
+            currentChunk.onBecomeAccessible -= OnChunkBecomeAccessible;
+            currentChunk.onBecomeInaccessible -= OnChunkBecomeInaccessible;
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             if (!isInitialised)
                 return;
-
+            
             if (currentChunk == null)
             {
                 //current chunk may have despawned
@@ -103,15 +114,13 @@ namespace Gumball
                 return;
             }
             
-            TryDelayedUpdate();
-        }
-
-        private void FixedUpdate()
-        {
             if (!isFrozen && !recoveringFromCollision)
             {
                 Move();
             }
+
+            if (activationCheckCooldown.IsReady)
+                ActivationRangeCheck();
             
             if (isActivated)
             {
@@ -119,12 +128,6 @@ namespace Gumball
                 if (!recoveringFromCollision && speed > 0.01f)
                     TurnFrontWheels();
             }
-        }
-
-        private void DelayedUpdate()
-        {
-            FreezeRangeCheck();
-            ActivationRangeCheck();
         }
 
         public void SetLaneDistance(float laneDistance)
@@ -178,25 +181,18 @@ namespace Gumball
             inCollision = false;
         }
 
-        private void FreezeRangeCheck()
+        private void OnChunkBecomeInaccessible()
         {
-#if UNITY_EDITOR
-            if (debug)
-            {
-                if (isFrozen)
-                    Unfreeze();
-                return;
-            }
-#endif
-
-            bool shouldBeFrozen = !currentChunk.IsAccessible;
-            if (!isFrozen && shouldBeFrozen)
-                Freeze();
-
-            if (isFrozen && !shouldBeFrozen)
-                Unfreeze();
+            Freeze();
+            ActivationRangeCheck();
         }
 
+        private void OnChunkBecomeAccessible()
+        {
+            Unfreeze();
+            ActivationRangeCheck();
+        }
+        
         private void Freeze()
         {
             isFrozen = true;
@@ -211,6 +207,8 @@ namespace Gumball
         
         private void ActivationRangeCheck()
         {
+            activationCheckCooldown.Reset();
+            
 #if UNITY_EDITOR
             if (debug)
             {
@@ -617,17 +615,6 @@ namespace Gumball
             }
         }
         
-        private void TryDelayedUpdate()
-        {
-            timeSinceLastDelayedUpdate += Time.deltaTime;
-
-            if (timeSinceLastDelayedUpdate > timeBetweenDelayedUpdates)
-            {
-                timeSinceLastDelayedUpdate = 0;
-                DelayedUpdate();
-            }
-        }
-
         private void Despawn()
         {
             OnStopMoving();
