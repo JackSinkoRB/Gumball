@@ -30,6 +30,7 @@ namespace Gumball
                 
             yield return CurrentCar.Customisation.ApplyVehicleChanges(defaultCarData);
 
+            //if chunk manager is running tests, don't apply decals
             DecalManager.ApplyDecalDataToCar(CurrentCar);
 
             onComplete?.Invoke();

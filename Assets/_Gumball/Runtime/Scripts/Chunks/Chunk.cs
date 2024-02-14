@@ -24,7 +24,10 @@ namespace Gumball
             LOW,
             HIGH
         }
-        
+
+        public event Action onFullyLoaded;
+        public event Action onBecomeAccessible;
+        public event Action onBecomeInaccessible;
         public event Action onTerrainChanged;
         public event Action onChunkUnload;
         
@@ -49,6 +52,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private GameObject terrainLowLOD;
         
         [Header("Debugging")]
+        [SerializeField] private bool isFullyLoaded;
+        [SerializeField] private bool isAccessible;
         [Tooltip("A list of child spline meshes. These are automatically assigned when the chunk asset is saved.")]
         [SerializeField, ReadOnly] private SplineMesh[] splineMeshes;
         [SerializeField, ReadOnly] private ChunkMeshData chunkMeshData;
@@ -57,6 +62,8 @@ namespace Gumball
         
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
 
+        public bool IsFullyLoaded => isFullyLoaded;
+        public bool IsAccessible => isAccessible;
         public ChunkMeshData ChunkMeshData => chunkMeshData;
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
@@ -125,6 +132,27 @@ namespace Gumball
             DoTerrainLODCheck();
         }
 
+        /// <summary>
+        /// Called once the chunk has completely loaded (ie. terrain has been applied, chunk objects have spawned etc.).
+        /// </summary>
+        public void OnFullyLoaded()
+        {
+            isFullyLoaded = true;
+            onFullyLoaded?.Invoke();
+        }
+
+        public void OnBecomeAccessible()
+        {
+            isAccessible = true;
+            onBecomeAccessible?.Invoke();
+        }
+
+        public void OnBecomeInaccessible()
+        {
+            isAccessible = false;
+            onBecomeInaccessible?.Invoke();
+        }
+        
         public void OnChunkUnload()
         {
             onChunkUnload?.Invoke();

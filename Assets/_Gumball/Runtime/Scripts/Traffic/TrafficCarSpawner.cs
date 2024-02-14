@@ -80,8 +80,8 @@ namespace Gumball
                 int random = Random.Range(0, 2);
                 bool useFirstChunk = random == 0;
                 
-                Chunk firstChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(ChunkManager.Instance.LoadedChunksIndices.Min).Value.Chunk;
-                Chunk lastChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(ChunkManager.Instance.LoadedChunksIndices.Max).Value.Chunk;
+                Chunk firstChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(ChunkManager.Instance.AccessibleChunksIndices.Min).Value.Chunk;
+                Chunk lastChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(ChunkManager.Instance.AccessibleChunksIndices.Max).Value.Chunk;
                 Chunk chunkToUse = useFirstChunk ? firstChunk : lastChunk;
                 
                 chunkToUse.TrafficManager.SpawnCarInRandomPosition(useFirstChunk ? ChunkTrafficManager.LaneDirection.FORWARD : ChunkTrafficManager.LaneDirection.BACKWARD);

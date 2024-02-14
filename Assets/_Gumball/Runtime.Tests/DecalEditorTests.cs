@@ -42,12 +42,19 @@ namespace Gumball.Runtime.Tests
         public void OneTimeTearDown()
         {
             DataManager.EnableTestProviders(false);
+            Object.DestroyImmediate(PlayerCarManager.Instance.CurrentCar);
         }
 
         [SetUp]
         public void SetUp()
         {
             DataManager.RemoveAllData();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            DecalEditor.Instance.EndSession();
         }
         
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)

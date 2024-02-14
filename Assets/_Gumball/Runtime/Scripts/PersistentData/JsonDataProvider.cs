@@ -20,13 +20,6 @@ namespace Gumball
             return File.Exists(filePath);
         }
 
-        public override void RemoveFromSource()
-        {
-            base.RemoveFromSource();
-
-            File.Delete(filePath);
-        }
-
         protected override void SaveToSource()
         {
             //serialise to binary file
@@ -50,5 +43,10 @@ namespace Gumball
             currentValues = (Dictionary<string, object>)data;
         }
 
+        protected override void OnRemoveFromSource()
+        {
+            File.Delete(filePath);
+        }
+        
     }
 }

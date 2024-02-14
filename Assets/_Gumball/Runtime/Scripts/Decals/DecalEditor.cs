@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -45,9 +46,10 @@ namespace Gumball
         [SerializeField] private int numberOfRainbowColours = 50;
         
         [Header("Debugging")]
+        [SerializeField, ReadOnly] private bool isSessionActive;
         [SerializeField, ReadOnly] private LiveDecal currentSelected;
         [SerializeField, ReadOnly] private List<PaintableMesh> paintableMeshes = new();
-        
+
         public List<LiveDecal> LiveDecals => liveDecals;
         public LiveDecal CurrentSelected => currentSelected;
         public CarManager CurrentCar => currentCar;
@@ -131,6 +133,12 @@ namespace Gumball
 
         public void StartSession(CarManager car)
         {
+            if (isSessionActive)
+            {
+                Debug.LogWarning("Cannot start decal session, because one has already been started.");
+                return;
+            }
+
             PrimaryContactInput.onRelease += OnPrimaryContactReleased;
             DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
             
@@ -161,11 +169,15 @@ namespace Gumball
             //disable the car's collider temporarily
             PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(false);
             
+            isSessionActive = true;
             onSessionStart?.Invoke();
         }
 
         public void EndSession()
         {
+            if (!isSessionActive)
+                return;
+            
             GlobalLoggers.DecalsLogger.Log($"Ending session.");
 
             PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
@@ -190,9 +202,27 @@ namespace Gumball
             
             DecalStateManager.ClearHistory();
             
+            isSessionActive = false;
             onSessionEnd?.Invoke();
 
-            SessionCleanup();
+            //need to wait for the texture to fully apply before removing paintable components
+            disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(SessionCleanup);
+        }
+        
+        private void SessionCleanup()
+        {
+            for (int i = paintableMeshes.Count - 1; i >= 0; i--)
+            {
+                PaintableMesh paintableMesh = paintableMeshes[i];
+                paintableMesh.DisablePainting();
+                paintableMeshes.Remove(paintableMesh);
+            }
+
+            if (CurrentCar != null)
+            {
+                currentCar.Rigidbody.isKinematic = false;
+                currentCar = null;
+            }
         }
 
         /// <summary>
@@ -326,24 +356,7 @@ namespace Gumball
                     DeselectLiveDecal();
             }
         }
-        
-        private void SessionCleanup()
-        {
-            //need to wait for the texture to fully apply before removing paintable components
-            disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(() =>
-            {
-                for (int i = paintableMeshes.Count - 1; i >= 0; i--)
-                {
-                    PaintableMesh paintableMesh = paintableMeshes[i];
-                    paintableMesh.DisablePainting();
-                    paintableMeshes.Remove(paintableMesh);
-                }
-                
-                currentCar.Rigidbody.isKinematic = false;
-                currentCar = null;
-            });
-        }
-        
+
         private void OnBeforeSaveAllDataOnAppExit()
         {
 #if UNITY_EDITOR

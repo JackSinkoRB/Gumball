@@ -43,6 +43,12 @@ namespace Gumball
         /// </summary>
         public static void ApplyDecalDataToCar(CarManager car)
         {
+            if (!DecalEditor.ExistsRuntime)
+            {
+                Debug.LogWarning("Could not apply decals as the decal editor doesn't exist.");
+                return;
+            }
+            
             DecalEditor.Instance.StartSession(car);
             DecalEditor.Instance.EndSession();
         }
