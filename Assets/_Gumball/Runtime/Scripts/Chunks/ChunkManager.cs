@@ -468,6 +468,12 @@ namespace Gumball
                 accessibleChunksIndices.Max = index;
             if (index < accessibleChunksIndices.Min)
                 accessibleChunksIndices.Min = index;
+
+            //include custom load chunks in the loading range to keep it consistent
+            if (accessibleChunksIndices.Max > loadingOrLoadedChunksIndices.Max)
+                loadingOrLoadedChunksIndices.Max = accessibleChunksIndices.Max;
+            if (accessibleChunksIndices.Min < loadingOrLoadedChunksIndices.Min)
+                loadingOrLoadedChunksIndices.Min = accessibleChunksIndices.Min;
         }
         
         private IEnumerator LoadChunkAsync(int mapIndex, ChunkUtils.LoadDirection loadDirection)

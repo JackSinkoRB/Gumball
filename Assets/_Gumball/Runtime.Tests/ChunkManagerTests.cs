@@ -140,7 +140,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
             
             Assert.AreEqual(2, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Min);
-            Assert.AreEqual(9, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
+            Assert.AreEqual(10, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
             
             Assert.AreEqual(2, ChunkManager.Instance.AccessibleChunksIndices.Min);
             Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
@@ -194,7 +194,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(0, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
             
             Assert.AreEqual(0, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Min);
-            Assert.AreEqual(9, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
+            Assert.AreEqual(10, ChunkManager.Instance.LoadingOrLoadedChunksIndices.Max);
             
             Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
             Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
