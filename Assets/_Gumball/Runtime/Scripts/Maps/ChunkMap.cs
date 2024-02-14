@@ -15,10 +15,10 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Gumball
 {
-    [CreateAssetMenu(menuName = "Gumball/Map Data")]
-    public class MapData : ScriptableObject
+    [CreateAssetMenu(menuName = "Gumball/Chunk Map")]
+    public class ChunkMap : ScriptableObject
     {
-        
+        //ChunkMap
         [SerializeField] private int startingChunkIndex;
         [SerializeField] private Vector3 vehicleStartingPosition;
         [SerializeField] private Vector3 vehicleStartingRotation;

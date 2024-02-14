@@ -15,7 +15,7 @@ namespace Gumball
         /// <remarks>Temporary method to load the testing map. Should be replaced by the map picker UI to load a specific map.</remarks>
         public void LoadTestMapDrivingScene()
         {
-            MapDrivingSceneManager.LoadMapDrivingScene(ChunkManager.Instance.TestingMap);
+            MapDrivingSceneManager.LoadMapDrivingScene(ChunkManager.Instance.TestingChunkMap);
         }
 
         public void LoadDecalEditor()

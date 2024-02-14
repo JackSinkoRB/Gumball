@@ -9,7 +9,7 @@ namespace Gumball
     public abstract class GameSession : ScriptableObject
     {
 
-        [SerializeField] private MapData mapToUse;
+        [SerializeField] private ChunkMap chunkMapToUse;
 
     }
 }
