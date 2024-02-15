@@ -53,6 +53,9 @@ namespace Gumball
 
         public static IEnumerator SetupMapDrivingScene(ChunkMap chunkMap)
         {
+            PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(true);
+            
+            AvatarManager.Instance.HideAvatars(true);
             //freeze the car
             Rigidbody currentCarRigidbody = PlayerCarManager.Instance.CurrentCar.Rigidbody;
             currentCarRigidbody.velocity = Vector3.zero;

@@ -49,7 +49,7 @@ namespace Gumball
         private void OnValidate()
         {
             if (chunk == null)
-                chunk = transform.FindComponentInParents<Chunk>();
+                chunk = transform.GetComponentInAllParents<Chunk>();
         }
 
         private void OnEnable()

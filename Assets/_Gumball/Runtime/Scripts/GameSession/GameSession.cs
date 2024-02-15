@@ -8,8 +8,11 @@ namespace Gumball
     [Serializable]
     public abstract class GameSession : ScriptableObject
     {
+        
+        [SerializeField] private ChunkMap chunkMap;
 
-        [SerializeField] private ChunkMap chunkMapToUse;
-
+        public ChunkMap ChunkMap => chunkMap;
+        public string Type => GetType().Name.Replace("GameSession", "");
+        
     }
 }

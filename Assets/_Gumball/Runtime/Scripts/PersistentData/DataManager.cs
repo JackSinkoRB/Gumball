@@ -12,6 +12,7 @@ namespace Gumball
         public static JsonDataProvider Settings { get; private set; } = new("Settings");
         public static JsonDataProvider Cars { get; private set; } = new("Cars");
         public static JsonDataProvider Avatar { get; private set; } = new("Avatar");
+        public static JsonDataProvider GameSessions { get; private set; } = new("GameSessions");
 
         /// <summary>
         /// Enable or disable whether it reads from the test providers, or the real providers.
@@ -21,6 +22,7 @@ namespace Gumball
             Settings = new JsonDataProvider(enableTestProviders ? "Settings_Tests" : "Settings");
             Cars = new JsonDataProvider(enableTestProviders ? "Cars_Tests" : "Cars");
             Avatar = new JsonDataProvider(enableTestProviders ? "Avatar_Tests" : "Avatar");
+            GameSessions = new JsonDataProvider(enableTestProviders ? "GameSessions_Tests" : "GameSessions");
         }
         
         /// <summary>
@@ -34,6 +36,7 @@ namespace Gumball
             Settings.LoadFromSourceAsync();
             Cars.LoadFromSourceAsync();
             Avatar.LoadFromSourceAsync();
+            GameSessions.LoadFromSourceAsync();
             yield return new WaitUntil(() => Settings.IsLoaded && Cars.IsLoaded);
             onComplete?.Invoke();
         }
@@ -47,6 +50,7 @@ namespace Gumball
             Settings.LoadFromSourceSync();
             Cars.LoadFromSourceSync();
             Avatar.LoadFromSourceSync();
+            GameSessions.LoadFromSourceSync();
         }
 
         public static void RemoveAllData()
@@ -54,6 +58,7 @@ namespace Gumball
             Settings.RemoveFromSource();
             Cars.RemoveFromSource();
             Avatar.RemoveFromSource();
+            GameSessions.RemoveFromSource();
         }
         
     }
