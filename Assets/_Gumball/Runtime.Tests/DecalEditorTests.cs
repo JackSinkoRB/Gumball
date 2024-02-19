@@ -2,11 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
@@ -42,7 +39,7 @@ namespace Gumball.Runtime.Tests
         public void OneTimeTearDown()
         {
             DataManager.EnableTestProviders(false);
-            Object.DestroyImmediate(PlayerCarManager.Instance.CurrentCar);
+            Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar);
         }
 
         [SetUp]
@@ -59,7 +56,7 @@ namespace Gumball.Runtime.Tests
         
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            CoroutineHelper.Instance.StartCoroutine(PlayerCarManager.Instance.SpawnCar(
+            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(0, 0, 
                 Vector3.zero, 
                 Quaternion.Euler(Vector3.zero), 
                     () => isInitialised = true));
@@ -77,7 +74,7 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
 
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             
             Assert.AreEqual(0, DecalEditor.Instance.LiveDecals.Count);
         }
@@ -87,10 +84,10 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
 
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             DecalEditor.Instance.EndSession();
 
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(PlayerCarManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
             Assert.AreEqual(0, liveDecalData.Length);
         }
         
@@ -99,7 +96,7 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
 
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             
             //create a random decal
             DecalUICategory category = DecalManager.Instance.DecalUICategories[0];
@@ -107,7 +104,7 @@ namespace Gumball.Runtime.Tests
             
             DecalEditor.Instance.EndSession();
 
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(PlayerCarManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
         }
         
@@ -119,7 +116,7 @@ namespace Gumball.Runtime.Tests
             const int categoryToUse = 1;
             const int textureToUse = 2;
             
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             
             //create a random decal
             DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
@@ -127,7 +124,7 @@ namespace Gumball.Runtime.Tests
             
             DecalEditor.Instance.EndSession();
 
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(PlayerCarManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(categoryToUse, liveDecalData[0].CategoryIndex);
             Assert.AreEqual(textureToUse, liveDecalData[0].TextureIndex);
@@ -142,7 +139,7 @@ namespace Gumball.Runtime.Tests
             const int textureToUse = 0;
             Vector3 scaleToUse = new Vector3(1.1f, 2.2f, 3.3f);
             
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             
             //create a random decal
             DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
@@ -151,7 +148,7 @@ namespace Gumball.Runtime.Tests
             
             DecalEditor.Instance.EndSession();
 
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(PlayerCarManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(scaleToUse, liveDecalData[0].Scale.ToVector3());
         }
@@ -166,7 +163,7 @@ namespace Gumball.Runtime.Tests
             
             const float angleToUse = 30.1f;
             
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             
             //create a random decal
             DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
@@ -175,7 +172,7 @@ namespace Gumball.Runtime.Tests
             
             DecalEditor.Instance.EndSession();
 
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(PlayerCarManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(angleToUse, liveDecalData[0].Angle);
         }
@@ -191,7 +188,7 @@ namespace Gumball.Runtime.Tests
             Vector3 positionToUse = new Vector3(4.4f, 5.5f, 6.6f);
             Quaternion rotationToUse = Quaternion.Euler(new Vector3(7.7f, 8.8f, 9.9f));
             
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             
             //create a random decal
             DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
@@ -200,7 +197,7 @@ namespace Gumball.Runtime.Tests
             
             DecalEditor.Instance.EndSession();
 
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(PlayerCarManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(positionToUse, liveDecalData[0].LastKnownPosition.ToVector3());
             Assert.AreEqual(rotationToUse.eulerAngles, liveDecalData[0].LastKnownRotationEuler.ToVector3());
@@ -216,7 +213,7 @@ namespace Gumball.Runtime.Tests
             
             const int colorIndexToUse = 3;
             
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             
             //create a random decal
             DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
@@ -229,7 +226,7 @@ namespace Gumball.Runtime.Tests
             
             DecalEditor.Instance.EndSession();
 
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(PlayerCarManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(colorIndexToUse, liveDecalData[0].ColorIndex);
         }
@@ -244,7 +241,7 @@ namespace Gumball.Runtime.Tests
             const float angleToUse = 32.2f;
             const int colorIndexToUse = 6;
 
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
 
             const int categoryToUse = 0;
             const int textureToUse = 0;
@@ -263,7 +260,7 @@ namespace Gumball.Runtime.Tests
             
             DecalEditor.Instance.EndSession();
             
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
 
             LiveDecal liveDecalAfterLoading = Object.FindObjectOfType<LiveDecal>();
             Assert.AreEqual(positionToUse, liveDecalAfterLoading.transform.position);
@@ -277,7 +274,7 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
             
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             
             const int categoryToUse = 0;
             DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
@@ -307,7 +304,7 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
             
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             
             const int categoryToUse = 0;
             DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];
@@ -337,7 +334,7 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
 
-            DecalEditor.Instance.StartSession(PlayerCarManager.Instance.CurrentCar);
+            DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
 
             const int categoryToUse = 0;
             DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryToUse];

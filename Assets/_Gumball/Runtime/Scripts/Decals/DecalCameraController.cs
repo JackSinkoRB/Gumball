@@ -169,7 +169,7 @@ namespace Gumball
                 return;
 
             float actualDistance;
-            if (target == PlayerCarManager.Instance.CurrentCar.transform)
+            if (target == WarehouseManager.Instance.CurrentCar.transform)
             {
                 actualDistance = distance;
             }
@@ -177,7 +177,7 @@ namespace Gumball
             {
                 //keep the camera at the same zoomed amount
                 float distanceFromCarToTarget = Vector3.Distance(
-                    PlayerCarManager.Instance.CurrentCar.transform.position + defaultTargetOffset, 
+                    WarehouseManager.Instance.CurrentCar.transform.position + defaultTargetOffset, 
                     target.transform.position + targetOffset);
                 actualDistance = distance - distanceFromCarToTarget;
             }

@@ -14,7 +14,7 @@ namespace Gumball
 
         [SerializeField] private TextMeshProUGUI gearLabel;
 
-        private bool carExists => PlayerCarManager.ExistsRuntime && PlayerCarManager.Instance.CurrentCar != null;
+        private bool carExists => WarehouseManager.Instance.CurrentCar != null;
 
         private void LateUpdate()
         {
@@ -24,7 +24,7 @@ namespace Gumball
                 return;
             }
             
-            gearLabel.text = $"{GetGearAsUserFriendlyString(PlayerCarManager.Instance.CurrentCar.drivetrain.Gear)}";
+            gearLabel.text = $"{GetGearAsUserFriendlyString(WarehouseManager.Instance.CurrentCar.drivetrain.Gear)}";
         }
 
         private string GetGearAsUserFriendlyString(int gear)

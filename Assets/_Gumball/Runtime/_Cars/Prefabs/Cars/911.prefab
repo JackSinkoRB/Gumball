@@ -6160,9 +6160,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6836390663536110284}
   - component: {fileID: 6777725669087683204}
-  - component: {fileID: 7905591232483990507}
   - component: {fileID: 9001985661592792078}
   - component: {fileID: 8662234676856793948}
+  - component: {fileID: 1719540584431063934}
   m_Layer: 8
   m_Name: 911
   m_TagString: Untagged
@@ -6215,51 +6215,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &7905591232483990507
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6830464531487253684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a8605dddb3a61b42acf7414ab942936, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  defaultEngine: RWB_911
-  brakeLightsMaterial: {fileID: 2100000, guid: b70505c7a1b2cf843b3cd1b18c9e1abb, type: 2}
-  defaultWheelScale: 0.95
-  wheelFL: {fileID: 6827565354737759850}
-  wheelFR: {fileID: 6835906167737980218}
-  wheelRL: {fileID: 6827906603901746830}
-  wheelRR: {fileID: 6836139979067976720}
-  wheelRoots:
-  - {fileID: 2430117766345981897}
-  - {fileID: 269626837315759907}
-  - {fileID: 4710508177498996512}
-  - {fileID: 1656472018291913677}
-  wheelFrontAssetReference:
-    m_AssetGUID: 07ee20135498a58438bafb5f301db98d
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  wheelRearAssetReference:
-    m_AssetGUID: 07ee20135498a58438bafb5f301db98d
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  tyreLeftAssetReference:
-    m_AssetGUID: 4d907cf0e079cb94389c7000f6a24cfb
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  tyreRightAssetReference:
-    m_AssetGUID: 1cad980472beb1c4d929478d836deca6
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  spawnedEngine: {fileID: 0}
 --- !u!114 &9001985661592792078
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6332,16 +6287,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c43ffebacb5b8d428aab0356696744b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wheels:
-  - {fileID: 2430117766345981897}
-  - {fileID: 269626837315759907}
-  - {fileID: 4710508177498996512}
-  - {fileID: 1656472018291913677}
-  customisation: {fileID: 7905591232483990507}
   centerOfMass: {fileID: 6836209331330445120}
   colliders: {fileID: 6830272080298800554}
-  tyreCompound: 2
   inertiaFactor: 1.5
+  brakeLightsMaterial: {fileID: 0}
   brake: 0
   drivetrain: {fileID: 9001985661592792078}
   shiftSpeed: 1
@@ -6384,6 +6333,52 @@ MonoBehaviour:
   minSteerReleaseSpeed: 35
   speedForMinSteerSpeed: 250
   rigidBody: {fileID: 0}
+  wheelManager: {fileID: 1719540584431063934}
+  carIndex: 0
+  id: 0
+--- !u!114 &1719540584431063934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6830464531487253684}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac5b0c7ffda00a247be79729d2db5971, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wheels:
+  - {fileID: 2430117766345981897}
+  - {fileID: 269626837315759907}
+  - {fileID: 4710508177498996512}
+  - {fileID: 1656472018291913677}
+  frontLeftWheel: {fileID: 2430117766345981897}
+  frontRightWheel: {fileID: 269626837315759907}
+  rearLeftWheel: {fileID: 4710508177498996512}
+  rearRightWheel: {fileID: 1656472018291913677}
+  wheelFrontAssetReference:
+    m_AssetGUID: 07ee20135498a58438bafb5f301db98d
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  wheelRearAssetReference:
+    m_AssetGUID: 07ee20135498a58438bafb5f301db98d
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  tyreLeftAssetReference:
+    m_AssetGUID: 4d907cf0e079cb94389c7000f6a24cfb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  tyreRightAssetReference:
+    m_AssetGUID: 1cad980472beb1c4d929478d836deca6
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  spawnedWheels: []
+  spawnedTyres: []
 --- !u!1 &6830573702490331258
 GameObject:
   m_ObjectHideFlags: 0

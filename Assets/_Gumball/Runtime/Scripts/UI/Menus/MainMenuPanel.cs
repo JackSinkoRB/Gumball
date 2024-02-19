@@ -26,6 +26,11 @@ namespace Gumball
         {
             AvatarEditor.LoadEditor();
         }
+
+        public void LoadWarehouse()
+        {
+            WarehouseSceneManager.LoadWarehouse();
+        }
         
     }
 }

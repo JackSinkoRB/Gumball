@@ -75,8 +75,8 @@ namespace Gumball
             
             DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
 
-            if (PlayerCarManager.ExistsRuntime && PlayerCarManager.Instance.CurrentCar != null)
-                PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(false);
+            if (WarehouseManager.Instance.CurrentCar != null)
+                WarehouseManager.Instance.CurrentCar.gameObject.SetActive(false);
 
             SelectAvatar(true); //always start with driver selected
 

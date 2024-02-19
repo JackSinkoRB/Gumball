@@ -12,14 +12,12 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI speedLabel;
         [SerializeField] private float timeBetweenUpdating = 0.05f;
         
-        private bool carExists => PlayerCarManager.ExistsRuntime && PlayerCarManager.Instance.CurrentCar != null;
-
         private float timeOfLastUpdate;
         private float timeSinceLastUpdate => Time.realtimeSinceStartup - timeOfLastUpdate;
         
         private void LateUpdate()
         {
-            if (!carExists)
+            if (WarehouseManager.Instance.CurrentCar == null)
             {
                 speedLabel.text = "0";
                 return;
@@ -28,7 +26,7 @@ namespace Gumball
             if (timeSinceLastUpdate < timeBetweenUpdating)
                 return;
 
-            float speedAsKmh = Mathf.Abs(SpeedUtils.ToKmh(PlayerCarManager.Instance.CurrentCar.Speed));
+            float speedAsKmh = Mathf.Abs(SpeedUtils.ToKmh(WarehouseManager.Instance.CurrentCar.Speed));
             if (speedAsKmh < 1)
                 speedAsKmh = 0;
             

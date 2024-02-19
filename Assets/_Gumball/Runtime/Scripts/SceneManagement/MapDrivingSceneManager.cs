@@ -12,17 +12,16 @@ namespace Gumball
 
         private void OnEnable()
         {
-            this.PerformAfterTrue(() => PlayerCarManager.ExistsRuntime && PlayerCarManager.Instance.CurrentCar != null, () =>
+            this.PerformAfterTrue(() => WarehouseManager.Instance.CurrentCar != null, () =>
             {
-                OnCarChanged(PlayerCarManager.Instance.CurrentCar);
-                PlayerCarManager.Instance.onCurrentCarChanged += OnCarChanged;
+                OnCarChanged(WarehouseManager.Instance.CurrentCar);
+                WarehouseManager.Instance.onCurrentCarChanged += OnCarChanged;
             });
         }
 
         private void OnDisable()
         {
-            if (PlayerCarManager.ExistsRuntime)
-                PlayerCarManager.Instance.onCurrentCarChanged -= OnCarChanged;
+            WarehouseManager.Instance.onCurrentCarChanged -= OnCarChanged;
         }
 
         private void OnCarChanged(CarManager newCar)
@@ -53,11 +52,11 @@ namespace Gumball
 
         public static IEnumerator SetupMapDrivingScene(ChunkMap chunkMap)
         {
-            PlayerCarManager.Instance.CurrentCar.gameObject.SetActive(true);
+            WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
             
             AvatarManager.Instance.HideAvatars(true);
             //freeze the car
-            Rigidbody currentCarRigidbody = PlayerCarManager.Instance.CurrentCar.Rigidbody;
+            Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;
             currentCarRigidbody.velocity = Vector3.zero;
             currentCarRigidbody.angularVelocity = Vector3.zero;
             currentCarRigidbody.isKinematic = true;

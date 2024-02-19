@@ -21,7 +21,7 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI tractionControlLabel;
         [SerializeField] private TextMeshProUGUI stabilityControlLabel;
 
-        private CarManager currentCar => PlayerCarManager.Instance.CurrentCar;
+        private CarManager currentCar => WarehouseManager.Instance.CurrentCar;
         
         private void LateUpdate()
         {

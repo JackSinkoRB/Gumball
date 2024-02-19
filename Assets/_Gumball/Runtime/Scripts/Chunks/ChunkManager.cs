@@ -63,7 +63,7 @@ namespace Gumball
             {
                 lastFramePlayerChunkWasCached = Time.frameCount;
                 
-                if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
+                if (WarehouseManager.Instance.CurrentCar == null)
                 {
                     Debug.LogWarning("Can't get the chunk the player is in because the current car doesn't exist.");
                     chunkPlayerIsOnCached = null;
@@ -71,7 +71,7 @@ namespace Gumball
                 else
                 {
                     //raycast down to terrain
-                    if (Physics.Raycast(PlayerCarManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
+                    if (Physics.Raycast(WarehouseManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
                     {
                         chunkPlayerIsOnCached = hitDown.transform.parent.GetComponent<Chunk>();
                     }
@@ -151,7 +151,7 @@ namespace Gumball
         
         private void DoLoadingCheck()
         {
-            if (!PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
+            if (WarehouseManager.Instance.CurrentCar == null)
                 return;
 
             if (IsLoadingChunks) //ensure only 1 loading check at a time
@@ -163,7 +163,7 @@ namespace Gumball
             
             //can perform loading check
             timeSinceLastLoadCheck = 0;
-            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(PlayerCarManager.Instance.CurrentCar.transform.position));
+            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(WarehouseManager.Instance.CurrentCar.transform.position));
         }
 
         public IEnumerator LoadChunksAroundPosition(Vector3 position)

@@ -115,8 +115,8 @@ namespace Gumball
 
         private bool inReverse => Gear == 0;
 
-        public bool TractionControlOn => PlayerCarManager.Instance.CurrentCar.HasTractionControl && 
-            Mathf.Abs(slipRatio) > PlayerCarManager.Instance.CurrentCar.TractionControlSlipTrigger;
+        public bool TractionControlOn => WarehouseManager.Instance.CurrentCar.HasTractionControl && 
+                                         Mathf.Abs(slipRatio) > WarehouseManager.Instance.CurrentCar.TractionControlSlipTrigger;
 
         // Calculate engine torque for current rpm and throttle values.
         /*
@@ -325,7 +325,7 @@ namespace Gumball
                 }
             }
 
-            PlayerCarManager.Instance.CurrentCar.StabilityControlCheck();
+            WarehouseManager.Instance.CurrentCar.StabilityControlCheck();
 
             rpm = engineAngularVelo * (60.0f / (2 * Mathf.PI));
             rpm = Mathf.Clamp(rpm, minRPM, maxRPM + minRPM); //limit excess rpm

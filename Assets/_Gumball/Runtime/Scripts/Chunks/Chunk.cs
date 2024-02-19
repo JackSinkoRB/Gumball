@@ -5,9 +5,7 @@ using AYellowpaper.SerializedCollections;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
-using Object = UnityEngine.Object;
 #if UNITY_EDITOR
-using Gumball.Editor;
 using UnityEditor;
 #endif
 
@@ -327,7 +325,7 @@ namespace Gumball
 
         private void DoTerrainLODCheck()
         {
-            if (!ChunkManager.ExistsRuntime || !PlayerCarManager.ExistsRuntime || PlayerCarManager.Instance.CurrentCar == null)
+            if (!ChunkManager.ExistsRuntime || WarehouseManager.Instance.CurrentCar == null)
                 return;
             
             if (timeSinceTerrainLODCheck < secondsBetweenTerrainLODChecks)
@@ -346,7 +344,7 @@ namespace Gumball
             //if player is on the chunk, return high
             //else, check if forward or backward is closer, then get the distance to whicher is closer
 
-            Vector3 carPosition = PlayerCarManager.Instance.CurrentCar.transform.position;
+            Vector3 carPosition = WarehouseManager.Instance.CurrentCar.transform.position;
             Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
 
             float shortestDistanceSqr;

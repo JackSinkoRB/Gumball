@@ -270,7 +270,7 @@ namespace Gumball
             Graphic[] excludeRing = {DecalEditor.Instance.SelectedDecalUI.Ring};
             wasClickableUnderPointerOnPress = PrimaryContactInput.IsGraphicUnderPointer(excludeRing);
             
-            float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, PlayerCarManager.Instance.CurrentCar.transform.position);
+            float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, WarehouseManager.Instance.CurrentCar.transform.position);
             WasUnderPointerOnPress = PrimaryContactInput.IsGraphicUnderPointer(DecalEditor.Instance.SelectedDecalUI.Ring) //check if the ring is first, as it is cached
                                      || PrimaryContactInput.IsColliderUnderPointer(selectionCollider, maxRaycastDistance, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.LiveDecal));
 

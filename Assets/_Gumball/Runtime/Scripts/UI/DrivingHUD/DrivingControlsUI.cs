@@ -17,7 +17,7 @@ namespace Gumball
 
         private void OnEnable()
         {
-            PlayerCarManager.Instance.onCurrentCarChanged += OnCarChanged;
+            WarehouseManager.Instance.onCurrentCarChanged += OnCarChanged;
             Drivetrain.onGearChanged += OnGearChanged;
             SettingsManager.Instance.onGearboxSettingChanged += OnGearboxSettingChanged;
 
@@ -26,8 +26,7 @@ namespace Gumball
 
         private void OnDisable()
         {
-            if (PlayerCarManager.ExistsRuntime)
-                PlayerCarManager.Instance.onCurrentCarChanged -= OnCarChanged;
+            WarehouseManager.Instance.onCurrentCarChanged -= OnCarChanged;
             Drivetrain.onGearChanged -= OnGearChanged;
             SettingsManager.Instance.onGearboxSettingChanged -= OnGearboxSettingChanged;
         }
@@ -46,7 +45,7 @@ namespace Gumball
         
         private void OnGearChanged(int previousgear, int newgear)
         {
-            Drivetrain drivetrain = PlayerCarManager.Instance.CurrentCar.drivetrain;
+            Drivetrain drivetrain = WarehouseManager.Instance.CurrentCar.drivetrain;
             
             if (!drivetrain.automatic)
             {

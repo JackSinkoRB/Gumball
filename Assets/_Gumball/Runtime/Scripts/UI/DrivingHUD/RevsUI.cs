@@ -14,7 +14,7 @@ namespace Gumball
         [SerializeField] private MinMaxFloat minMaxNeedleRotation;
         [SerializeField] private float needleLerpSpeed = 10;
         
-        private bool carExists => PlayerCarManager.ExistsRuntime && PlayerCarManager.Instance.CurrentCar != null;
+        private bool carExists => WarehouseManager.Instance.CurrentCar != null;
 
         private void LateUpdate()
         {
@@ -24,7 +24,7 @@ namespace Gumball
                 return;
             }
 
-            Drivetrain drivetrain = PlayerCarManager.Instance.CurrentCar.drivetrain;
+            Drivetrain drivetrain = WarehouseManager.Instance.CurrentCar.drivetrain;
             float rpmAsPercent = Mathf.Clamp01(drivetrain.rpm / maxRpmDisplayed);
             UpdateNeedleAsPercent(rpmAsPercent);
         }

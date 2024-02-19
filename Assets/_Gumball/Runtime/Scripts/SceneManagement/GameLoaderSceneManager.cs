@@ -80,7 +80,7 @@ namespace Gumball
             currentStage = Stage.Loading_vehicle;
             Vector3 carStartingPosition = Vector3.zero;
             Quaternion carStartingRotation = Quaternion.Euler(Vector3.zero);
-            TrackedCoroutine carLoadCoroutine = new TrackedCoroutine(PlayerCarManager.Instance.SpawnCar(carStartingPosition, carStartingRotation));
+            TrackedCoroutine carLoadCoroutine = new TrackedCoroutine(WarehouseManager.Instance.SpawnSavedCar(carStartingPosition, carStartingRotation));
             
             currentStage = Stage.Loading_avatars;
             TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation));
@@ -117,7 +117,8 @@ namespace Gumball
                 GlobalLoggers.LoadInstanceAsync(),
                 SettingsManager.LoadInstanceAsync(),
                 DecalManager.LoadInstanceAsync(),
-                AvatarManager.LoadInstanceAsync()
+                AvatarManager.LoadInstanceAsync(),
+                WarehouseManager.LoadInstanceAsync()
             };
             return handles;
         }

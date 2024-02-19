@@ -90,11 +90,8 @@ namespace Gumball
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
 
-            CarManager car = PlayerCarManager.Instance.CurrentCar;
-            
-            //move the vehicle to the right position
-            car.Rigidbody.Move(Vector3.zero, Quaternion.Euler(Vector3.zero));
-            
+            CarManager car = WarehouseManager.Instance.CurrentCar;
+
             Instance.cameraController.gameObject.SetActive(true);
             Instance.StartSession(car);
             
@@ -167,7 +164,7 @@ namespace Gumball
             }
             
             //disable the car's collider temporarily
-            PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(false);
+            WarehouseManager.Instance.CurrentCar.Colliders.SetActive(false);
             
             isSessionActive = true;
             onSessionStart?.Invoke();
@@ -195,8 +192,7 @@ namespace Gumball
             
             liveDecals.Clear();
 
-            if (PlayerCarManager.ExistsRuntime)
-                PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
+            WarehouseManager.Instance.CurrentCar.Colliders.SetActive(true);
             
             DecalStateManager.ClearHistory();
             

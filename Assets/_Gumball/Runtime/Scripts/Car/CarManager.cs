@@ -10,17 +10,8 @@ namespace Gumball
     [RequireComponent(typeof(Drivetrain))]
     public class CarManager : MonoBehaviour
     {
-        public enum TyreCompound
-        {
-            Economy, //Low Forward & Sideways
-            Street, //Low Forward, OK Sideways
-            Sport, //OK Forward, OK Sideways
-            Drag //OK Forward, Low Sideways
-        }
-        
-        [Tooltip("Add all wheels of the car here, so brake and steering forces can be applied to them.")]
-        [SerializeField] private Wheel[] wheels;
-        [SerializeField] private CarCustomisation customisation;
+
+        private static readonly int BrakeShaderID = Shader.PropertyToID("_Brake");
 
         [Tooltip("A transform object which marks the car's center of gravity." +
                  "\nCars with a higher CoG tend to tilt more in corners." +
@@ -30,16 +21,17 @@ namespace Gumball
 
         [SerializeField] private GameObject colliders;
         
-        [SerializeField] private TyreCompound tyreCompound = TyreCompound.Street;
-
         [Tooltip("A factor applied to the car's inertia tensor." +
                  "\nUnity calculates the inertia tensor based on the car's collider shape." +
                  "\nThis factor lets you scale the tensor, in order to make the car more or less dynamic." +
                  "\nA higher inertia makes the car change direction slower, which can make it easier to respond to.")]
         [SerializeField] private float inertiaFactor = 1.5f;
 
+        [Header("Braking")]
+        [SerializeField] private Material brakeLightsMaterial;
         [ReadOnly] public float brake;
-        [HideInInspector] private float throttle;
+        
+        private float throttle;
         private float throttleInput;
 
         public float CurrentSteering { get; private set; }
@@ -118,27 +110,36 @@ namespace Gumball
         public bool HasStabilityControl => hasStabilityControl;
         public bool StabilityControlOn { get; private set; }
         public float TractionControlSlipTrigger => tractionControlSlipTrigger;
-        public bool IsBraking => brake > 0 && !isReversing; 
-        public CarCustomisation Customisation => customisation;
-        
-        public Wheel[] Wheels => wheels;
-        public Wheel FrontLeftWheel => wheels.First(w => !w.isRear && w.isLeft);
-        public Wheel FrontRightWheel => wheels.First(w => !w.isRear && !w.isLeft);
-        public Wheel RearLeftWheel => wheels.First(w => w.isRear && w.isLeft);
-        public Wheel RearRightWheel => wheels.First(w => w.isRear && !w.isLeft);
-        
+        public bool IsBraking => brake > 0 && !isReversing;
+
         // Used by SoundController to get average slip velo of all wheels for skid sounds.
         public float slipVelo
         {
             get
             {
                 float val = 0.0f;
-                foreach (Wheel w in wheels)
-                    val += w.slipVelo / wheels.Length;
+                foreach (Wheel w in wheelManager.Wheels)
+                    val += w.slipVelo / wheelManager.Wheels.Length;
                 return val;
             }
         }
 
+        [Header("New")]
+        [SerializeField] private CarWheelsManager wheelManager;
+
+        [SerializeField, ReadOnly] private int carIndex;
+        [SerializeField, ReadOnly] private int id;
+
+        public CarWheelsManager WheelManager => wheelManager;
+
+        public IEnumerator Initialise(int carIndex, int id)
+        {
+            this.carIndex = carIndex;
+            this.id = id;
+            
+            yield return wheelManager.Initialise();
+        }
+        
         private void OnEnable()
         {
             SettingsManager.Instance.onGearboxSettingChanged += OnGearboxSettingChanged;
@@ -156,7 +157,7 @@ namespace Gumball
                 rigidBody.centerOfMass = centerOfMass.localPosition;
 
             rigidBody.inertiaTensor *= inertiaFactor;
-            foreach (Wheel wheel in wheels)
+            foreach (Wheel wheel in wheelManager.Wheels)
             {
                 wheel.manager = this;
             }
@@ -182,8 +183,8 @@ namespace Gumball
         /// <returns>2 float values that add up to 1.</returns>
         public (float, float) GetSlipPercentage(bool isRear)
         {
-            Wheel leftWheel = isRear ? RearLeftWheel : FrontLeftWheel;
-            Wheel rightWheel = isRear ? RearRightWheel : FrontRightWheel;
+            Wheel leftWheel = isRear ? wheelManager.RearLeftWheel : wheelManager.FrontLeftWheel;
+            Wheel rightWheel = isRear ? wheelManager.RearRightWheel : wheelManager.FrontRightWheel;
             
             float leftSlipRatio = Mathf.Abs(leftWheel.slipRatio);
             float rightSlipRatio = Mathf.Abs(rightWheel.slipRatio);
@@ -199,18 +200,18 @@ namespace Gumball
         {
             //reset values:
             StabilityControlOn = false;
-            FrontLeftWheel.stabilityControlBraking = 0;
-            FrontRightWheel.stabilityControlBraking = 0;
-            RearLeftWheel.stabilityControlBraking = 0;
-            RearRightWheel.stabilityControlBraking = 0;
+            wheelManager.FrontLeftWheel.stabilityControlBraking = 0;
+            wheelManager.FrontRightWheel.stabilityControlBraking = 0;
+            wheelManager.RearLeftWheel.stabilityControlBraking = 0;
+            wheelManager.RearRightWheel.stabilityControlBraking = 0;
             
-            if (!PlayerCarManager.Instance.CurrentCar.HasStabilityControl)
+            if (!WarehouseManager.Instance.CurrentCar.HasStabilityControl)
                 return;
             
             //get the averages:
             float frontSlipAngleAverage = 0;
             float rearSlipAngleAverage = 0;
-            foreach (Wheel wheel in wheels)
+            foreach (Wheel wheel in wheelManager.Wheels)
             {
                 if (wheel.isRear)
                 {
@@ -228,10 +229,10 @@ namespace Gumball
             bool hasOversteer = Mathf.Abs(rearSlipAngleAverage) > 0.1f && Mathf.Abs(rearSlipAngleAverage) > Mathf.Abs(frontSlipAngleAverage);
 
             //reset in case there's no under or oversteer
-            RearLeftWheel.SetDriveTorqueSlipModifier(0);
-            RearRightWheel.SetDriveTorqueSlipModifier(0);
-            FrontLeftWheel.SetDriveTorqueSlipModifier(0);
-            FrontRightWheel.SetDriveTorqueSlipModifier(0);
+            wheelManager.RearLeftWheel.SetDriveTorqueSlipModifier(0);
+            wheelManager.RearRightWheel.SetDriveTorqueSlipModifier(0);
+            wheelManager.FrontLeftWheel.SetDriveTorqueSlipModifier(0);
+            wheelManager.FrontRightWheel.SetDriveTorqueSlipModifier(0);
             
             if (hasUndersteer)
             {
@@ -248,8 +249,8 @@ namespace Gumball
         {
             StabilityControlOn = true;
 
-            Wheel leftWheel = isRear ? RearLeftWheel : FrontLeftWheel;
-            Wheel rightWheel = isRear ? RearRightWheel : FrontRightWheel;
+            Wheel leftWheel = isRear ? wheelManager.RearLeftWheel : wheelManager.FrontLeftWheel;
+            Wheel rightWheel = isRear ? wheelManager.RearRightWheel : wheelManager.FrontRightWheel;
             
             //get the slip ratios of the rear 2 wheels
             //apply brakes to front wheels depending on the percentage
@@ -348,7 +349,7 @@ namespace Gumball
             brake = Mathf.Clamp01(brake);
             throttleInput = Mathf.Clamp(throttleInput, -1, 1);
 
-            customisation.SetBrakeLights(brake > 0);
+            SetBrakeLights(brake > 0);
 
             if (InputManager.Handbrake.IsPressed || clutchIn)
             {
@@ -439,6 +440,11 @@ namespace Gumball
 
             ApplyToWheels();
         }
+        
+        private void SetBrakeLights(bool isOn)
+        {
+            brakeLightsMaterial.SetFloat(BrakeShaderID, isOn ? 1 : 0);
+        }
 
         /// <summary>
         /// Get the slip ratio of the wheel with the highest slip ratio.
@@ -446,7 +452,7 @@ namespace Gumball
         private float GetHighestSlipRatio()
         {
             float highest = 0;
-            foreach (Wheel wheel in wheels)
+            foreach (Wheel wheel in wheelManager.Wheels)
             {
                 float slipRatio = Mathf.Abs(wheel.slipRatio);
                 if (slipRatio > highest)
@@ -462,7 +468,7 @@ namespace Gumball
         {
             float highestSlipRatio = GetHighestSlipRatio();
             
-            foreach (Wheel wheel in wheels)
+            foreach (Wheel wheel in wheelManager.Wheels)
             {
                 float brakeToApply = brake;
                 

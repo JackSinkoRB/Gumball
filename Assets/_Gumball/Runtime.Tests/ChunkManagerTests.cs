@@ -55,7 +55,7 @@ namespace Gumball.Runtime.Tests
         
         private IEnumerator Initialise()
         {
-            yield return PlayerCarManager.Instance.SpawnCar(Vector3.zero, Quaternion.Euler(Vector3.zero));
+            yield return WarehouseManager.Instance.SpawnCar(0, 0, Vector3.zero, Quaternion.Euler(Vector3.zero));
             yield return MapDrivingSceneManager.SetupMapDrivingScene(ChunkMap);
             
             isInitialised = true;
@@ -213,14 +213,14 @@ namespace Gumball.Runtime.Tests
         
         private IEnumerator MoveAndLoadAroundPosition(Vector3 position)
         {
-            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
-            PlayerCarManager.Instance.CurrentCar.Teleport(position, Quaternion.Euler(Vector3.zero));
+            WarehouseManager.Instance.CurrentCar.Rigidbody.isKinematic = true;
+            WarehouseManager.Instance.CurrentCar.Teleport(position, Quaternion.Euler(Vector3.zero));
             yield return new WaitForFixedUpdate();
             
             ChunkManager.Instance.HasLoaded = false; //don't slow down loading
             yield return ChunkManager.Instance.LoadChunksAroundPosition(position);
             
-            PlayerCarManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
+            WarehouseManager.Instance.CurrentCar.Rigidbody.isKinematic = false;
             yield return new WaitForFixedUpdate();
         }
 
