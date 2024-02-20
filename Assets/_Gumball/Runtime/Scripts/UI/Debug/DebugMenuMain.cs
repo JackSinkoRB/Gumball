@@ -25,7 +25,7 @@ namespace Gumball
         
         private void LateUpdate()
         {
-            if (!PlayerCarManager.ExistsRuntime || currentCar == null)
+            if (currentCar == null)
                 return;
             
             speedLabel.text = $"{Mathf.RoundToInt(SpeedUtils.ToKmh(currentCar.Speed)).ToString()} km/h";

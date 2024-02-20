@@ -28,8 +28,7 @@ namespace Gumball
             if (currentCar != null)
                 FindWheel(currentCar);
             
-            this.PerformAfterTrue(() => PlayerCarManager.ExistsRuntime, 
-                () => WarehouseManager.Instance.onCurrentCarChanged += FindWheel);
+            WarehouseManager.Instance.onCurrentCarChanged += FindWheel;
         }
 
         private void OnDisable()
@@ -51,7 +50,7 @@ namespace Gumball
 
         private void LateUpdate()
         {
-            if (!PlayerCarManager.ExistsRuntime || currentCar == null || wheel == null)
+            if (currentCar == null || wheel == null)
                 return;
 
             nameLabel.text = $"Wheel {(isRear ? "R" : "F")}{(isLeft ? "L" : "R")}";
