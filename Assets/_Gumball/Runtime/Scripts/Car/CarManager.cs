@@ -131,7 +131,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private int id;
 
         public CarWheelsManager WheelManager => wheelManager;
-
+        public int CarIndex => carIndex;
+        public int ID => id;
+        
         public IEnumerator Initialise(int carIndex, int id)
         {
             this.carIndex = carIndex;
@@ -205,7 +207,7 @@ namespace Gumball
             wheelManager.RearLeftWheel.stabilityControlBraking = 0;
             wheelManager.RearRightWheel.stabilityControlBraking = 0;
             
-            if (!WarehouseManager.Instance.CurrentCar.HasStabilityControl)
+            if (!HasStabilityControl)
                 return;
             
             //get the averages:

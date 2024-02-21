@@ -20,7 +20,8 @@ namespace Gumball
 
         public CarManager CurrentCar { get; private set; }
         public string CurrentCarSaveKey => $"CarData.{SavedCarIndex}.{SavedCarID}";
-
+        public List<AssetReferenceGameObject> AllCars => allCars;
+        
         public int SavedCarIndex
         {
             get => DataManager.Warehouse.Get("CurrentCar.Index", 0);
@@ -32,22 +33,30 @@ namespace Gumball
             get => DataManager.Warehouse.Get("CurrentCar.ID", 0);
             private set => DataManager.Warehouse.Set("CurrentCar.ID", value);
         }
-
-        /// <summary>
-        /// Sets the car as the current/saved car.
-        /// </summary>
-        public void SelectCar(int index, int id)
+        
+        public void SetCurrentCar(CarManager car)
         {
-            SavedCarIndex = index;
-            SavedCarID = id;
+            //remove DontDestroyOnLoad() for existing cars:
+            if (CurrentCar != null)
+                CurrentCar.transform.SetParent(new GameObject("TEMP_CarDestroyer").transform);
+            
+            CurrentCar = car;
+
+            //save the values:
+            SavedCarIndex = car.CarIndex;
+            SavedCarID = car.ID;
+            
+            onCurrentCarChanged?.Invoke(car);
+            
+            DontDestroyOnLoad(car.gameObject);
         }
         
-        public IEnumerator SpawnSavedCar(Vector3 position, Quaternion rotation)
+        public IEnumerator SpawnSavedCar(Vector3 position, Quaternion rotation, Action<CarManager> onComplete = null)
         {
-            yield return SpawnCar(SavedCarIndex, SavedCarID, position, rotation);
+            yield return SpawnCar(SavedCarIndex, SavedCarID, position, rotation, onComplete);
         }
 
-        public IEnumerator SpawnCar(int index, int id, Vector3 position, Quaternion rotation, Action onComplete = null)
+        public IEnumerator SpawnCar(int index, int id, Vector3 position, Quaternion rotation, Action<CarManager> onComplete = null)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             
@@ -55,17 +64,16 @@ namespace Gumball
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
             yield return handle;
 
-            CurrentCar = Instantiate(handle.Result, position, rotation).GetComponent<CarManager>();
-            CurrentCar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-            DontDestroyOnLoad(CurrentCar.gameObject);
+            CarManager car = Instantiate(handle.Result, position, rotation).GetComponent<CarManager>();
+            car.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             
-            yield return CurrentCar.Initialise(index, id);
+            yield return car.Initialise(index, id);
             
-            DecalManager.ApplyDecalDataToCar(CurrentCar);
+            DecalManager.ApplyDecalDataToCar(car);
 
-            onComplete?.Invoke();
-            onCurrentCarChanged?.Invoke(CurrentCar);
-            
+            onComplete?.Invoke(car);
+            onCurrentCarChanged?.Invoke(car);
+
 #if ENABLE_LOGS
             Debug.Log($"Vehicle loading for {CurrentCar.name} took {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif

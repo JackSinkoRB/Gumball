@@ -164,7 +164,7 @@ namespace Gumball
             }
             
             //disable the car's collider temporarily
-            WarehouseManager.Instance.CurrentCar.Colliders.SetActive(false);
+            car.Colliders.SetActive(false);
             
             isSessionActive = true;
             onSessionStart?.Invoke();
@@ -192,7 +192,7 @@ namespace Gumball
             
             liveDecals.Clear();
 
-            WarehouseManager.Instance.CurrentCar.Colliders.SetActive(true);
+            Instance.CurrentCar.Colliders.SetActive(true);
             
             DecalStateManager.ClearHistory();
             

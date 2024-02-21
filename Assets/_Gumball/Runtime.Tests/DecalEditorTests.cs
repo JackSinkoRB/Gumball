@@ -59,7 +59,7 @@ namespace Gumball.Runtime.Tests
             CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(0, 0, 
                 Vector3.zero, 
                 Quaternion.Euler(Vector3.zero), 
-                    () => isInitialised = true));
+                    (car) => isInitialised = true));
         }
         
         [UnityTest]
