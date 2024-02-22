@@ -20,6 +20,8 @@ namespace Gumball
             LiveDecal liveDecal = Instance.liveDecalPrefab.gameObject.GetSpareOrCreate<LiveDecal>();
             DontDestroyOnLoad(liveDecal);
 
+            liveDecal.transform.SetParent(DecalEditor.Instance.CurrentCar.transform);
+            
             liveDecal.SetPriority(priority);
             liveDecal.Initialise(decalTexture,
                 Array.IndexOf(Instance.decalUICategories, category), 
@@ -41,16 +43,16 @@ namespace Gumball
         /// <summary>
         /// Loads and applies the decals from the car's save data.
         /// </summary>
-        public static void ApplyDecalDataToCar(CarManager car)
+        public static IEnumerator ApplyDecalDataToCar(CarManager car)
         {
             if (!DecalEditor.ExistsRuntime)
             {
                 Debug.LogWarning("Could not apply decals as the decal editor doesn't exist.");
-                return;
+                yield break;
             }
             
-            DecalEditor.Instance.StartSession(car);
-            DecalEditor.Instance.EndSession();
+            yield return DecalEditor.Instance.StartSession(car);
+            yield return DecalEditor.Instance.EndSession();
         }
 
         /// <summary>
@@ -98,9 +100,7 @@ namespace Gumball
         /// </summary>
         public static string GetDecalsSaveKey(CarManager car)
         {
-            //TODO - use actual car ID
-            const string carID = "0";
-            return $"Cars.{carID}.Decals";
+            return $"{car.SaveKey}.Decals";
         }
 
     }

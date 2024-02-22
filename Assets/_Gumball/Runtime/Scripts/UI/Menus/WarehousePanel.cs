@@ -10,6 +10,11 @@ namespace Gumball
 
         [SerializeField] private MagneticScroll magneticScroll;
 
+        public void OnClickBackButton()
+        {
+            MainSceneManager.LoadMainScene();
+        }
+        
         protected override void OnShow()
         {
             base.OnShow();

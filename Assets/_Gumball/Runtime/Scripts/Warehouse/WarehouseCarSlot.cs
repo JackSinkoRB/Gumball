@@ -25,6 +25,12 @@ namespace Gumball
             carManager.Teleport(transform.position, transform.rotation);
         }
 
+        public void OnSelected()
+        {
+            if (currentCar != null)
+                WarehouseManager.Instance.SetCurrentCar(currentCar);
+        }
+
         private void OnSpawnCar(CarManager car)
         {
             currentCar = car;

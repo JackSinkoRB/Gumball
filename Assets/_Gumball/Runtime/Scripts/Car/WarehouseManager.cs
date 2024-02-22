@@ -19,7 +19,6 @@ namespace Gumball
         public event CarChangedDelegate onCurrentCarChanged;
 
         public CarManager CurrentCar { get; private set; }
-        public string CurrentCarSaveKey => $"CarData.{SavedCarIndex}.{SavedCarID}";
         public List<AssetReferenceGameObject> AllCars => allCars;
         
         public int SavedCarIndex
@@ -38,7 +37,7 @@ namespace Gumball
         {
             //remove DontDestroyOnLoad() for existing cars:
             if (CurrentCar != null)
-                CurrentCar.transform.SetParent(new GameObject("TEMP_CarDestroyer").transform);
+                DontDestroyOnLoadUtils.RemoveDontDestroyOnLoad(CurrentCar.transform);
             
             CurrentCar = car;
 
@@ -48,6 +47,8 @@ namespace Gumball
             
             onCurrentCarChanged?.Invoke(car);
             
+            //set dont destroy
+            car.transform.SetParent(null);
             DontDestroyOnLoad(car.gameObject);
         }
         
@@ -69,7 +70,7 @@ namespace Gumball
             
             yield return car.Initialise(index, id);
             
-            DecalManager.ApplyDecalDataToCar(car);
+            yield return DecalManager.ApplyDecalDataToCar(car);
 
             onComplete?.Invoke(car);
             onCurrentCarChanged?.Invoke(car);

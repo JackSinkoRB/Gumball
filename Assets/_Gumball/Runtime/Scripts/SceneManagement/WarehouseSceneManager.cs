@@ -47,6 +47,7 @@ namespace Gumball
         {
             currentSelectedSlot = slot;
 
+            slot.OnSelected();
             onSelectSlot?.Invoke(slot);
         }
         

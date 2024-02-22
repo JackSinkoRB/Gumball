@@ -133,6 +133,7 @@ namespace Gumball
         public CarWheelsManager WheelManager => wheelManager;
         public int CarIndex => carIndex;
         public int ID => id;
+        public string SaveKey => $"CarData.{carIndex}.{id}";
         
         public IEnumerator Initialise(int carIndex, int id)
         {
