@@ -40,7 +40,8 @@ namespace Gumball.Runtime.Tests
         public void OneTimeTearDown()
         {
             DataManager.EnableTestProviders(false);
-            Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
+            if (WarehouseManager.Instance.CurrentCar != null)
+                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
         }
 
         [SetUp]
