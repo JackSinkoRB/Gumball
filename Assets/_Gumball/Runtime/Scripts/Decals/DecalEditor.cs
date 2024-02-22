@@ -171,7 +171,7 @@ namespace Gumball
             onSessionStart?.Invoke();
             Debug.Log("[DECAL EDITOR TEST] Spawn car 9");
 
-            yield return new WaitForEndOfFrame();
+            yield return null;
             DeselectLiveDecal(); //perform at end of frame as magnetic scroll will select it in LateUpdate()
             Debug.Log("[DECAL EDITOR TEST] Spawn car 10");
 
@@ -205,7 +205,7 @@ namespace Gumball
             DecalStateManager.ClearHistory();
 
             //need to wait for the texture to fully apply before removing paintable components
-            yield return new WaitForEndOfFrame();
+            yield return null;
             SessionCleanup();
             
             GlobalLoggers.DecalsLogger.Log($"Ended session {currentSessionTicketNumber}.");

@@ -28,19 +28,19 @@ namespace MagneticScrollUtils
             }
         }
         
-        public static Coroutine PerformAtEndOfFrame(Action action, MonoBehaviour monoToRunOn = null)
+        public static Coroutine PerformNextFrame(Action action, MonoBehaviour monoToRunOn = null)
         {
             if (action == null)
                 return null;
 
             if (monoToRunOn == null)
                 monoToRunOn = Instance;
-            return monoToRunOn.StartCoroutine(PerformAtEndOfFrameIE(action));
+            return monoToRunOn.StartCoroutine(PerformNextFrameIE(action));
         }
 
-        private static IEnumerator PerformAtEndOfFrameIE(Action action)
+        private static IEnumerator PerformNextFrameIE(Action action)
         {
-            yield return new WaitForEndOfFrame();
+            yield return null;
             action?.Invoke();
         }
 

@@ -77,8 +77,7 @@ namespace Gumball
             yield return DecalManager.ApplyDecalDataToCar(car);
 
             onComplete?.Invoke(car);
-            onCurrentCarChanged?.Invoke(car);
-
+            
 #if ENABLE_LOGS
             Debug.Log($"Vehicle loading for {CurrentCar.name} took {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif

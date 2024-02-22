@@ -509,14 +509,14 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to get chunk data.");
 
             if (HasLoaded)
-                yield return new WaitForEndOfFrame();
+                yield return null;
             stopwatch.Restart();
 
             chunkMapData.ApplyToChunk(chunk);
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to apply chunk data.");
             
             if (HasLoaded)
-                yield return new WaitForEndOfFrame();
+                yield return null;
             stopwatch.Restart();
 
             //TODO: can this just be unity_editor?
@@ -530,7 +530,7 @@ namespace Gumball
             stopwatch.Restart();
 
             if (HasLoaded)
-                yield return new WaitForEndOfFrame();
+                yield return null;
             yield return LoadChunkObjects(chunk);
             
             stopwatch.Restart();
@@ -596,7 +596,7 @@ namespace Gumball
                     if (HasLoaded && stopwatch.ElapsedMilliseconds > maxTimeAllowedPerFrameMs)
                     {
                         GlobalLoggers.LoadingLogger.Log($"Reached max for this frame, waiting until next frame.");
-                        yield return new WaitForEndOfFrame();
+                        yield return null;
                         stopwatch.Restart();
                     }
                 }
