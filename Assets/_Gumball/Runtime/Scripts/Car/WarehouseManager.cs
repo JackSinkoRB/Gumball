@@ -59,23 +59,19 @@ namespace Gumball
 
         public IEnumerator SpawnCar(int index, int id, Vector3 position, Quaternion rotation, Action<CarManager> onComplete = null)
         {
-            Debug.Log("[DECAL EDITOR TEST] Spawn car 1");
             Stopwatch stopwatch = Stopwatch.StartNew();
             
             AssetReferenceGameObject assetReference = allCars[index];
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
             yield return handle;
-            Debug.Log("[DECAL EDITOR TEST] Spawn car 2");
-
+            
             CarManager car = Instantiate(handle.Result, position, rotation).GetComponent<CarManager>();
             car.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-            Debug.Log("[DECAL EDITOR TEST] Spawn car 3");
-
+            
             yield return car.Initialise(index, id);
-            Debug.Log("[DECAL EDITOR TEST] Spawn car 4");
-
+            
             yield return DecalManager.ApplyDecalDataToCar(car);
-
+            
             onComplete?.Invoke(car);
             
 #if ENABLE_LOGS

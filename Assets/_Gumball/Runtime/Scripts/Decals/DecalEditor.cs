@@ -155,31 +155,25 @@ namespace Gumball
             liveDecals = DecalManager.CreateLiveDecalsFromData(car);
             
             GlobalLoggers.DecalsLogger.Log($"Starting session for {car.gameObject.name} with {liveDecals.Count} saved decals.");
-            Debug.Log("[DECAL EDITOR TEST] Spawn car 7");
-
+            
             paintableMeshes.Clear();
             foreach (PaintableMesh paintableMesh in car.transform.GetComponentsInAllChildren<PaintableMesh>())
             {
                 paintableMeshes.Add(paintableMesh);
                 paintableMesh.EnablePainting();
             }
-            Debug.Log("[DECAL EDITOR TEST] Spawn car 8");
-
+            
             //disable the car's collider temporarily
             car.Colliders.SetActive(false);
-
+            
             onSessionStart?.Invoke();
-            Debug.Log("[DECAL EDITOR TEST] Spawn car 9");
-
+            
             yield return null;
             DeselectLiveDecal(); //perform at end of frame as magnetic scroll will select it in LateUpdate()
-            Debug.Log("[DECAL EDITOR TEST] Spawn car 10");
-
         }
 
         public IEnumerator EndSession()
         {
-            Debug.Log("[DECAL EDITOR TEST] Spawn car 11");
             if (!isSessionActive)
                 yield break;
             
