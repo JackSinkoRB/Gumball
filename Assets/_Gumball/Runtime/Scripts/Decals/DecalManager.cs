@@ -45,12 +45,15 @@ namespace Gumball
         /// </summary>
         public static IEnumerator ApplyDecalDataToCar(CarManager car)
         {
+            Debug.Log("[DECAL EDITOR TEST] Spawn car 5");
+
             if (!DecalEditor.ExistsRuntime)
             {
                 Debug.LogWarning("Could not apply decals as the decal editor doesn't exist.");
                 yield break;
             }
-            
+            Debug.Log("[DECAL EDITOR TEST] Spawn car 6");
+
             yield return DecalEditor.Instance.StartSession(car);
             yield return DecalEditor.Instance.EndSession();
         }
