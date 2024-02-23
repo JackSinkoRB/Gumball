@@ -29,6 +29,8 @@ namespace Gumball
 
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
+
+        [SerializeField] private SplineComputer racingLine;
         
         //when map driving scene loads, load all the traffic cars (eg. a traffic manager that holds reference to all traffic cars)
 
@@ -67,6 +69,32 @@ namespace Gumball
         private void OnChunkLoadedAndReady()
         {
             InitialiseCars();
+
+            TryConnectRacingLines();
+        }
+
+        private void TryConnectRacingLines()
+        {
+            if (racingLine == null)
+                return;
+            
+            int currentMapIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunk);
+            LoadedChunkData? previousChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(currentMapIndex - 1);
+            if (previousChunk == null)
+                return;
+
+            ChunkTrafficManager previousChunkTrafficManager = previousChunk.Value.Chunk.TrafficManager;
+            if (previousChunkTrafficManager == null)
+                return;
+
+            if (previousChunkTrafficManager.racingLine == null)
+                return;
+            
+            //insert to end of previous chunks racing line a point with other chunks first point
+            previousChunkTrafficManager.racingLine.SetPoint(previousChunkTrafficManager.racingLine.pointCount, racingLine.GetPoint(0));
+            
+            //insert at start of chunks racing line a node with previous chunks last node
+            racingLine.InsertPoint(0, previousChunkTrafficManager.racingLine.GetPoint(previousChunkTrafficManager.racingLine.pointCount-2));
         }
 
         /// <summary>
