@@ -1487,7 +1487,7 @@ GameObject:
   - component: {fileID: 5974823439251168409}
   - component: {fileID: 7200104935709712868}
   m_Layer: 9
-  m_Name: kiri86
+  m_Name: TrafficCar-Kiri86
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1545,6 +1545,7 @@ MonoBehaviour:
     Max: 90
   timeToAccelerateTo60: 10
   timeToDecelerateFrom60: 5
+  emergencyBrakeTimeFrom60: 2.5
   debug: 0
   isInitialised: 0
   isFrozen: 0
@@ -1557,8 +1558,9 @@ MonoBehaviour:
   timeSinceAccelerating: 0
   isDecelerating: 0
   timeSinceDecelerating: 0
-  timeSinceCollision: 0
   inCollision: 0
+  isPathBlocked: 0
+  distanceToBlockage: 0
 --- !u!54 &5974823439251168409
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1585,7 +1587,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!65 &7200104935709712868
 BoxCollider:
   m_ObjectHideFlags: 0

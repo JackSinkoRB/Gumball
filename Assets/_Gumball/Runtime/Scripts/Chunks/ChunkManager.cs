@@ -16,11 +16,7 @@ namespace Gumball
     {
         
         private const float timeBetweenLoadingChecks = 0.5f;
-
-        [Header("Settings")]
-        [Obsolete("To be removed - for testing only")]
-        [SerializeField] private ChunkMap testingChunkMap;
-
+        
         [Header("Debugging")]
         [ReadOnly, SerializeField] private ChunkMap currentChunkMap;
         [Tooltip("The range of chunk indexes (in terms of the map data) that are currently loaded OR in the loading process.")]
@@ -32,7 +28,6 @@ namespace Gumball
         [SerializeField] private List<LoadedChunkData> currentChunks = new();
         
         [Obsolete("To be removed - for testing only")]
-        public ChunkMap TestingChunkMap => testingChunkMap;
         public ChunkMap CurrentChunkMap => currentChunkMap;
         /// <summary>
         /// A list of the current loaded chunks, in order of map index.
