@@ -31,6 +31,11 @@ namespace Gumball
         {
             WarehouseSceneManager.LoadWarehouse();
         }
+
+        public void LoadWorkshop()
+        {
+            WorkshopSceneManager.LoadWorkshop();
+        }
         
     }
 }
