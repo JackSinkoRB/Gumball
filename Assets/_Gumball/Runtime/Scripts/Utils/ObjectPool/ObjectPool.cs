@@ -6,7 +6,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
-    public class ObjectPool : Singleton<ObjectPool>
+    public class ObjectPool : PersistentSingleton<ObjectPool>
     {
         [Tooltip("Assign poolable objects here")]
         [SerializeField] private PoolablePrefab[] poolablePrefabs;
