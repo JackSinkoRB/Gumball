@@ -54,7 +54,6 @@ namespace Gumball
         {
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
             
-            AvatarManager.Instance.HideAvatars(true);
             //freeze the car
             Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;
             currentCarRigidbody.velocity = Vector3.zero;
@@ -75,6 +74,13 @@ namespace Gumball
             
             //set car rigidbody as dynamic
             currentCarRigidbody.isKinematic = false;
+
+            //set driving states:
+            AvatarManager.Instance.HideAvatars(false);
+            AvatarDrivingState driverDrivingState = AvatarManager.Instance.DriverAvatar.StateManager.GetState<AvatarDrivingState>();
+            AvatarDrivingState coDriverDrivingState = AvatarManager.Instance.CoDriverAvatar.StateManager.GetState<AvatarDrivingState>();
+            AvatarManager.Instance.DriverAvatar.StateManager.SetState(driverDrivingState);
+            AvatarManager.Instance.CoDriverAvatar.StateManager.SetState(coDriverDrivingState);
 
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car);
         }

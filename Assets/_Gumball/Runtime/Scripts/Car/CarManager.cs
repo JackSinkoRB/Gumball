@@ -126,11 +126,13 @@ namespace Gumball
 
         [Header("New")]
         [SerializeField] private CarWheelsManager wheelManager;
+        [SerializeField] private CarIKPositions avatarIKPositions;
 
         [SerializeField, ReadOnly] private int carIndex;
         [SerializeField, ReadOnly] private int id;
 
         public CarWheelsManager WheelManager => wheelManager;
+        public CarIKPositions AvatarIKPositions => avatarIKPositions;
         public int CarIndex => carIndex;
         public int ID => id;
         public string SaveKey => $"CarData.{carIndex}.{id}";
