@@ -21,13 +21,9 @@ namespace Gumball
             
             DecalEditor.onSelectLiveDecal += OnSelectDecal;
             DecalEditor.onDeselectLiveDecal += OnDeselectDecal;
-            
-            this.PerformAfterTrue(() => DecalEditor.ExistsRuntime && DecalEditor.Instance.CurrentCar != null, 
-                () =>
-                {
-                    SetTarget(DecalEditor.Instance.CurrentCar.transform, defaultTargetOffset);
-                    SetInitialPosition();
-                });
+
+            SetTarget(WarehouseManager.Instance.CurrentCar.transform, defaultTargetOffset);
+            SetInitialPosition();
         }
 
         protected override void OnDisable()

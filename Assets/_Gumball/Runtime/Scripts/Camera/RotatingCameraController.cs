@@ -78,6 +78,8 @@ namespace Gumball
         {
             this.target = target;
             targetOffset = offset;
+            
+            decelerationTween?.Kill();
             MoveCamera(Vector2.zero, movementTweenDuration);
         }
         
@@ -96,6 +98,8 @@ namespace Gumball
             vertical = Camera.main.transform.eulerAngles.x;
 
             pressedUI = PrimaryContactInput.IsGraphicUnderPointer();
+            
+            decelerationTween?.Kill();
         }
         
         private void OnPrimaryContactRelease()
@@ -172,9 +176,6 @@ namespace Gumball
             Vector3 position = rotation * new Vector3(0, 0, -actualDistance) + target.position + targetOffset;
 
             currentMovementTween?.Kill();
-            if (duration > 0)
-                decelerationTween?.Kill();
-            
             currentMovementTween = DOTween.Sequence()
                 .Join(Camera.main.transform.DOMove(position, duration))
                 .Join(Camera.main.transform.DORotate(rotationEuler, duration));
@@ -189,6 +190,7 @@ namespace Gumball
             newDistance = Mathf.Clamp(newDistance, zoomDistanceClamp.Min, zoomDistanceClamp.Max);
             
             distance = newDistance;
+            
             MoveCamera(Vector2.zero, 0.1f);
         }
 
@@ -215,13 +217,10 @@ namespace Gumball
         {
             if (pressedUI)
                 return;
-
+            
             if (currentMovementTween != null && currentMovementTween.IsActive() && currentMovementTween.IsPlaying())
                 return;
             
-            if (DecalEditor.Instance.CurrentSelected != null && !DecalEditor.Instance.CurrentSelected.WasUnderPointerOnPress)
-                return;
-
             if (PinchInput.IsPinching)
                 return;
             
@@ -244,6 +243,7 @@ namespace Gumball
             if (!positionHasMoved)
                 return;
 
+            decelerationTween?.Kill();
             MoveCamera(Vector2.zero, movementTweenDuration);
         }
         
