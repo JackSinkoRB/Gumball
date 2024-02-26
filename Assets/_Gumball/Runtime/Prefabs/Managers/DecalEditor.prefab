@@ -47,7 +47,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroy: 1
-  currentCar: {fileID: 0}
   selectedLiveDecalUI: {fileID: 1925627446997356956}
   cameraController: {fileID: 8801126979822624446}
   colorPalette:
@@ -114,10 +113,9 @@ MonoBehaviour:
   - {r: 1, g: 0, b: 0.119999886, a: 1}
   numberOfGrayscaleColors: 10
   numberOfRainbowColours: 50
+  isSessionActive: 0
   currentSelected: {fileID: 0}
-  priorityCount: 0
   paintableMeshes: []
-  liveDecals: []
 --- !u!1 &3422100899205488632
 GameObject:
   m_ObjectHideFlags: 0
@@ -162,12 +160,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0e3f2ffe30c4514397ff3fbe4fcb2f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialCameraPosition: {x: -3.6, y: 1.5, z: 3.3}
-  initialCameraRotation: {x: 11.3, y: 132, z: 0}
+  initialCameraOffset: {x: -0.88402987, y: -0.08080811}
   target: {fileID: 0}
   targetOffset: {x: 0, y: 0.5, z: 0}
   defaultTargetOffset: {x: 0, y: 0.5, z: 0}
-  decalTargetOffset: {x: 0, y: 0, z: 0}
   xSpeed: 50
   ySpeed: 100
   yClamp:
@@ -178,10 +174,12 @@ MonoBehaviour:
   movementTweenDuration: 0.3
   distance: 5
   pinchZoomSpeed: 0.01
-  keyboardZoomSpeed: 0.1
+  keyboardZoomSpeed: 10
   zoomDistanceClamp:
     Min: 3
     Max: 6
+  totalOffset: {x: 0, y: 0}
+  decalTargetOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &4999621885020328775
 GameObject:
   m_ObjectHideFlags: 0

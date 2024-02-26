@@ -9,7 +9,7 @@ namespace Gumball
     public class ObjectPool : PersistentSingleton<ObjectPool>
     {
         [Tooltip("Assign poolable objects here")]
-        [SerializeField] private PoolablePrefab[] poolablePrefabs;
+        [SerializeField] private PoolablePrefab[] poolablePrefabs = Array.Empty<PoolablePrefab>();
 
         private readonly Dictionary<string, PoolablePrefab> poolablePrefabsByName = new();
         private readonly Dictionary<string, List<GameObject>> spareObjectsByName = new();
@@ -228,7 +228,7 @@ namespace Gumball
         /// NOTE: You must pass an object prefab that isn't in the scene
         /// </summary>
         public static GameObject GetSpareOrCreate(this GameObject prefab, Transform assignToParent = null, Vector3 position = default, Quaternion rotation = default, bool poolOnDisable = true, Action onPool = null) 
-            => ObjectPool.ExistsRuntime ? ObjectPool.Instance.GetSpareOrCreate(prefab, assignToParent, position, rotation, poolOnDisable, onPool) : null;
+            => ObjectPool.Instance.GetSpareOrCreate(prefab, assignToParent, position, rotation, poolOnDisable, onPool);
 
         /// <summary>
         /// Get a spare of this object from the pool or create a new one.
