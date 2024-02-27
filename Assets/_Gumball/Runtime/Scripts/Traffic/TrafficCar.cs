@@ -151,7 +151,7 @@ namespace Gumball
             
             collisions.Add(collision);
 
-            if (collision.rigidbody.Equals(PlayerCarManager.Instance.CurrentCar.Rigidbody))
+            if (collision.rigidbody.Equals(WarehouseManager.Instance.CurrentCar.Rigidbody))
             {
                 GlobalLoggers.TrafficLogger.Log($"Player hit {gameObject.name} at {collision.impulse.magnitude}m/s");
             }
@@ -226,7 +226,7 @@ namespace Gumball
             }
             
             float carActivationRangeSqr = carActivationRange * carActivationRange;
-            float distanceToPlayerSqr = Vector3.SqrMagnitude(PlayerCarManager.Instance.CurrentCar.transform.position - transform.position);
+            float distanceToPlayerSqr = Vector3.SqrMagnitude(WarehouseManager.Instance.CurrentCar.transform.position - transform.position);
             if (!isActivated && distanceToPlayerSqr < carActivationRangeSqr)
                 Activate();
             else if (isActivated && distanceToPlayerSqr > carActivationRangeSqr)

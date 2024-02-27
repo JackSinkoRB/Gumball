@@ -43,8 +43,14 @@ namespace Gumball
             stopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             
+            //ensure car is showing
+            WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
+            
+            //ensure avatars are showing
+            AvatarManager.Instance.HideAvatars(false);
+            
             //move the car to the origin to be framed by the camera
-            PlayerCarManager.Instance.CurrentCar.Teleport(Vector3.zero, Quaternion.Euler(Vector3.zero));
+            WarehouseManager.Instance.CurrentCar.Teleport(Vector3.zero, Quaternion.Euler(Vector3.zero));
             
             //move the avatars
             AvatarManager.Instance.DriverAvatar.Teleport(Instance.driverStandingPosition, Instance.DriverStandingRotation);

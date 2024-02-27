@@ -36,10 +36,10 @@ namespace Gumball
         //these must be static so they are still alive when the application is quitting
         private static CarManager currentCar;
         private static List<LiveDecal> liveDecals = new();
+        private static PositionAndRotation positionBeforeSession;
 
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
-        [SerializeField] private DecalCameraController cameraController;
-
+        
         [Header("Colours")]
         [SerializeField] private Color[] colorPalette;
         [SerializeField] private int numberOfGrayscaleColors = 10;
@@ -57,8 +57,8 @@ namespace Gumball
         public Color[] ColorPalette => colorPalette;
 
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
-
-        private Coroutine disablePaintableMeshesCoroutine;
+        private int currentSessionTicketNumber;
+        private int maxWaitingSessionTicketNumber = -1;
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RuntimeInitialise()
@@ -90,14 +90,12 @@ namespace Gumball
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
 
-            CarManager car = PlayerCarManager.Instance.CurrentCar;
+            CarManager car = WarehouseManager.Instance.CurrentCar;
+
+            yield return Instance.StartSession(car);
             
-            //move the vehicle to the right position
-            car.Rigidbody.Move(Vector3.zero, Quaternion.Euler(Vector3.zero));
-            
-            Instance.cameraController.gameObject.SetActive(true);
-            Instance.StartSession(car);
-            
+            AvatarManager.Instance.HideAvatars(true);
+
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
 
@@ -131,34 +129,31 @@ namespace Gumball
             UpdateDecalUnderPointer();
         }
 
-        public void StartSession(CarManager car)
+        public IEnumerator StartSession(CarManager car)
         {
-            if (isSessionActive)
+            int sessionTicketNumber = ++maxWaitingSessionTicketNumber;
+            while (currentSessionTicketNumber != sessionTicketNumber)
             {
-                Debug.LogWarning("Cannot start decal session, because one has already been started.");
-                return;
+                GlobalLoggers.DecalsLogger.Log($"Cannot start decal session, because one has already been started. Waiting for its turn... ({currentSessionTicketNumber} / {sessionTicketNumber})");
+                yield return null;
             }
+
+            GlobalLoggers.DecalsLogger.Log($"Started session {currentSessionTicketNumber}.");
+            isSessionActive = true;
+            currentCar = car;
 
             PrimaryContactInput.onRelease += OnPrimaryContactReleased;
             DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
             
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
-
-            AvatarManager.Instance.HideAvatars(true);
-
-            currentCar = car;
-            
-            if (disablePaintableMeshesCoroutine != null)
-                CoroutineHelper.Instance.StopCoroutine(disablePaintableMeshesCoroutine);
             
             //set the vehicle kinematic
             currentCar.Rigidbody.isKinematic = true;
             
             liveDecals = DecalManager.CreateLiveDecalsFromData(car);
-            this.PerformAtEndOfFrame(DeselectLiveDecal); //perform at end of frame as magnetic scroll will select it in LateUpdate()
             
             GlobalLoggers.DecalsLogger.Log($"Starting session for {car.gameObject.name} with {liveDecals.Count} saved decals.");
-
+            
             paintableMeshes.Clear();
             foreach (PaintableMesh paintableMesh in car.transform.GetComponentsInAllChildren<PaintableMesh>())
             {
@@ -167,26 +162,26 @@ namespace Gumball
             }
             
             //disable the car's collider temporarily
-            PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(false);
+            car.Colliders.SetActive(false);
             
-            isSessionActive = true;
             onSessionStart?.Invoke();
+            
+            yield return null;
+            DeselectLiveDecal(); //perform at end of frame as magnetic scroll will select it in LateUpdate()
         }
 
-        public void EndSession()
+        public IEnumerator EndSession()
         {
             if (!isSessionActive)
-                return;
+                yield break;
             
-            GlobalLoggers.DecalsLogger.Log($"Ending session.");
+            GlobalLoggers.DecalsLogger.Log($"Ending session {currentSessionTicketNumber}.");
 
             PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
             DataProvider.onBeforeSaveAllDataOnAppExit -= OnBeforeSaveAllDataOnAppExit;
 
             DeselectLiveDecal();
             
-            AvatarManager.Instance.HideAvatars(false);
-
             DecalManager.SaveLiveDecalData(currentCar, liveDecals);
 
             foreach (LiveDecal liveDecal in liveDecals)
@@ -197,16 +192,19 @@ namespace Gumball
             
             liveDecals.Clear();
 
-            if (PlayerCarManager.ExistsRuntime)
-                PlayerCarManager.Instance.CurrentCar.Colliders.SetActive(true);
+            currentCar.Colliders.SetActive(true);
             
             DecalStateManager.ClearHistory();
-            
-            isSessionActive = false;
-            onSessionEnd?.Invoke();
 
             //need to wait for the texture to fully apply before removing paintable components
-            disablePaintableMeshesCoroutine = CoroutineHelper.PerformAtEndOfFrame(SessionCleanup);
+            yield return null;
+            SessionCleanup();
+            
+            GlobalLoggers.DecalsLogger.Log($"Ended session {currentSessionTicketNumber}.");
+            isSessionActive = false;
+            currentSessionTicketNumber++;
+
+            onSessionEnd?.Invoke();
         }
         
         private void SessionCleanup()
@@ -217,8 +215,8 @@ namespace Gumball
                 paintableMesh.DisablePainting();
                 paintableMeshes.Remove(paintableMesh);
             }
-
-            if (CurrentCar != null)
+            
+            if (currentCar != null)
             {
                 currentCar.Rigidbody.isKinematic = false;
                 currentCar = null;
@@ -317,7 +315,7 @@ namespace Gumball
             for (int index = 0; index < raycastHits; index++)
             {
                 RaycastHit hit = decalsUnderPointer[index];
-                LiveDecal decal = hit.transform.parent.GetComponent<LiveDecal>();
+                LiveDecal decal = hit.collider.transform.parent.GetComponent<LiveDecal>();
 
                 if (decal == currentSelected)
                 {

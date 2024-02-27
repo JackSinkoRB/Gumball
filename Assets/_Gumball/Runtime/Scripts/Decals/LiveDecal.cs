@@ -21,8 +21,8 @@ namespace Gumball
             [SerializeField] private int categoryIndex;
             [SerializeField] private int textureIndex;
             [SerializeField] private int priority;
-            [SerializeField] private SerializedVector3 lastKnownPosition;
-            [SerializeField] private SerializedVector3 lastKnownRotationEuler;
+            [SerializeField] private SerializedVector3 localPositionToCar;
+            [SerializeField] private SerializedVector3 localRotationToCar;
             [SerializeField] private SerializedVector3 lastKnownHitNormal;
             [SerializeField] private SerializedVector3 scale;
             [SerializeField] private float angle;
@@ -31,8 +31,8 @@ namespace Gumball
             public int CategoryIndex => categoryIndex;
             public int TextureIndex => textureIndex;
             public int Priority => priority;
-            public SerializedVector3 LastKnownPosition => lastKnownPosition;
-            public SerializedVector3 LastKnownRotationEuler => lastKnownRotationEuler;
+            public SerializedVector3 LocalPositionToCar => localPositionToCar;
+            public SerializedVector3 LocalRotationToCar => localRotationToCar;
             public SerializedVector3 LastKnownHitNormal => lastKnownHitNormal;
             
             public SerializedVector3 Scale => scale;
@@ -44,13 +44,30 @@ namespace Gumball
                 categoryIndex = liveDecal.categoryIndex;
                 textureIndex = liveDecal.textureIndex;
                 priority = liveDecal.priority;
-                lastKnownPosition = liveDecal.lastKnownPosition.ToSerializedVector();
-                lastKnownRotationEuler = liveDecal.lastKnownRotation.eulerAngles.ToSerializedVector();
+                
+                //save relative to car:
+                localPositionToCar = liveDecal.lastKnownLocalPosition.ToSerializedVector();
+                localRotationToCar = liveDecal.lastKnownLocalRotation.eulerAngles.ToSerializedVector();
                 lastKnownHitNormal = liveDecal.lastKnownHitNormal.ToSerializedVector();
+                
                 scale = liveDecal.Scale.ToSerializedVector();
                 angle = liveDecal.Angle;
                 colorIndex = liveDecal.ColorIndex;
             }
+
+            public LiveDecalData(int categoryIndex, int textureIndex, int priority, Vector3 positionOffsetFromCar, Vector3 rotationOffsetFromCar, Vector3 hitNormal, Vector3 scale, float angle, int colorIndex)
+            {
+                this.categoryIndex = categoryIndex;
+                this.textureIndex = textureIndex;
+                this.priority = priority;
+                this.localPositionToCar = positionOffsetFromCar.ToSerializedVector();
+                this.localRotationToCar = rotationOffsetFromCar.ToSerializedVector();
+                this.lastKnownHitNormal = hitNormal.ToSerializedVector();
+                this.scale = scale.ToSerializedVector();
+                this.angle = angle;
+                this.colorIndex = colorIndex;
+            }
+            
         }
 
         public event Action<Color, Color> onColorChanged;
@@ -77,8 +94,8 @@ namespace Gumball
         
         private DecalTexture textureData;
         private Vector2 clickOffset;
-        private Vector3 lastKnownPosition;
-        private Quaternion lastKnownRotation = Quaternion.Euler(Vector3.zero);
+        private Vector3 lastKnownLocalPosition;
+        private Quaternion lastKnownLocalRotation = Quaternion.Euler(Vector3.zero);
         private Vector3 lastKnownHitNormal;
         private bool wasClickableUnderPointerOnPress;
         private DecalStateManager.ModifyStateChange stateBeforeMoving;
@@ -106,16 +123,17 @@ namespace Gumball
             IsValidPosition = true;
         }
         
-        public void UpdatePosition(Vector3 position, Vector3 hitNormal, Quaternion rotation)
+        public void UpdatePosition(Vector3 localPosition, Vector3 hitNormal, Quaternion localRotation)
         {
-            bool hasMoved = !lastKnownPosition.Approximately(position, PrimaryContactInput.DragThreshold);
+            bool hasMoved = !lastKnownLocalPosition.Approximately(localPosition, PrimaryContactInput.DragThreshold);
 
-            lastKnownPosition = position;
-            lastKnownRotation = rotation;
+            lastKnownLocalPosition = localPosition;
+            lastKnownLocalRotation = localRotation;
             lastKnownHitNormal = hitNormal;
             
-            transform.position = lastKnownPosition;
-
+            transform.localPosition = lastKnownLocalPosition;
+            transform.localRotation = lastKnownLocalRotation;
+            
             if (hasMoved)
                 onMoved?.Invoke();
             
@@ -181,7 +199,10 @@ namespace Gumball
                 SetColorFromIndex(data.ColorIndex);
             else SetColor(Color.white);
             
-            UpdatePosition(data.LastKnownPosition.ToVector3(), data.LastKnownHitNormal.ToVector3(), Quaternion.Euler(data.LastKnownRotationEuler.ToVector3()));
+            UpdatePosition(data.LocalPositionToCar.ToVector3(), 
+                data.LastKnownHitNormal.ToVector3(), 
+                Quaternion.Euler(data.LocalRotationToCar.ToVector3()));
+            
             SetScale(data.Scale.ToVector3());
             SetAngle(data.Angle);
             SetValid();
@@ -192,7 +213,7 @@ namespace Gumball
         /// </summary>
         public void Apply()
         {
-            paintDecal.HandleHitPoint(false, priority, 1, 0, lastKnownPosition, lastKnownRotation);
+            paintDecal.HandleHitPoint(false, priority, 1, 0, transform.position, transform.rotation);
         }
         
         public void SetSprite(Sprite sprite)
@@ -270,7 +291,7 @@ namespace Gumball
             Graphic[] excludeRing = {DecalEditor.Instance.SelectedDecalUI.Ring};
             wasClickableUnderPointerOnPress = PrimaryContactInput.IsGraphicUnderPointer(excludeRing);
             
-            float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, PlayerCarManager.Instance.CurrentCar.transform.position);
+            float maxRaycastDistance = Vector3.Distance(Camera.main.transform.position, WarehouseManager.Instance.CurrentCar.transform.position);
             WasUnderPointerOnPress = PrimaryContactInput.IsGraphicUnderPointer(DecalEditor.Instance.SelectedDecalUI.Ring) //check if the ring is first, as it is cached
                                      || PrimaryContactInput.IsColliderUnderPointer(selectionCollider, maxRaycastDistance, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.LiveDecal));
 
@@ -308,7 +329,7 @@ namespace Gumball
             }
             else
             {
-                bool positionHasMoved = !transform.position.Approximately(stateBeforeMoving.Data.LastKnownPosition.ToVector3(), PrimaryContactInput.DragThreshold);
+                bool positionHasMoved = !transform.position.Approximately(DecalEditor.Instance.CurrentCar.transform.position + stateBeforeMoving.Data.LocalPositionToCar.ToVector3(), PrimaryContactInput.DragThreshold);
                 if (positionHasMoved)
                     DecalStateManager.LogStateChange(stateBeforeMoving);
             }
@@ -357,7 +378,7 @@ namespace Gumball
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.PaintableMesh)))
             {
                 Quaternion rotation = Quaternion.LookRotation(Camera.main.transform.forward - hit.normal, Vector3.up);
-                UpdatePosition(hit.point, hit.normal, rotation);
+                UpdatePosition(DecalEditor.Instance.CurrentCar.transform.InverseTransformPoint(hit.point), hit.normal, rotation);
                 
                 //always facing camera:
                 //UpdatePosition(hit.point, hit.normal, Quaternion.LookRotation(Camera.main.transform.forward, Camera.main.transform.up));
@@ -379,7 +400,7 @@ namespace Gumball
 
         private void DrawPreview()
         {
-            paintDecal.HandleHitPoint(true, priority, 1, 0, lastKnownPosition, lastKnownRotation);
+            paintDecal.HandleHitPoint(true, priority, 1, 0, transform.position, transform.rotation);
         }
         
     }

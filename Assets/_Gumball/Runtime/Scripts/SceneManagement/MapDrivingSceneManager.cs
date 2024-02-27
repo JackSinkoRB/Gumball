@@ -12,17 +12,16 @@ namespace Gumball
 
         private void OnEnable()
         {
-            this.PerformAfterTrue(() => PlayerCarManager.ExistsRuntime && PlayerCarManager.Instance.CurrentCar != null, () =>
+            this.PerformAfterTrue(() => WarehouseManager.Instance.CurrentCar != null, () =>
             {
-                OnCarChanged(PlayerCarManager.Instance.CurrentCar);
-                PlayerCarManager.Instance.onCurrentCarChanged += OnCarChanged;
+                OnCarChanged(WarehouseManager.Instance.CurrentCar);
+                WarehouseManager.Instance.onCurrentCarChanged += OnCarChanged;
             });
         }
 
         private void OnDisable()
         {
-            if (PlayerCarManager.ExistsRuntime)
-                PlayerCarManager.Instance.onCurrentCarChanged -= OnCarChanged;
+            WarehouseManager.Instance.onCurrentCarChanged -= OnCarChanged;
         }
 
         private void OnCarChanged(CarManager newCar)
@@ -30,12 +29,12 @@ namespace Gumball
             DrivingCameraController.Instance.SetTarget(newCar.transform);
         }
 
-        public static void LoadMapDrivingScene(MapData map)
+        public static void LoadMapDrivingScene(ChunkMap chunkMap)
         {
-            CoroutineHelper.Instance.StartCoroutine(LoadMapDrivingSceneIE(map));
+            CoroutineHelper.Instance.StartCoroutine(LoadMapDrivingSceneIE(chunkMap));
         }
         
-        private static IEnumerator LoadMapDrivingSceneIE(MapData map)
+        private static IEnumerator LoadMapDrivingSceneIE(ChunkMap chunkMap)
         {
             PanelManager.GetPanel<LoadingPanel>().Show();
             GlobalLoggers.LoadingLogger.Log($"Map loading started...");
@@ -45,31 +44,34 @@ namespace Gumball
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MapDrivingSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
 
-            yield return SetupMapDrivingScene(map);
+            yield return SetupMapDrivingScene(chunkMap);
 
             GlobalLoggers.LoadingLogger.Log($"Map loading complete!");
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
 
-        public static IEnumerator SetupMapDrivingScene(MapData map)
+        public static IEnumerator SetupMapDrivingScene(ChunkMap chunkMap)
         {
+            WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
+            
+            AvatarManager.Instance.HideAvatars(true);
             //freeze the car
-            Rigidbody currentCarRigidbody = PlayerCarManager.Instance.CurrentCar.Rigidbody;
+            Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;
             currentCarRigidbody.velocity = Vector3.zero;
             currentCarRigidbody.angularVelocity = Vector3.zero;
             currentCarRigidbody.isKinematic = true;
             
             //move the car to the right position
-            Vector3 startingPosition = map.VehicleStartingPosition;
-            Vector3 startingRotation = map.VehicleStartingRotation;
+            Vector3 startingPosition = chunkMap.VehicleStartingPosition;
+            Vector3 startingRotation = chunkMap.VehicleStartingRotation;
             currentCarRigidbody.Move(startingPosition, Quaternion.Euler(startingRotation));
             GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {startingPosition}");
             
             //load the map chunks
             Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
-            yield return ChunkManager.Instance.LoadMap(map);
+            yield return ChunkManager.Instance.LoadMap(chunkMap);
             chunkLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map '{map.name}' in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map '{chunkMap.name}' in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             //set car rigidbody as dynamic
             currentCarRigidbody.isKinematic = false;

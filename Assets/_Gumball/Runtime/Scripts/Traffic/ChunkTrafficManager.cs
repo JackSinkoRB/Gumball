@@ -49,7 +49,7 @@ namespace Gumball
         private void OnValidate()
         {
             if (chunk == null)
-                chunk = transform.FindComponentInParents<Chunk>();
+                chunk = transform.GetComponentInAllParents<Chunk>();
         }
 
         private void OnEnable()
@@ -138,7 +138,7 @@ namespace Gumball
             }
 
             //get distance to the player car
-            float distanceToPlayerSqr = Vector3.SqrMagnitude(position - PlayerCarManager.Instance.CurrentCar.transform.position);
+            float distanceToPlayerSqr = Vector3.SqrMagnitude(position - WarehouseManager.Instance.CurrentCar.transform.position);
             if (distanceToPlayerSqr <= minDistanceSqr)
                 return false;
             

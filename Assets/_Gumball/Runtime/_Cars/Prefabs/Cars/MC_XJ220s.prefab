@@ -438,9 +438,9 @@ GameObject:
   m_Component:
   - component: {fileID: 724044971135627713}
   - component: {fileID: 4872057246868372384}
-  - component: {fileID: 6667767253650285780}
   - component: {fileID: 5605294111590501033}
   - component: {fileID: 5131373250882681086}
+  - component: {fileID: 9131771319189854056}
   m_Layer: 8
   m_Name: MC_XJ220s
   m_TagString: Untagged
@@ -501,51 +501,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &6667767253650285780
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1422899270389967864}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a8605dddb3a61b42acf7414ab942936, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  defaultEngine: 
-  brakeLightsMaterial: {fileID: 2100000, guid: e6831d0d27221fc4bade7855a37a45d5, type: 2}
-  defaultWheelScale: 1
-  wheelFL: {fileID: 3237634670842496755}
-  wheelFR: {fileID: 3507370795112529054}
-  wheelRL: {fileID: 8228444936186061126}
-  wheelRR: {fileID: 3871936106196580445}
-  wheelRoots:
-  - {fileID: 5051336615544046332}
-  - {fileID: 934127581214753240}
-  - {fileID: 62694521215022786}
-  - {fileID: 3741650281825397557}
-  wheelFrontAssetReference:
-    m_AssetGUID: 06764950e490c0347a11faa4c40e18f5
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  wheelRearAssetReference:
-    m_AssetGUID: 1304a4a2d24ff5041958102583a81519
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  tyreLeftAssetReference:
-    m_AssetGUID: 4d907cf0e079cb94389c7000f6a24cfb
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  tyreRightAssetReference:
-    m_AssetGUID: 1cad980472beb1c4d929478d836deca6
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  spawnedEngine: {fileID: 0}
 --- !u!114 &5605294111590501033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -604,7 +559,7 @@ MonoBehaviour:
   enableTurbo: 0
   backFireEnabled: 1
   launchPower: 400
-  reverseLaunchPower: 50
+  reverseLaunchPower: 20
   launchCutoff: 5000
   launchAssist: 0
   sampleRpm: 0
@@ -620,16 +575,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c43ffebacb5b8d428aab0356696744b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wheels:
-  - {fileID: 5051336615544046332}
-  - {fileID: 934127581214753240}
-  - {fileID: 62694521215022786}
-  - {fileID: 3741650281825397557}
-  customisation: {fileID: 6667767253650285780}
   centerOfMass: {fileID: 237217014379845444}
   colliders: {fileID: 6054565963001126080}
-  tyreCompound: 2
   inertiaFactor: 1.5
+  brakeLightsMaterial: {fileID: 2100000, guid: e6831d0d27221fc4bade7855a37a45d5, type: 2}
   brake: 0
   drivetrain: {fileID: 5605294111590501033}
   shiftSpeed: 0.3
@@ -666,12 +615,58 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   stabilityControlTorqueModifier: 0.5
-  maxSteerSpeed: 2
-  minSteerSpeed: 0.35
+  maxSteerSpeed: 1
+  minSteerSpeed: 0.5
   maxSteerReleaseSpeed: 10
   minSteerReleaseSpeed: 35
   speedForMinSteerSpeed: 300
   rigidBody: {fileID: 0}
+  wheelManager: {fileID: 9131771319189854056}
+  carIndex: 0
+  id: 0
+--- !u!114 &9131771319189854056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1422899270389967864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac5b0c7ffda00a247be79729d2db5971, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wheels:
+  - {fileID: 5051336615544046332}
+  - {fileID: 934127581214753240}
+  - {fileID: 62694521215022786}
+  - {fileID: 3741650281825397557}
+  frontLeftWheel: {fileID: 5051336615544046332}
+  frontRightWheel: {fileID: 934127581214753240}
+  rearLeftWheel: {fileID: 62694521215022786}
+  rearRightWheel: {fileID: 3741650281825397557}
+  wheelFrontAssetReference:
+    m_AssetGUID: 06764950e490c0347a11faa4c40e18f5
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  wheelRearAssetReference:
+    m_AssetGUID: 1304a4a2d24ff5041958102583a81519
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  tyreLeftAssetReference:
+    m_AssetGUID: 4d907cf0e079cb94389c7000f6a24cfb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  tyreRightAssetReference:
+    m_AssetGUID: 1cad980472beb1c4d929478d836deca6
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  spawnedWheels: []
+  spawnedTyres: []
 --- !u!1 &1547205152086652757
 GameObject:
   m_ObjectHideFlags: 0
@@ -2330,8 +2325,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.98724014, y: 0.9478801, z: 0.93951005}
-  m_Center: {x: 0, y: 0.026059054, z: 0.024506383}
+  m_Size: {x: 1.0353034, y: 0.9478801, z: 1.0363817}
+  m_Center: {x: 0, y: 0.026059054, z: 0.0075220508}
 --- !u!1 &6169397294700913133
 GameObject:
   m_ObjectHideFlags: 0

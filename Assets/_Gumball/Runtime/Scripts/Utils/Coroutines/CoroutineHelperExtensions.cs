@@ -10,7 +10,7 @@ namespace Gumball
 
         public static Coroutine PerformAtEndOfFrame(this MonoBehaviour monoBehaviour, Action action)
         {
-            return CoroutineHelper.PerformAtEndOfFrame(action, monoBehaviour);
+            return CoroutineHelper.PerformNextFrame(action, monoBehaviour);
         }
 
         public static void PerformAfterFixedUpdate(this MonoBehaviour monoBehaviour, Action action)

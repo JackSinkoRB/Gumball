@@ -21,26 +21,24 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI isSlidingLabel;
 
         private Wheel wheel;
-        private CarManager currentCar => PlayerCarManager.Instance.CurrentCar;
+        private CarManager currentCar => WarehouseManager.Instance.CurrentCar;
 
         private void OnEnable()
         {
             if (currentCar != null)
                 FindWheel(currentCar);
             
-            this.PerformAfterTrue(() => PlayerCarManager.ExistsRuntime, 
-                () => PlayerCarManager.Instance.onCurrentCarChanged += FindWheel);
+            WarehouseManager.Instance.onCurrentCarChanged += FindWheel;
         }
 
         private void OnDisable()
         {
-            if (PlayerCarManager.ExistsRuntime)
-                PlayerCarManager.Instance.onCurrentCarChanged -= FindWheel;
+            WarehouseManager.Instance.onCurrentCarChanged -= FindWheel;
         }
 
         private void FindWheel(CarManager newCar)
         {
-            foreach (Wheel wheelOnNewCar in newCar.Wheels)
+            foreach (Wheel wheelOnNewCar in newCar.WheelManager.Wheels)
             {
                 if (wheelOnNewCar.isLeft == isLeft && wheelOnNewCar.isRear == isRear)
                 {
@@ -52,7 +50,7 @@ namespace Gumball
 
         private void LateUpdate()
         {
-            if (!PlayerCarManager.ExistsRuntime || currentCar == null || wheel == null)
+            if (currentCar == null || wheel == null)
                 return;
 
             nameLabel.text = $"Wheel {(isRear ? "R" : "F")}{(isLeft ? "L" : "R")}";

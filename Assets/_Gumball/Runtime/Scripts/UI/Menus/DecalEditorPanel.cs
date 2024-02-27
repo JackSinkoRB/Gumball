@@ -73,10 +73,9 @@ namespace Gumball
 
         public void OnClickBackButton()
         {
-            DecalEditor.Instance.EndSession();
-            MainSceneManager.LoadMainScene();
+            StartCoroutine(LoadMainScene());
         }
-        
+
         public void OnClickTrashButton()
         {
             DecalStateManager.LogStateChange(new DecalStateManager.DestroyStateChange(DecalEditor.Instance.CurrentSelected));
@@ -228,6 +227,12 @@ namespace Gumball
 
             sendForwardButton.interactable = hasDecalWithHigherPriority;
             sendBackwardButton.interactable = hasDecalWithLowerPriority;
+        }
+        
+        private IEnumerator LoadMainScene()
+        {
+            yield return DecalEditor.Instance.EndSession();
+            MainSceneManager.LoadMainScene();
         }
         
     }

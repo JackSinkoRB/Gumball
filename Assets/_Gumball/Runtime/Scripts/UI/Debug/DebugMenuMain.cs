@@ -21,11 +21,11 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI tractionControlLabel;
         [SerializeField] private TextMeshProUGUI stabilityControlLabel;
 
-        private CarManager currentCar => PlayerCarManager.Instance.CurrentCar;
+        private CarManager currentCar => WarehouseManager.Instance.CurrentCar;
         
         private void LateUpdate()
         {
-            if (!PlayerCarManager.ExistsRuntime || currentCar == null)
+            if (currentCar == null)
                 return;
             
             speedLabel.text = $"{Mathf.RoundToInt(SpeedUtils.ToKmh(currentCar.Speed)).ToString()} km/h";

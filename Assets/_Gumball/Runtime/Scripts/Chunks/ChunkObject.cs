@@ -102,7 +102,7 @@ namespace Gumball
             if (chunkBelongsTo != null)
                 return;
             
-            chunkBelongsTo = transform.FindComponentInParents<Chunk>();
+            chunkBelongsTo = transform.GetComponentInAllParents<Chunk>();
             if (chunkBelongsTo == null)
                 return;
             

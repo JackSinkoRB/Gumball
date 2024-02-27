@@ -19,7 +19,7 @@ namespace Gumball
 
         private void OnEnable()
         {
-            chunk = transform.FindComponentInParents<Chunk>();
+            chunk = transform.GetComponentInAllParents<Chunk>();
             
             //whenever the chunk is unloaded, pool the lines
             chunk.onChunkUnload += PoolLines;

@@ -11,11 +11,10 @@ namespace Gumball
         {
             PanelManager.GetPanel<SettingsPanel>().Show();
         }
-        
-        /// <remarks>Temporary method to load the testing map. Should be replaced by the map picker UI to load a specific map.</remarks>
-        public void LoadTestMapDrivingScene()
+
+        public void ShowMapPanel()
         {
-            MapDrivingSceneManager.LoadMapDrivingScene(ChunkManager.Instance.TestingMap);
+            MapSceneManager.LoadMapScene();
         }
 
         public void LoadDecalEditor()
@@ -26,6 +25,16 @@ namespace Gumball
         public void LoadAvatarEditor()
         {
             AvatarEditor.LoadEditor();
+        }
+
+        public void LoadWarehouse()
+        {
+            WarehouseSceneManager.LoadWarehouse();
+        }
+
+        public void LoadWorkshop()
+        {
+            WorkshopSceneManager.LoadWorkshop();
         }
         
     }

@@ -12,7 +12,9 @@ namespace Gumball
         public static JsonDataProvider Settings { get; private set; } = new("Settings");
         public static JsonDataProvider Cars { get; private set; } = new("Cars");
         public static JsonDataProvider Avatar { get; private set; } = new("Avatar");
-
+        public static JsonDataProvider GameSessions { get; private set; } = new("GameSessions");
+        public static JsonDataProvider Warehouse { get; private set; } = new("Warehouse");
+        
         /// <summary>
         /// Enable or disable whether it reads from the test providers, or the real providers.
         /// </summary>
@@ -21,6 +23,8 @@ namespace Gumball
             Settings = new JsonDataProvider(enableTestProviders ? "Settings_Tests" : "Settings");
             Cars = new JsonDataProvider(enableTestProviders ? "Cars_Tests" : "Cars");
             Avatar = new JsonDataProvider(enableTestProviders ? "Avatar_Tests" : "Avatar");
+            GameSessions = new JsonDataProvider(enableTestProviders ? "GameSessions_Tests" : "GameSessions");
+            Warehouse = new JsonDataProvider(enableTestProviders ? "Warehouse_Tests" : "Warehouse");
         }
         
         /// <summary>
@@ -34,6 +38,8 @@ namespace Gumball
             Settings.LoadFromSourceAsync();
             Cars.LoadFromSourceAsync();
             Avatar.LoadFromSourceAsync();
+            GameSessions.LoadFromSourceAsync();
+            Warehouse.LoadFromSourceAsync();
             yield return new WaitUntil(() => Settings.IsLoaded && Cars.IsLoaded);
             onComplete?.Invoke();
         }
@@ -47,6 +53,8 @@ namespace Gumball
             Settings.LoadFromSourceSync();
             Cars.LoadFromSourceSync();
             Avatar.LoadFromSourceSync();
+            GameSessions.LoadFromSourceSync();
+            Warehouse.LoadFromSourceSync();
         }
 
         public static void RemoveAllData()
@@ -54,6 +62,8 @@ namespace Gumball
             Settings.RemoveFromSource();
             Cars.RemoveFromSource();
             Avatar.RemoveFromSource();
+            GameSessions.RemoveFromSource();
+            Warehouse.RemoveFromSource();
         }
         
     }

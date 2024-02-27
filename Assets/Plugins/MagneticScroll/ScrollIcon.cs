@@ -84,7 +84,7 @@ namespace MagneticScrollUtils
         {
             CurrentTween?.Kill();
             CurrentTween = RectTransform.DOAnchorPos(pos, time).OnComplete(() =>
-                CoroutineHelper.PerformAtEndOfFrame(() => CurrentTween = null)); //if ended before the frame, the final frame update won't apply effects
+                CoroutineHelper.PerformNextFrame(() => CurrentTween = null)); //if ended before the frame, the final frame update won't apply effects
         }
 
         #region EVENTS TO SEND TO MAGNETIC SCROLL

@@ -137,20 +137,12 @@ namespace Gumball
             OffsetSincePressedNormalised = GetNormalisedScreenPosition(OffsetSincePressed);
             onPerform?.Invoke();
 
+            bool isFirstContact = lastKnownPositionOnPerformed == Vector2.zero;
             Vector2 offsetSinceLastFrame = Position - lastKnownPositionOnPerformed;
             lastKnownPositionOnPerformed = Position;
             
-            Vector2 offsetSinceLastFrameNormalised = GetNormalisedScreenPosition(offsetSinceLastFrame);
-            if (!offsetSinceLastFrameNormalised.Approximately(Vector2.zero, DragThreshold))
-            {
-                if (!IsDragging)
-                    OnStartDragging();
-
-                OnDrag(offsetSinceLastFrameNormalised);
-            } else if (IsDragging)
-            {
-                OnStopDragging();
-            }
+            if (!isFirstContact) //don't detect drag if it's the first frame
+                CheckForDrag(offsetSinceLastFrame);
         }
 
         public static bool IsColliderUnderPointer(Collider collider, float maxDistance = Mathf.Infinity, LayerMask layerMask = default)
@@ -198,6 +190,21 @@ namespace Gumball
             return false;
         }
         
+        private static void CheckForDrag(Vector2 offsetSinceLastFrame)
+        {
+            Vector2 offsetSinceLastFrameNormalised = GetNormalisedScreenPosition(offsetSinceLastFrame);
+            if (!offsetSinceLastFrameNormalised.Approximately(Vector2.zero, DragThreshold))
+            {
+                if (!IsDragging)
+                    OnStartDragging();
+
+                OnDrag(offsetSinceLastFrameNormalised);
+            } else if (IsDragging)
+            {
+                OnStopDragging();
+            }
+        }
+        
         private static void OnStartDragging()
         {
             onDragStart?.Invoke();
@@ -213,7 +220,7 @@ namespace Gumball
             onDragStop?.Invoke();
         }
         
-        private static List<Graphic> GetClickableGraphicsUnderPointer()
+        public static List<Graphic> GetClickableGraphicsUnderPointer()
         {
             //because input only updates once per frame, cache the results for the entire frame
             bool isCached = graphicsUnderPointerLastCached == Time.frameCount;
