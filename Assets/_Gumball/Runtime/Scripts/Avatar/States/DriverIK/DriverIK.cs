@@ -15,23 +15,16 @@ namespace Gumball
         [SerializeField] private IkChain leftLegChain;
         [SerializeField] private IkChain rightLegChain;
 
-        [Header("Debugging")]
-        [SerializeField, ReadOnly] private bool isDriver;
-        [SerializeField, ReadOnly] private CarIKPositions currentPositions;
-        
         //TODO: hands
         //public IkHandBones leftHand;
         //public IkHandBones rightHand;
 
-        public void Initialise(bool isDriver, CarIKPositions positions)
+        public void Initialise(IKPositionsInCar positions)
         {
-            this.isDriver = isDriver;
-            currentPositions = positions;
-            
-            leftArmChain.Initialise(isDriver ? currentPositions.LeftHandPositionDriving : currentPositions.LeftHandPositionPassenger);
-            rightArmChain.Initialise(isDriver ? currentPositions.RightHandPositionDriving : currentPositions.RightHandPositionPassenger);
-            leftLegChain.Initialise(isDriver ? currentPositions.LeftFootPositionDriving : currentPositions.LeftFootPositionPassenger);
-            rightLegChain.Initialise(isDriver ? currentPositions.RightFootPositionDriving : currentPositions.RightFootPositionPassenger);
+            leftArmChain.Initialise(positions.LeftHand);
+            rightArmChain.Initialise(positions.RightHand);
+            leftLegChain.Initialise(positions.LeftFoot);
+            rightLegChain.Initialise(positions.RightFoot);
         }
 
         private void LateUpdate()

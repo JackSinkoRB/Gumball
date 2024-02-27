@@ -140,7 +140,11 @@ namespace Gumball
             for (int i = 0; i < positions.Length; ++i)
             {
                 if (i == positions.Length - 1)
-                    bones[i].rotation = target.rotation;
+                {
+                    IKPositionData ikPositionData = target.GetComponent<IKPositionData>();
+                    if (ikPositionData != null && ikPositionData.EndBoneCopiesRotation)
+                        bones[i].rotation = target.rotation;
+                }
                 else
                     bones[i].rotation = Quaternion.FromToRotation(startDirectionSucc[i], positions[i + 1] - positions[i]) * startRotationBone[i];
 
