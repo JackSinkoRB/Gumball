@@ -14,7 +14,8 @@ namespace Gumball
             //remove parented
             avatar.transform.SetParent(null);
             
-            avatar.CurrentBody.TransformBone.enabled = true;
+            if (avatar.CurrentBody != null)
+                avatar.CurrentBody.TransformBone.enabled = true;
         }
         
     }
