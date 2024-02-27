@@ -48,6 +48,9 @@ namespace Gumball
 
         public void ResetPositions()
         {
+            if (Bones == null)
+                return; //not initialised
+            
             //loop over each bone/transform and reset to it's original local position and local rotation
             for (int i = 0; i < Bones.Length; i++)
             {
