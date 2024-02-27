@@ -10,7 +10,6 @@ namespace Gumball
         
         private Avatar avatar;
         
-        private Animator animator => avatar.CurrentBody.GetComponent<Animator>();
         private CarIKManager ikManager => WarehouseManager.Instance.CurrentCar.AvatarIKManager;
         private bool isDriver => AvatarManager.Instance.DriverAvatar == avatar;
         private bool isDriverMale => AvatarManager.Instance.DriverAvatar.CurrentBodyType == AvatarBodyType.MALE;
@@ -29,9 +28,7 @@ namespace Gumball
         public override void OnSetCurrent()
         {
             base.OnSetCurrent();
-
-            animator.enabled = false;
-
+            
             //set child of car
             avatar.transform.SetParent(WarehouseManager.Instance.CurrentCar.transform);
             
@@ -43,13 +40,19 @@ namespace Gumball
 
             avatar.CurrentBody.TransformBone.enabled = false;
             avatar.CurrentBody.DriverIK.Initialise(currentPositions);
-        }
+
+            if (isDriver)
+            {
+                //set the steering wheel as the hand target
+                currentPositions.LeftHand.SetParent(WarehouseManager.Instance.CurrentCar.SteeringWheel.transform);
+                currentPositions.RightHand.SetParent(WarehouseManager.Instance.CurrentCar.SteeringWheel.transform);
+            }
+        } 
 
         public override void OnEndState()
         {
             base.OnEndState();
             
-            animator.enabled = true;
             avatar.CurrentBody.TransformBone.enabled = true;
         }
         

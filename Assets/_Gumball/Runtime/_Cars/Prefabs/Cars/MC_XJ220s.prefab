@@ -77,6 +77,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endBoneCopiesRotation: 1
+  positionOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &493239006353142642
 GameObject:
   m_ObjectHideFlags: 0
@@ -693,6 +694,7 @@ MonoBehaviour:
   rigidBody: {fileID: 0}
   wheelManager: {fileID: 9131771319189854056}
   avatarIKManager: {fileID: 3038809945755952107}
+  steeringWheel: {fileID: 755326655889393961}
   carIndex: 0
   id: 0
 --- !u!114 &9131771319189854056
@@ -1526,6 +1528,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endBoneCopiesRotation: 1
+  positionOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &3905756656652600902
 GameObject:
   m_ObjectHideFlags: 0
@@ -1755,6 +1758,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3111759356534666228}
+  - component: {fileID: 755326655889393961}
   - component: {fileID: 6307327864637655851}
   - component: {fileID: 2872794234680217790}
   m_Layer: 0
@@ -1779,6 +1783,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 447986877756999281}
   m_LocalEulerAnglesHint: {x: -78.06, y: 0, z: 0}
+--- !u!114 &755326655889393961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4121310615458098224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d321a394e780b14899c521e78857dea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxRotationEulerLeft: {x: -78.06, y: 0, z: 50}
+  maxRotationEulerRight: {x: -78.06, y: 0, z: -50}
+  steerTweenDuration: 1.5
+  steerTweenEase: 27
+  currentSteerAmount: 0
 --- !u!33 &6307327864637655851
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1957,6 +1978,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endBoneCopiesRotation: 1
+  positionOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &4170544623560915892
 GameObject:
   m_ObjectHideFlags: 0
@@ -3094,6 +3116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endBoneCopiesRotation: 1
+  positionOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &6630929441906151381
 GameObject:
   m_ObjectHideFlags: 0

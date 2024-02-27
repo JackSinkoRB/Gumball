@@ -848,6 +848,7 @@ GameObject:
   - component: {fileID: 779309133349095076}
   - component: {fileID: 104990714534062137}
   - component: {fileID: 3105075534735641311}
+  - component: {fileID: 5482854987300756451}
   m_Layer: 0
   m_Name: FemaleBody
   m_TagString: Untagged
@@ -1017,6 +1018,21 @@ MonoBehaviour:
   Textures:
   - {fileID: 2800000, guid: 15d50a77cc1f0ee44944dbcc51e4b0e4, type: 3}
   - {fileID: 2800000, guid: 091203f8964268a4090a64fc7249561c, type: 3}
+--- !u!114 &5482854987300756451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1947461472601751690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df8cf4d0a366706449f625181dcb9402, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  randomSpeed:
+    Min: 0.95
+    Max: 1.05
 --- !u!1 &1974715680571651973
 GameObject:
   m_ObjectHideFlags: 0
@@ -1911,41 +1927,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   leftArmChain:
-    endBoneCopiesTargetRotation: 1
-    chainLength: 2
+    ChainLength: 2
     bone: {fileID: 5182653990809023545}
     target: {fileID: 0}
     pole: {fileID: 3848699251538821436}
-    iterations: 10
-    delta: 0.001
-    showDebug: 1
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
   rightArmChain:
-    endBoneCopiesTargetRotation: 1
-    chainLength: 2
+    ChainLength: 2
     bone: {fileID: 2350471136245031575}
     target: {fileID: 0}
     pole: {fileID: 4287898495084628955}
-    iterations: 10
-    delta: 0.001
-    showDebug: 1
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
   leftLegChain:
-    endBoneCopiesTargetRotation: 0
-    chainLength: 2
+    ChainLength: 2
     bone: {fileID: 1544831195939293279}
     target: {fileID: 0}
     pole: {fileID: 2232558196733435237}
-    iterations: 10
-    delta: 0.001
-    showDebug: 1
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
   rightLegChain:
-    endBoneCopiesTargetRotation: 0
-    chainLength: 2
+    ChainLength: 2
     bone: {fileID: 2977418511021091190}
     target: {fileID: 0}
     pole: {fileID: 6842395317228710151}
-    iterations: 10
-    delta: 0.001
-    showDebug: 1
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
 --- !u!1 &4522841489942541633
 GameObject:
   m_ObjectHideFlags: 0

@@ -902,37 +902,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   leftArmChain:
-    chainLength: 2
+    ChainLength: 2
     bone: {fileID: 4185158547901344346}
     target: {fileID: 0}
     pole: {fileID: 5571780202533437148}
-    iterations: 10
-    delta: 0.001
-    showDebug: 1
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
   rightArmChain:
-    chainLength: 2
+    ChainLength: 2
     bone: {fileID: 1299612865458460208}
     target: {fileID: 0}
     pole: {fileID: 231941843139601029}
-    iterations: 10
-    delta: 0.001
-    showDebug: 1
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
   leftLegChain:
-    chainLength: 2
+    ChainLength: 2
     bone: {fileID: 6227434718967896391}
     target: {fileID: 0}
     pole: {fileID: 2230402170942131458}
-    iterations: 10
-    delta: 0.001
-    showDebug: 1
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
   rightLegChain:
-    chainLength: 2
+    ChainLength: 2
     bone: {fileID: 5099149108410719360}
     target: {fileID: 0}
     pole: {fileID: 6756729074562466796}
-    iterations: 10
-    delta: 0.001
-    showDebug: 1
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
 --- !u!1 &2088751884596975269
 GameObject:
   m_ObjectHideFlags: 0
@@ -5016,6 +5016,7 @@ GameObject:
   - component: {fileID: 2301259722325109596}
   - component: {fileID: 3344247172540571197}
   - component: {fileID: 6508648348673625581}
+  - component: {fileID: 5618283575975042761}
   m_Layer: 0
   m_Name: MaleBody
   m_TagString: Untagged
@@ -5169,6 +5170,21 @@ MonoBehaviour:
     FloatProperties: []
     TextureProperties: []
     ColorProperties: []
+--- !u!114 &5618283575975042761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7872162728263503887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df8cf4d0a366706449f625181dcb9402, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  randomSpeed:
+    Min: 0.95
+    Max: 1.05
 --- !u!1 &8189404823849879822
 GameObject:
   m_ObjectHideFlags: 0
