@@ -14,7 +14,10 @@ namespace Gumball
         [SerializeField] private AvatarBodyType bodyType;
         [SerializeField] private CharacterCustomization customiser;
         [SerializeField] private Transform cosmeticsHolder;
-
+        [SerializeField] private DriverIK driverIK;
+        [SerializeField] private TransformBone transformBone;
+        [SerializeField] private Transform pelvis;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Avatar avatarBelongsTo;
         [SerializeField, ReadOnly] private AvatarCosmetic[] cosmetics;
@@ -28,6 +31,9 @@ namespace Gumball
         public AvatarBodyType BodyType => bodyType;
         public CharacterCustomization Customiser => customiser;
         public AvatarCosmetic[] Cosmetics => cosmetics;
+        public DriverIK DriverIK => driverIK;
+        public TransformBone TransformBone => transformBone;
+        public Transform Pelvis => pelvis;
 
         public Dictionary<AvatarCosmeticCategory, List<AvatarCosmetic>> CosmeticsGrouped { get; } = new();
 

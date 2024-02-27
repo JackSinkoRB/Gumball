@@ -16,6 +16,7 @@ namespace Gumball
         public const string AvatarEditorSceneName = "AvatarEditor";
         public const string MapSceneName = "MapScene";
         public const string WarehouseSceneName = "Warehouse";
-        
+        public const string WorkshopSceneName = "Workshop";
+
     }
 }

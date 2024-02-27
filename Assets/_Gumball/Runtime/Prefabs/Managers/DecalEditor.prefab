@@ -31,7 +31,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2692402741645592532}
-  - {fileID: 8278154539206843152}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2448111955045738793
@@ -47,9 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroy: 1
-  currentCar: {fileID: 0}
   selectedLiveDecalUI: {fileID: 1925627446997356956}
-  cameraController: {fileID: 8801126979822624446}
   colorPalette:
   - {r: 0, g: 0, b: 0, a: 1}
   - {r: 0.1, g: 0.1, b: 0.1, a: 1}
@@ -114,74 +111,9 @@ MonoBehaviour:
   - {r: 1, g: 0, b: 0.119999886, a: 1}
   numberOfGrayscaleColors: 10
   numberOfRainbowColours: 50
+  isSessionActive: 0
   currentSelected: {fileID: 0}
-  priorityCount: 0
   paintableMeshes: []
-  liveDecals: []
---- !u!1 &3422100899205488632
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8278154539206843152}
-  - component: {fileID: 8801126979822624446}
-  m_Layer: 0
-  m_Name: CameraController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &8278154539206843152
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3422100899205488632}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1262837667675294808}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8801126979822624446
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3422100899205488632}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0e3f2ffe30c4514397ff3fbe4fcb2f2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  initialCameraPosition: {x: -3.6, y: 1.5, z: 3.3}
-  initialCameraRotation: {x: 11.3, y: 132, z: 0}
-  target: {fileID: 0}
-  targetOffset: {x: 0, y: 0.5, z: 0}
-  defaultTargetOffset: {x: 0, y: 0.5, z: 0}
-  decalTargetOffset: {x: 0, y: 0, z: 0}
-  xSpeed: 50
-  ySpeed: 100
-  yClamp:
-    Min: 0
-    Max: 60
-  decelerationDuration: 0.5
-  decelerationSpeed: 50
-  movementTweenDuration: 0.3
-  distance: 5
-  pinchZoomSpeed: 0.01
-  keyboardZoomSpeed: 0.1
-  zoomDistanceClamp:
-    Min: 3
-    Max: 6
 --- !u!1 &4999621885020328775
 GameObject:
   m_ObjectHideFlags: 0

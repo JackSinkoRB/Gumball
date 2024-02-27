@@ -848,6 +848,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5731941678432047488}
   - component: {fileID: 6859301448386911851}
+  - component: {fileID: 1696873600396547014}
   m_Layer: 0
   m_Name: root
   m_TagString: Untagged
@@ -888,6 +889,50 @@ MonoBehaviour:
   offset: {x: 0, y: 0, z: 0}
   Axis: 1
   Mode: 0
+--- !u!114 &1696873600396547014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2063901068913681237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 674ccf4cedfa1ee4781f5781977217e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftArmChain:
+    ChainLength: 2
+    bone: {fileID: 4185158547901344346}
+    target: {fileID: 0}
+    pole: {fileID: 5571780202533437148}
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
+  rightArmChain:
+    ChainLength: 2
+    bone: {fileID: 1299612865458460208}
+    target: {fileID: 0}
+    pole: {fileID: 231941843139601029}
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
+  leftLegChain:
+    ChainLength: 2
+    bone: {fileID: 6227434718967896391}
+    target: {fileID: 0}
+    pole: {fileID: 2230402170942131458}
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
+  rightLegChain:
+    ChainLength: 2
+    bone: {fileID: 5099149108410719360}
+    target: {fileID: 0}
+    pole: {fileID: 6756729074562466796}
+    Iterations: 10
+    Delta: 0.001
+    SnapBackStrength: 1
 --- !u!1 &2088751884596975269
 GameObject:
   m_ObjectHideFlags: 0
@@ -1967,7 +2012,7 @@ Transform:
   m_GameObject: {fileID: 3081263211759129696}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.13575616, y: 0.046751007, z: 0.098830596}
+  m_LocalPosition: {x: 0.13575616, y: 0.046751007, z: 1.655}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4646,7 +4691,7 @@ Transform:
   m_GameObject: {fileID: 7272164204033015028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.13575616, y: 0.046750955, z: 0.09883058}
+  m_LocalPosition: {x: -0.13575616, y: 0.046750955, z: 1.6550004}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4971,6 +5016,7 @@ GameObject:
   - component: {fileID: 2301259722325109596}
   - component: {fileID: 3344247172540571197}
   - component: {fileID: 6508648348673625581}
+  - component: {fileID: 5618283575975042761}
   m_Layer: 0
   m_Name: MaleBody
   m_TagString: Untagged
@@ -4988,7 +5034,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.93, y: 0.93, z: 0.93}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6731912246860234848}
@@ -5014,6 +5060,9 @@ MonoBehaviour:
   bodyType: 2
   customiser: {fileID: 6508648348673625581}
   cosmeticsHolder: {fileID: 4940314657144353765}
+  driverIK: {fileID: 1696873600396547014}
+  transformBone: {fileID: 6859301448386911851}
+  pelvis: {fileID: 317172778604543605}
   avatarBelongsTo: {fileID: 0}
   cosmetics:
   - {fileID: 1911424327698218242}
@@ -5121,6 +5170,21 @@ MonoBehaviour:
     FloatProperties: []
     TextureProperties: []
     ColorProperties: []
+--- !u!114 &5618283575975042761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7872162728263503887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df8cf4d0a366706449f625181dcb9402, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  randomSpeed:
+    Min: 0.95
+    Max: 1.05
 --- !u!1 &8189404823849879822
 GameObject:
   m_ObjectHideFlags: 0

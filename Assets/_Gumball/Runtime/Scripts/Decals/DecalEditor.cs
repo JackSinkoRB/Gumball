@@ -39,8 +39,7 @@ namespace Gumball
         private static PositionAndRotation positionBeforeSession;
 
         [SerializeField] private SelectedDecalUI selectedLiveDecalUI;
-        [SerializeField] private DecalCameraController cameraController;
-
+        
         [Header("Colours")]
         [SerializeField] private Color[] colorPalette;
         [SerializeField] private int numberOfGrayscaleColors = 10;
@@ -93,7 +92,6 @@ namespace Gumball
 
             CarManager car = WarehouseManager.Instance.CurrentCar;
 
-            Instance.cameraController.gameObject.SetActive(true);
             yield return Instance.StartSession(car);
             
             AvatarManager.Instance.HideAvatars(true);

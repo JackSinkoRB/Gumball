@@ -13,21 +13,23 @@ namespace Gumball
 
         public delegate void OnChangeBodyTypeDelegate(Avatar avatar, AvatarBodyType previousBodyType, AvatarBodyType newBodyType);
         public static event OnChangeBodyTypeDelegate onChangeBodyType;
-        
-        /// <summary>
-        /// If the body type hasn't been saved, default to this body type.
-        /// </summary>
-        private AvatarBodyType defaultBodyType;
-        
+
+        [SerializeField] private AvatarStateManager stateManager;
         [SerializeField] private AssetReferenceGameObject femaleBodyReference;
         [SerializeField] private AssetReferenceGameObject maleBodyReference;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AvatarBodyType currentBodyType;
         
+        /// <summary>
+        /// If the body type hasn't been saved, default to this body type.
+        /// </summary>
+        private AvatarBodyType defaultBodyType;
+        
         private string savedBodyTypeKey => $"{SaveKey}.CurrentBodyType";
 
         public AvatarBody CurrentBody => currentBodyType == AvatarBodyType.MALE ? CurrentMaleBody : CurrentFemaleBody;
+        public AvatarStateManager StateManager => stateManager;
         
         public AvatarBodyType SavedBodyType
         {
