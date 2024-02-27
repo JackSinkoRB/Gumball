@@ -15,10 +15,19 @@ namespace Gumball
         
         public void Initialise(IKPositionsInCar positions)
         {
+            enabled = true;
             leftArmChain.Initialise(positions.LeftHand);
             rightArmChain.Initialise(positions.RightHand);
             leftLegChain.Initialise(positions.LeftFoot);
             rightLegChain.Initialise(positions.RightFoot);
+        }
+
+        private void OnDisable()
+        {
+            leftArmChain.ResetPositions();
+            rightArmChain.ResetPositions();
+            leftLegChain.ResetPositions();
+            rightLegChain.ResetPositions();
         }
 
         private void LateUpdate()

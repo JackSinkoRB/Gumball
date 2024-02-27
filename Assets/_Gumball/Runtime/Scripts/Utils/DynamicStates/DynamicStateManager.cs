@@ -85,6 +85,11 @@ namespace Gumball
             Logger.Log(logger, gameObject.name + " set state to " + (state == null ? "none" : state.name) + ".");
         }
 
+        public void SetState<T>() where T : DynamicState
+        {
+            SetState(GetState<T>());
+        }
+
         public T GetState<T>() where T : DynamicState
         {
             return (T)allStates[typeof(T)];

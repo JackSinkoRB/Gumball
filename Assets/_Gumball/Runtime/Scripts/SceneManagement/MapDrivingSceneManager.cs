@@ -22,6 +22,10 @@ namespace Gumball
         private void OnDisable()
         {
             WarehouseManager.Instance.onCurrentCarChanged -= OnCarChanged;
+            
+            //set idle states
+            AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarStandingIdleState>();
+            AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarStandingIdleState>();
         }
 
         private void OnCarChanged(CarManager newCar)
@@ -77,10 +81,8 @@ namespace Gumball
 
             //set driving states:
             AvatarManager.Instance.HideAvatars(false);
-            AvatarDrivingState driverDrivingState = AvatarManager.Instance.DriverAvatar.StateManager.GetState<AvatarDrivingState>();
-            AvatarDrivingState coDriverDrivingState = AvatarManager.Instance.CoDriverAvatar.StateManager.GetState<AvatarDrivingState>();
-            AvatarManager.Instance.DriverAvatar.StateManager.SetState(driverDrivingState);
-            AvatarManager.Instance.CoDriverAvatar.StateManager.SetState(coDriverDrivingState);
+            AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarDrivingState>();
+            AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarDrivingState>();
 
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car);
         }

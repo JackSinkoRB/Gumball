@@ -35,7 +35,6 @@ namespace Gumball
         [Range(0, 1)]
         public float SnapBackStrength = 1f;
 
-
         protected float[] BonesLength; //Target to Origin
         protected float CompleteLength;
         protected Transform[] Bones;
@@ -43,6 +42,20 @@ namespace Gumball
         protected Vector3[] StartDirectionSucc;
         protected Quaternion[] StartRotationBone;
         protected Transform Root;
+
+        [SerializeField, ReadOnly] private Vector3[] previousPositions;
+        [SerializeField, ReadOnly] private Quaternion[] previousRotations;
+
+        public void ResetPositions()
+        {
+            //loop over each bone/transform and reset to it's original local position and local rotation
+            for (int i = 0; i < Bones.Length; i++)
+            {
+                Transform boneToModify = Bones[i];
+                boneToModify.localPosition = previousPositions[i];
+                boneToModify.localRotation = previousRotations[i];
+            }
+        }
 
         public void Initialise(Transform target = null)
         {
@@ -53,6 +66,9 @@ namespace Gumball
             StartDirectionSucc = new Vector3[ChainLength + 1];
             StartRotationBone = new Quaternion[ChainLength + 1];
 
+            previousPositions = new Vector3[ChainLength + 1];
+            previousRotations = new Quaternion[ChainLength + 1];
+                
             //find root
             Root = bone;
             for (var i = 0; i <= ChainLength; i++)
@@ -82,6 +98,9 @@ namespace Gumball
             {
                 Bones[i] = current;
                 StartRotationBone[i] = GetRotationRootSpace(current);
+                
+                previousPositions[i] = current.localPosition;
+                previousRotations[i] = current.localRotation;
 
                 if (i == Bones.Length - 1)
                 {

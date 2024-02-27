@@ -4,10 +4,18 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class AvatarStandingIdleState : DynamicState
+    public class AvatarStandingIdleState : AvatarDynamicState
     {
         
-        
+        public override void OnSetCurrent()
+        {
+            base.OnSetCurrent();
+            
+            //remove parented
+            avatar.transform.SetParent(null);
+            
+            avatar.CurrentBody.TransformBone.enabled = true;
+        }
         
     }
 }
