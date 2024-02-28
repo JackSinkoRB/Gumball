@@ -13,7 +13,8 @@ namespace Gumball
         [SerializeField] private ChunkMap chunkMap;
 
         public ChunkMap ChunkMap => chunkMap;
-        public string Type => GetType().Name.Replace("GameSession", "");
+
+        public abstract string GetName();
 
         public void StartSession()
         {

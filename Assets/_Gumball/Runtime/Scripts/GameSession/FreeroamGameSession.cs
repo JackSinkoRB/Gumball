@@ -8,7 +8,10 @@ namespace Gumball
     public class FreeroamGameSession : GameSession
     {
         
-        
+        public override string GetName()
+        {
+            return "Freeroam";
+        }
         
     }
 }

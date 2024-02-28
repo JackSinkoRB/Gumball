@@ -22,7 +22,12 @@ namespace Gumball
         }
 
         [SerializeField] private RacerSessionData[] racerData;
-        
+
+        public override string GetName()
+        {
+            return "Timed";
+        }
+
         protected override IEnumerator OnSessionLoad()
         {
             yield return InitialiseRacers();

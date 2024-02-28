@@ -16,7 +16,7 @@ namespace Gumball
         
         private void OnEnable()
         {
-            typeLabel.text = session.Type;
+            typeLabel.text = session.GetName();
         }
 
         public void OnClicked()
