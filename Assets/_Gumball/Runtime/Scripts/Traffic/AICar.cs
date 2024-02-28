@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
@@ -11,27 +12,37 @@ namespace Gumball
     public abstract class AICar : MonoBehaviour
     {
 
-        private const float timeBetweenActivationChecks = 1;
-        private const float carActivationRange = 100;
+        [SerializeField] private Transform[] frontWheelMeshes;
+        [SerializeField] private Transform[] rearWheelMeshes;
+        [SerializeField] private WheelCollider[] frontWheelColliders;
+        [SerializeField] private WheelCollider[] rearWheelColliders;
+
+        [Header("Acceleration")]
+        [SerializeField] private float motorTorque = 500;
         
-        [SerializeField] private Transform[] frontWheels;
-        [SerializeField] private Transform[] wheels;
-        
-        [Header("Modify")]
-        [SerializeField] private float collisionRecoverDuration = 5;
-        [Space(5)]
+        [Header("Steering")]
         [SerializeField] private MinMaxFloat movementTargetDistance = new(3, 10);
         [Tooltip("At less than or equal to 'min' km/h, the movementTargetDistance is min.\n" +
                  "At greater than or equal to 'max' km/h, the movementTargetDistance is max.")]
         [SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(40, 90);
         [Space(5)]
-        [SerializeField] private float wheelRotateSpeed = 30;
+        [SerializeField, ReadOnly] private float desiredSteerAngle;
+
+        [Header("Collisions")]
+        [SerializeField] private float collisionRecoverDuration = 5; //TODO - make this value only start when the rigidbody velocity magnitude is less than a certain amount (has come to a stop)
+        
+        [Header("Braking")]
+        [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
+        [SerializeField] private AnimationCurve cornerBrakingCurve;
+        [Tooltip("The y axis represents the amount of brake torque when x (the amount to brake) is a certain value. When the amount to brake is more, there should be more brake torque.")]
+        [SerializeField] private AnimationCurve brakeTorqueCurve;
         [Space(5)]
-        [SerializeField] private MinMaxFloat turnSpeed = new(0, 4.5f);
-        [Tooltip("At less than or equal to 'min' km/h, the turnSpeed is min.\n" +
-                 "At greater than or equal to 'max' km/h, the turnSpeed is max.")]
-        [SerializeField] private MinMaxFloat turnSpeedFactors = new(0, 90);
-        [Space(5)]
+        [SerializeField, ReadOnly] private bool isBraking;
+        [SerializeField, ReadOnly] private float cornerSpeed;
+        [SerializeField, ReadOnly] private float speedToBrakeTo;
+        [SerializeField, ReadOnly] private float currentBrakeForce;
+        
+        [Header("Old")]
         [Tooltip("The time (in seconds) it takes to go from 0 to 60.")]
         [SerializeField] private float timeToAccelerateTo60 = 10;
         [Tooltip("The time (in seconds) it takes to go from 60 to 0.")]
@@ -41,9 +52,12 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField] private bool debug;
+        [Space(5)]
         [SerializeField, ReadOnly] protected bool isInitialised;
+        [SerializeField, ReadOnly] private Transform[] allWheelMeshes;
+        [SerializeField, ReadOnly] private WheelCollider[] allWheelColliders;
+        [Space(5)]
         [SerializeField, ReadOnly] protected Chunk currentChunk;
-        [SerializeField, ReadOnly] protected bool isActivated = true;
         [SerializeField, ReadOnly] protected bool isFrozen;
         [Space(5)]
         [SerializeField, ReadOnly] private bool isMoving;
@@ -57,10 +71,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private float speedBeforeDecelerating;
         [SerializeField, ReadOnly] private bool inCollision;
 
-        private readonly Cooldown activationCheckCooldown = new(timeBetweenActivationChecks);
         private readonly List<Collision> collisions = new();
         private float timeOfLastCollision = -Mathf.Infinity;
-        
+
         private Rigidbody rigidBody => GetComponent<Rigidbody>();
         private float timeSinceCollision => Time.realtimeSinceStartup - timeOfLastCollision;
         private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
@@ -74,10 +87,14 @@ namespace Gumball
             
             currentChunk.onBecomeAccessible += OnChunkBecomeAccessible;
             currentChunk.onBecomeInaccessible += OnChunkBecomeInaccessible;
-            
-            ActivationRangeCheck();
+
+            CacheAllWheelMeshes();
+            CacheAllWheelColliders();
         }
-        
+
+        //TODO: braking/acceleration
+        // - if collided with, start braking and enable drag
+
         protected virtual void OnDisable()
         {
             if (!isInitialised)
@@ -102,16 +119,6 @@ namespace Gumball
             if (!isFrozen && !recoveringFromCollision)
             {
                 Move();
-            }
-
-            if (activationCheckCooldown.IsReady)
-                ActivationRangeCheck();
-            
-            if (isActivated)
-            {
-                RotateWheels();
-                if (!recoveringFromCollision && speed > 0.01f)
-                    TurnFrontWheels();
             }
         }
         
@@ -164,13 +171,11 @@ namespace Gumball
         private void OnChunkBecomeInaccessible()
         {
             Freeze();
-            ActivationRangeCheck();
         }
 
         private void OnChunkBecomeAccessible()
         {
             Unfreeze();
-            ActivationRangeCheck();
         }
         
         private void Freeze()
@@ -184,63 +189,10 @@ namespace Gumball
         {
             isFrozen = false;
         }
-        
-        private void ActivationRangeCheck()
-        {
-            activationCheckCooldown.Reset();
-            
-#if UNITY_EDITOR
-            if (debug)
-            {
-                if (!isActivated)
-                    Activate();
-                return;
-            }
-#endif
-            
-            if (isFrozen)
-            {
-                if (isActivated)
-                    Deactivate();
-                return;
-            }
-            
-            float carActivationRangeSqr = carActivationRange * carActivationRange;
-            float distanceToPlayerSqr = Vector3.SqrMagnitude(WarehouseManager.Instance.CurrentCar.transform.position - transform.position);
-            if (!isActivated && distanceToPlayerSqr < carActivationRangeSqr)
-                Activate();
-            else if (isActivated && distanceToPlayerSqr > carActivationRangeSqr)
-                Deactivate();
-        }
-
-        private void Activate()
-        {
-            isActivated = true;
-
-            GetComponent<Rigidbody>().useGravity = true;
-            
-            foreach (Collider carCollider in GetComponents<Collider>())
-            {
-                carCollider.enabled = true;
-            }
-        }
-
-        private void Deactivate()
-        {
-            isActivated = false;
-            
-            GetComponent<Rigidbody>().useGravity = false;
-
-            foreach (Collider carCollider in GetComponents<Collider>())
-            {
-                carCollider.enabled = false;
-            }
-        }
 
         private void OnStartMoving()
         {
             isMoving = true;
-            GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
             if (debug) GlobalLoggers.AICarLogger.Log("Started moving");
         }
@@ -252,7 +204,6 @@ namespace Gumball
             desiredSpeed = 0;
             OnStopAccelerating();
             OnStopDecelerating();
-            GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
 
             if (debug) GlobalLoggers.AICarLogger.Log("Stopped moving");
         }
@@ -330,8 +281,8 @@ namespace Gumball
         {
             this.speed = speed;
         }
-        
-        protected abstract (Chunk, Vector3, Quaternion)? GetTargetPosition();
+
+        protected abstract (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance);
 
         protected virtual void PreMoveChecks()
         {
@@ -342,80 +293,124 @@ namespace Gumball
         {
             PreMoveChecks();
             
-            var targetPos = GetTargetPosition();
+            var targetPos = GetPositionAhead(GetMovementTargetDistance(Speed));
             if (targetPos == null)
             {
                 Despawn();
                 return;
             }
             
-            float accelerationTime = ((desiredSpeed - speedBeforeAccelerating)/60f) * timeToAccelerateTo60;
-            float decelerationTime = ((speedBeforeDecelerating - desiredSpeed)/60f) * timeToDecelerateFrom60; //TODO: there should be a min/max time to decelerate - depending on a 'safe distance' (normally 3 second gap, otherwise racers might be less with more braking power)
-            //TODO cont. Eg. If safe distance is 3, if distance to car in front is 2
-            
-            if (isAccelerating)
-            {
-                if (timeSinceAccelerating >= accelerationTime)
-                    OnStopAccelerating();
-                else
-                    OnAccelerate();
-            }
-
-            if (isDecelerating)
-            {
-                if (timeSinceDecelerating >= decelerationTime)
-                    OnStopDecelerating();
-                else
-                    OnDecelerate();
-            }
-
-            if (isAccelerating)
-            {
-                float difference = desiredSpeed - speedBeforeAccelerating;
-                speed = speedBeforeAccelerating + (difference * Mathf.Clamp01(timeSinceAccelerating / accelerationTime));
-            } else if (isDecelerating)
-            {
-                float difference = speedBeforeDecelerating - desiredSpeed;
-                speed = speedBeforeDecelerating - (difference * Mathf.Clamp01(timeSinceDecelerating / decelerationTime));
-            }
-            else
-            {
-                speed = desiredSpeed;
-            }
-
-            if (speed.Approximately(0))
-            {
-                if (isMoving)
-                    OnStopMoving();
-                return;
-            }
-
             if (!isMoving)
                 OnStartMoving();
 
             var (newChunk, targetPosition, targetRotation) = targetPos.Value;
-
-            currentChunk = newChunk;
-            
             Vector3 directionToTarget = targetPosition - transform.position;
-            Quaternion targetRotationFinal = Quaternion.LookRotation(directionToTarget); //face towards the target position
             
-            rigidBody.MoveRotation(Quaternion.Slerp(rigidBody.rotation, targetRotationFinal, GetTurnSpeed(speed) * Time.deltaTime));
+            currentChunk = newChunk;
+            speed = SpeedUtils.ToKmh(rigidBody.velocity.magnitude);
+            desiredSteerAngle = -Vector2.SignedAngle(transform.forward.FlattenAsVector2(), directionToTarget.FlattenAsVector2());
 
-            Vector3 targetVelocity = transform.forward * SpeedUtils.FromKmh(speed); //car always moves forward
-            rigidBody.velocity = targetVelocity;
-            Debug.DrawLine(transform.position + GetComponent<Rigidbody>().velocity * 5, targetPosition, Color.green);
+            //debug directions:
+            Debug.DrawLine(transform.position + rigidBody.velocity * 5, targetPosition, Color.green);
             Debug.DrawLine(transform.position, targetPosition, Color.yellow);
+
+            CheckForCorner();
+            CheckToBrake();
+            
+            if (isBraking)
+            {
+                ApplyBrakeForce();
+            }
+            else
+            {
+                ApplyAccelerationForce();
+            }
+            
+            ApplySteering();
+
+            UpdateWheelMeshes();
+        }
+
+        
+        private void ApplyBrakeForce()
+        {
+            if (!isBraking)
+                return;
+            
+            //the greater distance between speed and speedToBrakeTo, the more brake force should be applied
+            float amountToBrake = speed - speedToBrakeTo;
+            currentBrakeForce = brakeTorqueCurve.Evaluate(amountToBrake);
+            
+            //apply brake force to entire car rather than the wheels to prevent lock up
+            rigidBody.AddForce(-rigidBody.velocity * currentBrakeForce, ForceMode.Force);
+        }
+
+
+        private void CheckToBrake()
+        {
+            isBraking = false; //reset for check
+
+            const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
+            float speedToObey = Mathf.Min(desiredSpeed + speedingLeeway, cornerSpeed);
+
+            if (speed > speedToObey)
+            {
+                speedToBrakeTo = speedToObey;
+                isBraking = true;
+            }
+            
+            //TODO: if obstacle blocking, check if it is a rigidbody and set the speedToBrakeTo to the speed
+            // - else set speedToBrakeTo to 0 if it's stationary
         }
         
-        private void RotateWheels()
+        private void CheckForCorner()
         {
-            foreach (Transform wheel in wheels)
+            const float visionDistance = 25f;
+            var targetPos = GetPositionAhead(visionDistance);
+            if (targetPos == null)
+                return;
+            
+            var (chunk, targetPosition, targetRotation) = targetPos.Value;
+            Vector3 directionToTarget = targetPosition - transform.position;
+
+            float angleAhead = Vector2.Angle(transform.forward.FlattenAsVector2(), directionToTarget.FlattenAsVector2());
+            float angleAheadToBrakeTo = Mathf.Max(Mathf.Abs(desiredSteerAngle), angleAhead);
+            
+            cornerSpeed = cornerBrakingCurve.Evaluate(angleAheadToBrakeTo);
+        }
+
+        private void ApplyAccelerationForce()
+        {
+            foreach (WheelCollider rearWheel in rearWheelColliders)
             {
-                wheel.Rotate(Vector3.up, wheelRotateSpeed * speed * Time.deltaTime, Space.Self);
+                rearWheel.motorTorque = speed < desiredSpeed ? motorTorque : 0; //TODO: use some kind of interpolation
+            }
+        }
+        
+        private void ApplySteering()
+        {
+            foreach (WheelCollider frontWheel in frontWheelColliders)
+            {
+                frontWheel.steerAngle = desiredSteerAngle; //TODO: use some kind of interpolation
             }
         }
 
+        /// <summary>
+        /// Update all the wheel meshes to match the wheel colliders.
+        /// </summary>
+        private void UpdateWheelMeshes()
+        {
+            for (int count = 0; count < allWheelMeshes.Length; count++)
+            {
+                Transform mesh = allWheelMeshes[count];
+                WheelCollider wheelCollider = allWheelColliders[count];
+                
+                wheelCollider.GetWorldPose(out Vector3 wheelPosition, out Quaternion wheelRotation);
+                mesh.position = wheelPosition;
+                mesh.rotation = wheelRotation;
+            }
+        }
+        
         protected float GetMovementTargetDistance(float speedToCheck)
         {
             speedToCheck = Mathf.Clamp(speedToCheck, movementTargetDistanceSpeedFactors.Min, movementTargetDistanceSpeedFactors.Max);
@@ -424,43 +419,50 @@ namespace Gumball
             return resultDistance;
         }
         
-        private float GetTurnSpeed(float speedToCheck)
-        {
-            speedToCheck = Mathf.Clamp(speedToCheck, turnSpeedFactors.Min, turnSpeedFactors.Max);
-            float percentage = (speedToCheck - turnSpeedFactors.Min) / (turnSpeedFactors.Max - turnSpeedFactors.Min);
-            float resultSpeed = Mathf.Lerp(turnSpeed.Min, turnSpeed.Max, percentage);
-            return resultSpeed;
-        }
-
-        protected abstract Vector3? GetFrontWheelTurnDirection();
-        
-        private void TurnFrontWheels()
-        {
-            Vector3? frontWheelTurnDirection = GetFrontWheelTurnDirection();
-            if (frontWheelTurnDirection == null)
-                return;
-
-            Vector3 directionAhead = frontWheelTurnDirection.Value;
-            
-            Debug.DrawLine(transform.position, transform.position + (directionAhead * GetMovementTargetDistance(speed)), Color.blue);
-
-            foreach (Transform wheel in frontWheels)
-            {
-                float speedFactor = Mathf.Clamp01(speed / desiredSpeed);
-                const float minWheelTurnSpeed = 0f;
-                const float maxWheelTurnSpeed = 1f;
-                float wheelTurnSpeed = Mathf.Lerp(minWheelTurnSpeed, maxWheelTurnSpeed, speedFactor);
-                
-                Quaternion targetRotation = Quaternion.LookRotation(directionAhead, wheel.transform.up);
-                wheel.rotation = Quaternion.Slerp(wheel.rotation, targetRotation, Time.deltaTime * wheelTurnSpeed);
-            }
-        }
-
         private void Despawn()
         {
             OnStopMoving();
             gameObject.Pool();
             GlobalLoggers.AICarLogger.Log($"Despawned at {transform.position}");
+        }
+
+        private void CacheAllWheelMeshes()
+        {
+            int indexCount = 0;
+            allWheelMeshes = new Transform[frontWheelMeshes.Length + rearWheelMeshes.Length];
+            foreach (Transform wheelMesh in frontWheelMeshes)
+            {
+                allWheelMeshes[indexCount] = wheelMesh;
+                indexCount++;
+            }
+            foreach (Transform wheelMesh in rearWheelMeshes)
+            {
+                allWheelMeshes[indexCount] = wheelMesh;
+                indexCount++;
+            }
+        }
+        
+        private void CacheAllWheelColliders()
+        {
+            int indexCount = 0;
+            allWheelColliders = new WheelCollider[frontWheelColliders.Length + rearWheelColliders.Length];
+            foreach (WheelCollider wheelCollider in frontWheelColliders)
+            {
+                allWheelColliders[indexCount] = wheelCollider;
+                indexCount++;
+            }
+            foreach (WheelCollider wheelCollider in rearWheelColliders)
+            {
+                allWheelColliders[indexCount] = wheelCollider;
+                indexCount++;
+            }
+        }
+        
+        private void OnDrawGizmos()
+        {
+            Vector3 carCentreOfMassWorld = rigidBody.transform.TransformPoint(rigidBody.centerOfMass);
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(carCentreOfMassWorld, 0.5f);
         }
         
     }

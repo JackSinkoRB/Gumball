@@ -89,9 +89,6 @@ namespace Gumball
 
         private bool CheckIfPathIsBlocked()
         {
-            if (!isActivated)
-                return false;
-
             BoxCollider carCollider = GetComponent<BoxCollider>();
             Vector3 boxCastHalfExtents = carCollider.size / 2f;
             int hits = Physics.BoxCastNonAlloc(transform.TransformPoint(carCollider.center.OffsetZ(carCollider.size.z)), boxCastHalfExtents, transform.forward, blockingObjects, transform.rotation, blockedPathDetectorDistance, LayersAndTags.AICarCollisionLayers);
@@ -123,7 +120,7 @@ namespace Gumball
         /// Get the next desired position and rotation relative to the sample on the next chunk's spline.
         /// </summary>
         /// <returns>The spline sample's position and rotation, or null if no more loaded chunks in the desired direction.</returns>
-        protected override (Chunk, Vector3, Quaternion)? GetTargetPosition()
+        protected override (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
         {
             if (currentChunk == null)
                 return null;
@@ -134,25 +131,13 @@ namespace Gumball
                 return null;
             }
 
-            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(GetMovementTargetDistance(Speed));
+            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(distance);
             if (splineSampleAhead == null)
                 return null; //no more chunks loaded
             
             var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
 
             return (splineSampleAhead.Value.Item2, position, rotation);
-        }
-
-        protected override Vector3? GetFrontWheelTurnDirection()
-        {
-            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(GetMovementTargetDistance(Speed));
-            if (splineSampleAhead == null)
-                return null; //no more chunks
-            
-            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
-            Vector3 directionAhead = (position - transform.position).normalized;
-
-            return directionAhead;
         }
 
         /// <summary>

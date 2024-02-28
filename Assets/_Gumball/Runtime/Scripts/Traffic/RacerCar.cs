@@ -17,15 +17,9 @@ namespace Gumball
         //spline sample ahead (10-20)
 
 
-        protected override (Chunk, Vector3, Quaternion)? GetTargetPosition()
+        protected override (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
         {
             throw new System.NotImplementedException();
         }
-
-        protected override Vector3? GetFrontWheelTurnDirection()
-        {
-            throw new System.NotImplementedException();
-        }
-        
     }
 }
