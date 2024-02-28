@@ -6,8 +6,7 @@ Shader "RBG/VertColor_Holomap"
 	{
 		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
-		_min("min", Range( 0 , 1)) = 0.1032741
-		_max("max", Range( 0 , 1)) = 0
+		_Clamp_Valley("Clamp_Valley", Range( 0 , 5)) = 0
 
 
 		//_TransmissionShadow( "Transmission Shadow", Range( 0, 1 ) ) = 0.5
@@ -186,6 +185,7 @@ Shader "RBG/VertColor_Holomap"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define ASE_SRP_VERSION 140008
 
 
@@ -237,7 +237,10 @@ Shader "RBG/VertColor_Holomap"
 				#define ENABLE_TERRAIN_PERPIXEL_NORMAL
 			#endif
 
-			
+			#define ASE_NEEDS_FRAG_COLOR
+			#define ASE_NEEDS_FRAG_WORLD_VIEW_DIR
+			#define ASE_NEEDS_FRAG_WORLD_NORMAL
+
 
 			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
 				#define ASE_SV_DEPTH SV_DepthLessEqual
@@ -280,8 +283,7 @@ Shader "RBG/VertColor_Holomap"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float _min;
-			float _max;
+			float _Clamp_Valley;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -524,12 +526,22 @@ Shader "RBG/VertColor_Holomap"
 
 				WorldViewDirection = SafeNormalize( WorldViewDirection );
 
-				float3 temp_cast_0 = ((_min + (IN.ase_color.r - 0.0) * (_max - _min) / (1.0 - 0.0))).xxx;
+				float lerpResult278 = lerp( IN.ase_color.r , ( 1.0 - IN.ase_color.r ) , _Clamp_Valley);
+				float4 color275 = IsGammaSpace() ? float4(0.01432895,0.02685519,0.1320755,0) : float4(0.001109052,0.002078575,0.01574109,0);
+				float4 temp_output_274_0 = ( lerpResult278 * color275 );
+				
+				float fresnelNdotV251 = dot( WorldNormal, WorldViewDirection );
+				float fresnelNode251 = ( 0.0 + 19.62 * pow( 1.0 - fresnelNdotV251, 13.1 ) );
+				float4 color256 = IsGammaSpace() ? float4(0,0.6407766,1,0) : float4(0,0.3682322,1,0);
+				float4 temp_output_255_0 = ( fresnelNode251 * color256 );
+				float4 color258 = IsGammaSpace() ? float4(0,0,0,0) : float4(0,0,0,0);
+				float clampResult284 = clamp( fresnelNode251 , 0.0 , 1.0 );
+				float4 lerpResult257 = lerp( temp_output_255_0 , color258 , clampResult284);
 				
 
-				float3 BaseColor = temp_cast_0;
+				float3 BaseColor = temp_output_274_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = 0;
+				float3 Emission = lerpResult257.rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -784,6 +796,7 @@ Shader "RBG/VertColor_Holomap"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define ASE_SRP_VERSION 140008
 
 
@@ -841,8 +854,7 @@ Shader "RBG/VertColor_Holomap"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float _min;
-			float _max;
+			float _Clamp_Valley;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1089,6 +1101,7 @@ Shader "RBG/VertColor_Holomap"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define ASE_SRP_VERSION 140008
 
 
@@ -1144,8 +1157,7 @@ Shader "RBG/VertColor_Holomap"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float _min;
-			float _max;
+			float _Clamp_Valley;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1364,6 +1376,7 @@ Shader "RBG/VertColor_Holomap"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define ASE_SRP_VERSION 140008
 
 
@@ -1384,7 +1397,10 @@ Shader "RBG/VertColor_Holomap"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/MetaInput.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
-			
+			#define ASE_NEEDS_FRAG_COLOR
+			#define ASE_NEEDS_FRAG_WORLD_POSITION
+			#define ASE_NEEDS_VERT_NORMAL
+
 
 			struct VertexInput
 			{
@@ -1411,13 +1427,13 @@ Shader "RBG/VertColor_Holomap"
 					float4 LightCoord : TEXCOORD3;
 				#endif
 				float4 ase_color : COLOR;
+				float4 ase_texcoord4 : TEXCOORD4;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float _min;
-			float _max;
+			float _Clamp_Valley;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1458,7 +1474,13 @@ Shader "RBG/VertColor_Holomap"
 				UNITY_TRANSFER_INSTANCE_ID(v, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
+				float3 ase_worldNormal = TransformObjectToWorldNormal(v.ase_normal);
+				o.ase_texcoord4.xyz = ase_worldNormal;
+				
 				o.ase_color = v.ase_color;
+				
+				//setting value to unused interpolator channels and avoid initialization warnings
+				o.ase_texcoord4.w = 0;
 
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 					float3 defaultVertexValue = v.vertex.xyz;
@@ -1610,11 +1632,24 @@ Shader "RBG/VertColor_Holomap"
 					#endif
 				#endif
 
-				float3 temp_cast_0 = ((_min + (IN.ase_color.r - 0.0) * (_max - _min) / (1.0 - 0.0))).xxx;
+				float lerpResult278 = lerp( IN.ase_color.r , ( 1.0 - IN.ase_color.r ) , _Clamp_Valley);
+				float4 color275 = IsGammaSpace() ? float4(0.01432895,0.02685519,0.1320755,0) : float4(0.001109052,0.002078575,0.01574109,0);
+				float4 temp_output_274_0 = ( lerpResult278 * color275 );
+				
+				float3 ase_worldViewDir = ( _WorldSpaceCameraPos.xyz - WorldPosition );
+				ase_worldViewDir = normalize(ase_worldViewDir);
+				float3 ase_worldNormal = IN.ase_texcoord4.xyz;
+				float fresnelNdotV251 = dot( ase_worldNormal, ase_worldViewDir );
+				float fresnelNode251 = ( 0.0 + 19.62 * pow( 1.0 - fresnelNdotV251, 13.1 ) );
+				float4 color256 = IsGammaSpace() ? float4(0,0.6407766,1,0) : float4(0,0.3682322,1,0);
+				float4 temp_output_255_0 = ( fresnelNode251 * color256 );
+				float4 color258 = IsGammaSpace() ? float4(0,0,0,0) : float4(0,0,0,0);
+				float clampResult284 = clamp( fresnelNode251 , 0.0 , 1.0 );
+				float4 lerpResult257 = lerp( temp_output_255_0 , color258 , clampResult284);
 				
 
-				float3 BaseColor = temp_cast_0;
-				float3 Emission = 0;
+				float3 BaseColor = temp_output_274_0.rgb;
+				float3 Emission = lerpResult257.rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 
@@ -1652,6 +1687,7 @@ Shader "RBG/VertColor_Holomap"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define ASE_SRP_VERSION 140008
 
 
@@ -1669,7 +1705,8 @@ Shader "RBG/VertColor_Holomap"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
-			
+			#define ASE_NEEDS_FRAG_COLOR
+
 
 			struct VertexInput
 			{
@@ -1694,8 +1731,7 @@ Shader "RBG/VertColor_Holomap"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float _min;
-			float _max;
+			float _Clamp_Valley;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1872,10 +1908,12 @@ Shader "RBG/VertColor_Holomap"
 					#endif
 				#endif
 
-				float3 temp_cast_0 = ((_min + (IN.ase_color.r - 0.0) * (_max - _min) / (1.0 - 0.0))).xxx;
+				float lerpResult278 = lerp( IN.ase_color.r , ( 1.0 - IN.ase_color.r ) , _Clamp_Valley);
+				float4 color275 = IsGammaSpace() ? float4(0.01432895,0.02685519,0.1320755,0) : float4(0.001109052,0.002078575,0.01574109,0);
+				float4 temp_output_274_0 = ( lerpResult278 * color275 );
 				
 
-				float3 BaseColor = temp_cast_0;
+				float3 BaseColor = temp_output_274_0.rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 
@@ -1908,6 +1946,7 @@ Shader "RBG/VertColor_Holomap"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define ASE_SRP_VERSION 140008
 
 
@@ -1968,8 +2007,7 @@ Shader "RBG/VertColor_Holomap"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float _min;
-			float _max;
+			float _Clamp_Valley;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2237,6 +2275,7 @@ Shader "RBG/VertColor_Holomap"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define ASE_SRP_VERSION 140008
 
 
@@ -2283,7 +2322,10 @@ Shader "RBG/VertColor_Holomap"
 				#define ENABLE_TERRAIN_PERPIXEL_NORMAL
 			#endif
 
-			
+			#define ASE_NEEDS_FRAG_COLOR
+			#define ASE_NEEDS_FRAG_WORLD_VIEW_DIR
+			#define ASE_NEEDS_FRAG_WORLD_NORMAL
+
 
 			#if defined(ASE_EARLY_Z_DEPTH_OPTIMIZE) && (SHADER_TARGET >= 45)
 				#define ASE_SV_DEPTH SV_DepthLessEqual
@@ -2326,8 +2368,7 @@ Shader "RBG/VertColor_Holomap"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float _min;
-			float _max;
+			float _Clamp_Valley;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2565,12 +2606,22 @@ Shader "RBG/VertColor_Holomap"
 
 				WorldViewDirection = SafeNormalize( WorldViewDirection );
 
-				float3 temp_cast_0 = ((_min + (IN.ase_color.r - 0.0) * (_max - _min) / (1.0 - 0.0))).xxx;
+				float lerpResult278 = lerp( IN.ase_color.r , ( 1.0 - IN.ase_color.r ) , _Clamp_Valley);
+				float4 color275 = IsGammaSpace() ? float4(0.01432895,0.02685519,0.1320755,0) : float4(0.001109052,0.002078575,0.01574109,0);
+				float4 temp_output_274_0 = ( lerpResult278 * color275 );
+				
+				float fresnelNdotV251 = dot( WorldNormal, WorldViewDirection );
+				float fresnelNode251 = ( 0.0 + 19.62 * pow( 1.0 - fresnelNdotV251, 13.1 ) );
+				float4 color256 = IsGammaSpace() ? float4(0,0.6407766,1,0) : float4(0,0.3682322,1,0);
+				float4 temp_output_255_0 = ( fresnelNode251 * color256 );
+				float4 color258 = IsGammaSpace() ? float4(0,0,0,0) : float4(0,0,0,0);
+				float clampResult284 = clamp( fresnelNode251 , 0.0 , 1.0 );
+				float4 lerpResult257 = lerp( temp_output_255_0 , color258 , clampResult284);
 				
 
-				float3 BaseColor = temp_cast_0;
+				float3 BaseColor = temp_output_274_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = 0;
+				float3 Emission = lerpResult257.rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -2692,6 +2743,7 @@ Shader "RBG/VertColor_Holomap"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define ASE_SRP_VERSION 140008
 
 
@@ -2732,8 +2784,7 @@ Shader "RBG/VertColor_Holomap"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float _min;
-			float _max;
+			float _Clamp_Valley;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2930,6 +2981,7 @@ Shader "RBG/VertColor_Holomap"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define ASE_SRP_VERSION 140008
 
 
@@ -2970,8 +3022,7 @@ Shader "RBG/VertColor_Holomap"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
-			float _min;
-			float _max;
+			float _Clamp_Valley;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -3174,52 +3225,73 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;208;3073.472,-505.3804;Floa
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;209;3073.472,-505.3804;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.RangedFloatNode;252;3356.71,-1865.563;Inherit;False;Constant;_Float0;Float 0;0;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.FresnelNode;251;3646.841,-1873.889;Inherit;True;Standard;WorldNormal;ViewDir;False;False;5;0;FLOAT3;0,0,1;False;4;FLOAT3;0,0,0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;5;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;253;3359.406,-1752.313;Inherit;False;Constant;_Float1;Float 0;0;0;Create;True;0;0;0;False;0;False;13;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;254;3400.156,-1667.673;Inherit;False;Constant;_Float2;Float 0;0;0;Create;True;0;0;0;False;0;False;8.19;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;255;4193.809,-2146.674;Inherit;True;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.LerpOp;257;4497.212,-1777.786;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.LerpOp;260;4631.155,-1413.13;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.ColorNode;256;3790.83,-2217.284;Inherit;False;Constant;_Color0;Color 0;0;0;Create;True;0;0;0;False;0;False;0.02211642,0.02465636,0.6698113,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.ColorNode;256;3790.83,-2217.284;Inherit;False;Constant;_Color0;Color 0;0;0;Create;True;0;0;0;False;0;False;0,0.6407766,1,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;262;4842.731,-1994.321;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.OneMinusNode;263;3939.944,-1745.291;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.ColorNode;261;4093.177,-1444.743;Inherit;False;Constant;_Color2;Color 0;0;0;Create;True;0;0;0;False;0;False;0,1,0.689394,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.ColorNode;261;4093.177,-1444.743;Inherit;False;Constant;_Color2;Color 0;0;0;Create;True;0;0;0;False;0;False;0,0.2260821,0.5943396,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;266;4286.333,-1223.427;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;265;4064.158,-1231.024;Inherit;False;Constant;_Float4;Float 4;0;0;Create;True;0;0;0;False;0;False;0.25;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;201;5481.851,-1709.703;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/VertColor_Holomap;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;638432247861236076;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
 Node;AmplifyShaderEditor.ColorNode;258;4085.647,-1669.055;Inherit;False;Constant;_Color1;Color 0;0;0;Create;True;0;0;0;False;0;False;0,0,0,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.VertexColorNode;185;4042.366,-1129.567;Inherit;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.ClampOpNode;267;4714.637,-1118.651;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.TFHCRemapNode;270;4739.157,-927.1091;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;4;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;269;4343.424,-815.0428;Inherit;False;Property;_max;max;1;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;268;4331.921,-903.5325;Inherit;False;Property;_min;min;0;0;Create;True;0;0;0;False;0;False;0.1032741;0;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;259;4897.567,-1649.403;Inherit;False;Constant;_Float3;Float 3;0;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;271;4355.94,-1104.152;Inherit;False;Constant;_Float5;Float 3;0;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;272;4377.162,-1034.82;Inherit;False;Constant;_Float6;Float 3;0;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.LerpOp;260;4514.78,-1434.95;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.LerpOp;257;5039.759,-1856.909;Inherit;True;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.ColorNode;283;5846.304,-2005.29;Inherit;False;Constant;_Color4;Color 4;3;0;Create;True;0;0;0;False;0;False;0,0,0,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;201;6320.191,-1696.741;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/VertColor_Holomap;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;638432247861236076;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
+Node;AmplifyShaderEditor.RangedFloatNode;254;3394.645,-1667.673;Inherit;False;Constant;_Float2;Float 0;0;0;Create;True;0;0;0;False;0;False;13.1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;253;3367.122,-1752.313;Inherit;False;Constant;_Float1;Float 0;0;0;Create;True;0;0;0;False;0;False;19.62;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.OneMinusNode;263;3994.567,-1753.859;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.ClampOpNode;284;4408.829,-1909.882;Inherit;True;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleAddOpNode;280;5561.712,-2096.228;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.TFHCRemapNode;270;4748.057,-508.8419;Inherit;False;5;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;3;FLOAT;0;False;4;FLOAT;1;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;269;4352.323,-396.7758;Inherit;False;Property;_max;max;1;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;268;4340.82,-485.2654;Inherit;False;Property;_min;min;0;0;Create;True;0;0;0;False;0;False;0.1032741;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;271;4364.839,-685.8848;Inherit;False;Constant;_Float5;Float 3;0;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;272;4386.062,-616.5527;Inherit;False;Constant;_Float6;Float 3;0;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.ClampOpNode;267;4674.441,-687.6553;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;1;False;1;FLOAT;0
+Node;AmplifyShaderEditor.VertexColorNode;185;4269.315,-976.4217;Inherit;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.RangedFloatNode;277;4695.853,-1361.452;Inherit;False;Property;_Clamp_Valley;Clamp_Valley;2;0;Create;True;0;0;0;False;0;False;0;0;0;5;0;1;FLOAT;0
+Node;AmplifyShaderEditor.OneMinusNode;273;4682.818,-1193.547;Inherit;True;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.LerpOp;278;5005.715,-1229.599;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;259;5935.04,-1316.241;Inherit;False;Constant;_Float3;Float 3;0;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.ColorNode;275;5033.587,-1074.192;Inherit;False;Constant;_Color3;Color 3;2;0;Create;True;0;0;0;False;0;False;0.01432895,0.02685519,0.1320755,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;274;5411.125,-1320.878;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleAddOpNode;285;5828.402,-1363.212;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 WireConnection;251;1;252;0
 WireConnection;251;2;253;0
 WireConnection;251;3;254;0
 WireConnection;255;0;251;0
 WireConnection;255;1;256;0
-WireConnection;257;0;255;0
-WireConnection;257;1;258;0
-WireConnection;257;2;251;0
+WireConnection;262;0;255;0
+WireConnection;266;0;265;0
+WireConnection;266;1;185;1
 WireConnection;260;0;256;0
 WireConnection;260;1;261;0
 WireConnection;260;2;266;0
-WireConnection;262;0;255;0
-WireConnection;263;0;251;0
-WireConnection;266;0;265;0
-WireConnection;266;1;185;1
-WireConnection;201;0;270;0
+WireConnection;257;0;255;0
+WireConnection;257;1;258;0
+WireConnection;257;2;284;0
+WireConnection;201;0;274;0
+WireConnection;201;2;257;0
 WireConnection;201;3;259;0
 WireConnection;201;4;259;0
-WireConnection;267;0;185;1
-WireConnection;267;1;268;0
-WireConnection;267;2;269;0
+WireConnection;263;0;251;0
+WireConnection;284;0;251;0
+WireConnection;280;0;257;0
+WireConnection;280;1;274;0
 WireConnection;270;0;185;1
 WireConnection;270;1;271;0
 WireConnection;270;2;272;0
 WireConnection;270;3;268;0
 WireConnection;270;4;269;0
+WireConnection;267;0;185;1
+WireConnection;267;1;268;0
+WireConnection;267;2;269;0
+WireConnection;273;0;185;1
+WireConnection;278;0;185;1
+WireConnection;278;1;273;0
+WireConnection;278;2;277;0
+WireConnection;274;0;278;0
+WireConnection;274;1;275;0
+WireConnection;285;0;257;0
+WireConnection;285;1;274;0
 ASEEND*/
-//CHKSM=3F662FA4A600AE2FE58D64B21B7ECD28190255DB
+//CHKSM=8A0AB01068785EE90C45949EFCC460320C5BCE6F
