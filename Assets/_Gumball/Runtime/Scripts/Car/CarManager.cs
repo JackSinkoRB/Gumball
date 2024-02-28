@@ -126,11 +126,15 @@ namespace Gumball
 
         [Header("New")]
         [SerializeField] private CarWheelsManager wheelManager;
+        [SerializeField] private CarIKManager avatarIKManager;
+        [SerializeField] private SteeringWheel steeringWheel;
 
         [SerializeField, ReadOnly] private int carIndex;
         [SerializeField, ReadOnly] private int id;
 
         public CarWheelsManager WheelManager => wheelManager;
+        public CarIKManager AvatarIKManager => avatarIKManager;
+        public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
         public int ID => id;
         public string SaveKey => $"CarData.{carIndex}.{id}";
@@ -299,6 +303,8 @@ namespace Gumball
 
         private void Update()
         {
+            steeringWheel.UpdateSteeringAmount(InputManager.SteeringInput);
+            
             CalculateSpeed();
             CalculateThrottle();
             CalculateHandbrake();

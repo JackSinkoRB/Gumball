@@ -21,6 +21,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private Avatar driverAvatar;
         [SerializeField, ReadOnly] private Avatar coDriverAvatar;
 
+        public AssetReferenceGameObject AvatarPrefab => avatarPrefab;
         public Avatar DriverAvatar => driverAvatar;
         public Avatar CoDriverAvatar => coDriverAvatar;
 
