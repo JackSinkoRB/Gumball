@@ -25,9 +25,13 @@ namespace Gumball
         [Tooltip("At less than or equal to 'min' km/h, the movementTargetDistance is min.\n" +
                  "At greater than or equal to 'max' km/h, the movementTargetDistance is max.")]
         [SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(40, 90);
+        [Tooltip("The speed that the wheel mesh is interpolated to the desired steer angle. This makes it not snappy.")]
+        [SerializeField] private float visualSteerSpeed = 1;
+        [SerializeField] private float maxSteerAngle = 65;
         [Space(5)]
         [SerializeField, ReadOnly] private float desiredSteerAngle;
-
+        [SerializeField, ReadOnly] private float visualSteerAngle;
+        
         [Header("Collisions")]
         [SerializeField] private float collisionRecoverDuration = 5; //TODO - make this value only start when the rigidbody velocity magnitude is less than a certain amount (has come to a stop)
         
@@ -304,11 +308,11 @@ namespace Gumball
                 OnStartMoving();
 
             var (newChunk, targetPosition, targetRotation) = targetPos.Value;
-            Vector3 directionToTarget = targetPosition - transform.position;
+            Vector3 directionToTarget = targetPosition - rigidBody.position;
             
             currentChunk = newChunk;
             speed = SpeedUtils.ToKmh(rigidBody.velocity.magnitude);
-            desiredSteerAngle = -Vector2.SignedAngle(transform.forward.FlattenAsVector2(), directionToTarget.FlattenAsVector2());
+            desiredSteerAngle = Mathf.Clamp(-Vector2.SignedAngle(rigidBody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
 
             //debug directions:
             Debug.DrawLine(transform.position + rigidBody.velocity * 5, targetPosition, Color.green);
@@ -391,7 +395,7 @@ namespace Gumball
         {
             foreach (WheelCollider frontWheel in frontWheelColliders)
             {
-                frontWheel.steerAngle = desiredSteerAngle; //TODO: use some kind of interpolation
+                frontWheel.steerAngle = desiredSteerAngle;
             }
         }
 
@@ -400,14 +404,34 @@ namespace Gumball
         /// </summary>
         private void UpdateWheelMeshes()
         {
-            for (int count = 0; count < allWheelMeshes.Length; count++)
+            //do rear wheels first as the front wheels require their rotation
+            for (int count = 0; count < rearWheelMeshes.Length; count++)
             {
-                Transform mesh = allWheelMeshes[count];
-                WheelCollider wheelCollider = allWheelColliders[count];
+                Transform rearWheelMesh = rearWheelMeshes[count];
+                WheelCollider rearWheelCollider = rearWheelColliders[count];
                 
-                wheelCollider.GetWorldPose(out Vector3 wheelPosition, out Quaternion wheelRotation);
-                mesh.position = wheelPosition;
-                mesh.rotation = wheelRotation;
+                rearWheelCollider.GetWorldPose(out Vector3 wheelPosition, out Quaternion wheelRotation);
+                rearWheelMesh.position = wheelPosition;
+                rearWheelMesh.rotation = wheelRotation;
+            }
+            
+            //set the visual steer angle (same for all front wheels)
+            visualSteerAngle = Mathf.LerpAngle(visualSteerAngle, desiredSteerAngle, visualSteerSpeed * Time.deltaTime);
+            
+            for (int count = 0; count < frontWheelMeshes.Length; count++)
+            {
+                Transform frontWheelMesh = frontWheelMeshes[count];
+                WheelCollider frontWheelCollider = frontWheelColliders[count];
+                
+                frontWheelCollider.GetWorldPose(out Vector3 wheelPosition, out _);
+                frontWheelMesh.position = wheelPosition;
+
+                //rotation is the same as the rear wheel, but with interpolated steer speed
+                Transform rearWheelRotation = rearWheelMeshes[count];
+                frontWheelMesh.rotation = rearWheelRotation.rotation;
+                
+                //set the steer amount
+                frontWheelMesh.localRotation = Quaternion.Euler(frontWheelMesh.localRotation.eulerAngles.SetY(visualSteerAngle));
             }
         }
         

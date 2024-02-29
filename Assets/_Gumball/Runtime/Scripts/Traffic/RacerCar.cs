@@ -19,7 +19,7 @@ namespace Gumball
 
         protected override (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
         {
-            throw new System.NotImplementedException();
+            return null;
         }
     }
 }
