@@ -45,15 +45,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private float cornerSpeed;
         [SerializeField, ReadOnly] private float speedToBrakeTo;
         [SerializeField, ReadOnly] private float currentBrakeForce;
-        
-        [Header("Old")]
-        [Tooltip("The time (in seconds) it takes to go from 0 to 60.")]
-        [SerializeField] private float timeToAccelerateTo60 = 10;
-        [Tooltip("The time (in seconds) it takes to go from 60 to 0.")]
-        [SerializeField] private float timeToDecelerateFrom60 = 5;
-        [Tooltip("The time (in seconds) it takes to go from 60 to 0 when there's an obstacle ahead.")]
-        [SerializeField] private float emergencyBrakeTimeFrom60 = 2.5f;
-        
+
         [Header("Debugging")]
         [SerializeField] private bool debug;
         [Space(5)]
@@ -79,7 +71,7 @@ namespace Gumball
         private float timeOfLastCollision = -Mathf.Infinity;
 
         private Rigidbody rigidBody => GetComponent<Rigidbody>();
-        private float timeSinceCollision => Time.realtimeSinceStartup - timeOfLastCollision;
+        private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
         public float DesiredSpeed => desiredSpeed;
         public float Speed => speed;
@@ -120,7 +112,7 @@ namespace Gumball
                 return;
             }
             
-            if (!isFrozen && !recoveringFromCollision)
+            if (!isFrozen)
             {
                 Move();
             }
@@ -292,12 +284,13 @@ namespace Gumball
         {
             
         }
-        
+
+        private (Chunk, Vector3, Quaternion)? targetPos;
         private void Move()
         {
             PreMoveChecks();
             
-            var targetPos = GetPositionAhead(GetMovementTargetDistance(Speed));
+            targetPos = GetPositionAhead(GetMovementTargetDistance(Speed));
             if (targetPos == null)
             {
                 Despawn();
@@ -308,21 +301,26 @@ namespace Gumball
                 OnStartMoving();
 
             var (newChunk, targetPosition, targetRotation) = targetPos.Value;
-            Vector3 directionToTarget = targetPosition - rigidBody.position;
             
             currentChunk = newChunk;
             speed = SpeedUtils.ToKmh(rigidBody.velocity.magnitude);
-            desiredSteerAngle = Mathf.Clamp(-Vector2.SignedAngle(rigidBody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
-
+            CalculateSteerAngle();
+            
             //debug directions:
             Debug.DrawLine(transform.position + rigidBody.velocity * 5, targetPosition, Color.green);
             Debug.DrawLine(transform.position, targetPosition, Color.yellow);
 
             CheckForCorner();
             CheckToBrake();
-            
+
+            rigidBody.drag = inCollision || recoveringFromCollision ? 1 : 0;
+
             if (isBraking)
             {
+                //TODO: on brake start only
+                foreach (WheelCollider wheelCollider in allWheelColliders)
+                    wheelCollider.motorTorque = 0;
+                
                 ApplyBrakeForce();
             }
             else
@@ -335,7 +333,21 @@ namespace Gumball
             UpdateWheelMeshes();
         }
 
-        
+        private void CalculateSteerAngle()
+        {
+            if (inCollision || recoveringFromCollision)
+                return; //don't update steering while in collision
+
+            Vector3 targetPosition = targetPos.Value.Item2;
+            Vector3 directionToTarget = targetPosition - rigidBody.position;
+            desiredSteerAngle = Mathf.Clamp(-Vector2.SignedAngle(rigidBody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
+            
+            //set the visual steer angle (same for all front wheels)
+            const float minSpeedVisualSteerModifier = 20;
+            float speedModifier = Mathf.Clamp01(speed / minSpeedVisualSteerModifier); //adjust for low speed
+            visualSteerAngle = Mathf.LerpAngle(visualSteerAngle, desiredSteerAngle, visualSteerSpeed * speedModifier * Time.deltaTime);
+        }
+
         private void ApplyBrakeForce()
         {
             if (!isBraking)
@@ -356,7 +368,7 @@ namespace Gumball
 
             const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
             float speedToObey = Mathf.Min(desiredSpeed + speedingLeeway, cornerSpeed);
-
+            
             if (speed > speedToObey)
             {
                 speedToBrakeTo = speedToObey;
@@ -414,10 +426,7 @@ namespace Gumball
                 rearWheelMesh.position = wheelPosition;
                 rearWheelMesh.rotation = wheelRotation;
             }
-            
-            //set the visual steer angle (same for all front wheels)
-            visualSteerAngle = Mathf.LerpAngle(visualSteerAngle, desiredSteerAngle, visualSteerSpeed * Time.deltaTime);
-            
+
             for (int count = 0; count < frontWheelMeshes.Length; count++)
             {
                 Transform frontWheelMesh = frontWheelMeshes[count];
@@ -431,7 +440,8 @@ namespace Gumball
                 frontWheelMesh.rotation = rearWheelRotation.rotation;
                 
                 //set the steer amount
-                frontWheelMesh.localRotation = Quaternion.Euler(frontWheelMesh.localRotation.eulerAngles.SetY(visualSteerAngle));
+                Transform steerPivot = frontWheelMesh.parent;
+                steerPivot.Rotate(steerPivot.up, visualSteerAngle);
             }
         }
         
