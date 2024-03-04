@@ -11,6 +11,7 @@ Shader "RBG/AlbedoGloss_Normal"
 		_Gloss("Gloss", Range( 0 , 1)) = 0
 		_Metal("Metal", Range( 0 , 1)) = 0
 		_NormalMap("NormalMap", 2D) = "bump" {}
+		_Emission_Str("Emission_Str", Range( 0 , 1)) = 1
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -190,6 +191,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -288,6 +290,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			float4 _Color;
 			float4 _Albedo_G_ST;
 			float4 _NormalMap_ST;
+			float _Emission_Str;
 			float _Metal;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -544,7 +547,7 @@ Shader "RBG/AlbedoGloss_Normal"
 
 				float3 BaseColor = ( _Color * tex2DNode5 ).rgb;
 				float3 Normal = UnpackNormalScale( tex2D( _NormalMap, uv_NormalMap ), 1.0f );
-				float3 Emission = 0;
+				float3 Emission = ( tex2DNode5.a * ( tex2DNode5 * _Emission_Str ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = _Metal;
 				float Smoothness = ( tex2DNode5.a * _Gloss );
@@ -799,6 +802,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -860,6 +864,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			float4 _Color;
 			float4 _Albedo_G_ST;
 			float4 _NormalMap_ST;
+			float _Emission_Str;
 			float _Metal;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -1108,6 +1113,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1167,6 +1173,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			float4 _Color;
 			float4 _Albedo_G_ST;
 			float4 _NormalMap_ST;
+			float _Emission_Str;
 			float _Metal;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -1387,6 +1394,7 @@ Shader "RBG/AlbedoGloss_Normal"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1443,6 +1451,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			float4 _Color;
 			float4 _Albedo_G_ST;
 			float4 _NormalMap_ST;
+			float _Emission_Str;
 			float _Metal;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -1645,7 +1654,7 @@ Shader "RBG/AlbedoGloss_Normal"
 				
 
 				float3 BaseColor = ( _Color * tex2DNode5 ).rgb;
-				float3 Emission = 0;
+				float3 Emission = ( tex2DNode5.a * ( tex2DNode5 * _Emission_Str ) ).rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 
@@ -1683,6 +1692,7 @@ Shader "RBG/AlbedoGloss_Normal"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1729,6 +1739,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			float4 _Color;
 			float4 _Albedo_G_ST;
 			float4 _NormalMap_ST;
+			float _Emission_Str;
 			float _Metal;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -1948,6 +1959,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -2012,6 +2024,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			float4 _Color;
 			float4 _Albedo_G_ST;
 			float4 _NormalMap_ST;
+			float _Emission_Str;
 			float _Metal;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -2287,6 +2300,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -2380,6 +2394,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			float4 _Color;
 			float4 _Albedo_G_ST;
 			float4 _NormalMap_ST;
+			float _Emission_Str;
 			float _Metal;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -2631,7 +2646,7 @@ Shader "RBG/AlbedoGloss_Normal"
 
 				float3 BaseColor = ( _Color * tex2DNode5 ).rgb;
 				float3 Normal = UnpackNormalScale( tex2D( _NormalMap, uv_NormalMap ), 1.0f );
-				float3 Emission = 0;
+				float3 Emission = ( tex2DNode5.a * ( tex2DNode5 * _Emission_Str ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = _Metal;
 				float Smoothness = ( tex2DNode5.a * _Gloss );
@@ -2753,6 +2768,7 @@ Shader "RBG/AlbedoGloss_Normal"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -2797,6 +2813,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			float4 _Color;
 			float4 _Albedo_G_ST;
 			float4 _NormalMap_ST;
+			float _Emission_Str;
 			float _Metal;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -2995,6 +3012,7 @@ Shader "RBG/AlbedoGloss_Normal"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -3039,6 +3057,7 @@ Shader "RBG/AlbedoGloss_Normal"
 			float4 _Color;
 			float4 _Albedo_G_ST;
 			float4 _NormalMap_ST;
+			float _Emission_Str;
 			float _Metal;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -3249,13 +3268,21 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;20;116,0;Float;False;False;
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;21;116,0;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;GBuffer;0;7;GBuffer;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalGBuffer;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;22;116,0;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;SceneSelectionPass;0;8;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;23;116,0;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;25;-224.3415,244.6008;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;27;-51.37008,190.1043;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;24;-435.7415,406.9828;Inherit;False;Property;_Emission_Str;Emission_Str;5;0;Create;True;0;0;0;False;0;False;1;1;0;1;0;1;FLOAT;0
 WireConnection;6;0;2;0
 WireConnection;6;1;5;0
 WireConnection;12;0;5;4
 WireConnection;12;1;4;0
 WireConnection;15;0;6;0
 WireConnection;15;1;7;0
+WireConnection;15;2;27;0
 WireConnection;15;3;13;0
 WireConnection;15;4;12;0
+WireConnection;25;0;5;0
+WireConnection;25;1;24;0
+WireConnection;27;0;5;4
+WireConnection;27;1;25;0
 ASEEND*/
-//CHKSM=788E88537C4809061E686BB7DBB1B3053AD12CE1
+//CHKSM=687BD201EB2E3D88494F81DB055C1C9F85C0CCEF
