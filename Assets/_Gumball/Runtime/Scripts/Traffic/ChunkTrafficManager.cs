@@ -30,7 +30,7 @@ namespace Gumball
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
 
-        [SerializeField] private SplineComputer racingLine;
+        [SerializeField] private RacingLine racingLine;
         
         //when map driving scene loads, load all the traffic cars (eg. a traffic manager that holds reference to all traffic cars)
 
@@ -47,7 +47,8 @@ namespace Gumball
         public Chunk Chunk => chunk;
         public float SpeedLimitKmh => speedLimitKmh;
         public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLength / density);
-
+        public RacingLine RacingLine => racingLine;
+        
         private void OnValidate()
         {
             if (chunk == null)
@@ -89,12 +90,15 @@ namespace Gumball
 
             if (previousChunkTrafficManager.racingLine == null)
                 return;
+
+            SplineComputer currentSpline = racingLine.SplineComputer;
+            SplineComputer previousSpline = previousChunkTrafficManager.racingLine.SplineComputer;
             
             //insert to end of previous chunks racing line a point with other chunks first point
-            previousChunkTrafficManager.racingLine.SetPoint(previousChunkTrafficManager.racingLine.pointCount, racingLine.GetPoint(0));
+            previousSpline.SetPoint(previousSpline.pointCount, currentSpline.GetPoint(0));
             
             //insert at start of chunks racing line a node with previous chunks last node
-            racingLine.InsertPoint(0, previousChunkTrafficManager.racingLine.GetPoint(previousChunkTrafficManager.racingLine.pointCount-2));
+            currentSpline.InsertPoint(0, previousSpline.GetPoint(previousSpline.pointCount-2));
         }
 
         /// <summary>
@@ -133,7 +137,7 @@ namespace Gumball
                     continue;
                 }
 
-                TrafficCar car = TrafficCarSpawner.Instance.SpawnCar(chunk, position, rotation);
+                TrafficCar car = TrafficCarSpawner.Instance.SpawnCar(position, rotation);
                 car.SetLaneDistance(randomLaneDistance + randomLaneOffset.RandomInRange());
                 break;
             }
@@ -175,9 +179,6 @@ namespace Gumball
         
         private float GetRandomLaneDistance(LaneDirection direction)
         {
-            if (laneDistancesBackwardCached.Length == 0 || laneDistancesForwardCached.Length == 0)
-                Debug.LogError("Here: " + chunk.gameObject.name);
-            
             return direction switch
             {
                 LaneDirection.NONE => laneDistances.GetRandom(),

@@ -16,10 +16,12 @@ namespace Gumball
         //desired position is the middle (spline)
         //spline sample ahead (10-20)
 
-
-        protected override (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
+        public override void Initialise()
         {
-            return null;
+            base.Initialise();
+            
+            OnChangeDesiredSpeed(150);
         }
+        
     }
 }

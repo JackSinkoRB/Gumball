@@ -2,19 +2,25 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
 
 namespace Gumball
 {
     [RequireComponent(typeof(Rigidbody))]
-    public abstract class AICar : MonoBehaviour
+    public class AICar : MonoBehaviour
     {
 
         [SerializeField] private Transform[] frontWheelMeshes;
         [SerializeField] private Transform[] rearWheelMeshes;
         [SerializeField] private WheelCollider[] frontWheelColliders;
         [SerializeField] private WheelCollider[] rearWheelColliders;
+
+        [Header("Lanes")]
+        [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
+        [SerializeField] private bool useRacingLine;
+        [ConditionalField(nameof(useRacingLine)), SerializeField, ReadOnly] private float currentLaneDistance;
 
         [Header("Acceleration")]
         [SerializeField] private float motorTorque = 500;
@@ -25,12 +31,12 @@ namespace Gumball
         private Tween[] currentMotorTorqueTweens;
         
         [Header("Steering")]
-        [SerializeField] private MinMaxFloat movementTargetDistance = new(3, 10);
+        [SerializeField] private MinMaxFloat movementTargetDistance = new(5, 10);
         [Tooltip("At less than or equal to 'min' km/h, the movementTargetDistance is min.\n" +
                  "At greater than or equal to 'max' km/h, the movementTargetDistance is max.")]
-        [SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(40, 90);
+        [SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(20, 90);
         [Tooltip("The speed that the wheel mesh is interpolated to the desired steer angle. This makes it not snappy.")]
-        [SerializeField] private float visualSteerSpeed = 1;
+        [SerializeField] private float visualSteerSpeed = 5;
         [SerializeField] private float maxSteerAngle = 65;
         [Space(5)]
         [SerializeField, ReadOnly] private float desiredSteerAngle;
@@ -38,8 +44,10 @@ namespace Gumball
         
         [Header("Collisions")]
         [SerializeField] private float collisionRecoverDuration = 1;
-        
+
         [Header("Braking")]
+        [Tooltip("Does the car slow down and come to a stop when in a collision? Or can it keep accelerating?")]
+        [SerializeField] private bool brakeInCollision = true;
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
         [SerializeField] private AnimationCurve cornerBrakingCurve;
         [Tooltip("The y axis represents the amount of brake torque when x (the amount to brake) is a certain value. When the amount to brake is more, there should be more brake torque.")]
@@ -57,7 +65,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private Transform[] allWheelMeshes;
         [SerializeField, ReadOnly] private WheelCollider[] allWheelColliders;
         [Space(5)]
-        [SerializeField, ReadOnly] protected Chunk currentChunk;
+        [SerializeField, ReadOnly] protected Chunk currentChunkCached;
         [SerializeField, ReadOnly] protected bool isFrozen;
         [Space(5)]
         [SerializeField, ReadOnly] private float speed;
@@ -71,37 +79,62 @@ namespace Gumball
         private bool recoveringFromCollision => inCollisionWithPlayer || timeSinceCollision < collisionRecoverDuration;
         public float DesiredSpeed => desiredSpeed;
         public float Speed => speed;
+        public float CurrentLaneDistance => currentLaneDistance;
+        private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
+        
+        private int lastFrameChunkWasCached = -1;
 
-        public virtual void Initialise(Chunk currentChunk)
+        /// <returns>The chunk the player is on, else null if it can't be found.</returns>
+        public Chunk CurrentChunk
+        {
+            get
+            {
+                if (lastFrameChunkWasCached != Time.frameCount)
+                {
+                    lastFrameChunkWasCached = Time.frameCount;
+
+                    Chunk previousChunk = currentChunkCached;
+                    
+                    //raycast down to terrain
+                    currentChunkCached = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
+                        ? hitDown.transform.parent.GetComponent<Chunk>()
+                        : null;
+                    
+                    if (currentChunkCached != previousChunk)
+                        OnChangeChunk(previousChunk, currentChunkCached);
+                }
+
+                return currentChunkCached;
+            }
+        }
+        
+        private void OnEnable()
+        {
+            if (!isInitialised)
+                Initialise();
+        }
+
+        public virtual void Initialise()
         {
             isInitialised = true;
-            this.currentChunk = currentChunk;
-            
-            currentChunk.onBecomeAccessible += OnChunkBecomeAccessible;
-            currentChunk.onBecomeInaccessible += OnChunkBecomeInaccessible;
+
+            OnChangeChunk(null, CurrentChunk);
 
             CacheAllWheelMeshes();
             CacheAllWheelColliders();
         }
 
-        //TODO: braking/acceleration
-        // - if collided with, start braking and enable drag
-
-        protected virtual void OnDisable()
+        public void SetLaneDistance(float laneDistance)
         {
-            if (!isInitialised)
-                return; //didn't get a chance to initialise
-            
-            currentChunk.onBecomeAccessible -= OnChunkBecomeAccessible;
-            currentChunk.onBecomeInaccessible -= OnChunkBecomeInaccessible;
+            currentLaneDistance = laneDistance;
         }
-
+        
         private void FixedUpdate()
         {
             if (!isInitialised)
                 return;
             
-            if (currentChunk == null)
+            if (CurrentChunk == null)
             {
                 //current chunk may have despawned
                 Despawn();
@@ -121,7 +154,7 @@ namespace Gumball
                     Debug.Log($"{wheelCollider.name}: {wheelCollider.motorTorque}");
             }
         }
-        
+
         private void OnCollisionEnter(Collision collision)
         {
             if (!LayersAndTags.AICarCollisionLayers.ContainsLayer(collision.gameObject.layer))
@@ -149,12 +182,12 @@ namespace Gumball
             }
         }
 
-        private void OnChunkBecomeInaccessible()
+        private void OnChunkCachedBecomeInaccessible()
         {
             Freeze();
         }
 
-        private void OnChunkBecomeAccessible()
+        private void OnChunkCachedBecomeAccessible()
         {
             Unfreeze();
         }
@@ -182,14 +215,15 @@ namespace Gumball
         {
             this.speed = speed;
         }
-
-        protected abstract (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance);
+        
 
         protected virtual void PreMoveChecks()
         {
             
         }
 
+        
+        //TODO: move
         private (Chunk, Vector3, Quaternion)? targetPos;
         
         
@@ -206,7 +240,6 @@ namespace Gumball
 
             var (newChunk, targetPosition, targetRotation) = targetPos.Value;
             
-            currentChunk = newChunk;
             speed = SpeedUtils.ToKmh(rigidBody.velocity.magnitude);
             
             CalculateSteerAngle();
@@ -229,7 +262,7 @@ namespace Gumball
         {
             bool wasAccelerating = isAccelerating;
 
-            if (isBraking || recoveringFromCollision)
+            if (isBraking || (brakeInCollision && recoveringFromCollision))
                 isAccelerating = false;
             else
                 isAccelerating = speed < desiredSpeed;
@@ -246,7 +279,7 @@ namespace Gumball
         
         private void CalculateSteerAngle()
         {
-            if (recoveringFromCollision)
+            if (brakeInCollision && recoveringFromCollision)
                 return; //don't update steering while in collision
 
             Vector3 targetPosition = targetPos.Value.Item2;
@@ -455,6 +488,127 @@ namespace Gumball
             {
                 allWheelColliders[indexCount] = wheelCollider;
                 indexCount++;
+            }
+        }
+        
+        
+        /// <summary>
+        /// Get the next desired position and rotation relative to the sample on the next chunk's spline.
+        /// </summary>
+        /// <returns>The spline sample's position and rotation, or null if no more loaded chunks in the desired direction.</returns>
+        protected (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
+        {
+            if (CurrentChunk == null)
+                return null;
+            
+            if (CurrentChunk.TrafficManager == null)
+            {
+                Debug.LogWarning($"A traffic car is on the chunk {CurrentChunk.gameObject.name}, but it doesn't have a traffic manager.");
+                return null;
+            }
+
+            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(distance);
+            if (splineSampleAhead == null)
+                return null; //no more chunks loaded
+
+            if (useRacingLine)
+            {
+                return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position, splineSampleAhead.Value.Item1.rotation);
+            }
+            else
+            {
+                var (position, rotation) = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
+                return (splineSampleAhead.Value.Item2, position, rotation);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the spline sample that is 'distance' metres away from the closest sample.
+        /// </summary>
+        private (SplineSample, Chunk)? GetSplineSampleAhead(float desiredDistance)
+        {
+            if (CurrentChunk.TrafficManager == null)
+                return null; //no traffic manager
+
+            float desiredDistanceSqr = desiredDistance * desiredDistance;
+
+            Chunk chunkToUse = CurrentChunk;
+            int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkToUse);
+            
+            bool isChunkLoaded = chunkIndex >= 0;
+            if (!isChunkLoaded)
+                return null; //current chunk isn't loaded
+
+            SampleCollection sampleCollection = useRacingLine ? CurrentChunk.TrafficManager.RacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
+            
+            //get the closest sample, then get the next, and next, until it is X distance away from the closest
+            int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(rigidBody.position).Item1;
+            SplineSample closestSample = sampleCollection.samples[closestSplineIndex];
+
+            SplineSample? previousSample = null;
+            float previousDistanceOffset = 0;
+            int offset = faceForward ? 1 : -1;
+            while (true)
+            {
+                int sampleIndex = closestSplineIndex + offset;
+                
+                //check if it goes past the current chunk
+                if (sampleIndex >= sampleCollection.samples.Length || sampleIndex < 0)
+                {
+                    //get the next chunk
+                    chunkIndex = faceForward ? chunkIndex + 1 : chunkIndex - 1;
+                    
+                    LoadedChunkData? loadedChunkData = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(chunkIndex);
+                    if (loadedChunkData == null)
+                    {
+                        //no more loaded chunks
+                        return null;
+                    }
+                    
+                    Chunk newChunk = loadedChunkData.Value.Chunk;
+                    chunkToUse = newChunk;
+                    if (newChunk.TrafficManager == null)
+                        return null; //no traffic manager
+
+                    sampleCollection = useRacingLine ? chunkToUse.TrafficManager.RacingLine.SampleCollection : chunkToUse.SplineSampleCollection;
+                    
+                    //reset the values
+                    previousSample = null;
+                    closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(rigidBody.position).Item1;
+                    closestSample = sampleCollection.samples[closestSplineIndex];
+                    offset = faceForward ? 1 : -1;
+                    continue;
+                }
+                
+                SplineSample sample = sampleCollection.samples[closestSplineIndex + offset];
+                float distanceToSampleSqr = Vector3.SqrMagnitude(sample.position - closestSample.position);
+                float distanceOffset = Mathf.Abs(desiredDistanceSqr - distanceToSampleSqr);
+                
+                bool isFurtherAway = previousSample != null && distanceOffset > previousDistanceOffset;
+                if (isFurtherAway)
+                    return (previousSample.Value, chunkToUse);
+                
+                previousDistanceOffset = distanceOffset;
+                previousSample = sample;
+                
+                offset = faceForward ? offset + 1 : offset - 1;
+            }
+        }
+        
+        private void OnChangeChunk(Chunk previous, Chunk current)
+        {
+            if (previous != null)
+            {
+                previous.onBecomeAccessible -= OnChunkCachedBecomeAccessible;
+                previous.onBecomeInaccessible -= OnChunkCachedBecomeInaccessible;
+            }
+
+            if (current != null)
+            {
+                current.onBecomeAccessible += OnChunkCachedBecomeAccessible;
+                current.onBecomeInaccessible += OnChunkCachedBecomeInaccessible;
             }
         }
         

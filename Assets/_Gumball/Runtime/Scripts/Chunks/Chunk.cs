@@ -117,6 +117,7 @@ namespace Gumball
         }
         
         [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
+        public SampleCollection SplineSampleCollection => splineSampleCollection;
 
         [SerializedDictionary("AssetKey", "Data")]
         public SerializedDictionary<string, List<ChunkObjectData>> ChunkObjectData = new();
@@ -125,6 +126,11 @@ namespace Gumball
         private float timeOfLastLODCheck = -secondsBetweenTerrainLODChecks;
         private float timeSinceTerrainLODCheck => Time.realtimeSinceStartup - timeOfLastLODCheck;
         
+        private void OnEnable()
+        {
+            splineComputer.updateMode = SplineComputer.UpdateMode.None; //make sure the spline computer doesn't update automatically at runtime
+        }
+
         private void LateUpdate()
         {
             DoTerrainLODCheck();
@@ -236,38 +242,13 @@ namespace Gumball
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint)
         {
             UpdateSplineSampleData();
-            float closestDistanceSqr = Mathf.Infinity;
-            SplineSample closestSample = default;
-            foreach (SplineSample sample in splineSampleCollection.samples)
-            {
-                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
-                if (distance < closestDistanceSqr)
-                {
-                    closestDistanceSqr = distance;
-                    closestSample = sample;
-                }
-            }
-            return (closestSample, closestDistanceSqr);
+            return splineSampleCollection.GetClosestSampleOnSpline(fromPoint);
         }
         
         public (int, float) GetClosestSampleIndexOnSpline(Vector3 fromPoint)
         {
             UpdateSplineSampleData();
-            float closestDistanceSqr = Mathf.Infinity;
-            int closestSampleIndex = -1;
-            for (int index = 0; index < splineSampleCollection.samples.Length; index++)
-            {
-                SplineSample sample = splineSampleCollection.samples[index];
-                
-                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
-                if (distance < closestDistanceSqr)
-                {
-                    closestDistanceSqr = distance;
-                    closestSampleIndex = index;
-                }
-            }
-
-            return (closestSampleIndex, closestDistanceSqr);
+            return splineSampleCollection.GetClosestSampleIndexOnSpline(fromPoint);
         }
         
         public void TryCreateChunkDetector()

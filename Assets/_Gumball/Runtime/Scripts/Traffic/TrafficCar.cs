@@ -24,35 +24,25 @@ namespace Gumball
 
         private readonly RaycastHit[] blockingObjects = new RaycastHit[10];
         
-        private bool faceForward => currentChunk.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
-        
-        public float CurrentLaneDistance { get; private set; }
 
-        public override void Initialise(Chunk currentChunk)
+        public override void Initialise()
         {
-            base.Initialise(currentChunk);
+            base.Initialise();
             
             TrafficCarSpawner.TrackCar(this);
             
-            //spawn at max speed
-            SetMaxSpeed();
+            //spawn at max speed once chunk exists
+            this.PerformAfterTrue(() => CurrentChunk != null, SetMaxSpeed);
             
             gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
         }
 
-        protected override void OnDisable()
+        protected void OnDisable()
         {
-            base.OnDisable();
-            
             if (!isInitialised)
                 return; //didn't get a chance to initialise
             
             TrafficCarSpawner.UntrackCar(this);
-        }
-
-        public void SetLaneDistance(float laneDistance)
-        {
-            CurrentLaneDistance = laneDistance;
         }
 
         /// <summary>
@@ -60,7 +50,8 @@ namespace Gumball
         /// </summary>
         private void SetMaxSpeed()
         {
-            float newDesiredSpeed = currentChunk.TrafficManager.SpeedLimitKmh;
+            //TODO: set the rigidbody velocity
+            float newDesiredSpeed = CurrentChunk.TrafficManager.SpeedLimitKmh;
             OnChangeDesiredSpeed(newDesiredSpeed);
             ForceSetSpeed(newDesiredSpeed);
         }
@@ -79,7 +70,7 @@ namespace Gumball
             }
             else
             {
-                float newDesiredSpeed = currentChunk.TrafficManager.SpeedLimitKmh;
+                float newDesiredSpeed = currentChunkCached.TrafficManager.SpeedLimitKmh;
                 if (!newDesiredSpeed.Approximately(DesiredSpeed))
                 {
                     OnChangeDesiredSpeed(newDesiredSpeed);
@@ -114,99 +105,6 @@ namespace Gumball
 #endif
             
             return actualHit != null;
-        }
-        
-        /// <summary>
-        /// Get the next desired position and rotation relative to the sample on the next chunk's spline.
-        /// </summary>
-        /// <returns>The spline sample's position and rotation, or null if no more loaded chunks in the desired direction.</returns>
-        protected override (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
-        {
-            if (currentChunk == null)
-                return null;
-            
-            if (currentChunk.TrafficManager == null)
-            {
-                Debug.LogWarning($"A traffic car is on the chunk {currentChunk.gameObject.name}, but it doesn't have a traffic manager.");
-                return null;
-            }
-
-            (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(distance);
-            if (splineSampleAhead == null)
-                return null; //no more chunks loaded
-            
-            var (position, rotation) = currentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
-
-            return (splineSampleAhead.Value.Item2, position, rotation);
-        }
-
-        /// <summary>
-        /// Gets the spline sample that is 'distance' metres away from the closest sample.
-        /// </summary>
-        private (SplineSample, Chunk)? GetSplineSampleAhead(float desiredDistance)
-        {
-            if (currentChunk.TrafficManager == null)
-                return null; //no traffic manager
-
-            float desiredDistanceSqr = desiredDistance * desiredDistance;
-
-            Chunk chunkToUse = currentChunk;
-            int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunkToUse);
-            
-            bool isChunkLoaded = chunkIndex >= 0;
-            if (!isChunkLoaded)
-                return null; //current chunk isn't loaded
-            
-            //get the closest sample, then get the next, and next, until it is X distance away from the closest
-            int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(rigidBody.position).Item1;
-            SplineSample closestSample = currentChunk.SplineSamples[closestSplineIndex];
-
-            SplineSample? previousSample = null;
-            float previousDistanceOffset = 0;
-            int offset = faceForward ? 1 : -1;
-            while (true)
-            {
-                int sampleIndex = closestSplineIndex + offset;
-                
-                //check if it goes past the current chunk
-                if (sampleIndex >= chunkToUse.SplineSamples.Length || sampleIndex < 0)
-                {
-                    //get the next chunk
-                    chunkIndex = faceForward ? chunkIndex + 1 : chunkIndex - 1;
-                    
-                    LoadedChunkData? loadedChunkData = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(chunkIndex);
-                    if (loadedChunkData == null)
-                    {
-                        //no more loaded chunks
-                        return null;
-                    }
-                    
-                    Chunk newChunk = loadedChunkData.Value.Chunk;
-                    chunkToUse = newChunk;
-                    if (newChunk.TrafficManager == null)
-                        return null; //no traffic manager
-
-                    //reset the values
-                    previousSample = null;
-                    closestSplineIndex = newChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
-                    closestSample = newChunk.SplineSamples[closestSplineIndex];
-                    offset = faceForward ? 1 : -1;
-                    continue;
-                }
-                
-                SplineSample sample = chunkToUse.SplineSamples[closestSplineIndex + offset];
-                float distanceToSampleSqr = Vector3.SqrMagnitude(sample.position - closestSample.position);
-                float distanceOffset = Mathf.Abs(desiredDistanceSqr - distanceToSampleSqr);
-                
-                bool isFurtherAway = previousSample != null && distanceOffset > previousDistanceOffset;
-                if (isFurtherAway)
-                    return (previousSample.Value, chunkToUse);
-                
-                previousDistanceOffset = distanceOffset;
-                previousSample = sample;
-                
-                offset = faceForward ? offset + 1 : offset - 1;
-            }
         }
 
     }

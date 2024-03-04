@@ -44,10 +44,10 @@ namespace Gumball
         
         private float timeSinceLastSpawnCheck => Time.realtimeSinceStartup - lastSpawnCheckTime;
         
-        public TrafficCar SpawnCar(Chunk chunk, Vector3 position, Quaternion rotation)
+        public TrafficCar SpawnCar(Vector3 position, Quaternion rotation)
         {
             TrafficCar randomCarVariant = trafficCarPrefabs.GetRandom().gameObject.GetSpareOrCreate<TrafficCar>(transform, position, rotation);
-            randomCarVariant.Initialise(chunk);
+            randomCarVariant.Initialise();
             
 #if UNITY_EDITOR
             randomCarVariant.name = $"TrafficCar-{randomCarVariant.gameObject.name}-{trafficCarID}";
