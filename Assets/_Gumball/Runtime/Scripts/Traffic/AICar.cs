@@ -1,8 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Dreamteck.Splines;
+using DG.Tweening;
 using MyBox;
 using UnityEngine;
 
@@ -19,6 +18,11 @@ namespace Gumball
 
         [Header("Acceleration")]
         [SerializeField] private float motorTorque = 500;
+        [Tooltip("The duration to go from 0 motor torque to the max motor torque.")]
+        [SerializeField] private float accelerationDurationToMaxTorque = 1f;
+        [SerializeField] private AnimationCurve accelerationEase;
+        [SerializeField, ReadOnly] private bool isAccelerating;
+        private Tween[] currentMotorTorqueTweens;
         
         [Header("Steering")]
         [SerializeField] private MinMaxFloat movementTargetDistance = new(3, 10);
@@ -56,21 +60,14 @@ namespace Gumball
         [SerializeField, ReadOnly] protected Chunk currentChunk;
         [SerializeField, ReadOnly] protected bool isFrozen;
         [Space(5)]
-        [SerializeField, ReadOnly] private bool isMoving;
         [SerializeField, ReadOnly] private float speed;
         [SerializeField, ReadOnly] private float desiredSpeed;
-        [SerializeField, ReadOnly] private bool isAccelerating;
-        [SerializeField, ReadOnly] private float timeSinceAccelerating;
-        [SerializeField, ReadOnly] private float speedBeforeAccelerating;
-        [SerializeField, ReadOnly] private bool isDecelerating;
-        [SerializeField, ReadOnly] private float timeSinceDecelerating;
-        [SerializeField, ReadOnly] private float speedBeforeDecelerating;
         [SerializeField, ReadOnly] private bool inCollision;
 
         private readonly List<Collision> collisions = new();
         private float timeOfLastCollision = -Mathf.Infinity;
 
-        private Rigidbody rigidBody => GetComponent<Rigidbody>();
+        protected Rigidbody rigidBody => GetComponent<Rigidbody>();
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
         public float DesiredSpeed => desiredSpeed;
@@ -116,6 +113,14 @@ namespace Gumball
             {
                 Move();
             }
+            
+            for (int index = 0; index < rearWheelColliders.Length; index++)
+            {
+                WheelCollider wheelCollider = rearWheelColliders[index];
+
+                if (debug)
+                    Debug.Log($"{wheelCollider.name}: {wheelCollider.motorTorque}");
+            }
         }
         
         private void OnCollisionEnter(Collision collision)
@@ -156,7 +161,6 @@ namespace Gumball
         private void OnCollisionStart()
         {
             inCollision = true;
-            OnStopMoving();
         }
         
         private void OnCollisionEnd()
@@ -185,92 +189,12 @@ namespace Gumball
         {
             isFrozen = false;
         }
-
-        private void OnStartMoving()
-        {
-            isMoving = true;
-
-            if (debug) GlobalLoggers.AICarLogger.Log("Started moving");
-        }
-
-        private void OnStopMoving()
-        {
-            isMoving = false;
-            speed = 0;
-            desiredSpeed = 0;
-            OnStopAccelerating();
-            OnStopDecelerating();
-
-            if (debug) GlobalLoggers.AICarLogger.Log("Stopped moving");
-        }
         
-        private void OnStartAccelerating()
-        {
-            isAccelerating = true;
-            timeSinceAccelerating = 0;
-            speedBeforeAccelerating = speed;
-            
-            if (debug) GlobalLoggers.AICarLogger.Log("Started accelerating");
-        }
-        
-        private void OnAccelerate()
-        {
-            timeSinceAccelerating += Time.deltaTime;
-        }
-
-        /// <summary>
-        /// Called when at max speed.
-        /// </summary>
-        private void OnStopAccelerating()
-        {
-            isAccelerating = false;
-            timeSinceAccelerating = 0;
-            
-            if (debug) GlobalLoggers.AICarLogger.Log("Stopped accelerating");
-        }
-        
-        private void OnStartDecelerating()
-        {
-            isDecelerating = true;
-            timeSinceDecelerating = 0;
-            speedBeforeDecelerating = speed;
-            
-            if (debug) GlobalLoggers.AICarLogger.Log("Started decelerating");
-        }
-
-        private void OnDecelerate()
-        {
-            timeSinceDecelerating += Time.deltaTime;
-        }
-        
-        private void OnStopDecelerating()
-        {
-            isDecelerating = false;
-            timeSinceDecelerating = 0;
-            
-            if (debug) GlobalLoggers.AICarLogger.Log("Stopped decelerating");
-        }
-
         protected void OnChangeDesiredSpeed(float newSpeed)
         {
-            float previousSpeed = desiredSpeed;
-            
             desiredSpeed = newSpeed;
             
             if (debug) GlobalLoggers.AICarLogger.Log($"Changed desired speed to {desiredSpeed}");
-
-            if (newSpeed > previousSpeed)
-            {
-                OnStartAccelerating();
-                if (isDecelerating)
-                    OnStopDecelerating();
-            }
-            else if (newSpeed < previousSpeed)
-            {
-                OnStartDecelerating();
-                if (isAccelerating)
-                    OnStopAccelerating();
-            }
         }
 
         protected void ForceSetSpeed(float speed)
@@ -286,6 +210,8 @@ namespace Gumball
         }
 
         private (Chunk, Vector3, Quaternion)? targetPos;
+        
+        
         private void Move()
         {
             PreMoveChecks();
@@ -296,43 +222,47 @@ namespace Gumball
                 Despawn();
                 return;
             }
-            
-            if (!isMoving)
-                OnStartMoving();
 
             var (newChunk, targetPosition, targetRotation) = targetPos.Value;
             
             currentChunk = newChunk;
             speed = SpeedUtils.ToKmh(rigidBody.velocity.magnitude);
+            
             CalculateSteerAngle();
+            CheckForCorner();
+            CheckToBrake();
+            CheckToAccelerate();
+
+            rigidBody.drag = inCollision || recoveringFromCollision ? 1 : 0;
+
+            ApplySteering();
+
+            UpdateWheelMeshes();
             
             //debug directions:
             Debug.DrawLine(transform.position + rigidBody.velocity * 5, targetPosition, Color.green);
             Debug.DrawLine(transform.position, targetPosition, Color.yellow);
-
-            CheckForCorner();
-            CheckToBrake();
-
-            rigidBody.drag = inCollision || recoveringFromCollision ? 1 : 0;
-
-            if (isBraking)
-            {
-                //TODO: on brake start only
-                foreach (WheelCollider wheelCollider in allWheelColliders)
-                    wheelCollider.motorTorque = 0;
-                
-                ApplyBrakeForce();
-            }
-            else
-            {
-                ApplyAccelerationForce();
-            }
-            
-            ApplySteering();
-
-            UpdateWheelMeshes();
         }
 
+        private void CheckToAccelerate()
+        {
+            bool wasAccelerating = isAccelerating;
+
+            if (isBraking || inCollision || recoveringFromCollision)
+                isAccelerating = false;
+            else
+                isAccelerating = speed < desiredSpeed;
+
+            if (wasAccelerating && !isAccelerating)
+                OnStopAccelerating();
+
+            if (!wasAccelerating && isAccelerating)
+                OnStartAccelerating();
+            
+            if (isAccelerating)
+                OnAccelerate();
+        }
+        
         private void CalculateSteerAngle()
         {
             if (inCollision || recoveringFromCollision)
@@ -361,9 +291,9 @@ namespace Gumball
             rigidBody.AddForce(-rigidBody.velocity * currentBrakeForce, ForceMode.Force);
         }
 
-
         private void CheckToBrake()
         {
+            bool wasBraking = isBraking;
             isBraking = false; //reset for check
 
             const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
@@ -375,8 +305,32 @@ namespace Gumball
                 isBraking = true;
             }
             
+            if (wasBraking && !isBraking)
+                OnStopBraking();
+            
+            if (!wasBraking && isBraking)
+                OnStartBraking();
+            
+            if (isBraking)
+                OnBrake();
+            
             //TODO: if obstacle blocking, check if it is a rigidbody and set the speedToBrakeTo to the speed
             // - else set speedToBrakeTo to 0 if it's stationary
+        }
+
+        private void OnStartBraking()
+        {
+            
+        }
+        
+        private void OnBrake()
+        {
+            ApplyBrakeForce();
+        }
+
+        private void OnStopBraking()
+        {
+            
         }
         
         private void CheckForCorner()
@@ -395,12 +349,44 @@ namespace Gumball
             cornerSpeed = cornerBrakingCurve.Evaluate(angleAheadToBrakeTo);
         }
 
-        private void ApplyAccelerationForce()
+        private void OnStartAccelerating()
         {
-            foreach (WheelCollider rearWheel in rearWheelColliders)
+            //initialise the array
+            if (currentMotorTorqueTweens == null || currentMotorTorqueTweens.Length == 0)
+                currentMotorTorqueTweens = new Tween[rearWheelColliders.Length];
+
+            for (int index = 0; index < rearWheelColliders.Length; index++)
             {
-                rearWheel.motorTorque = speed < desiredSpeed ? motorTorque : 0; //TODO: use some kind of interpolation
+                WheelCollider rearWheel = rearWheelColliders[index];
+                
+                if (currentMotorTorqueTweens[index] != null)
+                    currentMotorTorqueTweens[index]?.Kill();
+
+                float currentTorque = rearWheel.motorTorque;
+                float durationPercent = Mathf.Clamp01(1 - (currentTorque / motorTorque));
+                float duration = durationPercent * accelerationDurationToMaxTorque;
+                
+                currentMotorTorqueTweens[index] = DOTween.To(() => rearWheel.motorTorque,
+                        x => rearWheel.motorTorque = x, motorTorque, duration).SetEase(accelerationEase);
             }
+        }
+
+        private void OnStopAccelerating()
+        {
+            for (int index = 0; index < rearWheelColliders.Length; index++)
+            {
+                WheelCollider wheelCollider = rearWheelColliders[index];
+
+                //stop acceleration tweens
+                currentMotorTorqueTweens[index]?.Kill();
+                
+                wheelCollider.motorTorque = 0;
+            }
+        }
+        
+        private void OnAccelerate()
+        {
+            
         }
         
         private void ApplySteering()
@@ -455,7 +441,6 @@ namespace Gumball
         
         private void Despawn()
         {
-            OnStopMoving();
             gameObject.Pool();
             GlobalLoggers.AICarLogger.Log($"Despawned at {transform.position}");
         }
