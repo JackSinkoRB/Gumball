@@ -158,7 +158,7 @@ namespace Gumball
                 return null; //current chunk isn't loaded
             
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
-            int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
+            int closestSplineIndex = currentChunk.GetClosestSampleIndexOnSpline(rigidBody.position).Item1;
             SplineSample closestSample = currentChunk.SplineSamples[closestSplineIndex];
 
             SplineSample? previousSample = null;

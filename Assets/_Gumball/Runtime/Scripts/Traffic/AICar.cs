@@ -37,7 +37,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private float visualSteerAngle;
         
         [Header("Collisions")]
-        [SerializeField] private float collisionRecoverDuration = 5; //TODO - make this value only start when the rigidbody velocity magnitude is less than a certain amount (has come to a stop)
+        [SerializeField] private float collisionRecoverDuration = 1;
         
         [Header("Braking")]
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
@@ -62,14 +62,13 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private float speed;
         [SerializeField, ReadOnly] private float desiredSpeed;
-        [SerializeField, ReadOnly] private bool inCollision;
+        [SerializeField, ReadOnly] private bool inCollisionWithPlayer;
 
-        private readonly List<Collision> collisions = new();
         private float timeOfLastCollision = -Mathf.Infinity;
 
         protected Rigidbody rigidBody => GetComponent<Rigidbody>();
         private float timeSinceCollision => Time.time - timeOfLastCollision;
-        private bool recoveringFromCollision => timeSinceCollision < collisionRecoverDuration;
+        private bool recoveringFromCollision => inCollisionWithPlayer || timeSinceCollision < collisionRecoverDuration;
         public float DesiredSpeed => desiredSpeed;
         public float Speed => speed;
 
@@ -130,42 +129,24 @@ namespace Gumball
 
             GlobalLoggers.AICarLogger.Log($"{gameObject.name} collided with {collision.gameObject.name}");
 
-            if (collisions.Count == 0)
-            {
-                OnCollisionStart();
-            }
-
             timeOfLastCollision = Time.time; //reset collision time
-            
-            collisions.Add(collision);
 
-            if (collision.rigidbody.Equals(WarehouseManager.Instance.CurrentCar.Rigidbody))
+            bool collisionWithPlayer = collision.rigidbody != null && collision.rigidbody == WarehouseManager.Instance.CurrentCar.Rigidbody;
+            if (collisionWithPlayer)
             {
+                inCollisionWithPlayer = true;
                 GlobalLoggers.AICarLogger.Log($"Player hit {gameObject.name} at {collision.impulse.magnitude}m/s");
             }
         }
 
         private void OnCollisionExit(Collision collision)
         {
-            if (!collisions.Contains(collision))
-                return;
-            
-            collisions.Remove(collision);
-
-            if (collisions.Count == 0)
+            bool collisionWithPlayer = collision.rigidbody != null && collision.rigidbody == WarehouseManager.Instance.CurrentCar.Rigidbody;
+            if (collisionWithPlayer)
             {
-                OnCollisionEnd();
+                timeOfLastCollision = Time.time; //reset collision time
+                inCollisionWithPlayer = false;
             }
-        }
-        
-        private void OnCollisionStart()
-        {
-            inCollision = true;
-        }
-        
-        private void OnCollisionEnd()
-        {
-            inCollision = false;
         }
 
         private void OnChunkBecomeInaccessible()
@@ -233,7 +214,7 @@ namespace Gumball
             CheckToBrake();
             CheckToAccelerate();
 
-            rigidBody.drag = inCollision || recoveringFromCollision ? 1 : 0;
+            rigidBody.drag = recoveringFromCollision ? 1 : 0;
 
             ApplySteering();
 
@@ -248,7 +229,7 @@ namespace Gumball
         {
             bool wasAccelerating = isAccelerating;
 
-            if (isBraking || inCollision || recoveringFromCollision)
+            if (isBraking || recoveringFromCollision)
                 isAccelerating = false;
             else
                 isAccelerating = speed < desiredSpeed;
@@ -265,7 +246,7 @@ namespace Gumball
         
         private void CalculateSteerAngle()
         {
-            if (inCollision || recoveringFromCollision)
+            if (recoveringFromCollision)
                 return; //don't update steering while in collision
 
             Vector3 targetPosition = targetPos.Value.Item2;
