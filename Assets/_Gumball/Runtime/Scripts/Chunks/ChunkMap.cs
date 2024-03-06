@@ -56,7 +56,7 @@ namespace Gumball
         {
             if (skybox == null)
             {
-                Debug.LogError($"{name} is missing a skybox reference.");
+                Debug.LogWarning($"{name} is missing a skybox reference.");
                 return;
             }
 

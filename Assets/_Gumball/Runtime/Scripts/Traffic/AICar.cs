@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Dreamteck.Splines;
+#if UNITY_EDITOR
+using Gumball.Editor;
+#endif
 using MyBox;
 using UnityEngine;
 
@@ -11,12 +14,26 @@ namespace Gumball
     [RequireComponent(typeof(Rigidbody))]
     public class AICar : MonoBehaviour
     {
+        
+        private enum ObstacleAvoidanceOffset
+        {
+            NONE,
+            LEFT,
+            RIGHT,
+            LEFT_SMALLER,
+            RIGHT_SMALLER
+        }
 
         [SerializeField] private Transform[] frontWheelMeshes;
         [SerializeField] private Transform[] rearWheelMeshes;
         [SerializeField] private WheelCollider[] frontWheelColliders;
         [SerializeField] private WheelCollider[] rearWheelColliders;
 
+        [Header("Max speed")]
+        [Tooltip("Does the car obey the current chunks speed limit?")]
+        [SerializeField] private bool obeySpeedLimit = true;
+        [SerializeField, ConditionalField(nameof(obeySpeedLimit), true)] private float maxSpeed = 200;
+        
         [Header("Lanes")]
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
         [SerializeField] private bool useRacingLine;
@@ -44,7 +61,19 @@ namespace Gumball
         
         [Header("Collisions")]
         [SerializeField] private float collisionRecoverDuration = 1;
-
+        private float timeOfLastCollision = -Mathf.Infinity;
+        
+        [Header("Obstacle avoidance")]
+        [SerializeField] private bool useObstacleAvoidance;
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private Vector3 obstacleAvoidanceDetectorSize = new(0.5f,1,0.5f);
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private float blockedPathDetectorDistance = 15;
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private float blockedPathDetectorDistanceSide = 10;
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private float blockedPathDetectorDistanceSideSmall = 5;
+        [Space(5)]
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private ObstacleAvoidanceOffset currentOffset;
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private bool hasPickedRandomSide;
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private bool hasPickedRandomSideSmaller;
+        
         [Header("Braking")]
         [Tooltip("Does the car slow down and come to a stop when in a collision? Or can it keep accelerating?")]
         [SerializeField] private bool brakeInCollision = true;
@@ -54,7 +83,9 @@ namespace Gumball
         [SerializeField] private AnimationCurve brakeTorqueCurve;
         [Space(5)]
         [SerializeField, ReadOnly] private bool isBraking;
-        [SerializeField, ReadOnly] private float cornerSpeed;
+        [SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
+        [Tooltip("If there's a blockage ahead, and the blockage is a rigidbody, this will be the rigidbodies speed.")]
+        [SerializeField, ReadOnly] private float blockageSpeed;
         [SerializeField, ReadOnly] private float speedToBrakeTo;
         [SerializeField, ReadOnly] private float currentBrakeForce;
 
@@ -71,19 +102,20 @@ namespace Gumball
         [SerializeField, ReadOnly] private float speed;
         [SerializeField, ReadOnly] private float desiredSpeed;
         [SerializeField, ReadOnly] private bool inCollisionWithPlayer;
-
-        private float timeOfLastCollision = -Mathf.Infinity;
-
+        
+        private readonly RaycastHit[] blockagesTemp = new RaycastHit[5]; //is used for all blockage checks, not to be used for debugging
+        private int lastFrameChunkWasCached = -1;
+        private (Chunk, Vector3, Quaternion)? targetPos;
+        
         protected Rigidbody rigidBody => GetComponent<Rigidbody>();
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => inCollisionWithPlayer || timeSinceCollision < collisionRecoverDuration;
+        private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
+        
         public float DesiredSpeed => desiredSpeed;
         public float Speed => speed;
         public float CurrentLaneDistance => currentLaneDistance;
-        private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
         
-        private int lastFrameChunkWasCached = -1;
-
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk CurrentChunk
         {
@@ -118,6 +150,8 @@ namespace Gumball
         {
             isInitialised = true;
 
+            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
+            
             OnChangeChunk(null, CurrentChunk);
 
             CacheAllWheelMeshes();
@@ -210,27 +244,9 @@ namespace Gumball
             
             if (debug) GlobalLoggers.AICarLogger.Log($"Changed desired speed to {desiredSpeed}");
         }
-
-        protected void ForceSetSpeed(float speed)
-        {
-            this.speed = speed;
-        }
-        
-
-        protected virtual void PreMoveChecks()
-        {
-            
-        }
-
-        
-        //TODO: move
-        private (Chunk, Vector3, Quaternion)? targetPos;
-        
         
         private void Move()
         {
-            PreMoveChecks();
-            
             targetPos = GetPositionAhead(GetMovementTargetDistance(Speed));
             if (targetPos == null)
             {
@@ -238,26 +254,50 @@ namespace Gumball
                 return;
             }
 
-            var (newChunk, targetPosition, targetRotation) = targetPos.Value;
+            var (_, targetPosition, _) = targetPos.Value;
             
             speed = SpeedUtils.ToKmh(rigidBody.velocity.magnitude);
+
+            if (useObstacleAvoidance)
+                TryAvoidObstacles();
             
+            UpdateDesiredSpeed();
             CalculateSteerAngle();
             CheckForCorner();
             CheckToBrake();
             CheckToAccelerate();
 
-            rigidBody.drag = recoveringFromCollision ? 1 : 0;
+            if (brakeInCollision)
+                rigidBody.drag = recoveringFromCollision ? 1 : 0;
 
             ApplySteering();
 
             UpdateWheelMeshes();
             
             //debug directions:
-            Debug.DrawLine(transform.position + rigidBody.velocity * 5, targetPosition, Color.green);
-            Debug.DrawLine(transform.position, targetPosition, Color.yellow);
+            Debug.DrawRay(transform.position, rigidBody.velocity, Color.green);
+            
+            Vector3 offsetDirection = GetObstacleOffset(currentOffset);
+            Debug.DrawLine(transform.position, targetPosition + offsetDirection, Color.yellow);
         }
 
+        private void UpdateDesiredSpeed()
+        {
+            float newDesiredSpeed = desiredSpeed;
+            if (obeySpeedLimit)
+            {
+                if (CurrentChunk.TrafficManager != null)
+                    newDesiredSpeed = CurrentChunk.TrafficManager.SpeedLimitKmh;
+            }
+            else
+            {
+                newDesiredSpeed = maxSpeed;
+            }
+            
+            if (!newDesiredSpeed.Approximately(DesiredSpeed))
+                OnChangeDesiredSpeed(newDesiredSpeed);
+        }
+        
         private void CheckToAccelerate()
         {
             bool wasAccelerating = isAccelerating;
@@ -281,8 +321,9 @@ namespace Gumball
         {
             if (brakeInCollision && recoveringFromCollision)
                 return; //don't update steering while in collision
-
-            Vector3 targetPosition = targetPos.Value.Item2;
+            
+            Vector3 offsetDirection = GetObstacleOffset(currentOffset);
+            Vector3 targetPosition = targetPos.Value.Item2 + offsetDirection;
             Vector3 directionToTarget = targetPosition - rigidBody.position;
             desiredSteerAngle = Mathf.Clamp(-Vector2.SignedAngle(rigidBody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
             
@@ -304,20 +345,35 @@ namespace Gumball
             //apply brake force to entire car rather than the wheels to prevent lock up
             rigidBody.AddForce(-rigidBody.velocity * currentBrakeForce, ForceMode.Force);
         }
-
+        
         private void CheckToBrake()
         {
             bool wasBraking = isBraking;
-            isBraking = false; //reset for check
-
-            const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
-            float speedToObey = Mathf.Min(desiredSpeed + speedingLeeway, cornerSpeed);
             
-            if (speed > speedToObey)
+            //reset for check
+            isBraking = false;
+            speedToBrakeTo = Mathf.Infinity;
+            
+            //is speeding over the desired speed? 
+            const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
+            if (speed > desiredSpeed + speedingLeeway)
             {
-                speedToBrakeTo = speedToObey;
+                speedToBrakeTo = desiredSpeed;
                 isBraking = true;
             }
+
+            //brake around corners
+            if (speed > corneringSpeed && speed < speedToBrakeTo)
+            {
+                speedToBrakeTo = corneringSpeed;
+                isBraking = true;
+            }
+
+            //TODO: check if blockage ahead
+            // - if blockage has a rigidbody, brake to the rigidbodies speed
+            // - else brake to 0
+            blockageSpeed = GetBlockageSpeed();
+            
             
             if (wasBraking && !isBraking)
                 OnStopBraking();
@@ -327,9 +383,150 @@ namespace Gumball
             
             if (isBraking)
                 OnBrake();
+        }
+
+        private void TryAvoidObstacles()
+        {
+            var (_, targetPosition, _) = targetPos.Value;
+            Vector3 directionToTarget = Vector3.Normalize(targetPosition - transform.position);
+
+            if (!IsDirectionBlocked(directionToTarget, blockedPathDetectorDistance))
+            {
+                SetObstacleOffset(ObstacleAvoidanceOffset.NONE);
+                return;
+            }
             
-            //TODO: if obstacle blocking, check if it is a rigidbody and set the speedToBrakeTo to the speed
-            // - else set speedToBrakeTo to 0 if it's stationary
+            //check left and right
+            Vector3 directionToLeft = Vector3.Normalize(targetPosition + GetObstacleOffset(ObstacleAvoidanceOffset.LEFT) - transform.position);
+            Vector3 directionToRight = Vector3.Normalize(targetPosition + GetObstacleOffset(ObstacleAvoidanceOffset.RIGHT) - transform.position);
+                
+            bool isLeftBlocked = IsDirectionBlocked(directionToLeft, blockedPathDetectorDistanceSide);
+            bool isRightBlocked = IsDirectionBlocked(directionToRight, blockedPathDetectorDistanceSide);
+
+            if (isLeftBlocked && isRightBlocked)
+            {
+                //both sides are blocked - try smaller directions
+                Vector3 directionToLeftSmall = Vector3.Normalize(targetPosition + GetObstacleOffset(ObstacleAvoidanceOffset.LEFT_SMALLER) - transform.position);
+                Vector3 directionToRightSmall = Vector3.Normalize(targetPosition + GetObstacleOffset(ObstacleAvoidanceOffset.RIGHT_SMALLER) - transform.position);
+                
+                bool isLeftBlockedSmall = IsDirectionBlocked(directionToLeftSmall, blockedPathDetectorDistanceSideSmall);
+                bool isRightBlockedSmall = IsDirectionBlocked(directionToRightSmall, blockedPathDetectorDistanceSideSmall);
+
+                if (isLeftBlockedSmall && isRightBlockedSmall)
+                    return; //all directions blocked - don't change direction
+
+                if (!isLeftBlockedSmall && !isRightBlockedSmall)
+                {
+                    if (hasPickedRandomSideSmaller)
+                        return; //already picked a side
+                
+                    //pick random side to go to
+                    int random = UnityEngine.Random.Range(0, 2);
+                    SetObstacleOffset(random == 0 ? ObstacleAvoidanceOffset.LEFT_SMALLER : ObstacleAvoidanceOffset.RIGHT_SMALLER);
+                
+                    hasPickedRandomSideSmaller = true;
+                }
+                else if (isRightBlockedSmall && !isLeftBlockedSmall)
+                {
+                    //offset to the left
+                    SetObstacleOffset(ObstacleAvoidanceOffset.LEFT_SMALLER);
+                } else if (isLeftBlockedSmall && !isRightBlockedSmall)
+                {
+                    //offset to the right
+                    SetObstacleOffset(ObstacleAvoidanceOffset.RIGHT_SMALLER);
+                }
+                
+                return;
+            }
+                
+            if (!isLeftBlocked && !isRightBlocked)
+            {
+                if (hasPickedRandomSide)
+                    return; //already picked a side
+                
+                //pick random side to go to
+                int random = UnityEngine.Random.Range(0, 2);
+                SetObstacleOffset(random == 0 ? ObstacleAvoidanceOffset.LEFT : ObstacleAvoidanceOffset.RIGHT);
+                
+                hasPickedRandomSide = true;
+            }
+            else if (isRightBlocked && !isLeftBlocked)
+            {
+                //offset to the left
+                SetObstacleOffset(ObstacleAvoidanceOffset.LEFT);
+            } else if (isLeftBlocked && !isRightBlocked)
+            {
+                //offset to the right
+                SetObstacleOffset(ObstacleAvoidanceOffset.RIGHT);
+            }
+        }
+
+        private Vector3 GetObstacleOffset(ObstacleAvoidanceOffset offset)
+        {
+            switch (offset)
+            {
+                case ObstacleAvoidanceOffset.NONE:
+                    return Vector3.zero;
+                case ObstacleAvoidanceOffset.LEFT:
+                case ObstacleAvoidanceOffset.RIGHT:
+                {
+                    const float offsetAmount = 3;
+                    Vector3 offsetDirection = transform.right * offsetAmount;
+                    if (offset == ObstacleAvoidanceOffset.LEFT)
+                        offsetDirection = -offsetDirection;
+
+                    return offsetDirection;
+                }
+                case ObstacleAvoidanceOffset.LEFT_SMALLER:
+                case ObstacleAvoidanceOffset.RIGHT_SMALLER:
+                {
+                    const float offsetAmount = 6;
+                    Vector3 offsetDirection = transform.right * offsetAmount;
+                    if (offset == ObstacleAvoidanceOffset.LEFT_SMALLER)
+                        offsetDirection = -offsetDirection;
+
+                    return offsetDirection;
+                }
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+        
+        private void SetObstacleOffset(ObstacleAvoidanceOffset offset)
+        {
+            currentOffset = offset;
+            hasPickedRandomSide = false;
+            hasPickedRandomSideSmaller = false;
+        }
+
+        private bool IsDirectionBlocked(Vector3 direction, float raycastLength)
+        {
+            int hits = Physics.BoxCastNonAlloc(transform.position, obstacleAvoidanceDetectorSize, direction, blockagesTemp, transform.rotation, raycastLength, LayersAndTags.AICarCollisionLayers);
+            RaycastHit? actualHit = null;
+            
+            for (int index = 0; index < hits; index++)
+            {
+                RaycastHit hit = blockagesTemp[index];
+                if (!ReferenceEquals(hit.transform.gameObject, gameObject.transform.gameObject))
+                {
+                    actualHit = hit;
+                }
+            }
+            
+#if UNITY_EDITOR
+            BoxCastUtils.DrawBoxCastBox(transform.position, obstacleAvoidanceDetectorSize, transform.rotation, direction, raycastLength, actualHit != null ? Color.magenta : Color.gray);
+#endif
+
+            return actualHit != null;
+        }
+
+        /// <summary>
+        /// Checks if there are any blockages in front, and slows down to the blockage speed.
+        /// </summary>
+        /// <returns></returns>
+        private float GetBlockageSpeed()
+        {
+            return Mathf.Infinity;
         }
 
         private void OnStartBraking()
@@ -360,7 +557,7 @@ namespace Gumball
             float angleAhead = Vector2.Angle(transform.forward.FlattenAsVector2(), directionToTarget.FlattenAsVector2());
             float angleAheadToBrakeTo = Mathf.Max(Mathf.Abs(desiredSteerAngle), angleAhead);
             
-            cornerSpeed = cornerBrakingCurve.Evaluate(angleAheadToBrakeTo);
+            corneringSpeed = cornerBrakingCurve.Evaluate(angleAheadToBrakeTo);
         }
 
         private void OnStartAccelerating()

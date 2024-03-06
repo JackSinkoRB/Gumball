@@ -42,7 +42,7 @@ namespace Gumball
             Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
             yield return ChunkManager.Instance.LoadMap(chunkMap);
             chunkLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map '{chunkMap.name}' in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             //set car rigidbody as dynamic
             currentCarRigidbody.isKinematic = false;
@@ -53,7 +53,7 @@ namespace Gumball
 
             InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car);
         }
-                
+        
         protected virtual IEnumerator OnSessionLoad()
         {
             yield break;

@@ -4144,22 +4144,24 @@ MonoBehaviour:
   rearWheelColliders:
   - {fileID: 5742870871003887090}
   - {fileID: 7622156785749997775}
+  obeySpeedLimit: 0
+  maxSpeed: 200
   useRacingLine: 1
   currentLaneDistance: 0
   motorTorque: 1500
-  accelerationDurationToMaxTorque: 0.4
+  accelerationDurationToMaxTorque: 1
   accelerationEase:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 2
-      outSlope: 2
+      inSlope: 2.6603773
+      outSlope: 2.6603773
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.041666668
     - serializedVersion: 3
       time: 1
       value: 1
@@ -4184,6 +4186,8 @@ MonoBehaviour:
   desiredSteerAngle: 0
   visualSteerAngle: 0
   collisionRecoverDuration: 0
+  obstacleAvoidanceDetectorSize: {x: 0.5, y: 1, z: 0.5}
+  blockedPathDetectorDistance: 15
   brakeInCollision: 0
   cornerBrakingCurve:
     serializedVersion: 2
@@ -4215,17 +4219,17 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 1
-      inSlope: 49.99
-      outSlope: 49.99
+      inSlope: 24.99
+      outSlope: 24.99
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 100
-      value: 5000
-      inSlope: 49.99
-      outSlope: 49.99
+      value: 2500
+      inSlope: 24.99
+      outSlope: 24.99
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -4234,7 +4238,8 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   isBraking: 0
-  cornerSpeed: 0
+  corneringSpeed: Infinity
+  blockageSpeed: 0
   speedToBrakeTo: 0
   currentBrakeForce: 0
   debug: 1
@@ -4246,6 +4251,7 @@ MonoBehaviour:
   speed: 0
   desiredSpeed: 0
   inCollisionWithPlayer: 0
+  currentOffset: 0
 --- !u!54 &5602847413459088334
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4255,7 +4261,7 @@ Rigidbody:
   m_GameObject: {fileID: 4145277957530748488}
   serializedVersion: 4
   m_Mass: 2000
-  m_Drag: 1
+  m_Drag: 0
   m_AngularDrag: 10
   m_CenterOfMass: {x: 0, y: 0.56, z: -0.459}
   m_InertiaTensor: {x: 1, y: 1, z: 1}

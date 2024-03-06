@@ -27,8 +27,6 @@ namespace Gumball
         [Tooltip("A list of the current loaded chunks, in order of map index.\nDoes NOT include custom loaded chunks.")]
         [SerializeField] private List<LoadedChunkData> currentChunks = new();
         
-        [Obsolete("To be removed - for testing only")]
-        public ChunkMap CurrentChunkMap => currentChunkMap;
         /// <summary>
         /// A list of the current loaded chunks, in order of map index.
         /// <remarks>Does NOT include custom loaded chunks.</remarks>
@@ -47,6 +45,7 @@ namespace Gumball
         private int lastFramePlayerChunkWasCached = -1;
 
         public bool HasLoaded;
+        public ChunkMap CurrentChunkMap => currentChunkMap;
         public bool IsLoadingChunks { get; private set; }
         public MinMaxInt LoadingOrLoadedChunksIndices => loadingOrLoadedChunksIndices;
         public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
@@ -66,14 +65,8 @@ namespace Gumball
                 else
                 {
                     //raycast down to terrain
-                    if (Physics.Raycast(WarehouseManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector)))
-                    {
-                        chunkPlayerIsOnCached = hitDown.transform.parent.GetComponent<Chunk>();
-                    }
-                    else
-                    {
-                        chunkPlayerIsOnCached = null;
-                    }
+                    chunkPlayerIsOnCached = Physics.Raycast(WarehouseManager.Instance.CurrentCar.transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
+                        ? hitDown.transform.parent.GetComponent<Chunk>() : null;
                 }
             }
             
