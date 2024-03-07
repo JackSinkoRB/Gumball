@@ -638,7 +638,7 @@ namespace Gumball
                 
                 //set the steer amount
                 Transform steerPivot = frontWheelMesh.parent;
-                steerPivot.Rotate(steerPivot.up, visualSteerAngle);
+                steerPivot.Rotate(Vector3.up, visualSteerAngle);
             }
         }
         
