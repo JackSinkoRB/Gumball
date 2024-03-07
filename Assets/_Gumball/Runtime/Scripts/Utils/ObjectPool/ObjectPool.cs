@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Diagnostics;
+using AYellowpaper.SerializedCollections;
 using Debug = UnityEngine.Debug;
 
 namespace Gumball
@@ -10,9 +11,10 @@ namespace Gumball
     {
         [Tooltip("Assign poolable objects here")]
         [SerializeField] private PoolablePrefab[] poolablePrefabs = Array.Empty<PoolablePrefab>();
-
-        private readonly Dictionary<string, PoolablePrefab> poolablePrefabsByName = new();
-        private readonly Dictionary<string, List<GameObject>> spareObjectsByName = new();
+        
+        [Header("Debugging")]
+        [SerializeField, SerializedDictionary("ID", "Prefab")] private SerializedDictionary<string, PoolablePrefab> poolablePrefabsByName = new();
+        [SerializeField, SerializedDictionary("ID", "Spares")] private SerializedDictionary<string, List<GameObject>> spareObjectsByName = new();
 
         /// <summary>
         /// Retrieve a spare object from a prefab, otherwise create a new one.
@@ -77,9 +79,9 @@ namespace Gumball
             
             objectToGive.SetActive(true); //set object active
             objectToGive.transform.SetParent(assignToParent, false); //set parent?
-            objectToGive.GetComponent<PooledObject>().PoolOnDisable = poolOnDisable; //all objects at this point will have a PooledObject attached, so no need to check
-            objectToGive.GetComponent<PooledObject>().IsPooled = false;
-            objectToGive.GetComponent<PooledObject>().OnPoolAction = onPool;
+
+            PooledObject pooledObject = objectToGive.GetComponent<PooledObject>();
+            pooledObject.Initialise(prefabName, poolOnDisable, onPool);
             
             return objectToGive;
         }
@@ -92,7 +94,14 @@ namespace Gumball
         /// <param name="gameObject">The game object to discard.</param>
         public void Pool(GameObject gameObject)
         {
-            String prefabName = gameObject.name;
+            PooledObject pooledObject = gameObject.GetComponent<PooledObject>();
+            if (!pooledObject)
+            {
+                Debug.LogError($"Can not pool object {gameObject.name} because it was retrieved from a pool.");
+                return;
+            }
+            
+            string prefabName = pooledObject.PrefabName;
             if (!spareObjectsByName.ContainsKey(prefabName))
             {
                 // create a new pool
@@ -109,9 +118,8 @@ namespace Gumball
             if (gameObject.activeSelf)
                 gameObject.SetActive(false);
 
-            gameObject.GetComponent<PooledObject>().IsPooled = true;
-            gameObject.GetComponent<PooledObject>().OnPoolAction?.Invoke();
-
+            gameObject.GetComponent<PooledObject>().SetPooled(true);
+            
             GlobalLoggers.ObjectPoolLogger.Log($"Added {gameObject.name} to {prefabName} pool. ({spareObjectsByName[prefabName].Count} spare)");
         }
 
@@ -121,9 +129,9 @@ namespace Gumball
             return pooledObject != null && pooledObject.IsPooled;
         }
         
-        public void RemoveFromPool(GameObject pooledObject)
+        public void RemoveFromPool(PooledObject pooledObject)
         {
-            string prefabName = pooledObject.name; //if the prefabName is not given, try using the gameobject's name
+            string prefabName = pooledObject.PrefabName;
             if (!spareObjectsByName.ContainsKey(prefabName))
             {
                 Debug.LogWarning($"Tried removing {pooledObject.name} from a pool, but there is no pool.");
@@ -131,12 +139,12 @@ namespace Gumball
             }
 
             List<GameObject> pool = spareObjectsByName[prefabName];
-            if (!pool.Contains(pooledObject)) {
+            if (!pool.Contains(pooledObject.gameObject)) {
                 Debug.LogWarning($"Tried removing {pooledObject.name} from it's pool, but it wasn't in the pool.");
                 return;
             }
             
-            pool.Remove(pooledObject);
+            pool.Remove(pooledObject.gameObject);
 
             //if no more spare objects, remove the reference to the poolable prefab
             if (spareObjectsByName[prefabName].Count == 0 && poolablePrefabsByName.ContainsKey(prefabName))
@@ -246,7 +254,15 @@ namespace Gumball
         public static void RemoveFromPool(this GameObject gameObject)
         {
             if (!ObjectPool.ExistsRuntime) return;
-            ObjectPool.Instance.RemoveFromPool(gameObject);
+
+            PooledObject pooledObject = gameObject.GetComponent<PooledObject>();
+            if (pooledObject == null)
+            {
+                Debug.LogError($"Could not remove {gameObject.name} from pool, because it hasn't been initialised as a pooled object.");
+                return;
+            }
+            
+            ObjectPool.Instance.RemoveFromPool(pooledObject);
         }
     }   
 }
