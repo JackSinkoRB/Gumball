@@ -155,6 +155,10 @@ namespace Gumball
         {
             isInitialised = true;
 
+            //reset for pooled objects:
+            isAccelerating = false;
+            
+            
             gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
             
             OnChangeChunk(null, CurrentChunk);
