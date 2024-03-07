@@ -4186,8 +4186,14 @@ MonoBehaviour:
   desiredSteerAngle: 0
   visualSteerAngle: 0
   collisionRecoverDuration: 0
+  useObstacleAvoidance: 1
   obstacleAvoidanceDetectorSize: {x: 0.5, y: 1, z: 0.5}
   blockedPathDetectorDistance: 15
+  blockedPathDetectorDistanceSide: 10
+  blockedPathDetectorDistanceSideSmall: 5
+  currentOffset: 0
+  hasPickedRandomSide: 0
+  hasPickedRandomSideSmaller: 0
   brakeInCollision: 0
   cornerBrakingCurve:
     serializedVersion: 2
@@ -4251,7 +4257,6 @@ MonoBehaviour:
   speed: 0
   desiredSpeed: 0
   inCollisionWithPlayer: 0
-  currentOffset: 0
 --- !u!54 &5602847413459088334
 Rigidbody:
   m_ObjectHideFlags: 0
