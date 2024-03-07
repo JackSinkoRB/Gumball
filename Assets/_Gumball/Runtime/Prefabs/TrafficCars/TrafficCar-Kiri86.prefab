@@ -1676,6 +1676,8 @@ MonoBehaviour:
   rearWheelColliders:
   - {fileID: 1645255541620133767}
   - {fileID: 8281378343497143908}
+  obeySpeedLimit: 1
+  maxSpeed: 200
   useRacingLine: 0
   currentLaneDistance: 0
   motorTorque: 500
@@ -1716,6 +1718,18 @@ MonoBehaviour:
   desiredSteerAngle: 0
   visualSteerAngle: 0
   collisionRecoverDuration: 1
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 768
+  useObstacleAvoidance: 0
+  obstacleAvoidanceDetectorSize: {x: 0.5, y: 1, z: 0.5}
+  blockedPathDetectorDistance: 15
+  blockedPathDetectorDistanceSide: 10
+  blockedPathDetectorDistanceSideSmall: 5
+  currentOffset: 0
+  hasPickedRandomSide: 0
+  hasPickedRandomSideSmaller: 0
+  brakeInCollision: 1
   cornerBrakingCurve:
     serializedVersion: 2
     m_Curve:
@@ -1765,7 +1779,8 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   isBraking: 0
-  cornerSpeed: 0
+  corneringSpeed: Infinity
+  blockageSpeed: 0
   speedToBrakeTo: 0
   currentBrakeForce: 0
   debug: 0
@@ -1776,9 +1791,7 @@ MonoBehaviour:
   isFrozen: 0
   speed: 0
   desiredSpeed: 0
-  inCollisionWithPlayer: 0
-  isPathBlocked: 0
-  distanceToBlockage: 0
+  inCollision: 0
 --- !u!54 &5974823439251168409
 Rigidbody:
   m_ObjectHideFlags: 0

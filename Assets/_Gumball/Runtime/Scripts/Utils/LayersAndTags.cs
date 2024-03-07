@@ -18,8 +18,8 @@ namespace Gumball
             PaintableMesh = 12
         }
         
-        public static LayerMask AICarCollisionLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerVehicle;
-
+        public static LayerMask AllCarLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerVehicle;
+        
         public static bool ContainsLayer(this LayerMask layerMask, int layer)
         {
             return layerMask == (layerMask | (1 << layer));

@@ -62,6 +62,9 @@ namespace Gumball
         [Header("Collisions")]
         [SerializeField] private float collisionRecoverDuration = 1;
         private float timeOfLastCollision = -Mathf.Infinity;
+
+        [Header("Obstacle detection")]
+        [SerializeField] private LayerMask obstacleLayers;
         
         [Header("Obstacle avoidance")]
         [SerializeField] private bool useObstacleAvoidance;
@@ -101,7 +104,7 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private float speed;
         [SerializeField, ReadOnly] private float desiredSpeed;
-        [SerializeField, ReadOnly] private bool inCollisionWithPlayer;
+        [SerializeField, ReadOnly] private bool inCollision;
         
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[5]; //is used for all blockage checks, not to be used for debugging
         private int lastFrameChunkWasCached = -1;
@@ -109,7 +112,7 @@ namespace Gumball
         
         protected Rigidbody rigidBody => GetComponent<Rigidbody>();
         private float timeSinceCollision => Time.time - timeOfLastCollision;
-        private bool recoveringFromCollision => inCollisionWithPlayer || timeSinceCollision < collisionRecoverDuration;
+        private bool recoveringFromCollision => inCollision || timeSinceCollision < collisionRecoverDuration;
         private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
         
         public float DesiredSpeed => desiredSpeed;
@@ -191,29 +194,25 @@ namespace Gumball
 
         private void OnCollisionEnter(Collision collision)
         {
-            if (!LayersAndTags.AICarCollisionLayers.ContainsLayer(collision.gameObject.layer))
+            bool hitACar = LayersAndTags.AllCarLayers.ContainsLayer(collision.gameObject.layer);
+            if (!hitACar)
                 return;
 
             GlobalLoggers.AICarLogger.Log($"{gameObject.name} collided with {collision.gameObject.name}");
 
             timeOfLastCollision = Time.time; //reset collision time
 
-            bool collisionWithPlayer = collision.rigidbody != null && collision.rigidbody == WarehouseManager.Instance.CurrentCar.Rigidbody;
-            if (collisionWithPlayer)
-            {
-                inCollisionWithPlayer = true;
-                GlobalLoggers.AICarLogger.Log($"Player hit {gameObject.name} at {collision.impulse.magnitude}m/s");
-            }
+            inCollision = true;
         }
 
         private void OnCollisionExit(Collision collision)
         {
-            bool collisionWithPlayer = collision.rigidbody != null && collision.rigidbody == WarehouseManager.Instance.CurrentCar.Rigidbody;
-            if (collisionWithPlayer)
-            {
-                timeOfLastCollision = Time.time; //reset collision time
-                inCollisionWithPlayer = false;
-            }
+            bool hitACar = LayersAndTags.AllCarLayers.ContainsLayer(collision.gameObject.layer);
+            if (!hitACar)
+                return;
+            
+            timeOfLastCollision = Time.time; //reset collision time
+            inCollision = false;
         }
 
         private void OnChunkCachedBecomeInaccessible()
@@ -501,7 +500,7 @@ namespace Gumball
 
         private bool IsDirectionBlocked(Vector3 direction, float raycastLength)
         {
-            int hits = Physics.BoxCastNonAlloc(transform.position, obstacleAvoidanceDetectorSize, direction, blockagesTemp, transform.rotation, raycastLength, LayersAndTags.AICarCollisionLayers);
+            int hits = Physics.BoxCastNonAlloc(transform.position, obstacleAvoidanceDetectorSize, direction, blockagesTemp, transform.rotation, raycastLength, obstacleLayers);
             RaycastHit? actualHit = null;
             
             for (int index = 0; index < hits; index++)
