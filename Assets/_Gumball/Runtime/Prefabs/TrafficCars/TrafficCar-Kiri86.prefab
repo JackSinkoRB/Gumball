@@ -1718,9 +1718,12 @@ MonoBehaviour:
   desiredSteerAngle: 0
   visualSteerAngle: 0
   collisionRecoverDuration: 1
+  inCollision: 0
   obstacleLayers:
     serializedVersion: 2
     m_Bits: 768
+  brakeForObstacles: 1
+  obstacleSpeed: Infinity
   useObstacleAvoidance: 0
   obstacleAvoidanceDetectorSize: {x: 0.5, y: 1, z: 0.5}
   blockedPathDetectorDistance: 15
@@ -1759,28 +1762,27 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
-      inSlope: 49.99
-      outSlope: 49.99
-      tangentMode: 34
+      value: 0
+      inSlope: 0.034318835
+      outSlope: 0.034318835
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.33333334
+      outWeight: 0.3730495
     - serializedVersion: 3
       time: 100
       value: 5000
-      inSlope: 49.99
-      outSlope: 49.99
-      tangentMode: 34
+      inSlope: 149.89352
+      outSlope: 149.89352
+      tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33333334
+      inWeight: 0.051826857
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   isBraking: 0
   corneringSpeed: Infinity
-  blockageSpeed: 0
   speedToBrakeTo: 0
   currentBrakeForce: 0
   debug: 0
@@ -1791,7 +1793,6 @@ MonoBehaviour:
   isFrozen: 0
   speed: 0
   desiredSpeed: 0
-  inCollision: 0
 --- !u!54 &5974823439251168409
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -61,10 +61,16 @@ namespace Gumball
         
         [Header("Collisions")]
         [SerializeField] private float collisionRecoverDuration = 1;
+        [Tooltip("Does the car disable its braking, acceleration and steering while in a collision? Or can it keep driving?")]
+        [SerializeField] private bool disableMovementInCollision = true;
         private float timeOfLastCollision = -Mathf.Infinity;
-
+        [Space(5)]
+        [SerializeField, ReadOnly] private bool inCollision;
+        
         [Header("Obstacle detection")]
         [SerializeField] private LayerMask obstacleLayers;
+        [SerializeField] private bool brakeForObstacles = true;
+        [ConditionalField(nameof(brakeForObstacles)), SerializeField, ReadOnly] private float obstacleSpeed = Mathf.Infinity;
         
         [Header("Obstacle avoidance")]
         [SerializeField] private bool useObstacleAvoidance;
@@ -78,8 +84,6 @@ namespace Gumball
         [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private bool hasPickedRandomSideSmaller;
         
         [Header("Braking")]
-        [Tooltip("Does the car slow down and come to a stop when in a collision? Or can it keep accelerating?")]
-        [SerializeField] private bool brakeInCollision = true;
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
         [SerializeField] private AnimationCurve cornerBrakingCurve;
         [Tooltip("The y axis represents the amount of brake torque when x (the amount to brake) is a certain value. When the amount to brake is more, there should be more brake torque.")]
@@ -87,10 +91,9 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private bool isBraking;
         [SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
-        [Tooltip("If there's a blockage ahead, and the blockage is a rigidbody, this will be the rigidbodies speed.")]
-        [SerializeField, ReadOnly] private float blockageSpeed;
         [SerializeField, ReadOnly] private float speedToBrakeTo;
         [SerializeField, ReadOnly] private float currentBrakeForce;
+        private bool wasBrakingLastFrame;
 
         [Header("Debugging")]
         [SerializeField] private bool debug;
@@ -104,7 +107,6 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private float speed;
         [SerializeField, ReadOnly] private float desiredSpeed;
-        [SerializeField, ReadOnly] private bool inCollision;
         
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[5]; //is used for all blockage checks, not to be used for debugging
         private int lastFrameChunkWasCached = -1;
@@ -263,14 +265,12 @@ namespace Gumball
             UpdateDesiredSpeed();
             CalculateSteerAngle();
             CheckForCorner();
-            CheckToBrake();
+            
+            UpdateBrakingValues();
+            DoBrakeEvents();
+            
             CheckToAccelerate();
-
-            if (brakeInCollision)
-                rigidBody.drag = recoveringFromCollision ? 1 : 0;
-
             ApplySteering();
-
             UpdateWheelMeshes();
             
             //debug directions:
@@ -301,7 +301,7 @@ namespace Gumball
         {
             bool wasAccelerating = isAccelerating;
 
-            if (isBraking || (brakeInCollision && recoveringFromCollision))
+            if (isBraking || (disableMovementInCollision && recoveringFromCollision))
                 isAccelerating = false;
             else
                 isAccelerating = speed < desiredSpeed;
@@ -318,7 +318,7 @@ namespace Gumball
         
         private void CalculateSteerAngle()
         {
-            if (brakeInCollision && recoveringFromCollision)
+            if (disableMovementInCollision && recoveringFromCollision)
                 return; //don't update steering while in collision
             
             Vector3 offsetDirection = GetObstacleOffset(currentOffset);
@@ -345,13 +345,14 @@ namespace Gumball
             rigidBody.AddForce(-rigidBody.velocity * currentBrakeForce, ForceMode.Force);
         }
         
-        private void CheckToBrake()
+        private void UpdateBrakingValues()
         {
-            bool wasBraking = isBraking;
-            
             //reset for check
             isBraking = false;
             speedToBrakeTo = Mathf.Infinity;
+
+            if (disableMovementInCollision && inCollision)
+                return;
             
             //is speeding over the desired speed? 
             const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
@@ -362,26 +363,50 @@ namespace Gumball
             }
 
             //brake around corners
-            if (speed > corneringSpeed && speed < speedToBrakeTo)
+            if (speed > corneringSpeed && corneringSpeed < speedToBrakeTo)
             {
                 speedToBrakeTo = corneringSpeed;
                 isBraking = true;
             }
 
-            //TODO: check if blockage ahead
-            // - if blockage has a rigidbody, brake to the rigidbodies speed
-            // - else brake to 0
-            blockageSpeed = GetBlockageSpeed();
-            
-            
-            if (wasBraking && !isBraking)
+            if (brakeForObstacles)
+            {
+                obstacleSpeed = GetSpeedOfObstaclesAhead();
+                if (speed > obstacleSpeed && obstacleSpeed < speedToBrakeTo)
+                {
+                    speedToBrakeTo = obstacleSpeed;
+                    isBraking = true;
+                }
+            }
+        }
+        
+        private void DoBrakeEvents()
+        {
+            if (wasBrakingLastFrame && !isBraking)
                 OnStopBraking();
             
-            if (!wasBraking && isBraking)
+            if (!wasBrakingLastFrame && isBraking)
                 OnStartBraking();
             
             if (isBraking)
                 OnBrake();
+
+            wasBrakingLastFrame = isBraking;
+        }
+
+        private float GetSpeedOfObstaclesAhead()
+        {
+            var (_, targetPosition, _) = targetPos.Value;
+            Vector3 directionToTarget = Vector3.Normalize(targetPosition - transform.position);
+
+            RaycastHit? blockage = GetBlockage(directionToTarget, blockedPathDetectorDistance);
+            
+            bool isBlocked = blockage != null;
+            if (!isBlocked)
+                return Mathf.Infinity;
+            
+            //not moving
+            return 0;
         }
 
         private void TryAvoidObstacles()
@@ -500,8 +525,18 @@ namespace Gumball
 
         private bool IsDirectionBlocked(Vector3 direction, float raycastLength)
         {
+            return GetBlockage(direction, raycastLength) != null;
+        }
+        
+        /// <summary>
+        /// Gets the closest blockage in the given direction.
+        /// </summary>
+        private RaycastHit? GetBlockage(Vector3 direction, float raycastLength)
+        {
             int hits = Physics.BoxCastNonAlloc(transform.position, obstacleAvoidanceDetectorSize, direction, blockagesTemp, transform.rotation, raycastLength, obstacleLayers);
             RaycastHit? actualHit = null;
+            
+            RaycastHitSorter.SortRaycastHitsByDistance(blockagesTemp, hits);
             
             for (int index = 0; index < hits; index++)
             {
@@ -509,6 +544,7 @@ namespace Gumball
                 if (!ReferenceEquals(hit.transform.gameObject, gameObject.transform.gameObject))
                 {
                     actualHit = hit;
+                    break; //just get the first/closest hit
                 }
             }
             
@@ -516,21 +552,12 @@ namespace Gumball
             BoxCastUtils.DrawBoxCastBox(transform.position, obstacleAvoidanceDetectorSize, transform.rotation, direction, raycastLength, actualHit != null ? Color.magenta : Color.gray);
 #endif
 
-            return actualHit != null;
-        }
-
-        /// <summary>
-        /// Checks if there are any blockages in front, and slows down to the blockage speed.
-        /// </summary>
-        /// <returns></returns>
-        private float GetBlockageSpeed()
-        {
-            return Mathf.Infinity;
+            return actualHit;
         }
 
         private void OnStartBraking()
         {
-            
+            rigidBody.drag = 1;
         }
         
         private void OnBrake()
@@ -540,7 +567,7 @@ namespace Gumball
 
         private void OnStopBraking()
         {
-            
+            rigidBody.drag = 0;
         }
         
         private void CheckForCorner()
