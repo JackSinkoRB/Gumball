@@ -771,14 +771,14 @@ WheelCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 656656234719144236}
   serializedVersion: 2
-  m_Center: {x: 0, y: 0.15, z: 0}
+  m_Center: {x: 0, y: 0.08, z: 0}
   m_Radius: 0.29
   m_SuspensionSpring:
     spring: 35000
     damper: 4500
     targetPosition: 0.5
-  m_SuspensionDistance: 0.3
-  m_ForceAppPointDistance: 0.5
+  m_SuspensionDistance: 0.15
+  m_ForceAppPointDistance: 0.55
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -842,14 +842,14 @@ WheelCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 670322278191080991}
   serializedVersion: 2
-  m_Center: {x: 0, y: 0.15, z: 0}
+  m_Center: {x: 0, y: 0.08, z: 0}
   m_Radius: 0.29
   m_SuspensionSpring:
     spring: 35000
     damper: 4500
     targetPosition: 0.5
-  m_SuspensionDistance: 0.3
-  m_ForceAppPointDistance: 0.5
+  m_SuspensionDistance: 0.15
+  m_ForceAppPointDistance: 0.55
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -4148,8 +4148,8 @@ MonoBehaviour:
   maxSpeed: 200
   useRacingLine: 1
   currentLaneDistance: 0
-  motorTorque: 1500
-  accelerationDurationToMaxTorque: 1
+  motorTorque: 2000
+  accelerationDurationToMaxTorque: 0.5
   accelerationEase:
     serializedVersion: 2
     m_Curve:
@@ -4188,19 +4188,59 @@ MonoBehaviour:
   collisionRecoverDuration: 0
   disableMovementInCollision: 0
   inCollision: 0
-  obstacleLayers:
-    serializedVersion: 2
-    m_Bits: 8704
   brakeForObstacles: 0
   obstacleSpeed: Infinity
   useObstacleAvoidance: 1
-  obstacleAvoidanceDetectorSize: {x: 0.5, y: 1, z: 0.5}
-  blockedPathDetectorDistance: 15
-  blockedPathDetectorDistanceSide: 10
-  blockedPathDetectorDistanceSideSmall: 5
-  currentOffset: 0
-  hasPickedRandomSide: 0
-  hasPickedRandomSideSmaller: 0
+  obstacleAvoidanceRaycastLayers:
+  - raycasts:
+    - offset: 0
+      raycastLength: 15
+      detectorSize: {x: 0.7, y: 1, z: 0}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+  - raycasts:
+    - offset: -3
+      raycastLength: 10
+      detectorSize: {x: 0.7, y: 1, z: 0}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+    - offset: 3
+      raycastLength: 10
+      detectorSize: {x: 0.7, y: 1, z: 0}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+  - raycasts:
+    - offset: -6
+      raycastLength: 4
+      detectorSize: {x: 0.7, y: 1, z: 0}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+    - offset: 6
+      raycastLength: 4
+      detectorSize: {x: 0.7, y: 1, z: 0}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+  currentOffsetDirection: {x: 0, y: 0, z: 0}
   cornerBrakingCurve:
     serializedVersion: 2
     m_Curve:
@@ -4215,7 +4255,7 @@ MonoBehaviour:
       outWeight: 0.05833333
     - serializedVersion: 3
       time: 50
-      value: 50
+      value: 65
       inSlope: -0.0058325026
       outSlope: -0.0058325026
       tangentMode: 0
@@ -4271,7 +4311,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 2000
   m_Drag: 0
-  m_AngularDrag: 10
+  m_AngularDrag: 3
   m_CenterOfMass: {x: 0, y: 0.56, z: -0.459}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -6394,14 +6434,14 @@ WheelCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7428275358183854430}
   serializedVersion: 2
-  m_Center: {x: 0, y: 0.15, z: 0}
+  m_Center: {x: 0, y: 0.08, z: 0}
   m_Radius: 0.29
   m_SuspensionSpring:
     spring: 35000
     damper: 4500
     targetPosition: 0.5
-  m_SuspensionDistance: 0.3
-  m_ForceAppPointDistance: 0.5
+  m_SuspensionDistance: 0.15
+  m_ForceAppPointDistance: 0.55
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -6614,14 +6654,14 @@ WheelCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7892864324998435569}
   serializedVersion: 2
-  m_Center: {x: 0, y: 0.15, z: 0}
+  m_Center: {x: 0, y: 0.08, z: 0}
   m_Radius: 0.29
   m_SuspensionSpring:
     spring: 35000
     damper: 4500
     targetPosition: 0.5
-  m_SuspensionDistance: 0.3
-  m_ForceAppPointDistance: 0.5
+  m_SuspensionDistance: 0.15
+  m_ForceAppPointDistance: 0.55
   m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:

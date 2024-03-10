@@ -15,15 +15,6 @@ namespace Gumball
     public class AICar : MonoBehaviour
     {
         
-        private enum ObstacleAvoidanceOffset
-        {
-            NONE,
-            LEFT,
-            RIGHT,
-            LEFT_SMALLER,
-            RIGHT_SMALLER
-        }
-
         [SerializeField] private Transform[] frontWheelMeshes;
         [SerializeField] private Transform[] rearWheelMeshes;
         [SerializeField] private WheelCollider[] frontWheelColliders;
@@ -37,7 +28,7 @@ namespace Gumball
         [Header("Lanes")]
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
         [SerializeField] private bool useRacingLine;
-        [ConditionalField(nameof(useRacingLine)), SerializeField, ReadOnly] private float currentLaneDistance;
+        [ConditionalField(nameof(useRacingLine), true), SerializeField, ReadOnly] private float currentLaneDistance;
 
         [Header("Acceleration")]
         [SerializeField] private float motorTorque = 500;
@@ -68,21 +59,14 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool inCollision;
         
         [Header("Obstacle detection")]
-        [SerializeField] private LayerMask obstacleLayers;
         [SerializeField] private bool brakeForObstacles = true;
         [ConditionalField(nameof(brakeForObstacles)), SerializeField, ReadOnly] private float obstacleSpeed = Mathf.Infinity;
         
         [Header("Obstacle avoidance")]
         [SerializeField] private bool useObstacleAvoidance;
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private Vector3 obstacleAvoidanceDetectorSize = new(0.5f,1,0.5f);
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private float blockedPathDetectorDistance = 15;
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private float blockedPathDetectorDistanceSide = 10;
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private float blockedPathDetectorDistanceSideSmall = 5;
-        [Space(5)]
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private ObstacleAvoidanceOffset currentOffset;
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private bool hasPickedRandomSide;
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private bool hasPickedRandomSideSmaller;
-        
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private ObstacleRaycastLayer[] obstacleAvoidanceRaycastLayers;
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private Vector3 currentOffsetDirection;
+
         [Header("Braking")]
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
         [SerializeField] private AnimationCurve cornerBrakingCurve;
@@ -108,7 +92,6 @@ namespace Gumball
         [SerializeField, ReadOnly] private float speed;
         [SerializeField, ReadOnly] private float desiredSpeed;
         
-        private readonly RaycastHit[] blockagesTemp = new RaycastHit[5]; //is used for all blockage checks, not to be used for debugging
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion)? targetPos;
         
@@ -280,8 +263,7 @@ namespace Gumball
             //debug directions:
             Debug.DrawRay(transform.position, rigidBody.velocity, Color.green);
             
-            Vector3 offsetDirection = GetObstacleOffset(currentOffset);
-            Debug.DrawLine(transform.position, targetPosition + offsetDirection, Color.yellow);
+            Debug.DrawLine(transform.position, targetPosition + currentOffsetDirection, Color.yellow);
         }
 
         private void UpdateDesiredSpeed()
@@ -325,8 +307,7 @@ namespace Gumball
             if (disableMovementInCollision && recoveringFromCollision)
                 return; //don't update steering while in collision
             
-            Vector3 offsetDirection = GetObstacleOffset(currentOffset);
-            Vector3 targetPosition = targetPos.Value.Item2 + offsetDirection;
+            Vector3 targetPosition = targetPos.Value.Item2 + currentOffsetDirection;
             Vector3 directionToTarget = targetPosition - rigidBody.position;
             desiredSteerAngle = Mathf.Clamp(-Vector2.SignedAngle(rigidBody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
             
@@ -398,16 +379,18 @@ namespace Gumball
             wasBrakingLastFrame = isBraking;
         }
 
+        
+        //TODO: don't use a 'speed' based check - it should change the amount of braking depending on the speed and distance to the obstacle - in order to keep a 'safe' distance
         private float GetSpeedOfObstaclesAhead()
         {
             var (_, targetPosition, _) = targetPos.Value;
             Vector3 directionToTarget = Vector3.Normalize(targetPosition - transform.position);
 
-            RaycastHit? blockage = GetBlockage(directionToTarget, blockedPathDetectorDistance);
+            //RaycastHit? blockage = GetBlockage(directionToTarget, blockedPathDetectorDistance);
             
-            bool isBlocked = blockage != null;
-            if (!isBlocked)
-                return Mathf.Infinity;
+            // bool isBlocked = blockage != null;
+            // if (!isBlocked)
+            //     return Mathf.Infinity;
             
             //not moving
             return 0;
@@ -416,147 +399,17 @@ namespace Gumball
         private void TryAvoidObstacles()
         {
             var (_, targetPosition, _) = targetPos.Value;
-            Vector3 directionToTarget = Vector3.Normalize(targetPosition - transform.position);
 
-            if (!IsDirectionBlocked(directionToTarget, blockedPathDetectorDistance))
+            foreach (ObstacleRaycastLayer layer in obstacleAvoidanceRaycastLayers)
             {
-                SetObstacleOffset(ObstacleAvoidanceOffset.NONE);
-                return;
-            }
-            
-            //check left and right
-            Vector3 directionToLeft = Vector3.Normalize(targetPosition + GetObstacleOffset(ObstacleAvoidanceOffset.LEFT) - transform.position);
-            Vector3 directionToRight = Vector3.Normalize(targetPosition + GetObstacleOffset(ObstacleAvoidanceOffset.RIGHT) - transform.position);
-                
-            bool isLeftBlocked = IsDirectionBlocked(directionToLeft, blockedPathDetectorDistanceSide);
-            bool isRightBlocked = IsDirectionBlocked(directionToRight, blockedPathDetectorDistanceSide);
+                ObstacleRaycast raycast = layer.GetUnblockedRaycastWithLeastAngle(transform, targetPosition);
 
-            if (isLeftBlocked && isRightBlocked)
-            {
-                //both sides are blocked - try smaller directions
-                Vector3 directionToLeftSmall = Vector3.Normalize(targetPosition + GetObstacleOffset(ObstacleAvoidanceOffset.LEFT_SMALLER) - transform.position);
-                Vector3 directionToRightSmall = Vector3.Normalize(targetPosition + GetObstacleOffset(ObstacleAvoidanceOffset.RIGHT_SMALLER) - transform.position);
-                
-                bool isLeftBlockedSmall = IsDirectionBlocked(directionToLeftSmall, blockedPathDetectorDistanceSideSmall);
-                bool isRightBlockedSmall = IsDirectionBlocked(directionToRightSmall, blockedPathDetectorDistanceSideSmall);
-
-                if (isLeftBlockedSmall && isRightBlockedSmall)
-                    return; //all directions blocked - don't change direction
-
-                if (!isLeftBlockedSmall && !isRightBlockedSmall)
+                if (raycast != null)
                 {
-                    if (hasPickedRandomSideSmaller)
-                        return; //already picked a side
-                
-                    //pick random side to go to
-                    int random = UnityEngine.Random.Range(0, 2);
-                    SetObstacleOffset(random == 0 ? ObstacleAvoidanceOffset.LEFT_SMALLER : ObstacleAvoidanceOffset.RIGHT_SMALLER);
-                
-                    hasPickedRandomSideSmaller = true;
-                }
-                else if (isRightBlockedSmall && !isLeftBlockedSmall)
-                {
-                    //offset to the left
-                    SetObstacleOffset(ObstacleAvoidanceOffset.LEFT_SMALLER);
-                } else if (isLeftBlockedSmall && !isRightBlockedSmall)
-                {
-                    //offset to the right
-                    SetObstacleOffset(ObstacleAvoidanceOffset.RIGHT_SMALLER);
-                }
-                
-                return;
-            }
-                
-            if (!isLeftBlocked && !isRightBlocked)
-            {
-                if (hasPickedRandomSide)
-                    return; //already picked a side
-                
-                //pick random side to go to
-                int random = UnityEngine.Random.Range(0, 2);
-                SetObstacleOffset(random == 0 ? ObstacleAvoidanceOffset.LEFT : ObstacleAvoidanceOffset.RIGHT);
-                
-                hasPickedRandomSide = true;
-            }
-            else if (isRightBlocked && !isLeftBlocked)
-            {
-                //offset to the left
-                SetObstacleOffset(ObstacleAvoidanceOffset.LEFT);
-            } else if (isLeftBlocked && !isRightBlocked)
-            {
-                //offset to the right
-                SetObstacleOffset(ObstacleAvoidanceOffset.RIGHT);
-            }
-        }
-
-        private Vector3 GetObstacleOffset(ObstacleAvoidanceOffset offset)
-        {
-            switch (offset)
-            {
-                case ObstacleAvoidanceOffset.NONE:
-                    return Vector3.zero;
-                case ObstacleAvoidanceOffset.LEFT:
-                case ObstacleAvoidanceOffset.RIGHT:
-                {
-                    const float offsetAmount = 3;
-                    Vector3 offsetDirection = transform.right * offsetAmount;
-                    if (offset == ObstacleAvoidanceOffset.LEFT)
-                        offsetDirection = -offsetDirection;
-
-                    return offsetDirection;
-                }
-                case ObstacleAvoidanceOffset.LEFT_SMALLER:
-                case ObstacleAvoidanceOffset.RIGHT_SMALLER:
-                {
-                    const float offsetAmount = 6;
-                    Vector3 offsetDirection = transform.right * offsetAmount;
-                    if (offset == ObstacleAvoidanceOffset.LEFT_SMALLER)
-                        offsetDirection = -offsetDirection;
-
-                    return offsetDirection;
-                }
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-        
-        private void SetObstacleOffset(ObstacleAvoidanceOffset offset)
-        {
-            currentOffset = offset;
-            hasPickedRandomSide = false;
-            hasPickedRandomSideSmaller = false;
-        }
-
-        private bool IsDirectionBlocked(Vector3 direction, float raycastLength)
-        {
-            return GetBlockage(direction, raycastLength) != null;
-        }
-        
-        /// <summary>
-        /// Gets the closest blockage in the given direction.
-        /// </summary>
-        private RaycastHit? GetBlockage(Vector3 direction, float raycastLength)
-        {
-            int hits = Physics.BoxCastNonAlloc(transform.position, obstacleAvoidanceDetectorSize, direction, blockagesTemp, transform.rotation, raycastLength, obstacleLayers);
-            RaycastHit? actualHit = null;
-            
-            RaycastHitSorter.SortRaycastHitsByDistance(blockagesTemp, hits);
-            
-            for (int index = 0; index < hits; index++)
-            {
-                RaycastHit hit = blockagesTemp[index];
-                if (!ReferenceEquals(hit.transform.gameObject, gameObject.transform.gameObject))
-                {
-                    actualHit = hit;
-                    break; //just get the first/closest hit
+                    currentOffsetDirection = raycast.OffsetVector;
+                    break;
                 }
             }
-            
-#if UNITY_EDITOR
-            BoxCastUtils.DrawBoxCastBox(transform.position, obstacleAvoidanceDetectorSize, transform.rotation, direction, raycastLength, actualHit != null ? Color.magenta : Color.gray);
-#endif
-
-            return actualHit;
         }
 
         private void OnStartBraking()
