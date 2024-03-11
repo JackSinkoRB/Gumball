@@ -66,7 +66,8 @@ namespace Gumball
         [SerializeField] private bool useObstacleAvoidance;
         [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private ObstacleRaycastLayer[] obstacleAvoidanceRaycastLayers;
         [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private Vector3 currentOffsetDirection;
-
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private int currentLayerIndex;
+        
         [Header("Braking")]
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
         [SerializeField] private AnimationCurve cornerBrakingCurve;
@@ -140,7 +141,6 @@ namespace Gumball
 
             //reset for pooled objects:
             isAccelerating = false;
-            
             
             gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
             
@@ -399,17 +399,40 @@ namespace Gumball
         private void TryAvoidObstacles()
         {
             var (_, targetPosition, _) = targetPos.Value;
+            
+            //get the angle with the least angle UP TO the current layer
+            float leastAngle = Mathf.Infinity;
+            int leastAngleLayer = default;
+            Vector3 leastAngleOffset = default;
 
-            foreach (ObstacleRaycastLayer layer in obstacleAvoidanceRaycastLayers)
+            for (int index = 0; index < obstacleAvoidanceRaycastLayers.Length; index++)
             {
+                if (index > currentLayerIndex)
+                    break;
+                
+                ObstacleRaycastLayer layer = obstacleAvoidanceRaycastLayers[index];
                 ObstacleRaycast raycast = layer.GetUnblockedRaycastWithLeastAngle(transform, targetPosition);
 
-                if (raycast != null)
+                bool areAllBlocked = raycast == null;
+                if (!areAllBlocked)
                 {
-                    currentOffsetDirection = raycast.OffsetVector;
-                    break;
+                    if (raycast.Angle > leastAngle)
+                        continue;
+                    
+                    leastAngle = raycast.Angle;
+                    leastAngleLayer = index;
+                    leastAngleOffset = raycast.OffsetVector;
+                }
+                else
+                {
+                    //check the next layer as all are blocked
+                    if (index == currentLayerIndex)
+                        currentLayerIndex++;
                 }
             }
+            
+            currentOffsetDirection = leastAngleOffset;
+            currentLayerIndex = leastAngleLayer;
         }
 
         private void OnStartBraking()
