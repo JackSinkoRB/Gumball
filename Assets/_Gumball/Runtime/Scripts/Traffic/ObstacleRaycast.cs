@@ -29,13 +29,16 @@ namespace Gumball
         
         public void DoRaycast(Transform transformFrom, Vector3 targetPosition)
         {
+            //TODO: only perform once per frame
+            
             offsetVector = transformFrom.right * offset;
             Vector3 directionToTarget = Vector3.Normalize(targetPosition + offsetVector - transformFrom.position);
 
             RaycastHit? blockage = GetBlockage(transformFrom, directionToTarget);
             isBlocked = blockage != null;
-            
-            angle = Vector2.Angle((transformFrom.position + transformFrom.forward).FlattenAsVector2(), (transformFrom.position + directionToTarget).FlattenAsVector2());
+
+            const float angleVectorsLength = 10; //increase the vector size to get a more accurate angle
+            angle = Vector2.Angle((transformFrom.position + transformFrom.forward * angleVectorsLength).FlattenAsVector2(), (transformFrom.position + directionToTarget * angleVectorsLength).FlattenAsVector2());
         }
 
         /// <summary>
@@ -43,7 +46,9 @@ namespace Gumball
         /// </summary>
         private RaycastHit? GetBlockage(Transform transformFrom, Vector3 direction)
         {
-            int hits = Physics.BoxCastNonAlloc(transformFrom.position, detectorSize, direction, blockagesTemp, transformFrom.rotation, raycastLength, detectionLayers);
+            Quaternion rotation = Quaternion.LookRotation(direction);
+            
+            int hits = Physics.BoxCastNonAlloc(transformFrom.position, detectorSize, direction, blockagesTemp, rotation, raycastLength, detectionLayers);
             RaycastHit? actualHit = null;
             
             RaycastHitSorter.SortRaycastHitsByDistance(blockagesTemp, hits);
@@ -59,7 +64,7 @@ namespace Gumball
             }
             
 #if UNITY_EDITOR
-            BoxCastUtils.DrawBoxCastBox(transformFrom.position, detectorSize, transformFrom.rotation, direction, raycastLength, actualHit != null ? Color.magenta : Color.gray);
+            BoxCastUtils.DrawBoxCastBox(transformFrom.position, detectorSize, rotation, direction, raycastLength, actualHit != null ? Color.magenta : Color.gray);
 #endif
 
             return actualHit;
