@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if UNITY_EDITOR
 using Gumball.Editor;
+#endif
 using MyBox;
 using UnityEngine;
 
