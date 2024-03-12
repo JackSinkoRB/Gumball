@@ -13,6 +13,7 @@ namespace Gumball
 
         [SerializeField] private float offset;
         [SerializeField] private float raycastLength;
+        [SerializeField] private float startDistance = 2;
         [SerializeField] private Vector3 detectorSize = new(0.7f,1,0.7f);
         [SerializeField] private LayerMask detectionLayers;
 
@@ -20,25 +21,23 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isBlocked;
         [SerializeField, ReadOnly] private float angle;
         [SerializeField, ReadOnly] private Vector3 offsetVector;
-        
+
         public bool IsBlocked => isBlocked;
         public float Angle => angle;
         public Vector3 OffsetVector => offsetVector;
+        public float RaycastLength => raycastLength;
         
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[5]; //is used for all blockage checks, not to be used for debugging
         
         public void DoRaycast(Transform transformFrom, Vector3 targetPosition)
         {
-            //TODO: only perform once per frame
-            
             offsetVector = transformFrom.right * offset;
-            Vector3 directionToTarget = Vector3.Normalize(targetPosition + offsetVector - transformFrom.position);
+            Vector3 directionToTarget = Vector3.Normalize(targetPosition + offsetVector - transformFrom.position + (transformFrom.forward * startDistance));
 
             RaycastHit? blockage = GetBlockage(transformFrom, directionToTarget);
             isBlocked = blockage != null;
 
-            const float angleVectorsLength = 10; //increase the vector size to get a more accurate angle
-            angle = Vector2.Angle((transformFrom.position + transformFrom.forward * angleVectorsLength).FlattenAsVector2(), (transformFrom.position + directionToTarget * angleVectorsLength).FlattenAsVector2());
+            angle = Vector3.Angle(transformFrom.forward, directionToTarget);
         }
 
         /// <summary>
@@ -48,7 +47,7 @@ namespace Gumball
         {
             Quaternion rotation = Quaternion.LookRotation(direction);
             
-            int hits = Physics.BoxCastNonAlloc(transformFrom.position, detectorSize, direction, blockagesTemp, rotation, raycastLength, detectionLayers);
+            int hits = Physics.BoxCastNonAlloc(transformFrom.position + (transformFrom.forward * startDistance), detectorSize, direction, blockagesTemp, rotation, raycastLength, detectionLayers);
             RaycastHit? actualHit = null;
             
             RaycastHitSorter.SortRaycastHitsByDistance(blockagesTemp, hits);
@@ -64,7 +63,7 @@ namespace Gumball
             }
             
 #if UNITY_EDITOR
-            BoxCastUtils.DrawBoxCastBox(transformFrom.position, detectorSize, rotation, direction, raycastLength, actualHit != null ? Color.magenta : Color.gray);
+            BoxCastUtils.DrawBoxCastBox(transformFrom.position + (transformFrom.forward * startDistance), detectorSize, rotation, direction, raycastLength, actualHit != null ? Color.magenta : Color.gray);
 #endif
 
             return actualHit;

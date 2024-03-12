@@ -64,9 +64,11 @@ namespace Gumball
         
         [Header("Obstacle avoidance")]
         [SerializeField] private bool useObstacleAvoidance;
+        [SerializeField] private float distanceFromCentreForRaycasts = 2;
         [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private ObstacleRaycastLayer[] obstacleAvoidanceRaycastLayers;
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private Vector3 currentOffsetDirection;
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private ObstacleRaycastLayer obstacleAvoidanceRaycastLayerWhenBlocked;
         [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private int currentLayerIndex;
+        private bool allDirectionsAreBlocked;
         
         [Header("Braking")]
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
@@ -93,6 +95,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private float speed;
         [SerializeField, ReadOnly] private float desiredSpeed;
         
+        private Vector3 targetPosition;
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion)? targetPos;
         
@@ -242,7 +245,7 @@ namespace Gumball
                 return;
             }
 
-            var (_, targetPosition, _) = targetPos.Value;
+            targetPosition = targetPos.Value.Item2;
             
             speed = SpeedUtils.ToKmh(rigidBody.velocity.magnitude);
 
@@ -263,7 +266,7 @@ namespace Gumball
             //debug directions:
             Debug.DrawRay(transform.position, rigidBody.velocity, Color.green);
             
-            Debug.DrawLine(transform.position, targetPosition + currentOffsetDirection, Color.yellow);
+            Debug.DrawLine(transform.position, targetPosition, Color.yellow);
         }
 
         private void UpdateDesiredSpeed()
@@ -338,7 +341,7 @@ namespace Gumball
 
             if (disableMovementInCollision && inCollision)
                 return;
-            
+
             //is speeding over the desired speed? 
             const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
             if (speed > desiredSpeed + speedingLeeway)
@@ -354,12 +357,12 @@ namespace Gumball
                 isBraking = true;
             }
 
-            if (brakeForObstacles)
+            if (allDirectionsAreBlocked)
             {
-                obstacleSpeed = GetSpeedOfObstaclesAhead();
-                if (speed > obstacleSpeed && obstacleSpeed < speedToBrakeTo)
+                const float blockedSpeed = 50;
+                if (speed > blockedSpeed && blockedSpeed < speedToBrakeTo)
                 {
-                    speedToBrakeTo = obstacleSpeed;
+                    speedToBrakeTo = blockedSpeed;
                     isBraking = true;
                 }
             }
@@ -383,7 +386,6 @@ namespace Gumball
         //TODO: don't use a 'speed' based check - it should change the amount of braking depending on the speed and distance to the obstacle - in order to keep a 'safe' distance
         private float GetSpeedOfObstaclesAhead()
         {
-            var (_, targetPosition, _) = targetPos.Value;
             Vector3 directionToTarget = Vector3.Normalize(targetPosition - transform.position);
 
             //RaycastHit? blockage = GetBlockage(directionToTarget, blockedPathDetectorDistance);
@@ -398,13 +400,13 @@ namespace Gumball
 
         private void TryAvoidObstacles()
         {
-            var (_, targetPosition, _) = targetPos.Value;
-            
             //get the angle with the least angle UP TO the current layer
             float leastAngle = Mathf.Infinity;
             int leastAngleLayer = default;
             Vector3 leastAngleOffset = default;
 
+            allDirectionsAreBlocked = true;
+            
             for (int index = 0; index < obstacleAvoidanceRaycastLayers.Length; index++)
             {
                 if (index > currentLayerIndex)
@@ -416,9 +418,18 @@ namespace Gumball
                 bool areAllBlocked = raycast == null;
                 if (!areAllBlocked)
                 {
+                    if (raycast.Angle > 20 && !allDirectionsAreBlocked)
+                    {
+                        if (index == currentLayerIndex)
+                            currentLayerIndex++;
+                        continue;
+                    }
+                    
+                    allDirectionsAreBlocked = false;
+                    
                     if (raycast.Angle > leastAngle)
                         continue;
-                    
+
                     leastAngle = raycast.Angle;
                     leastAngleLayer = index;
                     leastAngleOffset = raycast.OffsetVector;
@@ -430,9 +441,22 @@ namespace Gumball
                         currentLayerIndex++;
                 }
             }
-            
-            currentOffsetDirection = leastAngleOffset;
-            currentLayerIndex = leastAngleLayer;
+
+            if (allDirectionsAreBlocked)
+            {
+                //try with directions relative to car
+                ObstacleRaycast raycast = obstacleAvoidanceRaycastLayerWhenBlocked.GetUnblockedRaycastWithLeastAngle(transform, transform.position + transform.forward * 10);
+                if (raycast == null)
+                    return;
+
+                targetPosition = transform.position + (transform.forward * raycast.RaycastLength) + raycast.OffsetVector;
+                currentLayerIndex = obstacleAvoidanceRaycastLayers.Length;
+            }
+            else
+            {
+                targetPosition += leastAngleOffset;
+                currentLayerIndex = leastAngleLayer;
+            }
         }
 
         private void OnStartBraking()
