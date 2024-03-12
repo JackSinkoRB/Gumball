@@ -141,6 +141,8 @@ namespace Gumball
         
         private void OnEnable()
         {
+            isFrozen = false;
+            
             if (!isInitialised)
                 Initialise();
         }
