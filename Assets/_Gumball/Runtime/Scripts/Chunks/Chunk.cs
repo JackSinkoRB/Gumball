@@ -35,6 +35,7 @@ namespace Gumball
         [Header("Optional")]
         [SerializeField] private ChunkTrafficManager trafficManager;
         [SerializeField] private ChunkPowerpoleManager powerpoleManager;
+        [SerializeField] private Collider[] barriers;
 
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, true, true)]
@@ -129,6 +130,8 @@ namespace Gumball
         private void OnEnable()
         {
             splineComputer.updateMode = SplineComputer.UpdateMode.None; //make sure the spline computer doesn't update automatically at runtime
+            
+            InitialiseBarriers();
         }
 
         private void LateUpdate()
@@ -349,6 +352,15 @@ namespace Gumball
             float highLODDistanceSqr = terrainHighLODDistance * terrainHighLODDistance;
 
             return shortestDistanceSqr <= highLODDistanceSqr ? TerrainLOD.HIGH : TerrainLOD.LOW;
+        }
+        
+        private void InitialiseBarriers()
+        {
+            foreach (Collider barrier in barriers)
+            {
+                barrier.gameObject.layer = (int) LayersAndTags.Layer.Barrier;
+                barrier.sharedMaterial = ChunkManager.Instance.SlipperyPhysicsMaterial;
+            }
         }
     }
 }

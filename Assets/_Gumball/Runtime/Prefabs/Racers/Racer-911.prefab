@@ -4148,7 +4148,7 @@ MonoBehaviour:
   maxSpeed: 200
   useRacingLine: 1
   currentLaneDistance: 0
-  motorTorque: 2000
+  motorTorque: 2500
   accelerationDurationToMaxTorque: 0.5
   accelerationEase:
     serializedVersion: 2
@@ -4181,7 +4181,7 @@ MonoBehaviour:
   movementTargetDistanceSpeedFactors:
     Min: 20
     Max: 70
-  visualSteerSpeed: 5
+  visualSteerSpeed: 10
   maxSteerAngle: 65
   desiredSteerAngle: 0
   visualSteerAngle: 0
@@ -4191,22 +4191,24 @@ MonoBehaviour:
   brakeForObstacles: 0
   obstacleSpeed: Infinity
   useObstacleAvoidance: 1
+  distanceFromCentreForRaycasts: 2
   obstacleAvoidanceRaycastLayers:
   - raycasts:
     - offset: 0
-      raycastLength: 15
-      detectorSize: {x: 0.7, y: 1, z: 0}
+      raycastLength: 13
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
       detectionLayers:
         serializedVersion: 2
         m_Bits: 8704
       isBlocked: 0
       angle: 0
       offsetVector: {x: 0, y: 0, z: 0}
-    numberOfUnblocked: 0
   - raycasts:
     - offset: -2
       raycastLength: 10
-      detectorSize: {x: 0.7, y: 1, z: 0}
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
       detectionLayers:
         serializedVersion: 2
         m_Bits: 8704
@@ -4215,18 +4217,51 @@ MonoBehaviour:
       offsetVector: {x: 0, y: 0, z: 0}
     - offset: 2
       raycastLength: 10
-      detectorSize: {x: 0.7, y: 1, z: 0}
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
       detectionLayers:
         serializedVersion: 2
         m_Bits: 8704
       isBlocked: 0
       angle: 0
       offsetVector: {x: 0, y: 0, z: 0}
-    numberOfUnblocked: 0
   - raycasts:
+    - offset: -4
+      raycastLength: 7
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+    - offset: 4
+      raycastLength: 7
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+  obstacleAvoidanceRaycastLayerWhenBlocked:
+    raycasts:
+    - offset: 0
+      raycastLength: 3
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
     - offset: -5
-      raycastLength: 4
-      detectorSize: {x: 0.7, y: 1, z: 0}
+      raycastLength: 3
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
       detectionLayers:
         serializedVersion: 2
         m_Bits: 8704
@@ -4234,16 +4269,16 @@ MonoBehaviour:
       angle: 0
       offsetVector: {x: 0, y: 0, z: 0}
     - offset: 5
-      raycastLength: 4
-      detectorSize: {x: 0.7, y: 1, z: 0}
+      raycastLength: 3
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
       detectionLayers:
         serializedVersion: 2
         m_Bits: 8704
       isBlocked: 0
       angle: 0
       offsetVector: {x: 0, y: 0, z: 0}
-    numberOfUnblocked: 0
-  currentOffsetDirection: {x: 0, y: 0, z: 0}
+  currentLayerIndex: 0
   cornerBrakingCurve:
     serializedVersion: 2
     m_Curve:

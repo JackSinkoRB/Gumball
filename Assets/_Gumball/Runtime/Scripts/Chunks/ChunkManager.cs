@@ -16,6 +16,8 @@ namespace Gumball
     {
         
         private const float timeBetweenLoadingChecks = 0.5f;
+
+        [SerializeField] private PhysicMaterial slipperyPhysicsMaterial;
         
         [Header("Debugging")]
         [ReadOnly, SerializeField] private ChunkMap currentChunkMap;
@@ -43,13 +45,15 @@ namespace Gumball
         
         private Chunk chunkPlayerIsOnCached;
         private int lastFramePlayerChunkWasCached = -1;
-
+        
+        public PhysicMaterial SlipperyPhysicsMaterial => slipperyPhysicsMaterial;
+        
         public bool HasLoaded;
         public ChunkMap CurrentChunkMap => currentChunkMap;
         public bool IsLoadingChunks { get; private set; }
         public MinMaxInt LoadingOrLoadedChunksIndices => loadingOrLoadedChunksIndices;
         public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
-
+        
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk GetChunkPlayerIsOn()
         {
