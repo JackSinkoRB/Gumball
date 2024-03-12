@@ -43,7 +43,9 @@ namespace Gumball
         [Tooltip("At less than or equal to 'min' km/h, the movementTargetDistance is min.\n" +
                  "At greater than or equal to 'max' km/h, the movementTargetDistance is max.")]
         [SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(20, 90);
-        [Tooltip("The speed that the wheel mesh is interpolated to the desired steer angle. This makes it not snappy.")]
+        [Tooltip("The speed that the wheel collider turns.")]
+        [SerializeField] private float steerSpeed = 10;
+        [Tooltip("The speed that the wheel mesh is interpolated to the desired steer angle. This is different to the steer speed of the wheel collider.")]
         [SerializeField] private float visualSteerSpeed = 5;
         [SerializeField] private float maxSteerAngle = 65;
         [Space(5)]
@@ -310,9 +312,9 @@ namespace Gumball
             if (disableMovementInCollision && recoveringFromCollision)
                 return; //don't update steering while in collision
             
-            Vector3 targetPosition = targetPos.Value.Item2 + currentOffsetDirection;
             Vector3 directionToTarget = targetPosition - rigidBody.position;
-            desiredSteerAngle = Mathf.Clamp(-Vector2.SignedAngle(rigidBody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
+            float angle = Mathf.Clamp(-Vector2.SignedAngle(rigidBody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
+            desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, steerSpeed * Time.deltaTime);
             
             //set the visual steer angle (same for all front wheels)
             const float minSpeedVisualSteerModifier = 20;
