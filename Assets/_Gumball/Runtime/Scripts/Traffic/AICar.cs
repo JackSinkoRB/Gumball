@@ -62,11 +62,16 @@ namespace Gumball
         
         [Header("Obstacle detection")]
         [SerializeField] private bool brakeForObstacles = true;
-        [ConditionalField(nameof(brakeForObstacles)), SerializeField, ReadOnly] private float obstacleSpeed = Mathf.Infinity;
+        [ConditionalField(nameof(brakeForObstacles)), SerializeField] private ObstacleRaycast brakeForObstaclesRaycast;
+        [Tooltip("If speed is at min of speedForBrakingRaycastLength, the brakingRaycastLength is at min, and vice versa.")]
+        [ConditionalField(nameof(brakeForObstacles)), SerializeField] private MinMaxFloat brakingRaycastLength = new(5, 15);
+        [Tooltip("If speed is at min of speedForBrakingRaycastLength, the brakingRaycastLength is at min, and vice versa.")]
+        [ConditionalField(nameof(brakeForObstacles)), SerializeField] private MinMaxFloat speedForBrakingRaycastLength = new(10, 60);
         
         [Header("Obstacle avoidance")]
         [SerializeField] private bool useObstacleAvoidance;
-        [SerializeField] private float distanceFromCentreForRaycasts = 2;
+        [Tooltip("The speed the car should brake to if all the directions are blocked (exlcuding the 'when blocked' layers).")]
+        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private float speedToBrakeToIfBlocked = 50;
         [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private ObstacleRaycastLayer[] obstacleAvoidanceRaycastLayers;
         [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private ObstacleRaycastLayer obstacleAvoidanceRaycastLayerWhenBlocked;
         [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private int currentLayerIndex;
@@ -334,7 +339,7 @@ namespace Gumball
             //apply brake force to entire car rather than the wheels to prevent lock up
             rigidBody.AddForce(-rigidBody.velocity * currentBrakeForce, ForceMode.Force);
         }
-        
+
         private void UpdateBrakingValues()
         {
             //reset for check
@@ -359,12 +364,25 @@ namespace Gumball
                 isBraking = true;
             }
 
-            if (allDirectionsAreBlocked)
+            if (brakeForObstacles)
             {
-                const float blockedSpeed = 50;
-                if (speed > blockedSpeed && blockedSpeed < speedToBrakeTo)
+                float speedPercent = (speed - speedForBrakingRaycastLength.Min) / (speedForBrakingRaycastLength.Max - speedForBrakingRaycastLength.Min);
+                float raycastLength = brakingRaycastLength.Min + ((brakingRaycastLength.Max - brakingRaycastLength.Min) * speedPercent);
+                brakeForObstaclesRaycast.SetRaycastLength(raycastLength);
+                
+                brakeForObstaclesRaycast.DoRaycast(transform, targetPosition);
+                if (brakeForObstaclesRaycast.IsBlocked)
                 {
-                    speedToBrakeTo = blockedSpeed;
+                    speedToBrakeTo = 0;
+                    isBraking = true;
+                }
+            }
+            
+            if (useObstacleAvoidance && allDirectionsAreBlocked)
+            {
+                if (speed > speedToBrakeToIfBlocked && speedToBrakeToIfBlocked < speedToBrakeTo)
+                {
+                    speedToBrakeTo = speedToBrakeToIfBlocked;
                     isBraking = true;
                 }
             }

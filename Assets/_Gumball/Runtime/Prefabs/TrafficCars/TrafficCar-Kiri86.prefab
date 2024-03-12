@@ -1713,26 +1713,38 @@ MonoBehaviour:
   movementTargetDistanceSpeedFactors:
     Min: 20
     Max: 70
+  steerSpeed: 10
   visualSteerSpeed: 5
   maxSteerAngle: 65
   desiredSteerAngle: 0
   visualSteerAngle: 0
   collisionRecoverDuration: 1
+  disableMovementInCollision: 1
   inCollision: 0
-  obstacleLayers:
-    serializedVersion: 2
-    m_Bits: 768
   brakeForObstacles: 1
-  obstacleSpeed: Infinity
+  brakeForObstaclesRaycast:
+    offset: 0
+    raycastLength: 15
+    startDistance: 2
+    detectorSize: {x: 0.7, y: 1, z: 0.7}
+    detectionLayers:
+      serializedVersion: 2
+      m_Bits: 768
+    isBlocked: 0
+    angle: 0
+    offsetVector: {x: 0, y: 0, z: 0}
+  brakingRaycastLength:
+    Min: 8
+    Max: 25
+  speedForBrakingRaycastLength:
+    Min: 10
+    Max: 60
   useObstacleAvoidance: 0
-  obstacleAvoidanceDetectorSize: {x: 0.5, y: 1, z: 0.5}
-  blockedPathDetectorDistance: 15
-  blockedPathDetectorDistanceSide: 10
-  blockedPathDetectorDistanceSideSmall: 5
-  currentOffset: 0
-  hasPickedRandomSide: 0
-  hasPickedRandomSideSmaller: 0
-  brakeInCollision: 1
+  speedToBrakeToIfBlocked: 50
+  obstacleAvoidanceRaycastLayers: []
+  obstacleAvoidanceRaycastLayerWhenBlocked:
+    raycasts: []
+  currentLayerIndex: 0
   cornerBrakingCurve:
     serializedVersion: 2
     m_Curve:
@@ -1762,7 +1774,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1000
       inSlope: 0.034318835
       outSlope: 0.034318835
       tangentMode: 0
@@ -1772,11 +1784,11 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 100
       value: 5000
-      inSlope: 149.89352
-      outSlope: 149.89352
+      inSlope: 130.3585
+      outSlope: 130.3585
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.051826857
+      inWeight: 0.041666716
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
