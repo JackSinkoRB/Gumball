@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Gumball
 {
@@ -10,9 +12,9 @@ namespace Gumball
     public abstract class GameSession : ScriptableObject
     {
         
-        [SerializeField] private ChunkMap chunkMap;
+        [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
 
-        public ChunkMap ChunkMap => chunkMap;
+        public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
 
         public abstract string GetName();
 
@@ -25,6 +27,12 @@ namespace Gumball
         {
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
             
+            //load the map:
+            AsyncOperationHandle<ChunkMap> handle = Addressables.LoadAssetAsync<ChunkMap>(chunkMapAssetReference);
+            yield return handle;
+            
+            ChunkMap chunkMap = handle.Result;
+
             AvatarManager.Instance.HideAvatars(true);
             //freeze the car
             Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;

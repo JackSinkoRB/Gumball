@@ -194,8 +194,6 @@ namespace Gumball
             currentLOD = lod;
             terrainHighLOD.SetActive(lod == TerrainLOD.HIGH);
             terrainLowLOD.SetActive(lod == TerrainLOD.LOW);
-            
-            GlobalLoggers.ChunkLogger.Log($"Switched LOD to {lod.ToString()} for {gameObject.name}");
         }
         
         public void UpdateChunkMeshData()
