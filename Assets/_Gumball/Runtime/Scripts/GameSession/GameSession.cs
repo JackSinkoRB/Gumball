@@ -54,6 +54,11 @@ namespace Gumball
             
             //set car rigidbody as dynamic
             currentCarRigidbody.isKinematic = false;
+
+            //set driving states:
+            AvatarManager.Instance.HideAvatars(false);
+            AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarDrivingState>();
+            AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarDrivingState>();
             
             GlobalLoggers.LoadingLogger.Log("Loading session...");
             yield return OnSessionLoad();
