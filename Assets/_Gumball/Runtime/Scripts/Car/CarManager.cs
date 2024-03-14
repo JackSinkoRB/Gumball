@@ -93,8 +93,7 @@ namespace Gumball
         [Tooltip("The speed (in km/h) that the car must be going to be at minSteerSpeed.")]
         [SerializeField] private float speedForMinSteerSpeed = 250;
 
-        [ReadOnly, SerializeField] private Rigidbody rigidBody;
-        public Rigidbody Rigidbody => rigidBody;
+        public Rigidbody Rigidbody => GetComponent<Rigidbody>();
         
         private bool isReversing;
         private bool clutchIn;
@@ -159,11 +158,10 @@ namespace Gumball
 
         private void Start()
         {
-            rigidBody = GetComponent<Rigidbody>();
             if (centerOfMass != null)
-                rigidBody.centerOfMass = centerOfMass.localPosition;
+                Rigidbody.centerOfMass = centerOfMass.localPosition;
 
-            rigidBody.inertiaTensor *= inertiaFactor;
+            Rigidbody.inertiaTensor *= inertiaFactor;
             foreach (Wheel wheel in wheelManager.Wheels)
             {
                 wheel.manager = this;
@@ -283,7 +281,7 @@ namespace Gumball
 
         private void CalculateSpeed()
         {
-            Speed = transform.InverseTransformDirection(rigidBody.velocity).z;
+            Speed = transform.InverseTransformDirection(Rigidbody.velocity).z;
         }
 
         private void CalculateThrottle()
@@ -514,7 +512,7 @@ namespace Gumball
 
         private void CalculateSteering()
         {
-            float speedPercent = Mathf.Clamp01(rigidBody.velocity.magnitude / SpeedUtils.FromKmh(speedForMinSteerSpeed));
+            float speedPercent = Mathf.Clamp01(Rigidbody.velocity.magnitude / SpeedUtils.FromKmh(speedForMinSteerSpeed));
             float desiredSteering = InputManager.SteeringInput;
             bool isCorrecting = false;
             

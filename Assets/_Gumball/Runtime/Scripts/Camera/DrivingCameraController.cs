@@ -17,7 +17,6 @@ namespace Gumball
         [SerializeField] private float distanceSnapTime;
         [SerializeField] private float distanceMultiplier;
         
-        private Rigidbody targetRigidbody;
         private float usedDistance;
         private float desiredRotationAngle;
         private float desiredHeight;
@@ -28,8 +27,10 @@ namespace Gumball
         private float yVelocity;
         private float zVelocity;
 
+        private Rigidbody targetRigidbody => target.GetComponent<Rigidbody>();
+        
         public Transform Target => target;
-
+        
         private void LateUpdate()
         {
             SmoothFollow();
@@ -38,9 +39,6 @@ namespace Gumball
         public void SetTarget(Transform newTarget, bool snap = true)
         {
             target = newTarget;
-            
-            if (targetRigidbody == null)
-                targetRigidbody = target.GetComponent<Rigidbody>();
             
             if (targetRigidbody != null)
                 targetRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
@@ -67,7 +65,7 @@ namespace Gumball
         {
             if (target == null)
                 return;
-
+            
             desiredHeight = target.position.y + height;
             currentHeight = transform.position.y;
 

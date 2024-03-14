@@ -52,10 +52,10 @@ namespace Gumball
             AsyncOperationHandle[] handles = { handleFront, handleRear, tyreLeftHandle, tyreRightHandle };
             yield return new WaitUntil(() => handles.AreAllComplete());
 
-            CreateWheel(frontLeftWheel.transform, handleFront, false, false);
-            CreateWheel(frontRightWheel.transform, handleFront, true, false);
-            CreateWheel(rearLeftWheel.transform, handleRear, false, true);
-            CreateWheel(rearRightWheel.transform, handleRear, true, true);
+            // CreateWheel(frontLeftWheel.transform, handleFront, false, false);
+            // CreateWheel(frontRightWheel.transform, handleFront, true, false);
+            // CreateWheel(rearLeftWheel.transform, handleRear, false, true);
+            // CreateWheel(rearRightWheel.transform, handleRear, true, true);
         }
         
         private void RemoveWheels()
