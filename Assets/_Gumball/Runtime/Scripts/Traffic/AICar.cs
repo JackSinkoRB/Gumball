@@ -14,16 +14,26 @@ namespace Gumball
     [RequireComponent(typeof(Rigidbody))]
     public class AICar : MonoBehaviour
     {
-        
-        [SerializeField] private Transform[] frontWheelMeshes;
-        [SerializeField] private Transform[] rearWheelMeshes;
-        [SerializeField] private WheelCollider[] frontWheelColliders;
-        [SerializeField] private WheelCollider[] rearWheelColliders;
 
+        private enum WheelConfiguration
+        {
+            REAR_WHEEL_DRIVE,
+            FRONT_WHEEL_DRIVE,
+            ALL_WHEEL_DRIVE
+        }
+        
+        [Header("Wheels")]
+        [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
+        [SerializeField, InitializationField] private Transform[] frontWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] rearWheelMeshes;
+        [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
+        [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
+        private Transform[] allWheelMeshes;
+        private WheelCollider[] allWheelColliders;
+        private WheelCollider[] poweredWheels;
+        
         [Header("Auto drive")]
         [SerializeField] private bool autoDrive;
-        [Tooltip("If the car is not auto drive, ensure it has a module to manually drive.")]
-        [ConditionalField(nameof(autoDrive), true), SerializeField] private ManualDriveModule manualDriveModule;
         
         [Header("Max speed")]
         [Tooltip("Does the car obey the current chunks speed limit?")]
@@ -108,8 +118,6 @@ namespace Gumball
         [SerializeField] private bool debug;
         [Space(5)]
         [SerializeField, ReadOnly] protected bool isInitialised;
-        [SerializeField, ReadOnly] private Transform[] allWheelMeshes;
-        [SerializeField, ReadOnly] private WheelCollider[] allWheelColliders;
         [Space(5)]
         [SerializeField, ReadOnly] protected Chunk currentChunkCached;
         [SerializeField, ReadOnly] protected bool isFrozen;
@@ -176,6 +184,7 @@ namespace Gumball
 
             CacheAllWheelMeshes();
             CacheAllWheelColliders();
+            CachePoweredWheels();
         }
 
         public void SetLaneDistance(float laneDistance)
@@ -359,25 +368,7 @@ namespace Gumball
             visualSteerAngle = Mathf.LerpAngle(visualSteerAngle, desiredSteerAngle, visualSteerSpeed * speedModifier * Time.deltaTime);
         }
 
-        private void ApplyBrakeForce()
-        {
-            if (!isBraking)
-                return;
-            
-            //the greater distance between speed and speedToBrakeTo, the more brake force should be applied
-            float amountToBrake = speed - speedToBrakeTo;
-            currentBrakeForce = brakeTorqueCurve.Evaluate(amountToBrake);
-            
-            //apply brake force to entire car rather than the wheels to prevent lock up
-            //rigidBody.AddForce(-rigidBody.velocity * currentBrakeForce, ForceMode.Force);
-
-            foreach (WheelCollider wheelCollider in allWheelColliders)
-            {
-                wheelCollider.brakeTorque = currentBrakeForce / 4f;
-            }
-        }
-        
-        protected virtual void UpdateBrakingValues()
+        private void UpdateBrakingValues()
         {
             //reset for check
             isBraking = false;
@@ -519,13 +510,13 @@ namespace Gumball
             
             foreach (WheelCollider wheelCollider in allWheelColliders)
             {
-                wheelCollider.brakeTorque = currentBrakeForce / 4f;
+                wheelCollider.brakeTorque = currentBrakeForce / allWheelColliders.Length;
             }
         }
         
         private void OnBrake()
         {
-            //ApplyBrakeForce();
+            
         }
 
         private void OnStopBraking()
@@ -558,17 +549,18 @@ namespace Gumball
         {
             //initialise the array
             if (currentMotorTorqueTweens == null || currentMotorTorqueTweens.Length == 0)
-                currentMotorTorqueTweens = new Tween[rearWheelColliders.Length];
+                currentMotorTorqueTweens = new Tween[poweredWheels.Length];
 
-            for (int index = 0; index < rearWheelColliders.Length; index++)
+            for (int index = 0; index < poweredWheels.Length; index++)
             {
-                WheelCollider rearWheel = rearWheelColliders[index];
+                WheelCollider rearWheel = poweredWheels[index];
                 
                 if (currentMotorTorqueTweens[index] != null)
                     currentMotorTorqueTweens[index]?.Kill();
 
+                float desiredTorque = motorTorque / poweredWheels.Length;
                 float currentTorque = rearWheel.motorTorque;
-                float durationPercent = Mathf.Clamp01(1 - (currentTorque / motorTorque));
+                float durationPercent = Mathf.Clamp01(1 - (currentTorque / desiredTorque));
                 float duration = durationPercent * accelerationDurationToMaxTorque;
                 
                 currentMotorTorqueTweens[index] = DOTween.To(() => rearWheel.motorTorque,
@@ -578,9 +570,9 @@ namespace Gumball
 
         private void OnStopAccelerating()
         {
-            for (int index = 0; index < rearWheelColliders.Length; index++)
+            for (int index = 0; index < poweredWheels.Length; index++)
             {
-                WheelCollider wheelCollider = rearWheelColliders[index];
+                WheelCollider wheelCollider = poweredWheels[index];
 
                 //stop acceleration tweens
                 currentMotorTorqueTweens[index]?.Kill();
@@ -671,25 +663,47 @@ namespace Gumball
                 indexCount++;
             }
         }
-        
+
         private void CacheAllWheelColliders()
         {
             int indexCount = 0;
             allWheelColliders = new WheelCollider[frontWheelColliders.Length + rearWheelColliders.Length];
             foreach (WheelCollider wheelCollider in frontWheelColliders)
             {
-#if UNITY_EDITOR
-                wheelCollider.gameObject.AddComponent<WheelColliderDebugger>();
-#endif
+                wheelCollider.gameObject.AddComponent<WheelColliderData>();
+                
                 allWheelColliders[indexCount] = wheelCollider;
                 indexCount++;
             }
             foreach (WheelCollider wheelCollider in rearWheelColliders)
             {
-#if UNITY_EDITOR
-                wheelCollider.gameObject.AddComponent<WheelColliderDebugger>();
-#endif
+                wheelCollider.gameObject.AddComponent<WheelColliderData>();
+
                 allWheelColliders[indexCount] = wheelCollider;
+                indexCount++;
+            }
+        }
+        
+        private void CachePoweredWheels()
+        {
+            int numberOfPoweredWheels = wheelConfiguration == WheelConfiguration.ALL_WHEEL_DRIVE ? 4 : 2;
+            poweredWheels = new WheelCollider[numberOfPoweredWheels];
+
+            int indexCount = 0;
+            foreach (WheelCollider wheelCollider in frontWheelColliders)
+            {
+                if (wheelConfiguration != WheelConfiguration.FRONT_WHEEL_DRIVE && wheelConfiguration != WheelConfiguration.ALL_WHEEL_DRIVE)
+                    continue;
+                
+                poweredWheels[indexCount] = wheelCollider;
+                indexCount++;
+            }
+            foreach (WheelCollider wheelCollider in rearWheelColliders)
+            {
+                if (wheelConfiguration != WheelConfiguration.REAR_WHEEL_DRIVE && wheelConfiguration != WheelConfiguration.ALL_WHEEL_DRIVE)
+                    continue;
+                
+                poweredWheels[indexCount] = wheelCollider;
                 indexCount++;
             }
         }

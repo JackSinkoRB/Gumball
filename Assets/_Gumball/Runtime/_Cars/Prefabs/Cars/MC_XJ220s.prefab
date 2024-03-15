@@ -572,6 +572,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da187e7637980114d820c1c8bc7370c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wheelConfiguration: 2
   frontWheelMeshes:
   - {fileID: 3229365723055604258}
   - {fileID: 7035977652713155345}
@@ -585,7 +586,6 @@ MonoBehaviour:
   - {fileID: 8440229591122516637}
   - {fileID: 6488037141158947642}
   autoDrive: 0
-  manualDriveModule: {fileID: 0}
   obeySpeedLimit: 0
   maxSpeed: 200
   useRacingLine: 1
@@ -625,7 +625,7 @@ MonoBehaviour:
   movementTargetDistanceSpeedFactors:
     Min: 20
     Max: 90
-  steerSpeed: 10
+  steerSpeed: 5
   releaseSpeed: 15
   visualSteerSpeed: 5
   maxSteerAngleCurve:
@@ -634,15 +634,15 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 55
-      inSlope: -117.25067
-      outSlope: -117.25067
+      inSlope: -81.49922
+      outSlope: -81.49922
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.058333334
+      outWeight: 0.07083333
     - serializedVersion: 3
       time: 1
-      value: 5
+      value: 15
       inSlope: -0.0000020807438
       outSlope: -0.0000020807438
       tangentMode: 0
@@ -717,8 +717,6 @@ MonoBehaviour:
   currentBrakeForce: 0
   debug: 0
   isInitialised: 0
-  allWheelMeshes: []
-  allWheelColliders: []
   currentChunkCached: {fileID: 0}
   isFrozen: 0
 --- !u!1 &1547205152086652757
@@ -3601,7 +3599,7 @@ WheelCollider:
     m_AsymptoteValue: 0.5
     m_Stiffness: 4
   m_SidewaysFriction:
-    m_ExtremumSlip: 0.2
+    m_ExtremumSlip: 0.4
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.5
     m_AsymptoteValue: 0.75
@@ -4320,7 +4318,7 @@ WheelCollider:
     m_AsymptoteValue: 0.5
     m_Stiffness: 4
   m_SidewaysFriction:
-    m_ExtremumSlip: 0.2
+    m_ExtremumSlip: 0.4
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.5
     m_AsymptoteValue: 0.75

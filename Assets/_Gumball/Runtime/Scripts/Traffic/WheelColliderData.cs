@@ -7,9 +7,8 @@ using UnityEngine;
 namespace Gumball
 {
     [RequireComponent(typeof(WheelCollider))]
-    public class WheelColliderDebugger : MonoBehaviour
+    public class WheelColliderData : MonoBehaviour
     {
-#if UNITY_EDITOR
 
         [SerializeField, ReadOnly] private bool isGrounded;
         [SerializeField, ReadOnly] private float motorTorque;
@@ -21,11 +20,23 @@ namespace Gumball
         [Header("Friction")]
         [SerializeField, ReadOnly] private float forwardSlip;
         [SerializeField, ReadOnly] private float sidewaysSlip;
-        [Tooltip("If the sideways slip is above the sideways extemum value, there will be understeer. This can be avoided by increasing the REAR wheel stiffness or lowering the extremum slip.")]
-        [SerializeField, ReadOnly] private bool hasUndersteer;
+        [Tooltip("If the sideways slip is above the sideways extemum value, there will be sliding.")]
+        [SerializeField, ReadOnly] private bool isSlidingSideways;
+        [Tooltip("If the forward slip is above the forward extemum value, there will be sliding.")]
+        [SerializeField, ReadOnly] private bool isSlidingForward;
 
         private WheelCollider wheelCollider => GetComponent<WheelCollider>();
+
+        /// <summary>
+        /// Understeer (front wheels) or oversteer (rear wheels).
+        /// </summary>
+        public bool IsSlidingSideways => isSlidingSideways;
         
+        /// <summary>
+        /// Loss of traction (wheels spinning without gripping).
+        /// </summary>
+        public bool IsSlidingForwards => isSlidingForward;
+
         private void LateUpdate()
         {
             isGrounded = wheelCollider.isGrounded;
@@ -34,14 +45,17 @@ namespace Gumball
             rpm = wheelCollider.rpm;
             rotationSpeed = wheelCollider.rotationSpeed;
             steerAngle = wheelCollider.steerAngle;
-            
+
             wheelCollider.GetGroundHit(out WheelHit wheelHit);
             forwardSlip = wheelHit.forwardSlip;
             sidewaysSlip = wheelHit.sidewaysSlip;
             
-            hasUndersteer = Mathf.Abs(wheelHit.sidewaysSlip / wheelCollider.sidewaysFriction.extremumSlip) > 1;
+            isSlidingSideways = Mathf.Abs(wheelHit.sidewaysSlip / wheelCollider.sidewaysFriction.extremumSlip) > 1;
+            isSlidingForward = Mathf.Abs(wheelHit.forwardSlip / wheelCollider.forwardFriction.extremumSlip) > 1;
+
+            //if (isSlidingSideways)
+                //Debug.Break();
         }
 
-#endif
     }
 }
