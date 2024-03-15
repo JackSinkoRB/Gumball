@@ -51,10 +51,18 @@ namespace Gumball
         private bool wasMovingLastFrame;
         private const float stationarySpeed = 2;
         private bool isStationary => speed < stationarySpeed && !isAccelerating;
-        
-        [Header("Acceleration")]
-        [SerializeField] private float motorTorque = 500;
+
+        [Header("Drivetrain")]
+        [ConditionalField(nameof(autoDrive), true), SerializeField] private bool isAutomaticTransmission = true;
+        [Tooltip("The engine torque output (y) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
+        [SerializeField] private AnimationCurve torqueCurve;
+        [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
+        [SerializeField] private float finalGearRatio = 3.42f;
+        [SerializeField] private MinMaxFloat engineRpmRange = new(1000, 8000);
+        [Space(5)]
+        [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
+        [SerializeField, ReadOnly] private float engineRpm;
         private bool wasAcceleratingLastFrame;
         
         [Header("Steering")]
@@ -85,8 +93,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private float speedToBrakeTo;
         private const float dragWhenBraking = 1;
         private bool wasBrakingLastFrame;
-        
+
         [Header("Reverse")]
+        [SerializeField] private float maxReverseSpeed = 25;
         [SerializeField, ReadOnly] private bool isReversing;
         
         [Header("Collisions")]
@@ -133,7 +142,7 @@ namespace Gumball
         
         public float DesiredSpeed => desiredSpeed;
         public float Speed => speed;
-        public float MaxSpeed => obeySpeedLimit ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed;
+        public float MaxSpeed => isReversing ? maxReverseSpeed : (obeySpeedLimit ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed);
         public float CurrentLaneDistance => currentLaneDistance;
         
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
@@ -296,6 +305,8 @@ namespace Gumball
             DoBrakeEvents();
 
             CheckToReverse();
+
+            UpdateCurrentGear();
             
             CheckToAccelerate();
             DoAccelerationEvents();
@@ -304,12 +315,53 @@ namespace Gumball
             
             UpdateWheelMeshes();
 
+            CalculateEngineRPM();
+
             //debug directions:
             Debug.DrawRay(transform.position, rigidBody.velocity, Color.green);
             
             Debug.DrawLine(transform.position, targetPosition, Color.yellow);
         }
 
+        private void UpdateCurrentGear()
+        {
+            if (autoDrive || isAutomaticTransmission)
+            {
+                if (isReversing)
+                    currentGear = 0;
+                else
+                {
+                    //TODO: calculate the ideal gear
+                    currentGear = 1;
+                }
+            }
+            else
+            {
+                if (autoDrive)
+                    return;
+                
+                //is manual transmission - get input
+                //TODO
+            }
+        }
+
+        /// <summary>
+        /// Calculate the engine RPM from the average rpm of the powered wheels, taken in account the gear ratios.
+        /// </summary>
+        private void CalculateEngineRPM()
+        {
+            float sumOfPoweredWheelRPM = 0;
+            foreach (WheelCollider poweredWheel in poweredWheels)
+            {
+                sumOfPoweredWheelRPM += poweredWheel.rpm;
+            }
+            
+            float averagePoweredWheelRPM = sumOfPoweredWheelRPM / poweredWheels.Length;
+
+            float engineRpmUnclamped = engineRpmRange.Min + averagePoweredWheelRPM * gearRatios[currentGear] * finalGearRatio;
+            engineRpm = engineRpmRange.Clamp(engineRpmUnclamped);
+        }
+        
         private void UpdateDesiredSpeed()
         {
             if (!MaxSpeed.Approximately(DesiredSpeed))
@@ -327,10 +379,12 @@ namespace Gumball
             //can't accelerate if above desired speed
             if (speed > desiredSpeed)
                 isAccelerating = false;
-            
+
             //check to accelerate
             else
-                isAccelerating = autoDrive || InputManager.Accelerate.IsPressed;
+            {
+                isAccelerating = autoDrive || (!autoDrive && InputManager.Accelerate.IsPressed) || (!autoDrive && isReversing);
+            }
         }
 
         private void DoAccelerationEvents()
@@ -464,22 +518,11 @@ namespace Gumball
         private void OnStartReversing()
         {
             isReversing = true;
-            
-            foreach (WheelCollider wheelCollider in poweredWheels)
-            {
-                wheelCollider.motorTorque = -motorTorque / poweredWheels.Length;
-                wheelCollider.brakeTorque = 0;
-            }
         }
 
         private void OnStopReversing()
         {
             isReversing = false;
-            
-            foreach (WheelCollider wheelCollider in poweredWheels)
-            {
-                wheelCollider.motorTorque = 0;
-            }
         }
         
         private void TryAvoidObstacles()
@@ -589,11 +632,7 @@ namespace Gumball
 
         private void OnStartAccelerating()
         {
-            foreach (WheelCollider poweredWheel in poweredWheels)
-            {
-                float desiredMotorTorque = motorTorque / poweredWheels.Length;
-                poweredWheel.motorTorque = desiredMotorTorque;
-            }
+            
         }
 
         private void OnStopAccelerating()
@@ -606,7 +645,24 @@ namespace Gumball
         
         private void OnAccelerate()
         {
+            ApplyTorqueToPoweredWheels();
+        }
+
+        private void ApplyTorqueToPoweredWheels()
+        {
+            //calculate the current engine torque from the engine RPM
+            float engineRpmPercent = (engineRpm - engineRpmRange.Min) / engineRpmRange.Difference;
+            float engineTorque = torqueCurve.Evaluate(engineRpmPercent);
             
+            foreach (WheelCollider poweredWheel in poweredWheels)
+            {
+                //distribute the engine torque to the wheels based on gear ratios
+                float engineTorqueDistributed = engineTorque / poweredWheels.Length; //TODO: might want to distribute this unevenly - eg. give more torque to the wheel with more traction
+                float wheelTorque = engineTorqueDistributed * gearRatios[currentGear] * finalGearRatio;
+            
+                //apply to the wheels
+                poweredWheel.motorTorque = wheelTorque;
+            }
         }
         
         private void ApplySteering()
@@ -618,7 +674,6 @@ namespace Gumball
                 else
                 {
                     frontWheel.steerAngle = desiredSteerAngle;
-
                 }
             }
         }

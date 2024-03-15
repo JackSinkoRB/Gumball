@@ -1651,8 +1651,55 @@ MonoBehaviour:
   currentLaneDistance: 0
   speed: 0
   desiredSpeed: 0
-  motorTorque: 500
+  isAutomaticTransmission: 1
+  torqueCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 25
+      inSlope: 602.26434
+      outSlope: 602.26434
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.18274854
+    - serializedVersion: 3
+      time: 0.57
+      value: 150
+      inSlope: 5.173304
+      outSlope: 5.173304
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.6979166
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -935.24084
+      outSlope: -935.24084
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.071791574
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  gearRatios:
+  - -2.5
+  - 2.66
+  - 1.78
+  - 1.3
+  - 1
+  - 0.7
+  - 0.5
+  finalGearRatio: 3.42
+  engineRpmRange:
+    Min: 1000
+    Max: 6000
+  currentGear: 0
   isAccelerating: 0
+  engineRpm: 0
   movementTargetDistance:
     Min: 5
     Max: 15
@@ -1688,33 +1735,6 @@ MonoBehaviour:
     m_RotationOrder: 4
   desiredSteerAngle: 0
   visualSteerAngle: 0
-  collisionRecoverDuration: 1
-  disableMovementInCollision: 1
-  inCollision: 0
-  brakeForObstacles: 1
-  brakeForObstaclesRaycast:
-    offset: 0
-    raycastLength: 15
-    startDistance: 2
-    detectorSize: {x: 0.7, y: 1, z: 0.7}
-    detectionLayers:
-      serializedVersion: 2
-      m_Bits: 768
-    isBlocked: 0
-    angle: 0
-    offsetVector: {x: 0, y: 0, z: 0}
-  brakingRaycastLength:
-    Min: 8
-    Max: 25
-  speedForBrakingRaycastLength:
-    Min: 10
-    Max: 60
-  useObstacleAvoidance: 0
-  speedToBrakeToIfBlocked: 50
-  obstacleAvoidanceRaycastLayers: []
-  obstacleAvoidanceRaycastLayerWhenBlocked:
-    raycasts: []
-  currentLayerIndex: 0
   brakeTorque: 1000
   autoBrakeAroundCorners: 1
   cornerBrakingCurve:
@@ -1744,6 +1764,35 @@ MonoBehaviour:
   isBraking: 0
   corneringSpeed: Infinity
   speedToBrakeTo: 0
+  maxReverseSpeed: 25
+  isReversing: 0
+  collisionRecoverDuration: 1
+  disableMovementInCollision: 1
+  inCollision: 0
+  brakeForObstacles: 1
+  brakeForObstaclesRaycast:
+    offset: 0
+    raycastLength: 15
+    startDistance: 2
+    detectorSize: {x: 0.7, y: 1, z: 0.7}
+    detectionLayers:
+      serializedVersion: 2
+      m_Bits: 768
+    isBlocked: 0
+    angle: 0
+    offsetVector: {x: 0, y: 0, z: 0}
+  brakingRaycastLength:
+    Min: 8
+    Max: 25
+  speedForBrakingRaycastLength:
+    Min: 10
+    Max: 60
+  useObstacleAvoidance: 0
+  speedToBrakeToIfBlocked: 50
+  obstacleAvoidanceRaycastLayers: []
+  obstacleAvoidanceRaycastLayerWhenBlocked:
+    raycasts: []
+  currentLayerIndex: 0
   debug: 0
   isInitialised: 0
   currentChunkCached: {fileID: 0}
