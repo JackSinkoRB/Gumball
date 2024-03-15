@@ -61,7 +61,7 @@ namespace Gumball
 
         public void OnPressBrakeButton(bool isPressed)
         {
-            InputManager.Decelerate.SetPressedOverride(isPressed);
+            InputManager.Brake.SetPressedOverride(isPressed);
         }
 
         public void OnPressSteerLeftButton(bool isPressed)

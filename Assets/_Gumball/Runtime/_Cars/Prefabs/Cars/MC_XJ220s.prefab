@@ -592,32 +592,7 @@ MonoBehaviour:
   currentLaneDistance: 0
   speed: 0
   desiredSpeed: 0
-  motorTorque: 2000
-  accelerationDurationToMaxTorque: 0
-  accelerationEase:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  motorTorque: 4000
   isAccelerating: 0
   movementTargetDistance:
     Min: 5
@@ -681,6 +656,7 @@ MonoBehaviour:
   obstacleAvoidanceRaycastLayerWhenBlocked:
     raycasts: []
   currentLayerIndex: 0
+  autoBrakeAroundCorners: 0
   cornerBrakingCurve:
     serializedVersion: 2
     m_Curve: []
@@ -692,7 +668,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1000
+      value: 500
       inSlope: 0.034318835
       outSlope: 0.034318835
       tangentMode: 0
@@ -701,12 +677,12 @@ MonoBehaviour:
       outWeight: 0.3730495
     - serializedVersion: 3
       time: 100
-      value: 5000
-      inSlope: 130.3585
-      outSlope: 130.3585
+      value: 1500
+      inSlope: 31.20806
+      outSlope: 31.20806
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.041666716
+      inWeight: 0.07916672
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -719,6 +695,7 @@ MonoBehaviour:
   isInitialised: 0
   currentChunkCached: {fileID: 0}
   isFrozen: 0
+  brakeTorque: 1000
 --- !u!1 &1547205152086652757
 GameObject:
   m_ObjectHideFlags: 0
@@ -3287,7 +3264,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
   m_ForceAppPointDistance: 0.5
-  m_Mass: 100
+  m_Mass: 200
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -3590,7 +3567,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
   m_ForceAppPointDistance: 0.5
-  m_Mass: 100
+  m_Mass: 200
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -3661,7 +3638,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
   m_ForceAppPointDistance: 0.5
-  m_Mass: 100
+  m_Mass: 200
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -4309,7 +4286,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
   m_ForceAppPointDistance: 0.5
-  m_Mass: 100
+  m_Mass: 200
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4

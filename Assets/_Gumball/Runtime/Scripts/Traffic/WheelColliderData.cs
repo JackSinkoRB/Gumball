@@ -52,9 +52,6 @@ namespace Gumball
             
             isSlidingSideways = Mathf.Abs(wheelHit.sidewaysSlip / wheelCollider.sidewaysFriction.extremumSlip) > 1;
             isSlidingForward = Mathf.Abs(wheelHit.forwardSlip / wheelCollider.forwardFriction.extremumSlip) > 1;
-
-            //if (isSlidingSideways)
-                //Debug.Break();
         }
 
     }

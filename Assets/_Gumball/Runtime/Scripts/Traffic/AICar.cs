@@ -49,14 +49,12 @@ namespace Gumball
         [SerializeField, ReadOnly] private float speed;
         [SerializeField, ReadOnly] private float desiredSpeed;
         private bool wasMovingLastFrame;
+        private const float stationarySpeed = 2;
+        private bool isStationary => speed < stationarySpeed && !isAccelerating;
         
         [Header("Acceleration")]
         [SerializeField] private float motorTorque = 500;
-        [Tooltip("The duration to go from 0 motor torque to the max motor torque.")]
-        [SerializeField] private float accelerationDurationToMaxTorque = 1f;
-        [SerializeField] private AnimationCurve accelerationEase;
         [SerializeField, ReadOnly] private bool isAccelerating;
-        private Tween[] currentMotorTorqueTweens;
         private bool wasAcceleratingLastFrame;
         
         [Header("Steering")]
@@ -74,7 +72,22 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private float desiredSteerAngle;
         [SerializeField, ReadOnly] private float visualSteerAngle;
-        public float DesiredSteerAngle => desiredSteerAngle;
+        
+        [Header("Braking")]
+        [SerializeField] private float brakeTorque = 1000;
+        [Space(5)]
+        [SerializeField] private bool autoBrakeAroundCorners;
+        [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
+        [ConditionalField(nameof(autoBrakeAroundCorners)), SerializeField] private AnimationCurve cornerBrakingCurve;
+        [Space(5)]
+        [SerializeField, ReadOnly] private bool isBraking;
+        [ConditionalField(nameof(autoBrakeAroundCorners)), SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
+        [SerializeField, ReadOnly] private float speedToBrakeTo;
+        private const float dragWhenBraking = 1;
+        private bool wasBrakingLastFrame;
+        
+        [Header("Reverse")]
+        [SerializeField, ReadOnly] private bool isReversing;
         
         [Header("Collisions")]
         [SerializeField] private float collisionRecoverDuration = 1;
@@ -100,19 +113,6 @@ namespace Gumball
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private ObstacleRaycastLayer obstacleAvoidanceRaycastLayerWhenBlocked;
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField, ReadOnly] private int currentLayerIndex;
         private bool allDirectionsAreBlocked;
-        
-        [Header("Braking")]
-        private const float dragWhenBraking = 1;
-        [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
-        [ConditionalField(nameof(autoDrive)), SerializeField] private AnimationCurve cornerBrakingCurve;
-        [Tooltip("The y axis represents the amount of brake torque when x (the amount to brake) is a certain value. When the amount to brake is more, there should be more brake torque.")]
-        [SerializeField] private AnimationCurve brakeTorqueCurve;
-        [Space(5)]
-        [SerializeField, ReadOnly] private bool isBraking;
-        [ConditionalField(nameof(autoDrive)), SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
-        [SerializeField, ReadOnly] private float speedToBrakeTo;
-        [SerializeField, ReadOnly] private float currentBrakeForce;
-        private bool wasBrakingLastFrame;
 
         [Header("Debugging")]
         [SerializeField] private bool debug;
@@ -170,8 +170,8 @@ namespace Gumball
         {
             //reset for pooled objects:
             Unfreeze();
-            OnStopAccelerating();
-            OnStopBraking();
+            isAccelerating = false;
+            wasAcceleratingLastFrame = false;
         }
 
         public virtual void Initialise()
@@ -294,6 +294,8 @@ namespace Gumball
             
             UpdateBrakingValues();
             DoBrakeEvents();
+
+            CheckToReverse();
             
             CheckToAccelerate();
             DoAccelerationEvents();
@@ -314,19 +316,21 @@ namespace Gumball
                 OnChangeDesiredSpeed(MaxSpeed);
         }
 
-        /// <summary>
-        /// If the speed goes below this value, the car applies the brakes to come to a COMPLETE stop.
-        /// </summary>
-        private const float autoBrakeSpeed = 1;
-        
         private void CheckToAccelerate()
         {
-            if (isBraking && speed > autoBrakeSpeed)
+            //don't accelerate if braking
+            if (isBraking && speed > stationarySpeed)
                 isAccelerating = false;
+            //don't accelerate if in collision
             else if (disableMovementInCollision && recoveringFromCollision)
                 isAccelerating = false;
+            //can't accelerate if above desired speed
+            if (speed > desiredSpeed)
+                isAccelerating = false;
+            
+            //check to accelerate
             else
-                isAccelerating = autoDrive ? speed < desiredSpeed : InputManager.Accelerate.IsPressed;
+                isAccelerating = autoDrive || InputManager.Accelerate.IsPressed;
         }
 
         private void DoAccelerationEvents()
@@ -377,22 +381,25 @@ namespace Gumball
             if (disableMovementInCollision && inCollision)
                 return;
 
+            if (isReversing)
+                return;
+
             //is speeding over the desired speed? 
             const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
-            if (speed > desiredSpeed + speedingLeeway)
+            if (autoDrive && speed > desiredSpeed + speedingLeeway)
             {
                 speedToBrakeTo = desiredSpeed;
                 isBraking = true;
             }
 
             //brake around corners
-            if (speed > corneringSpeed && corneringSpeed < speedToBrakeTo)
+            if (autoBrakeAroundCorners && speed > corneringSpeed && corneringSpeed < speedToBrakeTo)
             {
                 speedToBrakeTo = corneringSpeed;
                 isBraking = true;
             }
 
-            if (brakeForObstacles && autoDrive)
+            if (autoDrive && brakeForObstacles)
             {
                 float speedPercent = (speed - speedForBrakingRaycastLength.Min) / (speedForBrakingRaycastLength.Max - speedForBrakingRaycastLength.Min);
                 float raycastLength = brakingRaycastLength.Min + ((brakingRaycastLength.Max - brakingRaycastLength.Min) * speedPercent);
@@ -414,8 +421,15 @@ namespace Gumball
                     isBraking = true;
                 }
             }
+            
+            if (!autoDrive && InputManager.Brake.IsPressed)
+            {
+                speedToBrakeTo = 0;
+                isBraking = true;
+            }
 
-            if (speed < 1 && !isAccelerating)
+            //brake if stationary
+            if (isStationary)
             {
                 speedToBrakeTo = 0;
                 isBraking = true;
@@ -436,6 +450,38 @@ namespace Gumball
             wasBrakingLastFrame = isBraking;
         }
 
+        private void CheckToReverse()
+        {
+            if (!autoDrive)
+            {
+                if (isReversing && !InputManager.Brake.IsPressed)
+                    OnStopReversing();
+                if (!isReversing && (isStationary || speed < 1) && InputManager.Brake.IsPressed)
+                    OnStartReversing();
+            }
+        }
+        
+        private void OnStartReversing()
+        {
+            isReversing = true;
+            
+            foreach (WheelCollider wheelCollider in poweredWheels)
+            {
+                wheelCollider.motorTorque = -motorTorque / poweredWheels.Length;
+                wheelCollider.brakeTorque = 0;
+            }
+        }
+
+        private void OnStopReversing()
+        {
+            isReversing = false;
+            
+            foreach (WheelCollider wheelCollider in poweredWheels)
+            {
+                wheelCollider.motorTorque = 0;
+            }
+        }
+        
         private void TryAvoidObstacles()
         {
             if (!autoDrive)
@@ -504,13 +550,9 @@ namespace Gumball
         {
             rigidBody.drag = dragWhenBraking;
             
-            //the greater distance between speed and speedToBrakeTo, the more brake force should be applied
-            float amountToBrake = speed - speedToBrakeTo;
-            currentBrakeForce = brakeTorqueCurve.Evaluate(amountToBrake);
-            
             foreach (WheelCollider wheelCollider in allWheelColliders)
             {
-                wheelCollider.brakeTorque = currentBrakeForce / allWheelColliders.Length;
+                wheelCollider.brakeTorque = brakeTorque;
             }
         }
         
@@ -547,36 +589,17 @@ namespace Gumball
 
         private void OnStartAccelerating()
         {
-            //initialise the array
-            if (currentMotorTorqueTweens == null || currentMotorTorqueTweens.Length == 0)
-                currentMotorTorqueTweens = new Tween[poweredWheels.Length];
-
-            for (int index = 0; index < poweredWheels.Length; index++)
+            foreach (WheelCollider poweredWheel in poweredWheels)
             {
-                WheelCollider rearWheel = poweredWheels[index];
-                
-                if (currentMotorTorqueTweens[index] != null)
-                    currentMotorTorqueTweens[index]?.Kill();
-
-                float desiredTorque = motorTorque / poweredWheels.Length;
-                float currentTorque = rearWheel.motorTorque;
-                float durationPercent = Mathf.Clamp01(1 - (currentTorque / desiredTorque));
-                float duration = durationPercent * accelerationDurationToMaxTorque;
-                
-                currentMotorTorqueTweens[index] = DOTween.To(() => rearWheel.motorTorque,
-                        x => rearWheel.motorTorque = x, motorTorque, duration).SetEase(accelerationEase);
+                float desiredMotorTorque = motorTorque / poweredWheels.Length;
+                poweredWheel.motorTorque = desiredMotorTorque;
             }
         }
 
         private void OnStopAccelerating()
         {
-            for (int index = 0; index < poweredWheels.Length; index++)
+            foreach (WheelCollider wheelCollider in poweredWheels)
             {
-                WheelCollider wheelCollider = poweredWheels[index];
-
-                //stop acceleration tweens
-                currentMotorTorqueTweens[index]?.Kill();
-                
                 wheelCollider.motorTorque = 0;
             }
         }

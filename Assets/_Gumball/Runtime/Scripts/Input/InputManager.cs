@@ -26,7 +26,7 @@ namespace Gumball
         
         public static VirtualInputActionFloat Steering { get; private set; }
         public static VirtualInputActionButton Accelerate { get; private set; }
-        public static VirtualInputActionButton Decelerate { get; private set; }
+        public static VirtualInputActionButton Brake { get; private set; }
         public static VirtualInputActionButton Handbrake { get; private set; }
         public static VirtualInputActionButton ShiftUp { get; private set; }
         public static VirtualInputActionButton ShiftDown { get; private set; }
@@ -42,7 +42,7 @@ namespace Gumball
                 {
                     Steering = new VirtualInputActionFloat(Instance.GetOrCacheAction("Steering"));
                     Accelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Accelerate"));
-                    Decelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Decelerate"));
+                    Brake = new VirtualInputActionButton(Instance.GetOrCacheAction("Decelerate"));
                     Handbrake = new VirtualInputActionButton(Instance.GetOrCacheAction("Handbrake"));
                     ShiftUp = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftUp"));
                     ShiftDown = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftDown"));

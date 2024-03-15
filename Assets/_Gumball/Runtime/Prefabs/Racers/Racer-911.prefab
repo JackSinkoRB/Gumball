@@ -4100,6 +4100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6629d1ecf32008043bae9b7663e0b579, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wheelConfiguration: 0
   frontWheelMeshes:
   - {fileID: 2750247222061784653}
   - {fileID: 89272501969471419}
@@ -4119,32 +4120,7 @@ MonoBehaviour:
   currentLaneDistance: 0
   speed: 0
   desiredSpeed: 0
-  motorTorque: 2500
-  accelerationDurationToMaxTorque: 0.5
-  accelerationEase:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2.6603773
-      outSlope: 2.6603773
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.041666668
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  motorTorque: 4000
   isAccelerating: 0
   movementTargetDistance:
     Min: 5
@@ -4153,6 +4129,7 @@ MonoBehaviour:
     Min: 20
     Max: 70
   steerSpeed: 10
+  releaseSpeed: 15
   visualSteerSpeed: 10
   maxSteerAngleCurve:
     serializedVersion: 2
@@ -4290,6 +4267,7 @@ MonoBehaviour:
       angle: 0
       offsetVector: {x: 0, y: 0, z: 0}
   currentLayerIndex: 0
+  autoBrakeAroundCorners: 1
   cornerBrakingCurve:
     serializedVersion: 2
     m_Curve:
@@ -4319,18 +4297,18 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
-      inSlope: 24.99
-      outSlope: 24.99
+      value: 500
+      inSlope: 5
+      outSlope: 5
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 100
-      value: 2500
-      inSlope: 24.99
-      outSlope: 24.99
+      value: 1000
+      inSlope: 5
+      outSlope: 5
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -4344,10 +4322,9 @@ MonoBehaviour:
   currentBrakeForce: 0
   debug: 1
   isInitialised: 0
-  allWheelMeshes: []
-  allWheelColliders: []
   currentChunkCached: {fileID: 0}
   isFrozen: 0
+  brakeTorque: 1000
 --- !u!54 &5602847413459088334
 Rigidbody:
   m_ObjectHideFlags: 0

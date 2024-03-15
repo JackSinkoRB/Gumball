@@ -331,7 +331,7 @@ namespace Gumball
 
             throttle = Mathf.Clamp01(throttle);
 
-            if (InputManager.Decelerate.IsPressed)
+            if (InputManager.Brake.IsPressed)
             {
                 if (drivetrain.slipRatio < tractionControlSlipTrigger)
                     brake += Time.deltaTime / throttleTime;
@@ -348,7 +348,7 @@ namespace Gumball
                     brake -= Time.deltaTime / throttleReleaseTimeNoTraction;
             }
 
-            if (!InputManager.Decelerate.IsPressed && !InputManager.Accelerate.IsPressed)
+            if (!InputManager.Brake.IsPressed && !InputManager.Accelerate.IsPressed)
             {
                 throttleInput = 0;
             }
