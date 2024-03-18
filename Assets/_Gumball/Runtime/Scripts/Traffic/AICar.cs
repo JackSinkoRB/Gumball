@@ -257,6 +257,7 @@ namespace Gumball
             {
                 wheelCollider.motorTorque = 0;
                 wheelCollider.rotationSpeed = 0;
+                wheelCollider.steerAngle = 0;
             }
 
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
