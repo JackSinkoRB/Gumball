@@ -251,10 +251,14 @@ namespace Gumball
             
             Rigidbody.position = position;
             Rigidbody.rotation = rotation;
+            
+            foreach (WheelCollider wheelCollider in allWheelColliders)
+            {
+                wheelCollider.motorTorque = 0;
+                wheelCollider.rotationSpeed = 0;
+            }
 
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
-            
-            Move();
         }
 
         public void SetLaneDistance(float laneDistance)
