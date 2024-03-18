@@ -116,6 +116,7 @@ jobs:
 
       # Move Build Files
       - name: Move Build Files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: mv Gumball-${{ matrix.targetPlatform }}.zip /var/www/html
 
       # Delete build folder to save space
@@ -126,6 +127,7 @@ jobs:
     needs: build
     name: Deploy
     runs-on: self-hosted
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     steps:
 
       # Get all the commits
