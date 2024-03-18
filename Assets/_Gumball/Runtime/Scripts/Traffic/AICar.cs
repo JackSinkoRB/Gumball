@@ -213,9 +213,12 @@ namespace Gumball
             Unfreeze();
             isAccelerating = false;
             wasAcceleratingLastFrame = false;
-            
-            InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
-            InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
+
+            if (InputManager.ExistsRuntime)
+            {
+                InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
+                InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
+            }
         }
 
         public virtual void Initialise()

@@ -22,7 +22,7 @@ namespace Gumball
             
             PrimaryContact.started += PrimaryContactInput.OnPressed;
             PrimaryContact.canceled += PrimaryContactInput.OnReleased;
-            PrimaryContact.performed += PrimaryContactInput.OnPerformed;
+            PrimaryPosition.performed += PrimaryContactInput.OnPerformed;
         }
 
         protected override void OnDisableMap()
@@ -31,7 +31,7 @@ namespace Gumball
 
             PrimaryContact.started -= PrimaryContactInput.OnPressed;
             PrimaryContact.canceled -= PrimaryContactInput.OnReleased;
-            PrimaryContact.performed -= PrimaryContactInput.OnPerformed;
+            PrimaryPosition.performed -= PrimaryContactInput.OnPerformed;
         }
         
     }

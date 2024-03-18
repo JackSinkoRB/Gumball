@@ -74,20 +74,8 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void InitialisePostSceneLoad()
         {
-            CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
-            {
-                InputManager.Instance.GeneralInput.PrimaryContact.started -= OnPressed;
-                InputManager.Instance.GeneralInput.PrimaryContact.started += OnPressed;
-
-                InputManager.Instance.GeneralInput.PrimaryContact.canceled -= OnReleased;
-                InputManager.Instance.GeneralInput.PrimaryContact.canceled += OnReleased;
-
-                InputManager.Instance.GeneralInput.PrimaryPosition.performed -= OnPerformed;
-                InputManager.Instance.GeneralInput.PrimaryPosition.performed += OnPerformed;
-
-                CoroutineHelper.onUnityUpdate -= Update;
-                CoroutineHelper.onUnityUpdate += Update;
-            });
+            CoroutineHelper.onUnityUpdate -= Update;
+            CoroutineHelper.onUnityUpdate += Update;
         }
         
         private static void Update()
