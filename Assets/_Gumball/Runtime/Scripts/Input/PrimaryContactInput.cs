@@ -76,14 +76,14 @@ namespace Gumball
         {
             CoroutineHelper.PerformAfterTrue(() => InputManager.ExistsRuntime, () =>
             {
-                InputManager.PrimaryContact.started -= OnPressed;
-                InputManager.PrimaryContact.started += OnPressed;
+                InputManager.Instance.GeneralInput.PrimaryContact.started -= OnPressed;
+                InputManager.Instance.GeneralInput.PrimaryContact.started += OnPressed;
 
-                InputManager.PrimaryContact.canceled -= OnReleased;
-                InputManager.PrimaryContact.canceled += OnReleased;
+                InputManager.Instance.GeneralInput.PrimaryContact.canceled -= OnReleased;
+                InputManager.Instance.GeneralInput.PrimaryContact.canceled += OnReleased;
 
-                InputManager.PrimaryPosition.performed -= OnPerformed;
-                InputManager.PrimaryPosition.performed += OnPerformed;
+                InputManager.Instance.GeneralInput.PrimaryPosition.performed -= OnPerformed;
+                InputManager.Instance.GeneralInput.PrimaryPosition.performed += OnPerformed;
 
                 CoroutineHelper.onUnityUpdate -= Update;
                 CoroutineHelper.onUnityUpdate += Update;
@@ -99,7 +99,7 @@ namespace Gumball
         public static void OnPressed(InputAction.CallbackContext context)
         {
             IsPressed = true;
-            PositionOnPress = InputManager.PrimaryPosition.ReadValue<Vector2>();
+            PositionOnPress = InputManager.Instance.GeneralInput.PrimaryPosition.ReadValue<Vector2>();
             Position = PositionOnPress;
             lastKnownPositionOnPerformed = Position;
             OffsetSincePressed = Vector2.zero;

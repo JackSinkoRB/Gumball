@@ -213,8 +213,8 @@ namespace Gumball
             isAccelerating = false;
             wasAcceleratingLastFrame = false;
             
-            InputManager.ShiftUp.onPressed -= ShiftUp;
-            InputManager.ShiftDown.onPressed -= ShiftDown;
+            InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
+            InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
         }
 
         public virtual void Initialise()
@@ -236,8 +236,8 @@ namespace Gumball
             
             if (!IsAutomaticTransmission)
             {
-                InputManager.ShiftUp.onPressed += ShiftUp;
-                InputManager.ShiftDown.onPressed += ShiftDown;
+                InputManager.Instance.CarInput.ShiftUp.onPressed += ShiftUp;
+                InputManager.Instance.CarInput.ShiftDown.onPressed += ShiftDown;
             }
         }
 
@@ -440,10 +440,10 @@ namespace Gumball
             //check to accelerate
             else
             {
-                isAccelerating = autoDrive || (!autoDrive && InputManager.Accelerate.IsPressed) || (!autoDrive && isReversing);
+                isAccelerating = autoDrive || (!autoDrive && InputManager.Instance.CarInput.Accelerate.IsPressed) || (!autoDrive && isReversing);
                 
                 //if accelerating from reverse, change the gear
-                if (InputManager.Accelerate.IsPressed && currentGear == 0)
+                if (InputManager.Instance.CarInput.Accelerate.IsPressed && currentGear == 0)
                     currentGear = 1;
             }
         }
@@ -475,9 +475,9 @@ namespace Gumball
             }
             else
             {
-                float actualSteerSpeed = InputManager.SteeringInput.Approximately(0) ? releaseSpeed : this.steerSpeed;
+                float actualSteerSpeed = InputManager.Instance.CarInput.SteeringInput.Approximately(0) ? releaseSpeed : this.steerSpeed;
 
-                float angle = InputManager.SteeringInput * maxSteerAngle;
+                float angle = InputManager.Instance.CarInput.SteeringInput * maxSteerAngle;
                 desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, actualSteerSpeed * Time.deltaTime);
             }
             
@@ -537,7 +537,7 @@ namespace Gumball
                 }
             }
             
-            if (!autoDrive && InputManager.Brake.IsPressed)
+            if (!autoDrive && InputManager.Instance.CarInput.Brake.IsPressed)
             {
                 speedToBrakeTo = 0;
                 isBraking = true;
@@ -569,9 +569,9 @@ namespace Gumball
         {
             if (!autoDrive)
             {
-                if (isReversing && !InputManager.Brake.IsPressed)
+                if (isReversing && !InputManager.Instance.CarInput.Brake.IsPressed)
                     OnStopReversing();
-                if (!isReversing && (isStationary || speed < 1 || currentGear == 0) && InputManager.Brake.IsPressed)
+                if (!isReversing && (isStationary || speed < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
                     OnStartReversing();
             }
         }

@@ -145,7 +145,7 @@ namespace Gumball
             PrimaryContactInput.onRelease += OnPrimaryContactReleased;
             DataProvider.onBeforeSaveAllDataOnAppExit += OnBeforeSaveAllDataOnAppExit;
             
-            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
+            InputManager.Instance.GeneralInput.Enable();
             
             //set the vehicle kinematic
             currentCar.Rigidbody.isKinematic = true;

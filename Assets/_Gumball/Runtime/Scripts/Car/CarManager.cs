@@ -301,13 +301,13 @@ namespace Gumball
 
         private void Update()
         {
-            steeringWheel.UpdateSteeringAmount(InputManager.SteeringInput);
+            steeringWheel.UpdateSteeringAmount(InputManager.Instance.CarInput.SteeringInput);
             
             CalculateSpeed();
             CalculateThrottle();
             CalculateHandbrake();
 
-            if (InputManager.Accelerate.IsPressed)
+            if (InputManager.Instance.CarInput.Accelerate.IsPressed)
             {
                 //if car is slipping, and there's no traction control, increase the throttle response time
                 if (drivetrain.slipRatio < tractionControlSlipTrigger)
@@ -331,7 +331,7 @@ namespace Gumball
 
             throttle = Mathf.Clamp01(throttle);
 
-            if (InputManager.Brake.IsPressed)
+            if (InputManager.Instance.CarInput.Brake.IsPressed)
             {
                 if (drivetrain.slipRatio < tractionControlSlipTrigger)
                     brake += Time.deltaTime / throttleTime;
@@ -348,7 +348,7 @@ namespace Gumball
                     brake -= Time.deltaTime / throttleReleaseTimeNoTraction;
             }
 
-            if (!InputManager.Brake.IsPressed && !InputManager.Accelerate.IsPressed)
+            if (!InputManager.Instance.CarInput.Brake.IsPressed && !InputManager.Instance.CarInput.Accelerate.IsPressed)
             {
                 throttleInput = 0;
             }
@@ -358,7 +358,7 @@ namespace Gumball
 
             SetBrakeLights(brake > 0);
 
-            if (InputManager.Handbrake.IsPressed || clutchIn)
+            if (InputManager.Instance.CarInput.Handbrake.IsPressed || clutchIn)
             {
                 drivetrain.clutch = 1;
             }
@@ -435,12 +435,12 @@ namespace Gumball
 
             drivetrain.throttleInput = throttleInput;
 
-            if (InputManager.ShiftUp.WasPressedThisFrame)
+            if (InputManager.Instance.CarInput.ShiftUp.WasPressedThisFrame)
             {
                 ShiftUp();
             }
 
-            if (InputManager.ShiftDown.WasPressedThisFrame)
+            if (InputManager.Instance.CarInput.ShiftDown.WasPressedThisFrame)
             {
                 ShiftDown();
             }
@@ -486,7 +486,7 @@ namespace Gumball
                 }
                 
                 wheel.brakePedal = brakeToApply;
-                wheel.handbrake = InputManager.Handbrake.IsPressed ? 1 : 0;
+                wheel.handbrake = InputManager.Instance.CarInput.Handbrake.IsPressed ? 1 : 0;
                 wheel.steering = CurrentSteering;
             }
         }
@@ -513,15 +513,15 @@ namespace Gumball
         private void CalculateSteering()
         {
             float speedPercent = Mathf.Clamp01(Rigidbody.velocity.magnitude / SpeedUtils.FromKmh(speedForMinSteerSpeed));
-            float desiredSteering = InputManager.SteeringInput;
+            float desiredSteering = InputManager.Instance.CarInput.SteeringInput;
             bool isCorrecting = false;
             
-            if (InputManager.SteeringInput == 0)
+            if (InputManager.Instance.CarInput.SteeringInput == 0)
             {
                 float difference = maxSteerReleaseSpeed - minSteerReleaseSpeed;
                 CurrentSteerSpeed = minSteerReleaseSpeed + ((1-speedPercent) * difference);;
-            } else if (InputManager.SteeringInput > 0.01f && CurrentSteering < -0.01f
-                       || InputManager.SteeringInput < -0.01f && CurrentSteering > 0.01f)
+            } else if (InputManager.Instance.CarInput.SteeringInput > 0.01f && CurrentSteering < -0.01f
+                       || InputManager.Instance.CarInput.SteeringInput < -0.01f && CurrentSteering > 0.01f)
             {
                 float maxCorrection = (maxSteerSpeed + maxSteerReleaseSpeed) / 2;
                 float minCorrection = (minSteerSpeed + minSteerReleaseSpeed) / 2;
@@ -540,7 +540,7 @@ namespace Gumball
             
             CurrentSteering = Mathf.Lerp(CurrentSteering, desiredSteering, Time.deltaTime * CurrentSteerSpeed);
             if (isCorrecting)
-                CurrentSteering = Mathf.Clamp(CurrentSteering, 0, -Mathf.Sign(InputManager.SteeringInput) * 1);
+                CurrentSteering = Mathf.Clamp(CurrentSteering, 0, -Mathf.Sign(InputManager.Instance.CarInput.SteeringInput) * 1);
         }
         
         private void SetGearboxFromSettings()

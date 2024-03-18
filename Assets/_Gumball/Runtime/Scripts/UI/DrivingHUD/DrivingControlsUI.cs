@@ -56,12 +56,12 @@ namespace Gumball
 
         public void OnPressAccelerateButton(bool isPressed)
         {
-            InputManager.Accelerate.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(isPressed);
         }
 
         public void OnPressBrakeButton(bool isPressed)
         {
-            InputManager.Brake.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.Brake.SetPressedOverride(isPressed);
         }
 
         public void OnPressSteerLeftButton(bool isPressed)
@@ -78,17 +78,17 @@ namespace Gumball
 
         public void OnPressHandbrakeButton(bool isPressed)
         {
-            InputManager.Handbrake.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.Handbrake.SetPressedOverride(isPressed);
         }
 
         public void OnPressGearDownButton(bool isPressed)
         {
-            InputManager.ShiftDown.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.ShiftDown.SetPressedOverride(isPressed);
         }
 
         public void OnPressGearUpButton(bool isPressed)
         {
-            InputManager.ShiftUp.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.ShiftUp.SetPressedOverride(isPressed);
         }
 
         private void OnSteeringButtonUpdated()
@@ -101,7 +101,7 @@ namespace Gumball
             else if (isSteerRightButtonPressed)
                 steeringValue = 1;
             
-            InputManager.Steering.SetValueOverride(steeringValue);
+            InputManager.Instance.CarInput.Steering.SetValueOverride(steeringValue);
         }
         
     }

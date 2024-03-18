@@ -56,8 +56,7 @@ namespace Gumball
             AvatarManager.Instance.DriverAvatar.Teleport(Instance.driverStandingPosition, Instance.DriverStandingRotation);
             AvatarManager.Instance.CoDriverAvatar.Teleport(Instance.coDriverStandingPosition, Instance.CoDriverStandingRotation);
 
-            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car, false);
-            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.General);
+            InputManager.Instance.CarInput.Disable();
 
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }

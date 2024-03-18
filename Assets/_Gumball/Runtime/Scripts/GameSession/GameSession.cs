@@ -67,7 +67,7 @@ namespace Gumball
             yield return OnSessionLoad();
             GlobalLoggers.LoadingLogger.Log("Loaded session");
 
-            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car);
+            InputManager.Instance.CarInput.Enable();
         }
         
         protected virtual IEnumerator OnSessionLoad()
