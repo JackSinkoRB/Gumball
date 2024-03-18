@@ -745,6 +745,9 @@ namespace Gumball
                     frontWheel.steerAngle = desiredSteerAngle;
                 }
             }
+            
+            if (steeringWheel != null)
+                steeringWheel.UpdateSteeringAmount(desiredSteerAngle);
         }
 
         /// <summary>
