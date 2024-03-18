@@ -249,9 +249,11 @@ namespace Gumball
                 Rigidbody.angularVelocity = Vector3.zero;
             }
             
-            transform.position = position;
-            transform.rotation = rotation;
+            Rigidbody.position = position;
+            Rigidbody.rotation = rotation;
 
+            GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
+            
             Move();
         }
 

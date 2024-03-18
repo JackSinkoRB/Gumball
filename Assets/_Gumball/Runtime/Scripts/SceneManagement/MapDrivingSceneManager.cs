@@ -24,8 +24,10 @@ namespace Gumball
             WarehouseManager.Instance.onCurrentCarChanged -= OnCarChanged;
             
             //set idle states
-            AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarStandingIdleState>();
-            AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarStandingIdleState>();
+            if (AvatarManager.Instance.DriverAvatar != null)
+                AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarStandingIdleState>();
+            if (AvatarManager.Instance.CoDriverAvatar != null)
+                AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarStandingIdleState>();
         }
 
         private void OnCarChanged(AICar newCar)
