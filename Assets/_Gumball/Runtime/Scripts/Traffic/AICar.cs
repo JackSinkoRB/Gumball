@@ -40,9 +40,10 @@ namespace Gumball
         [SerializeField, InitializationField] private Transform[] rearWheelMeshes;
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
+        [Space(5)]
+        [SerializeField, ReadOnly] private WheelCollider[] poweredWheels;
         private Transform[] allWheelMeshes;
         private WheelCollider[] allWheelColliders;
-        private WheelCollider[] poweredWheels;
         
         [Header("Auto drive")]
         [SerializeField] private bool autoDrive;
