@@ -34,7 +34,7 @@ namespace Gumball
         public static event Action<LiveDecal> onDestroyLiveDecal;
         
         //these must be static so they are still alive when the application is quitting
-        private static CarManager currentCar;
+        private static AICar currentCar;
         private static List<LiveDecal> liveDecals = new();
         private static PositionAndRotation positionBeforeSession;
 
@@ -52,7 +52,7 @@ namespace Gumball
 
         public List<LiveDecal> LiveDecals => liveDecals;
         public LiveDecal CurrentSelected => currentSelected;
-        public CarManager CurrentCar => currentCar;
+        public AICar CurrentCar => currentCar;
         public SelectedDecalUI SelectedDecalUI => selectedLiveDecalUI;
         public Color[] ColorPalette => colorPalette;
 
@@ -90,7 +90,7 @@ namespace Gumball
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
 
-            CarManager car = WarehouseManager.Instance.CurrentCar;
+            AICar car = WarehouseManager.Instance.CurrentCar;
 
             yield return Instance.StartSession(car);
             
@@ -129,7 +129,7 @@ namespace Gumball
             UpdateDecalUnderPointer();
         }
 
-        public IEnumerator StartSession(CarManager car)
+        public IEnumerator StartSession(AICar car)
         {
             int sessionTicketNumber = ++maxWaitingSessionTicketNumber;
             while (currentSessionTicketNumber != sessionTicketNumber)

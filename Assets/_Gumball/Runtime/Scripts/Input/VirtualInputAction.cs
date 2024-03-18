@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,19 +21,38 @@ namespace Gumball
 
     public class VirtualInputActionButton : VirtualInputAction
     {
+
+        public event Action onPressed;
+        public event Action onReleased;
+        
         public bool IsPressed => InputAction.IsPressed() || isPressedOverride;
         public bool WasPressedThisFrame => InputAction.WasPressedThisFrame() || (IsPressed && Time.frameCount == lastPressedFrame);
         
         private bool isPressedOverride;
         private int lastPressedFrame = Time.frameCount;
-            
-        public VirtualInputActionButton(InputAction inputAction) : base(inputAction) {}
-            
+
+        public VirtualInputActionButton(InputAction inputAction) : base(inputAction)
+        {
+            InputAction.started += OnInputActionStarted;
+            InputAction.canceled += OnInputActionCanceled;
+        }
+
+        private void OnInputActionStarted(InputAction.CallbackContext context)
+        {
+            onPressed?.Invoke();
+        }
+
+        private void OnInputActionCanceled(InputAction.CallbackContext context)
+        {
+            onReleased?.Invoke();
+        }
+
         public void SetPressedOverride(bool pressed)
         {
             isPressedOverride = pressed;
             lastPressedFrame = Time.frameCount;
         }
+        
     }
         
     public class VirtualInputActionFloat : VirtualInputAction

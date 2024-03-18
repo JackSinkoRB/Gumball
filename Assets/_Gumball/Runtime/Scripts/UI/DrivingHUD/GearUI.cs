@@ -24,7 +24,7 @@ namespace Gumball
                 return;
             }
             
-            gearLabel.text = $"{GetGearAsUserFriendlyString(WarehouseManager.Instance.CurrentCar.drivetrain.Gear)}";
+            gearLabel.text = $"{GetGearAsUserFriendlyString(WarehouseManager.Instance.CurrentCar.CurrentGear)}";
         }
 
         private string GetGearAsUserFriendlyString(int gear)
@@ -32,10 +32,7 @@ namespace Gumball
             if (gear == 0)
                 return reverseLabel;
 
-            if (gear == 1)
-                return neutralLabel;
-
-            return (gear - 1).ToString();
+            return gear.ToString();
         }
         
     }

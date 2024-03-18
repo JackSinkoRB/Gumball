@@ -15,10 +15,10 @@ namespace Gumball
         
         [SerializeField] private List<AssetReferenceGameObject> allCars;
 
-        public delegate void CarChangedDelegate(CarManager newCar);
+        public delegate void CarChangedDelegate(AICar newCar);
         public event CarChangedDelegate onCurrentCarChanged;
 
-        public CarManager CurrentCar { get; private set; }
+        public AICar CurrentCar { get; private set; }
         public List<AssetReferenceGameObject> AllCars => allCars;
         
         public int SavedCarIndex
@@ -33,7 +33,7 @@ namespace Gumball
             private set => DataManager.Warehouse.Set("CurrentCar.ID", value);
         }
         
-        public void SetCurrentCar(CarManager car)
+        public void SetCurrentCar(AICar car)
         {
             //remove DontDestroyOnLoad() for existing cars:
             if (CurrentCar != null)
@@ -52,12 +52,12 @@ namespace Gumball
             DontDestroyOnLoad(car.gameObject);
         }
         
-        public IEnumerator SpawnSavedCar(Vector3 position, Quaternion rotation, Action<CarManager> onComplete = null)
+        public IEnumerator SpawnSavedCar(Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
         {
             yield return SpawnCar(SavedCarIndex, SavedCarID, position, rotation, onComplete);
         }
 
-        public IEnumerator SpawnCar(int index, int id, Vector3 position, Quaternion rotation, Action<CarManager> onComplete = null)
+        public IEnumerator SpawnCar(int index, int id, Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             
@@ -65,10 +65,10 @@ namespace Gumball
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
             yield return handle;
             
-            CarManager car = Instantiate(handle.Result, position, rotation).GetComponent<CarManager>();
+            AICar car = Instantiate(handle.Result, position, rotation).GetComponent<AICar>();
             car.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             
-            yield return car.Initialise(index, id);
+            car.InitialisePlayerCar(index, id);
             
             yield return DecalManager.ApplyDecalDataToCar(car);
             

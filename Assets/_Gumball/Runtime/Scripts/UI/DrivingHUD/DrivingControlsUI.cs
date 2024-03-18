@@ -31,9 +31,9 @@ namespace Gumball
             SettingsManager.Instance.onGearboxSettingChanged -= OnGearboxSettingChanged;
         }
 
-        private void OnCarChanged(CarManager newCar)
+        private void OnCarChanged(AICar newCar)
         {
-            OnGearChanged(-1, newCar.drivetrain.Gear); //initialise the gear UI
+            OnGearChanged(-1, newCar.CurrentGear); //initialise the gear UI
         }
 
         private void OnGearboxSettingChanged(int newValue)
@@ -45,12 +45,12 @@ namespace Gumball
         
         private void OnGearChanged(int previousgear, int newgear)
         {
-            Drivetrain drivetrain = WarehouseManager.Instance.CurrentCar.drivetrain;
+            AICar currentCar = WarehouseManager.Instance.CurrentCar;
             
-            if (!drivetrain.automatic)
+            if (!currentCar.IsAutomaticTransmission)
             {
-                gearDownButton.interactable = drivetrain.Gear > 1;
-                gearUpButton.interactable = drivetrain.Gear < drivetrain.gearRatios.Length - 1;
+                gearDownButton.interactable = currentCar.CurrentGear > 1;
+                gearUpButton.interactable = currentCar.CurrentGear < currentCar.NumberOfGears - 1;
             }
         }
 

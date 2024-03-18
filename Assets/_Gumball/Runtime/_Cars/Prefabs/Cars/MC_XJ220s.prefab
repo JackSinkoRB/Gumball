@@ -375,7 +375,7 @@ Rigidbody:
   m_GameObject: {fileID: 1422899270389967864}
   serializedVersion: 4
   m_Mass: 1500
-  m_Drag: 0
+  m_Drag: 0.05
   m_AngularDrag: 3
   m_CenterOfMass: {x: 0, y: 0.3, z: -0.67}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -572,6 +572,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da187e7637980114d820c1c8bc7370c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canBeDrivenByPlayer: 1
+  avatarIKManager: {fileID: 3038809945755952107}
+  steeringWheel: {fileID: 755326655889393961}
+  carIndex: 0
+  id: 0
   wheelConfiguration: 2
   frontWheelMeshes:
   - {fileID: 3229365723055604258}
@@ -587,7 +592,7 @@ MonoBehaviour:
   - {fileID: 6488037141158947642}
   autoDrive: 0
   obeySpeedLimit: 0
-  maxSpeed: 200
+  maxSpeed: 300
   useRacingLine: 1
   currentLaneDistance: 0
   speed: 0
@@ -607,7 +612,7 @@ MonoBehaviour:
       outWeight: 0.13157895
     - serializedVersion: 3
       time: 0.57
-      value: 600
+      value: 700
       inSlope: 5.173304
       outSlope: 5.173304
       tangentMode: 0
@@ -638,9 +643,15 @@ MonoBehaviour:
   engineRpmRange:
     Min: 1000
     Max: 8000
+  idealRPMRangeForGearChanges:
+    Min: 3500
+    Max: 5500
+  idealTorqueRPM: 0
   currentGear: 0
   isAccelerating: 0
   engineRpm: 0
+  maxReverseSpeed: 25
+  isReversing: 0
   movementTargetDistance:
     Min: 5
     Max: 10
@@ -687,8 +698,7 @@ MonoBehaviour:
   isBraking: 0
   corneringSpeed: Infinity
   speedToBrakeTo: 0
-  maxReverseSpeed: 25
-  isReversing: 0
+  colliders: {fileID: 6054565963001126080}
   collisionRecoverDuration: 0
   disableMovementInCollision: 0
   inCollision: 0
@@ -3288,7 +3298,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
   m_ForceAppPointDistance: 0.5
-  m_Mass: 200
+  m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -3591,7 +3601,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
   m_ForceAppPointDistance: 0.5
-  m_Mass: 200
+  m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -3662,7 +3672,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
   m_ForceAppPointDistance: 0.5
-  m_Mass: 200
+  m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -4310,7 +4320,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
   m_ForceAppPointDistance: 0.5
-  m_Mass: 200
+  m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4

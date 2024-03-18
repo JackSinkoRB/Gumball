@@ -33,7 +33,7 @@ namespace Gumball
         /// <summary>
         /// Saves the specified decals to the car's save data.
         /// </summary>
-        public static void SaveLiveDecalData(CarManager car, List<LiveDecal> liveDecals)
+        public static void SaveLiveDecalData(AICar car, List<LiveDecal> liveDecals)
         {
             LiveDecal.LiveDecalData[] liveDecalData = CreateLiveDecalData(liveDecals);
             DataManager.Cars.Set(GetDecalsSaveKey(car), liveDecalData);
@@ -43,7 +43,7 @@ namespace Gumball
         /// <summary>
         /// Loads and applies the decals from the car's save data.
         /// </summary>
-        public static IEnumerator ApplyDecalDataToCar(CarManager car)
+        public static IEnumerator ApplyDecalDataToCar(AICar car)
         {
             if (!DecalEditor.ExistsRuntime)
             {
@@ -58,7 +58,7 @@ namespace Gumball
         /// <summary>
         /// Creates a list of live decals from the specified car's save data.
         /// </summary>
-        public static List<LiveDecal> CreateLiveDecalsFromData(CarManager car)
+        public static List<LiveDecal> CreateLiveDecalsFromData(AICar car)
         {
             List<LiveDecal> liveDecals = new();
             LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(GetDecalsSaveKey(car), Array.Empty<LiveDecal.LiveDecalData>());
@@ -98,7 +98,7 @@ namespace Gumball
         /// <summary>
         /// Gets the save key for the specific car in the player's car.
         /// </summary>
-        public static string GetDecalsSaveKey(CarManager car)
+        public static string GetDecalsSaveKey(AICar car)
         {
             return $"{car.SaveKey}.Decals";
         }

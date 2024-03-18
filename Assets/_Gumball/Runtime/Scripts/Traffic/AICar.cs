@@ -22,6 +22,18 @@ namespace Gumball
             ALL_WHEEL_DRIVE
         }
         
+        [Header("Player car")]
+        [SerializeField] private bool canBeDrivenByPlayer;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private CarIKManager avatarIKManager;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private SteeringWheel steeringWheel;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int id;
+        public CarIKManager AvatarIKManager => avatarIKManager;
+        public SteeringWheel SteeringWheel => steeringWheel;
+        public int CarIndex => carIndex;
+        public int ID => id;
+        public string SaveKey => $"CarData.{carIndex}.{id}";
+
         [Header("Wheels")]
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
         [SerializeField, InitializationField] private Transform[] frontWheelMeshes;
@@ -52,7 +64,7 @@ namespace Gumball
         private const float stationarySpeed = 2;
         private bool isStationary => speed < stationarySpeed && !isAccelerating;
 
-        [Header("Drivetrain")]
+        [Header("Engine & Transmission")]
         [ConditionalField(nameof(autoDrive), true), SerializeField] private bool isAutomaticTransmission = true;
         [Tooltip("The engine torque output (y) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
         [SerializeField] private AnimationCurve torqueCurve;
@@ -60,10 +72,23 @@ namespace Gumball
         [SerializeField] private float finalGearRatio = 3.42f;
         [SerializeField] private MinMaxFloat engineRpmRange = new(1000, 8000);
         [Space(5)]
+        [ConditionalField(nameof(isAutomaticTransmission)), SerializeField] private MinMaxFloat idealRPMRangeForGearChanges = new(3000, 6000);
+        [Tooltip("The peak of the torque curve for maximum torque.")]
+        [ConditionalField(nameof(isAutomaticTransmission)), SerializeField, ReadOnly] private float idealTorqueRPM;
+        [Space(5)]
         [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
         [SerializeField, ReadOnly] private float engineRpm;
+        private const float dragWhenIdle = 0.15f;
         private bool wasAcceleratingLastFrame;
+        public bool IsAutomaticTransmission => autoDrive || isAutomaticTransmission;
+        public int CurrentGear => currentGear;
+        public int NumberOfGears => gearRatios.Length;
+        public float EngineRpm => engineRpm;
+        
+        [Header("Reversing")]
+        [SerializeField] private float maxReverseSpeed = 25;
+        [SerializeField, ReadOnly] private bool isReversing;
         
         [Header("Steering")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private MinMaxFloat movementTargetDistance = new(5, 10);
@@ -93,18 +118,16 @@ namespace Gumball
         [SerializeField, ReadOnly] private float speedToBrakeTo;
         private const float dragWhenBraking = 1;
         private bool wasBrakingLastFrame;
-
-        [Header("Reverse")]
-        [SerializeField] private float maxReverseSpeed = 25;
-        [SerializeField, ReadOnly] private bool isReversing;
         
         [Header("Collisions")]
+        [SerializeField] private GameObject colliders;
         [SerializeField] private float collisionRecoverDuration = 1;
         [Tooltip("Does the car disable its braking, acceleration and steering while in a collision? Or can it keep driving?")]
         [SerializeField] private bool disableMovementInCollision = true;
         private float timeOfLastCollision = -Mathf.Infinity;
         [Space(5)]
         [SerializeField, ReadOnly] private bool inCollision;
+        public GameObject Colliders => colliders;
         
         [Header("Obstacle detection")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool brakeForObstacles = true;
@@ -135,11 +158,11 @@ namespace Gumball
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion)? targetPos;
         
-        protected Rigidbody rigidBody => GetComponent<Rigidbody>();
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => inCollision || timeSinceCollision < collisionRecoverDuration;
         private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
-        
+
+        public Rigidbody Rigidbody => GetComponent<Rigidbody>();
         public float DesiredSpeed => desiredSpeed;
         public float Speed => speed;
         public float MaxSpeed => isReversing ? maxReverseSpeed : (obeySpeedLimit ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed);
@@ -173,6 +196,14 @@ namespace Gumball
         {
             if (!isInitialised)
                 Initialise();
+
+            InitialiseGearbox();
+        }
+        
+        public void InitialisePlayerCar(int carIndex, int id)
+        {
+            this.carIndex = carIndex;
+            this.id = id;
         }
 
         private void OnDisable()
@@ -181,6 +212,9 @@ namespace Gumball
             Unfreeze();
             isAccelerating = false;
             wasAcceleratingLastFrame = false;
+            
+            InputManager.ShiftUp.onPressed -= ShiftUp;
+            InputManager.ShiftDown.onPressed -= ShiftDown;
         }
 
         public virtual void Initialise()
@@ -194,6 +228,31 @@ namespace Gumball
             CacheAllWheelMeshes();
             CacheAllWheelColliders();
             CachePoweredWheels();
+        }
+
+        private void InitialiseGearbox()
+        {
+            currentGear = 1;
+            
+            if (!IsAutomaticTransmission)
+            {
+                InputManager.ShiftUp.onPressed += ShiftUp;
+                InputManager.ShiftDown.onPressed += ShiftDown;
+            }
+        }
+
+        public void Teleport(Vector3 position, Quaternion rotation)
+        {
+            if (!Rigidbody.isKinematic)
+            {
+                Rigidbody.velocity = Vector3.zero;
+                Rigidbody.angularVelocity = Vector3.zero;
+            }
+            
+            transform.position = position;
+            transform.rotation = rotation;
+
+            Move();
         }
 
         public void SetLaneDistance(float laneDistance)
@@ -256,15 +315,15 @@ namespace Gumball
         {
             isFrozen = true;
 
-            rigidBody.velocity = Vector3.zero;
-            rigidBody.isKinematic = true;
+            Rigidbody.velocity = Vector3.zero;
+            Rigidbody.isKinematic = true;
         }
 
         private void Unfreeze()
         {
             isFrozen = false;
             
-            rigidBody.isKinematic = false;
+            Rigidbody.isKinematic = false;
         }
         
         protected void OnChangeDesiredSpeed(float newSpeed)
@@ -273,7 +332,7 @@ namespace Gumball
             
             if (debug) GlobalLoggers.AICarLogger.Log($"Changed desired speed to {desiredSpeed}");
         }
-        
+
         private void Move()
         {
             if (autoDrive)
@@ -288,7 +347,7 @@ namespace Gumball
                 targetPosition = targetPos.Value.Item2;
             }
 
-            speed = SpeedUtils.ToKmh(rigidBody.velocity.magnitude);
+            speed = SpeedUtils.ToKmh(Rigidbody.velocity.magnitude);
             
             if (useObstacleAvoidance && autoDrive)
                 TryAvoidObstacles();
@@ -318,30 +377,26 @@ namespace Gumball
             CalculateEngineRPM();
 
             //debug directions:
-            Debug.DrawRay(transform.position, rigidBody.velocity, Color.green);
+            Debug.DrawRay(transform.position, Rigidbody.velocity, Color.green);
             
             Debug.DrawLine(transform.position, targetPosition, Color.yellow);
         }
 
         private void UpdateCurrentGear()
         {
-            if (autoDrive || isAutomaticTransmission)
+            if (!IsAutomaticTransmission)
+                return;
+
+            if (isReversing)
+                return;
+
+            //check whether to shift up or down
+            if (engineRpm < idealRPMRangeForGearChanges.Min && currentGear > 1)
             {
-                if (isReversing)
-                    currentGear = 0;
-                else
-                {
-                    //TODO: calculate the ideal gear
-                    currentGear = 1;
-                }
-            }
-            else
+                ShiftDown();
+            } else if (engineRpm > idealRPMRangeForGearChanges.Max && currentGear < NumberOfGears - 1)
             {
-                if (autoDrive)
-                    return;
-                
-                //is manual transmission - get input
-                //TODO
+                ShiftUp();
             }
         }
 
@@ -384,6 +439,10 @@ namespace Gumball
             else
             {
                 isAccelerating = autoDrive || (!autoDrive && InputManager.Accelerate.IsPressed) || (!autoDrive && isReversing);
+                
+                //if accelerating from reverse, change the gear
+                if (InputManager.Accelerate.IsPressed && currentGear == 0)
+                    currentGear = 1;
             }
         }
 
@@ -408,8 +467,8 @@ namespace Gumball
             
             if (autoDrive)
             {
-                Vector3 directionToTarget = targetPosition - rigidBody.position;
-                float angle = Mathf.Clamp(-Vector2.SignedAngle(rigidBody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
+                Vector3 directionToTarget = targetPosition - Rigidbody.position;
+                float angle = Mathf.Clamp(-Vector2.SignedAngle(Rigidbody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
                 desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, steerSpeed * Time.deltaTime);
             }
             else
@@ -510,7 +569,7 @@ namespace Gumball
             {
                 if (isReversing && !InputManager.Brake.IsPressed)
                     OnStopReversing();
-                if (!isReversing && (isStationary || speed < 1) && InputManager.Brake.IsPressed)
+                if (!isReversing && (isStationary || speed < 1 || currentGear == 0) && InputManager.Brake.IsPressed)
                     OnStartReversing();
             }
         }
@@ -518,6 +577,7 @@ namespace Gumball
         private void OnStartReversing()
         {
             isReversing = true;
+            currentGear = 0;
         }
 
         private void OnStopReversing()
@@ -591,7 +651,7 @@ namespace Gumball
         
         private void OnStartBraking()
         {
-            rigidBody.drag = dragWhenBraking;
+            Rigidbody.drag = dragWhenBraking;
             
             foreach (WheelCollider wheelCollider in allWheelColliders)
             {
@@ -606,7 +666,7 @@ namespace Gumball
 
         private void OnStopBraking()
         {
-            rigidBody.drag = 0;
+            Rigidbody.drag = isAccelerating ? 0 : dragWhenIdle;
             
             foreach (WheelCollider wheelCollider in allWheelColliders)
             {
@@ -632,7 +692,7 @@ namespace Gumball
 
         private void OnStartAccelerating()
         {
-            
+            Rigidbody.drag = 0;
         }
 
         private void OnStopAccelerating()
@@ -641,6 +701,8 @@ namespace Gumball
             {
                 wheelCollider.motorTorque = 0;
             }
+            
+            Rigidbody.drag = isBraking ? dragWhenBraking : dragWhenIdle;
         }
         
         private void OnAccelerate()
@@ -838,7 +900,7 @@ namespace Gumball
             SampleCollection sampleCollection = useRacingLine ? CurrentChunk.TrafficManager.RacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
             
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
-            int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(rigidBody.position).Item1;
+            int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(Rigidbody.position).Item1;
             SplineSample closestSample = sampleCollection.samples[closestSplineIndex];
 
             SplineSample? previousSample = null;
@@ -870,7 +932,7 @@ namespace Gumball
                     
                     //reset the values
                     previousSample = null;
-                    closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(rigidBody.position).Item1;
+                    closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(Rigidbody.position).Item1;
                     closestSample = sampleCollection.samples[closestSplineIndex];
                     offset = faceForward ? 1 : -1;
                     continue;
@@ -906,12 +968,30 @@ namespace Gumball
             }
         }
         
+        private void ShiftUp()
+        {
+            if (currentGear >= NumberOfGears - 1)
+                return; //at max gear;
+            
+            currentGear++;
+        }
+
+        private void ShiftDown()
+        {
+            if (currentGear <= 0)
+                return; //at lowest gear (excluding reverse)
+            
+            currentGear--;
+        }
+        
+#if UNITY_EDITOR
         private void OnDrawGizmos()
         {
-            Vector3 carCentreOfMassWorld = rigidBody.transform.TransformPoint(rigidBody.centerOfMass);
+            Vector3 carCentreOfMassWorld = Rigidbody.transform.TransformPoint(Rigidbody.centerOfMass);
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(carCentreOfMassWorld, 0.5f);
         }
+#endif
         
     }
 }

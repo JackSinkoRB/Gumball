@@ -28,7 +28,7 @@ namespace Gumball
             AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarStandingIdleState>();
         }
 
-        private void OnCarChanged(CarManager newCar)
+        private void OnCarChanged(AICar newCar)
         {
             DrivingCameraController.Instance.SetTarget(newCar.transform);
         }
