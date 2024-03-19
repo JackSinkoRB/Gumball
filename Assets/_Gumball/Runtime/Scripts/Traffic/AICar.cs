@@ -58,6 +58,13 @@ namespace Gumball
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
 
+        [Header("Drag")]
+        [SerializeField] private float dragWhenAccelerating;
+        [SerializeField] private float dragWhenIdle = 0.15f;
+        [SerializeField] private float dragWhenBraking = 1;
+        [SerializeField] private float dragWhenHandbraking = 0.5f;
+        [SerializeField] private float angularDragWhenHandbraking = 6;
+        
         [Header("Movement")]
         [SerializeField, ReadOnly] private float speed;
         [SerializeField, ReadOnly] private float desiredSpeed;
@@ -80,7 +87,6 @@ namespace Gumball
         [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
         [SerializeField, ReadOnly] private float engineRpm;
-        private const float dragWhenIdle = 0.15f;
         private bool wasAcceleratingLastFrame;
         public bool IsAutomaticTransmission => autoDrive || isAutomaticTransmission;
         public int CurrentGear => currentGear;
@@ -117,8 +123,16 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isBraking;
         [ConditionalField(nameof(autoBrakeAroundCorners)), SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
         [SerializeField, ReadOnly] private float speedToBrakeTo;
-        private const float dragWhenBraking = 1;
         private bool wasBrakingLastFrame;
+        
+        [Header("Handbrake")]
+        [SerializeField] private float handbrakeEaseOffDuration = 1f;
+        [SerializeField] private float handbrakeTorque = 5000;
+        [Space(5)]
+        [SerializeField, ReadOnly] private bool isHandbrakeEngaged;
+        private float defaultRearWheelStiffness = -1;
+        private float defaultAngularDrag;
+        private readonly Sequence[] handbrakeEaseOffTweens = new Sequence[2];
         
         [Header("Collisions")]
         [SerializeField] private GameObject colliders;
@@ -225,7 +239,10 @@ namespace Gumball
         {
             isInitialised = true;
 
-            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
+            defaultAngularDrag = Rigidbody.angularDrag;
+            
+            if (!canBeDrivenByPlayer)
+                gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
             
             OnChangeChunk(null, CurrentChunk);
 
@@ -374,6 +391,7 @@ namespace Gumball
             UpdateBrakingValues();
             DoBrakeEvents();
 
+            CheckForHandbrake();
             CheckToReverse();
 
             UpdateCurrentGear();
@@ -387,12 +405,32 @@ namespace Gumball
 
             CalculateEngineRPM();
 
+            UpdateDrag();
+            
             //debug directions:
             Debug.DrawRay(transform.position, Rigidbody.velocity, Color.green);
             
             Debug.DrawLine(transform.position, targetPosition, Color.yellow);
         }
 
+        private void UpdateDrag()
+        {
+            if (isHandbrakeEngaged)
+            {
+                Sequence handbrakeEaseOffTween = handbrakeEaseOffTweens[0];
+                if (handbrakeEaseOffTween != null && handbrakeEaseOffTween.IsPlaying())
+                    return;
+                
+                Rigidbody.drag = dragWhenHandbraking;
+            }
+            else if (isBraking)
+                Rigidbody.drag = dragWhenBraking;
+            else if (isAccelerating)
+                Rigidbody.drag = dragWhenAccelerating;
+            else
+                Rigidbody.drag = dragWhenIdle;
+        }
+        
         private void UpdateCurrentGear()
         {
             if (!IsAutomaticTransmission)
@@ -576,12 +614,65 @@ namespace Gumball
 
         private void CheckToReverse()
         {
-            if (!autoDrive)
+            if (autoDrive)
+                //TODO: might want to handle cases if car is completely blocked ahead and reverse out
+                return;
+            
+            if (isReversing && !InputManager.Instance.CarInput.Brake.IsPressed)
+                OnStopReversing();
+            if (!isReversing && (isStationary || speed < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
+                OnStartReversing();
+        }
+        
+        private void CheckForHandbrake()
+        {
+            if (autoDrive)
+                return;
+            
+            if (isHandbrakeEngaged && !InputManager.Instance.CarInput.Handbrake.IsPressed)
+                OnHandbrakeDisengage();
+            if (!isHandbrakeEngaged && InputManager.Instance.CarInput.Handbrake.IsPressed)
+                OnHandbrakeEngage();
+        }
+
+        private void OnHandbrakeEngage()
+        {
+            isHandbrakeEngaged = true;
+            
+            Rigidbody.angularDrag = angularDragWhenHandbraking;
+
+            for (int index = 0; index < rearWheelColliders.Length; index++)
             {
-                if (isReversing && !InputManager.Instance.CarInput.Brake.IsPressed)
-                    OnStopReversing();
-                if (!isReversing && (isStationary || speed < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
-                    OnStartReversing();
+                WheelCollider wheelCollider = rearWheelColliders[index];
+                handbrakeEaseOffTweens[index]?.Kill();
+
+                WheelFrictionCurve sidewaysFriction = wheelCollider.sidewaysFriction;
+                sidewaysFriction.stiffness = 0;
+
+                wheelCollider.sidewaysFriction = sidewaysFriction;
+
+                wheelCollider.brakeTorque = handbrakeTorque;
+            }
+        }
+
+        private void OnHandbrakeDisengage()
+        {
+            isHandbrakeEngaged = false;
+
+            for (int index = 0; index < rearWheelColliders.Length; index++)
+            {
+                WheelCollider wheelCollider = rearWheelColliders[index];
+                
+                WheelFrictionCurve sidewaysFriction = wheelCollider.sidewaysFriction;
+
+                wheelCollider.brakeTorque = 0;
+                
+                handbrakeEaseOffTweens[index]?.Kill();
+                handbrakeEaseOffTweens[index] = DOTween.Sequence()
+                    .Join(DOTween.To(() => Rigidbody.angularDrag, x => Rigidbody.angularDrag = x, defaultAngularDrag, handbrakeEaseOffDuration))
+                    .Join(DOTween.To(() => sidewaysFriction.stiffness, 
+                        x => sidewaysFriction.stiffness = x, defaultRearWheelStiffness, handbrakeEaseOffDuration)
+                    .OnUpdate(() => wheelCollider.sidewaysFriction = sidewaysFriction));
             }
         }
         
@@ -831,6 +922,9 @@ namespace Gumball
             }
             foreach (WheelCollider wheelCollider in rearWheelColliders)
             {
+                if (defaultRearWheelStiffness < 0)
+                    defaultRearWheelStiffness = wheelCollider.sidewaysFriction.stiffness;
+                        
                 wheelCollider.gameObject.AddComponent<WheelColliderData>();
 
                 allWheelColliders[indexCount] = wheelCollider;

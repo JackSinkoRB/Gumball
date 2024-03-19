@@ -596,6 +596,9 @@ MonoBehaviour:
   maxSpeed: 350
   useRacingLine: 1
   currentLaneDistance: 0
+  dragWhenAccelerating: 0
+  dragWhenIdle: 0.15
+  dragWhenBraking: 1
   speed: 0
   desiredSpeed: 0
   isAutomaticTransmission: 1
@@ -642,7 +645,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   gearRatios:
-  - -2.5
+  - -3
   - 3
   - 1.95
   - 1.42
@@ -659,7 +662,7 @@ MonoBehaviour:
   currentGear: 0
   isAccelerating: 0
   engineRpm: 0
-  maxReverseSpeed: 25
+  maxReverseSpeed: 35
   isReversing: 0
   movementTargetDistance:
     Min: 5
@@ -667,7 +670,7 @@ MonoBehaviour:
   movementTargetDistanceSpeedFactors:
     Min: 20
     Max: 90
-  steerSpeed: 3
+  steerSpeed: 2.5
   releaseSpeed: 15
   visualSteerSpeed: 5
   maxSteerAngleCurve:
@@ -676,12 +679,12 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 50
-      inSlope: -110.94342
-      outSlope: -110.94342
+      inSlope: -108.714584
+      outSlope: -108.714584
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.041666668
+      outWeight: 0.035658635
     - serializedVersion: 3
       time: 1
       value: 15
@@ -739,6 +742,11 @@ MonoBehaviour:
   isInitialised: 0
   currentChunkCached: {fileID: 0}
   isFrozen: 0
+  isHandbrakeEngaged: 0
+  angularDragWhenHandbraking: 6
+  dragWhenHandbraking: 0.5
+  handbrakeTorque: 5000
+  handbrakeEaseOffDuration: 0.8
 --- !u!1 &1547205152086652757
 GameObject:
   m_ObjectHideFlags: 0
@@ -3306,7 +3314,7 @@ WheelCollider:
     damper: 4500
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
-  m_ForceAppPointDistance: 0.5
+  m_ForceAppPointDistance: 0.6
   m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -3609,7 +3617,7 @@ WheelCollider:
     damper: 4500
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
-  m_ForceAppPointDistance: 0.5
+  m_ForceAppPointDistance: 0.6
   m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -3680,7 +3688,7 @@ WheelCollider:
     damper: 4500
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
-  m_ForceAppPointDistance: 0.5
+  m_ForceAppPointDistance: 0.6
   m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -4328,7 +4336,7 @@ WheelCollider:
     damper: 4500
     targetPosition: 0.5
   m_SuspensionDistance: 0.02
-  m_ForceAppPointDistance: 0.5
+  m_ForceAppPointDistance: 0.6
   m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
