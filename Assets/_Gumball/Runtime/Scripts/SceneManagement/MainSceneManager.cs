@@ -11,6 +11,9 @@ namespace Gumball
     public class MainSceneManager : Singleton<MainSceneManager>
     {
 
+        [SerializeField] private Vector3 carPosition;
+        [SerializeField] private Vector3 carRotationEuler;
+        
         [SerializeField] private Vector3 driverStandingPosition;
         [SerializeField] private Vector3 driverStandingRotationEuler;
 
@@ -50,7 +53,7 @@ namespace Gumball
             AvatarManager.Instance.HideAvatars(false);
             
             //move the car to the origin to be framed by the camera
-            WarehouseManager.Instance.CurrentCar.Teleport(Vector3.zero, Quaternion.Euler(Vector3.zero));
+            WarehouseManager.Instance.CurrentCar.Teleport(Instance.carPosition, Quaternion.Euler(Instance.carRotationEuler));
             
             //move the avatars
             AvatarManager.Instance.DriverAvatar.Teleport(Instance.driverStandingPosition, Instance.DriverStandingRotation);
