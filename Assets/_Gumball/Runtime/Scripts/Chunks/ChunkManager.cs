@@ -15,6 +15,10 @@ namespace Gumball
     public class ChunkManager : Singleton<ChunkManager>
     {
         
+#if UNITY_EDITOR
+        public static bool IsRunningTests;
+#endif
+        
         private const float timeBetweenLoadingChecks = 0.5f;
 
         [SerializeField] private PhysicMaterial slipperyPhysicsMaterial;
@@ -140,9 +144,14 @@ namespace Gumball
             if (currentChunkMap != null)
                 DoLoadingCheck();
         }
-        
+
         private void DoLoadingCheck()
         {
+#if UNITY_EDITOR
+            if (IsRunningTests)
+                return;
+#endif
+            
             if (WarehouseManager.Instance.CurrentCar == null)
                 return;
 

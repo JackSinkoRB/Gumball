@@ -29,6 +29,7 @@ namespace Gumball.Runtime.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            ChunkManager.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
             
             AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.MapDrivingScenePath, new LoadSceneParameters(LoadSceneMode.Single));
@@ -38,6 +39,7 @@ namespace Gumball.Runtime.Tests
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
+            ChunkManager.IsRunningTests = false;
             DataManager.EnableTestProviders(false);
         }
 
@@ -67,7 +69,8 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             Assert.IsTrue(ChunkManager.ExistsRuntime);
-            
+            Assert.IsFalse(ChunkManager.Instance.IsLoadingChunks);
+
             Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().SplineLength);
             Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().SplineLength);
             Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().SplineLength);
@@ -78,7 +81,7 @@ namespace Gumball.Runtime.Tests
 
         [UnityTest]
         [Order(1)]
-        public IEnumerator OnlyLoadChunksInLoadDistance()
+        public IEnumerator OnlyLoadedChunksInLoadDistance()
         {
             yield return new WaitUntil(() => isInitialised);
             
@@ -130,10 +133,12 @@ namespace Gumball.Runtime.Tests
         public IEnumerator ChunksLoadAfterMovingCar()
         {
             yield return new WaitUntil(() => isInitialised);
-
+            Assert.IsFalse(ChunkManager.Instance.IsLoadingChunks);
+            
             Assert.AreEqual(1, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
             
             yield return MoveAndLoadAroundPosition(new Vector3(0, 5, 710));
+            Assert.IsFalse(ChunkManager.Instance.IsLoadingChunks); //ensure loading is actually complete
             
             Assert.AreEqual(8, ChunkManager.Instance.CurrentChunks.Count);
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
