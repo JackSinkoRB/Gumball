@@ -600,6 +600,7 @@ Shader "RBG/VC_Terrain"
 				
 				float4 temp_output_170_0 = ( ( ( 1.0 - IN.ase_color.a ) * _Light_Color ) * _Light_Str );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
+				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
 				float lerpResult26 = lerp( ( tex2DNode2.a * IN.ase_color.r ) , tex2DNode7.a , IN.ase_color.g);
 				float lerpResult27 = lerp( lerpResult26 , tex2DNode10.a , IN.ase_color.b);
@@ -608,7 +609,7 @@ Shader "RBG/VC_Terrain"
 
 				float3 BaseColor = lerpResult122.rgb;
 				float3 Normal = lerpResult93;
-				float3 Emission = lerpResult186.rgb;
+				float3 Emission = saturate( ( lerpResult188 * lerpResult186 ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = ( ( _GlossinesValue * lerpResult27 ) - ( _ExtraGlossinesValue * tex2D( _NoiseEffectGrain, uv2_NoiseEffectGrain ).r ) );
@@ -1774,10 +1775,11 @@ Shader "RBG/VC_Terrain"
 				float3 lerpResult93 = lerp( lerpResult92 , unpack88 , IN.ase_color.b);
 				float4 temp_output_170_0 = ( ( ( 1.0 - IN.ase_color.a ) * _Light_Color ) * _Light_Str );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
+				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
 
 				float3 BaseColor = lerpResult122.rgb;
-				float3 Emission = lerpResult186.rgb;
+				float3 Emission = saturate( ( lerpResult188 * lerpResult186 ) ).rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 
@@ -2877,6 +2879,7 @@ Shader "RBG/VC_Terrain"
 				
 				float4 temp_output_170_0 = ( ( ( 1.0 - IN.ase_color.a ) * _Light_Color ) * _Light_Str );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
+				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
 				float lerpResult26 = lerp( ( tex2DNode2.a * IN.ase_color.r ) , tex2DNode7.a , IN.ase_color.g);
 				float lerpResult27 = lerp( lerpResult26 , tex2DNode10.a , IN.ase_color.b);
@@ -2885,7 +2888,7 @@ Shader "RBG/VC_Terrain"
 
 				float3 BaseColor = lerpResult122.rgb;
 				float3 Normal = lerpResult93;
-				float3 Emission = lerpResult186.rgb;
+				float3 Emission = saturate( ( lerpResult188 * lerpResult186 ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = ( ( _GlossinesValue * lerpResult27 ) - ( _ExtraGlossinesValue * tex2D( _NoiseEffectGrain, uv2_NoiseEffectGrain ).r ) );
@@ -3557,12 +3560,13 @@ Node;AmplifyShaderEditor.ColorNode;169;883.4823,701.5281;Inherit;False;Property;
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;168;1199.553,601.0034;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;170;1604.115,658.3731;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.BreakToComponentsNode;176;1604.739,171.907;Inherit;False;FLOAT3;1;0;FLOAT3;0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
-Node;AmplifyShaderEditor.LerpOp;186;2134.277,527.1775;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.RangedFloatNode;171;1227.018,768.0239;Inherit;False;Property;_Light_Str;Light_Str;12;0;Create;True;0;0;0;False;0;False;23.45971;0;0;30;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;189;2112.143,391.7902;Inherit;False;Constant;_Float1;Float 1;14;0;Create;True;0;0;0;False;0;False;0.8;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;158;2797.788,155.1411;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/VC_Terrain;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;190;2533.386,450.2632;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.LerpOp;188;2346.287,357.7657;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.LerpOp;186;2131.834,536.9495;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;189;2112.143,402.7837;Inherit;False;Constant;_Float1;Float 1;14;0;Create;True;0;0;0;False;0;False;0.8;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.LerpOp;188;2356.938,313.6425;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;190;2533.107,469.6575;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SaturateNode;191;2749.456,481.4573;Inherit;False;1;0;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;158;3001.667,142.9691;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/VC_Terrain;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
 WireConnection;75;0;2;4
 WireConnection;75;1;102;1
 WireConnection;87;5;98;0
@@ -3622,15 +3626,16 @@ WireConnection;176;0;93;0
 WireConnection;186;0;175;0
 WireConnection;186;1;170;0
 WireConnection;186;2;181;0
-WireConnection;158;0;122;0
-WireConnection;158;1;93;0
-WireConnection;158;2;186;0
-WireConnection;158;3;12;0
-WireConnection;158;4;101;0
-WireConnection;190;0;188;0
-WireConnection;190;1;186;0
 WireConnection;188;0;122;0
 WireConnection;188;1;186;0
 WireConnection;188;2;189;0
+WireConnection;190;0;188;0
+WireConnection;190;1;186;0
+WireConnection;191;0;190;0
+WireConnection;158;0;122;0
+WireConnection;158;1;93;0
+WireConnection;158;2;191;0
+WireConnection;158;3;12;0
+WireConnection;158;4;101;0
 ASEEND*/
-//CHKSM=22653D10D70C40CB2424306071CCBF490C2D6751
+//CHKSM=88DDA5170085148A16CCDF36B537E93332F78C63

@@ -11,7 +11,7 @@ Shader "RBG/AlbedoGloss_Normal"
 		_Gloss("Gloss", Range( 0 , 1)) = 0
 		_Metal("Metal", Range( 0 , 1)) = 0
 		_NormalMap("NormalMap", 2D) = "bump" {}
-		_Emission_Str("Emission_Str", Range( 0 , 1)) = 1
+		_Emission_Str("Emission_Str", Range( 0 , 5)) = 1
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -3270,7 +3270,7 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;22;116,0;Float;False;False;
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;23;116,0;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;25;-224.3415,244.6008;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;27;-51.37008,190.1043;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.RangedFloatNode;24;-435.7415,406.9828;Inherit;False;Property;_Emission_Str;Emission_Str;5;0;Create;True;0;0;0;False;0;False;1;1;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;24;-435.7415,406.9828;Inherit;False;Property;_Emission_Str;Emission_Str;5;0;Create;True;0;0;0;False;0;False;1;1;0;5;0;1;FLOAT;0
 WireConnection;6;0;2;0
 WireConnection;6;1;5;0
 WireConnection;12;0;5;4
@@ -3285,4 +3285,4 @@ WireConnection;25;1;24;0
 WireConnection;27;0;5;4
 WireConnection;27;1;25;0
 ASEEND*/
-//CHKSM=687BD201EB2E3D88494F81DB055C1C9F85C0CCEF
+//CHKSM=CF5CC3FD1C959D46AE5C1A561CD409FA0E80E43F
