@@ -202,7 +202,7 @@ GameObject:
   - component: {fileID: 2076558992251701251}
   - component: {fileID: 2091695948105045707}
   - component: {fileID: 8894919787135458134}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Barriers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8955,12 +8955,16 @@ MonoBehaviour:
   splineComputer: {fileID: 3051245161164908146}
   trafficManager: {fileID: 5195411063066913720}
   powerpoleManager: {fileID: 2050208080926926369}
+  barriers:
+  - {fileID: 8894919787135458134}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   terrainHighLODDistance: 150
   currentLOD: 1
   terrainHighLOD: {fileID: 216670080631576257}
   terrainLowLOD: {fileID: 109514483330093107}
+  isFullyLoaded: 0
+  isAccessible: 0
   splineMeshes:
   - {fileID: 4362320668062168892}
   - {fileID: 2091695948105045707}
@@ -16102,6 +16106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driveOnLeft: 1
+  racingLine: {fileID: 0}
   speedLimitKmh: 60
   density: 70
   laneDistances:

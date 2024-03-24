@@ -8379,6 +8379,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driveOnLeft: 1
+  racingLine: {fileID: 0}
   speedLimitKmh: 60
   density: 70
   laneDistances:
@@ -8402,7 +8403,7 @@ GameObject:
   - component: {fileID: 7362057359066944166}
   - component: {fileID: 6539361678719312013}
   - component: {fileID: 111355376100132586}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Barriers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31900,12 +31901,16 @@ MonoBehaviour:
   splineComputer: {fileID: 1184479275315945760}
   trafficManager: {fileID: 6102728473630700752}
   powerpoleManager: {fileID: 0}
+  barriers:
+  - {fileID: 111355376100132586}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   terrainHighLODDistance: 150
   currentLOD: 1
   terrainHighLOD: {fileID: 2693864783003292711}
   terrainLowLOD: {fileID: 4178559808064412411}
+  isFullyLoaded: 0
+  isAccessible: 0
   splineMeshes:
   - {fileID: 6977198258670646859}
   - {fileID: 6539361678719312013}
@@ -39049,12 +39054,12 @@ PrefabInstance:
     - target: {fileID: 7358563631059810098, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.z
-      value: -64.297195
+      value: -64.29724
       objectReference: {fileID: 0}
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.24777842
+      value: 0.24778008
       objectReference: {fileID: 0}
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
@@ -39064,7 +39069,7 @@ PrefabInstance:
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 105.35559
+      value: 105.35564
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -51808,12 +51813,12 @@ PrefabInstance:
     - target: {fileID: 7358563631059810098, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.z
-      value: -64.29713
+      value: -64.29717
       objectReference: {fileID: 0}
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.24777603
+      value: 0.24777746
       objectReference: {fileID: 0}
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
@@ -51823,7 +51828,7 @@ PrefabInstance:
     - target: {fileID: 8003767962910264709, guid: 3344a6202399863488731160b6eb7d75,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 105.35552
+      value: 105.35557
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

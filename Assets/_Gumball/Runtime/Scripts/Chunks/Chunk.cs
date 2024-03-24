@@ -35,6 +35,7 @@ namespace Gumball
         [Header("Optional")]
         [SerializeField] private ChunkTrafficManager trafficManager;
         [SerializeField] private ChunkPowerpoleManager powerpoleManager;
+        [SerializeField] private Collider[] barriers;
 
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, true, true)]
@@ -117,6 +118,7 @@ namespace Gumball
         }
         
         [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
+        public SampleCollection SplineSampleCollection => splineSampleCollection;
 
         [SerializedDictionary("AssetKey", "Data")]
         public SerializedDictionary<string, List<ChunkObjectData>> ChunkObjectData = new();
@@ -125,6 +127,13 @@ namespace Gumball
         private float timeOfLastLODCheck = -secondsBetweenTerrainLODChecks;
         private float timeSinceTerrainLODCheck => Time.realtimeSinceStartup - timeOfLastLODCheck;
         
+        private void OnEnable()
+        {
+            splineComputer.updateMode = SplineComputer.UpdateMode.None; //make sure the spline computer doesn't update automatically at runtime
+            
+            InitialiseBarriers();
+        }
+
         private void LateUpdate()
         {
             DoTerrainLODCheck();
@@ -137,6 +146,9 @@ namespace Gumball
         {
             isFullyLoaded = true;
             onFullyLoaded?.Invoke();
+            
+            //move the chunk detector relative to the chunk (as it may have rotated)
+            chunkDetector.transform.position = terrainHighLOD.transform.position.OffsetY(-500);
         }
 
         public void OnBecomeAccessible()
@@ -182,8 +194,6 @@ namespace Gumball
             currentLOD = lod;
             terrainHighLOD.SetActive(lod == TerrainLOD.HIGH);
             terrainLowLOD.SetActive(lod == TerrainLOD.LOW);
-            
-            GlobalLoggers.ChunkLogger.Log($"Switched LOD to {lod.ToString()} for {gameObject.name}");
         }
         
         public void UpdateChunkMeshData()
@@ -236,38 +246,13 @@ namespace Gumball
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint)
         {
             UpdateSplineSampleData();
-            float closestDistanceSqr = Mathf.Infinity;
-            SplineSample closestSample = default;
-            foreach (SplineSample sample in splineSampleCollection.samples)
-            {
-                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
-                if (distance < closestDistanceSqr)
-                {
-                    closestDistanceSqr = distance;
-                    closestSample = sample;
-                }
-            }
-            return (closestSample, closestDistanceSqr);
+            return splineSampleCollection.GetClosestSampleOnSpline(fromPoint);
         }
         
         public (int, float) GetClosestSampleIndexOnSpline(Vector3 fromPoint)
         {
             UpdateSplineSampleData();
-            float closestDistanceSqr = Mathf.Infinity;
-            int closestSampleIndex = -1;
-            for (int index = 0; index < splineSampleCollection.samples.Length; index++)
-            {
-                SplineSample sample = splineSampleCollection.samples[index];
-                
-                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
-                if (distance < closestDistanceSqr)
-                {
-                    closestDistanceSqr = distance;
-                    closestSampleIndex = index;
-                }
-            }
-
-            return (closestSampleIndex, closestDistanceSqr);
+            return splineSampleCollection.GetClosestSampleIndexOnSpline(fromPoint);
         }
         
         public void TryCreateChunkDetector()
@@ -365,6 +350,15 @@ namespace Gumball
             float highLODDistanceSqr = terrainHighLODDistance * terrainHighLODDistance;
 
             return shortestDistanceSqr <= highLODDistanceSqr ? TerrainLOD.HIGH : TerrainLOD.LOW;
+        }
+        
+        private void InitialiseBarriers()
+        {
+            foreach (Collider barrier in barriers)
+            {
+                barrier.gameObject.layer = (int) LayersAndTags.Layer.Barrier;
+                barrier.sharedMaterial = ChunkManager.Instance.SlipperyPhysicsMaterial;
+            }
         }
     }
 }

@@ -5,7 +5,6 @@ namespace Dreamteck.Splines
     [System.Serializable]
     public class SampleCollection
     {
-        [HideInInspector]
         [UnityEngine.Serialization.FormerlySerializedAs("samples")]
         public SplineSample[] samples = new SplineSample[0];
 

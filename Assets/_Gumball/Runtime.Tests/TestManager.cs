@@ -31,7 +31,7 @@ namespace Gumball.Runtime.Tests
         [SerializeField] private SceneAsset mapDrivingScene;
 
         [Header("Chunks")]
-        [SerializeField] private ChunkMap chunkTestingChunkMap;
+        [SerializeField] private GameSession chunkTestingSession;
         [SerializeField] private AssetReferenceGameObject testChunkPrefabA;
         [SerializeField] private AssetReferenceGameObject testChunkPrefabB;
         [SerializeField] private AssetReferenceGameObject testChunkPrefabC;
@@ -42,11 +42,11 @@ namespace Gumball.Runtime.Tests
         public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
         public string MapDrivingScenePath => AssetDatabase.GetAssetPath(mapDrivingScene);
 
-        public ChunkMap ChunkTestingChunkMap => chunkTestingChunkMap;
+        public GameSession ChunkTestingSession => chunkTestingSession;
         public AssetReferenceGameObject TestChunkPrefabA => testChunkPrefabA;
         public AssetReferenceGameObject TestChunkPrefabB => testChunkPrefabB;
         public AssetReferenceGameObject TestChunkPrefabC => testChunkPrefabC;
         public AssetReferenceGameObject TestChunkPrefabCustomLoad => testChunkPrefabCustomLoad;
-
+        
     }
 }

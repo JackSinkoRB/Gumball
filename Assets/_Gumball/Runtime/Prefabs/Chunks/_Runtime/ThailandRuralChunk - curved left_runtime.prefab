@@ -123,6 +123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driveOnLeft: 1
+  racingLine: {fileID: 0}
   speedLimitKmh: 60
   density: 70
   laneDistances:
@@ -146,7 +147,7 @@ GameObject:
   - component: {fileID: 5183226902812740627}
   - component: {fileID: 8415206966706622646}
   - component: {fileID: 4181233067790892117}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Barriers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -16037,12 +16038,16 @@ MonoBehaviour:
   splineComputer: {fileID: 1877199550492353546}
   trafficManager: {fileID: 100653351754067713}
   powerpoleManager: {fileID: 6642665871587722573}
+  barriers:
+  - {fileID: 4181233067790892117}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   terrainHighLODDistance: 150
   currentLOD: 1
   terrainHighLOD: {fileID: 5955959865312974772}
   terrainLowLOD: {fileID: 3151981127634544629}
+  isFullyLoaded: 0
+  isAccessible: 0
   splineMeshes:
   - {fileID: 5396505476512791802}
   - {fileID: 8415206966706622646}
@@ -22911,7 +22916,7 @@ MonoBehaviour:
         localRotation: {x: -0, y: -0.41469333, z: -0, w: 0.9099612}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1
-      - localPosition: {x: -23.53, y: -0.038085938, z: 58.47}
+      - localPosition: {x: -23.53, y: -0.017578125, z: 58.47}
         localRotation: {x: -0, y: -0.57414824, z: -0, w: 0.8187514}
         localScale: {x: 1, y: 1, z: 1}
         alwaysGrounded: 1

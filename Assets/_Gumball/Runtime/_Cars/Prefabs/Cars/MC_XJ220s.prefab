@@ -77,7 +77,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endBoneCopiesRotation: 1
-  positionOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &493239006353142642
 GameObject:
   m_ObjectHideFlags: 0
@@ -578,7 +577,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &5605294111590501033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1535,7 +1534,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endBoneCopiesRotation: 1
-  positionOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &3905756656652600902
 GameObject:
   m_ObjectHideFlags: 0
@@ -1985,7 +1983,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endBoneCopiesRotation: 1
-  positionOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &4170544623560915892
 GameObject:
   m_ObjectHideFlags: 0
@@ -2851,6 +2848,7 @@ GameObject:
   - component: {fileID: 8188422617694761044}
   - component: {fileID: 4609094206461391110}
   - component: {fileID: 2975897537000750247}
+  - component: {fileID: 4193391550509490409}
   m_Layer: 8
   m_Name: Colliders
   m_TagString: Untagged
@@ -2890,12 +2888,12 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.26
   m_Height: 1.05
   m_Direction: 2
-  m_Center: {x: -0.2281564, y: -0.054458328, z: 0.01}
+  m_Center: {x: -0.2281564, y: 0.05, z: 0.01}
 --- !u!136 &4609094206461391110
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2913,12 +2911,12 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.26
   m_Height: 1.05
   m_Direction: 2
-  m_Center: {x: 0.2281564, y: -0.054458328, z: 0.01}
+  m_Center: {x: 0.2281564, y: 0.05, z: 0.01}
 --- !u!65 &2975897537000750247
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2938,8 +2936,29 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.0353034, y: 0.9478801, z: 1.0363817}
-  m_Center: {x: 0, y: 0.026059054, z: 0.0075220508}
+  m_Size: {x: 0.96061325, y: 1.0759037, z: 0.9382439}
+  m_Center: {x: 0, y: -0.0379529, z: -0.043496303}
+--- !u!65 &4193391550509490409
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6054565963001126080}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.45267004, y: 1.0007849, z: 0.9661584}
+  m_Center: {x: 0, y: -0.0003937339, z: 0.0506332}
 --- !u!1 &6169397294700913133
 GameObject:
   m_ObjectHideFlags: 0
@@ -3123,7 +3142,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endBoneCopiesRotation: 1
-  positionOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &6630929441906151381
 GameObject:
   m_ObjectHideFlags: 0

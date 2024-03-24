@@ -23,14 +23,6 @@ namespace Gumball
             return true;
         }
 
-        public static async Task WaitForCompletion(this IEnumerable<AsyncOperationHandle> handles)
-        {
-            while (!handles.AreAllComplete())
-            {
-                await Task.Delay(100);
-            }
-        }
-        
         public static bool AreAllComplete(this IEnumerable<TrackedCoroutine> collection)
         {
             foreach (TrackedCoroutine coroutine in collection)

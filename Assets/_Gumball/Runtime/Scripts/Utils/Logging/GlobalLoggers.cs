@@ -16,7 +16,7 @@ namespace Gumball
         public static Logger PanelLogger => Instance.panelLogger;
         public static Logger ObjectPoolLogger => Instance.objectPoolLogger;
         public static Logger DecalsLogger => Instance.decalsLogger;
-        public static Logger TrafficLogger => Instance.trafficLogger;
+        public static Logger AICarLogger => Instance.trafficLogger;
         public static Logger AvatarLogger => Instance.avatarLogger;
         public static Logger PowerlineLogger => Instance.powerlineLogger;
 

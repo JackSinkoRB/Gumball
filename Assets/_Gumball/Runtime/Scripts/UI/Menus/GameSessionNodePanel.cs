@@ -24,7 +24,7 @@ namespace Gumball
 
         public void OnClickPlayButton()
         {
-            MapDrivingSceneManager.LoadMapDrivingScene(currentNode.Session.ChunkMap);
+            currentNode.Session.StartSession();
         }
         
     }
