@@ -12,12 +12,8 @@ namespace Gumball
     {
 
         [SerializeField] private AssetReferenceGameObject assetReference;
-        
-        [Header("Engine")]
-        [SerializeField] private InductionType inductionType;
-        
-        public AssetReferenceGameObject AssetReference => assetReference;
-        public InductionType InductionType => inductionType;
 
+        public AssetReferenceGameObject AssetReference => assetReference;
+        
     }
 }

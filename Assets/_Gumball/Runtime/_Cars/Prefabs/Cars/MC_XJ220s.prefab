@@ -335,9 +335,6 @@ GameObject:
   m_Component:
   - component: {fileID: 724044971135627713}
   - component: {fileID: 4872057246868372384}
-  - component: {fileID: 5605294111590501033}
-  - component: {fileID: 5131373250882681086}
-  - component: {fileID: 9131771319189854056}
   - component: {fileID: 4221895653879022365}
   m_Layer: 8
   m_Name: MC_XJ220s
@@ -393,173 +390,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 1
---- !u!114 &5605294111590501033
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1422899270389967864}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81d14874094bd674d9f77e9a9619e5e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  poweredWheels:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  gearRatios:
-  - -3.5
-  - 0
-  - 3.5
-  - 2
-  - 1.4
-  - 1
-  - 0.8
-  - 0.55
-  finalDriveRatio: 4.3
-  minRPM: 800
-  maxRPM: 8000
-  maxTorque: 550
-  torqueRPM: 5500
-  maxPower: 750
-  powerRPM: 6000
-  engineInertia: 0.5
-  engineBaseFriction: 30
-  engineRPMFriction: 0.02
-  engineOrientation: {x: 0, y: 0, z: 1}
-  differentialLockCoefficient: 70
-  throttle: 0
-  throttleInput: 0
-  clutch: 0
-  automatic: 1
-  rpm: 0
-  slipRatio: 0
-  engineAngularVelo: 0
-  turbo:
-    angularVelocity: 0
-    prevAngularVelocity: 0
-    brakingCoeff: 0.92
-    rpm: 0
-    boost: 2
-    pressure: 0
-    prev_pressure: 0
-    prev_throttle: 0
-    isSteeringWheelNo2: 0
-  enableTurbo: 0
-  backFireEnabled: 1
-  launchPower: 400
-  reverseLaunchPower: 20
-  launchCutoff: 5000
-  launchAssist: 0
-  sampleRpm: 0
---- !u!114 &5131373250882681086
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1422899270389967864}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c43ffebacb5b8d428aab0356696744b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  centerOfMass: {fileID: 0}
-  colliders: {fileID: 6054565963001126080}
-  inertiaFactor: 1.5
-  brakeLightsMaterial: {fileID: 2100000, guid: e6831d0d27221fc4bade7855a37a45d5, type: 2}
-  brake: 0
-  drivetrain: {fileID: 5605294111590501033}
-  shiftSpeed: 0.3
-  throttleTime: 0.3
-  throttleTimeNoTraction: 0.1
-  throttleReleaseTime: 0.1
-  throttleReleaseTimeNoTraction: 0.1
-  hasTractionControl: 1
-  hasAbsControl: 1
-  hasStabilityControl: 1
-  stabilityControlBrakingModifierMax: 250
-  stabilityControlBrakingModifier:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  stabilityControlTorqueModifier: 0.5
-  maxSteerSpeed: 1
-  minSteerSpeed: 0.5
-  maxSteerReleaseSpeed: 10
-  minSteerReleaseSpeed: 35
-  speedForMinSteerSpeed: 300
-  wheelManager: {fileID: 9131771319189854056}
-  avatarIKManager: {fileID: 3038809945755952107}
-  steeringWheel: {fileID: 755326655889393961}
-  carIndex: 0
-  id: 0
---- !u!114 &9131771319189854056
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1422899270389967864}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac5b0c7ffda00a247be79729d2db5971, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  wheels:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  frontLeftWheel: {fileID: 0}
-  frontRightWheel: {fileID: 0}
-  rearLeftWheel: {fileID: 0}
-  rearRightWheel: {fileID: 0}
-  wheelFrontAssetReference:
-    m_AssetGUID: 06764950e490c0347a11faa4c40e18f5
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  wheelRearAssetReference:
-    m_AssetGUID: 1304a4a2d24ff5041958102583a81519
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  tyreLeftAssetReference:
-    m_AssetGUID: 4d907cf0e079cb94389c7000f6a24cfb
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  tyreRightAssetReference:
-    m_AssetGUID: 1cad980472beb1c4d929478d836deca6
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  spawnedWheels: []
-  spawnedTyres: []
 --- !u!114 &4221895653879022365
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -590,7 +420,6 @@ MonoBehaviour:
   rearWheelColliders:
   - {fileID: 8440229591122516637}
   - {fileID: 6488037141158947642}
-  poweredWheels: []
   autoDrive: 0
   obeySpeedLimit: 0
   maxSpeed: 350
@@ -599,6 +428,8 @@ MonoBehaviour:
   dragWhenAccelerating: 0
   dragWhenIdle: 0.15
   dragWhenBraking: 1
+  dragWhenHandbraking: 0.5
+  angularDragWhenHandbraking: 6
   speed: 0
   desiredSpeed: 0
   isAutomaticTransmission: 1
@@ -710,6 +541,9 @@ MonoBehaviour:
   isBraking: 0
   corneringSpeed: Infinity
   speedToBrakeTo: 0
+  handbrakeEaseOffDuration: 0.8
+  handbrakeTorque: 5000
+  isHandbrakeEngaged: 0
   colliders: {fileID: 6054565963001126080}
   collisionRecoverDuration: 0
   disableMovementInCollision: 0
@@ -742,11 +576,6 @@ MonoBehaviour:
   isInitialised: 0
   currentChunkCached: {fileID: 0}
   isFrozen: 0
-  isHandbrakeEngaged: 0
-  angularDragWhenHandbraking: 6
-  dragWhenHandbraking: 0.5
-  handbrakeTorque: 5000
-  handbrakeEaseOffDuration: 0.8
 --- !u!1 &1547205152086652757
 GameObject:
   m_ObjectHideFlags: 0
@@ -1132,7 +961,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 5914845690873162442, guid: 1de01ab97ceb6954ab8c25a92985a465, type: 3}
+  - {fileID: 2100000, guid: 028ff16f3a3919b4492844827f397355, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1248,7 +1077,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 5914845690873162442, guid: 1de01ab97ceb6954ab8c25a92985a465, type: 3}
+  - {fileID: 2100000, guid: 028ff16f3a3919b4492844827f397355, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1331,7 +1160,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 5914845690873162442, guid: 1de01ab97ceb6954ab8c25a92985a465, type: 3}
+  - {fileID: 2100000, guid: 028ff16f3a3919b4492844827f397355, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3245,7 +3074,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 5914845690873162442, guid: 1de01ab97ceb6954ab8c25a92985a465, type: 3}
+  - {fileID: 2100000, guid: 028ff16f3a3919b4492844827f397355, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
