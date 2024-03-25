@@ -4,8 +4,8 @@ Shader "RBG/VertColor_Splat_Building"
 {
 	Properties
 	{
-		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
+		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		_red_UV4_Trim1("red_UV4_Trim", 2D) = "white" {}
 		_Green_UV3_Tile1("Green_UV3_Tile", 2D) = "white" {}
 		_Blue_UV3_Tile1("Blue_UV3_Tile", 2D) = "white" {}
@@ -13,12 +13,14 @@ Shader "RBG/VertColor_Splat_Building"
 		_GreenNormal1("GreenNormal", 2D) = "bump" {}
 		_BlueNormal("BlueNormal", 2D) = "bump" {}
 		_BlendNoise("BlendNoise", 2D) = "white" {}
+		_Grunge_Mask("Grunge_Mask", 2D) = "white" {}
 		_blendposition("blendposition", Range( 0 , 1)) = 0.102
 		_blendthickness("blendthickness", Range( 0 , 1)) = 0.49
 		_Normal_Strength1("Normal_Strength", Range( 0 , 3)) = 1
 		_Noise_Str("Noise_Str", Range( 0 , 1)) = 0.89
 		_Gloss_Str("Gloss_Str", Range( 0 , 3)) = 1
 		_Metal("Metal", Range( 0 , 1)) = 0
+		_Grunge_Str("Grunge_Str", Range( 0 , 5)) = 0.5
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -300,12 +302,14 @@ Shader "RBG/VertColor_Splat_Building"
 			float4 _Green_UV3_Tile1_ST;
 			float4 _Blue_UV3_Tile1_ST;
 			float4 _BlendNoise_ST;
+			float4 _Grunge_Mask_ST;
 			float4 _RedNormal1_ST;
 			float4 _GreenNormal1_ST;
 			float4 _BlueNormal_ST;
 			float _blendthickness;
 			float _blendposition;
 			float _Noise_Str;
+			float _Grunge_Str;
 			float _Normal_Strength1;
 			float _Metal;
 			float _Gloss_Str;
@@ -343,6 +347,7 @@ Shader "RBG/VertColor_Splat_Building"
 			sampler2D _Green_UV3_Tile1;
 			sampler2D _Blue_UV3_Tile1;
 			sampler2D _BlendNoise;
+			sampler2D _Grunge_Mask;
 			sampler2D _RedNormal1;
 			sampler2D _GreenNormal1;
 			sampler2D _BlueNormal;
@@ -616,6 +621,10 @@ Shader "RBG/VertColor_Splat_Building"
 				float temp_output_223_0 = saturate( ( ( ( tex2D( _BlendNoise, uv_BlendNoise ).r * _Noise_Str ) - 0.5 ) + IN.ase_color.r ) );
 				float mask160 = temp_output_223_0;
 				float3 localTopMidBot160 = TopMidBot160( top160 , mid160 , bot160 , blendposition160 , blendthickness160 , mask160 );
+				float2 uv_Grunge_Mask = IN.ase_texcoord8.xy * _Grunge_Mask_ST.xy + _Grunge_Mask_ST.zw;
+				float temp_output_291_0 = ( ( tex2D( _Grunge_Mask, uv_Grunge_Mask ).r * _Grunge_Str ) * IN.ase_color.g );
+				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968647,0.01151679,0.005228601,0);
+				float4 lerpResult287 = lerp( float4( localTopMidBot160 , 0.0 ) , ( float4( localTopMidBot160 , 0.0 ) * ( temp_output_291_0 * color284 ) ) , temp_output_291_0);
 				
 				float2 uv_RedNormal1 = IN.ase_texcoord8.xy * _RedNormal1_ST.xy + _RedNormal1_ST.zw;
 				float3 unpack235 = UnpackNormalScale( tex2D( _RedNormal1, uv_RedNormal1 ), _Normal_Strength1 );
@@ -640,12 +649,12 @@ Shader "RBG/VertColor_Splat_Building"
 				float4 lerpResult269 = lerp( float4( localTopMidBot160 , 0.0 ) , lerpResult268 , 0.25);
 				float4 break278 = lerpResult268;
 				
-				float3 temp_cast_5 = (tex2DNode210.a).xxx;
-				float3 top237 = temp_cast_5;
-				float3 temp_cast_6 = (tex2DNode211.a).xxx;
-				float3 mid237 = temp_cast_6;
-				float3 temp_cast_7 = (tex2DNode212.a).xxx;
-				float3 bot237 = temp_cast_7;
+				float3 temp_cast_8 = (tex2DNode210.a).xxx;
+				float3 top237 = temp_cast_8;
+				float3 temp_cast_9 = (tex2DNode211.a).xxx;
+				float3 mid237 = temp_cast_9;
+				float3 temp_cast_10 = (tex2DNode212.a).xxx;
+				float3 bot237 = temp_cast_10;
 				float blendposition237 = _blendthickness;
 				float blendthickness237 = _blendposition;
 				float mask237 = temp_output_223_0;
@@ -654,7 +663,7 @@ Shader "RBG/VertColor_Splat_Building"
 				float temp_output_247_0 = ( 1.0 - IN.ase_color.b );
 				
 
-				float3 BaseColor = localTopMidBot160;
+				float3 BaseColor = lerpResult287.rgb;
 				float3 Normal = localTopMidBot232;
 				float3 Emission = saturate( ( lerpResult269 * ( break278.r + break278.g + break278.b ) ) ).rgb;
 				float3 Specular = 0.5;
@@ -974,12 +983,14 @@ Shader "RBG/VertColor_Splat_Building"
 			float4 _Green_UV3_Tile1_ST;
 			float4 _Blue_UV3_Tile1_ST;
 			float4 _BlendNoise_ST;
+			float4 _Grunge_Mask_ST;
 			float4 _RedNormal1_ST;
 			float4 _GreenNormal1_ST;
 			float4 _BlueNormal_ST;
 			float _blendthickness;
 			float _blendposition;
 			float _Noise_Str;
+			float _Grunge_Str;
 			float _Normal_Strength1;
 			float _Metal;
 			float _Gloss_Str;
@@ -1290,12 +1301,14 @@ Shader "RBG/VertColor_Splat_Building"
 			float4 _Green_UV3_Tile1_ST;
 			float4 _Blue_UV3_Tile1_ST;
 			float4 _BlendNoise_ST;
+			float4 _Grunge_Mask_ST;
 			float4 _RedNormal1_ST;
 			float4 _GreenNormal1_ST;
 			float4 _BlueNormal_ST;
 			float _blendthickness;
 			float _blendposition;
 			float _Noise_Str;
+			float _Grunge_Str;
 			float _Normal_Strength1;
 			float _Metal;
 			float _Gloss_Str;
@@ -1577,12 +1590,14 @@ Shader "RBG/VertColor_Splat_Building"
 			float4 _Green_UV3_Tile1_ST;
 			float4 _Blue_UV3_Tile1_ST;
 			float4 _BlendNoise_ST;
+			float4 _Grunge_Mask_ST;
 			float4 _RedNormal1_ST;
 			float4 _GreenNormal1_ST;
 			float4 _BlueNormal_ST;
 			float _blendthickness;
 			float _blendposition;
 			float _Noise_Str;
+			float _Grunge_Str;
 			float _Normal_Strength1;
 			float _Metal;
 			float _Gloss_Str;
@@ -1620,6 +1635,7 @@ Shader "RBG/VertColor_Splat_Building"
 			sampler2D _Green_UV3_Tile1;
 			sampler2D _Blue_UV3_Tile1;
 			sampler2D _BlendNoise;
+			sampler2D _Grunge_Mask;
 			sampler2D _RedNormal1;
 			sampler2D _GreenNormal1;
 			sampler2D _BlueNormal;
@@ -1830,6 +1846,10 @@ Shader "RBG/VertColor_Splat_Building"
 				float temp_output_223_0 = saturate( ( ( ( tex2D( _BlendNoise, uv_BlendNoise ).r * _Noise_Str ) - 0.5 ) + IN.ase_color.r ) );
 				float mask160 = temp_output_223_0;
 				float3 localTopMidBot160 = TopMidBot160( top160 , mid160 , bot160 , blendposition160 , blendthickness160 , mask160 );
+				float2 uv_Grunge_Mask = IN.ase_texcoord4.xy * _Grunge_Mask_ST.xy + _Grunge_Mask_ST.zw;
+				float temp_output_291_0 = ( ( tex2D( _Grunge_Mask, uv_Grunge_Mask ).r * _Grunge_Str ) * IN.ase_color.g );
+				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968647,0.01151679,0.005228601,0);
+				float4 lerpResult287 = lerp( float4( localTopMidBot160 , 0.0 ) , ( float4( localTopMidBot160 , 0.0 ) * ( temp_output_291_0 * color284 ) ) , temp_output_291_0);
 				
 				float4 color273 = IsGammaSpace() ? float4(0.9716981,0.9300067,0.637104,0) : float4(0.9368213,0.8481022,0.3635845,0);
 				float4 temp_output_270_0 = ( ( IN.ase_color.a * color273 ) * 38.8989 );
@@ -1854,7 +1874,7 @@ Shader "RBG/VertColor_Splat_Building"
 				float4 break278 = lerpResult268;
 				
 
-				float3 BaseColor = localTopMidBot160;
+				float3 BaseColor = lerpResult287.rgb;
 				float3 Emission = saturate( ( lerpResult269 * ( break278.r + break278.g + break278.b ) ) ).rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
@@ -1912,7 +1932,8 @@ Shader "RBG/VertColor_Splat_Building"
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ShaderGraphFunctions.hlsl"
 			#include "Packages/com.unity.render-pipelines.universal/Editor/ShaderGraph/Includes/ShaderPass.hlsl"
 
-			
+			#define ASE_NEEDS_FRAG_COLOR
+
 
 			struct VertexInput
 			{
@@ -1943,12 +1964,14 @@ Shader "RBG/VertColor_Splat_Building"
 			float4 _Green_UV3_Tile1_ST;
 			float4 _Blue_UV3_Tile1_ST;
 			float4 _BlendNoise_ST;
+			float4 _Grunge_Mask_ST;
 			float4 _RedNormal1_ST;
 			float4 _GreenNormal1_ST;
 			float4 _BlueNormal_ST;
 			float _blendthickness;
 			float _blendposition;
 			float _Noise_Str;
+			float _Grunge_Str;
 			float _Normal_Strength1;
 			float _Metal;
 			float _Gloss_Str;
@@ -1986,6 +2009,7 @@ Shader "RBG/VertColor_Splat_Building"
 			sampler2D _Green_UV3_Tile1;
 			sampler2D _Blue_UV3_Tile1;
 			sampler2D _BlendNoise;
+			sampler2D _Grunge_Mask;
 
 
 			float3 TopMidBot160( float3 top, float3 mid, float3 bot, float blendposition, float blendthickness, float mask )
@@ -2167,9 +2191,13 @@ Shader "RBG/VertColor_Splat_Building"
 				float temp_output_223_0 = saturate( ( ( ( tex2D( _BlendNoise, uv_BlendNoise ).r * _Noise_Str ) - 0.5 ) + IN.ase_color.r ) );
 				float mask160 = temp_output_223_0;
 				float3 localTopMidBot160 = TopMidBot160( top160 , mid160 , bot160 , blendposition160 , blendthickness160 , mask160 );
+				float2 uv_Grunge_Mask = IN.ase_texcoord2.xy * _Grunge_Mask_ST.xy + _Grunge_Mask_ST.zw;
+				float temp_output_291_0 = ( ( tex2D( _Grunge_Mask, uv_Grunge_Mask ).r * _Grunge_Str ) * IN.ase_color.g );
+				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968647,0.01151679,0.005228601,0);
+				float4 lerpResult287 = lerp( float4( localTopMidBot160 , 0.0 ) , ( float4( localTopMidBot160 , 0.0 ) * ( temp_output_291_0 * color284 ) ) , temp_output_291_0);
 				
 
-				float3 BaseColor = localTopMidBot160;
+				float3 BaseColor = lerpResult287.rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 
@@ -2270,12 +2298,14 @@ Shader "RBG/VertColor_Splat_Building"
 			float4 _Green_UV3_Tile1_ST;
 			float4 _Blue_UV3_Tile1_ST;
 			float4 _BlendNoise_ST;
+			float4 _Grunge_Mask_ST;
 			float4 _RedNormal1_ST;
 			float4 _GreenNormal1_ST;
 			float4 _BlueNormal_ST;
 			float _blendthickness;
 			float _blendposition;
 			float _Noise_Str;
+			float _Grunge_Str;
 			float _Normal_Strength1;
 			float _Metal;
 			float _Gloss_Str;
@@ -2686,12 +2716,14 @@ Shader "RBG/VertColor_Splat_Building"
 			float4 _Green_UV3_Tile1_ST;
 			float4 _Blue_UV3_Tile1_ST;
 			float4 _BlendNoise_ST;
+			float4 _Grunge_Mask_ST;
 			float4 _RedNormal1_ST;
 			float4 _GreenNormal1_ST;
 			float4 _BlueNormal_ST;
 			float _blendthickness;
 			float _blendposition;
 			float _Noise_Str;
+			float _Grunge_Str;
 			float _Normal_Strength1;
 			float _Metal;
 			float _Gloss_Str;
@@ -2729,6 +2761,7 @@ Shader "RBG/VertColor_Splat_Building"
 			sampler2D _Green_UV3_Tile1;
 			sampler2D _Blue_UV3_Tile1;
 			sampler2D _BlendNoise;
+			sampler2D _Grunge_Mask;
 			sampler2D _RedNormal1;
 			sampler2D _GreenNormal1;
 			sampler2D _BlueNormal;
@@ -2997,6 +3030,10 @@ Shader "RBG/VertColor_Splat_Building"
 				float temp_output_223_0 = saturate( ( ( ( tex2D( _BlendNoise, uv_BlendNoise ).r * _Noise_Str ) - 0.5 ) + IN.ase_color.r ) );
 				float mask160 = temp_output_223_0;
 				float3 localTopMidBot160 = TopMidBot160( top160 , mid160 , bot160 , blendposition160 , blendthickness160 , mask160 );
+				float2 uv_Grunge_Mask = IN.ase_texcoord8.xy * _Grunge_Mask_ST.xy + _Grunge_Mask_ST.zw;
+				float temp_output_291_0 = ( ( tex2D( _Grunge_Mask, uv_Grunge_Mask ).r * _Grunge_Str ) * IN.ase_color.g );
+				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968647,0.01151679,0.005228601,0);
+				float4 lerpResult287 = lerp( float4( localTopMidBot160 , 0.0 ) , ( float4( localTopMidBot160 , 0.0 ) * ( temp_output_291_0 * color284 ) ) , temp_output_291_0);
 				
 				float2 uv_RedNormal1 = IN.ase_texcoord8.xy * _RedNormal1_ST.xy + _RedNormal1_ST.zw;
 				float3 unpack235 = UnpackNormalScale( tex2D( _RedNormal1, uv_RedNormal1 ), _Normal_Strength1 );
@@ -3021,12 +3058,12 @@ Shader "RBG/VertColor_Splat_Building"
 				float4 lerpResult269 = lerp( float4( localTopMidBot160 , 0.0 ) , lerpResult268 , 0.25);
 				float4 break278 = lerpResult268;
 				
-				float3 temp_cast_5 = (tex2DNode210.a).xxx;
-				float3 top237 = temp_cast_5;
-				float3 temp_cast_6 = (tex2DNode211.a).xxx;
-				float3 mid237 = temp_cast_6;
-				float3 temp_cast_7 = (tex2DNode212.a).xxx;
-				float3 bot237 = temp_cast_7;
+				float3 temp_cast_8 = (tex2DNode210.a).xxx;
+				float3 top237 = temp_cast_8;
+				float3 temp_cast_9 = (tex2DNode211.a).xxx;
+				float3 mid237 = temp_cast_9;
+				float3 temp_cast_10 = (tex2DNode212.a).xxx;
+				float3 bot237 = temp_cast_10;
 				float blendposition237 = _blendthickness;
 				float blendthickness237 = _blendposition;
 				float mask237 = temp_output_223_0;
@@ -3035,7 +3072,7 @@ Shader "RBG/VertColor_Splat_Building"
 				float temp_output_247_0 = ( 1.0 - IN.ase_color.b );
 				
 
-				float3 BaseColor = localTopMidBot160;
+				float3 BaseColor = lerpResult287.rgb;
 				float3 Normal = localTopMidBot232;
 				float3 Emission = saturate( ( lerpResult269 * ( break278.r + break278.g + break278.b ) ) ).rgb;
 				float3 Specular = 0.5;
@@ -3205,12 +3242,14 @@ Shader "RBG/VertColor_Splat_Building"
 			float4 _Green_UV3_Tile1_ST;
 			float4 _Blue_UV3_Tile1_ST;
 			float4 _BlendNoise_ST;
+			float4 _Grunge_Mask_ST;
 			float4 _RedNormal1_ST;
 			float4 _GreenNormal1_ST;
 			float4 _BlueNormal_ST;
 			float _blendthickness;
 			float _blendposition;
 			float _Noise_Str;
+			float _Grunge_Str;
 			float _Normal_Strength1;
 			float _Metal;
 			float _Gloss_Str;
@@ -3456,12 +3495,14 @@ Shader "RBG/VertColor_Splat_Building"
 			float4 _Green_UV3_Tile1_ST;
 			float4 _Blue_UV3_Tile1_ST;
 			float4 _BlendNoise_ST;
+			float4 _Grunge_Mask_ST;
 			float4 _RedNormal1_ST;
 			float4 _GreenNormal1_ST;
 			float4 _BlueNormal_ST;
 			float _blendthickness;
 			float _blendposition;
 			float _Noise_Str;
+			float _Grunge_Str;
 			float _Normal_Strength1;
 			float _Metal;
 			float _Gloss_Str;
@@ -3656,6 +3697,7 @@ Shader "RBG/VertColor_Splat_Building"
 }
 /*ASEBEGIN
 Version=19201
+Node;AmplifyShaderEditor.CommentaryNode;299;3407.938,-2967.542;Inherit;False;1543.081;740.2019;Grunge;8;287;286;285;291;284;289;290;298;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;264;2005.62,-564.4376;Inherit;False;2841.664;950.3076;Lighting;23;278;277;276;275;274;273;272;271;270;269;268;267;266;265;209;208;207;206;205;204;203;202;200;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;200;3073.472,-505.3804;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;202;3073.472,-505.3804;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;;0;0;Standard;0;False;0
@@ -3669,26 +3711,19 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;209;3073.472,-505.3804;Floa
 Node;AmplifyShaderEditor.RangedFloatNode;215;1650.374,-1348.263;Float;False;Constant;_Float1;Float 0;14;0;Create;True;0;0;0;False;0;False;0.5;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;216;1597.575,-1468.262;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleSubtractOpNode;220;1870.731,-1408.295;Inherit;False;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;213;1196.306,-1410.163;Float;False;Property;_Noise_Str;Noise_Str;10;0;Create;True;0;0;0;False;0;False;0.89;0.6;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SamplerNode;219;1079.271,-1636.292;Inherit;True;Property;_BlendNoise;BlendNoise;6;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;224;2429.752,-1866.827;Float;False;Property;_blendthickness;blendthickness;8;0;Create;True;0;0;0;False;0;False;0.49;0.24;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;213;1196.306,-1410.163;Float;False;Property;_Noise_Str;Noise_Str;11;0;Create;True;0;0;0;False;0;False;0.89;0.6;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;224;2429.752,-1866.827;Float;False;Property;_blendthickness;blendthickness;9;0;Create;True;0;0;0;False;0;False;0.49;0.24;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SamplerNode;212;2444.842,-2077.706;Inherit;True;Property;_Blue_UV3_Tile1;Blue_UV3_Tile;2;0;Create;True;0;0;0;False;0;False;-1;e75abae4edf2440419a20596a1b0d372;50e9aa931727c5a4989aafe5d689296f;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SamplerNode;210;2449.508,-2498.662;Inherit;True;Property;_red_UV4_Trim1;red_UV4_Trim;0;0;Create;True;0;0;0;False;0;False;-1;9514eb982c7b14f479009ea7066016b2;23d63906f4cab5e43ae54f176a91dead;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SamplerNode;211;2445.408,-2287.861;Inherit;True;Property;_Green_UV3_Tile1;Green_UV3_Tile;1;0;Create;True;0;0;0;False;0;False;-1;352167e52fa3b0c43ac690f5e2debc2b;352167e52fa3b0c43ac690f5e2debc2b;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;225;2425.107,-1775.499;Float;False;Property;_blendposition;blendposition;7;0;Create;True;0;0;0;False;0;False;0.102;0.21;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;225;2425.107,-1775.499;Float;False;Property;_blendposition;blendposition;8;0;Create;True;0;0;0;False;0;False;0.102;0.21;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SamplerNode;235;2924.472,-2883.698;Inherit;True;Property;_RedNormal1;RedNormal;3;0;Create;True;0;0;0;False;0;False;-1;None;f3c400a3509738246b088656d3b3da3f;True;0;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SamplerNode;233;2925.33,-2405.479;Inherit;True;Property;_BlueNormal;BlueNormal;5;0;Create;True;0;0;0;False;0;False;-1;None;9abb7062482965a40a5bcb80c80f0785;True;0;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SamplerNode;234;2929.559,-2632.506;Inherit;True;Property;_GreenNormal1;GreenNormal;4;0;Create;True;0;0;0;False;0;False;-1;None;3a8d2d61ba64f404781616855341c8f1;True;0;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;236;2481.812,-2686.327;Inherit;False;Property;_Normal_Strength1;Normal_Strength;9;0;Create;True;0;0;0;False;0;False;1;1.242;0;3;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;239;3541.01,-1360.338;Inherit;False;Property;_Gloss_Str;Gloss_Str;11;0;Create;True;0;0;0;False;0;False;1;0;0;3;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;238;3870.813,-1462.838;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.CustomExpressionNode;160;3228.727,-1473.581;Float;False;float halfblendthickness = blendthickness * 0.5f@$float near = blendposition + halfblendthickness@$float far = blendposition - halfblendthickness@$$float nearmultiplier = step(near, mask)@$float farmultiplier = step(far, mask)@$$top *= nearmultiplier@$mid *= (1 - nearmultiplier) * farmultiplier@$bot *= 1 - farmultiplier@$$return top + mid + bot@;3;Create;6;True;top;FLOAT3;0,0,0;In;;Float;False;True;mid;FLOAT3;0,0,0;In;;Float;False;True;bot;FLOAT3;0,0,0;In;;Float;False;True;blendposition;FLOAT;0;In;;Float;False;True;blendthickness;FLOAT;0;In;;Float;False;True;mask;FLOAT;0;In;;Float;False;TopMidBot;True;False;0;;False;6;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.RangedFloatNode;246;3954.258,-1560.558;Inherit;False;Property;_Metal;Metal;12;0;Create;True;0;0;0;False;0;False;0;1;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;236;2481.812,-2686.327;Inherit;False;Property;_Normal_Strength1;Normal_Strength;10;0;Create;True;0;0;0;False;0;False;1;1.242;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.OneMinusNode;247;2612.171,-959.7247;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;245;3229.526,-1023.843;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.SaturateNode;223;2478.806,-1309.222;Inherit;True;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleAddOpNode;222;2163.489,-1318.358;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.CustomExpressionNode;232;3498.55,-2114.706;Float;False;float halfblendthickness = blendthickness * 0.5f@$float near = blendposition + halfblendthickness@$float far = blendposition - halfblendthickness@$$float nearmultiplier = step(near, mask)@$float farmultiplier = step(far, mask)@$$top *= nearmultiplier@$mid *= (1 - nearmultiplier) * farmultiplier@$bot *= 1 - farmultiplier@$$return top + mid + bot@;3;Create;6;True;top;FLOAT3;0,0,0;In;;Float;False;True;mid;FLOAT3;0,0,0;In;;Float;False;True;bot;FLOAT3;0,0,0;In;;Float;False;True;blendposition;FLOAT;0;In;;Float;False;True;blendthickness;FLOAT;0;In;;Float;False;True;mask;FLOAT;0;In;;Float;False;TopMidBot;True;False;0;;False;6;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.VertexColorNode;217;1348.761,-797.3027;Inherit;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;201;4960.299,-1628.234;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/VertColor_Splat_Building;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
 Node;AmplifyShaderEditor.CustomExpressionNode;237;3367.328,-1804.881;Float;False;float halfblendthickness = blendthickness * 0.5f@$float near = blendposition + halfblendthickness@$float far = blendposition - halfblendthickness@$$float nearmultiplier = step(near, mask)@$float farmultiplier = step(far, mask)@$$top *= nearmultiplier@$mid *= (1 - nearmultiplier) * farmultiplier@$bot *= 1 - farmultiplier@$$return top + mid + bot@;3;Create;6;True;top;FLOAT3;0,0,0;In;;Float;False;True;mid;FLOAT3;0,0,0;In;;Float;False;True;bot;FLOAT3;0,0,0;In;;Float;False;True;blendposition;FLOAT;0;In;;Float;False;True;blendthickness;FLOAT;0;In;;Float;False;True;mask;FLOAT;0;In;;Float;False;TopMidBot;True;False;0;;False;6;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;1;FLOAT3;0
@@ -3707,6 +3742,21 @@ Node;AmplifyShaderEditor.RangedFloatNode;276;3372.015,68.92259;Inherit;True;Cons
 Node;AmplifyShaderEditor.SimpleAddOpNode;277;4280.856,-158.316;Inherit;False;3;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.BreakToComponentsNode;278;4014.281,-130.6864;Inherit;True;COLOR;1;0;COLOR;0,0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;248;3220.798,-873.8797;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.CustomExpressionNode;160;3276.08,-1493.875;Float;False;float halfblendthickness = blendthickness * 0.5f@$float near = blendposition + halfblendthickness@$float far = blendposition - halfblendthickness@$$float nearmultiplier = step(near, mask)@$float farmultiplier = step(far, mask)@$$top *= nearmultiplier@$mid *= (1 - nearmultiplier) * farmultiplier@$bot *= 1 - farmultiplier@$$return top + mid + bot@;3;Create;6;True;top;FLOAT3;0,0,0;In;;Float;False;True;mid;FLOAT3;0,0,0;In;;Float;False;True;bot;FLOAT3;0,0,0;In;;Float;False;True;blendposition;FLOAT;0;In;;Float;False;True;blendthickness;FLOAT;0;In;;Float;False;True;mask;FLOAT;0;In;;Float;False;TopMidBot;True;False;0;;False;6;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.CustomExpressionNode;232;3498.55,-2114.706;Float;False;float halfblendthickness = blendthickness * 0.5f@$float near = blendposition + halfblendthickness@$float far = blendposition - halfblendthickness@$$float nearmultiplier = step(near, mask)@$float farmultiplier = step(far, mask)@$$top *= nearmultiplier@$mid *= (1 - nearmultiplier) * farmultiplier@$bot *= 1 - farmultiplier@$$return top + mid + bot@;3;Create;6;True;top;FLOAT3;0,0,0;In;;Float;False;True;mid;FLOAT3;0,0,0;In;;Float;False;True;bot;FLOAT3;0,0,0;In;;Float;False;True;blendposition;FLOAT;0;In;;Float;False;True;blendthickness;FLOAT;0;In;;Float;False;True;mask;FLOAT;0;In;;Float;False;TopMidBot;True;False;0;;False;6;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.SaturateNode;223;2509.806,-1318.222;Inherit;True;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;219;1079.271,-1636.292;Inherit;True;Property;_BlendNoise;BlendNoise;6;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.LerpOp;287;4690.023,-2481.341;Inherit;True;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;286;4260.299,-2589.09;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;285;4456.294,-2520.09;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;291;3929.878,-2647.114;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.ColorNode;284;3981.323,-2460.055;Inherit;False;Constant;_Color0;Color 0;13;0;Create;True;0;0;0;False;0;False;0.1886792,0.1092381,0.06318974,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;289;3815.631,-2778.894;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;290;3508.804,-2669.662;Inherit;False;Property;_Grunge_Str;Grunge_Str;14;0;Create;True;0;0;0;False;0;False;0.5;0.5;0;5;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;298;3457.938,-2917.542;Inherit;True;Property;_Grunge_Mask;Grunge_Mask;7;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;238;4027.238,-1521.315;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
+Node;AmplifyShaderEditor.RangedFloatNode;239;3657.963,-1429.048;Inherit;True;Property;_Gloss_Str;Gloss_Str;12;0;Create;True;0;0;0;False;0;False;1;0;0;3;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;246;4261.992,-1630.229;Inherit;False;Property;_Metal;Metal;13;0;Create;True;0;0;0;False;0;False;0;1;0;1;0;1;FLOAT;0
 WireConnection;216;0;219;1
 WireConnection;216;1;213;0
 WireConnection;220;0;216;0
@@ -3714,27 +3764,12 @@ WireConnection;220;1;215;0
 WireConnection;235;5;236;0
 WireConnection;233;5;236;0
 WireConnection;234;5;236;0
-WireConnection;238;0;237;0
-WireConnection;238;1;239;0
-WireConnection;160;0;210;0
-WireConnection;160;1;211;0
-WireConnection;160;2;212;0
-WireConnection;160;3;224;0
-WireConnection;160;4;225;0
-WireConnection;160;5;223;0
 WireConnection;247;0;217;3
 WireConnection;245;0;247;0
 WireConnection;245;1;247;0
-WireConnection;223;0;222;0
 WireConnection;222;0;220;0
 WireConnection;222;1;217;1
-WireConnection;232;0;235;0
-WireConnection;232;1;234;0
-WireConnection;232;2;233;0
-WireConnection;232;3;224;0
-WireConnection;232;4;225;0
-WireConnection;232;5;223;0
-WireConnection;201;0;160;0
+WireConnection;201;0;287;0
 WireConnection;201;1;232;0
 WireConnection;201;2;266;0
 WireConnection;201;3;246;0
@@ -3768,5 +3803,31 @@ WireConnection;277;2;278;2
 WireConnection;278;0;268;0
 WireConnection;248;0;217;3
 WireConnection;248;1;217;3
+WireConnection;160;0;210;0
+WireConnection;160;1;211;0
+WireConnection;160;2;212;0
+WireConnection;160;3;224;0
+WireConnection;160;4;225;0
+WireConnection;160;5;223;0
+WireConnection;232;0;235;0
+WireConnection;232;1;234;0
+WireConnection;232;2;233;0
+WireConnection;232;3;224;0
+WireConnection;232;4;225;0
+WireConnection;232;5;223;0
+WireConnection;223;0;222;0
+WireConnection;287;0;160;0
+WireConnection;287;1;285;0
+WireConnection;287;2;291;0
+WireConnection;286;0;291;0
+WireConnection;286;1;284;0
+WireConnection;285;0;160;0
+WireConnection;285;1;286;0
+WireConnection;291;0;289;0
+WireConnection;291;1;217;2
+WireConnection;289;0;298;1
+WireConnection;289;1;290;0
+WireConnection;238;0;237;0
+WireConnection;238;1;239;0
 ASEEND*/
-//CHKSM=3C409EED932CEE4D7294D5E8EF9FF9036ED8CB4B
+//CHKSM=351B8214E6ADF7C3E9A333FBF36EA9A1842BF07A
