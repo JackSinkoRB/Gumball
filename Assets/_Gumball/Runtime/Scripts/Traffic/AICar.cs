@@ -41,7 +41,7 @@ namespace Gumball
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
         [Space(5)]
-        [SerializeField, ReadOnly] private WheelCollider[] poweredWheels;
+        private WheelCollider[] poweredWheels;
         private Transform[] allWheelMeshes;
         private WheelCollider[] allWheelColliders;
         
