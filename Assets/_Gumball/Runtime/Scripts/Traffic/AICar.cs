@@ -3,9 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Dreamteck.Splines;
-#if UNITY_EDITOR
-using Gumball.Editor;
-#endif
 using MyBox;
 using UnityEngine;
 
@@ -14,6 +11,8 @@ namespace Gumball
     [RequireComponent(typeof(Rigidbody))]
     public class AICar : MonoBehaviour
     {
+
+        public event Action onDisable;
 
         private enum WheelConfiguration
         {
@@ -26,8 +25,11 @@ namespace Gumball
         [SerializeField] private bool canBeDrivenByPlayer;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private CarIKManager avatarIKManager;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private SteeringWheel steeringWheel;
+        [Space(5)]
+        [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int id;
+        
         public CarIKManager AvatarIKManager => avatarIKManager;
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
@@ -153,7 +155,7 @@ namespace Gumball
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool brakeForObstacles = true;
         [ConditionalField(nameof(brakeForObstacles), nameof(autoDrive)), SerializeField] private ObstacleRaycast brakeForObstaclesRaycast;
         [Tooltip("If speed is at min of speedForBrakingRaycastLength, the brakingRaycastLength is at min, and vice versa.")]
-        [ConditionalField(nameof(brakeForObstacles), nameof(autoDrive)), SerializeField] private MinMaxFloat brakingRaycastLength = new(5, 15);
+        [ConditionalField(nameof(brakeForObstacles), nameof(autoDrive)), SerializeField] private MinMaxFloat brakingRaycastLength = new(8, 25);
         [Tooltip("If speed is at min of speedForBrakingRaycastLength, the brakingRaycastLength is at min, and vice versa.")]
         [ConditionalField(nameof(brakeForObstacles), nameof(autoDrive)), SerializeField] private MinMaxFloat speedForBrakingRaycastLength = new(10, 60);
         
@@ -170,10 +172,10 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField] private bool debug;
         [Space(5)]
-        [SerializeField, ReadOnly] protected bool isInitialised;
+        [SerializeField, ReadOnly] private bool isInitialised;
         [Space(5)]
-        [SerializeField, ReadOnly] protected Chunk currentChunkCached;
-        [SerializeField, ReadOnly] protected bool isFrozen;
+        [SerializeField, ReadOnly] private Chunk currentChunkCached;
+        [SerializeField, ReadOnly] private bool isFrozen;
 
         private Vector3 targetPosition;
         private int lastFrameChunkWasCached = -1;
@@ -224,14 +226,11 @@ namespace Gumball
             InitialiseGearbox();
         }
 
-        public void InitialisePlayerCar(int carIndex, int id)
-        {
-            this.carIndex = carIndex;
-            this.id = id;
-        }
-
         private void OnDisable()
         {
+            onDisable?.Invoke();
+            onDisable = null; //reset listener
+            
             //reset for pooled objects:
             Unfreeze();
             isAccelerating = false;
@@ -249,20 +248,32 @@ namespace Gumball
             }
         }
 
-        public virtual void Initialise()
+        private void Initialise()
         {
             isInitialised = true;
 
             defaultAngularDrag = Rigidbody.angularDrag;
             
-            if (!canBeDrivenByPlayer)
-                gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
+            gameObject.layer = canBeDrivenByPlayer ? (int)LayersAndTags.Layer.PlayerVehicle : (int)LayersAndTags.Layer.TrafficCar;
             
             OnChangeChunk(null, CurrentChunk);
 
             CacheAllWheelMeshes();
             CacheAllWheelColliders();
             CachePoweredWheels();
+        }
+        
+        public void InitialisePlayerCar(int carIndex, int id)
+        {
+            this.carIndex = carIndex;
+            this.id = id;
+            
+            SetAutoDrive(false);
+        }
+        
+        public void SetAutoDrive(bool autoDrive)
+        {
+            this.autoDrive = autoDrive;
         }
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -357,7 +368,7 @@ namespace Gumball
             Rigidbody.isKinematic = false;
         }
         
-        protected void OnChangeDesiredSpeed(float newSpeed)
+        private void OnChangeDesiredSpeed(float newSpeed)
         {
             desiredSpeed = newSpeed;
             
@@ -379,6 +390,8 @@ namespace Gumball
             }
 
             speed = SpeedUtils.ToKmh(Rigidbody.velocity.magnitude);
+
+            CheckIfPlayerDriving();
             
             if (useObstacleAvoidance && autoDrive)
                 TryAvoidObstacles();
@@ -890,7 +903,7 @@ namespace Gumball
             }
         }
         
-        protected float GetMovementTargetDistance(float speedToCheck)
+        private float GetMovementTargetDistance(float speedToCheck)
         {
             speedToCheck = Mathf.Clamp(speedToCheck, movementTargetDistanceSpeedFactors.Min, movementTargetDistanceSpeedFactors.Max);
             float percentage = (speedToCheck - movementTargetDistanceSpeedFactors.Min) / (movementTargetDistanceSpeedFactors.Max - movementTargetDistanceSpeedFactors.Min);
@@ -971,7 +984,7 @@ namespace Gumball
         /// Get the next desired position and rotation relative to the sample on the next chunk's spline.
         /// </summary>
         /// <returns>The spline sample's position and rotation, or null if no more loaded chunks in the desired direction.</returns>
-        protected (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
+        private (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
         {
             if (CurrentChunk == null)
                 return null;
@@ -1127,6 +1140,30 @@ namespace Gumball
             onGearChanged?.Invoke(currentGear + 1, currentGear);
         }
         
+        private void CheckIfPlayerDriving()
+        {
+            bool playerDrivingPreviouslyEnabled = isPlayerDrivingEnabled;
+            bool playerDrivingShouldBeEnabled = canBeDrivenByPlayer && !autoDrive && WarehouseManager.Instance.CurrentCar == this;
+
+            if (playerDrivingPreviouslyEnabled && !playerDrivingShouldBeEnabled)
+            {
+                OnPlayerDrivingDisabled();
+            } else if (!playerDrivingPreviouslyEnabled && playerDrivingShouldBeEnabled)
+            {
+                OnPlayerDrivingEnabled();
+            }
+        }
+        
+        private void OnPlayerDrivingEnabled()
+        {
+            isPlayerDrivingEnabled = true;
+        }
+
+        private void OnPlayerDrivingDisabled()
+        {
+            isPlayerDrivingEnabled = false;
+        }
+
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {

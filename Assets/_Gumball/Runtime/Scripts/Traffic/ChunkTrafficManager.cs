@@ -137,7 +137,7 @@ namespace Gumball
                     continue;
                 }
 
-                TrafficCar car = TrafficCarSpawner.Instance.SpawnCar(position, rotation);
+                AICar car = TrafficCarSpawner.Instance.SpawnCar(position, rotation);
                 car.SetLaneDistance(randomLaneDistance + randomLaneOffset.RandomInRange());
                 break;
             }
@@ -158,7 +158,7 @@ namespace Gumball
             const float minDistanceSqr = minDistanceRequiredToSpawn * minDistanceRequiredToSpawn;
 
             //loop over all cars and get distance to their position
-            foreach (TrafficCar trafficCar in TrafficCarSpawner.CurrentCars)
+            foreach (AICar trafficCar in TrafficCarSpawner.CurrentCars)
             {
                 bool isSameLane = Mathf.Abs(trafficCar.CurrentLaneDistance - laneDistance) > randomLaneOffset.Max;
                 if (isSameLane)

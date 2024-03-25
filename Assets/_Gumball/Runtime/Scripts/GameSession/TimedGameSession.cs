@@ -43,8 +43,10 @@ namespace Gumball
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
                 handle.Completed += h =>
                 {
-                    RacerCar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<RacerCar>();
+                    AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
+                    
+                    racer.SetAutoDrive(true);
                 };
                 handles.Add(handle);
             }
