@@ -49,8 +49,13 @@ namespace Gumball
 
         public void SetPressedOverride(bool pressed)
         {
+            if (!isPressedOverride && pressed)
+                onPressed?.Invoke();
+            else if (isPressedOverride && !pressed)
+                onReleased?.Invoke();
+
             isPressedOverride = pressed;
-            lastPressedFrame = Time.frameCount;
+            lastPressedFrame = Time.frameCount;            
         }
         
     }

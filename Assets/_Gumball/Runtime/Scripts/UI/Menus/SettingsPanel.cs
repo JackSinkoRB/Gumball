@@ -17,7 +17,7 @@ namespace Gumball
 
         private void UpdateDisplay()
         {
-            gearboxOption.Select(SettingsManager.GearboxSetting);
+            gearboxOption.Select((int)GearboxSetting.Setting);
         }
 
     }

@@ -73,22 +73,23 @@ namespace Gumball
         private bool isStationary => speed < stationarySpeed && !isAccelerating;
 
         [Header("Engine & Transmission")]
-        [ConditionalField(nameof(autoDrive), true), SerializeField] private bool isAutomaticTransmission = true;
         [Tooltip("The engine torque output (y) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
         [SerializeField] private AnimationCurve torqueCurve;
         [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
         [SerializeField] private float finalGearRatio = 3.42f;
         [SerializeField] private MinMaxFloat engineRpmRange = new(1000, 8000);
         [Space(5)]
-        [ConditionalField(nameof(isAutomaticTransmission)), SerializeField] private MinMaxFloat idealRPMRangeForGearChanges = new(3000, 6000);
-        [Tooltip("The peak of the torque curve for maximum torque.")]
-        [ConditionalField(nameof(isAutomaticTransmission)), SerializeField, ReadOnly] private float idealTorqueRPM;
+        [SerializeField] private MinMaxFloat idealRPMRangeForGearChanges = new(3000, 6000);
         [Space(5)]
         [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
         [SerializeField, ReadOnly] private float engineRpm;
+
+        public delegate void OnGearChangedDelegate(int previousGear, int currentGear);
+        public event OnGearChangedDelegate onGearChanged;
+        
         private bool wasAcceleratingLastFrame;
-        public bool IsAutomaticTransmission => autoDrive || isAutomaticTransmission;
+        public bool IsAutomaticTransmission => autoDrive || GearboxSetting.Setting == GearboxSetting.GearboxOption.AUTOMATIC;
         public int CurrentGear => currentGear;
         public int NumberOfGears => gearRatios.Length;
         public float EngineRpm => engineRpm;
@@ -123,6 +124,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isBraking;
         [ConditionalField(nameof(autoBrakeAroundCorners)), SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
         [SerializeField, ReadOnly] private float speedToBrakeTo;
+        
         private bool wasBrakingLastFrame;
         
         [Header("Handbrake")]
@@ -130,6 +132,7 @@ namespace Gumball
         [SerializeField] private float handbrakeTorque = 5000;
         [Space(5)]
         [SerializeField, ReadOnly] private bool isHandbrakeEngaged;
+        
         private float defaultRearWheelStiffness = -1;
         private float defaultAngularDrag;
         private readonly Sequence[] handbrakeEaseOffTweens = new Sequence[2];
@@ -139,9 +142,11 @@ namespace Gumball
         [SerializeField] private float collisionRecoverDuration = 1;
         [Tooltip("Does the car disable its braking, acceleration and steering while in a collision? Or can it keep driving?")]
         [SerializeField] private bool disableMovementInCollision = true;
-        private float timeOfLastCollision = -Mathf.Infinity;
         [Space(5)]
         [SerializeField, ReadOnly] private bool inCollision;
+        
+        private float timeOfLastCollision = -Mathf.Infinity;
+        
         public GameObject Colliders => colliders;
         
         [Header("Obstacle detection")]
@@ -159,6 +164,7 @@ namespace Gumball
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private ObstacleRaycastLayer[] obstacleAvoidanceRaycastLayers;
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private ObstacleRaycastLayer obstacleAvoidanceRaycastLayerWhenBlocked;
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField, ReadOnly] private int currentLayerIndex;
+        
         private bool allDirectionsAreBlocked;
 
         [Header("Debugging")]
@@ -212,9 +218,12 @@ namespace Gumball
             if (!isInitialised)
                 Initialise();
 
+            if (canBeDrivenByPlayer)
+                GearboxSetting.onSettingChanged += OnGearboxSettingChanged;
+            
             InitialiseGearbox();
         }
-        
+
         public void InitialisePlayerCar(int carIndex, int id)
         {
             this.carIndex = carIndex;
@@ -228,7 +237,12 @@ namespace Gumball
             isAccelerating = false;
             wasAcceleratingLastFrame = false;
 
-            if (InputManager.ExistsRuntime)
+            if (canBeDrivenByPlayer)
+                GearboxSetting.onSettingChanged -= OnGearboxSettingChanged;
+            
+            onGearChanged = null; //reset listeners
+            
+            if (InputManager.ExistsRuntime && canBeDrivenByPlayer)
             {
                 InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
                 InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
@@ -249,17 +263,6 @@ namespace Gumball
             CacheAllWheelMeshes();
             CacheAllWheelColliders();
             CachePoweredWheels();
-        }
-
-        private void InitialiseGearbox()
-        {
-            currentGear = 1;
-            
-            if (!IsAutomaticTransmission)
-            {
-                InputManager.Instance.CarInput.ShiftUp.onPressed += ShiftUp;
-                InputManager.Instance.CarInput.ShiftDown.onPressed += ShiftDown;
-            }
         }
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -491,8 +494,16 @@ namespace Gumball
                 
                 //if accelerating from reverse, change the gear
                 if (InputManager.Instance.CarInput.Accelerate.IsPressed && currentGear == 0)
-                    currentGear = 1;
+                    ChangeGear(1);
             }
+        }
+
+        private void ChangeGear(int newGear)
+        {
+            int previousGear = currentGear;
+            currentGear = newGear;
+            
+            onGearChanged?.Invoke(previousGear, currentGear);
         }
 
         private void DoAccelerationEvents()
@@ -679,7 +690,7 @@ namespace Gumball
         private void OnStartReversing()
         {
             isReversing = true;
-            currentGear = 0;
+            ChangeGear(0);
         }
 
         private void OnStopReversing()
@@ -1076,20 +1087,44 @@ namespace Gumball
             }
         }
         
+        private void InitialiseGearbox()
+        {
+            ChangeGear(1);
+            
+            if (canBeDrivenByPlayer)
+                OnGearboxSettingChanged(GearboxSetting.Setting);
+        }
+
+        private void OnGearboxSettingChanged(GearboxSetting.GearboxOption newValue)
+        {
+            InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
+            InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
+            
+            if (newValue == GearboxSetting.GearboxOption.MANUAL)
+            {
+                InputManager.Instance.CarInput.ShiftUp.onPressed += ShiftUp;
+                InputManager.Instance.CarInput.ShiftDown.onPressed += ShiftDown;
+            }
+        }
+        
         private void ShiftUp()
         {
             if (currentGear >= NumberOfGears - 1)
                 return; //at max gear;
             
             currentGear++;
+
+            onGearChanged?.Invoke(currentGear - 1, currentGear);
         }
 
         private void ShiftDown()
         {
-            if (currentGear <= 0)
+            if (currentGear <= 1)
                 return; //at lowest gear (excluding reverse)
             
             currentGear--;
+            
+            onGearChanged?.Invoke(currentGear + 1, currentGear);
         }
         
 #if UNITY_EDITOR

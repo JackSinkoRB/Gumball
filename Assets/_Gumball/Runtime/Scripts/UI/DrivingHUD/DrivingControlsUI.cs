@@ -17,30 +17,33 @@ namespace Gumball
 
         private void OnEnable()
         {
+            //listen for car change - or detect if there is currently a car
             WarehouseManager.Instance.onCurrentCarChanged += OnCarChanged;
-            //Drivetrain.onGearChanged += OnGearChanged;
-            SettingsManager.Instance.onGearboxSettingChanged += OnGearboxSettingChanged;
+            if (WarehouseManager.Instance.CurrentCar != null)
+                OnCarChanged(WarehouseManager.Instance.CurrentCar);
 
-            OnGearboxSettingChanged(SettingsManager.GearboxSetting);
+            GearboxSetting.onSettingChanged += OnGearboxSettingChanged;
+            
+            //update with the current setting
+            OnGearboxSettingChanged(GearboxSetting.Setting);
         }
 
         private void OnDisable()
         {
             WarehouseManager.Instance.onCurrentCarChanged -= OnCarChanged;
-            //Drivetrain.onGearChanged -= OnGearChanged;
-            SettingsManager.Instance.onGearboxSettingChanged -= OnGearboxSettingChanged;
+            GearboxSetting.onSettingChanged -= OnGearboxSettingChanged;
         }
 
         private void OnCarChanged(AICar newCar)
         {
+            newCar.onGearChanged += OnGearChanged;
             OnGearChanged(-1, newCar.CurrentGear); //initialise the gear UI
         }
 
-        private void OnGearboxSettingChanged(int newValue)
+        private void OnGearboxSettingChanged(GearboxSetting.GearboxOption newValue)
         {
-            bool isAutomatic = newValue == 0;
-            gearUpButton.gameObject.SetActive(!isAutomatic);
-            gearDownButton.gameObject.SetActive(!isAutomatic);
+            gearUpButton.gameObject.SetActive(newValue == GearboxSetting.GearboxOption.MANUAL);
+            gearDownButton.gameObject.SetActive(newValue == GearboxSetting.GearboxOption.MANUAL);
         }
         
         private void OnGearChanged(int previousgear, int newgear)

@@ -115,7 +115,6 @@ namespace Gumball
             var handles = new[] {
                 //LOAD ALL SINGLETON SCRIPTABLES HERE
                 GlobalLoggers.LoadInstanceAsync(),
-                SettingsManager.LoadInstanceAsync(),
                 DecalManager.LoadInstanceAsync(),
                 AvatarManager.LoadInstanceAsync(),
                 WarehouseManager.LoadInstanceAsync()
