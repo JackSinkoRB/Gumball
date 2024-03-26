@@ -223,6 +223,10 @@ namespace Gumball
             if (canBeDrivenByPlayer)
                 GearboxSetting.onSettingChanged += OnGearboxSettingChanged;
             
+            //reset steering
+            visualSteerAngle = 0;
+            desiredSteerAngle = 0;
+            
             InitialiseGearbox();
         }
 
@@ -292,6 +296,7 @@ namespace Gumball
             
             //reset steer angle
             visualSteerAngle = 0;
+            desiredSteerAngle = 0;
             
             foreach (WheelCollider wheelCollider in allWheelColliders)
             {
