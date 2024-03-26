@@ -28,6 +28,8 @@ namespace Gumball
 
         public IEnumerator SetupSession()
         {
+            GameSessionManager.Instance.SetCurrentSession(this);
+            
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
             
             //load the map:
@@ -74,6 +76,8 @@ namespace Gumball
         {
             inProgress = false;
             InputManager.Instance.CarInput.Disable();
+            
+            GameSessionManager.Instance.SetCurrentSession(null);
         }
         
         protected virtual IEnumerator OnSessionLoad()
