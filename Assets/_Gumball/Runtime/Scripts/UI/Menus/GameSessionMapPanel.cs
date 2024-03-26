@@ -10,7 +10,6 @@ namespace Gumball
 
         public void OnClickBackButton()
         {
-            GameSessionManager.Instance.CurrentSession.EndSession();
             MainSceneManager.LoadMainScene();
         }
         

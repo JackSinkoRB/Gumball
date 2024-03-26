@@ -75,6 +75,10 @@ namespace Gumball
         {
             base.EndSession();
             
+            //cancel the timer if still running (eg. quit early)
+            if (timerCoroutine != null)
+                CoroutineHelper.Instance.StopCoroutine(timerCoroutine);
+            
             //TODO: reward/race end screen
             MainSceneManager.LoadMainScene();
         }
