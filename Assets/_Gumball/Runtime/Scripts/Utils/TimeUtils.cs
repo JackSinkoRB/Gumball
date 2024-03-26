@@ -17,7 +17,7 @@ public static class TimeUtils
 
     private static readonly StringBuilder stringBuilder = new();
     
-    public static string ToPrettyString(this TimeSpan timeSpan, bool includeMs = false, bool longVersion = false)
+    public static string ToPrettyString(this TimeSpan timeSpan, bool includeMs = false, bool precise = true, bool longVersion = false)
     {
         stringBuilder.Clear();
         bool showMinutes = timeSpan.Minutes > 0;
@@ -42,10 +42,12 @@ public static class TimeUtils
                 float roundedDownSeconds = Mathf.FloorToInt(timeSpan.Seconds);
                 float ms = (timeSpan - TimeSpan.FromSeconds(roundedDownSeconds)).Milliseconds;
 
-                if (roundedDownSeconds > 0)
+                if (!precise || roundedDownSeconds > 0)
                 {
                     //showing seconds AND ms
-                    int msAsPercent = Mathf.RoundToInt((ms / MillisecondsInSecond) * 100f);
+                    int msAsPercent = precise 
+                        ? Mathf.RoundToInt((ms / MillisecondsInSecond) * 100f)
+                        : Mathf.FloorToInt((ms / MillisecondsInSecond) * 10f);
                     stringBuilder.Append($"{roundedDownSeconds}.{msAsPercent}{(longVersion ? " Seconds" : "s")}");
                 }
                 else

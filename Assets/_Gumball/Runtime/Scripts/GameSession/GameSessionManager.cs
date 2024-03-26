@@ -10,5 +10,7 @@ namespace Gumball
 
         [SerializeField, ReadOnly] private GameSession currentSession;
 
+        public GameSession CurrentSession => currentSession;
+        
     }
 }

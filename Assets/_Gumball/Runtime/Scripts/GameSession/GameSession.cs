@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -13,7 +14,9 @@ namespace Gumball
     {
         
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
-
+        
+        [SerializeField, ReadOnly] private bool inProgress;
+        
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
 
         public abstract string GetName();
@@ -65,13 +68,21 @@ namespace Gumball
 
             GlobalLoggers.LoadingLogger.Log("Loading session...");
             yield return OnSessionLoad();
-            GlobalLoggers.LoadingLogger.Log("Loaded session");
+        }
 
-            InputManager.Instance.CarInput.Enable();
+        public virtual void EndSession()
+        {
+            inProgress = false;
+            InputManager.Instance.CarInput.Disable();
         }
         
         protected virtual IEnumerator OnSessionLoad()
         {
+            GlobalLoggers.LoadingLogger.Log("Loaded session");
+
+            inProgress = true;
+            InputManager.Instance.CarInput.Enable();
+            
             yield break;
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -21,8 +22,14 @@ namespace Gumball
             public PositionAndRotation StartingPosition => startingPosition;
         }
 
+        [SerializeField] private float timeAllowedSeconds = 60;
         [SerializeField] private RacerSessionData[] racerData;
 
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private float timeRemainingSeconds;
+        
+        private Coroutine timerCoroutine;
+        
         public override string GetName()
         {
             return "Timed";
@@ -32,6 +39,44 @@ namespace Gumball
         {
             yield return InitialiseRacers();
             yield return base.OnSessionLoad();
+
+            PanelManager.GetPanel<TimedSessionPanel>().Show();
+            InitialiseTimer();
+        }
+
+        private void InitialiseTimer()
+        {
+            timeRemainingSeconds = timeAllowedSeconds;
+            
+            if (timerCoroutine != null)
+                CoroutineHelper.Instance.StopCoroutine(timerCoroutine);
+            timerCoroutine = CoroutineHelper.Instance.StartCoroutine(DoTimer());
+        }
+        
+        private IEnumerator DoTimer()
+        {
+            while (timeRemainingSeconds > 0)
+            {
+                const float timeRemainingForMs = 10; //if timer goes below this value, show the milliseconds
+                PanelManager.GetPanel<TimedSessionPanel>().TimerLabel.text = TimeSpan.FromSeconds(timeRemainingSeconds).ToPrettyString(timeRemainingSeconds < timeRemainingForMs, precise: false);
+
+                yield return null;
+                
+                timeRemainingSeconds -= Time.deltaTime;
+
+                if (timeRemainingSeconds < 0)
+                    timeRemainingSeconds = 0;
+            }
+            
+            EndSession();
+        }
+
+        public override void EndSession()
+        {
+            base.EndSession();
+            
+            //TODO: reward/race end screen
+            MainSceneManager.LoadMainScene();
         }
 
         private IEnumerator InitialiseRacers()
