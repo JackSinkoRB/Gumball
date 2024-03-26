@@ -105,13 +105,16 @@ namespace Gumball
         [Tooltip("At less than or equal to 'min' km/h, the movementTargetDistance is min.\n" +
                  "At greater than or equal to 'max' km/h, the movementTargetDistance is max.")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(20, 90);
-        [Tooltip("The speed that the wheel collider turns.")]
-        [SerializeField] private float steerSpeed = 10;
+        [Tooltip("The speed that the wheel collider turns if not auto driving.")]
+        [ConditionalField(nameof(autoDrive), true), SerializeField] private float steerSpeed = 2.5f;
+        [Tooltip("The speed that the wheel collider turns if auto driving.")]
+        [ConditionalField(nameof(autoDrive)), SerializeField] private float autoDriveSteerSpeed = 10;
         [Tooltip("This allows for a different steer speed when the steering input has been released.")]
         [ConditionalField(nameof(autoDrive), true), SerializeField] private float releaseSpeed = 15;
         [Tooltip("The speed that the wheel mesh is interpolated to the desired steer angle. This is different to the steer speed of the wheel collider.")]
         [SerializeField] private float visualSteerSpeed = 5;
-        [SerializeField] private AnimationCurve maxSteerAngleCurve;
+        [ConditionalField(nameof(autoDrive)), SerializeField] private float autoDriveMaxSteerAngle = 65;
+        [ConditionalField(nameof(autoDrive), true), SerializeField] private AnimationCurve maxSteerAngleCurve;
         [Space(5)]
         [SerializeField, ReadOnly] private float desiredSteerAngle;
         [SerializeField, ReadOnly] private float visualSteerAngle;
@@ -119,12 +122,11 @@ namespace Gumball
         [Header("Braking")]
         [SerializeField] private float brakeTorque = 1000;
         [Space(5)]
-        [SerializeField] private bool autoBrakeAroundCorners;
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
-        [ConditionalField(nameof(autoBrakeAroundCorners)), SerializeField] private AnimationCurve cornerBrakingCurve;
+        [ConditionalField(nameof(autoDrive)), SerializeField] private AnimationCurve cornerBrakingCurve;
         [Space(5)]
         [SerializeField, ReadOnly] private bool isBraking;
-        [ConditionalField(nameof(autoBrakeAroundCorners)), SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
+        [ConditionalField(nameof(autoDrive)), SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
         [SerializeField, ReadOnly] private float speedToBrakeTo;
         
         private bool wasBrakingLastFrame;
@@ -142,8 +144,6 @@ namespace Gumball
         [Header("Collisions")]
         [SerializeField] private GameObject colliders;
         [SerializeField] private float collisionRecoverDuration = 1;
-        [Tooltip("Does the car disable its braking, acceleration and steering while in a collision? Or can it keep driving?")]
-        [SerializeField] private bool disableMovementInCollision = true;
         [Space(5)]
         [SerializeField, ReadOnly] private bool inCollision;
         
@@ -398,7 +398,7 @@ namespace Gumball
             
             UpdateDesiredSpeed();
             
-            if (!disableMovementInCollision || !recoveringFromCollision) //don't update steering angle in collision
+            if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
                 CalculateSteerAngle();
             
             if (autoDrive)
@@ -493,8 +493,8 @@ namespace Gumball
             //don't accelerate if braking
             if (isBraking && speed > stationarySpeed)
                 isAccelerating = false;
-            //don't accelerate if in collision
-            else if (disableMovementInCollision && recoveringFromCollision)
+            //don't accelerate if in collision (auto drive only)
+            else if (autoDrive && recoveringFromCollision)
                 isAccelerating = false;
             //can't accelerate if above desired speed
             if (speed > desiredSpeed)
@@ -536,17 +536,17 @@ namespace Gumball
         private void CalculateSteerAngle()
         {
             float speedPercent = Mathf.Clamp01(speed / MaxSpeed);
-            float maxSteerAngle = maxSteerAngleCurve.Evaluate(speedPercent);
-            
+            float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : maxSteerAngleCurve.Evaluate(speedPercent);
+
             if (autoDrive)
             {
                 Vector3 directionToTarget = targetPosition - Rigidbody.position;
                 float angle = Mathf.Clamp(-Vector2.SignedAngle(Rigidbody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
-                desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, steerSpeed * Time.deltaTime);
+                desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, autoDriveSteerSpeed * Time.deltaTime);
             }
             else
             {
-                float actualSteerSpeed = InputManager.Instance.CarInput.SteeringInput.Approximately(0) ? releaseSpeed : this.steerSpeed;
+                float actualSteerSpeed = InputManager.Instance.CarInput.SteeringInput.Approximately(0) ? releaseSpeed : steerSpeed;
 
                 float angle = InputManager.Instance.CarInput.SteeringInput * maxSteerAngle;
                 desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, actualSteerSpeed * Time.deltaTime);
@@ -564,7 +564,7 @@ namespace Gumball
             isBraking = false;
             speedToBrakeTo = Mathf.Infinity;
 
-            if (disableMovementInCollision && inCollision)
+            if (autoDrive && inCollision)
                 return;
 
             if (isReversing)
@@ -579,7 +579,7 @@ namespace Gumball
             }
 
             //brake around corners
-            if (autoBrakeAroundCorners && speed > corneringSpeed && corneringSpeed < speedToBrakeTo)
+            if (autoDrive && speed > corneringSpeed && corneringSpeed < speedToBrakeTo)
             {
                 speedToBrakeTo = corneringSpeed;
                 isBraking = true;
@@ -599,7 +599,7 @@ namespace Gumball
                 }
             }
             
-            if (useObstacleAvoidance && allDirectionsAreBlocked)
+            if (autoDrive && useObstacleAvoidance && allDirectionsAreBlocked)
             {
                 if (speed > speedToBrakeToIfBlocked && speedToBrakeToIfBlocked < speedToBrakeTo)
                 {
