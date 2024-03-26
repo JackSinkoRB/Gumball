@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -2e-15, z: -0.000000020572}
-  m_LocalScale: {x: 1, y: 1, z: 1.1954}
+  m_LocalScale: {x: 1.6541, y: 1.6541, z: 1.977311}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6342928832101110741}
@@ -128,12 +128,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignoreAtRuntime: 0
+  loadSeparately: 1
   alwaysGrounded: 1
-  meshRendererToUseWhenGrounding: {fileID: 4619976344153720241}
   keepAtSpecificDistanceFromRoad: 0
   distanceFromRoad: 10
   flattenTerrain: 0
-  flattenTerrainRadius: 5
-  flattenTerrainBlendRadius: 20
+  colliderToFlattenTo: {fileID: 0}
+  flattenTerrainBlendDistance: 20
+  flattenTerrainBlendCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}

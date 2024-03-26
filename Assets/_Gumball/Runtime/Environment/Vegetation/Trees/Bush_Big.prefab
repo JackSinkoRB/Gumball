@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.8613, y: 2.8613, z: 2.8613}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4322335798320644081}
@@ -45,14 +45,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loadSeparately: 1
   ignoreAtRuntime: 0
+  loadSeparately: 1
   alwaysGrounded: 1
   keepAtSpecificDistanceFromRoad: 0
   distanceFromRoad: 10
   flattenTerrain: 0
-  flattenTerrainRadius: 5
-  flattenTerrainBlendRadius: 20
+  colliderToFlattenTo: {fileID: 0}
+  flattenTerrainBlendDistance: 20
+  flattenTerrainBlendCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!1001 &4356877495017297946
@@ -71,17 +95,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.62
+      value: 1.173474
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.62
+      value: 1.173474
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.62
+      value: 1.173474
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
@@ -91,12 +115,12 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.098
+      value: -0.4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
