@@ -284,8 +284,14 @@ namespace Gumball
                 Rigidbody.angularVelocity = Vector3.zero;
             }
             
+            //move the transform AND the rigidbody, so physics calculations are updated instantly too
+            transform.position = position;
+            transform.rotation = rotation;
             Rigidbody.position = position;
             Rigidbody.rotation = rotation;
+            
+            //reset steer angle
+            visualSteerAngle = 0;
             
             foreach (WheelCollider wheelCollider in allWheelColliders)
             {
@@ -293,6 +299,8 @@ namespace Gumball
                 wheelCollider.rotationSpeed = 0;
                 wheelCollider.steerAngle = 0;
             }
+
+            Move(); //force update
 
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
         }
