@@ -6665,6 +6665,7 @@ MonoBehaviour:
   canBeDrivenByPlayer: 1
   avatarIKManager: {fileID: 2543841123063907618}
   steeringWheel: {fileID: 7747513796075811436}
+  isPlayerDrivingEnabled: 0
   carIndex: 0
   id: 0
   wheelConfiguration: 0
@@ -6745,7 +6746,6 @@ MonoBehaviour:
   engineRpmRange:
     Min: 1000
     Max: 6700
-  isAutomaticTransmission: 1
   idealRPMRangeForGearChanges:
     Min: 4000
     Max: 6100
@@ -6759,10 +6759,12 @@ MonoBehaviour:
     Max: 10
   movementTargetDistanceSpeedFactors:
     Min: 20
-    Max: 90
+    Max: 70
   steerSpeed: 2.5
+  autoDriveSteerSpeed: 12
   releaseSpeed: 15
   visualSteerSpeed: 5
+  autoDriveMaxSteerAngle: 65
   maxSteerAngleCurve:
     serializedVersion: 2
     m_Curve:
@@ -6790,10 +6792,27 @@ MonoBehaviour:
   desiredSteerAngle: 0
   visualSteerAngle: 0
   brakeTorque: 1000
-  autoBrakeAroundCorners: 0
   cornerBrakingCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.20833206
+      value: 120
+      inSlope: -1.7872262
+      outSlope: -1.7872262
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.070833325
+    - serializedVersion: 3
+      time: 50
+      value: 75
+      inSlope: -0.11808722
+      outSlope: -0.11808722
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.24066396
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
@@ -6805,9 +6824,8 @@ MonoBehaviour:
   isHandbrakeEngaged: 0
   colliders: {fileID: 6830272080298800554}
   collisionRecoverDuration: 0
-  disableMovementInCollision: 0
   inCollision: 0
-  brakeForObstacles: 1
+  brakeForObstacles: 0
   brakeForObstaclesRaycast:
     offset: 0
     raycastLength: 0
@@ -6825,11 +6843,94 @@ MonoBehaviour:
   speedForBrakingRaycastLength:
     Min: 10
     Max: 60
-  useObstacleAvoidance: 0
+  useObstacleAvoidance: 1
   speedToBrakeToIfBlocked: 50
-  obstacleAvoidanceRaycastLayers: []
+  obstacleAvoidanceRaycastLayers:
+  - raycasts:
+    - offset: 0
+      raycastLength: 13
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+  - raycasts:
+    - offset: -2
+      raycastLength: 10
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+    - offset: 2
+      raycastLength: 10
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+  - raycasts:
+    - offset: -4
+      raycastLength: 7
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+    - offset: 4
+      raycastLength: 7
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
   obstacleAvoidanceRaycastLayerWhenBlocked:
-    raycasts: []
+    raycasts:
+    - offset: 0
+      raycastLength: 3
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+    - offset: -5
+      raycastLength: 3
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
+    - offset: 5
+      raycastLength: 3
+      startDistance: 2
+      detectorSize: {x: 0.75, y: 1, z: 0.75}
+      detectionLayers:
+        serializedVersion: 2
+        m_Bits: 8704
+      isBlocked: 0
+      angle: 0
+      offsetVector: {x: 0, y: 0, z: 0}
   currentLayerIndex: 0
   debug: 0
   isInitialised: 0
