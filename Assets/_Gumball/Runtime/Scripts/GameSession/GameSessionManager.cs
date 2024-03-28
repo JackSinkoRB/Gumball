@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
@@ -16,6 +17,13 @@ namespace Gumball
         {
             currentSession = session;
         }
-        
+
+        private void Update()
+        {
+            if (currentSession != null && currentSession.InProgress)
+            {
+                currentSession.UpdateWhenCurrent();
+            }
+        }
     }
 }

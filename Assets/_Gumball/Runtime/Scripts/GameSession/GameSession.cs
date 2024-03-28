@@ -14,18 +14,18 @@ namespace Gumball
     {
         
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
-        
         [SerializeField, ReadOnly] private bool inProgress;
         
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
-
+        public bool InProgress => inProgress;
+        
         public abstract string GetName();
 
         public void StartSession()
         {
             CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
-
+        
         public IEnumerator SetupSession()
         {
             GameSessionManager.Instance.SetCurrentSession(this);
@@ -78,6 +78,14 @@ namespace Gumball
             InputManager.Instance.CarInput.Disable();
             
             GameSessionManager.Instance.SetCurrentSession(null);
+        }
+
+        /// <summary>
+        /// Called every update loop when the game session is active.
+        /// </summary>
+        public virtual void UpdateWhenCurrent()
+        {
+            
         }
         
         protected virtual IEnumerator OnSessionLoad()

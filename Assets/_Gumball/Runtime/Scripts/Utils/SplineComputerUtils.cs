@@ -18,7 +18,7 @@ namespace Gumball
             
             splineComputer.SetPoint(index, splinePoint);
         }
-        
+
         public static (int, float) GetClosestSampleIndexOnSpline(this SampleCollection sampleCollection, Vector3 fromPoint)
         {
             float closestDistanceSqr = Mathf.Infinity;
@@ -37,21 +37,13 @@ namespace Gumball
 
             return (closestSampleIndex, closestDistanceSqr);
         }
-                
+
         public static (SplineSample, float) GetClosestSampleOnSpline(this SampleCollection sampleCollection, Vector3 fromPoint)
         {
-            float closestDistanceSqr = Mathf.Infinity;
-            SplineSample closestSample = default;
-            foreach (SplineSample sample in sampleCollection.samples)
-            {
-                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
-                if (distance < closestDistanceSqr)
-                {
-                    closestDistanceSqr = distance;
-                    closestSample = sample;
-                }
-            }
-            return (closestSample, closestDistanceSqr);
+            var (closestIndex, closestDistanceSqr) = GetClosestSampleIndexOnSpline(sampleCollection, fromPoint);
+            SplineSample sample = sampleCollection.samples[closestIndex];
+            return (sample, closestDistanceSqr);
         }
+        
     }
 }

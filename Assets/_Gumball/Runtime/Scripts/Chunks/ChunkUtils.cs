@@ -294,7 +294,7 @@ namespace Gumball
                 ChunkObjectData data = new ChunkObjectData(chunkObject);
                 chunkObjectList.Add(data);
                 chunkObjectData[assetKey] = chunkObjectList;
-                
+
                 Object.DestroyImmediate(chunkObject.gameObject);
             }
 
@@ -312,6 +312,9 @@ namespace Gumball
             //update the data
             runtimePrefabInstance.GetComponent<Chunk>().SetChunkObjectData(chunkObjectData);
 
+            //calculate the spline length
+            runtimePrefabInstance.GetComponent<Chunk>().CalculateSplineLength();
+            
             PrefabUtility.SaveAsPrefabAsset(runtimePrefabInstance, newChunkPath);
 
             //dispose of instance

@@ -46,7 +46,7 @@ namespace Gumball
         
         public Chunk Chunk => chunk;
         public float SpeedLimitKmh => speedLimitKmh;
-        public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLength / density);
+        public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLengthCached / density);
         public RacingLine RacingLine => racingLine;
         
         private void OnValidate()
