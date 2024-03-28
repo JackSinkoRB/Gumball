@@ -6,22 +6,20 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class TimedSessionPanel : AnimatedPanel
+    public class RaceSessionPanel : AnimatedPanel
     {
-
-        [SerializeField] private TextMeshProUGUI timerLabel;
+        
         [SerializeField] private TextMeshProUGUI distanceLabel;
 
-        private TimedGameSession currentSession => (TimedGameSession) GameSessionManager.Instance.CurrentSession;
+        private RaceGameSession currentSession => (RaceGameSession) GameSessionManager.Instance.CurrentSession;
         
         private void LateUpdate()
         {
             GameSession session = GameSessionManager.Instance.CurrentSession;
-            if (session == null || !session.InProgress || session is not TimedGameSession)
+            if (session == null || !session.InProgress || session is not RaceGameSession)
                 return;
             
             UpdateDistanceLabel();
-            UpdateTimerLabel();
         }
         
         private void UpdateDistanceLabel()
@@ -30,11 +28,5 @@ namespace Gumball
             distanceLabel.text = $"{distancePercent}%";
         }
         
-        private void UpdateTimerLabel()
-        {
-            const float timeRemainingForMs = 10; //if timer goes below this value, show the milliseconds
-            timerLabel.text = TimeSpan.FromSeconds(currentSession.TimeRemainingSeconds).ToPrettyString(currentSession.TimeRemainingSeconds < timeRemainingForMs, precise: false);
-        }
-
     }
 }
