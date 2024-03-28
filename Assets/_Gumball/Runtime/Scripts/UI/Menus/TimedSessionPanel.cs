@@ -9,8 +9,10 @@ namespace Gumball
     {
 
         [SerializeField] private TextMeshProUGUI timerLabel;
-        
+        [SerializeField] private TextMeshProUGUI distanceLabel;
+
         public TextMeshProUGUI TimerLabel => timerLabel;
+        public TextMeshProUGUI DistanceLabel => distanceLabel;
 
     }
 }

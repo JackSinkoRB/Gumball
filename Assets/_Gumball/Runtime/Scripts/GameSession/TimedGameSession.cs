@@ -29,12 +29,13 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private float timeRemainingSeconds;
         [SerializeField, ReadOnly] private float splineDistanceTraveled;
-
+        
         /// <summary>
         /// The distance along the spline from the player's starting position to the start of the map. 
         /// </summary>
         private float initialSplineDistance;
-        private Coroutine timerCoroutine;
+        
+        private TimedSessionPanel sessionPanel => PanelManager.GetPanel<TimedSessionPanel>();
         
         public override string GetName()
         {
@@ -49,7 +50,7 @@ namespace Gumball
             initialSplineDistance = GetSplineDistanceTraveled();
             SetupFinishLine();
 
-            PanelManager.GetPanel<TimedSessionPanel>().Show();
+            sessionPanel.Show();
             InitialiseTimer();
         }
 
@@ -57,41 +58,45 @@ namespace Gumball
         {
             base.UpdateWhenCurrent();
 
-            CheckIfCrossedFinishLine();
+            UpdateDistanceTraveled();
+
+            UpdateUI();
+            
+            DecreaseTimer();
         }
-        
-        private void CheckIfCrossedFinishLine()
+
+        private void UpdateDistanceTraveled()
         {
             splineDistanceTraveled = GetSplineDistanceTraveled() - initialSplineDistance;
-        }
 
-        private IEnumerator DoTimer()
-        {
-            while (timeRemainingSeconds > 0)
+            if (splineDistanceTraveled >= raceDistanceMetres)
             {
-                const float timeRemainingForMs = 10; //if timer goes below this value, show the milliseconds
-                PanelManager.GetPanel<TimedSessionPanel>().TimerLabel.text = TimeSpan.FromSeconds(timeRemainingSeconds).ToPrettyString(timeRemainingSeconds < timeRemainingForMs, precise: false);
-
-                yield return null;
-                
-                timeRemainingSeconds -= Time.deltaTime;
-
-                if (timeRemainingSeconds < 0)
-                    timeRemainingSeconds = 0;
+                OnCrossFinishLine();
             }
-            
-            EndSession();
         }
 
-        public override void EndSession()
+        private void DecreaseTimer()
         {
-            base.EndSession();
+            timeRemainingSeconds -= Time.deltaTime;
+
+            if (timeRemainingSeconds < 0)
+            {
+                timeRemainingSeconds = 0;
+                OnTimerExpire();
+            }
+        }
+
+        private void OnCrossFinishLine()
+        {
+            EndSession();
             
-            //cancel the timer if still running (eg. quit early)
-            if (timerCoroutine != null)
-                CoroutineHelper.Instance.StopCoroutine(timerCoroutine);
+            MainSceneManager.LoadMainScene();
+        }
+        
+        private void OnTimerExpire()
+        {
+            EndSession();
             
-            //TODO: reward/race end screen
             MainSceneManager.LoadMainScene();
         }
 
@@ -118,10 +123,6 @@ namespace Gumball
         private void InitialiseTimer()
         {
             timeRemainingSeconds = timeAllowedSeconds;
-            
-            if (timerCoroutine != null)
-                CoroutineHelper.Instance.StopCoroutine(timerCoroutine);
-            timerCoroutine = CoroutineHelper.Instance.StartCoroutine(DoTimer());
         }
 
         private void SetupFinishLine()
@@ -132,6 +133,8 @@ namespace Gumball
                 Debug.LogError($"Could not create finish line as the race distance {raceDistanceMetres} is bigger than the map length {mapLength}.");
                 return;
             }
+            
+            //TODO:
         }
         
         /// <summary>
@@ -157,6 +160,15 @@ namespace Gumball
             }
 
             return distanceInCurrentChunk + distanceInPreviousChunks;
+        }
+
+        private void UpdateUI()
+        {
+            const float timeRemainingForMs = 10; //if timer goes below this value, show the milliseconds
+            sessionPanel.TimerLabel.text = TimeSpan.FromSeconds(timeRemainingSeconds).ToPrettyString(timeRemainingSeconds < timeRemainingForMs, precise: false);
+
+            float distancePercent = Mathf.FloorToInt((splineDistanceTraveled / raceDistanceMetres) * 100f);
+            sessionPanel.DistanceLabel.text = $"{distancePercent}%";
         }
         
     }
