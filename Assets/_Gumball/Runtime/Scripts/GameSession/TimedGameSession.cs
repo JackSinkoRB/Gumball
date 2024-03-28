@@ -45,13 +45,14 @@ namespace Gumball
         protected override IEnumerator OnSessionLoad()
         {
             yield return InitialiseRacers();
-            yield return base.OnSessionLoad();
 
             initialSplineDistance = GetSplineDistanceTraveled();
             SetupFinishLine();
 
             sessionPanel.Show();
             InitialiseTimer();
+            
+            yield return base.OnSessionLoad();
         }
 
         public override void UpdateWhenCurrent()
@@ -89,15 +90,20 @@ namespace Gumball
         private void OnCrossFinishLine()
         {
             EndSession();
-            
-            MainSceneManager.LoadMainScene();
         }
         
         private void OnTimerExpire()
         {
             EndSession();
+        }
+
+        public override void EndSession()
+        {
+            base.EndSession();
             
-            MainSceneManager.LoadMainScene();
+            PanelManager.GetPanel<TimedSessionEndPanel>().Show();
+            
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
         }
 
         private IEnumerator InitialiseRacers()

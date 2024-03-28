@@ -39,18 +39,9 @@ namespace Gumball
             ChunkMap chunkMap = handle.Result;
 
             AvatarManager.Instance.HideAvatars(true);
-            //freeze the car
-            Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;
-            currentCarRigidbody.velocity = Vector3.zero;
-            currentCarRigidbody.angularVelocity = Vector3.zero;
-            currentCarRigidbody.isKinematic = true;
-            
-            //move the car to the right position
-            Vector3 startingPosition = chunkMap.VehicleStartingPosition;
-            Vector3 startingRotation = chunkMap.VehicleStartingRotation;
-            currentCarRigidbody.Move(startingPosition, Quaternion.Euler(startingRotation));
-            GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {startingPosition}");
-            
+
+            SetupPlayerCar(chunkMap);
+
             //load the map chunks
             Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
             yield return ChunkManager.Instance.LoadMap(chunkMap);
@@ -58,6 +49,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             //set car rigidbody as dynamic
+            Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;
             currentCarRigidbody.isKinematic = false;
 
             //set driving states:
@@ -67,9 +59,6 @@ namespace Gumball
                 AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarDrivingState>();
                 AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarDrivingState>();
             }
-
-            GlobalLoggers.LoadingLogger.Log("Loading session...");
-            yield return OnSessionLoad();
         }
 
         public virtual void EndSession()
@@ -104,8 +93,28 @@ namespace Gumball
 
             yield return MapDrivingSceneManager.LoadMapDrivingSceneIE();
             yield return SetupSession();
+            
+            GlobalLoggers.LoadingLogger.Log("Loading session...");
+            yield return OnSessionLoad();
 
             PanelManager.GetPanel<LoadingPanel>().Hide();
+        }
+
+        private void SetupPlayerCar(ChunkMap chunkMap)
+        {
+            //freeze the car
+            Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;
+            currentCarRigidbody.velocity = Vector3.zero;
+            currentCarRigidbody.angularVelocity = Vector3.zero;
+            currentCarRigidbody.isKinematic = true;
+            
+            //move the car to the right position
+            Vector3 startingPosition = chunkMap.VehicleStartingPosition;
+            Vector3 startingRotation = chunkMap.VehicleStartingRotation;
+            currentCarRigidbody.Move(startingPosition, Quaternion.Euler(startingRotation));
+            GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {startingPosition}");
+            
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
         }
         
     }
