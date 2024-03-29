@@ -439,6 +439,10 @@ namespace Gumball
 
                 targetPosition = targetPos.Value.Item2;
             }
+            else
+            {
+                targetPosition = transform.position + (transform.forward * 100);
+            }
 
             speed = SpeedUtils.ToKmh(Rigidbody.velocity.magnitude);
 
@@ -455,8 +459,7 @@ namespace Gumball
             if (autoDrive)
                 CheckForCorner();
 
-            if (isRacer)
-                CheckIfPushingAnotherRacer();
+            CheckIfPushingAnotherRacer();
             
             UpdateBrakingValues();
             DoBrakeEvents();
@@ -548,7 +551,7 @@ namespace Gumball
         /// </summary>
         private void CheckIfPushingAnotherRacer()
         {
-            if (!isRacer || !autoDrive)
+            if (!isPlayer && !isRacer)
                 return;
             
             //check if colliding with another racer or player
@@ -1264,12 +1267,9 @@ namespace Gumball
         
         private void CheckIfCollidedWithRacer(AICar car, bool adding)
         {
-            if (!isRacer)
+            if (!isRacer && !isPlayer)
                 return;
-
-            if (!autoDrive)
-                return;
-
+            
             if (!car.isRacer && !car.isPlayer)
                 return;
 
