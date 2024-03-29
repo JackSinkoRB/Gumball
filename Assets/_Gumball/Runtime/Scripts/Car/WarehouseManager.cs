@@ -68,7 +68,7 @@ namespace Gumball
             AICar car = Instantiate(handle.Result, position, rotation).GetComponent<AICar>();
             car.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             
-            car.InitialisePlayerCar(index, id);
+            car.InitialiseAsPlayer(index, id);
             
             yield return DecalManager.ApplyDecalDataToCar(car);
             

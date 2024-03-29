@@ -11,15 +11,16 @@ namespace Gumball
         {
             LiveDecal = 6,
             Terrain = 7,
-            PlayerVehicle = 8,
+            PlayerCar = 8,
             TrafficCar = 9,
             ChunkObject = 10,
             ChunkDetector = 11,
             PaintableMesh = 12,
-            Barrier = 13
+            Barrier = 13,
+            RacerCar = 14,
         }
         
-        public static LayerMask AllCarLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerVehicle;
+        public static LayerMask AllCarLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerCar | 1 << (int)Layer.RacerCar;
         
         public static bool ContainsLayer(this LayerMask layerMask, int layer)
         {

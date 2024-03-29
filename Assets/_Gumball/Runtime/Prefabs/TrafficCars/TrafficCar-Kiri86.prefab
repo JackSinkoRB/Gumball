@@ -1739,6 +1739,7 @@ MonoBehaviour:
   canBeDrivenByPlayer: 0
   avatarIKManager: {fileID: 0}
   steeringWheel: {fileID: 0}
+  isPlayerDrivingEnabled: 0
   carIndex: 0
   id: 0
   wheelConfiguration: 0
@@ -1759,6 +1760,7 @@ MonoBehaviour:
   maxSpeed: 200
   useRacingLine: 0
   currentLaneDistance: 0
+  racingLineOffset: 0
   dragWhenAccelerating: 0
   dragWhenIdle: 0.15
   dragWhenBraking: 1
@@ -1771,13 +1773,13 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 25
-      inSlope: 602.26434
-      outSlope: 602.26434
+      value: 50
+      inSlope: 449.95624
+      outSlope: 449.95624
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.18274854
+      outWeight: 0.065789476
     - serializedVersion: 3
       time: 0.57
       value: 150
@@ -1826,8 +1828,10 @@ MonoBehaviour:
     Min: 20
     Max: 70
   steerSpeed: 10
+  autoDriveSteerSpeed: 10
   releaseSpeed: 15
   visualSteerSpeed: 5
+  autoDriveMaxSteerAngle: 65
   maxSteerAngleCurve:
     serializedVersion: 2
     m_Curve:
@@ -1855,7 +1859,6 @@ MonoBehaviour:
   desiredSteerAngle: 0
   visualSteerAngle: 0
   brakeTorque: 1000
-  autoBrakeAroundCorners: 1
   cornerBrakingCurve:
     serializedVersion: 2
     m_Curve:
@@ -1888,8 +1891,9 @@ MonoBehaviour:
   isHandbrakeEngaged: 0
   colliders: {fileID: 1349138282531362610}
   collisionRecoverDuration: 1
-  disableMovementInCollision: 1
   inCollision: 0
+  isPushingAnotherRacer: 0
+  racersCollidingWith: []
   brakeForObstacles: 1
   brakeForObstaclesRaycast:
     offset: 0

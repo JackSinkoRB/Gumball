@@ -426,6 +426,7 @@ MonoBehaviour:
   maxSpeed: 350
   useRacingLine: 1
   currentLaneDistance: 0
+  racingLineOffset: 0
   dragWhenAccelerating: 0
   dragWhenIdle: 0.15
   dragWhenBraking: 1
@@ -565,6 +566,8 @@ MonoBehaviour:
   colliders: {fileID: 6054565963001126080}
   collisionRecoverDuration: 0
   inCollision: 0
+  isPushingAnotherRacer: 0
+  racersCollidingWith: []
   brakeForObstacles: 0
   brakeForObstaclesRaycast:
     offset: 0
@@ -584,7 +587,7 @@ MonoBehaviour:
     Min: 10
     Max: 60
   useObstacleAvoidance: 1
-  speedToBrakeToIfBlocked: 50
+  speedToBrakeToIfBlocked: 65
   obstacleAvoidanceRaycastLayers:
   - raycasts:
     - offset: 0

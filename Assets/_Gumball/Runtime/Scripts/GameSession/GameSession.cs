@@ -166,7 +166,7 @@ namespace Gumball
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
                     
-                    racer.SetAutoDrive(true);
+                    racer.InitialiseAsRacer();
                     
                     racer.SetRacingLineOffset(data.RacingLineOffset);
                     racingLineOffsetsUsed++;

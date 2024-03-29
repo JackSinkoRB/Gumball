@@ -1,10 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using DG.Tweening;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Gumball
 {
@@ -147,6 +151,8 @@ namespace Gumball
         [SerializeField] private float collisionRecoverDuration = 1;
         [Space(5)]
         [SerializeField, ReadOnly] private bool inCollision;
+        [SerializeField, ReadOnly] private bool isPushingAnotherRacer;
+        [SerializeField, ReadOnly] private List<AICar> racersCollidingWith = new();
         
         private float timeOfLastCollision = -Mathf.Infinity;
         
@@ -185,6 +191,8 @@ namespace Gumball
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => collisionRecoverDuration > 0 && (inCollision || timeSinceCollision < collisionRecoverDuration);
         private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
+        private bool isRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
+        private bool isPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
 
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
         public float DesiredSpeed => desiredSpeed;
@@ -240,7 +248,8 @@ namespace Gumball
             Unfreeze();
             isAccelerating = false;
             wasAcceleratingLastFrame = false;
-
+            racersCollidingWith.Clear();
+            
             if (canBeDrivenByPlayer)
                 GearboxSetting.onSettingChanged -= OnGearboxSettingChanged;
             
@@ -259,8 +268,6 @@ namespace Gumball
 
             defaultAngularDrag = Rigidbody.angularDrag;
             
-            gameObject.layer = canBeDrivenByPlayer ? (int)LayersAndTags.Layer.PlayerVehicle : (int)LayersAndTags.Layer.TrafficCar;
-            
             OnChangeChunk(null, CurrentChunk);
 
             CacheAllWheelMeshes();
@@ -268,12 +275,31 @@ namespace Gumball
             CachePoweredWheels();
         }
         
-        public void InitialisePlayerCar(int carIndex, int id)
+        public void InitialiseAsPlayer(int carIndex, int id)
         {
             this.carIndex = carIndex;
             this.id = id;
             
+            gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
+            colliders.layer = (int)LayersAndTags.Layer.PlayerCar;
+            
             SetAutoDrive(false);
+        }
+
+        public void InitialiseAsRacer()
+        {
+            gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
+            colliders.layer = (int)LayersAndTags.Layer.RacerCar;
+            
+            SetAutoDrive(true);
+        }
+        
+        public void InitialiseAsTraffic()
+        {
+            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
+            colliders.layer = (int)LayersAndTags.Layer.TrafficCar;
+            
+            SetAutoDrive(true);
         }
         
         public void SetAutoDrive(bool autoDrive)
@@ -338,12 +364,14 @@ namespace Gumball
                 Move();
             }
         }
-
+        
         private void OnCollisionEnter(Collision collision)
         {
-            bool hitACar = LayersAndTags.AllCarLayers.ContainsLayer(collision.gameObject.layer);
-            if (!hitACar)
+            AICar car = collision.gameObject.GetComponent<AICar>();
+            if (car == null)
                 return;
+
+            CheckIfCollidedWithRacer(car, true);
 
             GlobalLoggers.AICarLogger.Log($"{gameObject.name} collided with {collision.gameObject.name}");
 
@@ -354,9 +382,13 @@ namespace Gumball
 
         private void OnCollisionExit(Collision collision)
         {
-            bool hitACar = LayersAndTags.AllCarLayers.ContainsLayer(collision.gameObject.layer);
-            if (!hitACar)
+            AICar car = collision.gameObject.GetComponent<AICar>();
+            if (car == null)
                 return;
+
+            CheckIfCollidedWithRacer(car, false);
+            
+            GlobalLoggers.AICarLogger.Log($"{gameObject.name} stopped colliding with {collision.gameObject.name}");
             
             timeOfLastCollision = Time.time; //reset collision time
             inCollision = false;
@@ -422,6 +454,9 @@ namespace Gumball
             
             if (autoDrive)
                 CheckForCorner();
+
+            if (isRacer)
+                CheckIfPushingAnotherRacer();
             
             UpdateBrakingValues();
             DoBrakeEvents();
@@ -444,8 +479,9 @@ namespace Gumball
             
             //debug directions:
             Debug.DrawRay(transform.position, Rigidbody.velocity, Color.green);
-            
-            Debug.DrawLine(transform.position, targetPosition, Color.yellow);
+            if (targetPos != null)
+                Debug.DrawLine(transform.position, targetPos.Value.Item2, Color.yellow);
+            Debug.DrawLine(transform.position, targetPosition, Color.cyan);
         }
 
         private void UpdateDrag()
@@ -506,6 +542,42 @@ namespace Gumball
             if (!MaxSpeed.Approximately(DesiredSpeed))
                 OnChangeDesiredSpeed(MaxSpeed);
         }
+        
+        /// <summary>
+        /// Check if colliding with another racer or player and is behind it.
+        /// </summary>
+        private void CheckIfPushingAnotherRacer()
+        {
+            if (!isRacer || !autoDrive)
+                return;
+            
+            //check if colliding with another racer or player
+            //then check if it is behind it
+
+            isPushingAnotherRacer = false;
+
+            HashSet<AICar> racersAlreadyChecked = new();
+            
+            foreach (AICar racerCollidingWith in racersCollidingWith)
+            {
+                //since the racer may be in the list multiple times (multiple colliders colliding), only do the check once per racer
+                if (racersAlreadyChecked.Contains(racerCollidingWith))
+                    continue;
+
+                racersAlreadyChecked.Add(racerCollidingWith);
+                
+                //check if racer is ahead or behind
+                float distanceToTargetSqr = Vector3.SqrMagnitude(transform.position - targetPosition);
+                float otherCarsDistanceToTargetSqr = Vector3.SqrMagnitude(racerCollidingWith.transform.position - targetPosition);
+
+                bool isBehind = distanceToTargetSqr > otherCarsDistanceToTargetSqr;
+                if (isBehind)
+                {
+                    isPushingAnotherRacer = true;
+                    return;
+                }
+            }
+        }
 
         private void CheckToAccelerate()
         {
@@ -516,16 +588,19 @@ namespace Gumball
             else if (autoDrive && recoveringFromCollision)
                 isAccelerating = false;
             //can't accelerate if above desired speed
-            if (speed > desiredSpeed)
+            else if (speed > desiredSpeed)
+                isAccelerating = false;
+            else if (isPushingAnotherRacer)
                 isAccelerating = false;
 
             //check to accelerate
             else
             {
-                isAccelerating = autoDrive || (!autoDrive && InputManager.Instance.CarInput.Accelerate.IsPressed) || (!autoDrive && isReversing);
+                isAccelerating = autoDrive ||
+                                 (isPlayerDrivingEnabled && (InputManager.Instance.CarInput.Accelerate.IsPressed || isReversing));
                 
                 //if accelerating from reverse, change the gear
-                if (InputManager.Instance.CarInput.Accelerate.IsPressed && currentGear == 0)
+                if (isPlayerDrivingEnabled && InputManager.Instance.CarInput.Accelerate.IsPressed && currentGear == 0)
                     ChangeGear(1);
             }
         }
@@ -559,7 +634,7 @@ namespace Gumball
 
             if (autoDrive)
             {
-                Vector3 directionToTarget = targetPosition - Rigidbody.position;
+                Vector3 directionToTarget = targetPosition - transform.position;
                 float angle = Mathf.Clamp(-Vector2.SignedAngle(Rigidbody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
                 desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, autoDriveSteerSpeed * Time.deltaTime);
             }
@@ -582,6 +657,9 @@ namespace Gumball
             //reset for check
             isBraking = false;
             speedToBrakeTo = Mathf.Infinity;
+            
+            if (inCollision && autoDrive && !isRacer && !isPlayer)
+                return;
             
             if (isReversing)
                 return;
@@ -1179,6 +1257,25 @@ namespace Gumball
         private void OnPlayerDrivingDisabled()
         {
             isPlayerDrivingEnabled = false;
+        }
+        
+        private void CheckIfCollidedWithRacer(AICar car, bool adding)
+        {
+            if (!isRacer)
+                return;
+
+            if (!autoDrive)
+                return;
+
+            if (!car.isRacer && !car.isPlayer)
+                return;
+
+            if (car == this)
+                return;
+
+            if (adding)
+                racersCollidingWith.Add(car);
+            else racersCollidingWith.Remove(car);
         }
 
 #if UNITY_EDITOR

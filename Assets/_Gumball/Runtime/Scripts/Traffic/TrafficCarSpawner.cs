@@ -48,7 +48,7 @@ namespace Gumball
         {
             AICar randomCarVariant = trafficCarPrefabs.GetRandom().gameObject.GetSpareOrCreate<AICar>(transform, position, rotation);
             
-            randomCarVariant.SetAutoDrive(true);
+            randomCarVariant.InitialiseAsTraffic();
             TrackCar(randomCarVariant);
             randomCarVariant.onDisable += () => UntrackCar(randomCarVariant);
 
