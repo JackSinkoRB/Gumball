@@ -59,6 +59,7 @@ namespace Gumball
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
+        [ConditionalField(nameof(autoDrive), nameof(useRacingLine)), SerializeField] private float racingLineOffset;
 
         [Header("Drag")]
         [SerializeField] private float dragWhenAccelerating;
@@ -278,6 +279,11 @@ namespace Gumball
         public void SetAutoDrive(bool autoDrive)
         {
             this.autoDrive = autoDrive;
+        }
+
+        public void SetRacingLineOffset(float offset)
+        {
+            racingLineOffset = offset;
         }
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -1014,7 +1020,8 @@ namespace Gumball
 
             if (useRacingLine)
             {
-                return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position, splineSampleAhead.Value.Item1.rotation);
+                Vector3 offset = splineSampleAhead.Value.Item1.right * racingLineOffset;
+                return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position + offset, splineSampleAhead.Value.Item1.rotation);
             }
             else
             {

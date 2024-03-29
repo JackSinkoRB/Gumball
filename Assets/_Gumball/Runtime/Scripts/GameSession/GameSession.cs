@@ -19,9 +19,11 @@ namespace Gumball
         {
             [SerializeField] private AssetReferenceGameObject assetReference;
             [SerializeField] private PositionAndRotation startingPosition;
+            [SerializeField] private float racingLineOffset;
 
             public AssetReferenceGameObject AssetReference => assetReference;
             public PositionAndRotation StartingPosition => startingPosition;
+            public float RacingLineOffset => racingLineOffset;
         }
         
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
@@ -38,6 +40,7 @@ namespace Gumball
         /// The distance along the spline from the player's starting position to the start of the map. 
         /// </summary>
         private float initialSplineDistance;
+        private int racingLineOffsetsUsed;
         
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public bool InProgress => inProgress;
@@ -149,9 +152,10 @@ namespace Gumball
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
         }
-        
+
         private IEnumerator InitialiseRacers()
         {
+            racingLineOffsetsUsed = 0;
             List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
             
             foreach (RacerSessionData data in racerData)
@@ -163,6 +167,9 @@ namespace Gumball
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
                     
                     racer.SetAutoDrive(true);
+                    
+                    racer.SetRacingLineOffset(data.RacingLineOffset);
+                    racingLineOffsetsUsed++;
                 };
                 handles.Add(handle);
             }
