@@ -183,7 +183,7 @@ namespace Gumball
         private (Chunk, Vector3, Quaternion)? targetPos;
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
-        private bool recoveringFromCollision => inCollision || timeSinceCollision < collisionRecoverDuration;
+        private bool recoveringFromCollision => collisionRecoverDuration > 0 && (inCollision || timeSinceCollision < collisionRecoverDuration);
         private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
 
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
@@ -582,10 +582,7 @@ namespace Gumball
             //reset for check
             isBraking = false;
             speedToBrakeTo = Mathf.Infinity;
-
-            if (autoDrive && inCollision)
-                return;
-
+            
             if (isReversing)
                 return;
 
