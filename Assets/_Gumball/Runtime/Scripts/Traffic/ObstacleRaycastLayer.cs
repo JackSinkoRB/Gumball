@@ -27,7 +27,7 @@ namespace Gumball
         /// Performs all the raycasts, and searches the unblocked ones for the least angle.
         /// </summary>
         /// <returns>The unblocked raycast with the least angle, or null if all are blocked.</returns>
-        public ObstacleRaycast GetUnblockedRaycastWithLeastAngle(Transform fromTransform, Vector3 targetPosition)
+        public ObstacleRaycast GetUnblockedRaycastWithLeastAngle(Transform fromTransform, Vector3 targetPosition, Vector3 targetDirection = default)
         {
             if (!isInitialised)
                 Initialise();
@@ -37,7 +37,7 @@ namespace Gumball
             //do the raycasts
             foreach (ObstacleRaycast raycast in raycasts)
             {
-                raycast.DoRaycast(fromTransform, targetPosition);
+                raycast.DoRaycast(fromTransform, targetPosition, targetDirection);
 
                 if (!raycast.IsBlocked)
                 {

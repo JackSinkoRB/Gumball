@@ -855,7 +855,10 @@ namespace Gumball
             if (allDirectionsAreBlocked)
             {
                 //try with directions relative to car
-                ObstacleRaycast raycast = obstacleAvoidanceRaycastLayerWhenBlocked.GetUnblockedRaycastWithLeastAngle(transform, transform.position + transform.forward * 10);
+                Vector3 position = transform.position + (transform.forward * 10);
+                Vector3 direction = Vector3.Normalize(targetPosition - transform.position);
+                
+                ObstacleRaycast raycast = obstacleAvoidanceRaycastLayerWhenBlocked.GetUnblockedRaycastWithLeastAngle(transform, position, direction);
                 if (raycast == null)
                     return;
 
