@@ -24,9 +24,9 @@ namespace Gumball
             sessionPanel.Show();
         }
         
-        public override void EndSession()
+        protected override void OnSessionEnd()
         {
-            base.EndSession();
+            base.OnSessionEnd();
             
             PanelManager.GetPanel<RaceSessionEndPanel>().Show();
             

@@ -40,7 +40,7 @@ namespace Gumball
         /// The distance along the spline from the player's starting position to the start of the map. 
         /// </summary>
         private float initialSplineDistance;
-        private int racingLineOffsetsUsed;
+        private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public bool InProgress => inProgress;
@@ -50,21 +50,20 @@ namespace Gumball
         public abstract string GetName();
 
         public void StartSession()
-        {
+        { 
+            GameSessionManager.Instance.SetCurrentSession(this);
             CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
         
         public IEnumerator SetupSession()
         {
-            GameSessionManager.Instance.SetCurrentSession(this);
-            
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
-            
+
             //load the map:
-            AsyncOperationHandle<ChunkMap> handle = Addressables.LoadAssetAsync<ChunkMap>(chunkMapAssetReference);
-            yield return handle;
+            chunkMapHandle = Addressables.LoadAssetAsync<ChunkMap>(chunkMapAssetReference);
+            yield return chunkMapHandle;
             
-            ChunkMap chunkMap = handle.Result;
+            ChunkMap chunkMap = chunkMapHandle.Result;
 
             AvatarManager.Instance.HideAvatars(true);
 
@@ -89,16 +88,24 @@ namespace Gumball
             }
         }
 
-        public virtual void EndSession()
+        public void EndSession()
         {
-            splineDistanceTraveled = 0; //reset
-            
             inProgress = false;
-            InputManager.Instance.CarInput.Disable();
+
+            OnSessionEnd();
             
             GameSessionManager.Instance.SetCurrentSession(null);
+
+            if (chunkMapHandle.IsValid())
+                Addressables.Release(chunkMapHandle);
         }
 
+        protected virtual void OnSessionEnd()
+        {
+            splineDistanceTraveled = 0; //reset
+            InputManager.Instance.CarInput.Disable();
+        }
+        
         public virtual void UpdateWhenCurrent()
         {
             UpdateDistanceTraveled();
@@ -155,7 +162,6 @@ namespace Gumball
 
         private IEnumerator InitialiseRacers()
         {
-            racingLineOffsetsUsed = 0;
             List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
             
             foreach (RacerSessionData data in racerData)
@@ -169,7 +175,6 @@ namespace Gumball
                     racer.InitialiseAsRacer();
                     
                     racer.SetRacingLineOffset(data.RacingLineOffset);
-                    racingLineOffsetsUsed++;
                 };
                 handles.Add(handle);
             }

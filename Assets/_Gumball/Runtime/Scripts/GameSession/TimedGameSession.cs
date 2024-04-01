@@ -55,9 +55,9 @@ namespace Gumball
             EndSession();
         }
 
-        public override void EndSession()
+        protected override void OnSessionEnd()
         {
-            base.EndSession();
+            base.OnSessionEnd();
             
             PanelManager.GetPanel<TimedSessionEndPanel>().Show();
             
