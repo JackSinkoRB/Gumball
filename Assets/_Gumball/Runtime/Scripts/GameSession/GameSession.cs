@@ -206,7 +206,9 @@ namespace Gumball
         
         private void RemoveDistanceCalculators()
         {
-            //add distance calculators to racers
+            if (currentRacers == null)
+                return;
+
             foreach (AICar racer in currentRacers)
             {
                 Destroy(racer.gameObject.GetComponent<SplineTravelDistanceCalculator>());
