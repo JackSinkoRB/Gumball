@@ -40,8 +40,10 @@ namespace Gumball
         /// The distance along the spline from the player's starting position to the start of the map. 
         /// </summary>
         private float initialSplineDistance;
-        private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         
+        private AsyncOperationHandle<ChunkMap> chunkMapHandle;
+        private ChunkMap currentChunkMapCached;
+
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public bool InProgress => inProgress;
         public float SplineDistanceTraveled => splineDistanceTraveled;
@@ -50,28 +52,32 @@ namespace Gumball
         public abstract string GetName();
 
         public void StartSession()
-        { 
+        {
             GameSessionManager.Instance.SetCurrentSession(this);
             CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
+        }
+
+        public IEnumerator LoadChunkMap()
+        {
+            Debug.LogWarning("Loading chunk map");
+            //load the map:
+            chunkMapHandle = Addressables.LoadAssetAsync<ChunkMap>(chunkMapAssetReference);
+            yield return chunkMapHandle;
+            
+            currentChunkMapCached = Instantiate(chunkMapHandle.Result);
         }
         
         public IEnumerator SetupSession()
         {
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
 
-            //load the map:
-            chunkMapHandle = Addressables.LoadAssetAsync<ChunkMap>(chunkMapAssetReference);
-            yield return chunkMapHandle;
-            
-            ChunkMap chunkMap = chunkMapHandle.Result;
-
             AvatarManager.Instance.HideAvatars(true);
 
-            SetupPlayerCar(chunkMap);
+            SetupPlayerCar(currentChunkMapCached);
 
             //load the map chunks
             Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
-            yield return ChunkManager.Instance.LoadMap(chunkMap);
+            yield return ChunkManager.Instance.LoadMap(currentChunkMapCached);
             chunkLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
@@ -114,7 +120,7 @@ namespace Gumball
         protected virtual IEnumerator LoadSession()
         {
             //setup racers
-            if (racerData.Length > 0)
+            if (racerData != null && racerData.Length > 0)
                 yield return InitialiseRacers();
             
             //setup finish line
@@ -134,6 +140,7 @@ namespace Gumball
         {
             PanelManager.GetPanel<LoadingPanel>().Show();
 
+            yield return LoadChunkMap();
             yield return MapDrivingSceneManager.LoadMapDrivingSceneIE();
             yield return SetupSession();
             

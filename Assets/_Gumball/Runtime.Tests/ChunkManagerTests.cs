@@ -57,6 +57,7 @@ namespace Gumball.Runtime.Tests
         private IEnumerator Initialise()
         {
             yield return WarehouseManager.Instance.SpawnCar(0, 0, Vector3.zero, Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
+            yield return GameSession.LoadChunkMap();
             yield return GameSession.SetupSession();
             
             isInitialised = true;

@@ -24,7 +24,7 @@ namespace Gumball
         [SerializeField] private Vector3 vehicleStartingRotation;
 
         [Space(5)]
-        [SerializeField] private Material skybox;
+        [SerializeField] private AssetReferenceT<Material> skyboxAssetReference;
         [SerializeField] private float chunkLoadDistance = 700;
 #if UNITY_EDITOR
         [SerializeField] private AssetReferenceGameObject[] chunkReferences;
@@ -36,6 +36,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private ChunkMapData[] chunkData;
         [Tooltip("The sum of all the chunk spline lengths.")]
         [SerializeField, ReadOnly] private float totalLengthMetres;
+
+        private Material skybox;
         
 #if UNITY_EDITOR
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
@@ -49,20 +51,23 @@ namespace Gumball
         public List<int> ChunksWithCustomLoadDistance => chunksWithCustomLoadDistance;
         public float ChunkLoadDistance => chunkLoadDistance;
         public float TotalLengthMetres => totalLengthMetres;
-        
-        public void OnMapLoad()
-        {
-            UpdateSkybox();
-        }
 
-        private void UpdateSkybox()
+        public IEnumerator LoadSkybox()
         {
-            if (skybox == null)
+            if (skyboxAssetReference == null)
             {
                 Debug.LogWarning($"{name} is missing a skybox reference.");
-                return;
+                yield break;
             }
 
+            AsyncOperationHandle<Material> handle = Addressables.LoadAssetAsync<Material>(skyboxAssetReference);
+            yield return handle;
+
+            skybox = Instantiate(handle.Result);
+            
+            //release when the scene is changed/gameobject is destroyed
+            new GameObject("SkyboxAddressableReference").GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            
             RenderSettings.skybox = skybox;
         }
         
