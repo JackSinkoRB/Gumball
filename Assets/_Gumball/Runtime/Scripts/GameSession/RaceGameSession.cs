@@ -13,8 +13,6 @@ namespace Gumball
 
         [SerializeField, ReadOnly] private AICar[] racersInPositionOrder;
         
-        private int lastFrameCalculatedRacePositions = -1;
-
         private RaceSessionPanel sessionPanel => PanelManager.GetPanel<RaceSessionPanel>();
 
         public override string GetName()
@@ -40,17 +38,8 @@ namespace Gumball
 
         public int GetRacePosition(AICar car)
         {
-            //only calculate the racer positions once per frame
-            if (lastFrameCalculatedRacePositions != Time.frameCount)
-            {
-                lastFrameCalculatedRacePositions = Time.frameCount;
-                
-                foreach (AICar racer in CurrentRacers)
-                    racer.GetComponent<SplineTravelDistanceCalculator>().CalculateDistanceTraveled();
-            
-                //sort the cars based on distanceTraveled (descending order)
-                racersInPositionOrder = CurrentRacers.OrderByDescending(c => c.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled).ToArray();
-            }
+            //sort the cars based on distanceTraveled (descending order)
+            racersInPositionOrder = CurrentRacers.OrderByDescending(c => c.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled).ToArray();
             
             int rank = Array.IndexOf(racersInPositionOrder, car) + 1;
             return rank;

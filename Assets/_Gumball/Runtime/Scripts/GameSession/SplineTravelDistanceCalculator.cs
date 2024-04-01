@@ -12,21 +12,28 @@ namespace Gumball
         [SerializeField, ReadOnly] private float distanceTraveled;
         [Tooltip("The distance along the spline from the car's starting position to the start of the map. ")]
         [SerializeField, ReadOnly] private float initialSplineDistance;
+
+        private int lastFrameCalculated = -1;
         
         private AICar car => GetComponent<AICar>();
 
-        public float DistanceTraveled => distanceTraveled;
-        
+        public float DistanceTraveled
+        {
+            get
+            {
+                //only calculate once per frame
+                if (lastFrameCalculated != Time.frameCount)
+                    distanceTraveled = GetSplineDistanceTraveled() - initialSplineDistance;
+                
+                return distanceTraveled;
+            }
+        }
+
         private void OnEnable()
         {
             initialSplineDistance = GetSplineDistanceTraveled();
         }
-
-        public void CalculateDistanceTraveled()
-        {
-            distanceTraveled =  GetSplineDistanceTraveled() - initialSplineDistance;
-        }
-
+        
         private float GetSplineDistanceTraveled()
         {
             Chunk currentChunk = car.CurrentChunk;
