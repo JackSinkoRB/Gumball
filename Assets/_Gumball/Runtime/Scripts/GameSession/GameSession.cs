@@ -33,21 +33,15 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
-        [Tooltip("The distance traveled along the spline (only tracked if there's a finish line).")]
-        [SerializeField, ReadOnly, ConditionalField(nameof(raceDistanceMetres))] protected float splineDistanceTraveled;
-        
-        /// <summary>
-        /// The distance along the spline from the player's starting position to the start of the map. 
-        /// </summary>
-        private float initialSplineDistance;
-        
+        [SerializeField, ReadOnly] private AICar[] currentRacers;
+
         private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         private ChunkMap currentChunkMapCached;
 
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public bool InProgress => inProgress;
-        public float SplineDistanceTraveled => splineDistanceTraveled;
         public float RaceDistanceMetres => raceDistanceMetres;
+        public AICar[] CurrentRacers => currentRacers;
         
         public abstract string GetName();
 
@@ -59,7 +53,6 @@ namespace Gumball
 
         public IEnumerator LoadChunkMap()
         {
-            Debug.LogWarning("Loading chunk map");
             //load the map:
             chunkMapHandle = Addressables.LoadAssetAsync<ChunkMap>(chunkMapAssetReference);
             yield return chunkMapHandle;
@@ -108,13 +101,16 @@ namespace Gumball
 
         protected virtual void OnSessionEnd()
         {
-            splineDistanceTraveled = 0; //reset
             InputManager.Instance.CarInput.Disable();
+
+            RemoveDistanceCalculators();
         }
         
         public virtual void UpdateWhenCurrent()
         {
-            UpdateDistanceTraveled();
+            SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
+            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceTraveled >= raceDistanceMetres)
+                OnCrossFinishLine();
         }
 
         protected virtual IEnumerator LoadSession()
@@ -126,8 +122,7 @@ namespace Gumball
             //setup finish line
             if (raceDistanceMetres > 0)
             {
-                initialSplineDistance = GetSplineDistanceTraveled();
-                SetupFinishLine();
+                InitialiseRaceMode();
             }
             
             GlobalLoggers.LoadingLogger.Log("Loaded session");
@@ -166,27 +161,56 @@ namespace Gumball
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
         }
-
+        
         private IEnumerator InitialiseRacers()
         {
+            currentRacers = new AICar[racerData.Length + 1];
             List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
-            
-            foreach (RacerSessionData data in racerData)
+
+            for (int index = 0; index < racerData.Length; index++)
             {
+                RacerSessionData data = racerData[index];
+                
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
+                int finalIndex = index;
                 handle.Completed += h =>
                 {
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
-                    
+
                     racer.InitialiseAsRacer();
-                    
+
                     racer.SetRacingLineOffset(data.RacingLineOffset);
+
+                    currentRacers[finalIndex] = racer;
                 };
                 handles.Add(handle);
             }
-            
+
+            //add the player's car as a racer
+            currentRacers[^1] = WarehouseManager.Instance.CurrentCar;
+
             yield return new WaitUntil(() => handles.AreAllComplete());
+        }
+
+        private void InitialiseRaceMode()
+        {
+            //add distance calculators to racers
+            foreach (AICar racer in currentRacers)
+            {
+                racer.gameObject.AddComponent<SplineTravelDistanceCalculator>();
+            }
+            
+            SetupFinishLine();
+        }
+        
+        private void RemoveDistanceCalculators()
+        {
+            //add distance calculators to racers
+            foreach (AICar racer in currentRacers)
+            {
+                Destroy(racer.gameObject.GetComponent<SplineTravelDistanceCalculator>());
+            }
         }
         
         private void SetupFinishLine()
@@ -201,28 +225,18 @@ namespace Gumball
             //TODO:
         }
         
-        private void UpdateDistanceTraveled()
-        {
-            splineDistanceTraveled = GetSplineDistanceTraveled() - initialSplineDistance;
-
-            if (splineDistanceTraveled >= raceDistanceMetres)
-            {
-                OnCrossFinishLine();
-            }
-        }
-        
         private void OnCrossFinishLine()
         {
             EndSession();
         }
         
         /// <summary>
-        /// Gets the distance along the spline from the start of the map to the closest spline sample to the player.
+        /// Gets the distance along the spline from the start of the map to the closest spline sample to the car.
         /// </summary>
-        private float GetSplineDistanceTraveled()
+        protected float GetSplineDistanceTraveled(AICar car)
         {
-            Chunk currentChunk = ChunkManager.Instance.GetChunkPlayerIsOn();
-            if (currentChunk == null || !ChunkManager.Instance.HasLoaded)
+            Chunk currentChunk = car.CurrentChunk;
+            if (currentChunk == null)
                 return 0;
             
             //get the distance in the current chunk

@@ -26,7 +26,8 @@ namespace Gumball
         
         private void UpdateDistanceLabel()
         {
-            float distancePercent = Mathf.FloorToInt((currentSession.SplineDistanceTraveled / currentSession.RaceDistanceMetres) * 100f);
+            float playersDistanceTraveled = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled;
+            float distancePercent = Mathf.FloorToInt((playersDistanceTraveled / currentSession.RaceDistanceMetres) * 100f);
             distanceLabel.text = $"{distancePercent}%";
         }
         

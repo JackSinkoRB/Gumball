@@ -10,6 +10,7 @@ namespace Gumball
     {
         
         [SerializeField] private TextMeshProUGUI distanceLabel;
+        [SerializeField] private TextMeshProUGUI positionLabel;
 
         private RaceGameSession currentSession => (RaceGameSession) GameSessionManager.Instance.CurrentSession;
         
@@ -20,12 +21,20 @@ namespace Gumball
                 return;
             
             UpdateDistanceLabel();
+            UpdatePositionLabel();
         }
         
         private void UpdateDistanceLabel()
         {
-            float distancePercent = Mathf.FloorToInt((currentSession.SplineDistanceTraveled / currentSession.RaceDistanceMetres) * 100f);
+            float playersDistanceTraveled = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled;
+            float distancePercent = Mathf.FloorToInt((playersDistanceTraveled / currentSession.RaceDistanceMetres) * 100f);
             distanceLabel.text = $"{distancePercent}%";
+        }
+        
+        private void UpdatePositionLabel()
+        {
+            int currentRank = currentSession.GetRacePosition(WarehouseManager.Instance.CurrentCar);
+            positionLabel.text = $"{currentRank} / {currentSession.CurrentRacers.Length}";
         }
         
     }

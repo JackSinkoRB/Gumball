@@ -250,8 +250,8 @@ namespace Gumball
                 return -1;
             }
 
-            float distanceBetweenSamples = SplineLengthCached / SplineSamples.Length;
-
+            float distanceBetweenSamples = SplineLengthCached / SplineSamples.Length; //assuming the spline sample distance is uniform
+            
             var (closestSampleIndex, closestSampleDistance)  = GetClosestSampleIndexOnSpline(fromPoint);
 
             float totalDistance = distanceBetweenSamples * closestSampleIndex;
@@ -345,7 +345,7 @@ namespace Gumball
             //else, check if forward or backward is closer, then get the distance to whicher is closer
 
             Vector3 carPosition = WarehouseManager.Instance.CurrentCar.transform.position;
-            Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
+            Chunk chunkPlayerIsOn = WarehouseManager.Instance.CurrentCar.CurrentChunk;
 
             float shortestDistanceSqr;
             if (chunkPlayerIsOn == null)
