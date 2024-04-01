@@ -2,9 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -12,28 +14,139 @@ namespace Gumball
     public abstract class GameSession : ScriptableObject
     {
         
+        [Serializable]
+        public struct RacerSessionData
+        {
+            [SerializeField] private AssetReferenceGameObject assetReference;
+            [SerializeField] private PositionAndRotation startingPosition;
+            [SerializeField] private float racingLineOffset;
+
+            public AssetReferenceGameObject AssetReference => assetReference;
+            public PositionAndRotation StartingPosition => startingPosition;
+            public float RacingLineOffset => racingLineOffset;
+        }
+        
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
+        [SerializeField] private RacerSessionData[] racerData;
+        [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
+        [SerializeField] protected float raceDistanceMetres;
+
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private bool inProgress;
+        [SerializeField, ReadOnly] private AICar[] currentRacers;
+
+        private AsyncOperationHandle<ChunkMap> chunkMapHandle;
+        private ChunkMap currentChunkMapCached;
 
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
-
+        public bool InProgress => inProgress;
+        public float RaceDistanceMetres => raceDistanceMetres;
+        public AICar[] CurrentRacers => currentRacers;
+        
         public abstract string GetName();
 
         public void StartSession()
         {
+            GameSessionManager.Instance.SetCurrentSession(this);
             CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
 
+        public IEnumerator LoadChunkMap()
+        {
+            //load the map:
+            chunkMapHandle = Addressables.LoadAssetAsync<ChunkMap>(chunkMapAssetReference);
+            yield return chunkMapHandle;
+            
+            currentChunkMapCached = Instantiate(chunkMapHandle.Result);
+        }
+        
         public IEnumerator SetupSession()
         {
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
-            
-            //load the map:
-            AsyncOperationHandle<ChunkMap> handle = Addressables.LoadAssetAsync<ChunkMap>(chunkMapAssetReference);
-            yield return handle;
-            
-            ChunkMap chunkMap = handle.Result;
 
             AvatarManager.Instance.HideAvatars(true);
+
+            SetupPlayerCar(currentChunkMapCached);
+
+            //load the map chunks
+            Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
+            yield return ChunkManager.Instance.LoadMap(currentChunkMapCached);
+            chunkLoadingStopwatch.Stop();
+            GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            
+            //set car rigidbody as dynamic
+            Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;
+            currentCarRigidbody.isKinematic = false;
+
+            //set driving states:
+            if (AvatarManager.Instance.DriverAvatar != null && AvatarManager.Instance.CoDriverAvatar != null)
+            {
+                AvatarManager.Instance.HideAvatars(false);
+                AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarDrivingState>();
+                AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarDrivingState>();
+            }
+        }
+
+        public void EndSession()
+        {
+            inProgress = false;
+
+            OnSessionEnd();
+            
+            GameSessionManager.Instance.SetCurrentSession(null);
+
+            if (chunkMapHandle.IsValid())
+                Addressables.Release(chunkMapHandle);
+        }
+
+        protected virtual void OnSessionEnd()
+        {
+            InputManager.Instance.CarInput.Disable();
+
+            RemoveDistanceCalculators();
+        }
+        
+        public virtual void UpdateWhenCurrent()
+        {
+            SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
+            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceTraveled >= raceDistanceMetres)
+                OnCrossFinishLine();
+        }
+
+        protected virtual IEnumerator LoadSession()
+        {
+            //setup racers
+            if (racerData != null && racerData.Length > 0)
+                yield return InitialiseRacers();
+            
+            //setup finish line
+            if (raceDistanceMetres > 0)
+            {
+                InitialiseRaceMode();
+            }
+            
+            GlobalLoggers.LoadingLogger.Log("Loaded session");
+
+            inProgress = true;
+            InputManager.Instance.CarInput.Enable();
+        }
+
+        private IEnumerator StartSessionIE()
+        {
+            PanelManager.GetPanel<LoadingPanel>().Show();
+
+            yield return LoadChunkMap();
+            yield return MapDrivingSceneManager.LoadMapDrivingSceneIE();
+            yield return SetupSession();
+            
+            GlobalLoggers.LoadingLogger.Log("Loading session...");
+            yield return LoadSession();
+
+            PanelManager.GetPanel<LoadingPanel>().Hide();
+        }
+
+        private void SetupPlayerCar(ChunkMap chunkMap)
+        {
             //freeze the car
             Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;
             currentCarRigidbody.velocity = Vector3.zero;
@@ -46,41 +159,103 @@ namespace Gumball
             currentCarRigidbody.Move(startingPosition, Quaternion.Euler(startingRotation));
             GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {startingPosition}");
             
-            //load the map chunks
-            Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
-            yield return ChunkManager.Instance.LoadMap(chunkMap);
-            chunkLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
-            
-            //set car rigidbody as dynamic
-            currentCarRigidbody.isKinematic = false;
-
-            //set driving states:
-            AvatarManager.Instance.HideAvatars(false);
-            AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarDrivingState>();
-            AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarDrivingState>();
-            
-            GlobalLoggers.LoadingLogger.Log("Loading session...");
-            yield return OnSessionLoad();
-            GlobalLoggers.LoadingLogger.Log("Loaded session");
-
-            InputManager.Instance.EnableActionMap(InputManager.ActionMapType.Car);
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
         }
         
-        protected virtual IEnumerator OnSessionLoad()
+        private IEnumerator InitialiseRacers()
         {
-            yield break;
+            currentRacers = new AICar[racerData.Length + 1];
+            List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
+
+            for (int index = 0; index < racerData.Length; index++)
+            {
+                RacerSessionData data = racerData[index];
+                
+                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
+                int finalIndex = index;
+                handle.Completed += h =>
+                {
+                    AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
+                    racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
+
+                    racer.InitialiseAsRacer();
+
+                    racer.SetRacingLineOffset(data.RacingLineOffset);
+
+                    currentRacers[finalIndex] = racer;
+                };
+                handles.Add(handle);
+            }
+
+            //add the player's car as a racer
+            currentRacers[^1] = WarehouseManager.Instance.CurrentCar;
+
+            yield return new WaitUntil(() => handles.AreAllComplete());
         }
 
-        private IEnumerator StartSessionIE()
+        private void InitialiseRaceMode()
         {
-            PanelManager.GetPanel<LoadingPanel>().Show();
-
-            yield return MapDrivingSceneManager.LoadMapDrivingSceneIE();
-            yield return SetupSession();
-
-            PanelManager.GetPanel<LoadingPanel>().Hide();
+            //add distance calculators to racers
+            foreach (AICar racer in currentRacers)
+            {
+                racer.gameObject.AddComponent<SplineTravelDistanceCalculator>();
+            }
+            
+            SetupFinishLine();
         }
         
+        private void RemoveDistanceCalculators()
+        {
+            if (currentRacers == null)
+                return;
+
+            foreach (AICar racer in currentRacers)
+            {
+                Destroy(racer.gameObject.GetComponent<SplineTravelDistanceCalculator>());
+            }
+        }
+        
+        private void SetupFinishLine()
+        {
+            float mapLength = ChunkManager.Instance.CurrentChunkMap.TotalLengthMetres;
+            if (mapLength < raceDistanceMetres)
+            {
+                Debug.LogError($"Could not create finish line as the race distance {raceDistanceMetres} is bigger than the map length {mapLength}.");
+                return;
+            }
+            
+            //TODO:
+        }
+        
+        private void OnCrossFinishLine()
+        {
+            EndSession();
+        }
+        
+        /// <summary>
+        /// Gets the distance along the spline from the start of the map to the closest spline sample to the car.
+        /// </summary>
+        protected float GetSplineDistanceTraveled(AICar car)
+        {
+            Chunk currentChunk = car.CurrentChunk;
+            if (currentChunk == null)
+                return 0;
+            
+            //get the distance in the current chunk
+            int currentChunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(currentChunk);
+            Vector3 playerPosition = WarehouseManager.Instance.CurrentCar.transform.position;
+            float distanceInCurrentChunk = currentChunk.GetDistanceTravelledAlongSpline(playerPosition);
+            
+            //get the distance in previous chunks
+            float distanceInPreviousChunks = 0;
+            for (int index = 0; index < currentChunkIndex; index++)
+            {
+                ChunkMapData chunkData = ChunkManager.Instance.CurrentChunkMap.GetChunkData(index);
+                distanceInPreviousChunks += chunkData.SplineLength;
+            }
+
+            return distanceInCurrentChunk + distanceInPreviousChunks;
+        }
+
     }
 }

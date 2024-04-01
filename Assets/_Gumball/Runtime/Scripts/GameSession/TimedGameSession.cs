@@ -1,9 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Gumball
 {
@@ -11,46 +10,64 @@ namespace Gumball
     public class TimedGameSession : GameSession
     {
 
-        [Serializable]
-        public struct RacerSessionData
-        {
-            [SerializeField] private AssetReferenceGameObject assetReference;
-            [SerializeField] private PositionAndRotation startingPosition;
+        [Header("Timed")]
+        [SerializeField] private float timeAllowedSeconds = 60;
+        [Space(5)]
+        [SerializeField, ReadOnly] private float timeRemainingSeconds;
 
-            public AssetReferenceGameObject AssetReference => assetReference;
-            public PositionAndRotation StartingPosition => startingPosition;
-        }
-
-        [SerializeField] private RacerSessionData[] racerData;
-
+        public float TimeRemainingSeconds => timeRemainingSeconds;
+        
+        private TimedSessionPanel sessionPanel => PanelManager.GetPanel<TimedSessionPanel>();
+        
         public override string GetName()
         {
             return "Timed";
         }
 
-        protected override IEnumerator OnSessionLoad()
+        protected override IEnumerator LoadSession()
         {
-            yield return InitialiseRacers();
-            yield return base.OnSessionLoad();
+            yield return base.LoadSession();
+
+            sessionPanel.Show();
+            InitialiseTimer();
         }
 
-        private IEnumerator InitialiseRacers()
+        public override void UpdateWhenCurrent()
         {
-            List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
+            base.UpdateWhenCurrent();
             
-            foreach (RacerSessionData data in racerData)
+            DecreaseTimer();
+        }
+
+        private void DecreaseTimer()
+        {
+            timeRemainingSeconds -= Time.deltaTime;
+
+            if (timeRemainingSeconds < 0)
             {
-                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
-                handle.Completed += h =>
-                {
-                    RacerCar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<RacerCar>();
-                    racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
-                };
-                handles.Add(handle);
+                timeRemainingSeconds = 0;
+                OnTimerExpire();
             }
+        }
+
+        private void OnTimerExpire()
+        {
+            EndSession();
+        }
+
+        protected override void OnSessionEnd()
+        {
+            base.OnSessionEnd();
             
-            yield return new WaitUntil(() => handles.AreAllComplete());
+            PanelManager.GetPanel<TimedSessionEndPanel>().Show();
+            
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
         }
         
+        private void InitialiseTimer()
+        {
+            timeRemainingSeconds = timeAllowedSeconds;
+        }
+
     }
 }

@@ -33,8 +33,8 @@ namespace Gumball
         public float RaycastLength => raycastLength;
         
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[10]; //is used for all blockage checks, not to be used for debugging
-        
-        public void DoRaycast(Transform transformFrom, Vector3 targetPosition)
+
+        public void DoRaycast(Transform transformFrom, Vector3 targetPosition, Vector3 targetDirection = default)
         {
             offsetVector = transformFrom.right * offset;
             
@@ -44,8 +44,8 @@ namespace Gumball
 
             blockage = GetBlockage(transformFrom, directionToTarget);
             isBlocked = blockage != null;
-
-            angle = Vector3.Angle(transformFrom.forward, directionToTarget);
+            
+            angle = Vector3.Angle(targetDirection == default ? transformFrom.forward : targetDirection, directionToTarget);
         }
 
         public void SetRaycastLength(float length)

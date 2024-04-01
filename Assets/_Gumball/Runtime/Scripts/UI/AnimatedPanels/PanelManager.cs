@@ -65,9 +65,11 @@ public class PanelManager : PersistentSingleton<PanelManager>
         animatedPanel.OnAddToStack();
         GlobalLoggers.PanelLogger.Log($"Added {animatedPanel.gameObject.name} to stack.");
     }
-
+    
     public void RemoveFromStack(AnimatedPanel animatedPanel)
     {
+        RemoveNullPanelsFromStack();
+
         //show the previous panel if this was the last panel
         if (panelStack.Count >= 2 && panelStack[^1] == animatedPanel)
             panelStack[^2].Show();
@@ -110,6 +112,19 @@ public class PanelManager : PersistentSingleton<PanelManager>
         
         stopwatch.Stop();
         GlobalLoggers.LoadingLogger.Log($"Took {stopwatch.Elapsed.ToPrettyString(true)} to create the panel lookup for {sceneName}.");
+    }
+    
+    /// <summary>
+    /// If the scene has lost reference to a panel in the stack (scene change etc.), remove it from the stack.
+    /// </summary>
+    private void RemoveNullPanelsFromStack()
+    {
+        for (int index = 0; index < panelStack.Count; index++)
+        {
+            AnimatedPanel panel = panelStack[index];
+            if (panel == null)
+                panelStack.RemoveAt(index);
+        }
     }
 
 }

@@ -11,9 +11,9 @@ namespace Gumball
     {
         
         #region STATIC
-        private static readonly HashSet<TrafficCar> currentCars = new();
+        private static readonly HashSet<AICar> currentCars = new();
         
-        public static IReadOnlyCollection<TrafficCar> CurrentCars => currentCars;
+        public static IReadOnlyCollection<AICar> CurrentCars => currentCars;
 
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
@@ -21,12 +21,12 @@ namespace Gumball
             currentCars.Clear();
         }
         
-        public static void TrackCar(TrafficCar trafficCar)
+        public static void TrackCar(AICar trafficCar)
         {
             currentCars.Add(trafficCar);
         }
 
-        public static void UntrackCar(TrafficCar trafficCar)
+        public static void UntrackCar(AICar trafficCar)
         {
             currentCars.Remove(trafficCar);
         }
@@ -38,17 +38,20 @@ namespace Gumball
         
         private const float timeBetweenSpawnChecks = 1;
         
-        [SerializeField] private TrafficCar[] trafficCarPrefabs;
+        [SerializeField] private AICar[] trafficCarPrefabs;
 
         private float lastSpawnCheckTime;
         
         private float timeSinceLastSpawnCheck => Time.realtimeSinceStartup - lastSpawnCheckTime;
         
-        public TrafficCar SpawnCar(Vector3 position, Quaternion rotation)
+        public AICar SpawnCar(Vector3 position, Quaternion rotation)
         {
-            TrafficCar randomCarVariant = trafficCarPrefabs.GetRandom().gameObject.GetSpareOrCreate<TrafficCar>(transform, position, rotation);
-            randomCarVariant.Initialise();
+            AICar randomCarVariant = trafficCarPrefabs.GetRandom().gameObject.GetSpareOrCreate<AICar>(transform, position, rotation);
             
+            randomCarVariant.InitialiseAsTraffic();
+            TrackCar(randomCarVariant);
+            randomCarVariant.onDisable += () => UntrackCar(randomCarVariant);
+
 #if UNITY_EDITOR
             randomCarVariant.name = $"TrafficCar-{randomCarVariant.gameObject.name}-{trafficCarID}";
             trafficCarID++;
@@ -56,7 +59,7 @@ namespace Gumball
             
             return randomCarVariant;
         }
-        
+
         private void LateUpdate()
         {
             if (timeSinceLastSpawnCheck >= timeBetweenSpawnChecks)

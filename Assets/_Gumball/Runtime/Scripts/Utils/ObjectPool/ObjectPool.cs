@@ -97,7 +97,7 @@ namespace Gumball
             PooledObject pooledObject = gameObject.GetComponent<PooledObject>();
             if (!pooledObject)
             {
-                Debug.LogError($"Can not pool object {gameObject.name} because it was retrieved from a pool.");
+                Debug.LogWarning($"Can not pool object {gameObject.name} because it was not retrieved from a pool.");
                 return;
             }
             

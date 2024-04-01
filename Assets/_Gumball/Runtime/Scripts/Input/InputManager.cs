@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MyBox;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -13,103 +14,48 @@ namespace Gumball
     public class InputManager : Singleton<InputManager>
     {
         
-        public enum ActionMapType
-        {
-            Car,
-            General
-        }
-
-        public static InputAction PrimaryContact => Instance.GetOrCacheAction("PrimaryContact");
-        public static InputAction PrimaryPosition => Instance.GetOrCacheAction("PrimaryPosition");
-
-        public static ReadOnlyArray<Touch> ActiveTouches => Touch.activeTouches;
-        
-        public static VirtualInputActionFloat Steering { get; private set; }
-        public static VirtualInputActionButton Accelerate { get; private set; }
-        public static VirtualInputActionButton Decelerate { get; private set; }
-        public static VirtualInputActionButton Handbrake { get; private set; }
-        public static VirtualInputActionButton ShiftUp { get; private set; }
-        public static VirtualInputActionButton ShiftDown { get; private set; }
-
-        public static float SteeringInput => Steering?.Value ?? 0;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void RuntimeInitialise()
-        {
-            try
-            {
-                CoroutineHelper.Instance.PerformAfterTrue(() => ExistsRuntime, () =>
-                {
-                    Steering = new VirtualInputActionFloat(Instance.GetOrCacheAction("Steering"));
-                    Accelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Accelerate"));
-                    Decelerate = new VirtualInputActionButton(Instance.GetOrCacheAction("Decelerate"));
-                    Handbrake = new VirtualInputActionButton(Instance.GetOrCacheAction("Handbrake"));
-                    ShiftUp = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftUp"));
-                    ShiftDown = new VirtualInputActionButton(Instance.GetOrCacheAction("ShiftDown"));
-                });
-            }
-            catch (NullReferenceException)
-            {
-                //CoroutineHelper might not exist in the scene
-            }
-        }
-        
+        [SerializeField] private InputActionAsset controls;
         [SerializeField] private PlayerInput playerInput;
 
-        private readonly Dictionary<string, InputAction> actionsCached = new();
-        private readonly Dictionary<ActionMapType, InputActionMap> actionsMapsCached = new();
-
-        public PlayerInput PlayerInput => playerInput;
+        [Header("Action maps")]
+        [SerializeField] private GeneralInputManager generalInput;
+        [SerializeField] private CarInputManager carInput;
         
+        public InputActionAsset Controls => controls;
+        public GeneralInputManager GeneralInput => generalInput;
+        public CarInputManager CarInput => carInput;
+
+        public static ReadOnlyArray<Touch> ActiveTouches => Touch.activeTouches;
+
         protected override void Initialise()
         {
             base.Initialise();
             
-            EnableActionMap(ActionMapType.General);
             EnhancedTouchSupport.Enable();
-        }
-
-        protected override void OnInstanceDisabled()
-        {
-            base.OnInstanceDisabled();
+            GlobalLoggers.InputLogger.Log("Enhanced touch support has been force enabled.");
             
-            EnhancedTouchSupport.Disable();
-        }
+            ForceTouchSimulation();
 
+            generalInput.Enable();
+        }
+        
         private void Update()
         {
             PinchInput.CheckForPinch();
         }
-
-        private InputAction GetOrCacheAction(string action)
-        {
-            if (!actionsCached.ContainsKey(action))
-                actionsCached[action] = playerInput.actions.FindAction(action);
         
-            return actionsCached[action];
-        }
-
-        private InputActionMap GetActionMap(ActionMapType type)
+        private void ForceTouchSimulation()
         {
-            if (!actionsMapsCached.ContainsKey(type))
-            {
-                //cache it
-                actionsMapsCached[type] = playerInput.actions.FindActionMap(type.ToString());
-            }
+            TouchSimulation.Enable();
 
-            return actionsMapsCached[type];
-        }
+            DontDestroyOnLoad(TouchSimulation.instance.gameObject);
 
-        public void EnableActionMap(ActionMapType type, bool enable = true)
-        {
-            InputActionMap map = GetActionMap(type);
-            if (enable)
-                map.Enable();
-            else map.Disable();
+            //need to set the device as the current device after enabled
+            InputDevice touchscreen = InputSystem.devices.First(device => device == Touchscreen.current);
+            playerInput.SwitchCurrentControlScheme(touchscreen);
             
-            if (GlobalLoggers.HasLoaded)
-                GlobalLoggers.InputLogger.Log($"{(enable ? "Enabled" : "Disabled")} action map {type.ToString()}");
+            GlobalLoggers.InputLogger.Log("Touch simulation has been force enabled.");
         }
-
+        
     }
 }

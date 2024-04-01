@@ -26,7 +26,7 @@ namespace Gumball
             if (timeSinceLastUpdate < timeBetweenUpdating)
                 return;
 
-            float speedAsKmh = Mathf.Abs(SpeedUtils.ToKmh(WarehouseManager.Instance.CurrentCar.Speed));
+            float speedAsKmh = Mathf.Abs(WarehouseManager.Instance.CurrentCar.Speed);
             if (speedAsKmh < 1)
                 speedAsKmh = 0;
             

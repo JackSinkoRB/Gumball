@@ -80,21 +80,17 @@ namespace Gumball
 
         public ChunkTrafficManager TrafficManager => trafficManager;
         public ChunkPowerpoleManager PowerpoleManager => powerpoleManager;
-
-        /// <summary>
-        /// Uses a cached value, or calculates and caches the spline's length using the spline computer.
-        /// </summary>
-        public float SplineLength
+        
+        public float SplineLengthCached
         {
             get
             {
                 if (splineLengthCached < 0)
-                    splineLengthCached = splineComputer.CalculateLength();
-
+                    CalculateSplineLength();
                 return splineLengthCached;
             }
         }
-        
+
         public GameObject TerrainLowLOD
         {
             get
@@ -237,10 +233,29 @@ namespace Gumball
 
         public Vector3 GetCenterOfSpline()
         {
-            float splineLength = splineComputer.CalculateLength();
-            double travel = splineComputer.Travel(0.0, splineLength / 2f, Spline.Direction.Forward);
+            double travel = splineComputer.Travel(0.0, SplineLengthCached / 2f, Spline.Direction.Forward);
             Vector3 middle = splineComputer.EvaluatePosition(travel);
             return middle;
+        }
+        
+        /// <summary>
+        /// Gets the distance from the start of the chunk to the closest spline sample to the specified point.
+        /// <remarks>Must loop through all the spline samples in the chunk to get the index of the closest spline sample.</remarks>
+        /// </summary>
+        public float GetDistanceTravelledAlongSpline(Vector3 fromPoint)
+        {
+            if (splineComputer.sampleMode != SplineComputer.SampleMode.Uniform)
+            {
+                Debug.LogError("Could not get distance travelled along spline because the samples are not in uniform.");
+                return -1;
+            }
+
+            float distanceBetweenSamples = SplineLengthCached / SplineSamples.Length; //assuming the spline sample distance is uniform
+            
+            var (closestSampleIndex, closestSampleDistance)  = GetClosestSampleIndexOnSpline(fromPoint);
+
+            float totalDistance = distanceBetweenSamples * closestSampleIndex;
+            return totalDistance;
         }
         
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint)
@@ -330,7 +345,7 @@ namespace Gumball
             //else, check if forward or backward is closer, then get the distance to whicher is closer
 
             Vector3 carPosition = WarehouseManager.Instance.CurrentCar.transform.position;
-            Chunk chunkPlayerIsOn = ChunkManager.Instance.GetChunkPlayerIsOn();
+            Chunk chunkPlayerIsOn = WarehouseManager.Instance.CurrentCar.CurrentChunk;
 
             float shortestDistanceSqr;
             if (chunkPlayerIsOn == null)
@@ -360,5 +375,12 @@ namespace Gumball
                 barrier.sharedMaterial = ChunkManager.Instance.SlipperyPhysicsMaterial;
             }
         }
+        
+        [ButtonMethod]
+        public void CalculateSplineLength()
+        {
+            splineLengthCached = splineComputer.CalculateLength();
+        }
+        
     }
 }

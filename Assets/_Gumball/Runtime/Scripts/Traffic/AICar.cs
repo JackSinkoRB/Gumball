@@ -1,25 +1,59 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using DG.Tweening;
 using Dreamteck.Splines;
-#if UNITY_EDITOR
-using Gumball.Editor;
-#endif
 using MyBox;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Gumball
 {
     [RequireComponent(typeof(Rigidbody))]
     public class AICar : MonoBehaviour
     {
-        
-        [SerializeField] private Transform[] frontWheelMeshes;
-        [SerializeField] private Transform[] rearWheelMeshes;
-        [SerializeField] private WheelCollider[] frontWheelColliders;
-        [SerializeField] private WheelCollider[] rearWheelColliders;
 
+        public event Action onDisable;
+
+        private enum WheelConfiguration
+        {
+            REAR_WHEEL_DRIVE,
+            FRONT_WHEEL_DRIVE,
+            ALL_WHEEL_DRIVE
+        }
+        
+        [Header("Player car")]
+        [SerializeField] private bool canBeDrivenByPlayer;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private CarIKManager avatarIKManager;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private SteeringWheel steeringWheel;
+        [Space(5)]
+        [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int id;
+        
+        public CarIKManager AvatarIKManager => avatarIKManager;
+        public SteeringWheel SteeringWheel => steeringWheel;
+        public int CarIndex => carIndex;
+        public int ID => id;
+        public string SaveKey => $"CarData.{carIndex}.{id}";
+
+        [Header("Wheels")]
+        [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
+        [SerializeField, InitializationField] private Transform[] frontWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] rearWheelMeshes;
+        [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
+        [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
+        [Space(5)]
+        private WheelCollider[] poweredWheels;
+        private Transform[] allWheelMeshes;
+        private WheelCollider[] allWheelColliders;
+        
+        [Header("Auto drive")]
+        [SerializeField] private bool autoDrive;
+        
         [Header("Max speed")]
         [Tooltip("Does the car obey the current chunks speed limit?")]
         [SerializeField] private bool obeySpeedLimit = true;
@@ -27,92 +61,143 @@ namespace Gumball
         
         [Header("Lanes")]
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
-        [SerializeField] private bool useRacingLine;
-        [ConditionalField(nameof(useRacingLine), true), SerializeField, ReadOnly] private float currentLaneDistance;
+        [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
+        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
+        [ConditionalField(nameof(autoDrive), nameof(useRacingLine)), SerializeField] private float racingLineOffset;
 
-        [Header("Acceleration")]
-        [SerializeField] private float motorTorque = 500;
-        [Tooltip("The duration to go from 0 motor torque to the max motor torque.")]
-        [SerializeField] private float accelerationDurationToMaxTorque = 1f;
-        [SerializeField] private AnimationCurve accelerationEase;
+        [Header("Drag")]
+        [SerializeField] private float dragWhenAccelerating;
+        [SerializeField] private float dragWhenIdle = 0.15f;
+        [SerializeField] private float dragWhenBraking = 1;
+        [SerializeField] private float dragWhenHandbraking = 0.5f;
+        [SerializeField] private float angularDragWhenHandbraking = 6;
+        
+        [Header("Movement")]
+        [SerializeField, ReadOnly] private float speed;
+        [SerializeField, ReadOnly] private float desiredSpeed;
+        private bool wasMovingLastFrame;
+        private const float stationarySpeed = 2;
+        private bool isStationary => speed < stationarySpeed && !isAccelerating;
+
+        [Header("Engine & Transmission")]
+        [Tooltip("The engine torque output (y) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
+        [SerializeField] private AnimationCurve torqueCurve;
+        [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
+        [SerializeField] private float finalGearRatio = 3.42f;
+        [SerializeField] private MinMaxFloat engineRpmRange = new(1000, 8000);
+        [Space(5)]
+        [SerializeField] private MinMaxFloat idealRPMRangeForGearChanges = new(3000, 6000);
+        [Space(5)]
+        [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
-        private Tween[] currentMotorTorqueTweens;
+        [SerializeField, ReadOnly] private float engineRpm;
+
+        public delegate void OnGearChangedDelegate(int previousGear, int currentGear);
+        public event OnGearChangedDelegate onGearChanged;
+        
+        private bool wasAcceleratingLastFrame;
+        public bool IsAutomaticTransmission => autoDrive || GearboxSetting.Setting == GearboxSetting.GearboxOption.AUTOMATIC;
+        public int CurrentGear => currentGear;
+        public int NumberOfGears => gearRatios.Length;
+        public float EngineRpm => engineRpm;
+        
+        [Header("Reversing")]
+        [SerializeField] private float maxReverseSpeed = 25;
+        [SerializeField, ReadOnly] private bool isReversing;
         
         [Header("Steering")]
-        [SerializeField] private MinMaxFloat movementTargetDistance = new(5, 10);
+        [ConditionalField(nameof(autoDrive)), SerializeField] private MinMaxFloat movementTargetDistance = new(5, 10);
         [Tooltip("At less than or equal to 'min' km/h, the movementTargetDistance is min.\n" +
                  "At greater than or equal to 'max' km/h, the movementTargetDistance is max.")]
-        [SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(20, 90);
-        [Tooltip("The speed that the wheel collider turns.")]
-        [SerializeField] private float steerSpeed = 10;
+        [ConditionalField(nameof(autoDrive)), SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(20, 90);
+        [Tooltip("The speed that the wheel collider turns if not auto driving.")]
+        [ConditionalField(nameof(autoDrive), true), SerializeField] private float steerSpeed = 2.5f;
+        [Tooltip("The speed that the wheel collider turns if auto driving.")]
+        [ConditionalField(nameof(autoDrive)), SerializeField] private float autoDriveSteerSpeed = 10;
+        [Tooltip("This allows for a different steer speed when the steering input has been released.")]
+        [ConditionalField(nameof(autoDrive), true), SerializeField] private float releaseSpeed = 15;
         [Tooltip("The speed that the wheel mesh is interpolated to the desired steer angle. This is different to the steer speed of the wheel collider.")]
         [SerializeField] private float visualSteerSpeed = 5;
-        [SerializeField] private float maxSteerAngle = 65;
+        [ConditionalField(nameof(autoDrive)), SerializeField] private float autoDriveMaxSteerAngle = 65;
+        [ConditionalField(nameof(autoDrive), true), SerializeField] private AnimationCurve maxSteerAngleCurve;
         [Space(5)]
         [SerializeField, ReadOnly] private float desiredSteerAngle;
         [SerializeField, ReadOnly] private float visualSteerAngle;
         
-        [Header("Collisions")]
-        [SerializeField] private float collisionRecoverDuration = 1;
-        [Tooltip("Does the car disable its braking, acceleration and steering while in a collision? Or can it keep driving?")]
-        [SerializeField] private bool disableMovementInCollision = true;
-        private float timeOfLastCollision = -Mathf.Infinity;
-        [Space(5)]
-        [SerializeField, ReadOnly] private bool inCollision;
-        
-        [Header("Obstacle detection")]
-        [SerializeField] private bool brakeForObstacles = true;
-        [ConditionalField(nameof(brakeForObstacles)), SerializeField] private ObstacleRaycast brakeForObstaclesRaycast;
-        [Tooltip("If speed is at min of speedForBrakingRaycastLength, the brakingRaycastLength is at min, and vice versa.")]
-        [ConditionalField(nameof(brakeForObstacles)), SerializeField] private MinMaxFloat brakingRaycastLength = new(5, 15);
-        [Tooltip("If speed is at min of speedForBrakingRaycastLength, the brakingRaycastLength is at min, and vice versa.")]
-        [ConditionalField(nameof(brakeForObstacles)), SerializeField] private MinMaxFloat speedForBrakingRaycastLength = new(10, 60);
-        
-        [Header("Obstacle avoidance")]
-        [SerializeField] private bool useObstacleAvoidance;
-        [Tooltip("The speed the car should brake to if all the directions are blocked (exlcuding the 'when blocked' layers).")]
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private float speedToBrakeToIfBlocked = 50;
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private ObstacleRaycastLayer[] obstacleAvoidanceRaycastLayers;
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField] private ObstacleRaycastLayer obstacleAvoidanceRaycastLayerWhenBlocked;
-        [ConditionalField(nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private int currentLayerIndex;
-        private bool allDirectionsAreBlocked;
-        
         [Header("Braking")]
+        [SerializeField] private float brakeTorque = 1000;
+        [Space(5)]
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
-        [SerializeField] private AnimationCurve cornerBrakingCurve;
-        [Tooltip("The y axis represents the amount of brake torque when x (the amount to brake) is a certain value. When the amount to brake is more, there should be more brake torque.")]
-        [SerializeField] private AnimationCurve brakeTorqueCurve;
+        [ConditionalField(nameof(autoDrive)), SerializeField] private AnimationCurve cornerBrakingCurve;
         [Space(5)]
         [SerializeField, ReadOnly] private bool isBraking;
-        [SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
+        [ConditionalField(nameof(autoDrive)), SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
         [SerializeField, ReadOnly] private float speedToBrakeTo;
-        [SerializeField, ReadOnly] private float currentBrakeForce;
+        
         private bool wasBrakingLastFrame;
+        
+        [Header("Handbrake")]
+        [SerializeField] private float handbrakeEaseOffDuration = 1f;
+        [SerializeField] private float handbrakeTorque = 5000;
+        [Space(5)]
+        [SerializeField, ReadOnly] private bool isHandbrakeEngaged;
+        
+        private float defaultRearWheelStiffness = -1;
+        private float defaultAngularDrag;
+        private readonly Sequence[] handbrakeEaseOffTweens = new Sequence[2];
+        
+        [Header("Collisions")]
+        [SerializeField] private GameObject colliders;
+        [SerializeField] private float collisionRecoverDuration = 1;
+        [Space(5)]
+        [SerializeField, ReadOnly] private bool inCollision;
+        [SerializeField, ReadOnly] private bool isPushingAnotherRacer;
+        [SerializeField, ReadOnly] private List<AICar> racersCollidingWith = new();
+        
+        private float timeOfLastCollision = -Mathf.Infinity;
+        
+        public GameObject Colliders => colliders;
+        
+        [Header("Obstacle detection")]
+        [ConditionalField(nameof(autoDrive)), SerializeField] private bool brakeForObstacles = true;
+        [ConditionalField(nameof(brakeForObstacles), nameof(autoDrive)), SerializeField] private ObstacleRaycast brakeForObstaclesRaycast;
+        [Tooltip("If speed is at min of speedForBrakingRaycastLength, the brakingRaycastLength is at min, and vice versa.")]
+        [ConditionalField(nameof(brakeForObstacles), nameof(autoDrive)), SerializeField] private MinMaxFloat brakingRaycastLength = new(8, 25);
+        [Tooltip("If speed is at min of speedForBrakingRaycastLength, the brakingRaycastLength is at min, and vice versa.")]
+        [ConditionalField(nameof(brakeForObstacles), nameof(autoDrive)), SerializeField] private MinMaxFloat speedForBrakingRaycastLength = new(10, 60);
+        
+        [Header("Obstacle avoidance")]
+        [ConditionalField(nameof(autoDrive)), SerializeField] private bool useObstacleAvoidance;
+        [Tooltip("The speed the car should brake to if all the directions are blocked (exlcuding the 'when blocked' layers).")]
+        [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private float speedToBrakeToIfBlocked = 50;
+        [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private ObstacleRaycastLayer[] obstacleAvoidanceRaycastLayers;
+        [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private ObstacleRaycastLayer obstacleAvoidanceRaycastLayerWhenBlocked;
+        [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField, ReadOnly] private int currentLayerIndex;
+        
+        private bool allDirectionsAreBlocked;
 
         [Header("Debugging")]
         [SerializeField] private bool debug;
         [Space(5)]
-        [SerializeField, ReadOnly] protected bool isInitialised;
-        [SerializeField, ReadOnly] private Transform[] allWheelMeshes;
-        [SerializeField, ReadOnly] private WheelCollider[] allWheelColliders;
+        [SerializeField, ReadOnly] private bool isInitialised;
         [Space(5)]
-        [SerializeField, ReadOnly] protected Chunk currentChunkCached;
-        [SerializeField, ReadOnly] protected bool isFrozen;
-        [Space(5)]
-        [SerializeField, ReadOnly] private float speed;
-        [SerializeField, ReadOnly] private float desiredSpeed;
-        
+        [SerializeField, ReadOnly] private Chunk currentChunkCached;
+        [SerializeField, ReadOnly] private bool isFrozen;
+
         private Vector3 targetPosition;
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion)? targetPos;
         
-        protected Rigidbody rigidBody => GetComponent<Rigidbody>();
         private float timeSinceCollision => Time.time - timeOfLastCollision;
-        private bool recoveringFromCollision => inCollision || timeSinceCollision < collisionRecoverDuration;
+        private bool recoveringFromCollision => collisionRecoverDuration > 0 && (inCollision || timeSinceCollision < collisionRecoverDuration);
         private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
-        
+        private bool isRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
+        private bool isPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
+
+        public Rigidbody Rigidbody => GetComponent<Rigidbody>();
         public float DesiredSpeed => desiredSpeed;
         public float Speed => speed;
+        public float MaxSpeed => isReversing ? maxReverseSpeed : (obeySpeedLimit ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed);
         public float CurrentLaneDistance => currentLaneDistance;
         
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
@@ -141,25 +226,120 @@ namespace Gumball
         
         private void OnEnable()
         {
-            isFrozen = false;
-            
             if (!isInitialised)
                 Initialise();
+
+            if (canBeDrivenByPlayer)
+                GearboxSetting.onSettingChanged += OnGearboxSettingChanged;
+            
+            //reset steering
+            visualSteerAngle = 0;
+            desiredSteerAngle = 0;
+            
+            InitialiseGearbox();
         }
 
-        public virtual void Initialise()
+        private void OnDisable()
+        {
+            onDisable?.Invoke();
+            onDisable = null; //reset listener
+            
+            //reset for pooled objects:
+            Unfreeze();
+            isAccelerating = false;
+            wasAcceleratingLastFrame = false;
+            racersCollidingWith.Clear();
+            
+            if (canBeDrivenByPlayer)
+                GearboxSetting.onSettingChanged -= OnGearboxSettingChanged;
+            
+            onGearChanged = null; //reset listeners
+            
+            if (InputManager.ExistsRuntime && canBeDrivenByPlayer)
+            {
+                InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
+                InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
+            }
+        }
+
+        private void Initialise()
         {
             isInitialised = true;
 
-            //reset for pooled objects:
-            isAccelerating = false;
-            
-            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
+            defaultAngularDrag = Rigidbody.angularDrag;
             
             OnChangeChunk(null, CurrentChunk);
 
             CacheAllWheelMeshes();
             CacheAllWheelColliders();
+            CachePoweredWheels();
+        }
+        
+        public void InitialiseAsPlayer(int carIndex, int id)
+        {
+            this.carIndex = carIndex;
+            this.id = id;
+            
+            gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
+            colliders.layer = (int)LayersAndTags.Layer.PlayerCar;
+            
+            SetAutoDrive(false);
+        }
+
+        public void InitialiseAsRacer()
+        {
+            gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
+            colliders.layer = (int)LayersAndTags.Layer.RacerCar;
+            
+            SetAutoDrive(true);
+        }
+        
+        public void InitialiseAsTraffic()
+        {
+            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
+            colliders.layer = (int)LayersAndTags.Layer.TrafficCar;
+            
+            SetAutoDrive(true);
+        }
+        
+        public void SetAutoDrive(bool autoDrive)
+        {
+            this.autoDrive = autoDrive;
+        }
+
+        public void SetRacingLineOffset(float offset)
+        {
+            racingLineOffset = offset;
+        }
+
+        public void Teleport(Vector3 position, Quaternion rotation)
+        {
+            if (!Rigidbody.isKinematic)
+            {
+                Rigidbody.velocity = Vector3.zero;
+                Rigidbody.angularVelocity = Vector3.zero;
+            }
+            
+            //move the transform AND the rigidbody, so physics calculations are updated instantly too
+            transform.position = position;
+            transform.rotation = rotation;
+            Rigidbody.position = position;
+            Rigidbody.rotation = rotation;
+            
+            //reset steer angle
+            visualSteerAngle = 0;
+            desiredSteerAngle = 0;
+            
+            foreach (WheelCollider wheelCollider in allWheelColliders)
+            {
+                wheelCollider.motorTorque = 0;
+                wheelCollider.rotationSpeed = 0;
+                wheelCollider.steerAngle = 0;
+            }
+
+            Move(); //force update
+
+            GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
         }
 
         public void SetLaneDistance(float laneDistance)
@@ -172,7 +352,7 @@ namespace Gumball
             if (!isInitialised)
                 return;
             
-            if (CurrentChunk == null)
+            if (CurrentChunk == null && autoDrive)
             {
                 //current chunk may have despawned
                 Despawn();
@@ -183,21 +363,15 @@ namespace Gumball
             {
                 Move();
             }
-            
-            for (int index = 0; index < rearWheelColliders.Length; index++)
-            {
-                WheelCollider wheelCollider = rearWheelColliders[index];
-
-                if (debug)
-                    Debug.Log($"{wheelCollider.name}: {wheelCollider.motorTorque}");
-            }
         }
-
+        
         private void OnCollisionEnter(Collision collision)
         {
-            bool hitACar = LayersAndTags.AllCarLayers.ContainsLayer(collision.gameObject.layer);
-            if (!hitACar)
+            AICar car = collision.gameObject.GetComponent<AICar>();
+            if (car == null)
                 return;
+
+            CheckIfCollidedWithRacer(car, true);
 
             GlobalLoggers.AICarLogger.Log($"{gameObject.name} collided with {collision.gameObject.name}");
 
@@ -208,9 +382,13 @@ namespace Gumball
 
         private void OnCollisionExit(Collision collision)
         {
-            bool hitACar = LayersAndTags.AllCarLayers.ContainsLayer(collision.gameObject.layer);
-            if (!hitACar)
+            AICar car = collision.gameObject.GetComponent<AICar>();
+            if (car == null)
                 return;
+
+            CheckIfCollidedWithRacer(car, false);
+            
+            GlobalLoggers.AICarLogger.Log($"{gameObject.name} stopped colliding with {collision.gameObject.name}");
             
             timeOfLastCollision = Time.time; //reset collision time
             inCollision = false;
@@ -229,99 +407,247 @@ namespace Gumball
         private void Freeze()
         {
             isFrozen = true;
-            
-            GetComponent<Rigidbody>().velocity = Vector3.zero;
+
+            Rigidbody.velocity = Vector3.zero;
+            Rigidbody.isKinematic = true;
         }
 
         private void Unfreeze()
         {
             isFrozen = false;
+            
+            Rigidbody.isKinematic = false;
         }
         
-        protected void OnChangeDesiredSpeed(float newSpeed)
+        private void OnChangeDesiredSpeed(float newSpeed)
         {
             desiredSpeed = newSpeed;
             
             if (debug) GlobalLoggers.AICarLogger.Log($"Changed desired speed to {desiredSpeed}");
         }
-        
+
         private void Move()
         {
-            targetPos = GetPositionAhead(GetMovementTargetDistance(Speed));
-            if (targetPos == null)
+            if (autoDrive)
             {
-                Despawn();
-                return;
+                targetPos = GetPositionAhead(GetMovementTargetDistance(Speed));
+                if (targetPos == null)
+                {
+                    Despawn();
+                    return;
+                }
+
+                targetPosition = targetPos.Value.Item2;
+            }
+            else
+            {
+                targetPosition = transform.position + (transform.forward * 100);
             }
 
-            targetPosition = targetPos.Value.Item2;
-            
-            speed = SpeedUtils.ToKmh(rigidBody.velocity.magnitude);
+            speed = SpeedUtils.ToKmh(Rigidbody.velocity.magnitude);
 
-            if (useObstacleAvoidance)
+            CheckIfPlayerDriving();
+            
+            if (useObstacleAvoidance && autoDrive)
                 TryAvoidObstacles();
             
             UpdateDesiredSpeed();
-            CalculateSteerAngle();
-            CheckForCorner();
+            
+            if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
+                CalculateSteerAngle();
+            
+            if (autoDrive)
+                CheckForCorner();
+
+            CheckIfPushingAnotherRacer();
             
             UpdateBrakingValues();
             DoBrakeEvents();
+
+            CheckForHandbrake();
+            CheckToReverse();
+
+            UpdateCurrentGear();
             
             CheckToAccelerate();
+            DoAccelerationEvents();
+            
             ApplySteering();
+            
             UpdateWheelMeshes();
+
+            CalculateEngineRPM();
+
+            UpdateDrag();
             
             //debug directions:
-            Debug.DrawRay(transform.position, rigidBody.velocity, Color.green);
-            
-            Debug.DrawLine(transform.position, targetPosition, Color.yellow);
+            Debug.DrawRay(transform.position, Rigidbody.velocity, Color.green);
+            if (targetPos != null)
+                Debug.DrawLine(transform.position, targetPos.Value.Item2, Color.yellow);
+            Debug.DrawLine(transform.position, targetPosition, Color.cyan);
         }
 
-        private void UpdateDesiredSpeed()
+        private void UpdateDrag()
         {
-            float newDesiredSpeed = desiredSpeed;
-            if (obeySpeedLimit)
+            if (isHandbrakeEngaged)
             {
-                if (CurrentChunk.TrafficManager != null)
-                    newDesiredSpeed = CurrentChunk.TrafficManager.SpeedLimitKmh;
+                Sequence handbrakeEaseOffTween = handbrakeEaseOffTweens[0];
+                if (handbrakeEaseOffTween != null && handbrakeEaseOffTween.IsPlaying())
+                    return;
+                
+                Rigidbody.drag = dragWhenHandbraking;
             }
+            else if (isBraking)
+                Rigidbody.drag = dragWhenBraking;
+            else if (isAccelerating)
+                Rigidbody.drag = dragWhenAccelerating;
             else
-            {
-                newDesiredSpeed = maxSpeed;
-            }
-            
-            if (!newDesiredSpeed.Approximately(DesiredSpeed))
-                OnChangeDesiredSpeed(newDesiredSpeed);
+                Rigidbody.drag = dragWhenIdle;
         }
         
+        private void UpdateCurrentGear()
+        {
+            if (!IsAutomaticTransmission)
+                return;
+
+            if (isReversing)
+                return;
+
+            //check whether to shift up or down
+            if (engineRpm < idealRPMRangeForGearChanges.Min && currentGear > 1)
+            {
+                ShiftDown();
+            } else if (engineRpm > idealRPMRangeForGearChanges.Max && currentGear < NumberOfGears - 1)
+            {
+                ShiftUp();
+            }
+        }
+
+        /// <summary>
+        /// Calculate the engine RPM from the average rpm of the powered wheels, taken in account the gear ratios.
+        /// </summary>
+        private void CalculateEngineRPM()
+        {
+            float sumOfPoweredWheelRPM = 0;
+            foreach (WheelCollider poweredWheel in poweredWheels)
+            {
+                sumOfPoweredWheelRPM += poweredWheel.rpm;
+            }
+            
+            float averagePoweredWheelRPM = sumOfPoweredWheelRPM / poweredWheels.Length;
+
+            float engineRpmUnclamped = engineRpmRange.Min + averagePoweredWheelRPM * gearRatios[currentGear] * finalGearRatio;
+            engineRpm = engineRpmRange.Clamp(engineRpmUnclamped);
+        }
+        
+        private void UpdateDesiredSpeed()
+        {
+            if (!MaxSpeed.Approximately(DesiredSpeed))
+                OnChangeDesiredSpeed(MaxSpeed);
+        }
+        
+        /// <summary>
+        /// Check if colliding with another racer or player and is behind it.
+        /// </summary>
+        private void CheckIfPushingAnotherRacer()
+        {
+            if (!isPlayer && !isRacer)
+                return;
+            
+            //check if colliding with another racer or player
+            //then check if it is behind it
+
+            isPushingAnotherRacer = false;
+
+            HashSet<AICar> racersAlreadyChecked = new();
+            
+            foreach (AICar racerCollidingWith in racersCollidingWith)
+            {
+                //since the racer may be in the list multiple times (multiple colliders colliding), only do the check once per racer
+                if (racersAlreadyChecked.Contains(racerCollidingWith))
+                    continue;
+
+                racersAlreadyChecked.Add(racerCollidingWith);
+                
+                //check if racer is ahead or behind
+                float distanceToTargetSqr = Vector3.SqrMagnitude(transform.position - targetPosition);
+                float otherCarsDistanceToTargetSqr = Vector3.SqrMagnitude(racerCollidingWith.transform.position - targetPosition);
+
+                bool isBehind = distanceToTargetSqr > otherCarsDistanceToTargetSqr;
+                if (isBehind)
+                {
+                    isPushingAnotherRacer = true;
+                    return;
+                }
+            }
+        }
+
         private void CheckToAccelerate()
         {
-            bool wasAccelerating = isAccelerating;
-
-            if (isBraking || (disableMovementInCollision && recoveringFromCollision))
+            //don't accelerate if braking
+            if (isBraking && speed > stationarySpeed)
                 isAccelerating = false;
-            else
-                isAccelerating = speed < desiredSpeed;
+            //don't accelerate if in collision (auto drive only)
+            else if (autoDrive && recoveringFromCollision)
+                isAccelerating = false;
+            //can't accelerate if above desired speed
+            else if (speed > desiredSpeed)
+                isAccelerating = false;
+            else if (isPushingAnotherRacer)
+                isAccelerating = false;
 
-            if (wasAccelerating && !isAccelerating)
+            //check to accelerate
+            else
+            {
+                isAccelerating = autoDrive ||
+                                 (isPlayerDrivingEnabled && (InputManager.Instance.CarInput.Accelerate.IsPressed || isReversing));
+                
+                //if accelerating from reverse, change the gear
+                if (isPlayerDrivingEnabled && InputManager.Instance.CarInput.Accelerate.IsPressed && currentGear == 0)
+                    ChangeGear(1);
+            }
+        }
+
+        private void ChangeGear(int newGear)
+        {
+            int previousGear = currentGear;
+            currentGear = newGear;
+            
+            onGearChanged?.Invoke(previousGear, currentGear);
+        }
+
+        private void DoAccelerationEvents()
+        {
+            if (wasAcceleratingLastFrame && !isAccelerating)
                 OnStopAccelerating();
 
-            if (!wasAccelerating && isAccelerating)
+            if (!wasAcceleratingLastFrame && isAccelerating)
                 OnStartAccelerating();
             
             if (isAccelerating)
                 OnAccelerate();
+            
+            wasAcceleratingLastFrame = isAccelerating;
         }
         
         private void CalculateSteerAngle()
         {
-            if (disableMovementInCollision && recoveringFromCollision)
-                return; //don't update steering while in collision
-            
-            Vector3 directionToTarget = targetPosition - rigidBody.position;
-            float angle = Mathf.Clamp(-Vector2.SignedAngle(rigidBody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
-            desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, steerSpeed * Time.deltaTime);
+            float speedPercent = Mathf.Clamp01(speed / MaxSpeed);
+            float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : maxSteerAngleCurve.Evaluate(speedPercent);
+
+            if (autoDrive)
+            {
+                Vector3 directionToTarget = targetPosition - transform.position;
+                float angle = Mathf.Clamp(-Vector2.SignedAngle(Rigidbody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
+                desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, autoDriveSteerSpeed * Time.deltaTime);
+            }
+            else
+            {
+                float actualSteerSpeed = InputManager.Instance.CarInput.SteeringInput.Approximately(0) ? releaseSpeed : steerSpeed;
+
+                float angle = InputManager.Instance.CarInput.SteeringInput * maxSteerAngle;
+                desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, actualSteerSpeed * Time.deltaTime);
+            }
             
             //set the visual steer angle (same for all front wheels)
             const float minSpeedVisualSteerModifier = 20;
@@ -329,44 +655,34 @@ namespace Gumball
             visualSteerAngle = Mathf.LerpAngle(visualSteerAngle, desiredSteerAngle, visualSteerSpeed * speedModifier * Time.deltaTime);
         }
 
-        private void ApplyBrakeForce()
-        {
-            if (!isBraking)
-                return;
-            
-            //the greater distance between speed and speedToBrakeTo, the more brake force should be applied
-            float amountToBrake = speed - speedToBrakeTo;
-            currentBrakeForce = brakeTorqueCurve.Evaluate(amountToBrake);
-            
-            //apply brake force to entire car rather than the wheels to prevent lock up
-            rigidBody.AddForce(-rigidBody.velocity * currentBrakeForce, ForceMode.Force);
-        }
-
         private void UpdateBrakingValues()
         {
             //reset for check
             isBraking = false;
             speedToBrakeTo = Mathf.Infinity;
-
-            if (disableMovementInCollision && inCollision)
+            
+            if (inCollision && autoDrive && !isRacer && !isPlayer)
+                return;
+            
+            if (isReversing)
                 return;
 
             //is speeding over the desired speed? 
             const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
-            if (speed > desiredSpeed + speedingLeeway)
+            if (autoDrive && speed > desiredSpeed + speedingLeeway)
             {
                 speedToBrakeTo = desiredSpeed;
                 isBraking = true;
             }
 
             //brake around corners
-            if (speed > corneringSpeed && corneringSpeed < speedToBrakeTo)
+            if (autoDrive && speed > corneringSpeed && corneringSpeed < speedToBrakeTo)
             {
                 speedToBrakeTo = corneringSpeed;
                 isBraking = true;
             }
 
-            if (brakeForObstacles)
+            if (autoDrive && brakeForObstacles)
             {
                 float speedPercent = (speed - speedForBrakingRaycastLength.Min) / (speedForBrakingRaycastLength.Max - speedForBrakingRaycastLength.Min);
                 float raycastLength = brakingRaycastLength.Min + ((brakingRaycastLength.Max - brakingRaycastLength.Min) * speedPercent);
@@ -380,13 +696,26 @@ namespace Gumball
                 }
             }
             
-            if (useObstacleAvoidance && allDirectionsAreBlocked)
+            if (autoDrive && useObstacleAvoidance && allDirectionsAreBlocked)
             {
                 if (speed > speedToBrakeToIfBlocked && speedToBrakeToIfBlocked < speedToBrakeTo)
                 {
                     speedToBrakeTo = speedToBrakeToIfBlocked;
                     isBraking = true;
                 }
+            }
+            
+            if (!autoDrive && InputManager.Instance.CarInput.Brake.IsPressed)
+            {
+                speedToBrakeTo = 0;
+                isBraking = true;
+            }
+
+            //brake if stationary
+            if (isStationary)
+            {
+                speedToBrakeTo = 0;
+                isBraking = true;
             }
         }
         
@@ -404,24 +733,86 @@ namespace Gumball
             wasBrakingLastFrame = isBraking;
         }
 
-        
-        //TODO: don't use a 'speed' based check - it should change the amount of braking depending on the speed and distance to the obstacle - in order to keep a 'safe' distance
-        private float GetSpeedOfObstaclesAhead()
+        private void CheckToReverse()
         {
-            Vector3 directionToTarget = Vector3.Normalize(targetPosition - transform.position);
-
-            //RaycastHit? blockage = GetBlockage(directionToTarget, blockedPathDetectorDistance);
+            if (autoDrive)
+                //TODO: might want to handle cases if car is completely blocked ahead and reverse out
+                return;
             
-            // bool isBlocked = blockage != null;
-            // if (!isBlocked)
-            //     return Mathf.Infinity;
+            if (isReversing && !InputManager.Instance.CarInput.Brake.IsPressed)
+                OnStopReversing();
+            if (!isReversing && (isStationary || speed < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
+                OnStartReversing();
+        }
+        
+        private void CheckForHandbrake()
+        {
+            if (autoDrive)
+                return;
             
-            //not moving
-            return 0;
+            if (isHandbrakeEngaged && !InputManager.Instance.CarInput.Handbrake.IsPressed)
+                OnHandbrakeDisengage();
+            if (!isHandbrakeEngaged && InputManager.Instance.CarInput.Handbrake.IsPressed)
+                OnHandbrakeEngage();
         }
 
+        private void OnHandbrakeEngage()
+        {
+            isHandbrakeEngaged = true;
+            
+            Rigidbody.angularDrag = angularDragWhenHandbraking;
+
+            for (int index = 0; index < rearWheelColliders.Length; index++)
+            {
+                WheelCollider wheelCollider = rearWheelColliders[index];
+                handbrakeEaseOffTweens[index]?.Kill();
+
+                WheelFrictionCurve sidewaysFriction = wheelCollider.sidewaysFriction;
+                sidewaysFriction.stiffness = 0;
+
+                wheelCollider.sidewaysFriction = sidewaysFriction;
+
+                wheelCollider.brakeTorque = handbrakeTorque;
+            }
+        }
+
+        private void OnHandbrakeDisengage()
+        {
+            isHandbrakeEngaged = false;
+
+            for (int index = 0; index < rearWheelColliders.Length; index++)
+            {
+                WheelCollider wheelCollider = rearWheelColliders[index];
+                
+                WheelFrictionCurve sidewaysFriction = wheelCollider.sidewaysFriction;
+
+                wheelCollider.brakeTorque = 0;
+                
+                handbrakeEaseOffTweens[index]?.Kill();
+                handbrakeEaseOffTweens[index] = DOTween.Sequence()
+                    .Join(DOTween.To(() => Rigidbody.angularDrag, x => Rigidbody.angularDrag = x, defaultAngularDrag, handbrakeEaseOffDuration))
+                    .Join(DOTween.To(() => sidewaysFriction.stiffness, 
+                        x => sidewaysFriction.stiffness = x, defaultRearWheelStiffness, handbrakeEaseOffDuration)
+                    .OnUpdate(() => wheelCollider.sidewaysFriction = sidewaysFriction));
+            }
+        }
+        
+        private void OnStartReversing()
+        {
+            isReversing = true;
+            ChangeGear(0);
+        }
+
+        private void OnStopReversing()
+        {
+            isReversing = false;
+        }
+        
         private void TryAvoidObstacles()
         {
+            if (!autoDrive)
+                return;
+            
             //get the angle with the least angle UP TO the current layer
             float leastAngle = Mathf.Infinity;
             int leastAngleLayer = default;
@@ -467,7 +858,10 @@ namespace Gumball
             if (allDirectionsAreBlocked)
             {
                 //try with directions relative to car
-                ObstacleRaycast raycast = obstacleAvoidanceRaycastLayerWhenBlocked.GetUnblockedRaycastWithLeastAngle(transform, transform.position + transform.forward * 10);
+                Vector3 position = transform.position + (transform.forward * 10);
+                Vector3 direction = Vector3.Normalize(targetPosition - transform.position);
+                
+                ObstacleRaycast raycast = obstacleAvoidanceRaycastLayerWhenBlocked.GetUnblockedRaycastWithLeastAngle(transform, position, direction);
                 if (raycast == null)
                     return;
 
@@ -480,20 +874,30 @@ namespace Gumball
                 currentLayerIndex = leastAngleLayer;
             }
         }
-
+        
         private void OnStartBraking()
         {
-            rigidBody.drag = 1;
+            Rigidbody.drag = dragWhenBraking;
+            
+            foreach (WheelCollider wheelCollider in allWheelColliders)
+            {
+                wheelCollider.brakeTorque = brakeTorque;
+            }
         }
         
         private void OnBrake()
         {
-            ApplyBrakeForce();
+            
         }
 
         private void OnStopBraking()
         {
-            rigidBody.drag = 0;
+            Rigidbody.drag = isAccelerating ? 0 : dragWhenIdle;
+            
+            foreach (WheelCollider wheelCollider in allWheelColliders)
+            {
+                wheelCollider.brakeTorque = 0;
+            }
         }
         
         private void CheckForCorner()
@@ -514,50 +918,55 @@ namespace Gumball
 
         private void OnStartAccelerating()
         {
-            //initialise the array
-            if (currentMotorTorqueTweens == null || currentMotorTorqueTweens.Length == 0)
-                currentMotorTorqueTweens = new Tween[rearWheelColliders.Length];
-
-            for (int index = 0; index < rearWheelColliders.Length; index++)
-            {
-                WheelCollider rearWheel = rearWheelColliders[index];
-                
-                if (currentMotorTorqueTweens[index] != null)
-                    currentMotorTorqueTweens[index]?.Kill();
-
-                float currentTorque = rearWheel.motorTorque;
-                float durationPercent = Mathf.Clamp01(1 - (currentTorque / motorTorque));
-                float duration = durationPercent * accelerationDurationToMaxTorque;
-                
-                currentMotorTorqueTweens[index] = DOTween.To(() => rearWheel.motorTorque,
-                        x => rearWheel.motorTorque = x, motorTorque, duration).SetEase(accelerationEase);
-            }
+            Rigidbody.drag = 0;
         }
 
         private void OnStopAccelerating()
         {
-            for (int index = 0; index < rearWheelColliders.Length; index++)
+            foreach (WheelCollider wheelCollider in poweredWheels)
             {
-                WheelCollider wheelCollider = rearWheelColliders[index];
-
-                //stop acceleration tweens
-                currentMotorTorqueTweens[index]?.Kill();
-                
                 wheelCollider.motorTorque = 0;
             }
+            
+            Rigidbody.drag = isBraking ? dragWhenBraking : dragWhenIdle;
         }
         
         private void OnAccelerate()
         {
+            ApplyTorqueToPoweredWheels();
+        }
+
+        private void ApplyTorqueToPoweredWheels()
+        {
+            //calculate the current engine torque from the engine RPM
+            float engineRpmPercent = (engineRpm - engineRpmRange.Min) / engineRpmRange.Difference;
+            float engineTorque = torqueCurve.Evaluate(engineRpmPercent);
             
+            foreach (WheelCollider poweredWheel in poweredWheels)
+            {
+                //distribute the engine torque to the wheels based on gear ratios
+                float engineTorqueDistributed = engineTorque / poweredWheels.Length; //TODO: might want to distribute this unevenly - eg. give more torque to the wheel with more traction
+                float wheelTorque = engineTorqueDistributed * gearRatios[currentGear] * finalGearRatio;
+            
+                //apply to the wheels
+                poweredWheel.motorTorque = wheelTorque;
+            }
         }
         
         private void ApplySteering()
         {
             foreach (WheelCollider frontWheel in frontWheelColliders)
             {
-                frontWheel.steerAngle = desiredSteerAngle;
+                if (Mathf.Abs(desiredSteerAngle) < 1)
+                    frontWheel.steerAngle = 0;
+                else
+                {
+                    frontWheel.steerAngle = desiredSteerAngle;
+                }
             }
+            
+            if (steeringWheel != null)
+                steeringWheel.UpdateSteeringAmount(desiredSteerAngle);
         }
 
         /// <summary>
@@ -594,7 +1003,7 @@ namespace Gumball
             }
         }
         
-        protected float GetMovementTargetDistance(float speedToCheck)
+        private float GetMovementTargetDistance(float speedToCheck)
         {
             speedToCheck = Mathf.Clamp(speedToCheck, movementTargetDistanceSpeedFactors.Min, movementTargetDistanceSpeedFactors.Max);
             float percentage = (speedToCheck - movementTargetDistanceSpeedFactors.Min) / (movementTargetDistanceSpeedFactors.Max - movementTargetDistanceSpeedFactors.Min);
@@ -623,29 +1032,59 @@ namespace Gumball
                 indexCount++;
             }
         }
-        
+
         private void CacheAllWheelColliders()
         {
             int indexCount = 0;
             allWheelColliders = new WheelCollider[frontWheelColliders.Length + rearWheelColliders.Length];
             foreach (WheelCollider wheelCollider in frontWheelColliders)
             {
+                wheelCollider.gameObject.AddComponent<WheelColliderData>();
+                
                 allWheelColliders[indexCount] = wheelCollider;
                 indexCount++;
             }
             foreach (WheelCollider wheelCollider in rearWheelColliders)
             {
+                if (defaultRearWheelStiffness < 0)
+                    defaultRearWheelStiffness = wheelCollider.sidewaysFriction.stiffness;
+                        
+                wheelCollider.gameObject.AddComponent<WheelColliderData>();
+
                 allWheelColliders[indexCount] = wheelCollider;
                 indexCount++;
             }
         }
         
-        
+        private void CachePoweredWheels()
+        {
+            int numberOfPoweredWheels = wheelConfiguration == WheelConfiguration.ALL_WHEEL_DRIVE ? 4 : 2;
+            poweredWheels = new WheelCollider[numberOfPoweredWheels];
+
+            int indexCount = 0;
+            foreach (WheelCollider wheelCollider in frontWheelColliders)
+            {
+                if (wheelConfiguration != WheelConfiguration.FRONT_WHEEL_DRIVE && wheelConfiguration != WheelConfiguration.ALL_WHEEL_DRIVE)
+                    continue;
+                
+                poweredWheels[indexCount] = wheelCollider;
+                indexCount++;
+            }
+            foreach (WheelCollider wheelCollider in rearWheelColliders)
+            {
+                if (wheelConfiguration != WheelConfiguration.REAR_WHEEL_DRIVE && wheelConfiguration != WheelConfiguration.ALL_WHEEL_DRIVE)
+                    continue;
+                
+                poweredWheels[indexCount] = wheelCollider;
+                indexCount++;
+            }
+        }
+
         /// <summary>
         /// Get the next desired position and rotation relative to the sample on the next chunk's spline.
         /// </summary>
         /// <returns>The spline sample's position and rotation, or null if no more loaded chunks in the desired direction.</returns>
-        protected (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
+        private (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
         {
             if (CurrentChunk == null)
                 return null;
@@ -662,7 +1101,8 @@ namespace Gumball
 
             if (useRacingLine)
             {
-                return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position, splineSampleAhead.Value.Item1.rotation);
+                Vector3 offset = splineSampleAhead.Value.Item1.right * racingLineOffset;
+                return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position + offset, splineSampleAhead.Value.Item1.rotation);
             }
             else
             {
@@ -693,7 +1133,7 @@ namespace Gumball
             SampleCollection sampleCollection = useRacingLine ? CurrentChunk.TrafficManager.RacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
             
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
-            int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(rigidBody.position).Item1;
+            int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(Rigidbody.position).Item1;
             SplineSample closestSample = sampleCollection.samples[closestSplineIndex];
 
             SplineSample? previousSample = null;
@@ -725,7 +1165,7 @@ namespace Gumball
                     
                     //reset the values
                     previousSample = null;
-                    closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(rigidBody.position).Item1;
+                    closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(Rigidbody.position).Item1;
                     closestSample = sampleCollection.samples[closestSplineIndex];
                     offset = faceForward ? 1 : -1;
                     continue;
@@ -761,12 +1201,94 @@ namespace Gumball
             }
         }
         
+        private void InitialiseGearbox()
+        {
+            ChangeGear(1);
+            
+            if (canBeDrivenByPlayer)
+                OnGearboxSettingChanged(GearboxSetting.Setting);
+        }
+
+        private void OnGearboxSettingChanged(GearboxSetting.GearboxOption newValue)
+        {
+            InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
+            InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
+            
+            if (newValue == GearboxSetting.GearboxOption.MANUAL)
+            {
+                InputManager.Instance.CarInput.ShiftUp.onPressed += ShiftUp;
+                InputManager.Instance.CarInput.ShiftDown.onPressed += ShiftDown;
+            }
+        }
+        
+        private void ShiftUp()
+        {
+            if (currentGear >= NumberOfGears - 1)
+                return; //at max gear;
+            
+            currentGear++;
+
+            onGearChanged?.Invoke(currentGear - 1, currentGear);
+        }
+
+        private void ShiftDown()
+        {
+            if (currentGear <= 1)
+                return; //at lowest gear (excluding reverse)
+            
+            currentGear--;
+            
+            onGearChanged?.Invoke(currentGear + 1, currentGear);
+        }
+        
+        private void CheckIfPlayerDriving()
+        {
+            bool playerDrivingPreviouslyEnabled = isPlayerDrivingEnabled;
+            bool playerDrivingShouldBeEnabled = canBeDrivenByPlayer && !autoDrive && WarehouseManager.Instance.CurrentCar == this;
+
+            if (playerDrivingPreviouslyEnabled && !playerDrivingShouldBeEnabled)
+            {
+                OnPlayerDrivingDisabled();
+            } else if (!playerDrivingPreviouslyEnabled && playerDrivingShouldBeEnabled)
+            {
+                OnPlayerDrivingEnabled();
+            }
+        }
+        
+        private void OnPlayerDrivingEnabled()
+        {
+            isPlayerDrivingEnabled = true;
+        }
+
+        private void OnPlayerDrivingDisabled()
+        {
+            isPlayerDrivingEnabled = false;
+        }
+        
+        private void CheckIfCollidedWithRacer(AICar car, bool adding)
+        {
+            if (!isRacer && !isPlayer)
+                return;
+            
+            if (!car.isRacer && !car.isPlayer)
+                return;
+
+            if (car == this)
+                return;
+
+            if (adding)
+                racersCollidingWith.Add(car);
+            else racersCollidingWith.Remove(car);
+        }
+
+#if UNITY_EDITOR
         private void OnDrawGizmos()
         {
-            Vector3 carCentreOfMassWorld = rigidBody.transform.TransformPoint(rigidBody.centerOfMass);
+            Vector3 carCentreOfMassWorld = Rigidbody.transform.TransformPoint(Rigidbody.centerOfMass);
             Gizmos.color = Color.red;
             Gizmos.DrawSphere(carCentreOfMassWorld, 0.5f);
         }
+#endif
         
     }
 }

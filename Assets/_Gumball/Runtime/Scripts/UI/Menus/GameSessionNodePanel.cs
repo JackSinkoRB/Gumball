@@ -24,7 +24,7 @@ namespace Gumball
 
         public void OnClickPlayButton()
         {
-            currentNode.Session.StartSession();
+            currentNode.GameSession.StartSession();
         }
         
     }

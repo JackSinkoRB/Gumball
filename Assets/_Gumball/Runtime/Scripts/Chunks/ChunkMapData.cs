@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
@@ -17,6 +18,9 @@ namespace Gumball
         [SerializeField] private Vector3 splineStartPosition;
         [SerializeField] private Vector3 splineEndPosition;
 
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private float splineLength;
+        
         public Vector3 Position => position;
         public Quaternion Rotation => rotation;
         public ChunkMeshData FinalMeshData => finalMeshData;
@@ -25,7 +29,8 @@ namespace Gumball
         public float CustomLoadDistance => customLoadDistance;
         public Vector3 SplineStartPosition => splineStartPosition;
         public Vector3 SplineEndPosition => splineEndPosition;
-            
+        public float SplineLength => splineLength;
+        
         public ChunkMapData(Chunk originalChunk, ChunkMeshData finalMeshData)
         {
             position = originalChunk.transform.position;
@@ -38,6 +43,7 @@ namespace Gumball
             originalChunk.UpdateSplineSampleData();
             splineStartPosition = originalChunk.FirstSample.position;
             splineEndPosition = originalChunk.LastSample.position;
+            splineLength = originalChunk.SplineLengthCached;
         }
 
         public void ApplyToChunk(Chunk chunk)

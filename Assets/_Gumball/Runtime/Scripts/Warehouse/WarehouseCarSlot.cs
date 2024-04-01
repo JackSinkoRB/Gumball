@@ -10,7 +10,7 @@ namespace Gumball
     {
         
         [SerializeField] private PositionAndRotation cameraPosition;
-        [SerializeField, ReadOnly] private CarManager currentCar;
+        [SerializeField, ReadOnly] private AICar currentCar;
 
         public PositionAndRotation CameraPosition => cameraPosition;
 
@@ -19,10 +19,10 @@ namespace Gumball
             yield return WarehouseManager.Instance.SpawnCar(index, id, transform.position, transform.rotation, OnSpawnCar);
         }
 
-        public void PopulateWithCar(CarManager carManager)
+        public void PopulateWithCar(AICar car)
         {
-            currentCar = carManager;
-            carManager.Teleport(transform.position, transform.rotation);
+            currentCar = car;
+            car.Teleport(transform.position, transform.rotation);
         }
 
         public void OnSelected()
@@ -31,7 +31,7 @@ namespace Gumball
                 WarehouseManager.Instance.SetCurrentCar(currentCar);
         }
 
-        private void OnSpawnCar(CarManager car)
+        private void OnSpawnCar(AICar car)
         {
             currentCar = car;
         }

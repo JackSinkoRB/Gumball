@@ -34,7 +34,20 @@ namespace Gumball.Editor.Tests
         public void TimeUtilsToPrettyStringLongWithMilliseconds()
         {
             TimeSpan timeSpan = new TimeSpan(0, 2, 50, 35, 150);
-            Assert.AreEqual("2 Hours 50 Minutes 35.15 Seconds", timeSpan.ToPrettyString(true, true));
+            Assert.AreEqual("2 Hours 50 Minutes 35.15 Seconds", timeSpan.ToPrettyString(true, longVersion: true));
+        }
+        
+        [Test]
+        public void TimeUtilsToPrettyStringNonPreciseMilliseconds()
+        {
+            TimeSpan timeSpan1 = new TimeSpan(0, 0, 0, 9, 160);
+            Assert.AreEqual("9.1s", timeSpan1.ToPrettyString(true, false));
+            
+            TimeSpan timeSpan2 = new TimeSpan(0, 0, 0, 7, 60);
+            Assert.AreEqual("7.0s", timeSpan2.ToPrettyString(true, false));
+            
+            TimeSpan timeSpan3 = new TimeSpan(0, 0, 0, 9, 990);
+            Assert.AreEqual("9.9s", timeSpan3.ToPrettyString(true, false));
         }
         
         [Test]

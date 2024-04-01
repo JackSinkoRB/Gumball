@@ -24,8 +24,8 @@ namespace Gumball
                 return;
             }
 
-            Drivetrain drivetrain = WarehouseManager.Instance.CurrentCar.drivetrain;
-            float rpmAsPercent = Mathf.Clamp01(drivetrain.rpm / maxRpmDisplayed);
+            AICar currentCar = WarehouseManager.Instance.CurrentCar;
+            float rpmAsPercent = Mathf.Clamp01(currentCar.EngineRpm / maxRpmDisplayed);
             UpdateNeedleAsPercent(rpmAsPercent);
         }
 

@@ -15,6 +15,8 @@ namespace MyBox
 	{
 		public float Min;
 		public float Max;
+
+		public float Difference => Max - Min;
 		
 		public MinMaxFloat(float min, float max)
 		{

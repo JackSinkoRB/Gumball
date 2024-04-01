@@ -17,51 +17,54 @@ namespace Gumball
 
         private void OnEnable()
         {
+            //listen for car change - or detect if there is currently a car
             WarehouseManager.Instance.onCurrentCarChanged += OnCarChanged;
-            Drivetrain.onGearChanged += OnGearChanged;
-            SettingsManager.Instance.onGearboxSettingChanged += OnGearboxSettingChanged;
+            if (WarehouseManager.Instance.CurrentCar != null)
+                OnCarChanged(WarehouseManager.Instance.CurrentCar);
 
-            OnGearboxSettingChanged(SettingsManager.GearboxSetting);
+            GearboxSetting.onSettingChanged += OnGearboxSettingChanged;
+            
+            //update with the current setting
+            OnGearboxSettingChanged(GearboxSetting.Setting);
         }
 
         private void OnDisable()
         {
             WarehouseManager.Instance.onCurrentCarChanged -= OnCarChanged;
-            Drivetrain.onGearChanged -= OnGearChanged;
-            SettingsManager.Instance.onGearboxSettingChanged -= OnGearboxSettingChanged;
+            GearboxSetting.onSettingChanged -= OnGearboxSettingChanged;
         }
 
-        private void OnCarChanged(CarManager newCar)
+        private void OnCarChanged(AICar newCar)
         {
-            OnGearChanged(-1, newCar.drivetrain.Gear); //initialise the gear UI
+            newCar.onGearChanged += OnGearChanged;
+            OnGearChanged(-1, newCar.CurrentGear); //initialise the gear UI
         }
 
-        private void OnGearboxSettingChanged(int newValue)
+        private void OnGearboxSettingChanged(GearboxSetting.GearboxOption newValue)
         {
-            bool isAutomatic = newValue == 0;
-            gearUpButton.gameObject.SetActive(!isAutomatic);
-            gearDownButton.gameObject.SetActive(!isAutomatic);
+            gearUpButton.gameObject.SetActive(newValue == GearboxSetting.GearboxOption.MANUAL);
+            gearDownButton.gameObject.SetActive(newValue == GearboxSetting.GearboxOption.MANUAL);
         }
         
         private void OnGearChanged(int previousgear, int newgear)
         {
-            Drivetrain drivetrain = WarehouseManager.Instance.CurrentCar.drivetrain;
+            AICar currentCar = WarehouseManager.Instance.CurrentCar;
             
-            if (!drivetrain.automatic)
+            if (!currentCar.IsAutomaticTransmission)
             {
-                gearDownButton.interactable = drivetrain.Gear > 1;
-                gearUpButton.interactable = drivetrain.Gear < drivetrain.gearRatios.Length - 1;
+                gearDownButton.interactable = currentCar.CurrentGear > 1;
+                gearUpButton.interactable = currentCar.CurrentGear < currentCar.NumberOfGears - 1;
             }
         }
 
         public void OnPressAccelerateButton(bool isPressed)
         {
-            InputManager.Accelerate.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(isPressed);
         }
 
         public void OnPressBrakeButton(bool isPressed)
         {
-            InputManager.Decelerate.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.Brake.SetPressedOverride(isPressed);
         }
 
         public void OnPressSteerLeftButton(bool isPressed)
@@ -78,17 +81,17 @@ namespace Gumball
 
         public void OnPressHandbrakeButton(bool isPressed)
         {
-            InputManager.Handbrake.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.Handbrake.SetPressedOverride(isPressed);
         }
 
         public void OnPressGearDownButton(bool isPressed)
         {
-            InputManager.ShiftDown.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.ShiftDown.SetPressedOverride(isPressed);
         }
 
         public void OnPressGearUpButton(bool isPressed)
         {
-            InputManager.ShiftUp.SetPressedOverride(isPressed);
+            InputManager.Instance.CarInput.ShiftUp.SetPressedOverride(isPressed);
         }
 
         private void OnSteeringButtonUpdated()
@@ -101,7 +104,7 @@ namespace Gumball
             else if (isSteerRightButtonPressed)
                 steeringValue = 1;
             
-            InputManager.Steering.SetValueOverride(steeringValue);
+            InputManager.Instance.CarInput.Steering.SetValueOverride(steeringValue);
         }
         
     }

@@ -28,7 +28,6 @@ namespace Gumball
             currentSteerAmount = amount;
             
             Vector3 desiredRotation = Vector3.Lerp(maxRotationEulerLeft, maxRotationEulerRight, (amount + 1) / 2);
-            Debug.Log($"Desired rotation = {desiredRotation} for steer amount {amount}");
             
             currentSteerTween?.Kill();
             currentSteerTween = transform.DOLocalRotate(desiredRotation, steerTweenDuration).SetEase(steerTweenEase);

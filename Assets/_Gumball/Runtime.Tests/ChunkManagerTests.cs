@@ -29,6 +29,7 @@ namespace Gumball.Runtime.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            ChunkManager.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
             
             AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.MapDrivingScenePath, new LoadSceneParameters(LoadSceneMode.Single));
@@ -38,6 +39,7 @@ namespace Gumball.Runtime.Tests
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
+            ChunkManager.IsRunningTests = false;
             DataManager.EnableTestProviders(false);
         }
 
@@ -55,6 +57,7 @@ namespace Gumball.Runtime.Tests
         private IEnumerator Initialise()
         {
             yield return WarehouseManager.Instance.SpawnCar(0, 0, Vector3.zero, Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
+            yield return GameSession.LoadChunkMap();
             yield return GameSession.SetupSession();
             
             isInitialised = true;
@@ -67,18 +70,19 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             Assert.IsTrue(ChunkManager.ExistsRuntime);
-            
-            Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().SplineLength);
-            Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().SplineLength);
-            Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().SplineLength);
-            Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabCustomLoad.editorAsset.GetComponent<Chunk>().SplineLength);
+            Assert.IsFalse(ChunkManager.Instance.IsLoadingChunks);
+
+            Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabA.editorAsset.GetComponent<Chunk>().SplineLengthCached);
+            Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabB.editorAsset.GetComponent<Chunk>().SplineLengthCached);
+            Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabC.editorAsset.GetComponent<Chunk>().SplineLengthCached);
+            Assert.AreEqual(chunkSplineLengths, TestManager.Instance.TestChunkPrefabCustomLoad.editorAsset.GetComponent<Chunk>().SplineLengthCached);
 
             Assert.AreEqual(500, GameSession.ChunkMapAssetReference.editorAsset.ChunkLoadDistance);
         }
 
         [UnityTest]
         [Order(1)]
-        public IEnumerator OnlyLoadChunksInLoadDistance()
+        public IEnumerator OnlyLoadedChunksInLoadDistance()
         {
             yield return new WaitUntil(() => isInitialised);
             
@@ -130,10 +134,12 @@ namespace Gumball.Runtime.Tests
         public IEnumerator ChunksLoadAfterMovingCar()
         {
             yield return new WaitUntil(() => isInitialised);
-
+            Assert.IsFalse(ChunkManager.Instance.IsLoadingChunks);
+            
             Assert.AreEqual(1, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
             
             yield return MoveAndLoadAroundPosition(new Vector3(0, 5, 710));
+            Assert.IsFalse(ChunkManager.Instance.IsLoadingChunks); //ensure loading is actually complete
             
             Assert.AreEqual(8, ChunkManager.Instance.CurrentChunks.Count);
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
@@ -145,7 +151,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
 
             //chunk player is on:
-            Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(ChunkManager.Instance.GetChunkPlayerIsOn()));
+            Assert.AreEqual(7, ChunkManager.Instance.GetMapIndexOfLoadedChunk(WarehouseManager.Instance.CurrentCar.CurrentChunk));
             
             //check that the custom loaded chunk is the correct chunk
             Assert.AreEqual(TestManager.Instance.TestChunkPrefabCustomLoad.editorAsset.GetComponent<Chunk>().UniqueID, ChunkManager.Instance.CurrentCustomLoadedChunks[0].Chunk.UniqueID);
@@ -165,7 +171,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(5, ChunkManager.Instance.AccessibleChunksIndices.Max);
 
             //chunk player is on:
-            Assert.AreEqual(0, ChunkManager.Instance.GetMapIndexOfLoadedChunk(ChunkManager.Instance.GetChunkPlayerIsOn()));
+            Assert.AreEqual(0, ChunkManager.Instance.GetMapIndexOfLoadedChunk(WarehouseManager.Instance.CurrentCar.CurrentChunk));
         }
 
         [UnityTest]

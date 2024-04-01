@@ -24,7 +24,7 @@ namespace Gumball
         [SerializeField] private Vector3 vehicleStartingRotation;
 
         [Space(5)]
-        [SerializeField] private Material skybox;
+        [SerializeField] private AssetReferenceT<Material> skyboxAssetReference;
         [SerializeField] private float chunkLoadDistance = 700;
 #if UNITY_EDITOR
         [SerializeField] private AssetReferenceGameObject[] chunkReferences;
@@ -34,7 +34,11 @@ namespace Gumball
         [SerializeField, ReadOnly] private string[] runtimeChunkAssetKeys;
         [SerializeField, ReadOnly] private List<int> chunksWithCustomLoadDistance = new();
         [SerializeField, ReadOnly] private ChunkMapData[] chunkData;
+        [Tooltip("The sum of all the chunk spline lengths.")]
+        [SerializeField, ReadOnly] private float totalLengthMetres;
 
+        private Material skybox;
+        
 #if UNITY_EDITOR
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
 #endif
@@ -46,20 +50,24 @@ namespace Gumball
         
         public List<int> ChunksWithCustomLoadDistance => chunksWithCustomLoadDistance;
         public float ChunkLoadDistance => chunkLoadDistance;
+        public float TotalLengthMetres => totalLengthMetres;
 
-        public void OnMapLoad()
+        public IEnumerator LoadSkybox()
         {
-            UpdateSkybox();
-        }
-
-        private void UpdateSkybox()
-        {
-            if (skybox == null)
+            if (string.IsNullOrEmpty(skyboxAssetReference.AssetGUID))
             {
                 Debug.LogWarning($"{name} is missing a skybox reference.");
-                return;
+                yield break;
             }
 
+            AsyncOperationHandle<Material> handle = Addressables.LoadAssetAsync<Material>(skyboxAssetReference);
+            yield return handle;
+
+            skybox = Instantiate(handle.Result);
+            
+            //release when the scene is changed/gameobject is destroyed
+            new GameObject("SkyboxAddressableReference").GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            
             RenderSettings.skybox = skybox;
         }
         
@@ -79,6 +87,7 @@ namespace Gumball
             Chunk[] runtimeChunks = new Chunk[chunkReferences.Length];
             try
             {
+                totalLengthMetres = 0;
                 chunksWithCustomLoadDistance.Clear();
                 chunkData = new ChunkMapData[chunkReferences.Length];
 
@@ -90,7 +99,7 @@ namespace Gumball
                 for (int index = 0; index < chunkReferences.Length; index++)
                 {
                     AssetReferenceGameObject chunkReference = chunkReferences[index];
-
+                    
                     //only create the runtime chunk once
                     if (!runtimeChunksCreated.Contains(chunkReference.editorAsset.name))
                     {
@@ -114,7 +123,7 @@ namespace Gumball
                     {
                         if (failed)
                             return;
-                        
+
                         GlobalLoggers.ChunkLogger.Log($"Instantiating {runtimeChunkAssetKeys[finalIndex]}");
                         GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero));
                         instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
@@ -123,6 +132,8 @@ namespace Gumball
 
                         if (chunk.HasCustomLoadDistance)
                             chunksWithCustomLoadDistance.Add(finalIndex);
+
+                        totalLengthMetres += chunk.SplineLengthCached;
                     };
                 }
 
