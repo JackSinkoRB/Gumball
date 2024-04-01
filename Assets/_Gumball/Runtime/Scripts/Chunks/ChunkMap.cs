@@ -54,7 +54,7 @@ namespace Gumball
 
         public IEnumerator LoadSkybox()
         {
-            if (skyboxAssetReference == null)
+            if (!skyboxAssetReference.IsValid())
             {
                 Debug.LogWarning($"{name} is missing a skybox reference.");
                 yield break;
