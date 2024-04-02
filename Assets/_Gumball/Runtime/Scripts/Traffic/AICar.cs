@@ -57,7 +57,9 @@ namespace Gumball
         [Header("Max speed")]
         [Tooltip("Does the car obey the current chunks speed limit?")]
         [SerializeField] private bool obeySpeedLimit = true;
-        [SerializeField, ConditionalField(nameof(obeySpeedLimit), true)] private float maxSpeed = 200;
+        [SerializeField, ConditionalField(nameof(obeySpeedLimit), true), InitializationField] private float maxSpeed = 200;
+        [Tooltip("A speed limit that overrides the max speed to be changed at runtime.")]
+        [SerializeField] private float tempSpeedLimit;
         
         [Header("Lanes")]
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
@@ -74,7 +76,6 @@ namespace Gumball
         
         [Header("Movement")]
         [SerializeField, ReadOnly] private float speed;
-        [SerializeField, ReadOnly] private float desiredSpeed;
         private bool wasMovingLastFrame;
         private const float stationarySpeed = 2;
         private bool isStationary => speed < stationarySpeed && !isAccelerating;
@@ -195,9 +196,8 @@ namespace Gumball
         private bool isPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
 
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
-        public float DesiredSpeed => desiredSpeed;
         public float Speed => speed;
-        public float MaxSpeed => isReversing ? maxReverseSpeed : (obeySpeedLimit ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed);
+        public float DesiredSpeed => tempSpeedLimit > 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed));
         public float CurrentLaneDistance => currentLaneDistance;
         
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
@@ -311,6 +311,16 @@ namespace Gumball
         {
             racingLineOffset = offset;
         }
+        
+        public void SetSpeed(float speedKmh)
+        {
+            Rigidbody.velocity = SpeedUtils.FromKmh(speedKmh) * transform.forward;
+        }
+        
+        public void SetTemporarySpeedLimit(float speedKmh)
+        {
+            tempSpeedLimit = speedKmh;
+        }
 
         public void Teleport(Vector3 position, Quaternion rotation)
         {
@@ -418,13 +428,6 @@ namespace Gumball
             
             Rigidbody.isKinematic = false;
         }
-        
-        private void OnChangeDesiredSpeed(float newSpeed)
-        {
-            desiredSpeed = newSpeed;
-            
-            if (debug) GlobalLoggers.AICarLogger.Log($"Changed desired speed to {desiredSpeed}");
-        }
 
         private void Move()
         {
@@ -450,8 +453,6 @@ namespace Gumball
             
             if (useObstacleAvoidance && autoDrive)
                 TryAvoidObstacles();
-            
-            UpdateDesiredSpeed();
             
             if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
                 CalculateSteerAngle();
@@ -539,13 +540,7 @@ namespace Gumball
             float engineRpmUnclamped = engineRpmRange.Min + averagePoweredWheelRPM * gearRatios[currentGear] * finalGearRatio;
             engineRpm = engineRpmRange.Clamp(engineRpmUnclamped);
         }
-        
-        private void UpdateDesiredSpeed()
-        {
-            if (!MaxSpeed.Approximately(DesiredSpeed))
-                OnChangeDesiredSpeed(MaxSpeed);
-        }
-        
+
         /// <summary>
         /// Check if colliding with another racer or player and is behind it.
         /// </summary>
@@ -591,7 +586,7 @@ namespace Gumball
             else if (autoDrive && recoveringFromCollision)
                 isAccelerating = false;
             //can't accelerate if above desired speed
-            else if (speed > desiredSpeed)
+            else if (speed > DesiredSpeed)
                 isAccelerating = false;
             else if (isPushingAnotherRacer)
                 isAccelerating = false;
@@ -632,7 +627,7 @@ namespace Gumball
         
         private void CalculateSteerAngle()
         {
-            float speedPercent = Mathf.Clamp01(speed / MaxSpeed);
+            float speedPercent = Mathf.Clamp01(speed / DesiredSpeed);
             float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : maxSteerAngleCurve.Evaluate(speedPercent);
 
             if (autoDrive)
@@ -669,9 +664,9 @@ namespace Gumball
 
             //is speeding over the desired speed? 
             const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
-            if (autoDrive && speed > desiredSpeed + speedingLeeway)
+            if (autoDrive && speed > DesiredSpeed + speedingLeeway)
             {
-                speedToBrakeTo = desiredSpeed;
+                speedToBrakeTo = DesiredSpeed;
                 isBraking = true;
             }
 

@@ -30,6 +30,7 @@ namespace Gumball
         [SerializeField] private RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] protected float raceDistanceMetres;
+        [SerializeField] private float racersStartingSpeed = 70;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
@@ -191,6 +192,13 @@ namespace Gumball
             currentRacers[^1] = WarehouseManager.Instance.CurrentCar;
 
             yield return new WaitUntil(() => handles.AreAllComplete());
+            
+            //set initial speeds
+            foreach (AICar racer in currentRacers)
+            {
+                racer.SetSpeed(racersStartingSpeed);
+                racer.SetTemporarySpeedLimit(racersStartingSpeed);
+            }
         }
 
         private void InitialiseRaceMode()
