@@ -139,6 +139,7 @@ namespace Gumball
 
                 AICar car = TrafficCarSpawner.Instance.SpawnCar(position, rotation);
                 car.SetLaneDistance(randomLaneDistance + randomLaneOffset.RandomInRange());
+                car.SetSpeed(car.DesiredSpeed);
                 break;
             }
         }
