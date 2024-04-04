@@ -19,13 +19,12 @@ namespace Gumball
         {
             [SerializeField] private AssetReferenceGameObject assetReference;
             [SerializeField] private PositionAndRotation startingPosition;
-            [SerializeField] private float racingLineOffset;
 
             public AssetReferenceGameObject AssetReference => assetReference;
             public PositionAndRotation StartingPosition => startingPosition;
-            public float RacingLineOffset => racingLineOffset;
         }
-        
+
+        [SerializeField] private float introTime = 3;
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
         [SerializeField] private RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
@@ -144,6 +143,20 @@ namespace Gumball
             yield return LoadSession();
 
             PanelManager.GetPanel<LoadingPanel>().Hide();
+
+            yield return IntroCinematicIE();
+        }
+
+        private IEnumerator IntroCinematicIE()
+        {
+            if (introTime > 0)
+            {
+                WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
+
+                yield return new WaitForSeconds(introTime);
+            }
+
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
         }
 
         private void SetupPlayerCar(ChunkMap chunkMap)
@@ -159,8 +172,6 @@ namespace Gumball
             Vector3 startingRotation = chunkMap.VehicleStartingRotation;
             currentCarRigidbody.Move(startingPosition, Quaternion.Euler(startingRotation));
             GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {startingPosition}");
-            
-            WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
         }
         
         private IEnumerator InitialiseRacers()
@@ -181,8 +192,6 @@ namespace Gumball
 
                     racer.InitialiseAsRacer();
 
-                    racer.SetRacingLineOffset(data.RacingLineOffset);
-
                     currentRacers[finalIndex] = racer;
                 };
                 handles.Add(handle);
@@ -197,7 +206,6 @@ namespace Gumball
             foreach (AICar racer in currentRacers)
             {
                 racer.SetSpeed(racersStartingSpeed);
-                racer.SetTemporarySpeedLimit(racersStartingSpeed);
             }
         }
 

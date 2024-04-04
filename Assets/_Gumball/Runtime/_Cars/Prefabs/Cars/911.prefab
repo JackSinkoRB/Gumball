@@ -6668,6 +6668,8 @@ MonoBehaviour:
   isPlayerDrivingEnabled: 0
   carIndex: 0
   id: 0
+  frontOfCarPosition: {x: 0, y: 1, z: 2}
+  carWidth: 2
   wheelConfiguration: 0
   frontWheelMeshes:
   - {fileID: 9214566522391282641}
@@ -6684,16 +6686,16 @@ MonoBehaviour:
   autoDrive: 1
   obeySpeedLimit: 0
   maxSpeed: 260
+  tempSpeedLimit: 0
   useRacingLine: 1
   currentLaneDistance: 0
-  racingLineOffset: 0
+  targetPositionOffset: 0
   dragWhenAccelerating: 0
   dragWhenIdle: 0.15
   dragWhenBraking: 1
   dragWhenHandbraking: 0.5
   angularDragWhenHandbraking: 7
   speed: 0
-  desiredSpeed: 0
   torqueCurve:
     serializedVersion: 2
     m_Curve:
@@ -6762,7 +6764,7 @@ MonoBehaviour:
     Min: 20
     Max: 70
   steerSpeed: 2.5
-  autoDriveSteerSpeed: 12
+  autoDriveSteerSpeed: 1000
   releaseSpeed: 15
   visualSteerSpeed: 5
   autoDriveMaxSteerAngle: 65
@@ -6807,7 +6809,7 @@ MonoBehaviour:
       outWeight: 0.037499998
     - serializedVersion: 3
       time: 50
-      value: 75
+      value: 65
       inSlope: -0.000001592221
       outSlope: -0.000001592221
       tangentMode: 0
@@ -6826,6 +6828,7 @@ MonoBehaviour:
   colliders: {fileID: 6830272080298800554}
   collisionRecoverDuration: 0
   inCollision: 0
+  numberOfCollisions: 0
   isPushingAnotherRacer: 0
   racersCollidingWith: []
   brakeForObstacles: 0
@@ -6847,95 +6850,10 @@ MonoBehaviour:
     Min: 10
     Max: 60
   useObstacleAvoidance: 1
-  speedToBrakeToIfBlocked: 50
-  obstacleAvoidanceRaycastLayers:
-  - raycasts:
-    - offset: 0
-      raycastLength: 13
-      startDistance: 2
-      detectorSize: {x: 0.75, y: 1, z: 0.75}
-      detectionLayers:
-        serializedVersion: 2
-        m_Bits: 8704
-      isBlocked: 0
-      angle: 0
-      offsetVector: {x: 0, y: 0, z: 0}
-  - raycasts:
-    - offset: -2
-      raycastLength: 10
-      startDistance: 2
-      detectorSize: {x: 0.75, y: 1, z: 0.75}
-      detectionLayers:
-        serializedVersion: 2
-        m_Bits: 8704
-      isBlocked: 0
-      angle: 0
-      offsetVector: {x: 0, y: 0, z: 0}
-    - offset: 2
-      raycastLength: 10
-      startDistance: 2
-      detectorSize: {x: 0.75, y: 1, z: 0.75}
-      detectionLayers:
-        serializedVersion: 2
-        m_Bits: 8704
-      isBlocked: 0
-      angle: 0
-      offsetVector: {x: 0, y: 0, z: 0}
-  - raycasts:
-    - offset: -4
-      raycastLength: 7
-      startDistance: 2
-      detectorSize: {x: 0.75, y: 1, z: 0.75}
-      detectionLayers:
-        serializedVersion: 2
-        m_Bits: 8704
-      isBlocked: 0
-      angle: 0
-      offsetVector: {x: 0, y: 0, z: 0}
-    - offset: 4
-      raycastLength: 7
-      startDistance: 2
-      detectorSize: {x: 0.75, y: 1, z: 0.75}
-      detectionLayers:
-        serializedVersion: 2
-        m_Bits: 8704
-      isBlocked: 0
-      angle: 0
-      offsetVector: {x: 0, y: 0, z: 0}
-  obstacleAvoidanceRaycastLayerWhenBlocked:
-    raycasts:
-    - offset: 0
-      raycastLength: 3
-      startDistance: 2
-      detectorSize: {x: 0.75, y: 1, z: 0.75}
-      detectionLayers:
-        serializedVersion: 2
-        m_Bits: 8704
-      isBlocked: 0
-      angle: 0
-      offsetVector: {x: 0, y: 0, z: 0}
-    - offset: -5
-      raycastLength: 3
-      startDistance: 2
-      detectorSize: {x: 0.75, y: 1, z: 0.75}
-      detectionLayers:
-        serializedVersion: 2
-        m_Bits: 8704
-      isBlocked: 0
-      angle: 0
-      offsetVector: {x: 0, y: 0, z: 0}
-    - offset: 5
-      raycastLength: 3
-      startDistance: 2
-      detectorSize: {x: 0.75, y: 1, z: 0.75}
-      detectionLayers:
-        serializedVersion: 2
-        m_Bits: 8704
-      isBlocked: 0
-      angle: 0
-      offsetVector: {x: 0, y: 0, z: 0}
-  currentLayerIndex: 0
-  debug: 0
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 58112
+  speedToBrakeToIfBlocked: 65
   isInitialised: 0
   currentChunkCached: {fileID: 0}
   isFrozen: 0

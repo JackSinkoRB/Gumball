@@ -18,6 +18,7 @@ namespace Gumball
             PaintableMesh = 12,
             Barrier = 13,
             RacerCar = 14,
+            MovementPath = 15,
         }
         
         public static LayerMask AllCarLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerCar | 1 << (int)Layer.RacerCar;

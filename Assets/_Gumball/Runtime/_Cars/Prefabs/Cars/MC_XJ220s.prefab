@@ -374,7 +374,7 @@ Rigidbody:
   m_Mass: 1080
   m_Drag: 0.05
   m_AngularDrag: 3
-  m_CenterOfMass: {x: 0, y: 0.3, z: -0.67}
+  m_CenterOfMass: {x: 0, y: 0.7, z: -0.37}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
@@ -424,6 +424,7 @@ MonoBehaviour:
   autoDrive: 1
   obeySpeedLimit: 0
   maxSpeed: 350
+  tempSpeedLimit: 0
   useRacingLine: 1
   currentLaneDistance: 0
   racingLineOffset: 0
@@ -433,7 +434,6 @@ MonoBehaviour:
   dragWhenHandbraking: 0.5
   angularDragWhenHandbraking: 6
   speed: 0
-  desiredSpeed: 0
   torqueCurve:
     serializedVersion: 2
     m_Curve:
@@ -497,12 +497,12 @@ MonoBehaviour:
   isReversing: 0
   movementTargetDistance:
     Min: 5
-    Max: 10
+    Max: 20
   movementTargetDistanceSpeedFactors:
     Min: 20
-    Max: 90
+    Max: 200
   steerSpeed: 2.5
-  autoDriveSteerSpeed: 12
+  autoDriveSteerSpeed: 1000
   releaseSpeed: 15
   visualSteerSpeed: 5
   autoDriveMaxSteerAngle: 65
@@ -679,6 +679,11 @@ MonoBehaviour:
   isInitialised: 0
   currentChunkCached: {fileID: 0}
   isFrozen: 0
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 58112
+  frontOfCarPosition: {x: 0, y: 1, z: 2.3}
+  carWidth: 2
 --- !u!1 &1547205152086652757
 GameObject:
   m_ObjectHideFlags: 0
