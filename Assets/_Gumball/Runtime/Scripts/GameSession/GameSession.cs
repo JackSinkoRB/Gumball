@@ -116,8 +116,7 @@ namespace Gumball
         protected virtual IEnumerator LoadSession()
         {
             //setup racers
-            if (racerData != null && racerData.Length > 0)
-                yield return InitialiseRacers();
+            yield return InitialiseRacers();
             
             //setup finish line
             if (raceDistanceMetres > 0)
@@ -157,7 +156,7 @@ namespace Gumball
             }
 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-
+            
             foreach (AICar racer in currentRacers)
             {
                 //tween the racing line offset to 0 for optimal driving
@@ -182,6 +181,8 @@ namespace Gumball
         
         private IEnumerator InitialiseRacers()
         {
+            racerData ??= Array.Empty<RacerSessionData>();
+                
             currentRacers = new AICar[racerData.Length + 1];
             List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
 
@@ -229,15 +230,12 @@ namespace Gumball
             {
                 racer.gameObject.AddComponent<SplineTravelDistanceCalculator>();
             }
-            
+
             SetupFinishLine();
         }
         
         private void RemoveDistanceCalculators()
         {
-            if (currentRacers == null)
-                return;
-
             foreach (AICar racer in currentRacers)
             {
                 Destroy(racer.gameObject.GetComponent<SplineTravelDistanceCalculator>());

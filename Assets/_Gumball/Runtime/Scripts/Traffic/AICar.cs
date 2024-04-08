@@ -71,10 +71,13 @@ namespace Gumball
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
+        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private ChunkTrafficManager.LaneDirection currentLaneDirection;
         [ConditionalField(nameof(autoDrive), nameof(useRacingLine)), SerializeField] private float racingLineOffset;
         [ConditionalField(nameof(autoDrive)), SerializeField] private float targetPositionOffset; //show in inspector
         
         private Tween currentRacingLineOffsetTween;
+
+        public float CurrentLaneDistance => currentLaneDistance;
         
         [Header("Drag")]
         [SerializeField] private float dragWhenAccelerating;
@@ -203,14 +206,13 @@ namespace Gumball
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => collisionRecoverDuration > 0 && (inCollision || timeSinceCollision < collisionRecoverDuration);
-        private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
+        private bool faceForward => useRacingLine || currentLaneDirection == ChunkTrafficManager.LaneDirection.FORWARD;
         private bool isRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
         private bool isPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
 
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
         public float Speed => speed;
         public float DesiredSpeed => tempSpeedLimit > 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed));
-        public float CurrentLaneDistance => currentLaneDistance;
         
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk CurrentChunk
@@ -359,9 +361,10 @@ namespace Gumball
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
         }
 
-        public void SetLaneDistance(float laneDistance)
+        public void SetLaneDistance(float laneDistance, ChunkTrafficManager.LaneDirection direction)
         {
             currentLaneDistance = laneDistance;
+            currentLaneDirection = direction;
         }
         
         private void FixedUpdate()
@@ -1253,7 +1256,7 @@ namespace Gumball
             }
             else
             {
-                var (position, rotation) = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
+                var (position, rotation) = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance, currentLaneDirection);
                 return (splineSampleAhead.Value.Item2, position, rotation, splineSampleAhead.Value.Item1);
             }
 
