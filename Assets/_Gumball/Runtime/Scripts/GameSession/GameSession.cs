@@ -38,6 +38,8 @@ namespace Gumball
         private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         private ChunkMap currentChunkMapCached;
 
+        private Coroutine sessionCoroutine;
+        
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
@@ -48,7 +50,7 @@ namespace Gumball
         public void StartSession()
         {
             GameSessionManager.Instance.SetCurrentSession(this);
-            CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
+            sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
 
         public IEnumerator LoadChunkMap()
@@ -91,6 +93,9 @@ namespace Gumball
         {
             inProgress = false;
 
+            if (sessionCoroutine != null)
+                CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
+            
             OnSessionEnd();
             
             GameSessionManager.Instance.SetCurrentSession(null);
@@ -146,39 +151,49 @@ namespace Gumball
             yield return IntroCinematicIE();
         }
 
-        private IEnumerator IntroCountdownIE()
-        {
-            PanelManager.GetPanel<SessionIntroPanel>().Show();
-            
-            int currentIntroTime = Mathf.CeilToInt(introTime);
-            while (currentIntroTime > 0)
-            {
-                PanelManager.GetPanel<SessionIntroPanel>().UpdateCountdownLabel($"{currentIntroTime}");
-                const int timeBetweenCountdownUpdates = 1;
-                yield return new WaitForSeconds(timeBetweenCountdownUpdates);
-                    
-                currentIntroTime -= timeBetweenCountdownUpdates;
-            }
-            
-            PanelManager.GetPanel<SessionIntroPanel>().Hide();
-        }
-
         private IEnumerator IntroCinematicIE()
         {
             if (introTime > 0)
             {
+                DrivingCameraController.Instance.SetState(DrivingCameraController.Instance.IntroState);
+                DrivingCameraController.Instance.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
+                DrivingCameraController.Instance.SkipTransition();
+                
+                //start the transition to driving start
+                DrivingCameraController.Instance.SetState(DrivingCameraController.Instance.DrivingState);
+                
                 WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
                 
                 yield return IntroCountdownIE();
             }
 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-            
+
+            DrivingCameraController.Instance.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
+            DrivingCameraController.Instance.SetState(DrivingCameraController.Instance.DrivingState);
+
             foreach (AICar racer in currentRacers)
             {
                 //tween the racing line offset to 0 for optimal driving
                 racer.SetRacingLineOffset(0, 3);
             }
+        }
+        
+        private IEnumerator IntroCountdownIE()
+        {
+            PanelManager.GetPanel<SessionIntroPanel>().Show();
+            
+            int remainingIntroTime = Mathf.CeilToInt(introTime);
+            while (remainingIntroTime > 0)
+            {
+                PanelManager.GetPanel<SessionIntroPanel>().UpdateCountdownLabel($"{remainingIntroTime}");
+                const int timeBetweenCountdownUpdates = 1;
+                yield return new WaitForSeconds(timeBetweenCountdownUpdates);
+                    
+                remainingIntroTime -= timeBetweenCountdownUpdates;
+            }
+            
+            PanelManager.GetPanel<SessionIntroPanel>().Hide();
         }
 
         private void SetupPlayerCar(ChunkMap chunkMap)
