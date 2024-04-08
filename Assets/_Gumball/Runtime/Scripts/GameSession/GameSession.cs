@@ -146,13 +146,30 @@ namespace Gumball
             yield return IntroCinematicIE();
         }
 
+        private IEnumerator IntroCountdownIE()
+        {
+            PanelManager.GetPanel<SessionIntroPanel>().Show();
+            
+            int currentIntroTime = Mathf.CeilToInt(introTime);
+            while (currentIntroTime > 0)
+            {
+                PanelManager.GetPanel<SessionIntroPanel>().UpdateCountdownLabel($"{currentIntroTime}");
+                const int timeBetweenCountdownUpdates = 1;
+                yield return new WaitForSeconds(timeBetweenCountdownUpdates);
+                    
+                currentIntroTime -= timeBetweenCountdownUpdates;
+            }
+            
+            PanelManager.GetPanel<SessionIntroPanel>().Hide();
+        }
+
         private IEnumerator IntroCinematicIE()
         {
             if (introTime > 0)
             {
                 WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-
-                yield return new WaitForSeconds(introTime);
+                
+                yield return IntroCountdownIE();
             }
 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
