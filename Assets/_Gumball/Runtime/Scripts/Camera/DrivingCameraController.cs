@@ -105,12 +105,15 @@ namespace Gumball
             if (targetRigidbody != null)
                 targetRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
 
-            if (snap)
+            if (snap && target != null)
                 CurrentState.SnapToTarget(this, target);
         }
 
         private void SetPositionAndRotation()
         {
+            if (target == null)
+                return;
+            
             CameraTransition currentTransition = GetCurrentTransition();
             if (currentTransition == null)
             {
