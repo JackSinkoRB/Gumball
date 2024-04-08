@@ -27,5 +27,14 @@ namespace Gumball
             return new Vector3(vector2.x, 0, vector2.y);
         }
 
+        public static bool IsFurtherInDirection(this Vector3 vector, Vector3 other, Vector3 direction)
+        {
+            float distanceA = Vector3.Dot(direction, vector);
+            float distanceB = Vector3.Dot(direction, other);
+
+            bool isFurtherInDirection = distanceA > distanceB;
+            return isFurtherInDirection;
+        }
+
     }
 }

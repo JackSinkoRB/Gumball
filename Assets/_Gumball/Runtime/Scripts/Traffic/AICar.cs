@@ -71,8 +71,11 @@ namespace Gumball
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
-        [ConditionalField(nameof(autoDrive)), SerializeField] private float targetPositionOffset;
-
+        [ConditionalField(nameof(autoDrive), nameof(useRacingLine)), SerializeField] private float racingLineOffset;
+        [ConditionalField(nameof(autoDrive)), SerializeField] private float targetPositionOffset; //show in inspector
+        
+        private Tween currentRacingLineOffsetTween;
+        
         [Header("Drag")]
         [SerializeField] private float dragWhenAccelerating;
         [SerializeField] private float dragWhenIdle = 0.15f;
@@ -113,10 +116,6 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isReversing;
         
         [Header("Steering")]
-        [ConditionalField(nameof(autoDrive)), SerializeField] private MinMaxFloat movementTargetDistance = new(5, 10);
-        [Tooltip("At less than or equal to 'min' km/h, the movementTargetDistance is min.\n" +
-                 "At greater than or equal to 'max' km/h, the movementTargetDistance is max.")]
-        [ConditionalField(nameof(autoDrive)), SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(20, 90);
         [Tooltip("The speed that the wheel collider turns if not auto driving.")]
         [ConditionalField(nameof(autoDrive), true), SerializeField] private float steerSpeed = 2.5f;
         [Tooltip("The speed that the wheel collider turns if auto driving.")]
@@ -442,6 +441,19 @@ namespace Gumball
             
             Rigidbody.isKinematic = false;
         }
+
+        public void SetRacingLineOffset(float offset, float interpolationDuration = 0)
+        {
+            currentRacingLineOffsetTween?.Kill();
+
+            if (interpolationDuration == 0)
+            {
+                racingLineOffset = offset;
+                return;
+            }
+
+            currentRacingLineOffsetTween = DOTween.To(() => racingLineOffset, x => racingLineOffset = x, offset, interpolationDuration); 
+        }
         
         private void Move()
         {
@@ -458,6 +470,14 @@ namespace Gumball
                 }
 
                 targetPosition = targetPos.Value.Item2;
+
+                //check to add racing line offset
+                if (useRacingLine)
+                {
+                    SplineSample targetPosSplineSample = targetPos.Value.Item4;
+                    Vector3 racingLineOffsetVector = transform.right * racingLineOffset;
+                    targetPosition += racingLineOffsetVector;
+                }
             }
             else
             {
@@ -595,15 +615,7 @@ namespace Gumball
         {
             Vector3 frontOfCar = transform.position + frontOfCarPosition;
             
-            //extend the target position to cover the distance between the 2 positions
-            float distanceBetweenPositions = Vector3.Distance(frontOfCar, position);
-            Vector3 directionToTargetPosition = Vector3.Normalize(targetPosition - transform.position);
-            Vector3 targetPositionExtended = targetPosition + directionToTargetPosition * distanceBetweenPositions;
-            
-            float distanceToTargetSqr = Vector3.SqrMagnitude(frontOfCar - targetPositionExtended);
-            float otherPositionDistanceToTargetSqr = Vector3.SqrMagnitude(position - targetPositionExtended);
-            
-            bool isAhead = otherPositionDistanceToTargetSqr < distanceToTargetSqr;
+            bool isAhead = position.IsFurtherInDirection(frontOfCar, transform.forward);
             return isAhead;
         }
         
@@ -1076,6 +1088,9 @@ namespace Gumball
                     AICar hitCar = hit.rigidbody.gameObject.GetComponent<AICar>();
                     if (hitCar != null)
                     {
+                        if (isPlayer && hitCar.isRacer)
+                            continue; //when player is autodriving, don't try avoid racers
+                        
                         bool otherCarIsAhead = IsPositionAhead(hit.transform.position + hitCar.frontOfCarPosition);
                         if (!otherCarIsAhead)
                             continue; //don't include if this car is ahead of the other
@@ -1135,8 +1150,7 @@ namespace Gumball
         private void SetTargetPositionOffset(float offset)
         {
             targetPositionOffset = offset;
-            SplineSample targetPosSplineSample = targetPos.Value.Item4;
-            Vector3 offsetVector = targetPosSplineSample.right * offset;
+            Vector3 offsetVector = transform.right * offset;
             targetPosition += offsetVector;
         }
         

@@ -154,6 +154,18 @@ namespace Gumball
             return (finalPos, rotation);
         }
         
+        public float GetOffsetFromRacingLine(Vector3 fromPoint)
+        {
+            var (splineSample, distanceSqr) = racingLine.SampleCollection.GetClosestSampleOnSpline(fromPoint);
+            float distance = Mathf.Sqrt(distanceSqr);
+            
+            //is the position to the left or right of the spline?
+            bool isRight = fromPoint.IsFurtherInDirection(splineSample.position, splineSample.right);
+            float offsetDirection = isRight ? 1 : -1;
+            
+            return distance * offsetDirection;
+        }
+        
         private bool CanSpawnCarAtPosition(Vector3 position, float laneDistance)
         {
             const float minDistanceSqr = minDistanceRequiredToSpawn * minDistanceRequiredToSpawn;
