@@ -118,8 +118,6 @@ namespace Gumball
         [Header("Steering")]
         [Tooltip("The speed that the wheel collider turns if not auto driving.")]
         [ConditionalField(nameof(autoDrive), true), SerializeField] private float steerSpeed = 2.5f;
-        [Tooltip("The speed that the wheel collider turns if auto driving.")]
-        [ConditionalField(nameof(autoDrive)), SerializeField] private float autoDriveSteerSpeed = 10;
         [Tooltip("This allows for a different steer speed when the steering input has been released.")]
         [ConditionalField(nameof(autoDrive), true), SerializeField] private float releaseSpeed = 15;
         [Tooltip("The speed that the wheel mesh is interpolated to the desired steer angle. This is different to the steer speed of the wheel collider.")]
@@ -676,7 +674,7 @@ namespace Gumball
             {
                 Vector3 directionToTarget = targetPosition - transform.position;
                 float angle = Mathf.Clamp(-Vector2.SignedAngle(Rigidbody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
-                desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, autoDriveSteerSpeed * Time.deltaTime);
+                desiredSteerAngle = angle;
             }
             else
             {
