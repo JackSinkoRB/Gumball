@@ -22,7 +22,7 @@ namespace Gumball
         private float yVelocity;
         private float zVelocity;
 
-        public (Vector3, Vector3) Calculate(DrivingCameraController controller, Transform target)
+        public (Vector3, Vector3) Calculate(CameraController controller, Transform target)
         {
             desiredRotationAngle = target.eulerAngles.y + horizontalAngleOffset;
             currentRotationAngle = controller.transform.eulerAngles.y;
@@ -38,7 +38,7 @@ namespace Gumball
             return (desiredPosition, lookAtPosition);
         }
 
-        public void SnapToTarget(DrivingCameraController controller, Transform target)
+        public void SnapToTarget(CameraController controller, Transform target)
         {
             desiredRotationAngle = target.eulerAngles.y + horizontalAngleOffset;
             
