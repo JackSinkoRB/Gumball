@@ -112,7 +112,10 @@ namespace Gumball
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
-
+            
+            //come to a stop
+            WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
+            
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
