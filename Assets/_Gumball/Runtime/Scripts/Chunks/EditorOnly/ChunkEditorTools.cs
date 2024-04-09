@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Dreamteck.Splines;
+using JBooth.VertexPainterPro;
 using MyBox;
 #if UNITY_EDITOR
 using Gumball.Editor;
@@ -267,12 +268,26 @@ namespace Gumball
             
             GlobalLoggers.ChunkLogger.Log($"Recreating terrain for '{chunk.name}'");
             Material[] previousMaterials = chunk.TerrainHighLOD.GetComponent<MeshRenderer>().sharedMaterials;
+
+            //check if there's additional vertex color data
+            VertexInstanceStream vertexInstanceStream = chunk.TerrainHighLOD.GetComponent<VertexInstanceStream>();
+            VertexInstanceStreamData vertexData = null;
+            if (vertexInstanceStream != null)
+                vertexData = vertexInstanceStream.Data;
+
             DestroyImmediate(chunk.TerrainHighLOD);
             DestroyImmediate(chunk.TerrainLowLOD);
 
             chunk.SplineComputer.RebuildImmediate();
 
             RecreateTerrainLODs();
+
+            if (vertexData != null)
+            {
+                //copy the vertex color data
+                //TODO: generate vertex color data for the low LOD
+                chunk.TerrainHighLOD.GetOrAddComponent<VertexInstanceStream>().SetData(vertexData);
+            }
             
             if (chunkBefore != null)
                 ChunkUtils.ConnectChunks(chunkBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunkBefore, chunk));

@@ -12,70 +12,45 @@ namespace JBooth.VertexPainterPro
    [ExecuteInEditMode]
    public class VertexInstanceStream : MonoBehaviour
    {
-      public bool keepRuntimeData = false;
+      
+      public bool keepRuntimeData;
 
+      public VertexInstanceStreamData Data { get; private set; } = new();
 
-      [HideInInspector]
-      [SerializeField]
-      private Color[] _colors;
-
-      [HideInInspector]
-      [SerializeField]
-      private List<Vector4> _uv0;
-
-      [HideInInspector]
-      [SerializeField]
-      private List<Vector4> _uv1;
-
-      [HideInInspector]
-      [SerializeField]
-      private List<Vector4> _uv2;
-
-      [HideInInspector]
-      [SerializeField]
-      private List<Vector4> _uv3;
-
-      [HideInInspector]
-      [SerializeField]
-      private Vector3[] _positions;
-
-      [HideInInspector]
-      [SerializeField]
-      private Vector3[] _normals;
-
-      [HideInInspector]
-      [SerializeField]
-      private Vector4[] _tangents;
-
+      public void SetData(VertexInstanceStreamData data)
+      {
+         Data = data;
+      }
+      
       public Color[] colors 
       { 
          get 
          { 
-            return _colors; 
+            return Data.Colors; 
          }
          set
          {
-            enforcedColorChannels = (! (_colors == null || (value != null && _colors.Length != value.Length)));
-            _colors = value;
+            enforcedColorChannels = (! (Data.Colors == null || (value != null && Data.Colors.Length != value.Length)));
+            Data.Colors = value;
             Apply();
          }
       }
 
-      public List<Vector4> uv0 { get { return _uv0; } set { _uv0 = value; Apply(); } }
-      public List<Vector4> uv1 { get { return _uv1; } set { _uv1 = value; Apply(); } }
-      public List<Vector4> uv2 { get { return _uv2; } set { _uv2 = value; Apply(); } }
-      public List<Vector4> uv3 { get { return _uv3; } set { _uv3 = value; Apply(); } }
-      public Vector3[] positions { get { return _positions; } set { _positions = value; Apply(); } }
-      public Vector3[] normals { get { return _normals; } set { _normals = value; Apply(); } }
-      public Vector4[] tangents { get { return _tangents; } set { _tangents = value; Apply(); } }
+      public List<Vector4> uv0 { get { return Data.Uv0; } set { Data.Uv0 = value; Apply(); } }
+      public List<Vector4> uv1 { get { return Data.Uv1; } set { Data.Uv1 = value; Apply(); } }
+      public List<Vector4> uv2 { get { return Data.Uv2; } set { Data.Uv2 = value; Apply(); } }
+      public List<Vector4> uv3 { get { return Data.Uv3; } set { Data.Uv3 = value; Apply(); } }
+      public Vector3[] positions { get { return Data.Positions; } set { Data.Positions = value; Apply(); } }
+      public Vector3[] normals { get { return Data.Normals; } set { Data.Normals = value; Apply(); } }
+      public Vector4[] tangents { get { return Data.Tangents; } set { Data.Tangents = value; Apply(); } }
 
       #if UNITY_EDITOR
       Vector3[] cachedPositions;
       public Vector3 GetSafePosition(int index)
       {
-         if (_positions != null && index < _positions.Length)
+         if (Data.Positions != null && index < Data.Positions.Length)
          {
-            return _positions[index];
+            return Data.Positions[index];
          }
          if (cachedPositions == null)
          {
@@ -97,9 +72,9 @@ namespace JBooth.VertexPainterPro
       Vector3[] cachedNormals;
       public Vector3 GetSafeNormal(int index)
       {
-         if (_normals != null && index < _normals.Length)
+         if (Data.Normals != null && index < Data.Normals.Length)
          {
-            return _normals[index];
+            return Data.Normals[index];
          }
          if (cachedPositions == null)
          {
@@ -121,9 +96,9 @@ namespace JBooth.VertexPainterPro
       Vector4[] cachedTangents;
       public Vector4 GetSafeTangent(int index)
       {
-         if (_tangents != null && index < _tangents.Length)
+         if (Data.Tangents != null && index < Data.Tangents.Length)
          {
-            return _tangents[index];
+            return Data.Tangents[index];
          }
          if (cachedTangents == null)
          {
@@ -192,7 +167,7 @@ namespace JBooth.VertexPainterPro
          if (keepRuntimeData)
          {
             var mf = GetComponent<MeshFilter>();
-            _positions = mf.sharedMesh.vertices;
+            Data.Positions = mf.sharedMesh.vertices;
          }
       }
 
@@ -223,206 +198,206 @@ namespace JBooth.VertexPainterPro
       }
 
       #if UNITY_EDITOR
-      public void SetColor(Color c, int count) { _colors = new Color[count]; for (int i = 0; i < count; ++i) { _colors[i] = c; } Apply(); }
-      public void SetUV0(Vector4 uv, int count) { _uv0 = new List<Vector4>(count); for (int i = 0; i < count; ++i) { _uv0.Add(uv); } Apply(); }
-      public void SetUV1(Vector4 uv, int count) { _uv1 = new List<Vector4>(count); for (int i = 0; i < count; ++i) { _uv1.Add(uv); } Apply(); }
-      public void SetUV2(Vector4 uv, int count) { _uv2 = new List<Vector4>(count); for (int i = 0; i < count; ++i) { _uv2.Add(uv); } Apply(); }
-      public void SetUV3(Vector4 uv, int count) { _uv3 = new List<Vector4>(count); for (int i = 0; i < count; ++i) { _uv3.Add(uv); } Apply(); }
+      public void SetColor(Color c, int count) { Data.Colors = new Color[count]; for (int i = 0; i < count; ++i) { Data.Colors[i] = c; } Apply(); }
+      public void SetUV0(Vector4 uv, int count) { Data.Uv0 = new List<Vector4>(count); for (int i = 0; i < count; ++i) { Data.Uv0.Add(uv); } Apply(); }
+      public void SetUV1(Vector4 uv, int count) { Data.Uv1 = new List<Vector4>(count); for (int i = 0; i < count; ++i) { Data.Uv1.Add(uv); } Apply(); }
+      public void SetUV2(Vector4 uv, int count) { Data.Uv2 = new List<Vector4>(count); for (int i = 0; i < count; ++i) { Data.Uv2.Add(uv); } Apply(); }
+      public void SetUV3(Vector4 uv, int count) { Data.Uv3 = new List<Vector4>(count); for (int i = 0; i < count; ++i) { Data.Uv3.Add(uv); } Apply(); }
 
       public void SetUV0_XY(Vector2 uv, int count)
       {
-         if (_uv0 == null || _uv0.Count != count)
+         if (Data.Uv0 == null || Data.Uv0.Count != count)
          {
-            _uv0 = new List<Vector4>(count);
+            Data.Uv0 = new List<Vector4>(count);
             for (int i = 0; i < count; ++i)
             {
-               _uv0[i] = Vector4.zero;
+               Data.Uv0[i] = Vector4.zero;
             }
          }
 
          for (int i = 0; i < count; ++i) 
          { 
-            Vector4 v = _uv0[i];
+            Vector4 v = Data.Uv0[i];
             v.x = uv.x;
             v.y = uv.y;
-            _uv0[i] = v;
+            Data.Uv0[i] = v;
          }
          Apply();
       }
 
       public void SetUV0_ZW(Vector2 uv, int count)
       {
-         if (_uv0 == null || _uv0.Count != count)
+         if (Data.Uv0 == null || Data.Uv0.Count != count)
          {
-            _uv0 = new List<Vector4>(count);
+            Data.Uv0 = new List<Vector4>(count);
             for (int i = 0; i < count; ++i)
             {
-               _uv0[i] = Vector4.zero;
+               Data.Uv0[i] = Vector4.zero;
             }
          }
 
          for (int i = 0; i < count; ++i) 
          { 
-            Vector4 v = _uv0[i];
+            Vector4 v = Data.Uv0[i];
             v.z = uv.x;
             v.w = uv.y;
-            _uv0[i] = v;
+            Data.Uv0[i] = v;
          }
          Apply();
       }
 
       public void SetUV1_XY(Vector2 uv, int count)
       {
-         if (_uv1 == null || _uv1.Count != count)
+         if (Data.Uv1 == null || Data.Uv1.Count != count)
          {
-            _uv1 = new List<Vector4>(count);
+            Data.Uv1 = new List<Vector4>(count);
             for (int i = 0; i < count; ++i)
             {
-               _uv1[i] = Vector4.zero;
+               Data.Uv1[i] = Vector4.zero;
             }
          }
 
          for (int i = 0; i < count; ++i) 
          { 
-            Vector4 v = _uv1[i];
+            Vector4 v = Data.Uv1[i];
             v.x = uv.x;
             v.y = uv.y;
-            _uv1[i] = v;
+            Data.Uv1[i] = v;
          }
          Apply();
       }
 
       public void SetUV1_ZW(Vector2 uv, int count)
       {
-         if (_uv1 == null || _uv1.Count != count)
+         if (Data.Uv1 == null || Data.Uv1.Count != count)
          {
-            _uv1 = new List<Vector4>(count);
+            Data.Uv1 = new List<Vector4>(count);
             for (int i = 0; i < count; ++i)
             {
-               _uv1[i] = Vector4.zero;
+               Data.Uv1[i] = Vector4.zero;
             }
          }
 
          for (int i = 0; i < count; ++i) 
          { 
-            Vector4 v = _uv1[i];
+            Vector4 v = Data.Uv1[i];
             v.z = uv.x;
             v.w = uv.y;
-            _uv1[i] = v;
+            Data.Uv1[i] = v;
          }
          Apply();
       }
 
       public void SetUV2_XY(Vector2 uv, int count)
       {
-         if (_uv2 == null || _uv2.Count != count)
+         if (Data.Uv2 == null || Data.Uv2.Count != count)
          {
-            _uv2 = new List<Vector4>(count);
+            Data.Uv2 = new List<Vector4>(count);
             for (int i = 0; i < count; ++i)
             {
-               _uv2[i] = Vector4.zero;
+               Data.Uv2[i] = Vector4.zero;
             }
          }
 
          for (int i = 0; i < count; ++i) 
          { 
-            Vector4 v = _uv2[i];
+            Vector4 v = Data.Uv2[i];
             v.x = uv.x;
             v.y = uv.y;
-            _uv2[i] = v;
+            Data.Uv2[i] = v;
          }
          Apply();
       }
 
       public void SetUV2_ZW(Vector2 uv, int count)
       {
-         if (_uv2 == null || _uv2.Count != count)
+         if (Data.Uv2 == null || Data.Uv2.Count != count)
          {
-            _uv2 = new List<Vector4>(count);
+            Data.Uv2 = new List<Vector4>(count);
             for (int i = 0; i < count; ++i)
             {
-               _uv2[i] = Vector4.zero;
+               Data.Uv2[i] = Vector4.zero;
             }
          }
 
          for (int i = 0; i < count; ++i) 
          { 
-            Vector4 v = _uv2[i];
+            Vector4 v = Data.Uv2[i];
             v.z = uv.x;
             v.w = uv.y;
-            _uv2[i] = v;
+            Data.Uv2[i] = v;
          }
          Apply();
       }
 
       public void SetUV3_XY(Vector2 uv, int count)
       {
-         if (_uv3 == null || _uv3.Count != count)
+         if (Data.Uv3 == null || Data.Uv3.Count != count)
          {
-            _uv3 = new List<Vector4>(count);
+            Data.Uv3 = new List<Vector4>(count);
             for (int i = 0; i < count; ++i)
             {
-               _uv3[i] = Vector4.zero;
+               Data.Uv3[i] = Vector4.zero;
             }
          }
 
          for (int i = 0; i < count; ++i) 
          { 
-            Vector4 v = _uv3[i];
+            Vector4 v = Data.Uv3[i];
             v.x = uv.x;
             v.y = uv.y;
-            _uv3[i] = v;
+            Data.Uv3[i] = v;
          }
          Apply();
       }
 
       public void SetUV3_ZW(Vector2 uv, int count)
       {
-         if (_uv3 == null || _uv3.Count != count)
+         if (Data.Uv3 == null || Data.Uv3.Count != count)
          {
-            _uv3 = new List<Vector4>(count);
+            Data.Uv3 = new List<Vector4>(count);
             for (int i = 0; i < count; ++i)
             {
-               _uv3[i] = Vector4.zero;
+               Data.Uv3[i] = Vector4.zero;
             }
          }
 
          for (int i = 0; i < count; ++i) 
          { 
-            Vector4 v = _uv3[i];
+            Vector4 v = Data.Uv3[i];
             v.z = uv.x;
             v.w = uv.y;
-            _uv3[i] = v;
+            Data.Uv3[i] = v;
          }
          Apply();
       }
 
       public void SetColorRG(Vector2 rg, int count) 
       { 
-         if (_colors == null || _colors.Length != count)
+         if (Data.Colors == null || Data.Colors.Length != count)
          {
-            _colors = new Color[count];
+            Data.Colors = new Color[count];
             enforcedColorChannels = false;
          }
          for (int i = 0; i < count; ++i)
          {
-            _colors[i].r = rg.x;
-            _colors[i].g = rg.y;
+            Data.Colors[i].r = rg.x;
+            Data.Colors[i].g = rg.y;
          }
          Apply();
       }
 
       public void SetColorBA(Vector2 ba, int count) 
       { 
-         if (_colors == null || _colors.Length != count)
+         if (Data.Colors == null || Data.Colors.Length != count)
          {
-            _colors = new Color[count];
+            Data.Colors = new Color[count];
             enforcedColorChannels = false;
          }
          for (int i = 0; i < count; ++i)
          {
-            _colors[i].r = ba.x;
-            _colors[i].g = ba.y;
+            Data.Colors[i].r = ba.x;
+            Data.Colors[i].g = ba.y;
          }
          Apply();
       }
@@ -463,14 +438,14 @@ namespace JBooth.VertexPainterPro
 
                stream.hideFlags = HideFlags.HideAndDontSave;
             }
-            if (_positions != null && _positions.Length == vertexCount) { stream.vertices = _positions; }
-            if (_normals != null && _normals.Length == vertexCount) { stream.normals = _normals; } else { stream.normals = null; }
-            if (_tangents != null && _tangents.Length == vertexCount) { stream.tangents = _tangents; } else { stream.tangents = null; }
-            if (_colors != null && _colors.Length == vertexCount) { stream.colors = _colors; } else { stream.colors = null; }
-            if (_uv0 != null && _uv0.Count == vertexCount) { stream.SetUVs(0, _uv0);  }  else { stream.uv = null; }
-            if (_uv1 != null && _uv1.Count == vertexCount) { stream.SetUVs(1, _uv1); }  else { stream.uv2 = null; }
-            if (_uv2 != null && _uv2.Count == vertexCount) { stream.SetUVs(2, _uv2); }  else { stream.uv3 = null; }
-            if (_uv3 != null && _uv3.Count == vertexCount) { stream.SetUVs(3, _uv3); }  else { stream.uv4 = null; }
+            if (Data.Positions != null && Data.Positions.Length == vertexCount) { stream.vertices = Data.Positions; }
+            if (Data.Normals != null && Data.Normals.Length == vertexCount) { stream.normals = Data.Normals; } else { stream.normals = null; }
+            if (Data.Tangents != null && Data.Tangents.Length == vertexCount) { stream.tangents = Data.Tangents; } else { stream.tangents = null; }
+            if (Data.Colors != null && Data.Colors.Length == vertexCount) { stream.colors = Data.Colors; } else { stream.colors = null; }
+            if (Data.Uv0 != null && Data.Uv0.Count == vertexCount) { stream.SetUVs(0, Data.Uv0);  }  else { stream.uv = null; }
+            if (Data.Uv1 != null && Data.Uv1.Count == vertexCount) { stream.SetUVs(1, Data.Uv1); }  else { stream.uv2 = null; }
+            if (Data.Uv2 != null && Data.Uv2.Count == vertexCount) { stream.SetUVs(2, Data.Uv2); }  else { stream.uv3 = null; }
+            if (Data.Uv3 != null && Data.Uv3.Count == vertexCount) { stream.SetUVs(3, Data.Uv3); }  else { stream.uv4 = null; }
 
             EnforceOriginalMeshHasColors(stream);
  
