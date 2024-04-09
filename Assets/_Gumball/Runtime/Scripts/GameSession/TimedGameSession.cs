@@ -9,6 +9,11 @@ namespace Gumball
     [CreateAssetMenu(menuName = "Gumball/GameSession/Timed")]
     public class TimedGameSession : GameSession
     {
+        
+        /// <summary>
+        /// How long should the last second actually last? This allows you to extend how long the last second is to make it more 'clutch'.
+        /// </summary>
+        private const float lastSecondFakedLength = 1.5f;
 
         [Header("Timed")]
         [SerializeField] private float timeAllowedSeconds = 60;
@@ -51,7 +56,12 @@ namespace Gumball
 
         private void DecreaseTimer()
         {
-            timeRemainingSeconds -= Time.deltaTime;
+            //extend the last second
+            float timePassedThisFrame = Time.deltaTime;
+            if (timeRemainingSeconds < 1)
+                timePassedThisFrame /= lastSecondFakedLength;
+                    
+            timeRemainingSeconds -= timePassedThisFrame;
 
             if (timeRemainingSeconds < 0)
             {

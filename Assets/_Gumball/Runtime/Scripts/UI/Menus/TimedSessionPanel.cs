@@ -48,8 +48,7 @@ namespace Gumball
         
         private void UpdateTimerLabel()
         {
-            const float timeRemainingForMs = 10; //if timer goes below this value, show the milliseconds
-            timerLabel.text = TimeSpan.FromSeconds(currentSession.TimeRemainingSeconds).ToPrettyString(currentSession.TimeRemainingSeconds < timeRemainingForMs, precise: false);
+            timerLabel.text = TimeSpan.FromSeconds(currentSession.TimeRemainingSeconds).ToPrettyString(currentSession.TimeRemainingSeconds < timeNearlyOutTime, precise: false);
 
             timerLabel.color = currentSession.TimeRemainingSeconds > timeNearlyOutTime ? defaultTimerLabelColor : timeNearlyOutTimerLabelColor;
         }
