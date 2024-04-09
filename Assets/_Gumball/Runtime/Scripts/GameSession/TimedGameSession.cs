@@ -14,7 +14,8 @@ namespace Gumball
         [SerializeField] private float timeAllowedSeconds = 60;
         [Space(5)]
         [SerializeField, ReadOnly] private float timeRemainingSeconds;
-
+        [SerializeField, ReadOnly] private bool timerHasStarted;
+        
         public float TimeRemainingSeconds => timeRemainingSeconds;
         
         private TimedSessionPanel sessionPanel => PanelManager.GetPanel<TimedSessionPanel>();
@@ -28,15 +29,24 @@ namespace Gumball
         {
             yield return base.LoadSession();
 
-            sessionPanel.Show();
             InitialiseTimer();
+            sessionPanel.Show();
         }
 
+        protected override void OnSessionStart()
+        {
+            base.OnSessionStart();
+
+            //start the timer
+            timerHasStarted = true;
+        }
+        
         public override void UpdateWhenCurrent()
         {
             base.UpdateWhenCurrent();
             
-            DecreaseTimer();
+            if (timerHasStarted)
+                DecreaseTimer();
         }
 
         private void DecreaseTimer()
@@ -67,6 +77,7 @@ namespace Gumball
         
         private void InitialiseTimer()
         {
+            timerHasStarted = false;
             timeRemainingSeconds = timeAllowedSeconds;
         }
 

@@ -159,6 +159,8 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Hide();
 
             yield return IntroCinematicIE();
+
+            OnSessionStart();
             
             drivingCameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
             drivingCameraController.SetState(drivingCameraController.DrivingState);
@@ -170,6 +172,11 @@ namespace Gumball
                 //tween the racing line offset to 0 for optimal driving
                 racer.SetRacingLineOffset(0, 3);
             }
+        }
+
+        protected virtual void OnSessionStart()
+        {
+            
         }
 
         private IEnumerator IntroCinematicIE()
