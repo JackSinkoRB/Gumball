@@ -31,6 +31,7 @@ Transform:
   m_Children:
   - {fileID: 1229020240171631144}
   - {fileID: 6816404527527180913}
+  - {fileID: 3123130293420109088}
   m_Father: {fileID: 6339226346032666140}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4253194131732378506
@@ -79,14 +80,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecc4e7208838b6841b8ecf72be774815, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dontDestroy: 0
   defaultState: {fileID: 1106808287208623235}
   target: {fileID: 0}
-  drivingState: {fileID: 1106808287208623235}
-  introState: {fileID: 6014276090379262820}
-  currentState: {fileID: 0}
-  previousState: {fileID: 0}
-  timeSinceStateChange: 0
   transitions:
   - from: {fileID: 6014276090379262820}
     to: {fileID: 1106808287208623235}
@@ -115,6 +110,39 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 0
+  - from: {fileID: 1106808287208623235}
+    to: {fileID: 3031186043028912081}
+    transitionTime: 2
+    blendCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+  currentState: {fileID: 0}
+  previousState: {fileID: 0}
+  timeSinceStateChange: 0
+  drivingState: {fileID: 1106808287208623235}
+  introState: {fileID: 6014276090379262820}
+  outroState: {fileID: 3031186043028912081}
 --- !u!1 &4356335451156436081
 GameObject:
   m_ObjectHideFlags: 0
@@ -352,3 +380,53 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
+--- !u!1 &8923850077309717859
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3123130293420109088}
+  - component: {fileID: 3031186043028912081}
+  m_Layer: 0
+  m_Name: Outro
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3123130293420109088
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8923850077309717859}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1130900604380814223}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3031186043028912081
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8923850077309717859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb8cfe2fe24707e4792205588589a5f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetOffsetHorizontal: 2
+  targetOffsetVertical: 1
+  verticalLookAtOffset: 1
+  horizontalAngleOffset: -40
+  distance: 4
+  rotationSnapTime: 0.15

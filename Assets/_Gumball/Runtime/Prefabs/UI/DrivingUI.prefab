@@ -835,6 +835,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6557188955257155058}
+  - component: {fileID: 576998701337154017}
   m_Layer: 5
   m_Name: DrivingUI
   m_TagString: Untagged
@@ -865,6 +866,35 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &576998701337154017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5121963124623513006}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1250a8da269cc4fa05917d00e04dc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isAddedToPanelStack: 1
+  ignoreTimescale: 1
+  disableWhenHidden: 1
+  fadeElements:
+  - ignoreTimescale: 0
+    startHidden: 0
+    disableWhenHidden: 0
+    doShowAnimation: 1
+    doHideAnimation: 1
+    showDelay: 0
+    hideDelay: 0
+    showDuration: 0.2
+    hideDuration: 0.2
+    rectTransform: {fileID: 6557188955257155058}
+    showEase: 4
+    hideEase: 4
+  slideElements: []
 --- !u!1 &5286779443057334468
 GameObject:
   m_ObjectHideFlags: 0

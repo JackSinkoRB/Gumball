@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class CameraController : Singleton<DrivingCameraController>
+    public abstract class CameraController : MonoBehaviour
     {
         
         [SerializeField] private CameraState defaultState;

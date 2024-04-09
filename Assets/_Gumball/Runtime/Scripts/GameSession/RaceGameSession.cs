@@ -31,6 +31,7 @@ namespace Gumball
         {
             base.OnSessionEnd();
             
+            PanelManager.GetPanel<RaceSessionPanel>().Hide();
             PanelManager.GetPanel<RaceSessionEndPanel>().Show();
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);

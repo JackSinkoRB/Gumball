@@ -37,8 +37,9 @@ namespace Gumball
 
         private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         private ChunkMap currentChunkMapCached;
-
         private Coroutine sessionCoroutine;
+
+        private DrivingCameraController drivingCameraController => MapDrivingSceneManager.Instance.DrivingCameraController;
         
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public bool InProgress => inProgress;
@@ -64,8 +65,10 @@ namespace Gumball
         
         public IEnumerator SetupSession()
         {
+            PanelManager.GetPanel<DrivingControlsPanel>().Show();
+            
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
-
+            
             AvatarManager.Instance.HideAvatars(true);
 
             SetupPlayerCar(currentChunkMapCached);
@@ -106,6 +109,10 @@ namespace Gumball
 
         protected virtual void OnSessionEnd()
         {
+            PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+            
+            drivingCameraController.SetState(drivingCameraController.OutroState);
+
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
@@ -149,34 +156,34 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Hide();
 
             yield return IntroCinematicIE();
-        }
-
-        private IEnumerator IntroCinematicIE()
-        {
-            if (introTime > 0)
-            {
-                DrivingCameraController.Instance.SetState(DrivingCameraController.Instance.IntroState);
-                DrivingCameraController.Instance.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
-                DrivingCameraController.Instance.SkipTransition();
-                
-                //start the transition to driving start
-                DrivingCameraController.Instance.SetState(DrivingCameraController.Instance.DrivingState);
-                
-                WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-                
-                yield return IntroCountdownIE();
-            }
-
+            
+            drivingCameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
+            drivingCameraController.SetState(drivingCameraController.DrivingState);
+            
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-
-            DrivingCameraController.Instance.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
-            DrivingCameraController.Instance.SetState(DrivingCameraController.Instance.DrivingState);
 
             foreach (AICar racer in currentRacers)
             {
                 //tween the racing line offset to 0 for optimal driving
                 racer.SetRacingLineOffset(0, 3);
             }
+        }
+
+        private IEnumerator IntroCinematicIE()
+        {
+            if (introTime <= 0)
+                yield break;
+            
+            drivingCameraController.SetState(drivingCameraController.IntroState);
+            drivingCameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
+            drivingCameraController.SkipTransition();
+                
+            //start the transition to driving start
+            drivingCameraController.SetState(drivingCameraController.DrivingState);
+                
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
+                
+            yield return IntroCountdownIE();
         }
         
         private IEnumerator IntroCountdownIE()
@@ -289,31 +296,6 @@ namespace Gumball
         private void OnCrossFinishLine()
         {
             EndSession();
-        }
-        
-        /// <summary>
-        /// Gets the distance along the spline from the start of the map to the closest spline sample to the car.
-        /// </summary>
-        protected float GetSplineDistanceTraveled(AICar car)
-        {
-            Chunk currentChunk = car.CurrentChunk;
-            if (currentChunk == null)
-                return 0;
-            
-            //get the distance in the current chunk
-            int currentChunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(currentChunk);
-            Vector3 playerPosition = WarehouseManager.Instance.CurrentCar.transform.position;
-            float distanceInCurrentChunk = currentChunk.GetDistanceTravelledAlongSpline(playerPosition);
-            
-            //get the distance in previous chunks
-            float distanceInPreviousChunks = 0;
-            for (int index = 0; index < currentChunkIndex; index++)
-            {
-                ChunkMapData chunkData = ChunkManager.Instance.CurrentChunkMap.GetChunkData(index);
-                distanceInPreviousChunks += chunkData.SplineLength;
-            }
-
-            return distanceInCurrentChunk + distanceInPreviousChunks;
         }
 
     }

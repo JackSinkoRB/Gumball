@@ -12,9 +12,11 @@ namespace Gumball
         [Header("States")]
         [SerializeField] private CameraState drivingState;
         [SerializeField] private CameraState introState;
+        [SerializeField] private CameraState outroState;
 
         public CameraState DrivingState => drivingState;
         public CameraState IntroState => introState;
+        public CameraState OutroState => outroState;
 
     }
 }
