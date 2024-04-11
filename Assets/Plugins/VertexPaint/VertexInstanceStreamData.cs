@@ -7,13 +7,13 @@ using UnityEngine;
 public class VertexInstanceStreamData
 {
 
-    [HideInInspector] public Color[] Colors;
-    [HideInInspector] public List<Vector4> Uv0;
-    [HideInInspector] public List<Vector4> Uv1;
-    [HideInInspector] public List<Vector4> Uv2;
-    [HideInInspector] public List<Vector4> Uv3;
-    [HideInInspector] public Vector3[] Positions;
-    [HideInInspector] public Vector3[] Normals;
-    [HideInInspector] public Vector4[] Tangents;
+    public Color[] Colors;
+    public List<Vector4> Uv0;
+    public List<Vector4> Uv1;
+    public List<Vector4> Uv2;
+    public List<Vector4> Uv3;
+    public Vector3[] Positions;
+    public Vector3[] Normals;
+    public Vector4[] Tangents;
 
 }

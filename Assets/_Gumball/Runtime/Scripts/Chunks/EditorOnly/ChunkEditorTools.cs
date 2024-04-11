@@ -271,9 +271,9 @@ namespace Gumball
 
             //check if there's additional vertex color data
             VertexInstanceStream vertexInstanceStream = chunk.TerrainHighLOD.GetComponent<VertexInstanceStream>();
-            VertexInstanceStreamData vertexData = null;
+            GenericDictionary<int, List<VertexInstanceStream.PaintData>> paintData = null;
             if (vertexInstanceStream != null)
-                vertexData = vertexInstanceStream.Data;
+                paintData = vertexInstanceStream.paintedVertices;
 
             DestroyImmediate(chunk.TerrainHighLOD);
             DestroyImmediate(chunk.TerrainLowLOD);
@@ -282,11 +282,11 @@ namespace Gumball
 
             RecreateTerrainLODs();
 
-            if (vertexData != null)
+            if (paintData != null)
             {
-                //copy the vertex color data
+                chunk.TerrainHighLOD.GetOrAddComponent<VertexInstanceStream>().SetPaintData(paintData);
+                
                 //TODO: generate vertex color data for the low LOD
-                chunk.TerrainHighLOD.GetOrAddComponent<VertexInstanceStream>().SetData(vertexData);
             }
             
             if (chunkBefore != null)

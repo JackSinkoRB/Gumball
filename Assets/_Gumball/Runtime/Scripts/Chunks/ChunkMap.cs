@@ -142,8 +142,8 @@ namespace Gumball
                 //connect the chunks
                 for (int index = 1; index < chunkReferences.Length; index++)
                 {
-                    Chunk chunk = runtimeChunks[index];
                     Chunk previousChunk = runtimeChunks[index - 1];
+                    Chunk chunk = runtimeChunks[index];
 
                     GlobalLoggers.ChunkLogger.Log($"Connecting {chunk.name} and {previousChunk.name}");
 
@@ -151,6 +151,10 @@ namespace Gumball
                     ChunkBlendData newBlendData = ChunkUtils.ConnectChunksWithNewBlendData(previousChunk, chunk, ChunkUtils.LoadDirection.AFTER);
                     chunkData[index - 1] = new ChunkMapData(previousChunk, newBlendData.BlendedFirstChunkMeshData);
                     chunkData[index] = new ChunkMapData(chunk, newBlendData.BlendedLastChunkMeshData);
+                    
+                    //update the mesh data for the chunk copies, so the next blend has that data
+                    previousChunk.SetMeshData(newBlendData.BlendedFirstChunkMeshData);
+                    chunk.SetMeshData(newBlendData.BlendedLastChunkMeshData);
                 }
 
                 EditorUtility.SetDirty(this);

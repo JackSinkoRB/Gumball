@@ -1884,10 +1884,16 @@ namespace JBooth.VertexPainterPro
                   float str = 1.0f - dist / bz;
                   str = Mathf.Pow(str, brushFalloff);
                   float finalStr = str * (float)deltaTime * brushFlow * pressure;
+                  
                   if (finalStr > 0)
                   {
                      affected = true;
                      lerper.Invoke(j, i, ref value, finalStr);
+
+                     //save the painting data
+                     bool isPainting = value is Color;
+                     if (isPainting)
+                        j.stream.TrackPaintData(i, (Color)value, finalStr);
                   }
                }
             }

@@ -15,8 +15,53 @@ namespace JBooth.VertexPainterPro
       
       public bool keepRuntimeData;
 
-      public VertexInstanceStreamData Data { get; private set; } = new();
+      public VertexInstanceStreamData Data = new();
+      
+#if UNITY_EDITOR
+      [Serializable]
+      public struct PaintData
+      {
+         public Color color;
+         public float strength;
 
+         public PaintData(Color color, float strength)
+         {
+            this.color = color;
+            this.strength = strength;
+         }
+      }
+
+      public GenericDictionary<int, List<PaintData>> paintedVertices = new();
+      
+      public void TrackPaintData(int index, Color color, float strength)
+      {
+         if (!paintedVertices.ContainsKey(index))
+            paintedVertices[index] = new List<PaintData>();
+         
+         paintedVertices[index].Add(new PaintData(color, strength));
+      }
+      
+      public void SetPaintData(GenericDictionary<int, List<PaintData>> paintedVertices)
+      {
+         this.paintedVertices = paintedVertices;
+         
+         Color[] meshColors = GetComponent<MeshFilter>().sharedMesh.colors;
+         if (Data.Colors == null || Data.Colors.Length != meshColors.Length)
+            Data.Colors = meshColors;
+         
+         foreach (int index in paintedVertices.Keys)
+         {
+            List<PaintData> dataCollection = paintedVertices[index];
+            foreach (PaintData data in dataCollection)
+            {
+               Data.Colors[index] = Color.Lerp(Data.Colors[index], data.color, data.strength);
+            }
+         }
+
+         Apply();
+      }
+#endif
+      
       public void SetData(VertexInstanceStreamData data)
       {
          Data = data;

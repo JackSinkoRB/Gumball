@@ -170,6 +170,12 @@ namespace Gumball
             Debug.Log($"Setting {chunkObjectData.Keys.Count} chunk object data for {gameObject.name}");
         }
 
+        public void SetMeshData(ChunkMeshData data)
+        {
+            chunkMeshData = data;
+            data.SetChunk(this);
+        }
+        
         public void SetTerrain(TerrainLOD lod, GameObject terrain)
         {
             if (lod == TerrainLOD.HIGH)

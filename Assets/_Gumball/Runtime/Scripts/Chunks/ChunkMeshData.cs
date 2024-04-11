@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using JBooth.VertexPainterPro;
 using MyBox;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -35,9 +36,7 @@ namespace Gumball
             /// </summary>
             public Vector3 GetCurrentWorldPosition()
             {
-                Vector3 previousPositionLocal = MeshBelongsTo.vertices[Index];
-                Vector3 previousPositionWorld = MeshBelongsTo.MeshFilter.transform.TransformPoint(previousPositionLocal);
-                return previousPositionWorld;
+                return MeshBelongsTo.GetCurrentVertexWorldPosition(index);
             }
 
             public bool Equals(Vertex other)
@@ -80,6 +79,29 @@ namespace Gumball
             FindVerticesOnTangents();
         }
 
+        public ChunkMeshData()
+        {
+            
+        }
+        
+        public ChunkMeshData Clone()
+        {
+            ChunkMeshData copy = new ChunkMeshData();
+            copy.chunk = chunk;
+            copy.vertices = vertices;
+            copy.lastEndVertices = lastEndVertices;
+            copy.firstEndVertices = firstEndVertices;
+            copy.vertexColors = vertexColors;
+            copy.additionalVertexPaintData = additionalVertexPaintData;
+
+            return copy;
+        }
+
+        public void SetChunk(Chunk chunk)
+        {
+            this.chunk = chunk;
+        }
+
         /// <summary>
         /// Because the mesh can be updated but not yet applied, use this to get the current (but not applied) value instead.
         /// </summary>
@@ -113,6 +135,8 @@ namespace Gumball
             meshToUse.RecalculateNormals();
             meshToUse.RecalculateBounds();
             
+            meshToUse.colors = vertexColors.ToColors();
+
             MeshFilter.sharedMesh = meshToUse;
             MeshCollider.sharedMesh = meshToUse;
         }
@@ -124,11 +148,38 @@ namespace Gumball
         }
         
 #if UNITY_EDITOR
+        private GenericDictionary<int, List<VertexInstanceStream.PaintData>> additionalVertexPaintData = new();
+        
+        public void TrackPaintData(int index, VertexInstanceStream.PaintData data)
+        {
+            if (!additionalVertexPaintData.ContainsKey(index))
+                additionalVertexPaintData[index] = new List<VertexInstanceStream.PaintData>();
+         
+            additionalVertexPaintData[index].Add(data);
+        }
+        
         public Color[] CalculateVertexColors()
         {
             TerrainTextureBlendSettings terrainBlendSettings = chunk.GetComponent<ChunkEditorTools>().TerrainData.TextureBlendSettings;
             Color[] colors = terrainBlendSettings.GetVertexColors(chunk, new List<Vector3>(vertices), MeshFilter.transform, Mesh);
+
+            ApplyPaintData(colors);
+            UpdateVertexColors(colors.ToSerializableColors());
+            
             return colors;
+        }
+
+        private void ApplyPaintData(Color[] colors)
+        {
+            foreach (int index in additionalVertexPaintData.Keys)
+            {
+                List<VertexInstanceStream.PaintData> dataCollection = additionalVertexPaintData[index];
+                
+                foreach (VertexInstanceStream.PaintData data in dataCollection)
+                {
+                    colors[index] = Color.Lerp(colors[index], data.color, data.strength);
+                }
+            }
         }
 #endif
 
