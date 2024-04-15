@@ -73,10 +73,15 @@ namespace Gumball
                 FixOverlappingVertices(firstChunk);
                 FixOverlappingVertices(lastChunk);
                 GlobalLoggers.LoadingLogger.Log($"FixOverlappingVertices = {stopwatch.ElapsedMilliseconds}ms");
-                
+
                 blendedFirstChunkMeshData.ApplyChanges();
                 blendedLastChunkMeshData.ApplyChanges();
                 
+                //calculate normals
+                stopwatch.Restart();
+                SetNormalsIdenticalOnEnds();
+                GlobalLoggers.LoadingLogger.Log($"CalculateNormals = {stopwatch.ElapsedMilliseconds}ms");
+
                 //need to update colours once all the vertices and normals have been set
                 stopwatch.Restart();
                 Color[] firstChunkColors = blendedFirstChunkMeshData.CalculateVertexColors();
@@ -94,6 +99,60 @@ namespace Gumball
             {
                 Debug.LogError($"Error creating blend data between {firstChunk.gameObject.name} and {lastChunk.gameObject.name}\n{e.Message}\n{e.StackTrace}");
             }
+        }
+
+        /// <summary>
+        /// Sets the normals of each mesh data
+        /// </summary>
+        private void SetNormalsIdenticalOnEnds()
+        {
+            //TODO! Can't just get average (if normal is pointing outward?)
+            // - TODO, why is average not working?
+            
+            // - viable option (but complicated): duplicate the mesh and add vertices to the ends (with additional distance being like an extra grid square),
+            //  - set the position as the closest vertex on the next chunk
+            
+            //recalculate and apply the normals to the mesh
+            blendedFirstChunkMeshData.Mesh.RecalculateNormals();
+            blendedLastChunkMeshData.Mesh.RecalculateNormals();
+            blendedFirstChunkMeshData.SetNormals(blendedFirstChunkMeshData.Mesh.normals);
+            blendedLastChunkMeshData.SetNormals(blendedLastChunkMeshData.Mesh.normals);
+            
+            //position, list of normals
+            Dictionary<Vector3, List<Vector3>> normalsAtPositionLookup = new();
+            
+            //get all the normals at a position
+            foreach (VertexConnection connection in connections)
+            {
+                Vector3 position = connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(connection.vertexIndex1); //just use vertexIndex1, but vertexIndex2 should be identical
+
+                List<Vector3> normalsAtPosition = normalsAtPositionLookup.ContainsKey(position) ? normalsAtPositionLookup[position] : new List<Vector3>();
+
+                normalsAtPosition.Add(connection.vertexIndexChunk1.Normals[connection.vertexIndex1]);
+                normalsAtPosition.Add(connection.vertexIndexChunk2.Normals[connection.vertexIndex2]);
+
+                normalsAtPositionLookup[position] = normalsAtPosition;
+            }
+            
+            //loop each connection and set the normal as the average of the normals at the position
+            foreach (VertexConnection connection in connections)
+            {
+                Vector3 position = connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(connection.vertexIndex1); //just use vertexIndex1, but vertexIndex2 should be identical
+
+                Vector3 average = Vector3.zero;
+                foreach (Vector3 normal in normalsAtPositionLookup[position])
+                {
+                    average += normal;
+                }
+                average /= normalsAtPositionLookup[position].Count;
+                
+                connection.vertexIndexChunk1.ModifyNormal(connection.vertexIndex1, average);
+                connection.vertexIndexChunk2.ModifyNormal(connection.vertexIndex2, average);
+            }
+            
+            //refresh the mesh
+            blendedFirstChunkMeshData.UpdateNormals();
+            blendedLastChunkMeshData.UpdateNormals();
         }
         
         private void BlendPaintedVertexColours(Chunk chunk)
@@ -156,7 +215,7 @@ namespace Gumball
             float desiredY = (fromWorldPosition.y + toWorldPosition.y) / 2;
             Vector3 desiredPosition = toWorldPosition.SetY(desiredY);
 
-            //if a vertex is already matched with an opposite vertex, use the other vertices Y
+            //if the opposite vertex already has a connection (previous vertex), set this desired position to the same position.
             if (VertexHasConnection(chunkMeshVertexIndexToMatch, meshDataMovingTo))
             {
                 desiredPosition = toWorldPosition;

@@ -15,6 +15,8 @@ namespace Gumball
         
         [SerializeField, ReadOnly] private Chunk chunk;
         [SerializeField, ReadOnly] private Vector3[] vertices;
+        [SerializeField, ReadOnly] private Vector3[] normals;
+        [SerializeField, ReadOnly] private GenericDictionary<int, Vector3> modifiedNormals = new();
         [SerializeField, ReadOnly] private List<int> lastEndVertices;
         [SerializeField, ReadOnly] private List<int> firstEndVertices;
         [SerializeField, ReadOnly] private SerializableColor[] vertexColors;
@@ -24,6 +26,7 @@ namespace Gumball
         public MeshCollider MeshCollider => chunk.TerrainHighLOD.GetComponent<MeshCollider>();
         public Mesh Mesh => MeshFilter.sharedMesh;
         public Vector3[] Vertices => vertices;
+        public Vector3[] Normals => normals;
         public SerializableColor[] VertexColors => vertexColors;
         public ReadOnlyCollection<int> LastEndVertices => lastEndVertices.AsReadOnly();
         public ReadOnlyCollection<int> FirstEndVertices => firstEndVertices.AsReadOnly();
@@ -47,6 +50,8 @@ namespace Gumball
             ChunkMeshData copy = new ChunkMeshData();
             copy.chunk = chunk;
             copy.vertices = vertices;
+            copy.normals = normals;
+            copy.modifiedNormals = modifiedNormals;
             copy.lastEndVertices = lastEndVertices;
             copy.firstEndVertices = firstEndVertices;
             copy.vertexColors = vertexColors;
@@ -80,20 +85,47 @@ namespace Gumball
             this.vertices = vertices;
         }
         
+#if UNITY_EDITOR
+        public void SetNormals(Vector3[] normals)
+        {
+            //apply modified normals
+            foreach (int vertexIndex in modifiedNormals.Keys)
+            {
+                Vector3 modifiedNormal = modifiedNormals[vertexIndex];
+
+                normals[vertexIndex] = modifiedNormal;
+            }
+            
+            this.normals = normals;
+
+            if (MeshFilter.sharedMesh != null)
+                MeshFilter.sharedMesh.SetNormals(normals);
+        }
+
+        public void UpdateNormals()
+        {
+            SetNormals(normals);
+        }
+
+        public void ModifyNormal(int vertexIndex, Vector3 normal)
+        {
+            modifiedNormals[vertexIndex] = normal;
+        }
+#endif
+
         public void ApplyChanges()
         {
             Mesh meshToUse = Object.Instantiate(Mesh); //use a mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
 
             meshToUse.SetVertices(vertices);
+            meshToUse.SetNormals(normals);
+            meshToUse.SetColors(vertexColors.ToColors());
 
             //recalculate UVs
             meshToUse.SetUVs(0, ChunkUtils.GetTriplanarUVs(vertices, MeshFilter.transform));
 
             meshToUse.RecalculateTangents();
-            meshToUse.RecalculateNormals();
             meshToUse.RecalculateBounds();
-            
-            meshToUse.colors = vertexColors.ToColors();
 
             MeshFilter.sharedMesh = meshToUse;
             MeshCollider.sharedMesh = meshToUse;

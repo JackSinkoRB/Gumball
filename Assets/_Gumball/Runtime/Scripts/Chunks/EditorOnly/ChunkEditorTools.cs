@@ -189,12 +189,21 @@ namespace Gumball
             {
                 DrawNormal(vertexIndex, Color.blue);
             }
-
-            void DrawNormal(int vertexIndex, Color color)
+        }
+        
+        private void DrawNormal(int vertexIndex, Color color)
+        {
+            const float distance = 5;
+            const float duration = 120;
+            Debug.DrawRay(chunk.ChunkMeshData.GetCurrentVertexWorldPosition(vertexIndex), chunk.ChunkMeshData.Mesh.normals[vertexIndex] * distance, color, duration);
+        }
+        
+        [ButtonMethod]
+        public void DrawAllNormals()
+        {
+            for (int vertexIndex = 0; vertexIndex < chunk.ChunkMeshData.Vertices.Length; vertexIndex++)
             {
-                const float distance = 5;
-                const float duration = 120;
-                Debug.DrawRay(chunk.ChunkMeshData.GetCurrentVertexWorldPosition(vertexIndex), chunk.ChunkMeshData.Mesh.normals[vertexIndex] * distance, color, duration);
+                DrawNormal(vertexIndex, Color.red);
             }
         }
         
