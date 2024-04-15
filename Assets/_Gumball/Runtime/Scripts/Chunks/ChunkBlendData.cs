@@ -83,7 +83,7 @@ namespace Gumball
                 Color[] lastChunkColors = blendedLastChunkMeshData.CalculateVertexColors();
                 blendedFirstChunkMeshData.UpdateVertexColors(firstChunkColors.ToSerializableColors());
                 blendedLastChunkMeshData.UpdateVertexColors(lastChunkColors.ToSerializableColors());
-                GlobalLoggers.LoadingLogger.Log($"VertexColors = {stopwatch.ElapsedMilliseconds}ms");
+                GlobalLoggers.LoadingLogger.Log($"UpdateVertexColors = {stopwatch.ElapsedMilliseconds}ms");
                 
                 stopwatch.Restart();
                 BlendPaintedVertexColours(firstChunk);
@@ -105,6 +105,7 @@ namespace Gumball
             bool isFirstChunk = chunk == firstChunk;
             ChunkMeshData meshData = isFirstChunk ? blendedFirstChunkMeshData : blendedLastChunkMeshData;
             Chunk otherChunk = isFirstChunk ? lastChunk : firstChunk;
+            ChunkMeshData otherMeshData = isFirstChunk ? blendedLastChunkMeshData : blendedFirstChunkMeshData;
 
             VertexInstanceStream vertexInstanceStream = otherChunk.TerrainHighLOD.GetComponent<VertexInstanceStream>();
             if (vertexInstanceStream == null)
@@ -114,20 +115,20 @@ namespace Gumball
             var otherEndVertices = isFirstChunk ? blendedLastChunkMeshData.FirstEndVertices : blendedFirstChunkMeshData.LastEndVertices;
 
             Color[] colors = meshData.VertexColors.ToColors();
-            foreach (ChunkMeshData.Vertex endVertex in endVertices)
+            foreach (int endVertexIndex in endVertices)
             {
-                var (closestEndVertex, distanceToClosestEndVertexSqr) = GetClosestVertex(endVertex.GetCurrentWorldPosition(), otherEndVertices);
+                var (closestEndVertexIndex, distanceToClosestEndVertexSqr) = GetClosestVertexIndex(meshData.GetCurrentVertexWorldPosition(endVertexIndex), otherEndVertices, otherMeshData);
 
-                bool isPaintedVertex = vertexInstanceStream.paintedVertices.ContainsKey(closestEndVertex.Index);
+                bool isPaintedVertex = vertexInstanceStream.paintedVertices.ContainsKey(closestEndVertexIndex);
                 if (!isPaintedVertex)
                     continue;
 
-                List<VertexInstanceStream.PaintData> closestPaintedVertex = vertexInstanceStream.paintedVertices[closestEndVertex.Index];
+                List<VertexInstanceStream.PaintData> closestPaintedVertex = vertexInstanceStream.paintedVertices[closestEndVertexIndex];
                 
                 foreach (VertexInstanceStream.PaintData data in closestPaintedVertex)
                 {
-                    colors[endVertex.Index] = Color.Lerp(colors[endVertex.Index], data.color, data.strength);
-                    meshData.TrackPaintData(endVertex.Index, data);
+                    colors[endVertexIndex] = Color.Lerp(colors[endVertexIndex], data.color, data.strength);
+                    meshData.TrackPaintData(endVertexIndex, data);
                 }
             }
 
@@ -138,36 +139,38 @@ namespace Gumball
         {
             GlobalLoggers.ChunkLogger.Log($"Moving {chunkToMove.Chunk.gameObject.name} vertices to {chunkToMatch.Chunk.gameObject.name}");
             var chunkToMoveEndVertices = chunkToMove == blendedFirstChunkMeshData ? chunkToMove.LastEndVertices : chunkToMove.FirstEndVertices;
-            foreach (ChunkMeshData.Vertex chunkToMoveVertex in chunkToMoveEndVertices)
+            foreach (int chunkToMoveVertexIndex in chunkToMoveEndVertices)
             {
-                var chunkToMatchEndVertices = chunkToMatch == blendedFirstChunkMeshData ? chunkToMatch.LastEndVertices : chunkToMatch.FirstEndVertices;
-                var (chunkToMatchVertex, distanceBetweenVerticesSqr) = GetClosestVertex(chunkToMoveVertex.GetCurrentWorldPosition(), chunkToMatchEndVertices);
-                MoveVertexToMatchAnother(chunkToMoveVertex, chunkToMatchVertex);
+                ReadOnlyCollection<int> chunkToMatchEndVertices = chunkToMatch == blendedFirstChunkMeshData ? chunkToMatch.LastEndVertices : chunkToMatch.FirstEndVertices;
+                var (chunkToMatchVertexIndex, distanceBetweenVerticesSqr) = GetClosestVertexIndex(chunkToMove.GetCurrentVertexWorldPosition(chunkToMoveVertexIndex), chunkToMatchEndVertices, chunkToMatch);
+                MoveVertexToMatchAnother(chunkToMove, chunkToMoveVertexIndex, chunkToMatch, chunkToMatchVertexIndex);
             }
         }
-        
-        private void MoveVertexToMatchAnother(ChunkMeshData.Vertex chunkMeshVertexToMove, ChunkMeshData.Vertex chunkMeshVertexToMatch)
+
+        private void MoveVertexToMatchAnother(ChunkMeshData meshDataMovingFrom, int chunkMeshVertexIndexToMove, ChunkMeshData meshDataMovingTo, int chunkMeshVertexIndexToMatch)
         {
             //set the same world Y position - the average of both
-            float desiredY = (chunkMeshVertexToMove.GetCurrentWorldPosition().y + chunkMeshVertexToMatch.GetCurrentWorldPosition().y) / 2;
-            Vector3 desiredPosition = chunkMeshVertexToMatch.GetCurrentWorldPosition().SetY(desiredY);
+            var fromWorldPosition = meshDataMovingFrom.GetCurrentVertexWorldPosition(chunkMeshVertexIndexToMove);
+            var toWorldPosition = meshDataMovingTo.GetCurrentVertexWorldPosition(chunkMeshVertexIndexToMatch);
+            
+            float desiredY = (fromWorldPosition.y + toWorldPosition.y) / 2;
+            Vector3 desiredPosition = toWorldPosition.SetY(desiredY);
 
             //if a vertex is already matched with an opposite vertex, use the other vertices Y
-            if (VertexHasConnection(chunkMeshVertexToMatch))
+            if (VertexHasConnection(chunkMeshVertexIndexToMatch, meshDataMovingTo))
             {
-                Vector3 previousPosition = chunkMeshVertexToMatch.GetCurrentWorldPosition();
-                desiredPosition = previousPosition;
+                desiredPosition = toWorldPosition;
             }
             
-            connections.Add(new VertexConnection(chunkMeshVertexToMove, chunkMeshVertexToMatch));
+            connections.Add(new VertexConnection(chunkMeshVertexIndexToMove, meshDataMovingFrom, chunkMeshVertexIndexToMatch, meshDataMovingTo));
 
 #if UNITY_EDITOR
-            if (chunkMeshVertexToMove.MeshBelongsTo.Chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
-                Debug.DrawLine(chunkMeshVertexToMove.GetCurrentWorldPosition(), desiredPosition, Color.white, 15);
+            if (meshDataMovingFrom.Chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
+                Debug.DrawLine(fromWorldPosition, desiredPosition, Color.white, 15);
 #endif
             
-            chunkMeshVertexToMove.MeshBelongsTo.SetVertexWorldPosition(chunkMeshVertexToMove.Index, desiredPosition);
-            chunkMeshVertexToMatch.MeshBelongsTo.SetVertexWorldPosition(chunkMeshVertexToMatch.Index, desiredPosition);
+            meshDataMovingFrom.SetVertexWorldPosition(chunkMeshVertexIndexToMove, desiredPosition);
+            meshDataMovingTo.SetVertexWorldPosition(chunkMeshVertexIndexToMatch, desiredPosition);
         }
 
         private void BlendWithEdges(Chunk chunk)
@@ -178,14 +181,15 @@ namespace Gumball
 
             bool isFirstChunk = chunk == firstChunk;
             ChunkMeshData meshData = isFirstChunk ? blendedFirstChunkMeshData : blendedLastChunkMeshData;
-            ReadOnlyCollection<ChunkMeshData.Vertex> otherChunksEndVertices = isFirstChunk ? blendedLastChunkMeshData.FirstEndVertices : blendedFirstChunkMeshData.LastEndVertices;
+            ChunkMeshData otherMeshData = isFirstChunk ? blendedLastChunkMeshData : blendedFirstChunkMeshData;
+            ReadOnlyCollection<int> otherChunksEndVertices = isFirstChunk ? otherMeshData.FirstEndVertices : otherMeshData.LastEndVertices;
 
             //check all the vertices if they're within distance to blend with the new middle heights
             for (int vertexIndex = 0; vertexIndex < meshData.Vertices.Length; vertexIndex++)
             {
                 Vector3 vertexPositionWorld = meshData.GetCurrentVertexWorldPosition(vertexIndex);
 
-                var (closestVertex, distanceToClosestVertexSqr) = GetClosestVertex(vertexPositionWorld, otherChunksEndVertices);
+                var (closestVertexIndex, distanceToClosestVertexSqr) = GetClosestVertexIndex(vertexPositionWorld, otherChunksEndVertices, otherMeshData);
 
                 float terrainBlendDistanceSqr = terrainBlendDistance * terrainBlendDistance;
                 if (distanceToClosestVertexSqr <= terrainBlendDistanceSqr)
@@ -198,7 +202,7 @@ namespace Gumball
 
                     float currentHeight = vertexPositionWorld.y;
                     
-                    Vector3 closestVertexPositionWorld = closestVertex.GetCurrentWorldPosition();
+                    Vector3 closestVertexPositionWorld = otherMeshData.GetCurrentVertexWorldPosition(closestVertexIndex);
                     float closestVertexHeight = closestVertexPositionWorld.y;
 
                     float heightDifference = closestVertexHeight - currentHeight;
@@ -221,19 +225,19 @@ namespace Gumball
             return isUnderRoad;
         }
 
-        private (ChunkMeshData.Vertex, float) GetClosestVertex(Vector3 worldPosition, ReadOnlyCollection<ChunkMeshData.Vertex> verticesToCheck)
+        private (int, float) GetClosestVertexIndex(Vector3 worldPosition, ReadOnlyCollection<int> verticesToCheck, ChunkMeshData meshData)
         {
             Vector2 worldPositionFlattened = worldPosition.FlattenAsVector2();
 
             float minDistanceSquared = Mathf.Infinity;
-            ChunkMeshData.Vertex closestChunkMeshVertex = default;
-            foreach (ChunkMeshData.Vertex vertex in verticesToCheck)
+            int closestChunkMeshVertex = default;
+            foreach (int vertexIndex in verticesToCheck)
             {
-                float distanceSquared = Vector2.SqrMagnitude(worldPositionFlattened - vertex.GetCurrentWorldPosition().FlattenAsVector2());
+                float distanceSquared = Vector2.SqrMagnitude(worldPositionFlattened - meshData.GetCurrentVertexWorldPosition(vertexIndex).FlattenAsVector2());
                 if (distanceSquared < minDistanceSquared)
                 {
                     minDistanceSquared = distanceSquared;
-                    closestChunkMeshVertex = vertex;
+                    closestChunkMeshVertex = vertexIndex;
                 }
             }
 
@@ -249,10 +253,8 @@ namespace Gumball
 
             for (var vertexIndex = 0; vertexIndex < meshData.Mesh.vertices.Length; vertexIndex++)
             {
-                ChunkMeshData.Vertex chunkMeshVertex = new ChunkMeshData.Vertex(vertexIndex, meshData.Mesh.vertices[vertexIndex], chunk);
-                
-                if (VertexHasConnection(chunkMeshVertex))
-                    continue; //don't do for end vertices
+                if (VertexHasConnection(vertexIndex, meshData))
+                    continue; //don't do for end vertices that have connected
                 
                 //get the end point tangent direction
                 SplineSample endPoint = isFirstChunk ? chunk.LastSample : chunk.FirstSample;
@@ -264,18 +266,18 @@ namespace Gumball
 #endif
                 
                 //get the closest end vertex on the other chunk
-                var (closestEndVertex, closestEndVertexDistanceSqr) = GetClosestVertex(chunkMeshVertex.GetCurrentWorldPosition(), otherChunkMeshData.FirstEndVertices);
+                var (closestEndVertexIndex, closestEndVertexDistanceSqr) = GetClosestVertexIndex(meshData.GetCurrentVertexWorldPosition(vertexIndex), otherChunkMeshData.FirstEndVertices, otherChunkMeshData);
                 
                 //check which point is further in the tangent direction
-                bool isOverlapping = IsPointFurtherInDirection(chunkMeshVertex.GetCurrentWorldPosition(), closestEndVertex.GetCurrentWorldPosition(), tangentDirection);
+                bool isOverlapping = IsPointFurtherInDirection(meshData.GetCurrentVertexWorldPosition(vertexIndex), otherChunkMeshData.GetCurrentVertexWorldPosition(closestEndVertexIndex), tangentDirection);
                 if (isOverlapping)
                 {
                     //move the vertex to the closest end vertex to stop overlapping
-                    Vector3 closestEndVertexPositionWorld = closestEndVertex.GetCurrentWorldPosition();
+                    Vector3 closestEndVertexPositionWorld = otherChunkMeshData.GetCurrentVertexWorldPosition(closestEndVertexIndex);
                     
 #if UNITY_EDITOR
                     if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
-                        Debug.DrawLine(closestEndVertexPositionWorld, chunkMeshVertex.GetCurrentWorldPosition(), Color.black, 15);
+                        Debug.DrawLine(closestEndVertexPositionWorld, meshData.GetCurrentVertexWorldPosition(vertexIndex), Color.black, 15);
 #endif
                     
                     meshData.SetVertexWorldPosition(vertexIndex, closestEndVertexPositionWorld);
@@ -294,25 +296,31 @@ namespace Gumball
         #region Vertex Connections
         private struct VertexConnection
         {
-            internal ChunkMeshData.Vertex vertex1;
-            internal ChunkMeshData.Vertex vertex2;
+            internal int vertexIndex1;
+            internal ChunkMeshData vertexIndexChunk1;
 
-            internal VertexConnection(ChunkMeshData.Vertex vertex1, ChunkMeshData.Vertex vertex2)
+            internal int vertexIndex2;
+            internal ChunkMeshData vertexIndexChunk2;
+
+            internal VertexConnection(int vertexIndex1, ChunkMeshData vertexIndexChunk1, int vertexIndex2, ChunkMeshData vertexIndexChunk2)
             {
-                this.vertex1 = vertex1;
-                this.vertex2 = vertex2;
+                this.vertexIndex1 = vertexIndex1;
+                this.vertexIndexChunk1 = vertexIndexChunk1;
+                
+                this.vertexIndex2 = vertexIndex2;
+                this.vertexIndexChunk2 = vertexIndexChunk2;
             }
         }
 
         private readonly List<VertexConnection> connections = new();
         
-        private bool VertexHasConnection(ChunkMeshData.Vertex chunkMeshVertex)
+        private bool VertexHasConnection(int vertexIndex, ChunkMeshData chunkMeshData)
         {
             foreach (VertexConnection connection in connections)
             {
-                if (connection.vertex1.Equals(chunkMeshVertex))
+                if (vertexIndex == connection.vertexIndex1 && chunkMeshData.Equals(connection.vertexIndexChunk1))
                     return true;
-                if (connection.vertex2.Equals(chunkMeshVertex))
+                if (vertexIndex == connection.vertexIndex2 && chunkMeshData.Equals(connection.vertexIndexChunk2))
                     return true;
             }
 

@@ -12,53 +12,11 @@ namespace Gumball
     [Serializable]
     public class ChunkMeshData
     {
-        [Serializable]
-        public struct Vertex : IEquatable<Vertex>
-        {
-            [SerializeField, ReadOnly] private int index;
-            [SerializeField, ReadOnly] private Vector3 localPosition;
-            [SerializeField, ReadOnly] private Chunk chunkBelongsTo;
-            
-            public int Index => index;
-            public Vector3 LocalPosition => localPosition;
-            public Vector3 WorldPosition => MeshBelongsTo.MeshFilter.transform.TransformPoint(LocalPosition);
-            public ChunkMeshData MeshBelongsTo => chunkBelongsTo.ChunkMeshData;
-
-            public Vertex(int index, Vector3 localPosition, Chunk chunkBelongsTo)
-            {
-                this.index = index;
-                this.localPosition = localPosition;
-                this.chunkBelongsTo = chunkBelongsTo;
-            }
-
-            /// <summary>
-            /// Because the mesh can be updated but not yet applied, use this to get the current (but not applied) value instead.
-            /// </summary>
-            public Vector3 GetCurrentWorldPosition()
-            {
-                return MeshBelongsTo.GetCurrentVertexWorldPosition(index);
-            }
-
-            public bool Equals(Vertex other)
-            {
-                return Index == other.Index && Equals(MeshBelongsTo, other.MeshBelongsTo);
-            }
-
-            public override bool Equals(object obj)
-            {
-                return obj is Vertex other && Equals(other);
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(Index, MeshBelongsTo);
-            }
-        }
         
         [SerializeField, ReadOnly] private Chunk chunk;
         [SerializeField, ReadOnly] private Vector3[] vertices;
-        [SerializeField, ReadOnly] private List<Vertex> lastEndVertices;
-        [SerializeField, ReadOnly] private List<Vertex> firstEndVertices;
+        [SerializeField, ReadOnly] private List<int> lastEndVertices;
+        [SerializeField, ReadOnly] private List<int> firstEndVertices;
         [SerializeField, ReadOnly] private SerializableColor[] vertexColors;
         
         public Chunk Chunk => chunk;
@@ -67,8 +25,8 @@ namespace Gumball
         public Mesh Mesh => MeshFilter.sharedMesh;
         public Vector3[] Vertices => vertices;
         public SerializableColor[] VertexColors => vertexColors;
-        public ReadOnlyCollection<Vertex> LastEndVertices => lastEndVertices.AsReadOnly();
-        public ReadOnlyCollection<Vertex> FirstEndVertices => firstEndVertices.AsReadOnly();
+        public ReadOnlyCollection<int> LastEndVertices => lastEndVertices.AsReadOnly();
+        public ReadOnlyCollection<int> FirstEndVertices => firstEndVertices.AsReadOnly();
         
         public ChunkMeshData(Chunk chunk)
         {
@@ -163,7 +121,7 @@ namespace Gumball
             TerrainTextureBlendSettings terrainBlendSettings = chunk.GetComponent<ChunkEditorTools>().TerrainData.TextureBlendSettings;
             Color[] colors = terrainBlendSettings.GetVertexColors(chunk, new List<Vector3>(vertices), MeshFilter.transform, Mesh);
 
-            ApplyPaintData(colors);
+            ApplyPaintData(colors); //re-add the paint data
             UpdateVertexColors(colors.ToSerializableColors());
             
             return colors;
@@ -212,9 +170,9 @@ namespace Gumball
             chunk.transform.rotation = previousRotation;
         }
         
-        private List<Vertex> GetVerticesOnTangent(Vector3 tangentStart, Vector3 tangentEnd)
+        private List<int> GetVerticesOnTangent(Vector3 tangentStart, Vector3 tangentEnd)
         {
-            List<Vertex> verticesOnTangent = new();
+            List<int> verticesOnTangent = new();
 
             for (var vertexIndex = 0; vertexIndex < Mesh.vertices.Length; vertexIndex++)
             {
@@ -228,7 +186,7 @@ namespace Gumball
 
                 if (IsPointOnTangent(vertexPositionWorld, tangentStart, tangentEnd))
                 {
-                    verticesOnTangent.Add(new Vertex(vertexIndex, vertexPosition, chunk));
+                    verticesOnTangent.Add(vertexIndex);
 #if UNITY_EDITOR
                     if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
                         Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 20, Color.magenta, 15);

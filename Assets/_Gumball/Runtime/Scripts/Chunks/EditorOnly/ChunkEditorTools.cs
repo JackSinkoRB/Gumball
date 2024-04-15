@@ -180,14 +180,14 @@ namespace Gumball
         [ButtonMethod]
         public void DrawMeshEdgeNormals()
         {
-            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.FirstEndVertices)
+            foreach (int vertexIndex in chunk.ChunkMeshData.FirstEndVertices)
             {
-                DrawNormal(vertex.Index, Color.red);
+                DrawNormal(vertexIndex, Color.red);
             }
             
-            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.LastEndVertices)
+            foreach (int vertexIndex in chunk.ChunkMeshData.LastEndVertices)
             {
-                DrawNormal(vertex.Index, Color.blue);
+                DrawNormal(vertexIndex, Color.blue);
             }
 
             void DrawNormal(int vertexIndex, Color color)
