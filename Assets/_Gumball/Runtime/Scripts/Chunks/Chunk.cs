@@ -376,7 +376,6 @@ namespace Gumball
             }
         }
         
-        [ButtonMethod]
         public void CalculateSplineLength()
         {
             splineLengthCached = splineComputer.CalculateLength();

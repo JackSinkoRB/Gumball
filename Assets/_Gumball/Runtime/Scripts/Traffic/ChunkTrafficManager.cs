@@ -5,6 +5,7 @@ using System.Linq;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Gumball
 {
@@ -37,9 +38,8 @@ namespace Gumball
         [SerializeField] private float speedLimitKmh = 40;
         [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
         [SerializeField] private int density = 100;
-        [SerializeField, InitializationField] private float[] laneDistances;
-        [SerializeField, ReadOnly] private float[] laneDistancesForwardCached;
-        [SerializeField, ReadOnly] private float[] laneDistancesBackwardCached;
+        [SerializeField] private float[] laneDistancesForward;
+        [SerializeField] private float[] laneDistancesBackward;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunk;
@@ -48,6 +48,8 @@ namespace Gumball
         public float SpeedLimitKmh => speedLimitKmh;
         public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLengthCached / density);
         public RacingLine RacingLine => racingLine;
+        public bool HasBackwardLanes => laneDistancesBackward != null && laneDistancesBackward.Length > 0;
+        public bool HasForwardLanes => laneDistancesForward != null && laneDistancesForward.Length > 0;
         
         private void OnValidate()
         {
@@ -112,22 +114,31 @@ namespace Gumball
             }
         }
 
-        public LaneDirection GetLaneDirection(float laneDistance)
-        {
-            if (driveOnLeft)
-                return laneDistance < 0 ? LaneDirection.FORWARD : LaneDirection.BACKWARD;
-            return laneDistance < 0 ? LaneDirection.BACKWARD : LaneDirection.FORWARD;
-        }
-
         public void SpawnCarInRandomPosition(LaneDirection direction = LaneDirection.NONE)
         {
             const int maxAttempts = 5;
             
             for (int attempt = 0; attempt < maxAttempts; attempt++)
             {
+                //make sure there is a direction
+                if (direction == LaneDirection.NONE)
+                {
+                    if (HasBackwardLanes && HasForwardLanes)
+                        direction = Random.Range(0, 2) == 0 ? LaneDirection.FORWARD : LaneDirection.BACKWARD;
+                    else if (HasBackwardLanes)
+                        direction = LaneDirection.BACKWARD;
+                    else if (HasForwardLanes)
+                        direction = LaneDirection.FORWARD;
+                    else
+                    {
+                        Debug.LogError("Could not spawn car as there are no lanes.");
+                        return;
+                    }
+                }
+
                 float randomLaneDistance = GetRandomLaneDistance(direction);
 
-                var (position, rotation) = GetLanePosition(chunk.SplineSamples.GetRandom(), randomLaneDistance);
+                var (position, rotation) = GetLanePosition(chunk.SplineSamples.GetRandom(), randomLaneDistance, direction);
                 
                 if (!CanSpawnCarAtPosition(position, randomLaneDistance))
                 {
@@ -138,19 +149,34 @@ namespace Gumball
                 }
 
                 AICar car = TrafficCarSpawner.Instance.SpawnCar(position, rotation);
-                car.SetLaneDistance(randomLaneDistance + randomLaneOffset.RandomInRange());
+                car.SetLaneDistance(randomLaneDistance + randomLaneOffset.RandomInRange(), direction);
+                car.SetSpeed(car.DesiredSpeed);
                 break;
             }
         }
         
-        public (Vector3, Quaternion) GetLanePosition(SplineSample splineSample, float laneDistance)
+        /// <summary>
+        /// Gets the position of a lane from a certain spline sample.
+        /// </summary>
+        public (Vector3, Quaternion) GetLanePosition(SplineSample splineSample, float laneDistance, LaneDirection direction)
         {
-            //get a random sample on the spline, then get the distance depending on the lane
             Vector3 laneOffset = splineSample.right * laneDistance;
             Vector3 finalPos = splineSample.position + laneOffset;
-            Quaternion rotation = Quaternion.LookRotation(driveOnLeft && laneDistance < 0 ? splineSample.forward : -splineSample.forward);
+            Quaternion rotation = Quaternion.LookRotation(driveOnLeft && direction == LaneDirection.FORWARD ? splineSample.forward : -splineSample.forward);
             
             return (finalPos, rotation);
+        }
+        
+        public float GetOffsetFromRacingLine(Vector3 fromPoint)
+        {
+            var (splineSample, distanceSqr) = racingLine.SampleCollection.GetClosestSampleOnSpline(fromPoint);
+            float distance = Mathf.Sqrt(distanceSqr);
+            
+            //is the position to the left or right of the spline?
+            bool isRight = fromPoint.IsFurtherInDirection(splineSample.position, splineSample.right);
+            float offsetDirection = isRight ? 1 : -1;
+            
+            return distance * offsetDirection;
         }
         
         private bool CanSpawnCarAtPosition(Vector3 position, float laneDistance)
@@ -179,66 +205,84 @@ namespace Gumball
         
         private float GetRandomLaneDistance(LaneDirection direction)
         {
-            return direction switch
+            if (direction == LaneDirection.NONE)
             {
-                LaneDirection.NONE => laneDistances.GetRandom(),
-                LaneDirection.FORWARD => laneDistancesForwardCached.GetRandom(),
-                LaneDirection.BACKWARD => laneDistancesBackwardCached.GetRandom(),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                if (HasBackwardLanes && HasForwardLanes)
+                    //pick random direction
+                    return Random.Range(0, 2) == 0 ? laneDistancesForward.GetRandom() : laneDistancesBackward.GetRandom();
+                if (HasBackwardLanes)
+                    return laneDistancesBackward.GetRandom();
+                if (HasForwardLanes)
+                    return laneDistancesForward.GetRandom();
+                
+                Debug.LogError("Could not get random lane distance as there are no lanes.");
+                return 0;
+            }
+
+            if (direction == LaneDirection.BACKWARD)
+            {
+                if (!HasBackwardLanes)
+                {
+                    Debug.LogError("Could not get random lane distance as there are no backward lanes.");
+                    return 0;
+                }
+
+                return laneDistancesBackward.GetRandom();
+            }
+
+            if (direction == LaneDirection.FORWARD)
+            {
+                if (!HasForwardLanes)
+                {
+                    Debug.LogError("Could not get random lane distance as there are no forward lanes.");
+                    return 0;
+                }
+
+                return laneDistancesForward.GetRandom();
+            }
+
+            throw new ArgumentOutOfRangeException();
         }
         
         private void InitialiseLanes()
         {
             //if no lanes, just create one in the centre
-            if (laneDistances.Length == 0)
-                laneDistances = new[] { 0f };
-            
-            CacheLaneDistances();
-        }
-        
-        /// <summary>
-        /// Splits the lane distances into forward and backward arrays.
-        /// </summary>
-        private void CacheLaneDistances()
-        {
-            HashSet<float> laneDistancesForward = new();
-            HashSet<float> laneDistancesBackward = new();
-
-            foreach (float lane in laneDistances)
-            {
-                if (GetLaneDirection(lane) == LaneDirection.FORWARD)
-                    laneDistancesForward.Add(lane);
-                if (GetLaneDirection(lane) == LaneDirection.BACKWARD)
-                    laneDistancesBackward.Add(lane);
-            }
-
-            //copy to the cached array
-            laneDistancesForwardCached = new float[laneDistancesForward.Count];
-            laneDistancesForward.CopyTo(laneDistancesForwardCached);
-
-            laneDistancesBackwardCached = new float[laneDistancesBackward.Count];
-            laneDistancesBackward.CopyTo(laneDistancesBackwardCached);
+            if (laneDistancesForward.Length == 0 && laneDistancesBackward.Length == 0)
+                laneDistancesForward = new[] { 0f };
         }
 
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
-            if (laneDistances == null)
-                return;
-            
             SplineSample firstSample = chunk.SplineSamples[0];
             SplineSample lastSample = chunk.SplineSamples[^1];
             
-            Gizmos.color = Color.yellow;
-
-            for (int i = 0; i < laneDistances.Length; i++)
+            if (laneDistancesForward != null)
             {
-                Vector3 firstSamplePos = firstSample.position + laneDistances[i] * firstSample.right;
-                Gizmos.DrawSphere(firstSamplePos, 1f);
+                Gizmos.color = Color.yellow;
 
-                Vector3 lastSamplePos = lastSample.position + laneDistances[i] * lastSample.right;
-                Gizmos.DrawSphere(lastSamplePos, 1f);
+                foreach (float laneDistance in laneDistancesForward)
+                {
+                    Vector3 firstSamplePos = firstSample.position + laneDistance * firstSample.right;
+                    Gizmos.DrawSphere(firstSamplePos, 1f);
+
+                    Vector3 lastSamplePos = lastSample.position + laneDistance * lastSample.right;
+                    Gizmos.DrawSphere(lastSamplePos, 1f);
+                }
+            }
+            
+            if (laneDistancesBackward != null)
+            {
+                Gizmos.color = Color.blue;
+
+                foreach (float laneDistance in laneDistancesBackward)
+                {
+                    Vector3 firstSamplePos = firstSample.position + laneDistance * firstSample.right;
+                    Gizmos.DrawSphere(firstSamplePos, 1f);
+
+                    Vector3 lastSamplePos = lastSample.position + laneDistance * lastSample.right;
+                    Gizmos.DrawSphere(lastSamplePos, 1f);
+                }
             }
         }
 #endif

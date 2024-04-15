@@ -31,6 +31,7 @@ namespace Gumball
         {
             base.OnSessionEnd();
             
+            PanelManager.GetPanel<RaceSessionPanel>().Hide();
             PanelManager.GetPanel<RaceSessionEndPanel>().Show();
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
@@ -39,7 +40,9 @@ namespace Gumball
         public int GetRacePosition(AICar car)
         {
             //sort the cars based on distanceTraveled (descending order)
-            racersInPositionOrder = CurrentRacers.OrderByDescending(c => c.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled).ToArray();
+            racersInPositionOrder = CurrentRacers.OrderByDescending(
+                c => c.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled 
+                     + c.GetComponent<SplineTravelDistanceCalculator>().InitialDistance).ToArray();
             
             int rank = Array.IndexOf(racersInPositionOrder, car) + 1;
             return rank;

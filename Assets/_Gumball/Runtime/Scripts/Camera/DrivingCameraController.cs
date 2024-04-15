@@ -1,91 +1,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
 {
-    public class DrivingCameraController : Singleton<DrivingCameraController>
+    public class DrivingCameraController : CameraController
     {
         
-        [SerializeField] private Transform target;
-        [SerializeField] private float distance = 1;
-        [SerializeField] private float height = 0.1f;
-        [SerializeField] private float heightDamping = 2;
-        [SerializeField] private float lookAtHeight;
-        [SerializeField] private float rotationSnapTime = 0.1f;
-        [SerializeField] private float distanceSnapTime;
-        [SerializeField] private float distanceMultiplier;
-        
-        private float usedDistance;
-        private float desiredRotationAngle;
-        private float desiredHeight;
-        private float currentRotationAngle;
-        private float currentHeight;
-        private Quaternion currentRotation;
-        private Vector3 desiredPosition;
-        private float yVelocity;
-        private float zVelocity;
+        [Header("States")]
+        [SerializeField] private CameraState drivingState;
+        [SerializeField] private CameraState introState;
+        [SerializeField] private CameraState outroState;
 
-        private Rigidbody targetRigidbody => target.GetComponent<Rigidbody>();
-        
-        public Transform Target => target;
-        
-        private void LateUpdate()
-        {
-            SmoothFollow();
-        }
+        public CameraState DrivingState => drivingState;
+        public CameraState IntroState => introState;
+        public CameraState OutroState => outroState;
 
-        public void SetTarget(Transform newTarget, bool snap = true)
-        {
-            target = newTarget;
-            
-            if (targetRigidbody != null)
-                targetRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
-
-            if (snap)
-                SnapToTarget();
-        }
-
-        private void SnapToTarget()
-        {
-            desiredHeight = target.position.y + height;
-            desiredRotationAngle = target.eulerAngles.y;
-            desiredPosition = target.position;
-            desiredPosition.y = desiredHeight;
-
-            usedDistance = distance + (targetRigidbody.velocity.magnitude * distanceMultiplier);
-            desiredPosition += Quaternion.Euler(0, desiredRotationAngle, 0) * new Vector3(0, 0, -usedDistance);
-            
-            transform.position = desiredPosition;
-            transform.LookAt(target.position + new Vector3(0, lookAtHeight, 0));
-        }
-
-        private void SmoothFollow()
-        {
-            if (target == null)
-                return;
-            
-            desiredHeight = target.position.y + height;
-            currentHeight = transform.position.y;
-
-            desiredRotationAngle = target.eulerAngles.y;
-            currentRotationAngle = transform.eulerAngles.y;
-
-            currentRotationAngle = Mathf.SmoothDampAngle(currentRotationAngle, desiredRotationAngle, ref yVelocity, rotationSnapTime);
-
-            currentHeight = Mathf.Lerp(currentHeight, desiredHeight, heightDamping * Time.deltaTime);
-
-            desiredPosition = target.position;
-            desiredPosition.y = currentHeight;
-
-            usedDistance = Mathf.SmoothDampAngle(usedDistance, distance + (targetRigidbody.velocity.magnitude * distanceMultiplier), ref zVelocity, distanceSnapTime);
-
-            desiredPosition += Quaternion.Euler(0, currentRotationAngle, 0) * new Vector3(0, 0, -usedDistance);
-
-            transform.position = desiredPosition;
-            transform.LookAt(target.position + new Vector3(0, lookAtHeight, 0));
-        }
-        
     }
 }

@@ -17,6 +17,8 @@ namespace Gumball
         
         private AICar car => GetComponent<AICar>();
 
+        public float InitialDistance => initialSplineDistance;
+        
         public float DistanceTraveled
         {
             get

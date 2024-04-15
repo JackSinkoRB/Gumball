@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
 using DG.Tweening;
 using Dreamteck.Splines;
+#if UNITY_EDITOR
+using Gumball.Editor;
+#endif
 using MyBox;
 using UnityEngine;
 using Quaternion = UnityEngine.Quaternion;
@@ -40,6 +42,10 @@ namespace Gumball
         public int ID => id;
         public string SaveKey => $"CarData.{carIndex}.{id}";
 
+        [Header("Sizing")]
+        [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
+        [SerializeField] private float carWidth = 2;
+        
         [Header("Wheels")]
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
         [SerializeField, InitializationField] private Transform[] frontWheelMeshes;
@@ -57,14 +63,22 @@ namespace Gumball
         [Header("Max speed")]
         [Tooltip("Does the car obey the current chunks speed limit?")]
         [SerializeField] private bool obeySpeedLimit = true;
-        [SerializeField, ConditionalField(nameof(obeySpeedLimit), true)] private float maxSpeed = 200;
+        [SerializeField, ConditionalField(nameof(obeySpeedLimit), true), InitializationField] private float maxSpeed = 200;
+        [Tooltip("A speed limit that overrides the max speed to be changed at runtime.")]
+        [SerializeField] private float tempSpeedLimit = -1f;
         
         [Header("Lanes")]
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
+        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private ChunkTrafficManager.LaneDirection currentLaneDirection;
         [ConditionalField(nameof(autoDrive), nameof(useRacingLine)), SerializeField] private float racingLineOffset;
+        [ConditionalField(nameof(autoDrive)), SerializeField] private float targetPositionOffset; //show in inspector
+        
+        private Tween currentRacingLineOffsetTween;
 
+        public float CurrentLaneDistance => currentLaneDistance;
+        
         [Header("Drag")]
         [SerializeField] private float dragWhenAccelerating;
         [SerializeField] private float dragWhenIdle = 0.15f;
@@ -74,7 +88,6 @@ namespace Gumball
         
         [Header("Movement")]
         [SerializeField, ReadOnly] private float speed;
-        [SerializeField, ReadOnly] private float desiredSpeed;
         private bool wasMovingLastFrame;
         private const float stationarySpeed = 2;
         private bool isStationary => speed < stationarySpeed && !isAccelerating;
@@ -106,14 +119,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isReversing;
         
         [Header("Steering")]
-        [ConditionalField(nameof(autoDrive)), SerializeField] private MinMaxFloat movementTargetDistance = new(5, 10);
-        [Tooltip("At less than or equal to 'min' km/h, the movementTargetDistance is min.\n" +
-                 "At greater than or equal to 'max' km/h, the movementTargetDistance is max.")]
-        [ConditionalField(nameof(autoDrive)), SerializeField] private MinMaxFloat movementTargetDistanceSpeedFactors = new(20, 90);
         [Tooltip("The speed that the wheel collider turns if not auto driving.")]
         [ConditionalField(nameof(autoDrive), true), SerializeField] private float steerSpeed = 2.5f;
-        [Tooltip("The speed that the wheel collider turns if auto driving.")]
-        [ConditionalField(nameof(autoDrive)), SerializeField] private float autoDriveSteerSpeed = 10;
         [Tooltip("This allows for a different steer speed when the steering input has been released.")]
         [ConditionalField(nameof(autoDrive), true), SerializeField] private float releaseSpeed = 15;
         [Tooltip("The speed that the wheel mesh is interpolated to the desired steer angle. This is different to the steer speed of the wheel collider.")]
@@ -134,6 +141,11 @@ namespace Gumball
         [ConditionalField(nameof(autoDrive)), SerializeField, ReadOnly] private float corneringSpeed = Mathf.Infinity;
         [SerializeField, ReadOnly] private float speedToBrakeTo;
         
+        /// <summary>
+        /// The time that the autodriving car looks ahead for curves to brake.
+        /// </summary>
+        private const float brakingReactionTime = 0.95f;
+        
         private bool wasBrakingLastFrame;
         
         [Header("Handbrake")]
@@ -151,10 +163,12 @@ namespace Gumball
         [SerializeField] private float collisionRecoverDuration = 1;
         [Space(5)]
         [SerializeField, ReadOnly] private bool inCollision;
+        [SerializeField, ReadOnly] private int numberOfCollisions;
         [SerializeField, ReadOnly] private bool isPushingAnotherRacer;
         [SerializeField, ReadOnly] private List<AICar> racersCollidingWith = new();
         
         private float timeOfLastCollision = -Mathf.Infinity;
+        private BoxCollider movementPathCollider;
         
         public GameObject Colliders => colliders;
         
@@ -168,17 +182,19 @@ namespace Gumball
         
         [Header("Obstacle avoidance")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useObstacleAvoidance;
+        [ConditionalField(nameof(autoDrive)), SerializeField] private LayerMask obstacleLayers;
         [Tooltip("The speed the car should brake to if all the directions are blocked (exlcuding the 'when blocked' layers).")]
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private float speedToBrakeToIfBlocked = 50;
-        [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private ObstacleRaycastLayer[] obstacleAvoidanceRaycastLayers;
-        [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private ObstacleRaycastLayer obstacleAvoidanceRaycastLayerWhenBlocked;
-        [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField, ReadOnly] private int currentLayerIndex;
+
+        /// <summary>
+        /// The time that the autodriving car looks ahead for curves.
+        /// </summary>
+        private const float predictedPositionReactionTime = 0.65f;
         
+        private readonly RaycastHit[] blockagesTemp = new RaycastHit[10];
         private bool allDirectionsAreBlocked;
 
         [Header("Debugging")]
-        [SerializeField] private bool debug;
-        [Space(5)]
         [SerializeField, ReadOnly] private bool isInitialised;
         [Space(5)]
         [SerializeField, ReadOnly] private Chunk currentChunkCached;
@@ -186,19 +202,17 @@ namespace Gumball
 
         private Vector3 targetPosition;
         private int lastFrameChunkWasCached = -1;
-        private (Chunk, Vector3, Quaternion)? targetPos;
+        private (Chunk, Vector3, Quaternion, SplineSample)? targetPos;
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => collisionRecoverDuration > 0 && (inCollision || timeSinceCollision < collisionRecoverDuration);
-        private bool faceForward => useRacingLine || currentChunkCached.TrafficManager.GetLaneDirection(CurrentLaneDistance) == ChunkTrafficManager.LaneDirection.FORWARD;
+        private bool faceForward => useRacingLine || currentLaneDirection == ChunkTrafficManager.LaneDirection.FORWARD;
         private bool isRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
         private bool isPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
 
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
-        public float DesiredSpeed => desiredSpeed;
         public float Speed => speed;
-        public float MaxSpeed => isReversing ? maxReverseSpeed : (obeySpeedLimit ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed);
-        public float CurrentLaneDistance => currentLaneDistance;
+        public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed));
         
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk CurrentChunk
@@ -249,6 +263,7 @@ namespace Gumball
             isAccelerating = false;
             wasAcceleratingLastFrame = false;
             racersCollidingWith.Clear();
+            tempSpeedLimit = -1f; //clear the temp speed limit
             
             if (canBeDrivenByPlayer)
                 GearboxSetting.onSettingChanged -= OnGearboxSettingChanged;
@@ -307,9 +322,14 @@ namespace Gumball
             this.autoDrive = autoDrive;
         }
 
-        public void SetRacingLineOffset(float offset)
+        public void SetSpeed(float speedKmh)
         {
-            racingLineOffset = offset;
+            Rigidbody.velocity = SpeedUtils.FromKmh(speedKmh) * transform.forward;
+        }
+        
+        public void SetTemporarySpeedLimit(float speedKmh)
+        {
+            tempSpeedLimit = speedKmh;
         }
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -342,9 +362,10 @@ namespace Gumball
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
         }
 
-        public void SetLaneDistance(float laneDistance)
+        public void SetLaneDistance(float laneDistance, ChunkTrafficManager.LaneDirection direction)
         {
             currentLaneDistance = laneDistance;
+            currentLaneDirection = direction;
         }
         
         private void FixedUpdate()
@@ -377,6 +398,7 @@ namespace Gumball
 
             timeOfLastCollision = Time.time; //reset collision time
 
+            numberOfCollisions++;
             inCollision = true;
         }
 
@@ -391,7 +413,10 @@ namespace Gumball
             GlobalLoggers.AICarLogger.Log($"{gameObject.name} stopped colliding with {collision.gameObject.name}");
             
             timeOfLastCollision = Time.time; //reset collision time
-            inCollision = false;
+
+            numberOfCollisions--;
+            if (numberOfCollisions == 0)
+                inCollision = false;
         }
 
         private void OnChunkCachedBecomeInaccessible()
@@ -418,19 +443,28 @@ namespace Gumball
             
             Rigidbody.isKinematic = false;
         }
-        
-        private void OnChangeDesiredSpeed(float newSpeed)
-        {
-            desiredSpeed = newSpeed;
-            
-            if (debug) GlobalLoggers.AICarLogger.Log($"Changed desired speed to {desiredSpeed}");
-        }
 
+        public void SetRacingLineOffset(float offset, float interpolationDuration = 0)
+        {
+            currentRacingLineOffsetTween?.Kill();
+
+            if (interpolationDuration == 0)
+            {
+                racingLineOffset = offset;
+                return;
+            }
+
+            currentRacingLineOffsetTween = DOTween.To(() => racingLineOffset, x => racingLineOffset = x, offset, interpolationDuration); 
+        }
+        
         private void Move()
         {
+            speed = SpeedUtils.ToKmh(Rigidbody.velocity.magnitude);
+            TryCreateMovementPathCollider();
+            
             if (autoDrive)
             {
-                targetPos = GetPositionAhead(GetMovementTargetDistance(Speed));
+                targetPos = GetPositionAhead(GetMovementTargetDistance());
                 if (targetPos == null)
                 {
                     Despawn();
@@ -438,20 +472,24 @@ namespace Gumball
                 }
 
                 targetPosition = targetPos.Value.Item2;
+
+                //check to add racing line offset
+                if (useRacingLine)
+                {
+                    SplineSample targetPosSplineSample = targetPos.Value.Item4;
+                    Vector3 racingLineOffsetVector = transform.right * racingLineOffset;
+                    targetPosition += racingLineOffsetVector;
+                }
             }
             else
             {
                 targetPosition = transform.position + (transform.forward * 100);
             }
-
-            speed = SpeedUtils.ToKmh(Rigidbody.velocity.magnitude);
-
+            
             CheckIfPlayerDriving();
             
             if (useObstacleAvoidance && autoDrive)
                 TryAvoidObstacles();
-            
-            UpdateDesiredSpeed();
             
             if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
                 CalculateSteerAngle();
@@ -479,12 +517,12 @@ namespace Gumball
             CalculateEngineRPM();
 
             UpdateDrag();
+
+            UpdateMovementPathCollider();
             
             //debug directions:
-            Debug.DrawRay(transform.position, Rigidbody.velocity, Color.green);
-            if (targetPos != null)
-                Debug.DrawLine(transform.position, targetPos.Value.Item2, Color.yellow);
-            Debug.DrawLine(transform.position, targetPosition, Color.cyan);
+            Debug.DrawLine(transform.position, targetPosition, 
+                isBraking ? Color.red : (isAccelerating ? Color.green : Color.white));
         }
 
         private void UpdateDrag()
@@ -539,13 +577,7 @@ namespace Gumball
             float engineRpmUnclamped = engineRpmRange.Min + averagePoweredWheelRPM * gearRatios[currentGear] * finalGearRatio;
             engineRpm = engineRpmRange.Clamp(engineRpmUnclamped);
         }
-        
-        private void UpdateDesiredSpeed()
-        {
-            if (!MaxSpeed.Approximately(DesiredSpeed))
-                OnChangeDesiredSpeed(MaxSpeed);
-        }
-        
+
         /// <summary>
         /// Check if colliding with another racer or player and is behind it.
         /// </summary>
@@ -570,11 +602,7 @@ namespace Gumball
                 racersAlreadyChecked.Add(racerCollidingWith);
                 
                 //check if racer is ahead or behind
-                float distanceToTargetSqr = Vector3.SqrMagnitude(transform.position - targetPosition);
-                float otherCarsDistanceToTargetSqr = Vector3.SqrMagnitude(racerCollidingWith.transform.position - targetPosition);
-
-                bool isBehind = distanceToTargetSqr > otherCarsDistanceToTargetSqr;
-                if (isBehind)
+                if (IsPositionAhead(racerCollidingWith.transform.position + racerCollidingWith.frontOfCarPosition))
                 {
                     isPushingAnotherRacer = true;
                     return;
@@ -582,6 +610,17 @@ namespace Gumball
             }
         }
 
+        /// <summary>
+        /// Checks if the specified position is ahead of the player (in terms of the direction to the target position).
+        /// </summary>
+        private bool IsPositionAhead(Vector3 position)
+        {
+            Vector3 frontOfCar = transform.position + frontOfCarPosition;
+            
+            bool isAhead = position.IsFurtherInDirection(frontOfCar, transform.forward);
+            return isAhead;
+        }
+        
         private void CheckToAccelerate()
         {
             //don't accelerate if braking
@@ -591,7 +630,9 @@ namespace Gumball
             else if (autoDrive && recoveringFromCollision)
                 isAccelerating = false;
             //can't accelerate if above desired speed
-            else if (speed > desiredSpeed)
+            else if (speed > DesiredSpeed)
+                isAccelerating = false;
+            else if (DesiredSpeed == 0)
                 isAccelerating = false;
             else if (isPushingAnotherRacer)
                 isAccelerating = false;
@@ -632,14 +673,17 @@ namespace Gumball
         
         private void CalculateSteerAngle()
         {
-            float speedPercent = Mathf.Clamp01(speed / MaxSpeed);
+            if (speed <= 0) 
+                return;
+
+            float speedPercent = Mathf.Clamp01(speed / DesiredSpeed);
             float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : maxSteerAngleCurve.Evaluate(speedPercent);
 
             if (autoDrive)
             {
                 Vector3 directionToTarget = targetPosition - transform.position;
                 float angle = Mathf.Clamp(-Vector2.SignedAngle(Rigidbody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
-                desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, autoDriveSteerSpeed * Time.deltaTime);
+                desiredSteerAngle = angle;
             }
             else
             {
@@ -668,10 +712,18 @@ namespace Gumball
                 return;
 
             //is speeding over the desired speed? 
-            const float speedingLeeway = 10; //the amount the player can speed past the desired speed before needing to brake
-            if (autoDrive && speed > desiredSpeed + speedingLeeway)
+            const float speedingLeewayPercent = 5; //the amount the player can speed past the desired speed before needing to brake
+            float speedingLeeway = speedingLeewayPercent * DesiredSpeed;
+            if (autoDrive && speed > DesiredSpeed + speedingLeeway)
             {
-                speedToBrakeTo = desiredSpeed;
+                speedToBrakeTo = DesiredSpeed;
+                isBraking = true;
+            }
+
+            //check if needs to be stationary
+            if (DesiredSpeed <= 0)
+            {
+                speedToBrakeTo = 0;
                 isBraking = true;
             }
 
@@ -694,6 +746,12 @@ namespace Gumball
                     speedToBrakeTo = 0;
                     isBraking = true;
                 }
+            }
+            
+            if (autoDrive && isPushingAnotherRacer)
+            {
+                isBraking = true;
+                speedToBrakeTo = 0;
             }
             
             if (autoDrive && useObstacleAvoidance && allDirectionsAreBlocked)
@@ -807,74 +865,7 @@ namespace Gumball
         {
             isReversing = false;
         }
-        
-        private void TryAvoidObstacles()
-        {
-            if (!autoDrive)
-                return;
-            
-            //get the angle with the least angle UP TO the current layer
-            float leastAngle = Mathf.Infinity;
-            int leastAngleLayer = default;
-            Vector3 leastAngleOffset = default;
 
-            allDirectionsAreBlocked = true;
-            
-            for (int index = 0; index < obstacleAvoidanceRaycastLayers.Length; index++)
-            {
-                if (index > currentLayerIndex)
-                    break;
-                
-                ObstacleRaycastLayer layer = obstacleAvoidanceRaycastLayers[index];
-                ObstacleRaycast raycast = layer.GetUnblockedRaycastWithLeastAngle(transform, targetPosition);
-
-                bool areAllBlocked = raycast == null;
-                if (!areAllBlocked)
-                {
-                    if (raycast.Angle > 20 && !allDirectionsAreBlocked)
-                    {
-                        if (index == currentLayerIndex)
-                            currentLayerIndex++;
-                        continue;
-                    }
-                    
-                    allDirectionsAreBlocked = false;
-                    
-                    if (raycast.Angle > leastAngle)
-                        continue;
-
-                    leastAngle = raycast.Angle;
-                    leastAngleLayer = index;
-                    leastAngleOffset = raycast.OffsetVector;
-                }
-                else
-                {
-                    //check the next layer as all are blocked
-                    if (index == currentLayerIndex)
-                        currentLayerIndex++;
-                }
-            }
-
-            if (allDirectionsAreBlocked)
-            {
-                //try with directions relative to car
-                Vector3 position = transform.position + (transform.forward * 10);
-                Vector3 direction = Vector3.Normalize(targetPosition - transform.position);
-                
-                ObstacleRaycast raycast = obstacleAvoidanceRaycastLayerWhenBlocked.GetUnblockedRaycastWithLeastAngle(transform, position, direction);
-                if (raycast == null)
-                    return;
-
-                targetPosition = transform.position + (transform.forward * raycast.RaycastLength) + raycast.OffsetVector;
-                currentLayerIndex = obstacleAvoidanceRaycastLayers.Length;
-            }
-            else
-            {
-                targetPosition += leastAngleOffset;
-                currentLayerIndex = leastAngleLayer;
-            }
-        }
-        
         private void OnStartBraking()
         {
             Rigidbody.drag = dragWhenBraking;
@@ -902,18 +893,47 @@ namespace Gumball
         
         private void CheckForCorner()
         {
-            const float visionDistance = 25f;
+            const float min = 2;
+            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmh(speed));
+            float visionDistance = metresPerSecond * brakingReactionTime;
+            
             var targetPos = GetPositionAhead(visionDistance);
             if (targetPos == null)
                 return;
             
-            var (chunk, targetPosition, targetRotation) = targetPos.Value;
+            var (chunk, targetPosition, targetRotation, splineSample) = targetPos.Value;
             Vector3 directionToTarget = targetPosition - transform.position;
 
             float angleAhead = Vector2.Angle(transform.forward.FlattenAsVector2(), directionToTarget.FlattenAsVector2());
             float angleAheadToBrakeTo = Mathf.Max(Mathf.Abs(desiredSteerAngle), angleAhead);
             
             corneringSpeed = cornerBrakingCurve.Evaluate(angleAheadToBrakeTo);
+        }
+
+        private void TryCreateMovementPathCollider()
+        {
+            if (movementPathCollider != null)
+                return;
+            
+            movementPathCollider = new GameObject("MovementPath").AddComponent<BoxCollider>();
+            movementPathCollider.transform.SetParent(transform);
+            movementPathCollider.gameObject.layer = (int)LayersAndTags.Layer.MovementPath;
+            movementPathCollider.isTrigger = true;
+        }
+        
+        private void UpdateMovementPathCollider()
+        {
+            movementPathCollider.transform.localPosition = frontOfCarPosition;
+
+            float distanceToPredictedPosition = Rigidbody.velocity.magnitude * predictedPositionReactionTime;
+            movementPathCollider.size = new Vector3(carWidth, carWidth, distanceToPredictedPosition);
+            
+            //center is half the size so it points outwards
+            movementPathCollider.center = new Vector3(0, 0, movementPathCollider.size.z / 2f);
+            
+            //rotate towards target position
+            Vector3 finalTargetPosition = targetPosition.OffsetY(frontOfCarPosition.y);
+            movementPathCollider.transform.LookAt(finalTargetPosition);
         }
 
         private void OnStartAccelerating()
@@ -1002,13 +1022,158 @@ namespace Gumball
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
             }
         }
-        
-        private float GetMovementTargetDistance(float speedToCheck)
+
+        private void TryAvoidObstacles()
         {
-            speedToCheck = Mathf.Clamp(speedToCheck, movementTargetDistanceSpeedFactors.Min, movementTargetDistanceSpeedFactors.Max);
-            float percentage = (speedToCheck - movementTargetDistanceSpeedFactors.Min) / (movementTargetDistanceSpeedFactors.Max - movementTargetDistanceSpeedFactors.Min);
-            float resultDistance = Mathf.Lerp(movementTargetDistance.Min, movementTargetDistance.Max, percentage);
-            return resultDistance;
+            if (!autoDrive)
+                return;
+            
+            allDirectionsAreBlocked = false;
+
+            Vector3 futurePosition = targetPosition.OffsetY(frontOfCarPosition.y);
+            if (TryBoxcast(futurePosition, 0))
+            {
+                SetTargetPositionOffset(0);
+                return;
+            }
+
+            float? bestLeftOffset = TryBoxcastsInDirection(false);
+            float? bestRightOffset = TryBoxcastsInDirection(true);
+
+            bool bothFree = bestLeftOffset != null && bestRightOffset != null;
+            if (bothFree)
+            {
+                //get the direction with least angle
+                Vector3 potentialTargetPositionLeft = targetPosition + (transform.right * bestLeftOffset.Value);
+                Vector3 potentialTargetPositionRight = targetPosition + (transform.right * bestRightOffset.Value);
+
+                Vector3 directionLeft = Vector3.Normalize(potentialTargetPositionLeft - transform.position);
+                Vector3 directionRight = Vector3.Normalize(potentialTargetPositionRight - transform.position);
+
+                float angleLeft = Vector3.Angle(transform.forward, directionLeft);
+                float angleRight = Vector3.Angle(transform.forward, directionRight);
+                
+                SetTargetPositionOffset(angleLeft < angleRight ? bestLeftOffset.Value : bestRightOffset.Value);
+                return;
+            }
+
+            bool onlyLeftFree = bestLeftOffset != null;
+            if (onlyLeftFree)
+            {
+                SetTargetPositionOffset(bestLeftOffset.Value);
+                return;
+            }
+
+            bool onlyRightFree = bestRightOffset != null;
+            if (onlyRightFree)
+            {
+                SetTargetPositionOffset(bestRightOffset.Value);
+                return;
+            }
+            
+            allDirectionsAreBlocked = true;
+        }
+        
+        /// <returns>True if the boxcast wasn't blocked, or false if it was blocked.</returns>
+        private bool TryBoxcast(Vector3 targetPosition, float offset)
+        {
+            Vector3 startPosition = transform.TransformPoint(frontOfCarPosition);
+            Vector3 detectorSize = new Vector3(carWidth / 2f, carWidth / 2f, 0);
+
+            Vector3 finalTargetPosition = targetPosition + (transform.right * offset);
+            Vector3 directionToFuturePosition = Vector3.Normalize(finalTargetPosition - startPosition);
+            Quaternion rotation = Quaternion.LookRotation(directionToFuturePosition);
+
+            const float sizeModifierByOffset = 0.1f; //the larger the offset, the smaller the distance is
+            float distanceToFuturePosition = GetMovementTargetDistance() / (Mathf.Abs((offset) * sizeModifierByOffset) + 1f); //make the length shorter as the offset gets wider
+            
+            int hits = Physics.BoxCastNonAlloc(startPosition, detectorSize, directionToFuturePosition, blockagesTemp, rotation, distanceToFuturePosition, obstacleLayers);
+
+            RaycastHit? actualHit = null;
+            for (int index = 0; index < hits; index++)
+            {
+                RaycastHit hit = blockagesTemp[index];
+
+                if (hit.rigidbody != null)
+                {
+                    bool hitSelf = ReferenceEquals(hit.rigidbody.gameObject, gameObject);
+                    if (hitSelf)
+                        continue;
+                    
+                    AICar hitCar = hit.rigidbody.gameObject.GetComponent<AICar>();
+                    if (hitCar != null)
+                    {
+                        if (isPlayer && hitCar.isRacer)
+                            continue; //when player is autodriving, don't try avoid racers
+                        
+                        bool otherCarIsAhead = IsPositionAhead(hit.transform.position + hitCar.frontOfCarPosition);
+                        if (!otherCarIsAhead)
+                            continue; //don't include if this car is ahead of the other
+
+                        const float percentAllowed = 0.1f;
+                        float percentOfSpeed = hitCar.speed * percentAllowed;
+                        bool isGoingSlower = speed < hitCar.speed - percentOfSpeed;
+                        if (isGoingSlower)
+                            continue;
+                    }
+                }
+
+                //good hit
+                actualHit = hit;
+                break;
+            }
+            
+#if UNITY_EDITOR
+            BoxCastUtils.DrawBoxCastBox(startPosition, detectorSize, rotation, directionToFuturePosition, distanceToFuturePosition, actualHit != null ? Color.magenta : Color.gray);
+#endif
+
+            return actualHit == null;
+        }
+
+        /// <returns>The offset to the left that is unblocked, or -1 if none unblocked.</returns>
+        private float? TryBoxcastsInDirection(bool isRight)
+        {
+            const float distance = 2;
+            const float distanceModifier = 0.7f; //as the angle gets larger, the distance offset gets smaller
+            const float maxAngle = 35;
+            
+            float offset = isRight ? distance : -distance;
+            float angle = 0;
+            int count = 0;
+            
+            while (angle < maxAngle)
+            {
+                Vector3 futurePosition = targetPosition.OffsetY(frontOfCarPosition.y);
+
+                bool successful = TryBoxcast(futurePosition, offset);
+                if (successful)
+                    return offset;
+                
+                Vector3 potentialTargetPosition = targetPosition + (transform.right * offset);
+                Vector3 direction = Vector3.Normalize(potentialTargetPosition - transform.position);
+                angle = Vector3.Angle(transform.forward, direction);
+
+                float distanceWithModifier = distance + (count * distanceModifier);
+                offset += isRight ? distanceWithModifier : -distanceWithModifier;
+
+                count++;
+            }
+            
+            return null;
+        }
+
+        private void SetTargetPositionOffset(float offset)
+        {
+            targetPositionOffset = offset;
+            Vector3 offsetVector = transform.right * offset;
+            targetPosition += offsetVector;
+        }
+        
+        private float GetMovementTargetDistance()
+        {
+            const float min = 2;
+            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmh(speed));
+            return metresPerSecond * predictedPositionReactionTime;
         }
         
         private void Despawn()
@@ -1084,7 +1249,7 @@ namespace Gumball
         /// Get the next desired position and rotation relative to the sample on the next chunk's spline.
         /// </summary>
         /// <returns>The spline sample's position and rotation, or null if no more loaded chunks in the desired direction.</returns>
-        private (Chunk, Vector3, Quaternion)? GetPositionAhead(float distance)
+        private (Chunk, Vector3, Quaternion, SplineSample)? GetPositionAhead(float distance)
         {
             if (CurrentChunk == null)
                 return null;
@@ -1101,13 +1266,12 @@ namespace Gumball
 
             if (useRacingLine)
             {
-                Vector3 offset = splineSampleAhead.Value.Item1.right * racingLineOffset;
-                return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position + offset, splineSampleAhead.Value.Item1.rotation);
+                return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position, splineSampleAhead.Value.Item1.rotation, splineSampleAhead.Value.Item1);
             }
             else
             {
-                var (position, rotation) = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, CurrentLaneDistance);
-                return (splineSampleAhead.Value.Item2, position, rotation);
+                var (position, rotation) = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance, currentLaneDirection);
+                return (splineSampleAhead.Value.Item2, position, rotation, splineSampleAhead.Value.Item1);
             }
 
             return null;

@@ -7,9 +7,13 @@ using UnityEngine.SceneManagement;
 
 namespace Gumball
 {
-    public class MapDrivingSceneManager : MonoBehaviour
+    public class MapDrivingSceneManager : Singleton<MapDrivingSceneManager>
     {
 
+        [SerializeField] private DrivingCameraController drivingCameraController;
+
+        public DrivingCameraController DrivingCameraController => drivingCameraController;
+        
         private void OnEnable()
         {
             this.PerformAfterTrue(() => WarehouseManager.Instance.CurrentCar != null, () =>
@@ -32,7 +36,7 @@ namespace Gumball
 
         private void OnCarChanged(AICar newCar)
         {
-            DrivingCameraController.Instance.SetTarget(newCar.transform);
+            drivingCameraController.SetTarget(newCar.transform);
         }
 
         public static IEnumerator LoadMapDrivingSceneIE()

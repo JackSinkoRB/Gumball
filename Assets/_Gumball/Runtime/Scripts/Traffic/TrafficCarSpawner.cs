@@ -86,8 +86,15 @@ namespace Gumball
                 Chunk firstChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(ChunkManager.Instance.AccessibleChunksIndices.Min).Value.Chunk;
                 Chunk lastChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(ChunkManager.Instance.AccessibleChunksIndices.Max).Value.Chunk;
                 Chunk chunkToUse = useFirstChunk ? firstChunk : lastChunk;
+
+                //try make the car go in the direction away from the end of the map to prevent instantly despawning
+                ChunkTrafficManager.LaneDirection laneDirection = ChunkTrafficManager.LaneDirection.NONE;
+                if (useFirstChunk && firstChunk.TrafficManager.HasForwardLanes)
+                    laneDirection = ChunkTrafficManager.LaneDirection.FORWARD;
+                else if (!useFirstChunk && lastChunk.TrafficManager.HasBackwardLanes)
+                    laneDirection = ChunkTrafficManager.LaneDirection.BACKWARD;
                 
-                chunkToUse.TrafficManager.SpawnCarInRandomPosition(useFirstChunk ? ChunkTrafficManager.LaneDirection.FORWARD : ChunkTrafficManager.LaneDirection.BACKWARD);
+                chunkToUse.TrafficManager.SpawnCarInRandomPosition(laneDirection);
             }
         }
 

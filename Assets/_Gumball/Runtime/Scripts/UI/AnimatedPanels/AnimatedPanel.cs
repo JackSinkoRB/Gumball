@@ -26,11 +26,23 @@ public abstract class AnimatedPanel : MonoBehaviour
     [SerializeField] private FadeElement[] fadeElements;
     [SerializeField] private SlideElement[] slideElements;
 
+    private bool isInitialised;
     private Sequence currentTween;
 
     public bool IsShowing { get; private set; }
     public bool IsTransitioning => currentTween != null && currentTween.IsActive() && currentTween.IsPlaying();
 
+    private void OnEnable()
+    {
+        if (!isInitialised)
+            Initialise();
+    }
+
+    protected virtual void Initialise()
+    {
+        isInitialised = true;
+    }
+    
     private void OnDisable()
     {
         if (IsShowing && !IsTransitioning)

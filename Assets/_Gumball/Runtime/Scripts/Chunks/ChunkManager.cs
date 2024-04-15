@@ -482,9 +482,7 @@ namespace Gumball
 
             ChunkMapData chunkMapData = currentChunkMap.GetChunkData(mapIndex);
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to get chunk data.");
-
-            if (HasLoaded)
-                yield return null;
+            
             stopwatch.Restart();
 
             chunkMapData.ApplyToChunk(chunk);
