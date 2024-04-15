@@ -74,6 +74,9 @@ namespace Gumball
                 FixOverlappingVertices(lastChunk);
                 GlobalLoggers.LoadingLogger.Log($"FixOverlappingVertices = {stopwatch.ElapsedMilliseconds}ms");
                 
+                blendedFirstChunkMeshData.ApplyChanges();
+                blendedLastChunkMeshData.ApplyChanges();
+                
                 //need to update colours once all the vertices and normals have been set
                 stopwatch.Restart();
                 Color[] firstChunkColors = blendedFirstChunkMeshData.CalculateVertexColors();
