@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using Dreamteck.Splines;
 using JBooth.VertexPainterPro;
 using MyBox;
@@ -74,12 +75,14 @@ namespace Gumball
                 FixOverlappingVertices(lastChunk);
                 GlobalLoggers.LoadingLogger.Log($"FixOverlappingVertices = {stopwatch.ElapsedMilliseconds}ms");
 
+                stopwatch.Restart();
                 blendedFirstChunkMeshData.ApplyChanges();
                 blendedLastChunkMeshData.ApplyChanges();
-                
+                GlobalLoggers.LoadingLogger.Log($"ApplyChanges = {stopwatch.ElapsedMilliseconds}ms");
+
                 //calculate normals
                 stopwatch.Restart();
-                SetNormalsIdenticalOnEnds();
+                CalculateNormals();
                 GlobalLoggers.LoadingLogger.Log($"CalculateNormals = {stopwatch.ElapsedMilliseconds}ms");
 
                 //need to update colours once all the vertices and normals have been set
@@ -100,59 +103,144 @@ namespace Gumball
                 Debug.LogError($"Error creating blend data between {firstChunk.gameObject.name} and {lastChunk.gameObject.name}\n{e.Message}\n{e.StackTrace}");
             }
         }
-
-        /// <summary>
-        /// Sets the normals of each mesh data
-        /// </summary>
-        private void SetNormalsIdenticalOnEnds()
+        
+        private void CalculateNormals()
         {
-            //TODO! Can't just get average (if normal is pointing outward?)
-            // - TODO, why is average not working?
-            
-            // - viable option (but complicated): duplicate the mesh and add vertices to the ends (with additional distance being like an extra grid square),
-            //  - set the position as the closest vertex on the next chunk
-            
             //recalculate and apply the normals to the mesh
             blendedFirstChunkMeshData.Mesh.RecalculateNormals();
             blendedLastChunkMeshData.Mesh.RecalculateNormals();
             blendedFirstChunkMeshData.SetNormals(blendedFirstChunkMeshData.Mesh.normals);
             blendedLastChunkMeshData.SetNormals(blendedLastChunkMeshData.Mesh.normals);
             
-            //position, list of normals
-            Dictionary<Vector3, List<Vector3>> normalsAtPositionLookup = new();
+            // COMBINING THE MESHES AND RETRIEVING THE NORMALS
             
-            //get all the normals at a position
-            foreach (VertexConnection connection in connections)
-            {
-                Vector3 position = connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(connection.vertexIndex1); //just use vertexIndex1, but vertexIndex2 should be identical
-
-                List<Vector3> normalsAtPosition = normalsAtPositionLookup.ContainsKey(position) ? normalsAtPositionLookup[position] : new List<Vector3>();
-
-                normalsAtPosition.Add(connection.vertexIndexChunk1.Normals[connection.vertexIndex1]);
-                normalsAtPosition.Add(connection.vertexIndexChunk2.Normals[connection.vertexIndex2]);
-
-                normalsAtPositionLookup[position] = normalsAtPosition;
-            }
+            //combine the meshes
+            CombineInstance[] combine = new CombineInstance[2];
+            combine[0].mesh = blendedFirstChunkMeshData.Mesh;
+            combine[0].transform = blendedFirstChunkMeshData.MeshFilter.transform.localToWorldMatrix;
+            combine[1].mesh = blendedLastChunkMeshData.Mesh;
+            combine[1].transform = blendedLastChunkMeshData.MeshFilter.transform.localToWorldMatrix;
             
-            //loop each connection and set the normal as the average of the normals at the position
-            foreach (VertexConnection connection in connections)
+            Mesh combinedMesh = new Mesh();
+            combinedMesh.CombineMeshes(combine);
+            RecalculateNormalsSeamless(combinedMesh);
+            
+            //update the combined mesh normals, but copy the normals at shared positions
+            void RecalculateNormalsSeamless(Mesh mesh)
             {
-                Vector3 position = connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(connection.vertexIndex1); //just use vertexIndex1, but vertexIndex2 should be identical
+                var trianglesOriginal = mesh.triangles;
+                var triangles = trianglesOriginal.ToArray();
 
-                Vector3 average = Vector3.zero;
-                foreach (Vector3 normal in normalsAtPositionLookup[position])
+                var vertices = mesh.vertices;
+
+                var mergeIndices = new Dictionary<int, int>();
+
+                for (int i = 0; i < vertices.Length; i++)
                 {
-                    average += normal;
+                    var vertexHash = vertices[i].GetHashCode();
+
+                    if (mergeIndices.TryGetValue(vertexHash, out var index))
+                    {
+                        for (int j = 0; j < triangles.Length; j++)
+                            if (triangles[j] == i)
+                                triangles[j] = index;
+                    }
+                    else
+                        mergeIndices.Add(vertexHash, i);
                 }
-                average /= normalsAtPositionLookup[position].Count;
-                
-                connection.vertexIndexChunk1.ModifyNormal(connection.vertexIndex1, average);
-                connection.vertexIndexChunk2.ModifyNormal(connection.vertexIndex2, average);
+
+                mesh.triangles = triangles;
+
+                var normals = new Vector3[vertices.Length];
+
+                mesh.RecalculateNormals();
+                var newNormals = mesh.normals;
+
+                for (int i = 0; i < vertices.Length; i++)
+                    if (mergeIndices.TryGetValue(vertices[i].GetHashCode(), out var index))
+                        normals[i] = newNormals[index];
+
+                mesh.triangles = trianglesOriginal;
+                mesh.normals = normals;
             }
+
+            //for each end vertex in the first chunk
+            foreach (int endVertexIndex in blendedFirstChunkMeshData.LastEndVertices)
+            {
+                //get the desired normal from the combined mesh
+                Vector3 normalFromCombinedMesh = combinedMesh.normals[endVertexIndex];
+                
+                //set the modified normal for the original mesh
+                blendedFirstChunkMeshData.ModifyNormal(endVertexIndex, normalFromCombinedMesh);
+            }
+            
+            //for each end vertex in the last chunk
+            foreach (int endVertexIndex in blendedLastChunkMeshData.FirstEndVertices)
+            {
+                //get the desired normal from the combined mesh
+                Vector3 normalFromCombinedMesh = combinedMesh.normals[blendedFirstChunkMeshData.Vertices.Length + endVertexIndex]; //add the first chunks vertex count to get the begining of the last chunk's vertices 
+                
+                //set the modified normal for the original mesh
+                blendedLastChunkMeshData.ModifyNormal(endVertexIndex, normalFromCombinedMesh);
+            }
+            
+            // USING AVERAGE OF NORMALS NEAREST TO END VERTICES
+            
+            // foreach (VertexConnection connection in connections)
+            // {
+            //     var (closestEndVertexIndex2, distanceToClosestEndVertexSqr1) = GetClosestVertexIndex(connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(connection.vertexIndex1), connection.vertexIndexChunk2.VerticesExcludingEnds, connection.vertexIndexChunk2);
+            //     Vector3 normal = connection.vertexIndexChunk2.Normals[closestEndVertexIndex2];
+            //
+            //     var (closestEndVertexIndex1, distanceToClosestEndVertexSqr2) = GetClosestVertexIndex(connection.vertexIndexChunk2.GetCurrentVertexWorldPosition(connection.vertexIndex2), connection.vertexIndexChunk1.VerticesExcludingEnds, connection.vertexIndexChunk1);
+            //     Vector3 otherNormal = connection.vertexIndexChunk1.Normals[closestEndVertexIndex1];
+            //     
+            //     Vector3 average = (normal + otherNormal) / 2f;
+            //     
+            //     connection.vertexIndexChunk1.ModifyNormal(connection.vertexIndex1, average);
+            //     connection.vertexIndexChunk2.ModifyNormal(connection.vertexIndex2, average);
+            //
+            //     Debug.DrawLine(connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(closestEndVertexIndex1), connection.vertexIndexChunk2.GetCurrentVertexWorldPosition(closestEndVertexIndex2), Color.green, 60);
+            // }
+
+            // USING AVERAGE OF ALL NORMALS AT POSITION:
+            
+            // //position, list of normals
+            // Dictionary<Vector3, List<Vector3>> normalsAtPositionLookup = new();
+            //
+            // //get all the normals at a position
+            // foreach (VertexConnection connection in connections)
+            // {
+            //     Vector3 position = connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(connection.vertexIndex1); //just use vertexIndex1, but vertexIndex2 should be identical
+            //
+            //     List<Vector3> normalsAtPosition = normalsAtPositionLookup.ContainsKey(position) ? normalsAtPositionLookup[position] : new List<Vector3>();
+            //
+            //     normalsAtPosition.Add(connection.vertexIndexChunk1.Normals[connection.vertexIndex1]);
+            //     normalsAtPosition.Add(connection.vertexIndexChunk2.Normals[connection.vertexIndex2]);
+            //
+            //     normalsAtPositionLookup[position] = normalsAtPosition;
+            // }
+            //
+            // //loop each connection and set the normal as the average of the normals at the position
+            // foreach (VertexConnection connection in connections)
+            // {
+            //     Vector3 position = connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(connection.vertexIndex1); //just use vertexIndex1, but vertexIndex2 should be identical
+            //
+            //     Vector3 average = Vector3.zero;
+            //     foreach (Vector3 normal in normalsAtPositionLookup[position])
+            //     {
+            //         average += normal;
+            //     }
+            //     average /= normalsAtPositionLookup[position].Count;
+            //     
+            //     connection.vertexIndexChunk1.ModifyNormal(connection.vertexIndex1, average);
+            //     connection.vertexIndexChunk2.ModifyNormal(connection.vertexIndex2, average);
+            // }
             
             //refresh the mesh
             blendedFirstChunkMeshData.UpdateNormals();
             blendedLastChunkMeshData.UpdateNormals();
+            blendedFirstChunkMeshData.Mesh.RecalculateTangents();
+            blendedLastChunkMeshData.Mesh.RecalculateTangents();
         }
         
         private void BlendPaintedVertexColours(Chunk chunk)

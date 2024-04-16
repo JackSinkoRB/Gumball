@@ -157,7 +157,56 @@ namespace Gumball
         private static PlayModeStateChange playModeState;
 
         public ChunkTerrainData TerrainData => terrainData;
+
+        #region COMBINE_MESHES
+        [Header("Combine meshes")]
+        [SerializeField] private MeshFilter meshFilter1;
+        [SerializeField] private MeshFilter meshFilter2;
+
+        [SerializeField, ReadOnly] private Vector3[] vertices1Before;
+        [SerializeField, ReadOnly] private Vector3[] vertices2Before;
+
+        [SerializeField, ReadOnly] private Vector3[] verticesCombined;
         
+        [ButtonMethod]
+        public void CombineMeshes()
+        {
+            vertices1Before = meshFilter1.sharedMesh.vertices;
+            vertices2Before = meshFilter2.sharedMesh.vertices;
+            
+            var combine = new CombineInstance[2];
+            combine[0].mesh = meshFilter1.sharedMesh;
+            combine[0].transform = meshFilter1.transform.localToWorldMatrix;
+            combine[1].mesh = meshFilter2.sharedMesh;
+            combine[1].transform = meshFilter2.transform.localToWorldMatrix;
+
+            MeshFilter combinedMeshFilter = new GameObject("TEMP").AddComponent<MeshFilter>();
+            combinedMeshFilter.gameObject.AddComponent<MeshRenderer>();
+            
+            Mesh combinedMesh = new Mesh();
+            combinedMesh.CombineMeshes(combine);
+            
+            combinedMesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(combinedMesh.vertices, combinedMeshFilter.transform));
+
+            combinedMesh.RecalculateBounds();
+            combinedMesh.RecalculateNormals();
+            combinedMesh.RecalculateTangents();
+
+            combinedMeshFilter.sharedMesh = combinedMesh;
+
+            verticesCombined = combinedMesh.vertices;
+            
+            Debug.DrawRay(meshFilter1.transform.TransformPoint(vertices1Before[2]), Vector3.up * 100, Color.red, 60);
+            Debug.DrawRay(meshFilter2.transform.TransformPoint(vertices2Before[2]), Vector3.up * 100, Color.blue, 60);
+            
+            //green should be at the same position as red
+            Debug.DrawRay(combinedMeshFilter.transform.TransformPoint(verticesCombined[2]).OffsetY(100), Vector3.up * 100, Color.green, 60);
+
+            //black should be at same position as blue
+            Debug.DrawRay(combinedMeshFilter.transform.TransformPoint(verticesCombined[vertices1Before.Length + 2]).OffsetY(100), Vector3.up * 100, Color.black, 60);
+        }
+        #endregion
+
         [ButtonMethod]
         public void ShowTerrainGrid()
         {

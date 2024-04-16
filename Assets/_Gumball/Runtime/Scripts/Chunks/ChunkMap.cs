@@ -168,11 +168,11 @@ namespace Gumball
             }
             finally
             {
-                foreach (Chunk chunk in runtimeChunks)
-                {
-                    GlobalLoggers.ChunkLogger.Log($"Destroying {chunk.name}");
-                    DestroyImmediate(chunk.gameObject);
-                }
+                // foreach (Chunk chunk in runtimeChunks)
+                // {
+                //     GlobalLoggers.ChunkLogger.Log($"Destroying {chunk.name}");
+                //     DestroyImmediate(chunk.gameObject);
+                // }
             }
         }
 #endif
