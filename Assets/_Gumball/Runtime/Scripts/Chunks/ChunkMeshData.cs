@@ -19,7 +19,6 @@ namespace Gumball
         [SerializeField, ReadOnly] private GenericDictionary<int, Vector3> modifiedNormals = new();
         [SerializeField, ReadOnly] private List<int> lastEndVertices;
         [SerializeField, ReadOnly] private List<int> firstEndVertices;
-        [SerializeField, ReadOnly] private List<int> verticesExcludingEnds;
         [SerializeField, ReadOnly] private SerializableColor[] vertexColors;
         
         public Chunk Chunk => chunk;
@@ -31,7 +30,6 @@ namespace Gumball
         public SerializableColor[] VertexColors => vertexColors;
         public ReadOnlyCollection<int> LastEndVertices => lastEndVertices.AsReadOnly();
         public ReadOnlyCollection<int> FirstEndVertices => firstEndVertices.AsReadOnly();
-        public ReadOnlyCollection<int> VerticesExcludingEnds => verticesExcludingEnds.AsReadOnly();
 
         public ChunkMeshData(Chunk chunk)
         {
@@ -56,7 +54,6 @@ namespace Gumball
             copy.modifiedNormals = modifiedNormals;
             copy.lastEndVertices = lastEndVertices;
             copy.firstEndVertices = firstEndVertices;
-            copy.verticesExcludingEnds = verticesExcludingEnds;
             copy.vertexColors = vertexColors;
             copy.additionalVertexPaintData = additionalVertexPaintData;
 
@@ -202,16 +199,6 @@ namespace Gumball
 #endif
             GlobalLoggers.ChunkLogger.Log($"Found {firstEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
 
-            //cache the remaining vertices
-            verticesExcludingEnds = new List<int>();
-            for (int vertexIndex = 0; vertexIndex < vertices.Length; vertexIndex++)
-            {
-                if (lastEndVertices.Contains(vertexIndex) || firstEndVertices.Contains(vertexIndex))
-                    continue;
-                
-                verticesExcludingEnds.Add(vertexIndex);
-            }
-            
             chunk.transform.rotation = previousRotation;
         }
         
