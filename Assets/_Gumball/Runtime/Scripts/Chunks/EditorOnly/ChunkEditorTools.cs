@@ -257,6 +257,22 @@ namespace Gumball
         }
         
         [ButtonMethod]
+        public void DrawAllTangents()
+        {
+            for (int vertexIndex = 0; vertexIndex < chunk.ChunkMeshData.Vertices.Length; vertexIndex++)
+            {
+                DrawTangent(vertexIndex, Color.magenta);
+            }
+        }
+        
+        private void DrawTangent(int vertexIndex, Color color)
+        {
+            const float distance = 5;
+            const float duration = 120;
+            Debug.DrawRay(chunk.ChunkMeshData.GetCurrentVertexWorldPosition(vertexIndex), chunk.ChunkMeshData.Mesh.tangents[vertexIndex] * distance, color, duration);
+        }
+        
+        [ButtonMethod]
         public void CreateTerrain()
         {
             RecreateTerrainLODs();

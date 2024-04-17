@@ -30,10 +30,10 @@ namespace Gumball
         [SerializeField] private MinMaxInt minMaxSlopeAngle = new(0, 50);
         [SerializeField, Range(0, 1)] private float slopeMaxOpacity = 0.8f;
 
-        public Color[] GetVertexColors(Chunk chunk, List<Vector3> vertexPositions, Transform terrainTransform, Mesh mesh)
+        public Color[] GetVertexColors(Chunk chunk, Vector3[] vertexPositions, Transform terrainTransform, Mesh mesh)
         {
-            Color[] vertexColors = new Color[vertexPositions.Count];
-            for (int i = 0; i < vertexPositions.Count; i++)
+            Color[] vertexColors = new Color[vertexPositions.Length];
+            for (int i = 0; i < vertexPositions.Length; i++)
             {
                 Vector3 vertexPosition = vertexPositions[i];
                 Vector3 vertexPositionWorld = terrainTransform.TransformPoint(vertexPosition);

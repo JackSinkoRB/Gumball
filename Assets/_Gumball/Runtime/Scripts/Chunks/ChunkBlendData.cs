@@ -112,76 +112,20 @@ namespace Gumball
             blendedFirstChunkMeshData.SetNormals(blendedFirstChunkMeshData.Mesh.normals);
             blendedLastChunkMeshData.SetNormals(blendedLastChunkMeshData.Mesh.normals);
             
-            // COMBINING THE MESHES AND RETRIEVING THE NORMALS
-            
-            //combine the meshes
-            CombineInstance[] combine = new CombineInstance[2];
-            combine[0].mesh = blendedFirstChunkMeshData.Mesh;
-            combine[0].transform = blendedFirstChunkMeshData.MeshFilter.transform.localToWorldMatrix;
-            combine[1].mesh = blendedLastChunkMeshData.Mesh;
-            combine[1].transform = blendedLastChunkMeshData.MeshFilter.transform.localToWorldMatrix;
-            
-            Mesh combinedMesh = new Mesh();
-            combinedMesh.CombineMeshes(combine);
-            RecalculateNormalsSeamless(combinedMesh);
-            
-            //update the combined mesh normals, but copy the normals at shared positions
-            void RecalculateNormalsSeamless(Mesh mesh)
+            foreach (VertexConnection connection in connections)
             {
-                var trianglesOriginal = mesh.triangles;
-                var triangles = trianglesOriginal.ToArray();
-
-                var vertices = mesh.vertices;
-
-                var mergeIndices = new Dictionary<int, int>();
-
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    var vertexHash = vertices[i].GetHashCode();
-
-                    if (mergeIndices.TryGetValue(vertexHash, out var index))
-                    {
-                        for (int j = 0; j < triangles.Length; j++)
-                            if (triangles[j] == i)
-                                triangles[j] = index;
-                    }
-                    else
-                        mergeIndices.Add(vertexHash, i);
-                }
-
-                mesh.triangles = triangles;
-
-                var normals = new Vector3[vertices.Length];
-
-                mesh.RecalculateNormals();
-                var newNormals = mesh.normals;
-
-                for (int i = 0; i < vertices.Length; i++)
-                    if (mergeIndices.TryGetValue(vertices[i].GetHashCode(), out var index))
-                        normals[i] = newNormals[index];
-
-                mesh.triangles = trianglesOriginal;
-                mesh.normals = normals;
-            }
-
-            //for each end vertex in the first chunk
-            foreach (int endVertexIndex in blendedFirstChunkMeshData.LastEndVertices)
-            {
-                //get the desired normal from the combined mesh
-                Vector3 normalFromCombinedMesh = combinedMesh.normals[endVertexIndex];
+                var (closestEndVertexIndex2, distanceToClosestEndVertexSqr1) = GetClosestVertexIndex(connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(connection.vertexIndex1), connection.vertexIndexChunk2.VerticesExcludingEnds, connection.vertexIndexChunk2);
+                Vector3 normal = connection.vertexIndexChunk2.Normals[closestEndVertexIndex2];
+            
+                var (closestEndVertexIndex1, distanceToClosestEndVertexSqr2) = GetClosestVertexIndex(connection.vertexIndexChunk2.GetCurrentVertexWorldPosition(connection.vertexIndex2), connection.vertexIndexChunk1.VerticesExcludingEnds, connection.vertexIndexChunk1);
+                Vector3 otherNormal = connection.vertexIndexChunk1.Normals[closestEndVertexIndex1];
                 
-                //set the modified normal for the original mesh
-                blendedFirstChunkMeshData.ModifyNormal(endVertexIndex, normalFromCombinedMesh);
-            }
-            
-            //for each end vertex in the last chunk
-            foreach (int endVertexIndex in blendedLastChunkMeshData.FirstEndVertices)
-            {
-                //get the desired normal from the combined mesh
-                Vector3 normalFromCombinedMesh = combinedMesh.normals[blendedFirstChunkMeshData.Vertices.Length + endVertexIndex]; //add the first chunks vertex count to get the begining of the last chunk's vertices 
+                Vector3 average = (normal + otherNormal) / 2f;
                 
-                //set the modified normal for the original mesh
-                blendedLastChunkMeshData.ModifyNormal(endVertexIndex, normalFromCombinedMesh);
+                connection.vertexIndexChunk1.ModifyNormal(connection.vertexIndex1, average);
+                connection.vertexIndexChunk2.ModifyNormal(connection.vertexIndex2, average);
+            
+                Debug.DrawLine(connection.vertexIndexChunk1.GetCurrentVertexWorldPosition(closestEndVertexIndex1), connection.vertexIndexChunk2.GetCurrentVertexWorldPosition(closestEndVertexIndex2), Color.green, 60);
             }
             
             //refresh the mesh
@@ -263,6 +207,9 @@ namespace Gumball
             if (meshDataMovingFrom.Chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
                 Debug.DrawLine(fromWorldPosition, desiredPosition, Color.white, 15);
 #endif
+            
+            Debug.DrawLine(meshDataMovingFrom.GetCurrentVertexWorldPosition(chunkMeshVertexIndexToMove), desiredPosition, Color.cyan, 60);
+            Debug.DrawLine(meshDataMovingTo.GetCurrentVertexWorldPosition(chunkMeshVertexIndexToMatch), desiredPosition, Color.magenta, 60);
             
             meshDataMovingFrom.SetVertexWorldPosition(chunkMeshVertexIndexToMove, desiredPosition);
             meshDataMovingTo.SetVertexWorldPosition(chunkMeshVertexIndexToMatch, desiredPosition);
