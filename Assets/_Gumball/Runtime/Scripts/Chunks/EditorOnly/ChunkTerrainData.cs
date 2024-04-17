@@ -167,21 +167,21 @@ namespace Gumball
                         triangleIndexes.Add(vertexIndexOnRight);
                     }
                     
-                    if (hasVertexAbove && hasVertexOnLeft)
-                    {
-                        //order matters
-                        triangleIndexes.Add(vertexIndex);
-                        triangleIndexes.Add(vertexIndexOnLeft);
-                        triangleIndexes.Add(vertexIndexAbove);
-                    }
-                    
-                    if (hasVertexBelow && hasVertexOnRight)
-                    {
-                        //order matters
-                        triangleIndexes.Add(vertexIndex);
-                        triangleIndexes.Add(vertexIndexOnRight);
-                        triangleIndexes.Add(vertexIndexBelow);
-                    }
+                    // if (hasVertexAbove && hasVertexOnLeft)
+                    // {
+                    //     //order matters
+                    //     triangleIndexes.Add(vertexIndex);
+                    //     triangleIndexes.Add(vertexIndexOnLeft);
+                    //     triangleIndexes.Add(vertexIndexAbove);
+                    // }
+                    //
+                    // if (hasVertexBelow && hasVertexOnRight)
+                    // {
+                    //     //order matters
+                    //     triangleIndexes.Add(vertexIndex);
+                    //     triangleIndexes.Add(vertexIndexOnRight);
+                    //     triangleIndexes.Add(vertexIndexBelow);
+                    // }
                     
                     if (hasVertexBelow && hasVertexOnLeft)
                     {
