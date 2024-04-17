@@ -102,14 +102,16 @@ namespace Gumball
             //setup the mesh
             mesh.SetVertices(verticesWithHeightData);
             mesh.SetTriangles(CreateTrianglesFromGrid(grid), 0);
-            mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(verticesWithHeightData, terrain.transform));
+            mesh.Optimize();
+            
+            mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(mesh.vertices, terrain.transform));
             
             //apply the changes to the mesh
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
             
             //set the vertex colours AFTER calculating normals
-            Color[] vertexColors = textureBlendSettings.GetVertexColors(chunk, verticesWithHeightData, terrain.transform, mesh);
+            Color[] vertexColors = textureBlendSettings.GetVertexColors(chunk, mesh.vertices, terrain.transform, mesh);
             mesh.SetColors(vertexColors);
 
             //save the mesh asset
