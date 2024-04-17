@@ -223,34 +223,43 @@ namespace Gumball
 
             bool isFirstChunk = chunk == firstChunk;
             ChunkMeshData meshData = isFirstChunk ? blendedFirstChunkMeshData : blendedLastChunkMeshData;
-            ChunkMeshData otherMeshData = isFirstChunk ? blendedLastChunkMeshData : blendedFirstChunkMeshData;
-            ReadOnlyCollection<int> otherChunksEndVertices = isFirstChunk ? otherMeshData.FirstEndVertices : otherMeshData.LastEndVertices;
+            ReadOnlyCollection<int> endVertices = isFirstChunk ? meshData.LastEndVertices : meshData.FirstEndVertices;
 
+            SplineSample endOfSplineSample = isFirstChunk ? chunk.LastSample : chunk.FirstSample;
+            
             //check all the vertices if they're within distance to blend with the new middle heights
-            for (int vertexIndex = 0; vertexIndex < meshData.Vertices.Length; vertexIndex++)
+            foreach (int vertexIndex in meshData.VerticesExcludingEnds)
             {
                 Vector3 vertexPositionWorld = meshData.GetCurrentVertexWorldPosition(vertexIndex);
-
-                var (closestVertexIndex, distanceToClosestVertexSqr) = GetClosestVertexIndex(vertexPositionWorld, otherChunksEndVertices, otherMeshData);
+                
+                //get the distance to the tangent
+                Vector2 intersectionPoint = VectorUtils.FindIntersection(vertexPositionWorld.FlattenAsVector2(), (vertexPositionWorld + endOfSplineSample.forward * 10000).FlattenAsVector2(), endOfSplineSample.position.FlattenAsVector2(), (endOfSplineSample.position + endOfSplineSample.right * 10000).FlattenAsVector2());
+                if (intersectionPoint == Vector2.zero)
+                    continue; //is paralell, no intersection
+                
+                float distanceToTangentSqr = Vector2.SqrMagnitude(intersectionPoint - vertexPositionWorld.FlattenAsVector2());
 
                 float terrainBlendDistanceSqr = terrainBlendDistance * terrainBlendDistance;
-                if (distanceToClosestVertexSqr <= terrainBlendDistanceSqr)
+                if (distanceToTangentSqr <= terrainBlendDistanceSqr)
                 {
                     //don't blend if should be under the road
                     if (IsPositionUnderRoad(vertexPositionWorld, chunk))
                         continue;
-
-                    float differencePercent = 1 - Mathf.Clamp01(distanceToClosestVertexSqr / terrainBlendDistanceSqr);
-
+                    
+                    float differencePercent = 1 - Mathf.Clamp01(distanceToTangentSqr / terrainBlendDistanceSqr);
+                    
                     float currentHeight = vertexPositionWorld.y;
                     
-                    Vector3 closestVertexPositionWorld = otherMeshData.GetCurrentVertexWorldPosition(closestVertexIndex);
+                    var (closestVertexIndex, distanceToClosestVertexSqr) = GetClosestVertexIndex(vertexPositionWorld, endVertices, meshData);
+                    Vector3 closestVertexPositionWorld = meshData.GetCurrentVertexWorldPosition(closestVertexIndex);
                     float closestVertexHeight = closestVertexPositionWorld.y;
-
+                    
                     float heightDifference = closestVertexHeight - currentHeight;
                     float heightBlended = currentHeight + (heightDifference * differencePercent);
                     Vector3 newDesiredPosition = vertexPositionWorld.SetY(heightBlended);
                     
+                    Debug.DrawLine(meshData.GetCurrentVertexWorldPosition(vertexIndex), newDesiredPosition, Color.blue, 60);
+
                     meshData.SetVertexWorldPosition(vertexIndex, newDesiredPosition);
                 }
             }
