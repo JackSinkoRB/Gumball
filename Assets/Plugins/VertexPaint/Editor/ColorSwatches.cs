@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using System.Collections;
 
 namespace JBooth.VertexPainterPro
@@ -11,3 +12,4 @@ namespace JBooth.VertexPainterPro
       };
    }
 }
+#endif

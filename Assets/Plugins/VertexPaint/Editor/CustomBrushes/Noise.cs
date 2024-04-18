@@ -1,4 +1,5 @@
-﻿// SimplexNoise for C#
+﻿#if UNITY_EDITOR
+// SimplexNoise for C#
 // Author: Heikki Törmälä
 
 //This is free and unencumbered software released into the public domain.
@@ -306,3 +307,4 @@ namespace JBooth.VertexPainterPro.SimplexNoise
       }
    }
 }
+#endif

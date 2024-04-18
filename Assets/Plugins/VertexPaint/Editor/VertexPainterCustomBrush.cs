@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using System.Collections;
 
 // base class for custom brushes, see VertexPainterNoiseBrush for an example of how to use..
@@ -55,3 +56,4 @@ namespace JBooth.VertexPainterPro
       #endif
    }
 }
+#endif
