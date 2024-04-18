@@ -32,6 +32,7 @@ namespace Gumball
 
         public Color[] GetVertexColors(Chunk chunk, Vector3[] vertexPositions, Transform terrainTransform, Mesh mesh)
         {
+            //calculate the automatic vertex colours
             Color[] vertexColors = new Color[vertexPositions.Length];
             for (int i = 0; i < vertexPositions.Length; i++)
             {
@@ -48,7 +49,23 @@ namespace Gumball
 
                 Color finalColor = noiseWeight * noiseColor + objectSurroundingWeight * objectSurroundingColor +
                                    slopeWeight * slopeColor;
-
+                
+                //apply chunk object colouring
+                //raycast upwards from vertex point (add 10,000 to start at top) to see if it's overlapping
+                const int maxChunkObjectsPerPosition = 15;
+                RaycastHit[] hits = new RaycastHit[maxChunkObjectsPerPosition];
+                int numberOfHits = chunk.gameObject.scene.GetPhysicsScene().Raycast(vertexPositionWorld.OffsetY(10000), Vector3.down, hits, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkObject));
+                for (int count = 0; count < numberOfHits; count++)
+                {
+                    RaycastHit hit = hits[count];
+                    ChunkObject chunkObject = hit.transform.GetComponentInAllParents<ChunkObject>();
+                    
+                    if (chunkObject == null || !chunkObject.CanColourTerrain)
+                        continue;
+                    
+                    finalColor = Color.Lerp(finalColor, chunkObject.ColourTerrainColor, chunkObject.ColourTerrainStrength);
+                }
+                
                 vertexColors[i] = finalColor;
             }
 

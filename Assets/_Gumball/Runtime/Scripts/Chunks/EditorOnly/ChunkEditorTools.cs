@@ -94,6 +94,9 @@ namespace Gumball
             {
                 if (chunkObject.CanFlattenTerrain)
                     chunkObject.ColliderToFlattenTo.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
+                
+                if (chunkObject.CanColourTerrain)
+                    chunkObject.ColliderToColourAround.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
             }
         }
         

@@ -361,19 +361,17 @@ namespace Gumball
             Dictionary<ChunkObject, float> desiredOffsets = new();
             float sumOfOffsets = 0;
 
-            //raycast upwards from vertex point (minus 10,000 to start at bottom) to see if it's overlapping
+            //raycast upwards from vertex point (add 10,000 to start at top) to see if it's overlapping
             const int maxChunkObjectsPerPosition = 15;
             RaycastHit[] hits = new RaycastHit[maxChunkObjectsPerPosition];
             int numberOfHits = chunk.gameObject.scene.GetPhysicsScene().Raycast(currentPosition.OffsetY(10000), Vector3.down, hits, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkObject));
             for (int count = 0; count < numberOfHits; count++)
             {
                 RaycastHit hit = hits[count];
-                ChunkObject chunkObject = hit.transform.GetComponent<ChunkObject>();
-                
+                ChunkObject chunkObject = hit.transform.GetComponentInAllParents<ChunkObject>();
+
                 if (chunkObject == null || !chunkObject.CanFlattenTerrain)
                     continue;
-                
-                //TODO: draw ray upward from the current position
                 
                 float offset = hit.point.y - currentPosition.y;
                 
