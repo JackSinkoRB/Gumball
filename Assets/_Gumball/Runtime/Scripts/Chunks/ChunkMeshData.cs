@@ -58,7 +58,9 @@ namespace Gumball
             copy.firstEndVertices = firstEndVertices;
             copy.verticesExcludingEnds = verticesExcludingEnds;
             copy.vertexColors = vertexColors;
+#if UNITY_EDITOR
             copy.additionalVertexPaintData = additionalVertexPaintData;
+#endif
 
             MeshFilter.sharedMesh = Object.Instantiate(Mesh); //copy the mesh so not directly editing
 
