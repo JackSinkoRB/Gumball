@@ -22,6 +22,7 @@ namespace Gumball
             }
         }
 
+        [Header("Debugging Only")]
         [SerializeField, ReadOnly] private Chunk chunk;
         [SerializeField] public SerializedDictionary<Powerpole.PowerpolePosition, List<Powerpole>> poles = new();
 

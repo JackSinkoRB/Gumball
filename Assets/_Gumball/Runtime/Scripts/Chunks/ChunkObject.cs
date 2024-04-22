@@ -20,6 +20,7 @@ namespace Gumball
         [SerializeField] private bool ignoreAtRuntime;
         
         [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
+        [HelpBox("The object is not loading separately, which can contribute to lag when the chunk is loaded.", MessageType.Warning, true)]
         [SerializeField, ConditionalField(nameof(ignoreAtRuntime), true)] private bool loadSeparately = true;
         
         [Space(10)]

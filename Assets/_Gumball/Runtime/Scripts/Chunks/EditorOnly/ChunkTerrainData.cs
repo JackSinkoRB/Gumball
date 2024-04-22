@@ -21,7 +21,7 @@ namespace Gumball
         [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 50;
 
         [Header("Road")]
-        [Tooltip("Should the terrain match the road's height? Or should it be above (eg. a highway overpass)?")]
+        [Tooltip("Should the terrain match the road height? Or should it be above (eg. a highway overpass)?")]
         [SerializeField] private bool matchRoadHeight = true;
         [SerializeField, ConditionalField(nameof(matchRoadHeight), true)] private float terrainHeightFromRoad;
         [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
