@@ -11,7 +11,6 @@ namespace Gumball
         public const string BootSceneName = "BootScene";
         public const string GameLoaderSceneName = "GameLoaderScene";
         public const string MainSceneName = "MainScene";
-        public const string MapDrivingSceneName = "MapDrivingScene";
         public const string DecalEditorSceneName = "DecalEditor";
         public const string AvatarEditorSceneName = "AvatarEditor";
         public const string MapSceneName = "MapScene";

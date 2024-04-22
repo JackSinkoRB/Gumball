@@ -39,7 +39,7 @@ namespace Gumball
         private ChunkMap currentChunkMapCached;
         private Coroutine sessionCoroutine;
 
-        private DrivingCameraController drivingCameraController => MapDrivingSceneManager.Instance.DrivingCameraController;
+        private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
         
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public bool InProgress => inProgress;
@@ -150,7 +150,7 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             yield return LoadChunkMap();
-            yield return MapDrivingSceneManager.LoadMapDrivingSceneIE();
+            yield return currentChunkMapCached.LoadSceneIE();
             yield return SetupSession();
             
             GlobalLoggers.LoadingLogger.Log("Loading session...");

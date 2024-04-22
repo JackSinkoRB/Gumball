@@ -1,17 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using MyBox;
 #if UNITY_EDITOR
-using System.IO;
 using UnityEditor;
-using UnityEngine.ResourceManagement.ResourceLocations;
 #endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -24,7 +23,7 @@ namespace Gumball
         [SerializeField] private Vector3 vehicleStartingRotation;
 
         [Space(5)]
-        [SerializeField] private AssetReferenceT<Material> skyboxAssetReference;
+        [SerializeField] private AddressableSceneReference scene;
         [SerializeField] private float chunkLoadDistance = 700;
 #if UNITY_EDITOR
         [SerializeField] private AssetReferenceGameObject[] chunkReferences;
@@ -37,8 +36,6 @@ namespace Gumball
         [Tooltip("The sum of all the chunk spline lengths.")]
         [SerializeField, ReadOnly] private float totalLengthMetres;
 
-        private Material skybox;
-        
 #if UNITY_EDITOR
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
 #endif
@@ -52,25 +49,16 @@ namespace Gumball
         public float ChunkLoadDistance => chunkLoadDistance;
         public float TotalLengthMetres => totalLengthMetres;
 
-        public IEnumerator LoadSkybox()
+        public IEnumerator LoadSceneIE()
         {
-            if (string.IsNullOrEmpty(skyboxAssetReference.AssetGUID))
-            {
-                Debug.LogWarning($"{name} is missing a skybox reference.");
-                yield break;
-            }
+            GlobalLoggers.LoadingLogger.Log("Map loading started...");
 
-            AsyncOperationHandle<Material> handle = Addressables.LoadAssetAsync<Material>(skyboxAssetReference);
-            yield return handle;
-
-            skybox = Instantiate(handle.Result);
-            
-            //release when the scene is changed/gameobject is destroyed
-            new GameObject("SkyboxAddressableReference").GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-            
-            RenderSettings.skybox = skybox;
+            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
+            yield return Addressables.LoadSceneAsync(scene.SceneName);
+            sceneLoadingStopwatch.Stop();
+            GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
         }
-        
+
         public ChunkMapData GetChunkData(int index)
         {
             if (index >= chunkData.Length || index < 0)
