@@ -1,0 +1,103 @@
+using System.Collections;
+using System.Collections.Generic;
+using NUnit.Framework;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+
+namespace Gumball.Runtime.Tests
+{
+    public class CarPartTests : IPrebuildSetup, IPostBuildCleanup
+    {
+        
+        private const int carIndexToUse = 1; //test with the 911
+        
+        private bool isInitialised;
+
+        public void Setup()
+        {
+            BootSceneClear.TrySetup();
+        }
+
+        public void Cleanup()
+        {
+            BootSceneClear.TryCleanup();
+        }
+        
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            DecalEditor.IsRunningTests = true;
+            DataManager.EnableTestProviders(true);
+
+            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.DecalEditorScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            loadMainScene.completed += OnSceneLoadComplete;
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            DataManager.EnableTestProviders(false);
+            if (WarehouseManager.Instance.CurrentCar != null)
+                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            DataManager.RemoveAllData();
+        }
+
+        [UnityTearDown]
+        public IEnumerator UnityTearDown()
+        {
+            yield return DecalEditor.Instance.EndSession();
+        }
+        
+        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
+        {
+            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(carIndexToUse, 0, 
+                Vector3.zero, 
+                Quaternion.Euler(Vector3.zero), 
+                (car) =>
+                {
+                    WarehouseManager.Instance.SetCurrentCar(car);
+                    isInitialised = true;
+                }));
+        }
+        
+        [UnityTest]
+        [Order(1)]
+        public IEnumerator CarIsSetup()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            Assert.IsNotNull(WarehouseManager.Instance.CurrentCar);
+            Assert.AreEqual(WarehouseManager.Instance.CurrentCar.CarIndex, carIndexToUse);
+            Assert.IsNotNull(WarehouseManager.Instance.CurrentCar.CarPartManager);
+            Assert.Greater(WarehouseManager.Instance.CurrentCar.CarPartManager.CarPartGroups.Length, 0);
+        }
+        
+        [UnityTest]
+        [Order(2)]
+        public IEnumerator CarPartsArePersistent()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            CarPartGroup partGroupToTest = WarehouseManager.Instance.CurrentCar.CarPartManager.CarPartGroups[0];
+            
+            Assert.AreEqual(partGroupToTest.SavedPartIndex, 0);
+            Assert.AreEqual(partGroupToTest.CurrentPartIndex, 0);
+            
+            partGroupToTest.SetPartActive(1);
+            
+            //ensure it applied
+            Assert.AreEqual(partGroupToTest.CurrentPartIndex, 1);
+            
+            //ensure it saved
+            Assert.AreEqual(partGroupToTest.SavedPartIndex, 1);
+        }
+        
+    }
+}

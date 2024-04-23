@@ -18,7 +18,11 @@ namespace Gumball
         [SerializeField, ReadOnly] private AICar carBelongsTo;
         
         private string groupID => gameObject.name;
-        private string savedIndexKey => $"{carBelongsTo.SaveKey}.{groupID}";
+        private string savedPartIndexKey => $"{carBelongsTo.SaveKey}.{groupID}";
+
+        public int CurrentPartIndex => currentPartIndex;
+
+        public int SavedPartIndex => DataManager.Cars.Get(savedPartIndexKey, 0);
         
         public CarPart[] CarParts
         {
@@ -45,8 +49,7 @@ namespace Gumball
             this.carBelongsTo = carBelongsTo;
             
             //load the saved part, or set the first part active
-            int savedIndex = DataManager.Cars.Get(savedIndexKey, 0);
-            SetPartActive(savedIndex);
+            SetPartActive(SavedPartIndex);
         }
         
         public void SetPartActive(int index)
@@ -77,7 +80,7 @@ namespace Gumball
             if (!carBelongsTo.IsPlayerCar)
                 return; //non player cars don't get saved
             
-            DataManager.Cars.Set(savedIndexKey, currentPartIndex);
+            DataManager.Cars.Set(savedPartIndexKey, currentPartIndex);
         }
 
     }
