@@ -31,11 +31,14 @@ namespace Gumball
         [SerializeField] private bool canBeDrivenByPlayer;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private CarIKManager avatarIKManager;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private SteeringWheel steeringWheel;
+
         [Space(5)]
+        [SerializeField, ReadOnly] private bool isPlayerCar;
         [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int id;
-        
+
+        public bool IsPlayerCar => isPlayerCar;
         public CarIKManager AvatarIKManager => avatarIKManager;
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
@@ -297,6 +300,8 @@ namespace Gumball
         
         public void InitialiseAsPlayer(int carIndex, int id)
         {
+            isPlayerCar = true;
+            
             this.carIndex = carIndex;
             this.id = id;
             
@@ -304,6 +309,9 @@ namespace Gumball
             colliders.layer = (int)LayersAndTags.Layer.PlayerCar;
             
             SetAutoDrive(false);
+            
+            if (carPartManager != null)
+                carPartManager.Initialise(this);
         }
 
         public void InitialiseAsRacer()

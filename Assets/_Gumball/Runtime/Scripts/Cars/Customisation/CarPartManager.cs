@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
@@ -11,7 +12,8 @@ namespace Gumball
         
         [Header("Debugging")]
         [Tooltip("The car part groups are retrieved and cached from under this object lazilly when required.")]
-        [SerializeField] private CarPartGroup[] carPartGroupsCached;
+        [SerializeField, ReadOnly] private CarPartGroup[] carPartGroupsCached;
+        [SerializeField, ReadOnly] private AICar carBelongsTo;
         
         public CarPartGroup[] CarPartGroups
         {
@@ -30,6 +32,16 @@ namespace Gumball
                 }
                 
                 return carPartGroupsCached;
+            }
+        }
+
+        public void Initialise(AICar carBelongsTo)
+        {
+            this.carBelongsTo = carBelongsTo;
+            
+            foreach (CarPartGroup partGroup in CarPartGroups)
+            {
+                partGroup.Initialise(carBelongsTo);
             }
         }
         
