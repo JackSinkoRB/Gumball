@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using JBooth.VertexPainterPro;
 using MyBox;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -11,55 +12,14 @@ namespace Gumball
     [Serializable]
     public class ChunkMeshData
     {
-        [Serializable]
-        public struct Vertex : IEquatable<Vertex>
-        {
-            [SerializeField, ReadOnly] private int index;
-            [SerializeField, ReadOnly] private Vector3 localPosition;
-            [SerializeField, ReadOnly] private Chunk chunkBelongsTo;
-            
-            public int Index => index;
-            public Vector3 LocalPosition => localPosition;
-            public Vector3 WorldPosition => MeshBelongsTo.MeshFilter.transform.TransformPoint(LocalPosition);
-            public ChunkMeshData MeshBelongsTo => chunkBelongsTo.ChunkMeshData;
-
-            public Vertex(int index, Vector3 localPosition, Chunk chunkBelongsTo)
-            {
-                this.index = index;
-                this.localPosition = localPosition;
-                this.chunkBelongsTo = chunkBelongsTo;
-            }
-
-            /// <summary>
-            /// Because the mesh can be updated but not yet applied, use this to get the current (but not applied) value instead.
-            /// </summary>
-            public Vector3 GetCurrentWorldPosition()
-            {
-                Vector3 previousPositionLocal = MeshBelongsTo.vertices[Index];
-                Vector3 previousPositionWorld = MeshBelongsTo.MeshFilter.transform.TransformPoint(previousPositionLocal);
-                return previousPositionWorld;
-            }
-
-            public bool Equals(Vertex other)
-            {
-                return Index == other.Index && Equals(MeshBelongsTo, other.MeshBelongsTo);
-            }
-
-            public override bool Equals(object obj)
-            {
-                return obj is Vertex other && Equals(other);
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(Index, MeshBelongsTo);
-            }
-        }
         
         [SerializeField, ReadOnly] private Chunk chunk;
         [SerializeField, ReadOnly] private Vector3[] vertices;
-        [SerializeField, ReadOnly] private List<Vertex> lastEndVertices;
-        [SerializeField, ReadOnly] private List<Vertex> firstEndVertices;
+        [SerializeField, ReadOnly] private Vector3[] normals;
+        [SerializeField, ReadOnly] private GenericDictionary<int, Vector3> modifiedNormals = new();
+        [SerializeField, ReadOnly] private List<int> lastEndVertices;
+        [SerializeField, ReadOnly] private List<int> firstEndVertices;
+        [SerializeField, ReadOnly] private List<int> verticesExcludingEnds;
         [SerializeField, ReadOnly] private SerializableColor[] vertexColors;
         
         public Chunk Chunk => chunk;
@@ -67,10 +27,12 @@ namespace Gumball
         public MeshCollider MeshCollider => chunk.TerrainHighLOD.GetComponent<MeshCollider>();
         public Mesh Mesh => MeshFilter.sharedMesh;
         public Vector3[] Vertices => vertices;
+        public Vector3[] Normals => normals;
         public SerializableColor[] VertexColors => vertexColors;
-        public ReadOnlyCollection<Vertex> LastEndVertices => lastEndVertices.AsReadOnly();
-        public ReadOnlyCollection<Vertex> FirstEndVertices => firstEndVertices.AsReadOnly();
-        
+        public ReadOnlyCollection<int> LastEndVertices => lastEndVertices.AsReadOnly();
+        public ReadOnlyCollection<int> FirstEndVertices => firstEndVertices.AsReadOnly();
+        public ReadOnlyCollection<int> VerticesExcludingEnds => verticesExcludingEnds.AsReadOnly();
+
         public ChunkMeshData(Chunk chunk)
         {
             this.chunk = chunk;
@@ -78,6 +40,36 @@ namespace Gumball
             vertices = Mesh.vertices;
 
             FindVerticesOnTangents();
+        }
+
+        public ChunkMeshData()
+        {
+            
+        }
+        
+        public ChunkMeshData Clone()
+        {
+            ChunkMeshData copy = new ChunkMeshData();
+            copy.chunk = chunk;
+            copy.vertices = vertices;
+            copy.normals = normals;
+            copy.modifiedNormals = modifiedNormals;
+            copy.lastEndVertices = lastEndVertices;
+            copy.firstEndVertices = firstEndVertices;
+            copy.verticesExcludingEnds = verticesExcludingEnds;
+            copy.vertexColors = vertexColors;
+#if UNITY_EDITOR
+            copy.additionalVertexPaintData = additionalVertexPaintData;
+#endif
+
+            MeshFilter.sharedMesh = Object.Instantiate(Mesh); //copy the mesh so not directly editing
+
+            return copy;
+        }
+
+        public void SetChunk(Chunk chunk)
+        {
+            this.chunk = chunk;
         }
 
         /// <summary>
@@ -100,19 +92,48 @@ namespace Gumball
             this.vertices = vertices;
         }
         
+#if UNITY_EDITOR
+        public void SetNormals(Vector3[] normals)
+        {
+            //apply modified normals
+            foreach (int vertexIndex in modifiedNormals.Keys)
+            {
+                Vector3 modifiedNormal = modifiedNormals[vertexIndex];
+
+                normals[vertexIndex] = modifiedNormal;
+            }
+            
+            this.normals = normals;
+
+            if (MeshFilter.sharedMesh != null)
+                MeshFilter.sharedMesh.SetNormals(normals);
+        }
+
+        public void UpdateNormals()
+        {
+            SetNormals(normals);
+        }
+
+        public void ModifyNormal(int vertexIndex, Vector3 normal)
+        {
+            modifiedNormals[vertexIndex] = normal;
+        }
+#endif
+
         public void ApplyChanges()
         {
             Mesh meshToUse = Object.Instantiate(Mesh); //use a mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
 
             meshToUse.SetVertices(vertices);
+            meshToUse.SetNormals(normals);
+            meshToUse.SetColors(vertexColors.ToColors());
 
             //recalculate UVs
             meshToUse.SetUVs(0, ChunkUtils.GetTriplanarUVs(vertices, MeshFilter.transform));
 
             meshToUse.RecalculateTangents();
-            meshToUse.RecalculateNormals();
             meshToUse.RecalculateBounds();
-            
+
             MeshFilter.sharedMesh = meshToUse;
             MeshCollider.sharedMesh = meshToUse;
         }
@@ -124,11 +145,38 @@ namespace Gumball
         }
         
 #if UNITY_EDITOR
+        private GenericDictionary<int, List<VertexInstanceStream.PaintData>> additionalVertexPaintData = new();
+        
+        public void TrackPaintData(int index, VertexInstanceStream.PaintData data)
+        {
+            if (!additionalVertexPaintData.ContainsKey(index))
+                additionalVertexPaintData[index] = new List<VertexInstanceStream.PaintData>();
+         
+            additionalVertexPaintData[index].Add(data);
+        }
+        
         public Color[] CalculateVertexColors()
         {
             TerrainTextureBlendSettings terrainBlendSettings = chunk.GetComponent<ChunkEditorTools>().TerrainData.TextureBlendSettings;
-            Color[] colors = terrainBlendSettings.GetVertexColors(chunk, new List<Vector3>(vertices), MeshFilter.transform, Mesh);
+            Color[] colors = terrainBlendSettings.GetVertexColors(chunk, vertices, MeshFilter.transform, Mesh);
+
+            ApplyPaintData(colors); //re-add the paint data
+            UpdateVertexColors(colors.ToSerializableColors());
+            
             return colors;
+        }
+
+        private void ApplyPaintData(Color[] colors)
+        {
+            foreach (int index in additionalVertexPaintData.Keys)
+            {
+                List<VertexInstanceStream.PaintData> dataCollection = additionalVertexPaintData[index];
+                
+                foreach (VertexInstanceStream.PaintData data in dataCollection)
+                {
+                    colors[index] = Color.Lerp(colors[index], data.color, data.strength);
+                }
+            }
         }
 #endif
 
@@ -158,12 +206,22 @@ namespace Gumball
 #endif
             GlobalLoggers.ChunkLogger.Log($"Found {firstEndVertices.Count} vertices at the end of ({chunk.gameObject.name}) - position = {lastPoint}.");
 
+            //cache the remaining vertices
+            verticesExcludingEnds = new List<int>();
+            for (int vertexIndex = 0; vertexIndex < vertices.Length; vertexIndex++)
+            {
+                if (lastEndVertices.Contains(vertexIndex) || firstEndVertices.Contains(vertexIndex))
+                    continue;
+                
+                verticesExcludingEnds.Add(vertexIndex);
+            }
+            
             chunk.transform.rotation = previousRotation;
         }
         
-        private List<Vertex> GetVerticesOnTangent(Vector3 tangentStart, Vector3 tangentEnd)
+        private List<int> GetVerticesOnTangent(Vector3 tangentStart, Vector3 tangentEnd)
         {
-            List<Vertex> verticesOnTangent = new();
+            List<int> verticesOnTangent = new();
 
             for (var vertexIndex = 0; vertexIndex < Mesh.vertices.Length; vertexIndex++)
             {
@@ -177,7 +235,7 @@ namespace Gumball
 
                 if (IsPointOnTangent(vertexPositionWorld, tangentStart, tangentEnd))
                 {
-                    verticesOnTangent.Add(new Vertex(vertexIndex, vertexPosition, chunk));
+                    verticesOnTangent.Add(vertexIndex);
 #if UNITY_EDITOR
                     if (chunk.GetComponent<ChunkEditorTools>().ShowDebugLines)
                         Debug.DrawLine(vertexPositionWorld, vertexPositionWorld + Vector3.up * 20, Color.magenta, 15);

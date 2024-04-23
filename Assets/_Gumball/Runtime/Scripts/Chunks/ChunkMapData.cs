@@ -51,9 +51,10 @@ namespace Gumball
             chunk.UpdateSplineImmediately();
             chunk.transform.position = Position;
             chunk.transform.rotation = Rotation;
-            chunk.ChunkMeshData.SetVertices(FinalMeshData.Vertices);
-            chunk.ChunkMeshData.UpdateVertexColors(FinalMeshData.VertexColors);
-            chunk.ChunkMeshData.ApplyChanges();
+            
+            chunk.SetMeshData(FinalMeshData);
+            FinalMeshData.ApplyChanges();
+            
             chunk.UpdateSplineImmediately();
         }
     }

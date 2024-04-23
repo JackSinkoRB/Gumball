@@ -13,6 +13,8 @@ namespace Gumball
 {
 #if UNITY_EDITOR
     [RequireComponent(typeof(ChunkEditorTools))]
+    [RequireComponent(typeof(UniqueIDAssigner))]
+    [RequireComponent(typeof(SplineComputer))]
 #endif
     public class Chunk : MonoBehaviour
     {
@@ -29,10 +31,6 @@ namespace Gumball
         public event Action onTerrainChanged;
         public event Action onChunkUnload;
         
-        [Header("Required")]
-        [SerializeField] private SplineComputer splineComputer;
-        
-        [Header("Optional")]
         [SerializeField] private ChunkTrafficManager trafficManager;
         [SerializeField] private ChunkPowerpoleManager powerpoleManager;
         [SerializeField] private Collider[] barriers;
@@ -51,14 +49,15 @@ namespace Gumball
         [SerializeField, ReadOnly] private GameObject terrainLowLOD;
         
         [Header("Debugging")]
-        [SerializeField] private bool isFullyLoaded;
-        [SerializeField] private bool isAccessible;
+        [SerializeField, ReadOnly] private bool isFullyLoaded;
+        [SerializeField, ReadOnly] private bool isAccessible;
         [Tooltip("A list of child spline meshes. These are automatically assigned when the chunk asset is saved.")]
         [SerializeField, ReadOnly] private SplineMesh[] splineMeshes;
         [SerializeField, ReadOnly] private ChunkMeshData chunkMeshData;
         [SerializeField, ReadOnly] private GameObject chunkDetector;
         [SerializeField, ReadOnly] private float splineLengthCached = -1;
-        
+
+        private SplineComputer splineComputer => GetComponent<SplineComputer>();
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
 
         public bool IsFullyLoaded => isFullyLoaded;
@@ -126,6 +125,7 @@ namespace Gumball
         private void OnEnable()
         {
             splineComputer.updateMode = SplineComputer.UpdateMode.None; //make sure the spline computer doesn't update automatically at runtime
+            splineComputer.sampleMode = SplineComputer.SampleMode.Uniform;
             
             InitialiseBarriers();
         }
@@ -170,6 +170,12 @@ namespace Gumball
             Debug.Log($"Setting {chunkObjectData.Keys.Count} chunk object data for {gameObject.name}");
         }
 
+        public void SetMeshData(ChunkMeshData data)
+        {
+            chunkMeshData = data;
+            data.SetChunk(this);
+        }
+        
         public void SetTerrain(TerrainLOD lod, GameObject terrain)
         {
             if (lod == TerrainLOD.HIGH)

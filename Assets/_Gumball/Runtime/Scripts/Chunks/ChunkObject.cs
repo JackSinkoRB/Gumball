@@ -20,6 +20,7 @@ namespace Gumball
         [SerializeField] private bool ignoreAtRuntime;
         
         [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
+        [HelpBox("The object is not loading separately, which can contribute to lag when the chunk is loaded.", MessageType.Warning, true)]
         [SerializeField, ConditionalField(nameof(ignoreAtRuntime), true)] private bool loadSeparately = true;
         
         [Space(10)]
@@ -33,10 +34,10 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(keepAtSpecificDistanceFromRoad))] private float distanceFromRoad = 10;
         
         [Space(10)]
-        [Tooltip("When enabled, the terrain is flattened to the chunk object's position.")]
+        [Tooltip("When enabled, the terrain is flattened to the collider specified below.")]
         [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, true, true)]
         [SerializeField] private bool flattenTerrain;
-        [Tooltip("Assign a collider for the terrain to flatten to. If none supplied, it will flatten to the single point of the transform.")]
+        [Tooltip("Assign a collider for the terrain to flatten to.")]
         [SerializeField, ConditionalField(nameof(flattenTerrain))]
         private Collider colliderToFlattenTo;
         [Tooltip("The distance after the flattening for the terrain to be blended with it's original height.")]
@@ -45,13 +46,31 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(flattenTerrain))]
         private AnimationCurve flattenTerrainBlendCurve = AnimationCurve.Linear(0, 1, 1, 0);
         
+        [Space(10)]
+        [Tooltip("When enabled, the specified vertex colour is blended into the current vertex colours around the supplied mesh.")]
+        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, true, true)]
+        [SerializeField] private bool colourTerrain;
+        [Tooltip("Assign a collider for the terrain to colour around.")]
+        [SerializeField, ConditionalField(nameof(colourTerrain))]
+        private Collider colliderToColourAround;
+        [SerializeField, ConditionalField(nameof(colourTerrain))]
+        private Color colourTerrainColor;
+        [SerializeField, ConditionalField(nameof(colourTerrain))]
+        private float colourTerrainStrength = 0.5f;
+        
+        public bool CanColourTerrain => isActiveAndEnabled && colourTerrain && colliderToColourAround != null;
+        public Collider ColliderToColourAround => colliderToColourAround;
+        public Color ColourTerrainColor => colourTerrainColor;
+        public float ColourTerrainStrength => colourTerrainStrength;
+
+        public bool CanFlattenTerrain => isActiveAndEnabled && flattenTerrain && colliderToFlattenTo != null;
         public Collider ColliderToFlattenTo => colliderToFlattenTo;
         public float FlattenTerrainBlendDistance => flattenTerrainBlendDistance;
         public AnimationCurve FlattenTerrainBlendCurve => flattenTerrainBlendCurve;
+        
         public bool LoadSeparately => loadSeparately;
         public bool IgnoreAtRuntime => ignoreAtRuntime;
         public bool AlwaysGrounded => alwaysGrounded;
-        public bool CanFlattenTerrain => isActiveAndEnabled && flattenTerrain && colliderToFlattenTo != null;
         public Chunk Chunk => chunkBelongsTo;
         
         [Header("Debugging")]
@@ -60,7 +79,7 @@ namespace Gumball
         [SerializeField, HideInInspector] private Vector3 lastKnownPositionWhenGrounded;
         
 #if UNITY_EDITOR
-        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(flattenTerrain))]
+        [ButtonMethod]
         public void RecreateTerrain()
         {
             chunkBelongsTo.GetComponent<ChunkEditorTools>().RecreateTerrain();

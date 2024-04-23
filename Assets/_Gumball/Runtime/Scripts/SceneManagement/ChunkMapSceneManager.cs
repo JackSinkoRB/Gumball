@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace Gumball
 {
-    public class MapDrivingSceneManager : Singleton<MapDrivingSceneManager>
+    public class ChunkMapSceneManager : Singleton<ChunkMapSceneManager>
     {
 
         [SerializeField] private DrivingCameraController drivingCameraController;
@@ -37,16 +37,6 @@ namespace Gumball
         private void OnCarChanged(AICar newCar)
         {
             drivingCameraController.SetTarget(newCar.transform);
-        }
-
-        public static IEnumerator LoadMapDrivingSceneIE()
-        {
-            GlobalLoggers.LoadingLogger.Log($"Map loading started...");
-
-            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(SceneManager.MapDrivingSceneName, LoadSceneMode.Single, true);
-            sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MapDrivingSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
         }
 
     }

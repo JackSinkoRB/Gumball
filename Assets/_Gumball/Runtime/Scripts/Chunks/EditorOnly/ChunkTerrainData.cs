@@ -21,7 +21,7 @@ namespace Gumball
         [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 50;
 
         [Header("Road")]
-        [Tooltip("Should the terrain match the road's height? Or should it be above (eg. a highway overpass)?")]
+        [Tooltip("Should the terrain match the road height? Or should it be above (eg. a highway overpass)?")]
         [SerializeField] private bool matchRoadHeight = true;
         [SerializeField, ConditionalField(nameof(matchRoadHeight), true)] private float terrainHeightFromRoad;
         [PositiveValueOnly, SerializeField] private float widthAroundRoad = 100;
@@ -102,14 +102,16 @@ namespace Gumball
             //setup the mesh
             mesh.SetVertices(verticesWithHeightData);
             mesh.SetTriangles(CreateTrianglesFromGrid(grid), 0);
-            mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(verticesWithHeightData, terrain.transform));
+            mesh.Optimize();
+            
+            mesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(mesh.vertices, terrain.transform));
             
             //apply the changes to the mesh
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
             
             //set the vertex colours AFTER calculating normals
-            Color[] vertexColors = textureBlendSettings.GetVertexColors(chunk, verticesWithHeightData, terrain.transform, mesh);
+            Color[] vertexColors = textureBlendSettings.GetVertexColors(chunk, mesh.vertices, terrain.transform, mesh);
             mesh.SetColors(vertexColors);
 
             //save the mesh asset
@@ -165,21 +167,21 @@ namespace Gumball
                         triangleIndexes.Add(vertexIndexOnRight);
                     }
                     
-                    if (hasVertexAbove && hasVertexOnLeft)
-                    {
-                        //order matters
-                        triangleIndexes.Add(vertexIndex);
-                        triangleIndexes.Add(vertexIndexOnLeft);
-                        triangleIndexes.Add(vertexIndexAbove);
-                    }
-                    
-                    if (hasVertexBelow && hasVertexOnRight)
-                    {
-                        //order matters
-                        triangleIndexes.Add(vertexIndex);
-                        triangleIndexes.Add(vertexIndexOnRight);
-                        triangleIndexes.Add(vertexIndexBelow);
-                    }
+                    // if (hasVertexAbove && hasVertexOnLeft)
+                    // {
+                    //     //order matters
+                    //     triangleIndexes.Add(vertexIndex);
+                    //     triangleIndexes.Add(vertexIndexOnLeft);
+                    //     triangleIndexes.Add(vertexIndexAbove);
+                    // }
+                    //
+                    // if (hasVertexBelow && hasVertexOnRight)
+                    // {
+                    //     //order matters
+                    //     triangleIndexes.Add(vertexIndex);
+                    //     triangleIndexes.Add(vertexIndexOnRight);
+                    //     triangleIndexes.Add(vertexIndexBelow);
+                    // }
                     
                     if (hasVertexBelow && hasVertexOnLeft)
                     {
@@ -359,19 +361,17 @@ namespace Gumball
             Dictionary<ChunkObject, float> desiredOffsets = new();
             float sumOfOffsets = 0;
 
-            //raycast upwards from vertex point (minus 10,000 to start at bottom) to see if it's overlapping
+            //raycast upwards from vertex point (add 10,000 to start at top) to see if it's overlapping
             const int maxChunkObjectsPerPosition = 15;
             RaycastHit[] hits = new RaycastHit[maxChunkObjectsPerPosition];
             int numberOfHits = chunk.gameObject.scene.GetPhysicsScene().Raycast(currentPosition.OffsetY(10000), Vector3.down, hits, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkObject));
             for (int count = 0; count < numberOfHits; count++)
             {
                 RaycastHit hit = hits[count];
-                ChunkObject chunkObject = hit.transform.GetComponent<ChunkObject>();
-                
+                ChunkObject chunkObject = hit.transform.GetComponentInAllParents<ChunkObject>();
+
                 if (chunkObject == null || !chunkObject.CanFlattenTerrain)
                     continue;
-                
-                //TODO: draw ray upward from the current position
                 
                 float offset = hit.point.y - currentPosition.y;
                 

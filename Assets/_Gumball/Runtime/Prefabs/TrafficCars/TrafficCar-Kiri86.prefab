@@ -1742,6 +1742,8 @@ MonoBehaviour:
   isPlayerDrivingEnabled: 0
   carIndex: 0
   id: 0
+  frontOfCarPosition: {x: 0, y: 1, z: 2}
+  carWidth: 2
   wheelConfiguration: 0
   frontWheelMeshes:
   - {fileID: 3989320743972326410}
@@ -1758,16 +1760,18 @@ MonoBehaviour:
   autoDrive: 1
   obeySpeedLimit: 1
   maxSpeed: 200
+  tempSpeedLimit: -1
   useRacingLine: 0
   currentLaneDistance: 0
+  currentLaneDirection: 0
   racingLineOffset: 0
+  targetPositionOffset: 0
   dragWhenAccelerating: 0
   dragWhenIdle: 0.15
   dragWhenBraking: 1
   dragWhenHandbraking: 0.5
   angularDragWhenHandbraking: 6
   speed: 0
-  desiredSpeed: 0
   torqueCurve:
     serializedVersion: 2
     m_Curve:
@@ -1821,14 +1825,7 @@ MonoBehaviour:
   engineRpm: 0
   maxReverseSpeed: 25
   isReversing: 0
-  movementTargetDistance:
-    Min: 5
-    Max: 15
-  movementTargetDistanceSpeedFactors:
-    Min: 20
-    Max: 70
   steerSpeed: 10
-  autoDriveSteerSpeed: 10
   releaseSpeed: 15
   visualSteerSpeed: 5
   autoDriveMaxSteerAngle: 65
@@ -1892,6 +1889,7 @@ MonoBehaviour:
   colliders: {fileID: 1349138282531362610}
   collisionRecoverDuration: 1
   inCollision: 0
+  numberOfCollisions: 0
   isPushingAnotherRacer: 0
   racersCollidingWith: []
   brakeForObstacles: 1
@@ -1913,12 +1911,10 @@ MonoBehaviour:
     Min: 10
     Max: 60
   useObstacleAvoidance: 0
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 0
   speedToBrakeToIfBlocked: 50
-  obstacleAvoidanceRaycastLayers: []
-  obstacleAvoidanceRaycastLayerWhenBlocked:
-    raycasts: []
-  currentLayerIndex: 0
-  debug: 0
   isInitialised: 0
   currentChunkCached: {fileID: 0}
   isFrozen: 0

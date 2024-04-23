@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Dreamteck.Splines;
+using JBooth.VertexPainterPro;
 using MyBox;
 #if UNITY_EDITOR
 using Gumball.Editor;
@@ -93,6 +94,9 @@ namespace Gumball
             {
                 if (chunkObject.CanFlattenTerrain)
                     chunkObject.ColliderToFlattenTo.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
+                
+                if (chunkObject.CanColourTerrain)
+                    chunkObject.ColliderToColourAround.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
             }
         }
         
@@ -156,7 +160,56 @@ namespace Gumball
         private static PlayModeStateChange playModeState;
 
         public ChunkTerrainData TerrainData => terrainData;
+
+        #region COMBINE_MESHES
+        [Header("Combine meshes")]
+        [SerializeField] private MeshFilter meshFilter1;
+        [SerializeField] private MeshFilter meshFilter2;
+
+        [SerializeField, ReadOnly] private Vector3[] vertices1Before;
+        [SerializeField, ReadOnly] private Vector3[] vertices2Before;
+
+        [SerializeField, ReadOnly] private Vector3[] verticesCombined;
         
+        [ButtonMethod]
+        public void CombineMeshes()
+        {
+            vertices1Before = meshFilter1.sharedMesh.vertices;
+            vertices2Before = meshFilter2.sharedMesh.vertices;
+            
+            var combine = new CombineInstance[2];
+            combine[0].mesh = meshFilter1.sharedMesh;
+            combine[0].transform = meshFilter1.transform.localToWorldMatrix;
+            combine[1].mesh = meshFilter2.sharedMesh;
+            combine[1].transform = meshFilter2.transform.localToWorldMatrix;
+
+            MeshFilter combinedMeshFilter = new GameObject("TEMP").AddComponent<MeshFilter>();
+            combinedMeshFilter.gameObject.AddComponent<MeshRenderer>();
+            
+            Mesh combinedMesh = new Mesh();
+            combinedMesh.CombineMeshes(combine);
+            
+            combinedMesh.SetUVs(0, ChunkUtils.GetTriplanarUVs(combinedMesh.vertices, combinedMeshFilter.transform));
+
+            combinedMesh.RecalculateBounds();
+            combinedMesh.RecalculateNormals();
+            combinedMesh.RecalculateTangents();
+
+            combinedMeshFilter.sharedMesh = combinedMesh;
+
+            verticesCombined = combinedMesh.vertices;
+            
+            Debug.DrawRay(meshFilter1.transform.TransformPoint(vertices1Before[2]), Vector3.up * 100, Color.red, 60);
+            Debug.DrawRay(meshFilter2.transform.TransformPoint(vertices2Before[2]), Vector3.up * 100, Color.blue, 60);
+            
+            //green should be at the same position as red
+            Debug.DrawRay(combinedMeshFilter.transform.TransformPoint(verticesCombined[2]).OffsetY(100), Vector3.up * 100, Color.green, 60);
+
+            //black should be at same position as blue
+            Debug.DrawRay(combinedMeshFilter.transform.TransformPoint(verticesCombined[vertices1Before.Length + 2]).OffsetY(100), Vector3.up * 100, Color.black, 60);
+        }
+        #endregion
+
         [ButtonMethod]
         public void ShowTerrainGrid()
         {
@@ -179,22 +232,47 @@ namespace Gumball
         [ButtonMethod]
         public void DrawMeshEdgeNormals()
         {
-            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.FirstEndVertices)
+            foreach (int vertexIndex in chunk.ChunkMeshData.FirstEndVertices)
             {
-                DrawNormal(vertex.Index, Color.red);
+                DrawNormal(vertexIndex, Color.red);
             }
             
-            foreach (ChunkMeshData.Vertex vertex in chunk.ChunkMeshData.LastEndVertices)
+            foreach (int vertexIndex in chunk.ChunkMeshData.LastEndVertices)
             {
-                DrawNormal(vertex.Index, Color.blue);
+                DrawNormal(vertexIndex, Color.blue);
             }
-
-            void DrawNormal(int vertexIndex, Color color)
+        }
+        
+        private void DrawNormal(int vertexIndex, Color color)
+        {
+            const float distance = 5;
+            const float duration = 120;
+            Debug.DrawRay(chunk.ChunkMeshData.GetCurrentVertexWorldPosition(vertexIndex), chunk.ChunkMeshData.Mesh.normals[vertexIndex] * distance, color, duration);
+        }
+        
+        [ButtonMethod]
+        public void DrawAllNormals()
+        {
+            for (int vertexIndex = 0; vertexIndex < chunk.ChunkMeshData.Vertices.Length; vertexIndex++)
             {
-                const float distance = 5;
-                const float duration = 120;
-                Debug.DrawRay(chunk.ChunkMeshData.GetCurrentVertexWorldPosition(vertexIndex), chunk.ChunkMeshData.Mesh.normals[vertexIndex] * distance, color, duration);
+                DrawNormal(vertexIndex, Color.red);
             }
+        }
+        
+        [ButtonMethod]
+        public void DrawAllTangents()
+        {
+            for (int vertexIndex = 0; vertexIndex < chunk.ChunkMeshData.Vertices.Length; vertexIndex++)
+            {
+                DrawTangent(vertexIndex, Color.magenta);
+            }
+        }
+        
+        private void DrawTangent(int vertexIndex, Color color)
+        {
+            const float distance = 5;
+            const float duration = 120;
+            Debug.DrawRay(chunk.ChunkMeshData.GetCurrentVertexWorldPosition(vertexIndex), chunk.ChunkMeshData.Mesh.tangents[vertexIndex] * distance, color, duration);
         }
         
         [ButtonMethod]
@@ -267,12 +345,26 @@ namespace Gumball
             
             GlobalLoggers.ChunkLogger.Log($"Recreating terrain for '{chunk.name}'");
             Material[] previousMaterials = chunk.TerrainHighLOD.GetComponent<MeshRenderer>().sharedMaterials;
+
+            //check if there's additional vertex color data
+            VertexInstanceStream vertexInstanceStream = chunk.TerrainHighLOD.GetComponent<VertexInstanceStream>();
+            GenericDictionary<int, List<VertexInstanceStream.PaintData>> paintData = null;
+            if (vertexInstanceStream != null)
+                paintData = vertexInstanceStream.paintedVertices;
+
             DestroyImmediate(chunk.TerrainHighLOD);
             DestroyImmediate(chunk.TerrainLowLOD);
 
             chunk.SplineComputer.RebuildImmediate();
 
             RecreateTerrainLODs();
+
+            if (paintData != null)
+            {
+                chunk.TerrainHighLOD.GetOrAddComponent<VertexInstanceStream>().SetPaintData(paintData);
+                
+                //TODO: generate vertex color data for the low LOD
+            }
             
             if (chunkBefore != null)
                 ChunkUtils.ConnectChunks(chunkBefore, chunk, ChunkUtils.LoadDirection.AFTER, new ChunkBlendData(chunkBefore, chunk));

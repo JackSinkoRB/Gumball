@@ -35,6 +35,29 @@ namespace Gumball
             bool isFurtherInDirection = distanceA > distanceB;
             return isFurtherInDirection;
         }
+        
+        public static Vector2 FindIntersection(Vector2 line1Start, Vector2 line1End, Vector2 line2Start, Vector2 line2End)
+        {
+            Vector2 intersection = Vector2.zero;
+
+            // Calculate slopes of the lines
+            float m1 = (line1End.y - line1Start.y) / (line1End.x - line1Start.x);
+            float m2 = (line2End.y - line2Start.y) / (line2End.x - line2Start.x);
+
+            // Check if lines are parallel
+            if (Mathf.Approximately(m1, m2))
+                return intersection;
+
+            // Calculate y-intercepts
+            float b1 = line1Start.y - m1 * line1Start.x;
+            float b2 = line2Start.y - m2 * line2Start.x;
+
+            // Calculate intersection point
+            intersection.x = (b2 - b1) / (m1 - m2);
+            intersection.y = m1 * intersection.x + b1;
+
+            return intersection;
+        }
 
     }
 }

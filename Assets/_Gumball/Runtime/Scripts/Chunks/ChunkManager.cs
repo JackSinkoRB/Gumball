@@ -103,9 +103,7 @@ namespace Gumball
             HasLoaded = false;
             currentChunkMap = chunkMap;
             currentChunks.Clear();
-
-            yield return chunkMap.LoadSkybox();
-
+            
             //load the chunks in range
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(chunkMap.VehicleStartingPosition));
             yield return distanceLoadingCoroutine.Coroutine;

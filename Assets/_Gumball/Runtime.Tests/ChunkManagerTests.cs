@@ -32,7 +32,7 @@ namespace Gumball.Runtime.Tests
             ChunkManager.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
             
-            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.MapDrivingScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.ChunkMapScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadMainScene.completed += OnSceneLoadComplete;
         }
 
