@@ -42,6 +42,11 @@ namespace Gumball
         public int ID => id;
         public string SaveKey => $"CarData.{carIndex}.{id}";
 
+        [Header("Part customisation")]
+        [SerializeField] private CarPartManager carPartManager;
+
+        public CarPartManager CarPartManager => carPartManager;
+        
         [Header("Sizing")]
         [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
         [SerializeField] private float carWidth = 2;
