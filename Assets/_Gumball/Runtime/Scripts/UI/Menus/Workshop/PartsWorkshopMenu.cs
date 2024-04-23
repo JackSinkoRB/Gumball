@@ -52,13 +52,16 @@ namespace Gumball
                         partsScrollIcon.DisplayNameLabel.text = part.DisplayName;
                     };
 
-                    scrollItem.onSelect += () => { group.SetPartActive(finalIndex); };
+                    scrollItem.onSelect += () =>
+                    {
+                        group.SetPartActive(finalIndex);
+                    };
 
                     scrollItems.Add(scrollItem);
                 }
             }
 
-            magneticScroll.SetItems(scrollItems, magneticScroll.LastSelectedItemIndex);
+            magneticScroll.SetItems(scrollItems, group.CurrentPartIndex);
         }
 
     }
