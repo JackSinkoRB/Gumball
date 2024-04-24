@@ -65,6 +65,8 @@ namespace Gumball
         private Transform[] allWheelMeshes;
         private WheelCollider[] allWheelColliders;
 
+        public WheelCollider[] FrontWheelColliders => frontWheelColliders;
+        public WheelCollider[] RearWheelColliders => rearWheelColliders;
         public WheelCollider[] AllWheelColliders => allWheelColliders;
         public Transform[] AllWheelMeshes => allWheelMeshes;
         
