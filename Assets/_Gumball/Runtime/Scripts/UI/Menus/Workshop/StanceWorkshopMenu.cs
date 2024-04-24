@@ -9,17 +9,6 @@ namespace Gumball
     public class StanceWorkshopMenu : WorkshopSubMenu
     {
 
-        //car has a 'StanceModification' class on the wheels object
-        // - has the min/max values and default values
-        
-        //convert slider values to real values
-        //slider values are saved to file
-        // - they are converted whenever it needs to update
-        
-        //apply each slider value to the car
-        // - call on slider change
-        // - call when loading car
-        
         [SerializeField] private Slider suspensionHeightSlider;
 
         private void OnEnable()

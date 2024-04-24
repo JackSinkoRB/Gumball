@@ -299,8 +299,6 @@ namespace Gumball
             CacheAllWheelMeshes();
             CacheAllWheelColliders();
             CachePoweredWheels();
-
-            InitialiseWheelStance();
         }
 
         public void InitialiseAsPlayer(int carIndex, int id)
@@ -317,6 +315,8 @@ namespace Gumball
             
             if (carPartManager != null)
                 carPartManager.Initialise(this);
+            
+            InitialiseWheelStance();
         }
 
         public void InitialiseAsRacer()
@@ -325,6 +325,8 @@ namespace Gumball
             colliders.layer = (int)LayersAndTags.Layer.RacerCar;
             
             SetAutoDrive(true);
+            
+            InitialiseWheelStance();
         }
         
         public void InitialiseAsTraffic()

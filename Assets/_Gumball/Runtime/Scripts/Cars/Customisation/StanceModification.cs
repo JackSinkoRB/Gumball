@@ -10,25 +10,6 @@ namespace Gumball
     public class StanceModification : MonoBehaviour
     {
 
-        private AICar carBelongsTo;
-
-        private WheelCollider wheelCollider => GetComponent<WheelCollider>();
-        private Transform wheelMeshCached;
-
-        private Transform wheelMesh
-        {
-            get
-            {
-                if (wheelMeshCached == null)
-                {
-                    int index = carBelongsTo.AllWheelColliders.IndexOfItem(wheelCollider);
-                    wheelMeshCached = carBelongsTo.AllWheelMeshes[index];
-                }
-
-                return wheelMeshCached;
-            }
-        }
-        
         [Header("Modifiers")]
         [Tooltip("This is the actual value that is used for the suspension height on the wheel collider.")]
         [SerializeField] private RangedFloatValue suspensionHeight = new(0.01f, 0.2f, 0.05f);
@@ -41,6 +22,13 @@ namespace Gumball
         [Tooltip("This value is multiplied to the initial wheel mesh X scale.")]
         [SerializeField] private RangedFloatValue width = new(0.5f, 1.5f, 1);
 
+        private AICar carBelongsTo;
+        private int wheelIndex;
+        private Transform wheelMesh;
+        
+        private WheelCollider wheelCollider => GetComponent<WheelCollider>();
+        private string saveKey => $"{carBelongsTo.SaveKey}.Wheel.{wheelIndex}";
+        
         public RangedFloatValue SuspensionHeight => suspensionHeight;
         public RangedFloatValue Camber => camber;
         public RangedFloatValue Offset => offset;
@@ -50,7 +38,10 @@ namespace Gumball
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
-
+            
+            wheelIndex = carBelongsTo.AllWheelColliders.IndexOfItem(wheelCollider);
+            wheelMesh = carBelongsTo.AllWheelMeshes[wheelIndex];
+            
             if (carBelongsTo.IsPlayerCar)
                 ApplySavedPlayerData();
             else ApplyDefaultData();
@@ -84,12 +75,16 @@ namespace Gumball
 
         private void ApplySavedPlayerData()
         {
-            
+            ApplySuspensionHeight(DataManager.Cars.Get($"{saveKey}.SuspensionHeight", suspensionHeight.DefaultValue));
         }
 
         public void ApplySuspensionHeight(float heightValue)
         {
             wheelCollider.suspensionDistance = heightValue;
+
+            //save to file
+            if (carBelongsTo.IsPlayerCar)
+                DataManager.Cars.Set($"{saveKey}.SuspensionHeight", heightValue);
         }
 
     }
