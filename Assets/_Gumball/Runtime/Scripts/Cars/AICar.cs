@@ -64,6 +64,9 @@ namespace Gumball
         private WheelCollider[] poweredWheels;
         private Transform[] allWheelMeshes;
         private WheelCollider[] allWheelColliders;
+
+        public WheelCollider[] AllWheelColliders => allWheelColliders;
+        public Transform[] AllWheelMeshes => allWheelMeshes;
         
         [Header("Auto drive")]
         [SerializeField] private bool autoDrive;
@@ -296,8 +299,10 @@ namespace Gumball
             CacheAllWheelMeshes();
             CacheAllWheelColliders();
             CachePoweredWheels();
+
+            InitialiseWheelStance();
         }
-        
+
         public void InitialiseAsPlayer(int carIndex, int id)
         {
             isPlayerCar = true;
@@ -1005,7 +1010,7 @@ namespace Gumball
         /// <summary>
         /// Update all the wheel meshes to match the wheel colliders.
         /// </summary>
-        private void UpdateWheelMeshes()
+        public void UpdateWheelMeshes()
         {
             //do rear wheels first as the front wheels require their rotation
             for (int count = 0; count < rearWheelMeshes.Length; count++)
@@ -1458,6 +1463,17 @@ namespace Gumball
             else racersCollidingWith.Remove(car);
         }
 
+        private void InitialiseWheelStance()
+        {
+            //check if the wheels have stance options and initialise
+            foreach (WheelCollider wheelCollider in allWheelColliders)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+                if (stanceModification != null)
+                    stanceModification.Initialise(this);
+            }
+        }
+        
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
