@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,9 +18,10 @@ namespace Gumball
         }
         
         [SerializeField] private Slider suspensionHeightSlider;
-
+        [SerializeField] private Slider camberSlider;
+        
         [Header("Debugging")]
-        [SerializeField] private WheelsToModifyPosition wheelsToModifyPosition;
+        [SerializeField, ReadOnly] private WheelsToModifyPosition wheelsToModifyPosition;
         
         private WheelCollider[] wheelsToModify => wheelsToModifyPosition == WheelsToModifyPosition.ALL ? WarehouseManager.Instance.CurrentCar.AllWheelColliders
             : (wheelsToModifyPosition == WheelsToModifyPosition.FRONT ?
@@ -52,21 +54,30 @@ namespace Gumball
             
             StanceModification stanceModification = wheelToUse.GetComponent<StanceModification>();
 
-            float valueNormalized = stanceModification.SuspensionHeight.NormalizeValue(wheelToUse.suspensionDistance);
-            suspensionHeightSlider.SetValueWithoutNotify(valueNormalized);
+            float suspensionHeightNormalized = stanceModification.SuspensionHeight.NormalizeValue(wheelToUse.suspensionDistance);
+            suspensionHeightSlider.SetValueWithoutNotify(suspensionHeightNormalized);
+            
+            float camberNormalized = stanceModification.Camber.NormalizeValue(stanceModification.CurrentCamber);
+            camberSlider.SetValueWithoutNotify(camberNormalized);
         }
 
-        public void OnSuspensionHeightSliderChanged()
+        public void OnSliderChanged()
         {
             foreach (WheelCollider wheelCollider in wheelsToModify)
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
 
-                float denormalizedValue = stanceModification.SuspensionHeight.DenormalizeValue(suspensionHeightSlider.value);
-                stanceModification.ApplySuspensionHeight(denormalizedValue);
+                //apply suspension height
+                float suspensionHeightDenormalized = stanceModification.SuspensionHeight.DenormalizeValue(suspensionHeightSlider.value);
+                stanceModification.ApplySuspensionHeight(suspensionHeightDenormalized);
+                
+                //apply camber
+                float camberDenormalized = stanceModification.Camber.DenormalizeValue(camberSlider.value);
+                stanceModification.ApplyCamber(camberDenormalized);
             }
             
             WarehouseManager.Instance.CurrentCar.UpdateWheelMeshes();
         }
+        
     }
 }

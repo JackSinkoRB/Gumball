@@ -35,6 +35,8 @@ namespace Gumball
         public RangedFloatValue Diameter => diameter;
         public RangedFloatValue Width => width;
 
+        public float CurrentCamber { get; private set; }
+        
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
@@ -71,11 +73,14 @@ namespace Gumball
         private void ApplyDefaultData()
         {
             ApplySuspensionHeight(suspensionHeight.DefaultValue);
+            ApplyCamber(camber.DefaultValue);
         }
 
         private void ApplySavedPlayerData()
         {
+            //load values from file and apply them
             ApplySuspensionHeight(DataManager.Cars.Get($"{saveKey}.SuspensionHeight", suspensionHeight.DefaultValue));
+            ApplyCamber(DataManager.Cars.Get($"{saveKey}.Camber", camber.DefaultValue));
         }
 
         public void ApplySuspensionHeight(float heightValue)
@@ -85,6 +90,31 @@ namespace Gumball
             //save to file
             if (carBelongsTo.IsPlayerCar)
                 DataManager.Cars.Set($"{saveKey}.SuspensionHeight", heightValue);
+        }
+        
+        public void ApplyCamber(float rotationValue)
+        {
+            CurrentCamber = rotationValue;
+            
+            //save to file
+            if (carBelongsTo.IsPlayerCar)
+                DataManager.Cars.Set($"{saveKey}.Camber", rotationValue);
+            
+            UpdateWheelMeshCamber();
+        }
+
+        private void UpdateWheelMeshCamber()
+        {
+            wheelMesh.Rotate(carBelongsTo.transform.forward, CurrentCamber, Space.World);
+        }
+
+        /// <summary>
+        /// Called when the wheel mesh transform is updated.
+        /// </summary>
+        public void OnWheelMeshUpdate()
+        {
+            //camber needs to get applied after the wheel mesh rotation updates, as it gets overidden
+            UpdateWheelMeshCamber();
         }
 
     }

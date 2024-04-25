@@ -1043,6 +1043,14 @@ namespace Gumball
                 Transform steerPivot = frontWheelMesh.parent;
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
             }
+
+            //send updates to the stance modifiers
+            foreach (WheelCollider wheelCollider in allWheelColliders)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+                if (stanceModification != null)
+                    stanceModification.OnWheelMeshUpdate();
+            }
         }
 
         private void TryAvoidObstacles()
