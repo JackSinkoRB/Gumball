@@ -2625,7 +2625,7 @@ Transform:
   m_GameObject: {fileID: 1825357278669774304}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.775, y: 0.314, z: -1.127}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3216,7 +3216,7 @@ Transform:
   m_GameObject: {fileID: 2087665036940568953}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.699, y: -0.34, z: -1.111}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5139,7 +5139,7 @@ Transform:
   m_GameObject: {fileID: 3919753712703191146}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.775, y: 0.314, z: -1.127}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5308,8 +5308,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6661612721930570905}
-  - component: {fileID: 4553345485300180120}
   - component: {fileID: 8613997738765180584}
+  - component: {fileID: 4553345485300180120}
+  - component: {fileID: 2333640568454294693}
+  - component: {fileID: 598436692747716761}
   m_Layer: 0
   m_Name: Wheel_FL
   m_TagString: Untagged
@@ -5332,6 +5334,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3053855281547784238}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &8613997738765180584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4380399536267035405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ef37bca67219d740b95b6ee7d117d01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  suspensionHeight:
+    minValue: 0.01
+    maxValue: 0.2
+    defaultValue: 0.05
+  camber:
+    minValue: 5
+    maxValue: -15
+    defaultValue: 0
+  offset:
+    minValue: -0.6
+    maxValue: -0.8
+    defaultValue: -0.7
+  diameter:
+    minValue: 0.7
+    maxValue: 1.1
+    defaultValue: 1
+  width:
+    minValue: 0.5
+    maxValue: 1.5
+    defaultValue: 1
 --- !u!146 &4553345485300180120
 WheelCollider:
   m_ObjectHideFlags: 0
@@ -5371,7 +5405,7 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
---- !u!114 &8613997738765180584
+--- !u!114 &2333640568454294693
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5380,29 +5414,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 4380399536267035405}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ef37bca67219d740b95b6ee7d117d01, type: 3}
+  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  suspensionHeight:
-    minValue: 0.01
-    maxValue: 0.2
-    defaultValue: 0.05
-  camber:
-    minValue: 5
-    maxValue: -15
-    defaultValue: 0
-  offset:
-    minValue: -0.6
-    maxValue: -0.8
-    defaultValue: -0.7
-  diameter:
-    minValue: 0.7
-    maxValue: 1.1
-    defaultValue: 1
-  width:
-    minValue: 0.5
-    maxValue: 1.5
-    defaultValue: 1
+  isGrounded: 0
+  motorTorque: 0
+  brakeTorque: 0
+  rpm: 0
+  rotationSpeed: 0
+  steerAngle: 0
+  forwardSlip: 0
+  sidewaysSlip: 0
+  isSlidingSideways: 0
+  isSlidingForward: 0
+--- !u!114 &598436692747716761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4380399536267035405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGrounded: 0
+  motorTorque: 0
+  brakeTorque: 0
+  rpm: 0
+  rotationSpeed: 0
+  steerAngle: 0
+  forwardSlip: 0
+  sidewaysSlip: 0
+  isSlidingSideways: 0
+  isSlidingForward: 0
 --- !u!1 &4381112405059912312
 GameObject:
   m_ObjectHideFlags: 0
@@ -6017,8 +6063,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3042970270278367934}
-  - component: {fileID: 1184338390066223944}
   - component: {fileID: 1761372416995188532}
+  - component: {fileID: 1184338390066223944}
+  - component: {fileID: 710146657098433648}
+  - component: {fileID: 2187645682162537488}
   m_Layer: 0
   m_Name: Wheel_RR
   m_TagString: Untagged
@@ -6041,6 +6089,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3053855281547784238}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &1761372416995188532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5111029696582683627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ef37bca67219d740b95b6ee7d117d01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  suspensionHeight:
+    minValue: 0.01
+    maxValue: 0.2
+    defaultValue: 0.05
+  camber:
+    minValue: -5
+    maxValue: 15
+    defaultValue: 0
+  offset:
+    minValue: 0.675
+    maxValue: 0.875
+    defaultValue: 0.775
+  diameter:
+    minValue: 0.7
+    maxValue: 1.1
+    defaultValue: 1
+  width:
+    minValue: 0.5
+    maxValue: 1.5
+    defaultValue: 1
 --- !u!146 &1184338390066223944
 WheelCollider:
   m_ObjectHideFlags: 0
@@ -6080,7 +6160,7 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
---- !u!114 &1761372416995188532
+--- !u!114 &710146657098433648
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6089,29 +6169,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 5111029696582683627}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ef37bca67219d740b95b6ee7d117d01, type: 3}
+  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  suspensionHeight:
-    minValue: 0.01
-    maxValue: 0.2
-    defaultValue: 0.05
-  camber:
-    minValue: -5
-    maxValue: 15
-    defaultValue: 0
-  offset:
-    minValue: 0.675
-    maxValue: 0.875
-    defaultValue: 0.775
-  diameter:
-    minValue: 0.7
-    maxValue: 1.1
-    defaultValue: 1
-  width:
-    minValue: 0.5
-    maxValue: 1.5
-    defaultValue: 1
+  isGrounded: 0
+  motorTorque: 0
+  brakeTorque: 0
+  rpm: 0
+  rotationSpeed: 0
+  steerAngle: 0
+  forwardSlip: 0
+  sidewaysSlip: 0
+  isSlidingSideways: 0
+  isSlidingForward: 0
+--- !u!114 &2187645682162537488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5111029696582683627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGrounded: 0
+  motorTorque: 0
+  brakeTorque: 0
+  rpm: 0
+  rotationSpeed: 0
+  steerAngle: 0
+  forwardSlip: 0
+  sidewaysSlip: 0
+  isSlidingSideways: 0
+  isSlidingForward: 0
 --- !u!1 &5169999406704661700
 GameObject:
   m_ObjectHideFlags: 0
@@ -6551,8 +6643,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4245542525095350355}
-  - component: {fileID: 4774586260213020911}
   - component: {fileID: 755422131433421588}
+  - component: {fileID: 4774586260213020911}
+  - component: {fileID: 790258373804378034}
+  - component: {fileID: 4697913460500497049}
   m_Layer: 0
   m_Name: Wheel_RL
   m_TagString: Untagged
@@ -6575,6 +6669,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3053855281547784238}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &755422131433421588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5420588151929328643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ef37bca67219d740b95b6ee7d117d01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  suspensionHeight:
+    minValue: 0.01
+    maxValue: 0.2
+    defaultValue: 0.05
+  camber:
+    minValue: 5
+    maxValue: -15
+    defaultValue: 0
+  offset:
+    minValue: -0.675
+    maxValue: -0.875
+    defaultValue: -0.775
+  diameter:
+    minValue: 0.7
+    maxValue: 1.1
+    defaultValue: 1
+  width:
+    minValue: 0.5
+    maxValue: 1.5
+    defaultValue: 1
 --- !u!146 &4774586260213020911
 WheelCollider:
   m_ObjectHideFlags: 0
@@ -6614,7 +6740,7 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
---- !u!114 &755422131433421588
+--- !u!114 &790258373804378034
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6623,29 +6749,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 5420588151929328643}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ef37bca67219d740b95b6ee7d117d01, type: 3}
+  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  suspensionHeight:
-    minValue: 0.01
-    maxValue: 0.2
-    defaultValue: 0.05
-  camber:
-    minValue: 5
-    maxValue: -15
-    defaultValue: 0
-  offset:
-    minValue: -0.675
-    maxValue: -0.875
-    defaultValue: -0.775
-  diameter:
-    minValue: 0.7
-    maxValue: 1.1
-    defaultValue: 1
-  width:
-    minValue: 0.5
-    maxValue: 1.5
-    defaultValue: 1
+  isGrounded: 0
+  motorTorque: 0
+  brakeTorque: 0
+  rpm: 0
+  rotationSpeed: 0
+  steerAngle: 0
+  forwardSlip: 0
+  sidewaysSlip: 0
+  isSlidingSideways: 0
+  isSlidingForward: 0
+--- !u!114 &4697913460500497049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5420588151929328643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGrounded: 0
+  motorTorque: 0
+  brakeTorque: 0
+  rpm: 0
+  rotationSpeed: 0
+  steerAngle: 0
+  forwardSlip: 0
+  sidewaysSlip: 0
+  isSlidingSideways: 0
+  isSlidingForward: 0
 --- !u!1 &5462958983170139098
 GameObject:
   m_ObjectHideFlags: 0
@@ -7559,8 +7697,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1661818002231186998}
-  - component: {fileID: 5004421595254217820}
   - component: {fileID: 8237004464055496947}
+  - component: {fileID: 5004421595254217820}
+  - component: {fileID: 7442097835768479482}
+  - component: {fileID: 1781755108411606342}
   m_Layer: 0
   m_Name: Wheel_FR
   m_TagString: Untagged
@@ -7583,6 +7723,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3053855281547784238}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &8237004464055496947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6098220493647213811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ef37bca67219d740b95b6ee7d117d01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  suspensionHeight:
+    minValue: 0.01
+    maxValue: 0.2
+    defaultValue: 0.05
+  camber:
+    minValue: -5
+    maxValue: 15
+    defaultValue: 0
+  offset:
+    minValue: 0.6
+    maxValue: 0.8
+    defaultValue: 0.7
+  diameter:
+    minValue: 0.7
+    maxValue: 1.1
+    defaultValue: 1
+  width:
+    minValue: 0.5
+    maxValue: 1.5
+    defaultValue: 1
 --- !u!146 &5004421595254217820
 WheelCollider:
   m_ObjectHideFlags: 0
@@ -7622,7 +7794,7 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
---- !u!114 &8237004464055496947
+--- !u!114 &7442097835768479482
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -7631,29 +7803,41 @@ MonoBehaviour:
   m_GameObject: {fileID: 6098220493647213811}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ef37bca67219d740b95b6ee7d117d01, type: 3}
+  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  suspensionHeight:
-    minValue: 0.01
-    maxValue: 0.2
-    defaultValue: 0.05
-  camber:
-    minValue: -5
-    maxValue: 15
-    defaultValue: 0
-  offset:
-    minValue: 0.6
-    maxValue: 0.8
-    defaultValue: 0.7
-  diameter:
-    minValue: 0.7
-    maxValue: 1.1
-    defaultValue: 1
-  width:
-    minValue: 0.5
-    maxValue: 1.5
-    defaultValue: 1
+  isGrounded: 0
+  motorTorque: 0
+  brakeTorque: 0
+  rpm: 0
+  rotationSpeed: 0
+  steerAngle: 0
+  forwardSlip: 0
+  sidewaysSlip: 0
+  isSlidingSideways: 0
+  isSlidingForward: 0
+--- !u!114 &1781755108411606342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6098220493647213811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGrounded: 0
+  motorTorque: 0
+  brakeTorque: 0
+  rpm: 0
+  rotationSpeed: 0
+  steerAngle: 0
+  forwardSlip: 0
+  sidewaysSlip: 0
+  isSlidingSideways: 0
+  isSlidingForward: 0
 --- !u!1 &6150313477352915896
 GameObject:
   m_ObjectHideFlags: 0
@@ -7834,7 +8018,7 @@ Transform:
   m_GameObject: {fileID: 6476613463242980866}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.699, y: -0.34, z: -1.111}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

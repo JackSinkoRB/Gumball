@@ -40,13 +40,18 @@ namespace Gumball
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
-            
-            wheelIndex = carBelongsTo.AllWheelColliders.IndexOfItem(wheelCollider);
-            wheelMesh = carBelongsTo.AllWheelMeshes[wheelIndex];
+
+            FindWheelMesh();
             
             if (carBelongsTo.IsPlayerCar)
                 ApplySavedPlayerData();
             else ApplyDefaultData();
+        }
+
+        private void FindWheelMesh()
+        {
+            wheelIndex = carBelongsTo.AllWheelColliders.IndexOfItem(wheelCollider);
+            wheelMesh = carBelongsTo.AllWheelMeshes[wheelIndex];
         }
 
 #if UNITY_EDITOR
@@ -61,8 +66,11 @@ namespace Gumball
         {
             //lazilly find the car reference if it hasn't been initialised
             if (carBelongsTo == null)
+            {
                 carBelongsTo = transform.GetComponentInAllParents<AICar>();
-            
+                FindWheelMesh();
+            }
+
             ApplyDefaultData();
             
             //update the meshes as if the car was driving
@@ -105,7 +113,8 @@ namespace Gumball
 
         private void UpdateWheelMeshCamber()
         {
-            wheelMesh.Rotate(carBelongsTo.transform.forward, CurrentCamber, Space.World);
+            if (wheelMesh != null)
+                wheelMesh.Rotate(carBelongsTo.transform.forward, CurrentCamber, Space.World);
         }
 
         /// <summary>

@@ -62,14 +62,32 @@ namespace Gumball
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
         [Space(5)]
         private WheelCollider[] poweredWheels;
-        private Transform[] allWheelMeshes;
-        private WheelCollider[] allWheelColliders;
+        private Transform[] allWheelMeshesCached;
+        private WheelCollider[] allWheelCollidersCached;
 
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
         public WheelCollider[] RearWheelColliders => rearWheelColliders;
-        public WheelCollider[] AllWheelColliders => allWheelColliders;
-        public Transform[] AllWheelMeshes => allWheelMeshes;
+
+        public Transform[] AllWheelMeshes
+        {
+            get
+            {
+                if (allWheelMeshesCached == null || allWheelMeshesCached.Length == 0)
+                    CacheAllWheelMeshes();
+                return allWheelMeshesCached; 
+            }
+        }
         
+        public WheelCollider[] AllWheelColliders
+        {
+            get
+            {
+                if (allWheelCollidersCached == null || allWheelCollidersCached.Length == 0)
+                    CacheAllWheelColliders();
+                return allWheelCollidersCached;
+            }
+        }
+
         [Header("Auto drive")]
         [SerializeField] private bool autoDrive;
         
@@ -297,9 +315,7 @@ namespace Gumball
             defaultAngularDrag = Rigidbody.angularDrag;
             
             OnChangeChunk(null, CurrentChunk);
-
-            CacheAllWheelMeshes();
-            CacheAllWheelColliders();
+            
             CachePoweredWheels();
         }
 
@@ -372,7 +388,7 @@ namespace Gumball
             visualSteerAngle = 0;
             desiredSteerAngle = 0;
             
-            foreach (WheelCollider wheelCollider in allWheelColliders)
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
                 wheelCollider.motorTorque = 0;
                 wheelCollider.rotationSpeed = 0;
@@ -892,7 +908,7 @@ namespace Gumball
         {
             Rigidbody.drag = dragWhenBraking;
             
-            foreach (WheelCollider wheelCollider in allWheelColliders)
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
                 wheelCollider.brakeTorque = brakeTorque;
             }
@@ -907,7 +923,7 @@ namespace Gumball
         {
             Rigidbody.drag = isAccelerating ? 0 : dragWhenIdle;
             
-            foreach (WheelCollider wheelCollider in allWheelColliders)
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
                 wheelCollider.brakeTorque = 0;
             }
@@ -1045,7 +1061,7 @@ namespace Gumball
             }
 
             //send updates to the stance modifiers
-            foreach (WheelCollider wheelCollider in allWheelColliders)
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 if (stanceModification != null)
@@ -1215,15 +1231,15 @@ namespace Gumball
         private void CacheAllWheelMeshes()
         {
             int indexCount = 0;
-            allWheelMeshes = new Transform[frontWheelMeshes.Length + rearWheelMeshes.Length];
+            allWheelMeshesCached = new Transform[frontWheelMeshes.Length + rearWheelMeshes.Length];
             foreach (Transform wheelMesh in frontWheelMeshes)
             {
-                allWheelMeshes[indexCount] = wheelMesh;
+                allWheelMeshesCached[indexCount] = wheelMesh;
                 indexCount++;
             }
             foreach (Transform wheelMesh in rearWheelMeshes)
             {
-                allWheelMeshes[indexCount] = wheelMesh;
+                allWheelMeshesCached[indexCount] = wheelMesh;
                 indexCount++;
             }
         }
@@ -1231,12 +1247,12 @@ namespace Gumball
         private void CacheAllWheelColliders()
         {
             int indexCount = 0;
-            allWheelColliders = new WheelCollider[frontWheelColliders.Length + rearWheelColliders.Length];
+            allWheelCollidersCached = new WheelCollider[frontWheelColliders.Length + rearWheelColliders.Length];
             foreach (WheelCollider wheelCollider in frontWheelColliders)
             {
                 wheelCollider.gameObject.AddComponent<WheelColliderData>();
                 
-                allWheelColliders[indexCount] = wheelCollider;
+                allWheelCollidersCached[indexCount] = wheelCollider;
                 indexCount++;
             }
             foreach (WheelCollider wheelCollider in rearWheelColliders)
@@ -1246,7 +1262,7 @@ namespace Gumball
                         
                 wheelCollider.gameObject.AddComponent<WheelColliderData>();
 
-                allWheelColliders[indexCount] = wheelCollider;
+                allWheelCollidersCached[indexCount] = wheelCollider;
                 indexCount++;
             }
         }
@@ -1478,7 +1494,7 @@ namespace Gumball
         private void InitialiseWheelStance()
         {
             //check if the wheels have stance options and initialise
-            foreach (WheelCollider wheelCollider in allWheelColliders)
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 if (stanceModification != null)
