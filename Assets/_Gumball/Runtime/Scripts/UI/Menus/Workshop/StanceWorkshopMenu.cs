@@ -61,19 +61,27 @@ namespace Gumball
             camberSlider.SetValueWithoutNotify(camberNormalized);
         }
 
-        public void OnSliderChanged()
+        public void OnSuspensionHeightSliderChanged()
         {
             foreach (WheelCollider wheelCollider in wheelsToModify)
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
 
-                //apply suspension height
-                float suspensionHeightDenormalized = stanceModification.SuspensionHeight.DenormalizeValue(suspensionHeightSlider.value);
-                stanceModification.ApplySuspensionHeight(suspensionHeightDenormalized);
+                float valueDenormalized = stanceModification.SuspensionHeight.DenormalizeValue(suspensionHeightSlider.value);
+                stanceModification.ApplySuspensionHeight(valueDenormalized);
+            }
+            
+            WarehouseManager.Instance.CurrentCar.UpdateWheelMeshes();
+        }
+        
+        public void OnCamberSliderChanged()
+        {
+            foreach (WheelCollider wheelCollider in wheelsToModify)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 
-                //apply camber
-                float camberDenormalized = stanceModification.Camber.DenormalizeValue(camberSlider.value);
-                stanceModification.ApplyCamber(camberDenormalized);
+                float valueDenormalized = stanceModification.Camber.DenormalizeValue(camberSlider.value);
+                stanceModification.ApplyCamber(valueDenormalized);
             }
             
             WarehouseManager.Instance.CurrentCar.UpdateWheelMeshes();
