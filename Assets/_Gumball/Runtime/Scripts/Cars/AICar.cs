@@ -1065,7 +1065,7 @@ namespace Gumball
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 if (stanceModification != null)
-                    stanceModification.AddCurrentCamber();
+                    stanceModification.AddCamberRotation();
             }
         }
 

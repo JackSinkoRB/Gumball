@@ -82,6 +82,7 @@ namespace Gumball
         {
             ApplySuspensionHeight(suspensionHeight.DefaultValue);
             ApplyCamber(camber.DefaultValue);
+            ApplyOffset(offset.DefaultValue);
         }
 
         public void ApplySavedPlayerData()
@@ -89,6 +90,7 @@ namespace Gumball
             //load values from file and apply them
             ApplySuspensionHeight(DataManager.Cars.Get($"{saveKey}.SuspensionHeight", suspensionHeight.DefaultValue));
             ApplyCamber(DataManager.Cars.Get($"{saveKey}.Camber", camber.DefaultValue));
+            ApplyOffset(DataManager.Cars.Get($"{saveKey}.Offset", offset.DefaultValue));
         }
 
         public void ApplySuspensionHeight(float heightValue)
@@ -98,6 +100,8 @@ namespace Gumball
             //save to file
             if (carBelongsTo.IsPlayerCar)
                 DataManager.Cars.Set($"{saveKey}.SuspensionHeight", heightValue);
+            
+            carBelongsTo.UpdateWheelMeshes();
         }
         
         public void ApplyCamber(float rotationValue)
@@ -111,7 +115,21 @@ namespace Gumball
             carBelongsTo.UpdateWheelMeshes();
         }
 
-        public void AddCurrentCamber()
+        public void ApplyOffset(float offsetValue)
+        {
+            wheelCollider.transform.localPosition = wheelCollider.transform.localPosition.SetX(offsetValue);
+            
+            //save to file
+            if (carBelongsTo.IsPlayerCar)
+                DataManager.Cars.Set($"{saveKey}.Offset", offsetValue);
+            
+            carBelongsTo.UpdateWheelMeshes();
+        }
+        
+        /// <summary>
+        /// Adds the current camber to the wheel mesh rotation.
+        /// </summary>
+        public void AddCamberRotation()
         {
             if (WheelMesh == null)
                 return; //not yet setup

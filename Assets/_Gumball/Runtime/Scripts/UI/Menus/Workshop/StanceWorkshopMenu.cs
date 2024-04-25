@@ -19,7 +19,8 @@ namespace Gumball
         
         [SerializeField] private Slider suspensionHeightSlider;
         [SerializeField] private Slider camberSlider;
-        
+        [SerializeField] private Slider offsetSlider;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private WheelsToModifyPosition wheelsToModifyPosition;
         
@@ -59,6 +60,9 @@ namespace Gumball
             
             float camberNormalized = stanceModification.Camber.NormalizeValue(stanceModification.CurrentCamber);
             camberSlider.SetValueWithoutNotify(camberNormalized);
+            
+            float offsetNormalized = stanceModification.Offset.NormalizeValue(wheelToUse.transform.localPosition.x);
+            offsetSlider.SetValueWithoutNotify(offsetNormalized);
         }
 
         public void OnSuspensionHeightSliderChanged()
@@ -70,8 +74,6 @@ namespace Gumball
                 float valueDenormalized = stanceModification.SuspensionHeight.DenormalizeValue(suspensionHeightSlider.value);
                 stanceModification.ApplySuspensionHeight(valueDenormalized);
             }
-            
-            WarehouseManager.Instance.CurrentCar.UpdateWheelMeshes();
         }
         
         public void OnCamberSliderChanged()
@@ -82,6 +84,17 @@ namespace Gumball
                 
                 float valueDenormalized = stanceModification.Camber.DenormalizeValue(camberSlider.value);
                 stanceModification.ApplyCamber(valueDenormalized);
+            }
+        }
+        
+        public void OnOffsetSliderChanged()
+        {
+            foreach (WheelCollider wheelCollider in wheelsToModify)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+                
+                float valueDenormalized = stanceModification.Offset.DenormalizeValue(offsetSlider.value);
+                stanceModification.ApplyOffset(valueDenormalized);
             }
         }
         
