@@ -126,6 +126,18 @@ namespace Gumball
             carBelongsTo.UpdateWheelMeshes();
         }
         
+        public void ApplyDiameter(float diameterValue)
+        {
+            wheelCollider.radius = diameterValue;
+            WheelMesh.transform.localScale = wheelCollider.transform.localScale.SetYZ(diameterValue, diameterValue);
+            
+            //save to file
+            if (carBelongsTo.IsPlayerCar)
+                DataManager.Cars.Set($"{saveKey}.Diameter", diameterValue);
+            
+            carBelongsTo.UpdateWheelMeshes();
+        }
+        
         /// <summary>
         /// Adds the current camber to the wheel mesh rotation.
         /// </summary>
