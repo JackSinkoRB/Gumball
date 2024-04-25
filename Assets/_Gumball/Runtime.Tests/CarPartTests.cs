@@ -31,8 +31,8 @@ namespace Gumball.Runtime.Tests
             DecalEditor.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
 
-            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.DecalEditorScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadMainScene.completed += OnSceneLoadComplete;
+            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WorkshopScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            loadWorkshopScene.completed += OnSceneLoadComplete;
         }
 
         [OneTimeTearDown]
@@ -49,12 +49,6 @@ namespace Gumball.Runtime.Tests
             DataManager.RemoveAllData();
         }
 
-        [UnityTearDown]
-        public IEnumerator UnityTearDown()
-        {
-            yield return DecalEditor.Instance.EndSession();
-        }
-        
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
             CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(carIndexToUse, 0, 
@@ -81,7 +75,7 @@ namespace Gumball.Runtime.Tests
         
         [UnityTest]
         [Order(2)]
-        public IEnumerator CarPartsArePersistent()
+        public IEnumerator CarPartSwitching()
         {
             yield return new WaitUntil(() => isInitialised);
 
@@ -89,15 +83,42 @@ namespace Gumball.Runtime.Tests
             
             Assert.AreEqual(partGroupToTest.SavedPartIndex, 0);
             Assert.AreEqual(partGroupToTest.CurrentPartIndex, 0);
-            
-            partGroupToTest.SetPartActive(1);
+
+            const int indexToUse = 1;
+            partGroupToTest.SetPartActive(indexToUse);
             
             //ensure it applied
-            Assert.AreEqual(partGroupToTest.CurrentPartIndex, 1);
+            Assert.AreEqual(partGroupToTest.CurrentPartIndex, indexToUse);
             
+            //ensure it is the only part active
+            for (int index = 0; index < partGroupToTest.CarParts.Length; index++)
+            {
+                CarPart part = partGroupToTest.CarParts[index];
+                Assert.AreEqual(index == indexToUse, part.gameObject.activeSelf);
+            }
+
             //ensure it saved
-            Assert.AreEqual(partGroupToTest.SavedPartIndex, 1);
+            Assert.AreEqual(partGroupToTest.SavedPartIndex, indexToUse);
+            
+            
+            //set back to 0:
+            partGroupToTest.SetPartActive(0);
+            
+            //ensure it applied
+            Assert.AreEqual(partGroupToTest.CurrentPartIndex, 0);
+            
+            //ensure it is the only part active
+            for (int index = 0; index < partGroupToTest.CarParts.Length; index++)
+            {
+                CarPart part = partGroupToTest.CarParts[index];
+                Assert.AreEqual(index == 0, part.gameObject.activeSelf);
+            }
+
+            //ensure it saved
+            Assert.AreEqual(partGroupToTest.SavedPartIndex, 0);
         }
+        
+        
         
     }
 }
