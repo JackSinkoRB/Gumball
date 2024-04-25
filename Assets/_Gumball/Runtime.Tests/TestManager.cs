@@ -29,6 +29,7 @@ namespace Gumball.Runtime.Tests
         [SerializeField] private SceneAsset decalEditorScene;
         [SerializeField] private SceneAsset avatarEditorScene;
         [SerializeField] private SceneAsset chunkMapScene;
+        [SerializeField] private SceneAsset workshopScene;
 
         [Header("Chunks")]
         [SerializeField] private GameSession chunkTestingSession;
@@ -41,6 +42,7 @@ namespace Gumball.Runtime.Tests
         public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
         public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
         public string ChunkMapScenePath => AssetDatabase.GetAssetPath(chunkMapScene);
+        public string WorkshopScenePath => AssetDatabase.GetAssetPath(workshopScene);
 
         public GameSession ChunkTestingSession => chunkTestingSession;
         public AssetReferenceGameObject TestChunkPrefabA => testChunkPrefabA;

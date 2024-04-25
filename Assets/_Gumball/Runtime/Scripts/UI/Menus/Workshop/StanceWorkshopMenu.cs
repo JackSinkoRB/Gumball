@@ -83,8 +83,6 @@ namespace Gumball
                 float valueDenormalized = stanceModification.Camber.DenormalizeValue(camberSlider.value);
                 stanceModification.ApplyCamber(valueDenormalized);
             }
-            
-            WarehouseManager.Instance.CurrentCar.UpdateWheelMeshes();
         }
         
     }

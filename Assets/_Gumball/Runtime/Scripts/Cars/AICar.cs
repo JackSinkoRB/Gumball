@@ -1060,12 +1060,12 @@ namespace Gumball
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
             }
 
-            //send updates to the stance modifiers
+            //add camber
             foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 if (stanceModification != null)
-                    stanceModification.OnWheelMeshUpdate();
+                    stanceModification.AddCurrentCamber();
             }
         }
 

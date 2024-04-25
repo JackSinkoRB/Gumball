@@ -24,7 +24,7 @@ namespace Gumball
 
         private AICar carBelongsTo;
         private int wheelIndex;
-        private Transform wheelMesh;
+        public Transform WheelMesh { get; private set; }
         
         private WheelCollider wheelCollider => GetComponent<WheelCollider>();
         private string saveKey => $"{carBelongsTo.SaveKey}.Wheel.{wheelIndex}";
@@ -36,11 +36,11 @@ namespace Gumball
         public RangedFloatValue Width => width;
 
         public float CurrentCamber { get; private set; }
-        
+
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
-
+            
             FindWheelMesh();
             
             if (carBelongsTo.IsPlayerCar)
@@ -51,7 +51,7 @@ namespace Gumball
         private void FindWheelMesh()
         {
             wheelIndex = carBelongsTo.AllWheelColliders.IndexOfItem(wheelCollider);
-            wheelMesh = carBelongsTo.AllWheelMeshes[wheelIndex];
+            WheelMesh = carBelongsTo.AllWheelMeshes[wheelIndex];
         }
 
 #if UNITY_EDITOR
@@ -78,13 +78,13 @@ namespace Gumball
         }
 #endif
 
-        private void ApplyDefaultData()
+        public void ApplyDefaultData()
         {
             ApplySuspensionHeight(suspensionHeight.DefaultValue);
             ApplyCamber(camber.DefaultValue);
         }
 
-        private void ApplySavedPlayerData()
+        public void ApplySavedPlayerData()
         {
             //load values from file and apply them
             ApplySuspensionHeight(DataManager.Cars.Get($"{saveKey}.SuspensionHeight", suspensionHeight.DefaultValue));
@@ -108,22 +108,16 @@ namespace Gumball
             if (carBelongsTo.IsPlayerCar)
                 DataManager.Cars.Set($"{saveKey}.Camber", rotationValue);
             
-            UpdateWheelMeshCamber();
+            carBelongsTo.UpdateWheelMeshes();
         }
 
-        private void UpdateWheelMeshCamber()
+        public void AddCurrentCamber()
         {
-            if (wheelMesh != null)
-                wheelMesh.Rotate(carBelongsTo.transform.forward, CurrentCamber, Space.World);
-        }
+            if (WheelMesh == null)
+                return; //not yet setup
 
-        /// <summary>
-        /// Called when the wheel mesh transform is updated.
-        /// </summary>
-        public void OnWheelMeshUpdate()
-        {
-            //camber needs to get applied after the wheel mesh rotation updates, as it gets overidden
-            UpdateWheelMeshCamber();
+            //add the camber
+            WheelMesh.Rotate(carBelongsTo.transform.forward, CurrentCamber, Space.World);
         }
 
     }
