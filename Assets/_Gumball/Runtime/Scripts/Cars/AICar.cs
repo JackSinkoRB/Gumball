@@ -56,19 +56,19 @@ namespace Gumball
         
         [Header("Wheels")]
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
-        [SerializeField, InitializationField] private Transform[] frontWheelMeshes;
-        [SerializeField, InitializationField] private Transform[] rearWheelMeshes;
+        [SerializeField, InitializationField] private WheelMesh[] frontWheelMeshes;
+        [SerializeField, InitializationField] private WheelMesh[] rearWheelMeshes;
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
         [Space(5)]
         private WheelCollider[] poweredWheels;
-        private Transform[] allWheelMeshesCached;
+        private WheelMesh[] allWheelMeshesCached;
         private WheelCollider[] allWheelCollidersCached;
 
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
         public WheelCollider[] RearWheelColliders => rearWheelColliders;
 
-        public Transform[] AllWheelMeshes
+        public WheelMesh[] AllWheelMeshes
         {
             get
             {
@@ -1035,28 +1035,28 @@ namespace Gumball
             //do rear wheels first as the front wheels require their rotation
             for (int count = 0; count < rearWheelMeshes.Length; count++)
             {
-                Transform rearWheelMesh = rearWheelMeshes[count];
+                WheelMesh rearWheelMesh = rearWheelMeshes[count];
                 WheelCollider rearWheelCollider = rearWheelColliders[count];
                 
                 rearWheelCollider.GetWorldPose(out Vector3 wheelPosition, out Quaternion wheelRotation);
-                rearWheelMesh.position = wheelPosition;
-                rearWheelMesh.rotation = wheelRotation;
+                rearWheelMesh.transform.position = wheelPosition;
+                rearWheelMesh.transform.rotation = wheelRotation;
             }
 
             for (int count = 0; count < frontWheelMeshes.Length; count++)
             {
-                Transform frontWheelMesh = frontWheelMeshes[count];
+                WheelMesh frontWheelMesh = frontWheelMeshes[count];
                 WheelCollider frontWheelCollider = frontWheelColliders[count];
                 
                 frontWheelCollider.GetWorldPose(out Vector3 wheelPosition, out _);
-                frontWheelMesh.position = wheelPosition;
+                frontWheelMesh.transform.position = wheelPosition;
 
                 //rotation is the same as the rear wheel, but with interpolated steer speed
-                Transform rearWheelRotation = rearWheelMeshes[count];
-                frontWheelMesh.rotation = rearWheelRotation.rotation;
+                WheelMesh rearWheelRotation = rearWheelMeshes[count];
+                frontWheelMesh.transform.rotation = rearWheelRotation.transform.rotation;
                 
                 //set the steer amount
-                Transform steerPivot = frontWheelMesh.parent;
+                Transform steerPivot = frontWheelMesh.transform.parent;
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
             }
 
@@ -1231,13 +1231,13 @@ namespace Gumball
         private void CacheAllWheelMeshes()
         {
             int indexCount = 0;
-            allWheelMeshesCached = new Transform[frontWheelMeshes.Length + rearWheelMeshes.Length];
-            foreach (Transform wheelMesh in frontWheelMeshes)
+            allWheelMeshesCached = new WheelMesh[frontWheelMeshes.Length + rearWheelMeshes.Length];
+            foreach (WheelMesh wheelMesh in frontWheelMeshes)
             {
                 allWheelMeshesCached[indexCount] = wheelMesh;
                 indexCount++;
             }
-            foreach (Transform wheelMesh in rearWheelMeshes)
+            foreach (WheelMesh wheelMesh in rearWheelMeshes)
             {
                 allWheelMeshesCached[indexCount] = wheelMesh;
                 indexCount++;

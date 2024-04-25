@@ -24,7 +24,7 @@ namespace Gumball
 
         private AICar carBelongsTo;
         private int wheelIndex;
-        public Transform WheelMesh { get; private set; }
+        public WheelMesh WheelMesh { get; private set; }
         
         private WheelCollider wheelCollider => GetComponent<WheelCollider>();
         private string saveKey => $"{carBelongsTo.SaveKey}.Wheel.{wheelIndex}";
@@ -147,7 +147,7 @@ namespace Gumball
                 return; //not yet setup
 
             //add the camber
-            WheelMesh.Rotate(carBelongsTo.transform.forward, CurrentCamber, Space.World);
+            WheelMesh.transform.Rotate(carBelongsTo.transform.forward, CurrentCamber, Space.World);
         }
 
     }
