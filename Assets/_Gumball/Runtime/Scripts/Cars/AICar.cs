@@ -395,7 +395,7 @@ namespace Gumball
                 wheelCollider.steerAngle = 0;
             }
 
-            Move(); //force update
+            UpdateWheelMeshes(); //force update
 
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
         }
