@@ -14,7 +14,7 @@ namespace Gumball
         
         public void OnClickBackButton()
         {
-            MainSceneManager.LoadMainScene();
+            WorkshopSceneManager.Instance.ExitWorkshopScene();
         }
 
         public void OpenSubMenu(WorkshopSubMenu subMenu)

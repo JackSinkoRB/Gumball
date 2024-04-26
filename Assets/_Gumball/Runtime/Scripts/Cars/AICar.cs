@@ -234,6 +234,7 @@ namespace Gumball
         private Vector3 targetPosition;
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion, SplineSample)? targetPos;
+        private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => collisionRecoverDuration > 0 && (inCollision || timeSinceCollision < collisionRecoverDuration);
@@ -383,6 +384,8 @@ namespace Gumball
             transform.rotation = rotation;
             Rigidbody.position = position;
             Rigidbody.rotation = rotation;
+
+            SetGrounded();
             
             //reset steer angle
             visualSteerAngle = 0;
@@ -394,10 +397,37 @@ namespace Gumball
                 wheelCollider.rotationSpeed = 0;
                 wheelCollider.steerAngle = 0;
             }
-
+            
             UpdateWheelMeshes(); //force update
 
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
+        }
+
+        public void SetGrounded()
+        {
+            int numberOfHitsDown = Physics.RaycastNonAlloc(transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Ground));
+
+            if (numberOfHitsDown == 0)
+            {
+                Debug.LogWarning($"Could not ground car {gameObject.name} because there is no ground above or below.");
+                return;
+            }
+
+            Vector3 offset = groundedHitsCached[0].point - transform.position;
+
+            transform.position += offset;
+            Rigidbody.position += offset;
+            GlobalLoggers.AICarLogger.Log($"Grounded {gameObject.name} - moved {offset}");
+            
+            //check to apply ride height - currently only for player cars
+            if (isPlayerCar)
+            {
+                float rideHeight = DataManager.Cars.Get<float>($"{SaveKey}.RideHeight");
+                transform.position = transform.position.OffsetY(rideHeight);
+                Rigidbody.position = Rigidbody.position.OffsetY(rideHeight);
+
+                GlobalLoggers.AICarLogger.Log($"Applied {rideHeight} ride height to {gameObject.name}");
+            }
         }
 
         public void SetLaneDistance(float laneDistance, ChunkTrafficManager.LaneDirection direction)
