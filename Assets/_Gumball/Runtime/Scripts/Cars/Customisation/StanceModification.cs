@@ -137,11 +137,11 @@ namespace Gumball
         {
             WheelMesh.transform.localScale = WheelMesh.transform.localScale.SetYZ(rimDiameterValue, rimDiameterValue);
             
-            //TODO: update wheel collider radius size
-
             //save to file
             if (carBelongsTo.IsPlayerCar)
                 DataManager.Cars.Set($"{saveKey}.RimDiameter", rimDiameterValue);
+            
+            UpdateWheelColliderRadius();
         }
         
         public void ApplyRimWidth(float rimWidthValue)
@@ -162,6 +162,7 @@ namespace Gumball
                 DataManager.Cars.Set($"{saveKey}.TyreProfile", tyreProfileValue);
             
             WheelMesh.StretchTyre();
+            UpdateWheelColliderRadius();
         }
         
         public void ApplyTyreWidth(float tyreWidthValue)
@@ -187,5 +188,14 @@ namespace Gumball
             WheelMesh.transform.Rotate(carBelongsTo.transform.forward, CurrentCamber, Space.World);
         }
 
+        private void UpdateWheelColliderRadius()
+        {
+            //the tyre is always larger than the wheel, so get the tyre extents (accounting for transform scales)
+            Vector3 tyreSize = WheelMesh.Tyre.transform.TransformPoint(WheelMesh.Tyre.MeshFilter.sharedMesh.bounds.extents) - WheelMesh.Tyre.transform.position;
+            
+            //this can be either height or depth (not width) as the tyre is circular, and therefore the same value
+            wheelCollider.radius = Mathf.Abs(tyreSize.y);
+        }
+        
     }
 }
