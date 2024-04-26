@@ -1250,7 +1250,7 @@ namespace Gumball
             allWheelCollidersCached = new WheelCollider[frontWheelColliders.Length + rearWheelColliders.Length];
             foreach (WheelCollider wheelCollider in frontWheelColliders)
             {
-                wheelCollider.gameObject.AddComponent<WheelColliderData>();
+                wheelCollider.gameObject.GetComponent<WheelColliderData>(true);
                 
                 allWheelCollidersCached[indexCount] = wheelCollider;
                 indexCount++;
@@ -1260,7 +1260,7 @@ namespace Gumball
                 if (defaultRearWheelStiffness < 0)
                     defaultRearWheelStiffness = wheelCollider.sidewaysFriction.stiffness;
                         
-                wheelCollider.gameObject.AddComponent<WheelColliderData>();
+                wheelCollider.gameObject.GetComponent<WheelColliderData>(true);
 
                 allWheelCollidersCached[indexCount] = wheelCollider;
                 indexCount++;

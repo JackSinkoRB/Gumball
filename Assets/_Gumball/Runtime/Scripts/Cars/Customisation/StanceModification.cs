@@ -11,16 +11,13 @@ namespace Gumball
     {
 
         [Header("Modifiers")]
-        [Tooltip("This is the actual value that is used for the suspension height on the wheel collider.")]
         [SerializeField] private RangedFloatValue suspensionHeight = new(0.01f, 0.2f, 0.05f);
-        [Tooltip("This is the amount of rotation to apply to the wheels Z axis. This value is flipped for the left side wheels.")]
         [SerializeField] private RangedFloatValue camber = new(-5f, 15f, 0);
-        [Tooltip("This is the wheels position on the X axis. This value is flipped for the left side wheels.")]
         [SerializeField] private RangedFloatValue offset = new(-0.1f, 0.1f, 0);
-        [Tooltip("This value is multiplied to the initial wheel collider radius, as well as the meshes Y and Z scale axis'.")]
-        [SerializeField] private RangedFloatValue diameter = new(0.7f, 1.1f, 1);
-        [Tooltip("This value is multiplied to the initial wheel mesh X scale.")]
-        [SerializeField] private RangedFloatValue width = new(0.5f, 1.5f, 1);
+        [SerializeField] private RangedFloatValue tyreProfile = new(1, 1.3f, 1);
+        [SerializeField] private RangedFloatValue tyreWidth = new(0.8f, 1, 1);
+        [SerializeField] private RangedFloatValue rimDiameter = new(0.7f, 1.1f, 1);
+        [SerializeField] private RangedFloatValue rimWidth = new(0.5f, 1.5f, 1);
 
         private AICar carBelongsTo;
         private int wheelIndex;
@@ -32,8 +29,10 @@ namespace Gumball
         public RangedFloatValue SuspensionHeight => suspensionHeight;
         public RangedFloatValue Camber => camber;
         public RangedFloatValue Offset => offset;
-        public RangedFloatValue Diameter => diameter;
-        public RangedFloatValue Width => width;
+        public RangedFloatValue TyreProfile => tyreProfile;
+        public RangedFloatValue TyreWidth => tyreWidth;
+        public RangedFloatValue RimDiameter => rimDiameter;
+        public RangedFloatValue RimWidth => rimWidth;
 
         public float CurrentCamber { get; private set; }
 
@@ -83,6 +82,10 @@ namespace Gumball
             ApplySuspensionHeight(suspensionHeight.DefaultValue);
             ApplyCamber(camber.DefaultValue);
             ApplyOffset(offset.DefaultValue);
+            ApplyTyreProfile(tyreProfile.DefaultValue);
+            ApplyTyreWidth(tyreWidth.DefaultValue);
+            ApplyRimDiameter(rimDiameter.DefaultValue);
+            ApplyRimWidth(rimWidth.DefaultValue);
         }
 
         public void ApplySavedPlayerData()
@@ -91,6 +94,10 @@ namespace Gumball
             ApplySuspensionHeight(DataManager.Cars.Get($"{saveKey}.SuspensionHeight", suspensionHeight.DefaultValue));
             ApplyCamber(DataManager.Cars.Get($"{saveKey}.Camber", camber.DefaultValue));
             ApplyOffset(DataManager.Cars.Get($"{saveKey}.Offset", offset.DefaultValue));
+            ApplyTyreProfile(DataManager.Cars.Get($"{saveKey}.TyreProfile", tyreProfile.DefaultValue));
+            ApplyTyreWidth(DataManager.Cars.Get($"{saveKey}.TyreWidth", tyreWidth.DefaultValue));
+            ApplyRimDiameter(DataManager.Cars.Get($"{saveKey}.RimDiameter", rimDiameter.DefaultValue));
+            ApplyRimWidth(DataManager.Cars.Get($"{saveKey}.RimWidth", RimWidth.DefaultValue));
         }
 
         public void ApplySuspensionHeight(float heightValue)
@@ -126,16 +133,46 @@ namespace Gumball
             carBelongsTo.UpdateWheelMeshes();
         }
         
-        public void ApplyDiameter(float diameterValue)
+        public void ApplyRimDiameter(float rimDiameterValue)
         {
-            wheelCollider.radius = diameterValue;
-            WheelMesh.transform.localScale = wheelCollider.transform.localScale.SetYZ(diameterValue, diameterValue);
+            WheelMesh.transform.localScale = WheelMesh.transform.localScale.SetYZ(rimDiameterValue, rimDiameterValue);
+            
+            //TODO: update wheel collider radius size
+
+            //save to file
+            if (carBelongsTo.IsPlayerCar)
+                DataManager.Cars.Set($"{saveKey}.RimDiameter", rimDiameterValue);
+        }
+        
+        public void ApplyRimWidth(float rimWidthValue)
+        {
+            WheelMesh.transform.localScale = WheelMesh.transform.localScale.SetX(rimWidthValue);
             
             //save to file
             if (carBelongsTo.IsPlayerCar)
-                DataManager.Cars.Set($"{saveKey}.Diameter", diameterValue);
+                DataManager.Cars.Set($"{saveKey}.RimWidth", rimWidthValue);
+        }
+                                
+        public void ApplyTyreProfile(float tyreProfileValue)
+        {
+            WheelMesh.Tyre.transform.localScale = WheelMesh.Tyre.transform.localScale.SetXY(tyreProfileValue, tyreProfileValue);
             
-            carBelongsTo.UpdateWheelMeshes();
+            //save to file
+            if (carBelongsTo.IsPlayerCar)
+                DataManager.Cars.Set($"{saveKey}.TyreProfile", tyreProfileValue);
+            
+            WheelMesh.StretchTyre();
+        }
+        
+        public void ApplyTyreWidth(float tyreWidthValue)
+        {
+            WheelMesh.Tyre.transform.localScale = WheelMesh.Tyre.transform.localScale.SetZ(tyreWidthValue);
+            
+            //save to file
+            if (carBelongsTo.IsPlayerCar)
+                DataManager.Cars.Set($"{saveKey}.TyreWidth", tyreWidthValue);
+            
+            WheelMesh.StretchTyre();
         }
         
         /// <summary>

@@ -5189,14 +5189,7 @@ GameObject:
   - component: {fileID: 6661612721930570905}
   - component: {fileID: 8613997738765180584}
   - component: {fileID: 4553345485300180120}
-  - component: {fileID: 2333640568454294693}
-  - component: {fileID: 598436692747716761}
-  - component: {fileID: 4157532261704781269}
-  - component: {fileID: 8311298249873807927}
-  - component: {fileID: 8782206230570377356}
-  - component: {fileID: 5384393809927910763}
-  - component: {fileID: 9198713348077565127}
-  - component: {fileID: 8409585065960575517}
+  - component: {fileID: 2348220251345751196}
   m_Layer: 0
   m_Name: Wheel_FL
   m_TagString: Untagged
@@ -5243,11 +5236,19 @@ MonoBehaviour:
     minValue: -0.6
     maxValue: -0.8
     defaultValue: -0.7
-  diameter:
+  tyreProfile:
+    minValue: 1
+    maxValue: 1.3
+    defaultValue: 1
+  tyreWidth:
+    minValue: 0.8
+    maxValue: 1
+    defaultValue: 1
+  rimDiameter:
     minValue: 0.7
     maxValue: 1.1
     defaultValue: 1
-  width:
+  rimWidth:
     minValue: 0.5
     maxValue: 1.5
     defaultValue: 1
@@ -5290,161 +5291,7 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
---- !u!114 &2333640568454294693
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4380399536267035405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &598436692747716761
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4380399536267035405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &4157532261704781269
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4380399536267035405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &8311298249873807927
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4380399536267035405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &8782206230570377356
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4380399536267035405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &5384393809927910763
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4380399536267035405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &9198713348077565127
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4380399536267035405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &8409585065960575517
+--- !u!114 &2348220251345751196
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6082,14 +5929,7 @@ GameObject:
   - component: {fileID: 3042970270278367934}
   - component: {fileID: 1761372416995188532}
   - component: {fileID: 1184338390066223944}
-  - component: {fileID: 710146657098433648}
-  - component: {fileID: 2187645682162537488}
-  - component: {fileID: -7186314926410675112}
-  - component: {fileID: 1546207620590459058}
-  - component: {fileID: 3262729444270935652}
-  - component: {fileID: 6643736904697173777}
-  - component: {fileID: 1411010749433847862}
-  - component: {fileID: 2413408147870388694}
+  - component: {fileID: 8675554463292364464}
   m_Layer: 0
   m_Name: Wheel_RR
   m_TagString: Untagged
@@ -6136,11 +5976,19 @@ MonoBehaviour:
     minValue: 0.675
     maxValue: 0.875
     defaultValue: 0.775
-  diameter:
+  tyreProfile:
+    minValue: 1
+    maxValue: 1.3
+    defaultValue: 1
+  tyreWidth:
+    minValue: 0.8
+    maxValue: 1
+    defaultValue: 1
+  rimDiameter:
     minValue: 0.7
     maxValue: 1.1
     defaultValue: 1
-  width:
+  rimWidth:
     minValue: 0.5
     maxValue: 1.5
     defaultValue: 1
@@ -6183,161 +6031,7 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
---- !u!114 &710146657098433648
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5111029696582683627}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &2187645682162537488
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5111029696582683627}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &-7186314926410675112
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5111029696582683627}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &1546207620590459058
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5111029696582683627}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &3262729444270935652
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5111029696582683627}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &6643736904697173777
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5111029696582683627}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &1411010749433847862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5111029696582683627}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &2413408147870388694
+--- !u!114 &8675554463292364464
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6800,14 +6494,7 @@ GameObject:
   - component: {fileID: 4245542525095350355}
   - component: {fileID: 755422131433421588}
   - component: {fileID: 4774586260213020911}
-  - component: {fileID: 790258373804378034}
-  - component: {fileID: 4697913460500497049}
-  - component: {fileID: 7928214859279284293}
-  - component: {fileID: 855322784651413668}
-  - component: {fileID: 294007878864739413}
-  - component: {fileID: 7194963013858000448}
-  - component: {fileID: 4076249624750480438}
-  - component: {fileID: 9210329377304370776}
+  - component: {fileID: 3356021472736981405}
   m_Layer: 0
   m_Name: Wheel_RL
   m_TagString: Untagged
@@ -6854,11 +6541,19 @@ MonoBehaviour:
     minValue: -0.675
     maxValue: -0.875
     defaultValue: -0.775
-  diameter:
+  tyreProfile:
+    minValue: 1
+    maxValue: 1.3
+    defaultValue: 1
+  tyreWidth:
+    minValue: 0.8
+    maxValue: 1
+    defaultValue: 1
+  rimDiameter:
     minValue: 0.7
     maxValue: 1.1
     defaultValue: 1
-  width:
+  rimWidth:
     minValue: 0.5
     maxValue: 1.5
     defaultValue: 1
@@ -6901,161 +6596,7 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
---- !u!114 &790258373804378034
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5420588151929328643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &4697913460500497049
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5420588151929328643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &7928214859279284293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5420588151929328643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &855322784651413668
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5420588151929328643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &294007878864739413
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5420588151929328643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &7194963013858000448
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5420588151929328643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &4076249624750480438
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5420588151929328643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &9210329377304370776
+--- !u!114 &3356021472736981405
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -7992,14 +7533,7 @@ GameObject:
   - component: {fileID: 1661818002231186998}
   - component: {fileID: 8237004464055496947}
   - component: {fileID: 5004421595254217820}
-  - component: {fileID: 7442097835768479482}
-  - component: {fileID: 1781755108411606342}
-  - component: {fileID: -2385944062617358654}
-  - component: {fileID: 7764405030195221747}
-  - component: {fileID: 1725681642101070699}
-  - component: {fileID: 8153495719405070613}
-  - component: {fileID: 5697610920959488746}
-  - component: {fileID: 7911775592641421780}
+  - component: {fileID: 5838515166634805389}
   m_Layer: 0
   m_Name: Wheel_FR
   m_TagString: Untagged
@@ -8046,11 +7580,19 @@ MonoBehaviour:
     minValue: 0.6
     maxValue: 0.8
     defaultValue: 0.7
-  diameter:
+  tyreProfile:
+    minValue: 1
+    maxValue: 1.3
+    defaultValue: 1
+  tyreWidth:
+    minValue: 0.8
+    maxValue: 1
+    defaultValue: 1
+  rimDiameter:
     minValue: 0.7
     maxValue: 1.1
     defaultValue: 1
-  width:
+  rimWidth:
     minValue: 0.5
     maxValue: 1.5
     defaultValue: 1
@@ -8093,161 +7635,7 @@ WheelCollider:
   m_LayerOverridePriority: 0
   m_Enabled: 1
   m_ProvidesContacts: 0
---- !u!114 &7442097835768479482
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6098220493647213811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &1781755108411606342
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6098220493647213811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &-2385944062617358654
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6098220493647213811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &7764405030195221747
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6098220493647213811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &1725681642101070699
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6098220493647213811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &8153495719405070613
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6098220493647213811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &5697610920959488746
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6098220493647213811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e585b2f99fd7af441bbcf201b2bcd075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  motorTorque: 0
-  brakeTorque: 0
-  rpm: 0
-  rotationSpeed: 0
-  steerAngle: 0
-  forwardSlip: 0
-  sidewaysSlip: 0
-  isSlidingSideways: 0
-  isSlidingForward: 0
---- !u!114 &7911775592641421780
+--- !u!114 &5838515166634805389
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -12676,27 +12064,27 @@ PrefabInstance:
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
-        type: 3}
-      propertyPath: m_LocalRotation.x
       value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}
-      propertyPath: m_LocalRotation.y
+      propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
+        type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.7071068
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 180
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}
@@ -13020,27 +12408,27 @@ PrefabInstance:
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
-        type: 3}
-      propertyPath: m_LocalRotation.x
       value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}
-      propertyPath: m_LocalRotation.y
+      propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
+        type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.7071068
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 180
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6029140069691558891, guid: be76bd20b7aff7946bdf66b57ca79c5f,
         type: 3}

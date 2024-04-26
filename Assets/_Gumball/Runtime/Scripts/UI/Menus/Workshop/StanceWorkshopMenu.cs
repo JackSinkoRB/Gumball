@@ -20,6 +20,10 @@ namespace Gumball
         [SerializeField] private Slider suspensionHeightSlider;
         [SerializeField] private Slider camberSlider;
         [SerializeField] private Slider offsetSlider;
+        [SerializeField] private Slider tyreProfileSlider;
+        [SerializeField] private Slider tyreWidthSlider;
+        [SerializeField] private Slider rimDiameterSlider;
+        [SerializeField] private Slider rimWidthSlider;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private WheelsToModifyPosition wheelsToModifyPosition;
@@ -63,6 +67,15 @@ namespace Gumball
             
             float offsetNormalized = stanceModification.Offset.NormalizeValue(wheelToUse.transform.localPosition.x);
             offsetSlider.SetValueWithoutNotify(offsetNormalized);
+            
+            float tyreWidthNormalized = stanceModification.TyreWidth.NormalizeValue(stanceModification.WheelMesh.Tyre.transform.localScale.z);
+            tyreWidthSlider.SetValueWithoutNotify(tyreWidthNormalized);
+            
+            float rimDiameterNormalized = stanceModification.RimDiameter.NormalizeValue(stanceModification.WheelMesh.transform.localScale.y);
+            rimDiameterSlider.SetValueWithoutNotify(rimDiameterNormalized);
+            
+            float rimWidthNormalized = stanceModification.RimWidth.NormalizeValue(stanceModification.WheelMesh.transform.localScale.x);
+            rimWidthSlider.SetValueWithoutNotify(rimWidthNormalized);
         }
 
         public void OnSuspensionHeightSliderChanged()
@@ -95,6 +108,50 @@ namespace Gumball
                 
                 float valueDenormalized = stanceModification.Offset.DenormalizeValue(offsetSlider.value);
                 stanceModification.ApplyOffset(valueDenormalized);
+            }
+        }
+                
+        public void OnTyreProfileSliderChanged()
+        {
+            foreach (WheelCollider wheelCollider in wheelsToModify)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+                
+                float valueDenormalized = stanceModification.TyreProfile.DenormalizeValue(tyreProfileSlider.value);
+                stanceModification.ApplyTyreProfile(valueDenormalized);
+            }
+        }
+        
+        public void OnTyreWidthSliderChanged()
+        {
+            foreach (WheelCollider wheelCollider in wheelsToModify)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+                
+                float valueDenormalized = stanceModification.TyreWidth.DenormalizeValue(tyreWidthSlider.value);
+                stanceModification.ApplyTyreWidth(valueDenormalized);
+            }
+        }
+        
+        public void OnRimDiameterSliderChanged()
+        {
+            foreach (WheelCollider wheelCollider in wheelsToModify)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+                
+                float valueDenormalized = stanceModification.RimDiameter.DenormalizeValue(rimDiameterSlider.value);
+                stanceModification.ApplyRimDiameter(valueDenormalized);
+            }
+        }
+        
+        public void OnRimWidthSliderChanged()
+        {
+            foreach (WheelCollider wheelCollider in wheelsToModify)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+                
+                float valueDenormalized = stanceModification.RimWidth.DenormalizeValue(rimWidthSlider.value);
+                stanceModification.ApplyRimWidth(valueDenormalized);
             }
         }
         

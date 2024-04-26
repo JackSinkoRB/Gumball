@@ -11,7 +11,23 @@ namespace Gumball
         [SerializeField] private Rim currentRim; //TODO: set dynamically when rim is spawned
         [SerializeField] private Tyre currentTyre;
 
-        [ButtonMethod]
+        public Rim Rim => currentRim;
+        public Tyre Tyre => currentTyre;
+
+        private bool isTyreCopied;
+        private readonly Dictionary<int, int> closestVertexIndiciesOnBarrelCached = new();
+
+        /// <summary>
+        /// Ability to change the rim at runtime.
+        /// </summary>
+        public void SetRim(Rim rim)
+        {
+            currentRim = rim;
+
+            //reset the cache as the rim has changed
+            closestVertexIndiciesOnBarrelCached.Clear();
+        }
+        
         public void StretchTyre()
         {
             if (currentTyre.VerticesClosestToMiddle.Length == 0)
@@ -26,13 +42,32 @@ namespace Gumball
                 return;
             }
             
+#if UNITY_EDITOR
             //copy the mesh if editing in editor - to prevent editing the main mesh
             if (!Application.isPlaying)
-                currentTyre.MeshFilter.sharedMesh = Instantiate(currentTyre.MeshFilter.sharedMesh);
+            {
+                Debug.LogError("Cannot stretch tyre while application is not running.");
+                return;
+            }
+#endif
+            
+            //if modifying the tyre mesh, need to make sure the tyre is a copy
+            if (!isTyreCopied)
+                CopyTyre();
 
             MoveVertices();
         }
-
+        
+        private void CopyTyre()
+        {
+            if (!Application.isPlaying)
+                return;
+            
+            isTyreCopied = true;
+            
+            currentTyre.MeshFilter.sharedMesh = Instantiate(currentTyre.MeshFilter.sharedMesh);
+        }
+        
         private void MoveVertices()
         {
             Vector3[] verticesCopy = currentTyre.MeshFilter.sharedMesh.vertices;
@@ -43,10 +78,16 @@ namespace Gumball
                 Vector3 vertexPositionLocal = currentTyre.MeshFilter.sharedMesh.vertices[vertexIndex];
                 Vector3 vertexPositionWorld = currentTyre.MeshFilter.transform.TransformPoint(vertexPositionLocal);
 
-                Vector3 closestRimPositionWorld = GetClosestVertexPositionOnRim(vertexPositionWorld);
-                Vector3 closestRimPositionLocal = currentTyre.MeshFilter.transform.InverseTransformPoint(closestRimPositionWorld);
+                //cache the closest vertex position on rim if not already cached
+                if (!closestVertexIndiciesOnBarrelCached.ContainsKey(vertexIndex))
+                    closestVertexIndiciesOnBarrelCached[vertexIndex] = GetClosestVertexIndexOnBarrel(vertexPositionWorld);
+
+                Vector3 closestRimPositionLocal = currentRim.Barrel.sharedMesh.vertices[closestVertexIndiciesOnBarrelCached[vertexIndex]];
+                Vector3 closestRimPositionWorld = currentRim.Barrel.transform.TransformPoint(closestRimPositionLocal);
                 
-                verticesCopy[vertexIndex] = closestRimPositionLocal;
+                Vector3 closestRimTyrePositionLocal = currentTyre.MeshFilter.transform.InverseTransformPoint(closestRimPositionWorld);
+
+                verticesCopy[vertexIndex] = closestRimTyrePositionLocal;
                 
                 Debug.DrawLine(vertexPositionWorld, closestRimPositionWorld, Color.red, 15);
             }
@@ -54,10 +95,10 @@ namespace Gumball
             currentTyre.MeshFilter.sharedMesh.SetVertices(verticesCopy);
         }
 
-        private Vector3 GetClosestVertexPositionOnRim(Vector3 worldPosition)
+        private int GetClosestVertexIndexOnBarrel(Vector3 worldPosition)
         {
             float closestDistanceSqr = Mathf.Infinity;
-            Vector3 closestPosition = Vector3.zero;
+            int closestIndex = -1;
             
             foreach (int vertexIndex in currentRim.VerticesFurthestFromMiddle)
             {
@@ -68,11 +109,11 @@ namespace Gumball
                 if (distanceSqr < closestDistanceSqr)
                 {
                     closestDistanceSqr = distanceSqr;
-                    closestPosition = vertexPositionWorld;
+                    closestIndex = vertexIndex;
                 }
             }
 
-            return closestPosition;
+            return closestIndex;
         }
 
     }

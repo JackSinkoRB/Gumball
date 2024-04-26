@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
@@ -23,6 +26,7 @@ namespace Gumball
         public void CalculateData()
         {
             FindVerticesClosestToMiddle();
+            EditorUtility.SetDirty(this);
         }
 
         private void FindVerticesClosestToMiddle()
