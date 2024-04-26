@@ -43,12 +43,8 @@ namespace Gumball
             }
             
 #if UNITY_EDITOR
-            //copy the mesh if editing in editor - to prevent editing the main mesh
             if (!Application.isPlaying)
-            {
-                Debug.LogError("Cannot stretch tyre while application is not running.");
-                return;
-            }
+                return; //dont stretch outside playmode to avoid editing the mesh 
 #endif
             
             //if modifying the tyre mesh, need to make sure the tyre is a copy

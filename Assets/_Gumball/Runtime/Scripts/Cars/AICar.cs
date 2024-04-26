@@ -72,7 +72,7 @@ namespace Gumball
         {
             get
             {
-                if (allWheelMeshesCached == null || allWheelMeshesCached.Length == 0)
+                if (allWheelMeshesCached == null || allWheelMeshesCached.Length == 0 || allWheelMeshesCached[0] == null)
                     CacheAllWheelMeshes();
                 return allWheelMeshesCached; 
             }
@@ -82,7 +82,7 @@ namespace Gumball
         {
             get
             {
-                if (allWheelCollidersCached == null || allWheelCollidersCached.Length == 0)
+                if (allWheelCollidersCached == null || allWheelCollidersCached.Length == 0 || allWheelCollidersCached[0] == null)
                     CacheAllWheelColliders();
                 return allWheelCollidersCached;
             }

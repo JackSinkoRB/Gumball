@@ -64,7 +64,7 @@ namespace Gumball
         private void ForceUpdateDefaultData()
         {
             //lazilly find the car reference if it hasn't been initialised
-            if (carBelongsTo == null)
+            if (carBelongsTo == null || WheelMesh == null)
             {
                 carBelongsTo = transform.GetComponentInAllParents<AICar>();
                 FindWheelMesh();

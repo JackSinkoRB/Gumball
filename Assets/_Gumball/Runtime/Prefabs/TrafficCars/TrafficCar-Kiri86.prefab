@@ -92,6 +92,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4200480128797029338}
+  - component: {fileID: 5846168752822342895}
   m_Layer: 0
   m_Name: Wheel_RR
   m_TagString: Untagged
@@ -115,6 +116,20 @@ Transform:
   - {fileID: 6660601429997465544}
   m_Father: {fileID: 675233050339767358}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &5846168752822342895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 185845513324598591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af595dc498f76dd419477cadfc9ac637, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentRim: {fileID: 0}
+  currentTyre: {fileID: 0}
 --- !u!1 &277177135404168628
 GameObject:
   m_ObjectHideFlags: 0
@@ -1739,18 +1754,20 @@ MonoBehaviour:
   canBeDrivenByPlayer: 0
   avatarIKManager: {fileID: 0}
   steeringWheel: {fileID: 0}
+  isPlayerCar: 0
   isPlayerDrivingEnabled: 0
   carIndex: 0
   id: 0
+  carPartManager: {fileID: 0}
   frontOfCarPosition: {x: 0, y: 1, z: 2}
   carWidth: 2
   wheelConfiguration: 0
   frontWheelMeshes:
-  - {fileID: 3989320743972326410}
-  - {fileID: 7138462580865239185}
+  - {fileID: 3179187836900624905}
+  - {fileID: 8562329626490024817}
   rearWheelMeshes:
-  - {fileID: 5310304248000926899}
-  - {fileID: 4200480128797029338}
+  - {fileID: 5010557871269866860}
+  - {fileID: 5846168752822342895}
   frontWheelColliders:
   - {fileID: 2965708474844962954}
   - {fileID: 6825216254395174688}
@@ -2875,6 +2892,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7138462580865239185}
+  - component: {fileID: 8562329626490024817}
   m_Layer: 0
   m_Name: Wheel_FR
   m_TagString: Untagged
@@ -2898,6 +2916,20 @@ Transform:
   - {fileID: 6440302994953704795}
   m_Father: {fileID: 3649199783518173065}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &8562329626490024817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5614328188026796482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af595dc498f76dd419477cadfc9ac637, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentRim: {fileID: 0}
+  currentTyre: {fileID: 0}
 --- !u!1 &6274331019609484358
 GameObject:
   m_ObjectHideFlags: 0
@@ -3654,6 +3686,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3989320743972326410}
+  - component: {fileID: 3179187836900624905}
   m_Layer: 0
   m_Name: Wheel_FL
   m_TagString: Untagged
@@ -3677,6 +3710,20 @@ Transform:
   - {fileID: 8136841574878135209}
   m_Father: {fileID: 1723808146141301512}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &3179187836900624905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7157413569650616755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af595dc498f76dd419477cadfc9ac637, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentRim: {fileID: 0}
+  currentTyre: {fileID: 0}
 --- !u!1 &7365826460928921636
 GameObject:
   m_ObjectHideFlags: 0
@@ -4417,6 +4464,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5310304248000926899}
+  - component: {fileID: 5010557871269866860}
   m_Layer: 0
   m_Name: Wheel_RL
   m_TagString: Untagged
@@ -4440,6 +4488,20 @@ Transform:
   - {fileID: 8072705045073224769}
   m_Father: {fileID: 675233050339767358}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &5010557871269866860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8925802416134845969}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af595dc498f76dd419477cadfc9ac637, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentRim: {fileID: 0}
+  currentTyre: {fileID: 0}
 --- !u!1 &8996840166056109555
 GameObject:
   m_ObjectHideFlags: 0
