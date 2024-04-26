@@ -14,26 +14,33 @@ namespace Gumball
     {
 
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private int[] verticesClosestToMiddle;
+        [SerializeField, ReadOnly] private int[] outsideVertices;
+        [SerializeField, ReadOnly] private int[] insideVertices;
 
         public MeshFilter MeshFilter => GetComponent<MeshFilter>();
 
-        public int[] VerticesClosestToMiddle => verticesClosestToMiddle;
-        
+        public int[] OutsideVertices => outsideVertices;
+        public int[] InsideVertices => insideVertices;
+
 #if UNITY_EDITOR
         
         [ButtonMethod]
         public void CalculateData()
         {
-            FindVerticesClosestToMiddle();
+            //do both directions
+            FindVerticesClosestToMiddle(true);
+            FindVerticesClosestToMiddle(false);
+            
             EditorUtility.SetDirty(this);
         }
 
-        private void FindVerticesClosestToMiddle()
+        private void FindVerticesClosestToMiddle(bool inside)
         {
-            Debug.DrawLine(MeshFilter.transform.position, MeshFilter.transform.position - MeshFilter.transform.forward, Color.red, 15);
+            Vector3 direction = inside ? MeshFilter.transform.forward : -MeshFilter.transform.forward;
+            
+            Debug.DrawLine(MeshFilter.transform.position, MeshFilter.transform.position + direction, Color.red, 15);
             HashSet<int> verticesClosestToMiddleTemp = new();
-            Vector3 middle = MeshFilter.transform.position - MeshFilter.transform.forward;
+            Vector3 middle = MeshFilter.transform.position + direction;
 
             //1. find the closest distance
             float closestDistanceSqr = Mathf.Infinity;
@@ -63,7 +70,10 @@ namespace Gumball
                 }
             }
 
-            verticesClosestToMiddle = verticesClosestToMiddleTemp.ToArray();
+            if (inside)
+                insideVertices = verticesClosestToMiddleTemp.ToArray();
+            else
+                outsideVertices = verticesClosestToMiddleTemp.ToArray();
         }
         
 #endif

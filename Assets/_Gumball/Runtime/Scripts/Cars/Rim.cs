@@ -15,27 +15,33 @@ namespace Gumball
         [SerializeField] private MeshFilter barrel;
 
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private int[] verticesFurthestFromMiddle;
+        [SerializeField, ReadOnly] private int[] outsideVertices;
+        [SerializeField, ReadOnly] private int[] insideVertices;
 
         public MeshFilter Barrel => barrel;
-        public int[] VerticesFurthestFromMiddle => verticesFurthestFromMiddle;
+        public int[] OutsideVertices => outsideVertices;
+        public int[] InsideVertices => insideVertices;
 
 #if UNITY_EDITOR
         
         [ButtonMethod]
         public void CalculateData()
         {
-            FindVerticesClosestToMiddle();
+            //do both directions
+            FindVerticesFurthestFromMiddle(true);
+            FindVerticesFurthestFromMiddle(false);
+            
             EditorUtility.SetDirty(this);
         }
 
-        private void FindVerticesClosestToMiddle()
+        private void FindVerticesFurthestFromMiddle(bool inside)
         {
             MeshFilter meshFilter = barrel.GetComponent<MeshFilter>();
-            
-            Debug.DrawLine(meshFilter.transform.position, meshFilter.transform.position + meshFilter.transform.right, Color.red, 15);
+            Vector3 direction = inside ? -meshFilter.transform.right : meshFilter.transform.right;
+
+            Debug.DrawLine(meshFilter.transform.position, meshFilter.transform.position + direction, Color.red, 15);
             HashSet<int> verticesFurthestFromMiddleTemp = new();
-            Vector3 middle = meshFilter.transform.position + meshFilter.transform.right;
+            Vector3 middle = meshFilter.transform.position + direction;
 
             //1. find the furthest distance
             float furthestDistanceSqr = 0;
@@ -65,7 +71,10 @@ namespace Gumball
                 }
             }
 
-            verticesFurthestFromMiddle = verticesFurthestFromMiddleTemp.ToArray();
+            if (inside)
+                insideVertices = verticesFurthestFromMiddleTemp.ToArray();
+            else 
+                outsideVertices = verticesFurthestFromMiddleTemp.ToArray();
         }
         
 #endif

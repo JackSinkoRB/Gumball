@@ -30,13 +30,13 @@ namespace Gumball
         
         public void StretchTyre()
         {
-            if (currentTyre.VerticesClosestToMiddle.Length == 0)
+            if (currentTyre.OutsideVertices.Length == 0 || currentTyre.InsideVertices.Length == 0)
             {
                 Debug.LogError("Cannot stretch tyre - tyre data hasn't been calculated.");
                 return;
             }
             
-            if (currentRim.VerticesFurthestFromMiddle.Length == 0)
+            if (currentRim.OutsideVertices.Length == 0 || currentRim.InsideVertices.Length == 0)
             {
                 Debug.LogError("Cannot stretch tyre - rim data hasn't been calculated.");
                 return;
@@ -55,7 +55,9 @@ namespace Gumball
             if (!isTyreCopied)
                 CopyTyre();
 
-            MoveVertices();
+            //do both directions
+            MoveVertices(true);
+            MoveVertices(false);
         }
         
         private void CopyTyre()
@@ -68,19 +70,21 @@ namespace Gumball
             currentTyre.MeshFilter.sharedMesh = Instantiate(currentTyre.MeshFilter.sharedMesh);
         }
         
-        private void MoveVertices()
+        private void MoveVertices(bool inside)
         {
+            int[] tyreEndVertices = inside ? currentTyre.InsideVertices : currentTyre.OutsideVertices;
+            
             Vector3[] verticesCopy = currentTyre.MeshFilter.sharedMesh.vertices;
             
             //move the tyre end vertices to the rim end vertices
-            foreach (int vertexIndex in currentTyre.VerticesClosestToMiddle)
+            foreach (int vertexIndex in tyreEndVertices)
             {
                 Vector3 vertexPositionLocal = currentTyre.MeshFilter.sharedMesh.vertices[vertexIndex];
                 Vector3 vertexPositionWorld = currentTyre.MeshFilter.transform.TransformPoint(vertexPositionLocal);
 
                 //cache the closest vertex position on rim if not already cached
                 if (!closestVertexIndiciesOnBarrelCached.ContainsKey(vertexIndex))
-                    closestVertexIndiciesOnBarrelCached[vertexIndex] = GetClosestVertexIndexOnBarrel(vertexPositionWorld);
+                    closestVertexIndiciesOnBarrelCached[vertexIndex] = GetClosestVertexIndexOnBarrel(inside, vertexPositionWorld);
 
                 Vector3 closestRimPositionLocal = currentRim.Barrel.sharedMesh.vertices[closestVertexIndiciesOnBarrelCached[vertexIndex]];
                 Vector3 closestRimPositionWorld = currentRim.Barrel.transform.TransformPoint(closestRimPositionLocal);
@@ -95,12 +99,14 @@ namespace Gumball
             currentTyre.MeshFilter.sharedMesh.SetVertices(verticesCopy);
         }
 
-        private int GetClosestVertexIndexOnBarrel(Vector3 worldPosition)
+        private int GetClosestVertexIndexOnBarrel(bool inside, Vector3 worldPosition)
         {
+            int[] rimEndVertices = inside ? currentRim.InsideVertices : currentRim.OutsideVertices;
+            
             float closestDistanceSqr = Mathf.Infinity;
             int closestIndex = -1;
             
-            foreach (int vertexIndex in currentRim.VerticesFurthestFromMiddle)
+            foreach (int vertexIndex in rimEndVertices)
             {
                 Vector3 vertexPositionLocal = currentRim.Barrel.sharedMesh.vertices[vertexIndex];
                 Vector3 vertexPositionWorld = currentRim.Barrel.transform.TransformPoint(vertexPositionLocal);
