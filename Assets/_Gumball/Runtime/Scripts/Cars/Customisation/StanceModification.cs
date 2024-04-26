@@ -17,7 +17,7 @@ namespace Gumball
         [SerializeField] private RangedFloatValue tyreProfile = new(1, 1.3f, 1);
         [SerializeField] private RangedFloatValue tyreWidth = new(0.8f, 1, 1);
         [SerializeField] private RangedFloatValue rimDiameter = new(0.7f, 1.1f, 1);
-        [SerializeField] private RangedFloatValue rimWidth = new(0.5f, 1.5f, 1);
+        [SerializeField] private RangedFloatValue rimWidth = new(0.5f, 2f, 1);
 
         private AICar carBelongsTo;
         private int wheelIndex;

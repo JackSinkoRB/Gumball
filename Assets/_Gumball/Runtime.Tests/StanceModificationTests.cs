@@ -117,18 +117,18 @@ namespace Gumball.Runtime.Tests
             float valueToUse = stanceModification.Camber.MaxValue;
             stanceModification.ApplyCamber(valueToUse);
             Assert.AreEqual(valueToUse, stanceModification.CurrentCamber);
-            Assert.AreEqual(valueToUse.NormaliseAngle(), stanceModification.WheelMesh.transform.rotation.eulerAngles.z.NormaliseAngle(), 0.01f);
+            Assert.AreEqual(valueToUse.NormaliseAngle(), stanceModification.WheelMesh.transform.localRotation.eulerAngles.z.NormaliseAngle(), 0.01f);
             
             //check for persistency: reapply the saved data should be the same
             stanceModification.ApplySavedPlayerData();
             Assert.AreEqual(valueToUse, stanceModification.CurrentCamber);
-            Assert.AreEqual(valueToUse.NormaliseAngle(), stanceModification.WheelMesh.transform.rotation.eulerAngles.z.NormaliseAngle(), 0.01f);
+            Assert.AreEqual(valueToUse.NormaliseAngle(), stanceModification.WheelMesh.transform.localRotation.eulerAngles.z.NormaliseAngle(), 0.01f);
             
             //check default value works
             float defaultValue = stanceModification.Camber.DefaultValue;
             stanceModification.ApplyCamber(defaultValue);
             Assert.AreEqual(defaultValue, stanceModification.CurrentCamber);
-            Assert.AreEqual(defaultValue.NormaliseAngle(), stanceModification.WheelMesh.transform.rotation.eulerAngles.z.NormaliseAngle(), 0.01f);
+            Assert.AreEqual(defaultValue.NormaliseAngle(), stanceModification.WheelMesh.transform.localRotation.eulerAngles.z.NormaliseAngle(), 0.01f);
         }
 
         [UnityTest]
@@ -155,5 +155,133 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(defaultValue, wheelCollider.transform.localPosition.x);
         }
         
+        [UnityTest]
+        [Order(5)]
+        public IEnumerator RimDiameter()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            const int indexToUse = 0;
+            WheelCollider wheelCollider = WarehouseManager.Instance.CurrentCar.AllWheelColliders[indexToUse];
+            StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+
+            float valueToUse = stanceModification.RimDiameter.MinValue;
+            stanceModification.ApplyRimDiameter(valueToUse);
+            Assert.AreEqual(valueToUse, stanceModification.WheelMesh.transform.localScale.y);
+            //ensure wheel collider radius changes
+            Assert.AreEqual(wheelCollider.radius, GetMeshRadius(stanceModification.WheelMesh.Tyre.MeshFilter), 0.02f);
+            
+            //check for persistency: reapply the saved data should be the same
+            stanceModification.ApplySavedPlayerData();
+            Assert.AreEqual(valueToUse, stanceModification.WheelMesh.transform.localScale.y);
+
+            //check default value works
+            float defaultValue = stanceModification.RimDiameter.DefaultValue;
+            stanceModification.ApplyRimDiameter(defaultValue);
+            Assert.AreEqual(defaultValue, stanceModification.WheelMesh.transform.localScale.y);
+            //ensure wheel collider radius changes
+            Assert.AreEqual(wheelCollider.radius, GetMeshRadius(stanceModification.WheelMesh.Tyre.MeshFilter), 0.02f);
+        }
+        
+        [UnityTest]
+        [Order(6)]
+        public IEnumerator RimWidth()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            const int indexToUse = 0;
+            WheelCollider wheelCollider = WarehouseManager.Instance.CurrentCar.AllWheelColliders[indexToUse];
+            StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+
+            float valueToUse = stanceModification.RimWidth.MinValue;
+            stanceModification.ApplyRimWidth(valueToUse);
+            Assert.AreEqual(valueToUse, stanceModification.WheelMesh.transform.localScale.x);
+            
+            //check for persistency: reapply the saved data should be the same
+            stanceModification.ApplySavedPlayerData();
+            Assert.AreEqual(valueToUse, stanceModification.WheelMesh.transform.localScale.x);
+            
+            //check default value works
+            float defaultValue = stanceModification.RimWidth.DefaultValue;
+            stanceModification.ApplyRimWidth(defaultValue);
+            Assert.AreEqual(defaultValue, stanceModification.WheelMesh.transform.localScale.x);
+        }
+        
+        [UnityTest]
+        [Order(7)]
+        public IEnumerator TyreProfile()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            const int indexToUse = 0;
+            WheelCollider wheelCollider = WarehouseManager.Instance.CurrentCar.AllWheelColliders[indexToUse];
+            StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+
+            float valueToUse = stanceModification.TyreProfile.MinValue;
+            stanceModification.ApplyTyreProfile(valueToUse);
+            Assert.AreEqual(valueToUse, stanceModification.WheelMesh.Tyre.transform.localScale.x);
+            //ensure wheel collider radius changes
+            Assert.AreEqual(wheelCollider.radius, GetMeshRadius(stanceModification.WheelMesh.Tyre.MeshFilter), 0.02f);
+            
+            //check for persistency: reapply the saved data should be the same
+            stanceModification.ApplySavedPlayerData();
+            Assert.AreEqual(valueToUse, stanceModification.WheelMesh.Tyre.transform.localScale.x);
+            
+            //check default value works
+            float defaultValue = stanceModification.TyreProfile.DefaultValue;
+            stanceModification.ApplyTyreProfile(defaultValue);
+            Assert.AreEqual(defaultValue, stanceModification.WheelMesh.Tyre.transform.localScale.x);
+            //ensure wheel collider radius changes
+            Assert.AreEqual(wheelCollider.radius, GetMeshRadius(stanceModification.WheelMesh.Tyre.MeshFilter), 0.02f);
+        }
+        
+        [UnityTest]
+        [Order(8)]
+        public IEnumerator TyreWidth()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            const int indexToUse = 0;
+            WheelCollider wheelCollider = WarehouseManager.Instance.CurrentCar.AllWheelColliders[indexToUse];
+            StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+
+            float valueToUse = stanceModification.TyreWidth.MinValue;
+            stanceModification.ApplyTyreWidth(valueToUse);
+            Assert.AreEqual(valueToUse, stanceModification.WheelMesh.Tyre.transform.localScale.z);
+            
+            //check for persistency: reapply the saved data should be the same
+            stanceModification.ApplySavedPlayerData();
+            Assert.AreEqual(valueToUse, stanceModification.WheelMesh.Tyre.transform.localScale.z);
+            
+            //check default value works
+            float defaultValue = stanceModification.TyreWidth.DefaultValue;
+            stanceModification.ApplyTyreWidth(defaultValue);
+            Assert.AreEqual(defaultValue, stanceModification.WheelMesh.Tyre.transform.localScale.z);
+        }
+
+        /// <summary>
+        /// Gets the furthest vertex on the mesh and returns its distance/magnitude.
+        /// </summary>
+        private float GetMeshRadius(MeshFilter meshFilter)
+        {
+            int furthestVertexIndex = -1;
+            float furthestDistanceSqr = 0;
+            
+            for (int vertexIndex = 0; vertexIndex < meshFilter.mesh.vertices.Length; vertexIndex++)
+            {
+                float distance = meshFilter.mesh.vertices[vertexIndex].sqrMagnitude;
+
+                if (distance > furthestDistanceSqr)
+                {
+                    furthestDistanceSqr = distance;
+                    furthestVertexIndex = vertexIndex;
+                }
+            }
+
+            Vector3 vertexPositionWorld = meshFilter.transform.TransformPoint(meshFilter.mesh.vertices[furthestVertexIndex]);
+            float radiusWorld = Vector3.Distance(meshFilter.transform.position, vertexPositionWorld);
+            
+            return radiusWorld;
+        }
     }
 }

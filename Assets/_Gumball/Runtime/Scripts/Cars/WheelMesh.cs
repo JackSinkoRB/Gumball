@@ -97,6 +97,7 @@ namespace Gumball
             }
             
             currentTyre.MeshFilter.sharedMesh.SetVertices(verticesCopy);
+            currentTyre.MeshFilter.sharedMesh.RecalculateBounds();
         }
 
         private int GetClosestVertexIndexOnBarrel(bool inside, Vector3 worldPosition)

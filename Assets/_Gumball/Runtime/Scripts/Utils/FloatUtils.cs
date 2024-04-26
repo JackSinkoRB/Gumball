@@ -9,9 +9,8 @@ namespace Gumball
 
         public static float NormaliseAngle(this float angle)
         {
-            angle %= 360; //ensure angle is within [0, 360)
-            if (angle < 0)
-                angle += 360; //ensure angle is positive
+            angle += 360;
+            angle %= 360;
             return angle;
         }
         
