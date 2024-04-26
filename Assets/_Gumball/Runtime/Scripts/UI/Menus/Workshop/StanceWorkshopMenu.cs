@@ -68,6 +68,9 @@ namespace Gumball
             float offsetNormalized = stanceModification.Offset.NormalizeValue(wheelToUse.transform.localPosition.x);
             offsetSlider.SetValueWithoutNotify(offsetNormalized);
             
+            float tyreProfileNormalized = stanceModification.TyreProfile.NormalizeValue(stanceModification.WheelMesh.Tyre.transform.localScale.x);
+            tyreProfileSlider.SetValueWithoutNotify(tyreProfileNormalized);
+            
             float tyreWidthNormalized = stanceModification.TyreWidth.NormalizeValue(stanceModification.WheelMesh.Tyre.transform.localScale.z);
             tyreWidthSlider.SetValueWithoutNotify(tyreWidthNormalized);
             

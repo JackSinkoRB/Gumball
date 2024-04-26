@@ -26,6 +26,9 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.WorkshopSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             AvatarManager.Instance.HideAvatars(true);
+
+            //disable X and Z position movement while modifying the car to prevent it sliding away
+            WarehouseManager.Instance.CurrentCar.Rigidbody.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ;
             
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
