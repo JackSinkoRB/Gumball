@@ -193,8 +193,8 @@ namespace Gumball
             //the tyre is always larger than the wheel, so get the tyre extents (accounting for transform scales)
             Vector3 tyreSize = WheelMesh.Tyre.transform.TransformPoint(WheelMesh.Tyre.MeshFilter.sharedMesh.bounds.extents) - WheelMesh.Tyre.transform.position;
             
-            //this can be either height or depth (not width) as the tyre is circular, and therefore the same value
-            wheelCollider.radius = Mathf.Abs(tyreSize.y);
+            //tyre is circular, so add the height and width and divide by 2. This is because we're working with world position and the tyre might be rotated in world space.
+            wheelCollider.radius = (Mathf.Abs(tyreSize.y) + Mathf.Abs(tyreSize.z)) / 2f;
         }
         
     }
