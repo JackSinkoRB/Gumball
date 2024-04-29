@@ -45,11 +45,13 @@ namespace Gumball
         public int ID => id;
         public string SaveKey => $"CarData.{carIndex}.{id}";
 
-        [Header("Part customisation")]
+        [Header("Customisation")]
         [SerializeField] private CarPartManager carPartManager;
+        [SerializeField] private ColourModification colourModification;
 
         public CarPartManager CarPartManager => carPartManager;
-        
+        public ColourModification ColourModification => colourModification;
+
         [Header("Sizing")]
         [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
         [SerializeField] private float carWidth = 2;
@@ -335,6 +337,9 @@ namespace Gumball
             if (carPartManager != null)
                 carPartManager.Initialise(this);
             
+            if (colourModification != null)
+                colourModification.Initialise(this);
+
             InitialiseWheelStance();
         }
 
