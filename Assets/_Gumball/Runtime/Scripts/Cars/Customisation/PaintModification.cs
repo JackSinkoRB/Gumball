@@ -17,12 +17,12 @@ namespace Gumball
         }
                 
         //caching:
-        private static readonly int Emission = Shader.PropertyToID("_Emission");
-        private static readonly int ClearCoatSmoothness = Shader.PropertyToID("_ClearCoatSmoothness");
-        private static readonly int ClearCoat = Shader.PropertyToID("_ClearCoat");
-        private static readonly int Smoothness = Shader.PropertyToID("_Smoothness");
-        private static readonly int Metallic = Shader.PropertyToID("_Metallic");
-        private static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
+        public static readonly int BaseColorShaderID = Shader.PropertyToID("_BaseColor");
+        public static readonly int EmissionShaderID = Shader.PropertyToID("_Emission");
+        public static readonly int ClearCoatSmoothnessShaderID = Shader.PropertyToID("_ClearCoatSmoothness");
+        public static readonly int ClearCoatShaderID = Shader.PropertyToID("_ClearCoat");
+        public static readonly int SmoothnessShaderID = Shader.PropertyToID("_Smoothness");
+        public static readonly int MetallicShaderID = Shader.PropertyToID("_Metallic");
         
         [SerializeField] private Material bodyMaterial;
         [SerializeField] private ColourSwatch[] swatchPresets;
@@ -32,7 +32,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private MeshRenderer[] colourableBodyParts;
 
         private string saveKey => $"{carBelongsTo.SaveKey}.Paint";
-        
+
+        public MeshRenderer[] ColourableBodyParts => colourableBodyParts;
         public ColourSwatch[] SwatchPresets => swatchPresets;
         public PaintMode CurrentBodyPaintMode => GetCurrentSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
 
@@ -93,13 +94,13 @@ namespace Gumball
             
             foreach (MeshRenderer meshRenderer in colourableBodyParts)
             {
-                meshRenderer.sharedMaterial.SetColor(BaseColor, swatch.Color.ToColor());
-                meshRenderer.sharedMaterial.SetColor(Emission, swatch.Emission.ToColor());
+                meshRenderer.sharedMaterial.SetColor(BaseColorShaderID, swatch.Color.ToColor());
+                meshRenderer.sharedMaterial.SetColor(EmissionShaderID, swatch.Emission.ToColor());
                 
-                meshRenderer.sharedMaterial.SetFloat(Metallic, swatch.Metallic);
-                meshRenderer.sharedMaterial.SetFloat(Smoothness, swatch.Smoothness);
-                meshRenderer.sharedMaterial.SetFloat(ClearCoat, swatch.ClearCoat);
-                meshRenderer.sharedMaterial.SetFloat(ClearCoatSmoothness, swatch.ClearCoatSmoothness);
+                meshRenderer.sharedMaterial.SetFloat(MetallicShaderID, swatch.Metallic);
+                meshRenderer.sharedMaterial.SetFloat(SmoothnessShaderID, swatch.Smoothness);
+                meshRenderer.sharedMaterial.SetFloat(ClearCoatShaderID, swatch.ClearCoat);
+                meshRenderer.sharedMaterial.SetFloat(ClearCoatSmoothnessShaderID, swatch.ClearCoatSmoothness);
             }
 
             CurrentBodyColour = swatch;
