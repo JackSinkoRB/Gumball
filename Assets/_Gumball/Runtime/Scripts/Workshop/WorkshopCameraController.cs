@@ -11,7 +11,9 @@ namespace Gumball
         {
             base.OnEnable();
             
-            SetTarget(WarehouseManager.Instance.CurrentCar.transform, defaultTargetOffset);
+            if (WarehouseManager.Instance.CurrentCar != null)
+                SetTarget(WarehouseManager.Instance.CurrentCar.transform, defaultTargetOffset);
+            
             SetInitialPosition();
         }
         

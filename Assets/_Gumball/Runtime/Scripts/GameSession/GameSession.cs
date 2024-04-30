@@ -221,6 +221,9 @@ namespace Gumball
             currentCarRigidbody.angularVelocity = Vector3.zero;
             currentCarRigidbody.isKinematic = true;
             
+            //remove constraints
+            WarehouseManager.Instance.CurrentCar.Rigidbody.constraints = RigidbodyConstraints.None;
+            
             //move the car to the right position
             Vector3 startingPosition = chunkMap.VehicleStartingPosition;
             Vector3 startingRotation = chunkMap.VehicleStartingRotation;

@@ -22,7 +22,9 @@ namespace Gumball
             DecalEditor.onSelectLiveDecal += OnSelectDecal;
             DecalEditor.onDeselectLiveDecal += OnDeselectDecal;
 
-            SetTarget(WarehouseManager.Instance.CurrentCar.transform, defaultTargetOffset);
+            if (WarehouseManager.Instance.CurrentCar != null)
+                SetTarget(WarehouseManager.Instance.CurrentCar.transform, defaultTargetOffset);
+            
             SetInitialPosition();
         }
 

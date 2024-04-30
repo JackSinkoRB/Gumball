@@ -31,32 +31,63 @@ namespace Gumball
         [SerializeField] private bool canBeDrivenByPlayer;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private CarIKManager avatarIKManager;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private SteeringWheel steeringWheel;
+
         [Space(5)]
+        [SerializeField, ReadOnly] private bool isPlayerCar;
         [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int id;
-        
+
+        public bool IsPlayerCar => isPlayerCar;
         public CarIKManager AvatarIKManager => avatarIKManager;
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
         public int ID => id;
         public string SaveKey => $"CarData.{carIndex}.{id}";
 
+        [Header("Part customisation")]
+        [SerializeField] private CarPartManager carPartManager;
+
+        public CarPartManager CarPartManager => carPartManager;
+        
         [Header("Sizing")]
         [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
         [SerializeField] private float carWidth = 2;
         
         [Header("Wheels")]
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
-        [SerializeField, InitializationField] private Transform[] frontWheelMeshes;
-        [SerializeField, InitializationField] private Transform[] rearWheelMeshes;
+        [SerializeField, InitializationField] private WheelMesh[] frontWheelMeshes;
+        [SerializeField, InitializationField] private WheelMesh[] rearWheelMeshes;
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
         [Space(5)]
         private WheelCollider[] poweredWheels;
-        private Transform[] allWheelMeshes;
-        private WheelCollider[] allWheelColliders;
+        private WheelMesh[] allWheelMeshesCached;
+        private WheelCollider[] allWheelCollidersCached;
+
+        public WheelCollider[] FrontWheelColliders => frontWheelColliders;
+        public WheelCollider[] RearWheelColliders => rearWheelColliders;
+
+        public WheelMesh[] AllWheelMeshes
+        {
+            get
+            {
+                if (allWheelMeshesCached == null || allWheelMeshesCached.Length == 0 || allWheelMeshesCached[0] == null)
+                    CacheAllWheelMeshes();
+                return allWheelMeshesCached; 
+            }
+        }
         
+        public WheelCollider[] AllWheelColliders
+        {
+            get
+            {
+                if (allWheelCollidersCached == null || allWheelCollidersCached.Length == 0 || allWheelCollidersCached[0] == null)
+                    CacheAllWheelColliders();
+                return allWheelCollidersCached;
+            }
+        }
+
         [Header("Auto drive")]
         [SerializeField] private bool autoDrive;
         
@@ -203,6 +234,7 @@ namespace Gumball
         private Vector3 targetPosition;
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion, SplineSample)? targetPos;
+        private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => collisionRecoverDuration > 0 && (inCollision || timeSinceCollision < collisionRecoverDuration);
@@ -284,14 +316,14 @@ namespace Gumball
             defaultAngularDrag = Rigidbody.angularDrag;
             
             OnChangeChunk(null, CurrentChunk);
-
-            CacheAllWheelMeshes();
-            CacheAllWheelColliders();
+            
             CachePoweredWheels();
         }
-        
+
         public void InitialiseAsPlayer(int carIndex, int id)
         {
+            isPlayerCar = true;
+            
             this.carIndex = carIndex;
             this.id = id;
             
@@ -299,6 +331,11 @@ namespace Gumball
             colliders.layer = (int)LayersAndTags.Layer.PlayerCar;
             
             SetAutoDrive(false);
+            
+            if (carPartManager != null)
+                carPartManager.Initialise(this);
+            
+            InitialiseWheelStance();
         }
 
         public void InitialiseAsRacer()
@@ -307,6 +344,8 @@ namespace Gumball
             colliders.layer = (int)LayersAndTags.Layer.RacerCar;
             
             SetAutoDrive(true);
+            
+            InitialiseWheelStance();
         }
         
         public void InitialiseAsTraffic()
@@ -345,21 +384,50 @@ namespace Gumball
             transform.rotation = rotation;
             Rigidbody.position = position;
             Rigidbody.rotation = rotation;
+
+            SetGrounded();
             
             //reset steer angle
             visualSteerAngle = 0;
             desiredSteerAngle = 0;
             
-            foreach (WheelCollider wheelCollider in allWheelColliders)
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
                 wheelCollider.motorTorque = 0;
                 wheelCollider.rotationSpeed = 0;
                 wheelCollider.steerAngle = 0;
             }
-
-            Move(); //force update
+            
+            UpdateWheelMeshes(); //force update
 
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
+        }
+
+        public void SetGrounded()
+        {
+            int numberOfHitsDown = Physics.RaycastNonAlloc(transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Ground));
+
+            if (numberOfHitsDown == 0)
+            {
+                Debug.LogWarning($"Could not ground car {gameObject.name} because there is no ground above or below.");
+                return;
+            }
+
+            Vector3 offset = groundedHitsCached[0].point - transform.position;
+
+            transform.position += offset;
+            Rigidbody.position += offset;
+            GlobalLoggers.AICarLogger.Log($"Grounded {gameObject.name} - moved {offset}");
+            
+            //check to apply ride height - currently only for player cars
+            if (isPlayerCar)
+            {
+                float rideHeight = DataManager.Cars.Get<float>($"{SaveKey}.RideHeight");
+                transform.position = transform.position.OffsetY(rideHeight);
+                Rigidbody.position = Rigidbody.position.OffsetY(rideHeight);
+
+                GlobalLoggers.AICarLogger.Log($"Applied {rideHeight} ride height to {gameObject.name}");
+            }
         }
 
         public void SetLaneDistance(float laneDistance, ChunkTrafficManager.LaneDirection direction)
@@ -870,7 +938,7 @@ namespace Gumball
         {
             Rigidbody.drag = dragWhenBraking;
             
-            foreach (WheelCollider wheelCollider in allWheelColliders)
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
                 wheelCollider.brakeTorque = brakeTorque;
             }
@@ -885,7 +953,7 @@ namespace Gumball
         {
             Rigidbody.drag = isAccelerating ? 0 : dragWhenIdle;
             
-            foreach (WheelCollider wheelCollider in allWheelColliders)
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
                 wheelCollider.brakeTorque = 0;
             }
@@ -992,34 +1060,42 @@ namespace Gumball
         /// <summary>
         /// Update all the wheel meshes to match the wheel colliders.
         /// </summary>
-        private void UpdateWheelMeshes()
+        public void UpdateWheelMeshes()
         {
             //do rear wheels first as the front wheels require their rotation
             for (int count = 0; count < rearWheelMeshes.Length; count++)
             {
-                Transform rearWheelMesh = rearWheelMeshes[count];
+                WheelMesh rearWheelMesh = rearWheelMeshes[count];
                 WheelCollider rearWheelCollider = rearWheelColliders[count];
                 
                 rearWheelCollider.GetWorldPose(out Vector3 wheelPosition, out Quaternion wheelRotation);
-                rearWheelMesh.position = wheelPosition;
-                rearWheelMesh.rotation = wheelRotation;
+                rearWheelMesh.transform.position = wheelPosition;
+                rearWheelMesh.transform.rotation = wheelRotation;
             }
 
             for (int count = 0; count < frontWheelMeshes.Length; count++)
             {
-                Transform frontWheelMesh = frontWheelMeshes[count];
+                WheelMesh frontWheelMesh = frontWheelMeshes[count];
                 WheelCollider frontWheelCollider = frontWheelColliders[count];
                 
                 frontWheelCollider.GetWorldPose(out Vector3 wheelPosition, out _);
-                frontWheelMesh.position = wheelPosition;
+                frontWheelMesh.transform.position = wheelPosition;
 
                 //rotation is the same as the rear wheel, but with interpolated steer speed
-                Transform rearWheelRotation = rearWheelMeshes[count];
-                frontWheelMesh.rotation = rearWheelRotation.rotation;
+                WheelMesh rearWheelRotation = rearWheelMeshes[count];
+                frontWheelMesh.transform.rotation = rearWheelRotation.transform.rotation;
                 
                 //set the steer amount
-                Transform steerPivot = frontWheelMesh.parent;
+                Transform steerPivot = frontWheelMesh.transform.parent;
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
+            }
+
+            //add camber
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+                if (stanceModification != null)
+                    stanceModification.AddCamberRotation();
             }
         }
 
@@ -1185,15 +1261,15 @@ namespace Gumball
         private void CacheAllWheelMeshes()
         {
             int indexCount = 0;
-            allWheelMeshes = new Transform[frontWheelMeshes.Length + rearWheelMeshes.Length];
-            foreach (Transform wheelMesh in frontWheelMeshes)
+            allWheelMeshesCached = new WheelMesh[frontWheelMeshes.Length + rearWheelMeshes.Length];
+            foreach (WheelMesh wheelMesh in frontWheelMeshes)
             {
-                allWheelMeshes[indexCount] = wheelMesh;
+                allWheelMeshesCached[indexCount] = wheelMesh;
                 indexCount++;
             }
-            foreach (Transform wheelMesh in rearWheelMeshes)
+            foreach (WheelMesh wheelMesh in rearWheelMeshes)
             {
-                allWheelMeshes[indexCount] = wheelMesh;
+                allWheelMeshesCached[indexCount] = wheelMesh;
                 indexCount++;
             }
         }
@@ -1201,12 +1277,12 @@ namespace Gumball
         private void CacheAllWheelColliders()
         {
             int indexCount = 0;
-            allWheelColliders = new WheelCollider[frontWheelColliders.Length + rearWheelColliders.Length];
+            allWheelCollidersCached = new WheelCollider[frontWheelColliders.Length + rearWheelColliders.Length];
             foreach (WheelCollider wheelCollider in frontWheelColliders)
             {
-                wheelCollider.gameObject.AddComponent<WheelColliderData>();
+                wheelCollider.gameObject.GetComponent<WheelColliderData>(true);
                 
-                allWheelColliders[indexCount] = wheelCollider;
+                allWheelCollidersCached[indexCount] = wheelCollider;
                 indexCount++;
             }
             foreach (WheelCollider wheelCollider in rearWheelColliders)
@@ -1214,9 +1290,9 @@ namespace Gumball
                 if (defaultRearWheelStiffness < 0)
                     defaultRearWheelStiffness = wheelCollider.sidewaysFriction.stiffness;
                         
-                wheelCollider.gameObject.AddComponent<WheelColliderData>();
+                wheelCollider.gameObject.GetComponent<WheelColliderData>(true);
 
-                allWheelColliders[indexCount] = wheelCollider;
+                allWheelCollidersCached[indexCount] = wheelCollider;
                 indexCount++;
             }
         }
@@ -1445,6 +1521,17 @@ namespace Gumball
             else racersCollidingWith.Remove(car);
         }
 
+        private void InitialiseWheelStance()
+        {
+            //check if the wheels have stance options and initialise
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
+            {
+                StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
+                if (stanceModification != null)
+                    stanceModification.Initialise(this);
+            }
+        }
+        
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {

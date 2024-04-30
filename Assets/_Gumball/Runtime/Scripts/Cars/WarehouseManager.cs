@@ -69,6 +69,7 @@ namespace Gumball
             car.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             
             car.InitialiseAsPlayer(index, id);
+            car.SetGrounded();
             
             yield return DecalManager.ApplyDecalDataToCar(car);
             
