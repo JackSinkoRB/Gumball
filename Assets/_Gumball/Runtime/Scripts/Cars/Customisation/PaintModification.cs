@@ -141,6 +141,9 @@ namespace Gumball
             
             foreach (MeshRenderer meshRenderer in meshRenderers)
             {
+                if (meshRenderer.sharedMaterial == null)
+                    continue;
+                
                 //check if it's a colourable body part
                 bool isCopy = meshRenderer.sharedMaterial.name.Replace("(Clone)", "").Equals(bodyMaterial.name);
                 if (meshRenderer.sharedMaterial == bodyMaterial || isCopy)
