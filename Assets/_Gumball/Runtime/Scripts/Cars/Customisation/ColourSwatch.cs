@@ -59,7 +59,32 @@ namespace Gumball
         public float ClearCoat => clearCoat;
         public float ClearCoatSmoothness => clearCoatSmoothness;
         public Color Emission => emission;
+
+        public void SetColor(Color color)
+        {
+            this.color = color;
+        }
         
+        public void SetEmission(Color emission)
+        {
+            this.emission = emission;
+        }
+
+        public void SetMetallic(float value)
+        {
+            metallic = value;
+        }
+        
+        public void SetSmoothness(float value)
+        {
+            smoothness = value;
+        }
+        
+        public void SetClearcoat(float value)
+        {
+            clearCoat = value;
+        }
+
         public ColourSwatchSerialized Serialize()
         {
             return new ColourSwatchSerialized(this);

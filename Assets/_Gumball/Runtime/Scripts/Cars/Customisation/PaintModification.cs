@@ -7,15 +7,21 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class ColourModification : MonoBehaviour
+    public class PaintModification : MonoBehaviour
     {
         
+        public enum PaintMode
+        {
+            SIMPLE,
+            ADVANCED
+        }
+                
         //caching:
         private static readonly int Emission = Shader.PropertyToID("_Emission");
         private static readonly int ClearCoatSmoothness = Shader.PropertyToID("_ClearCoatSmoothness");
         private static readonly int ClearCoat = Shader.PropertyToID("_ClearCoat");
         private static readonly int Smoothness = Shader.PropertyToID("_Smoothness");
-        private static readonly int Mettalic = Shader.PropertyToID("_Mettalic");
+        private static readonly int Metallic = Shader.PropertyToID("_Metallic");
         private static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
         
         [SerializeField] private Material bodyMaterial;
@@ -26,14 +32,22 @@ namespace Gumball
         [SerializeField, ReadOnly] private MeshRenderer[] colourableBodyParts;
 
         private string saveKey => $"{carBelongsTo.SaveKey}.Paint";
+        
         public ColourSwatch[] SwatchPresets => swatchPresets;
+        public PaintMode CurrentBodyPaintMode => GetCurrentSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
 
-        private ColourSwatchSerialized currentBodyColour
+        public ColourSwatchSerialized CurrentBodyColour
         {
             get => DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.BodyColour");
             set => DataManager.Cars.Set($"{saveKey}.BodyColour", value);
         }
         
+        public int CurrentSelectedPresetIndex
+        {
+            get => DataManager.Cars.Get($"{saveKey}.SelectedPreset", 0);
+            set => DataManager.Cars.Set($"{saveKey}.SelectedPreset", value);
+        }
+
 #if UNITY_EDITOR
         [Header("Testing")]
         [SerializeField] private ColourSwatch testSwatch;
@@ -82,30 +96,15 @@ namespace Gumball
                 meshRenderer.sharedMaterial.SetColor(BaseColor, swatch.Color.ToColor());
                 meshRenderer.sharedMaterial.SetColor(Emission, swatch.Emission.ToColor());
                 
-                meshRenderer.sharedMaterial.SetFloat(Mettalic, swatch.Metallic);
+                meshRenderer.sharedMaterial.SetFloat(Metallic, swatch.Metallic);
                 meshRenderer.sharedMaterial.SetFloat(Smoothness, swatch.Smoothness);
                 meshRenderer.sharedMaterial.SetFloat(ClearCoat, swatch.ClearCoat);
                 meshRenderer.sharedMaterial.SetFloat(ClearCoatSmoothness, swatch.ClearCoatSmoothness);
             }
 
-            currentBodyColour = swatch;
+            CurrentBodyColour = swatch;
         }
 
-        /// <summary>
-        /// Gets the index of the current swatch if it exists in the presets, else returns the default swatch (0).
-        /// </summary>
-        public int GetCurrentSwatchIndexInPresets()
-        {
-            for (int index = 0; index < swatchPresets.Length; index++)
-            {
-                ColourSwatch colourSwatch = swatchPresets[index];
-                if (currentBodyColour.Equals(colourSwatch))
-                    return index;
-            }
-            
-            return 0;
-        }
-        
         public void LoadFromSave()
         {
             if (!DataManager.Cars.HasKey($"{saveKey}.BodyColour"))
@@ -116,6 +115,19 @@ namespace Gumball
 
             ColourSwatchSerialized saveData = DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.BodyColour");
             ApplySwatch(saveData);
+        }
+
+        /// <returns>Gets the index of the current swatch if it exists in the presets, else returns -1.</returns>
+        public int GetCurrentSwatchIndexInPresets()
+        {
+            for (int index = 0; index < swatchPresets.Length; index++)
+            {
+                ColourSwatch colourSwatch = swatchPresets[index];
+                if (CurrentBodyColour.Equals(colourSwatch))
+                    return index;
+            }
+            
+            return -1;
         }
 
         /// <summary>

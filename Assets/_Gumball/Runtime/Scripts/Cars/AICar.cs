@@ -47,10 +47,10 @@ namespace Gumball
 
         [Header("Customisation")]
         [SerializeField] private CarPartManager carPartManager;
-        [SerializeField] private ColourModification colourModification;
+        [SerializeField] private PaintModification paintModification;
 
         public CarPartManager CarPartManager => carPartManager;
-        public ColourModification ColourModification => colourModification;
+        public PaintModification PaintModification => paintModification;
 
         [Header("Sizing")]
         [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
@@ -337,8 +337,8 @@ namespace Gumball
             if (carPartManager != null)
                 carPartManager.Initialise(this);
             
-            if (colourModification != null)
-                colourModification.Initialise(this);
+            if (paintModification != null)
+                paintModification.Initialise(this);
 
             InitialiseWheelStance();
         }
