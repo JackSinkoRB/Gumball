@@ -867,8 +867,13 @@ namespace Gumball
         private void CheckToReverse()
         {
             if (autoDrive)
-                //TODO: might want to handle cases if car is completely blocked ahead and reverse out
+            {
+                //for now, autodrive has no reverse, so make sure it is not in reverse
+                //might want to handle cases if car is completely blocked ahead and reverse out
+                if (isReversing)
+                    OnStopReversing();
                 return;
+            }
             
             if (isReversing && !InputManager.Instance.CarInput.Brake.IsPressed)
                 OnStopReversing();
