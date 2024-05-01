@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class PaintModificationTests : IPrebuildSetup, IPostBuildCleanup
+    public class BodyPaintModificationTests : IPrebuildSetup, IPostBuildCleanup
     {
         
         private const int carIndexToUse = 0; //test with the XJ

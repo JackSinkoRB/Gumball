@@ -36,7 +36,8 @@ namespace Gumball
         private string saveKey => $"{carBelongsTo.SaveKey}.Paint.Wheel.{wheelIndex}";
         
         public PaintMode CurrentPaintMode => GetCurrentSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
-
+        public MeshRenderer[] ColourableParts => colourableParts;
+        
         public ColourSwatchSerialized CurrentSwatch
         {
             get => DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
