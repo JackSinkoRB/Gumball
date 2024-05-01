@@ -92,6 +92,8 @@ namespace Gumball
             paintableTexture.Slot = new P3dSlot(0, textureString); //car body shader uses albedo
             
             //paintable.UseMesh = P3dModel.UseMeshType.AutoSeamFix;
+            
+            paintableTexture.Color = new Color(1,1,1,0); //ensure alpha is transferred to the texture
         }
 
         public void DisablePainting()

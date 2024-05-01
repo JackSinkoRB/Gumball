@@ -17,9 +17,16 @@ namespace Gumball
             WorkshopSceneManager.Instance.ExitWorkshopScene();
         }
 
+        protected override void OnShow()
+        {
+            base.OnShow();
+            
+            OpenSubMenu(null);
+        }
+
         public void OpenSubMenu(WorkshopSubMenu subMenu)
         {
-            if (subMenu.IsShowing)
+            if (subMenu != null && subMenu.IsShowing)
                 return; //already open
             
             //hide all other menus
@@ -29,7 +36,8 @@ namespace Gumball
             stanceMenu.Hide();
             
             //just show this menu
-            subMenu.Show();
+            if (subMenu != null)
+                subMenu.Show();
         }
         
     }

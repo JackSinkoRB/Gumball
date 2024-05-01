@@ -61,7 +61,7 @@ namespace Gumball
                 }
             }
 
-            magneticScroll.SetItems(scrollItems, group.CurrentPartIndex);
+            magneticScroll.SetItems(scrollItems, group == null ? 0 : group.CurrentPartIndex);
         }
 
     }

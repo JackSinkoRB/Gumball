@@ -273,6 +273,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 7576791136675941403}
   - {fileID: 6978679286292903102}
   - {fileID: 7831755652159390863}
   - {fileID: 5144348758853134650}
@@ -327,6 +328,7 @@ MonoBehaviour:
   carIndex: 0
   id: 0
   carPartManager: {fileID: 0}
+  paintModification: {fileID: 6974816536114422547}
   frontOfCarPosition: {x: 0, y: 1, z: 2.3}
   carWidth: 2
   wheelConfiguration: 2
@@ -1281,6 +1283,153 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   endBoneCopiesRotation: 1
+--- !u!1 &3743935481210137089
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7576791136675941403}
+  - component: {fileID: 6974816536114422547}
+  m_Layer: 8
+  m_Name: PaintModification
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7576791136675941403
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3743935481210137089}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 724044971135627713}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6974816536114422547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3743935481210137089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43c1a843cef6b1643ba5dc940e9e2006, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bodyMaterial: {fileID: 2100000, guid: 7a3ef295712a3fa4dae03cdd96c89678, type: 2}
+  swatchPresets:
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0.7176471, g: 0.7176471, b: 0.7176471, a: 1}
+  - color: {r: 1, g: 0, b: 0, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 1, g: 0.4308149, b: 0, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0.5188679, g: 0.33599362, b: 0.090557136, a: 1}
+  - color: {r: 1, g: 0.8612033, b: 0, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 1, g: 0.80399513, b: 0, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0.4528302, g: 0.42992213, b: 0.09611963, a: 1}
+  - color: {r: 0.0869565, g: 1, b: 0, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0, g: 1, b: 0.99999976, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0.17021182, g: 0.47133934, b: 0.4811321, a: 1}
+  - color: {r: 0.044987053, g: 0.7169812, b: 0, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0.044555523, b: 0.5283019, a: 1}
+  - color: {r: 0.25485048, g: 0.2947121, b: 0.7830189, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.53753424, g: 0, b: 1, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0.36264154, g: 0.16580634, b: 0.509434, a: 1}
+  - color: {r: 0.9095907, g: 0, b: 1, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 1, g: 0, b: 0.6113291, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.7176471, g: 0, b: 0.057273805, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0.044555523, b: 0.5283019, a: 1}
+  - color: {r: 0.3773585, g: 0.3773585, b: 0.3773585, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8018868, g: 0.8018868, b: 0.8018868, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  carBelongsTo: {fileID: 4221895653879022365}
+  colourableBodyParts:
+  - {fileID: 750337925473403155}
+  - {fileID: 6922924910606962313}
+  testSwatch:
+    color: {r: 0.25485048, g: 0.2947121, b: 0.7830189, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &3905756656652600902
 GameObject:
   m_ObjectHideFlags: 0
