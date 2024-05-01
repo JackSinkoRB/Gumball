@@ -8,38 +8,40 @@ using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class PaintWorkshopMenu : WorkshopSubMenu
+    public class BodyPaintWorkshopMenu : WorkshopSubMenu
     {
 
         [SerializeField] private GameObject simpleMenu;
         [SerializeField] private GameObject advancedMenu;
 
+        [Header("Advanced")]
         [SerializeField] private ColorPicker primaryColorPicker;
         [SerializeField] private ColorPicker secondaryColorPicker;
         [SerializeField] private Slider metallicSlider;
         [SerializeField] private Slider glossSlider;
         [SerializeField] private Slider clearcoatSlider;
         
-        [SerializeField] private MagneticScroll bodyColourSwatchMagneticScroll;
+        [Header("Simple")]
+        [SerializeField] private MagneticScroll swatchMagneticScroll;
 
         private readonly ColourSwatch advancedSwatch = new();
-        private PaintModification.PaintMode? currentMode;
+        private BodyPaintModification.PaintMode? currentMode;
         
-        private PaintModification paintModification => WarehouseManager.Instance.CurrentCar.PaintModification;
+        private BodyPaintModification paintModification => WarehouseManager.Instance.CurrentCar.BodyPaintModification;
 
         public override void Show()
         {
             base.Show();
 
-            SelectTab(paintModification.CurrentBodyPaintMode);
+            SelectTab(paintModification.CurrentPaintMode);
         }
 
         /// <summary>
         /// Workaround for unity events.
         /// </summary>
-        public void SelectTab(int index) => SelectTab((PaintModification.PaintMode)index);
+        public void SelectTab(int index) => SelectTab((BodyPaintModification.PaintMode)index);
         
-        public void SelectTab(PaintModification.PaintMode paintMode)
+        public void SelectTab(BodyPaintModification.PaintMode paintMode)
         {
             if (currentMode == paintMode)
                 return; //already selected
@@ -48,10 +50,10 @@ namespace Gumball
 
             switch (paintMode)
             {
-                case PaintModification.PaintMode.SIMPLE:
+                case BodyPaintModification.PaintMode.SIMPLE:
                     OnSelectSimpleTab();
                     break;
-                case PaintModification.PaintMode.ADVANCED:
+                case BodyPaintModification.PaintMode.ADVANCED:
                     OnSelectAdvancedTab();
                     break;
                 default:
@@ -100,11 +102,11 @@ namespace Gumball
         
         private void OnSelectAdvancedTab()
         {
-            advancedSwatch.SetColor(paintModification.CurrentBodyColour.Color.ToColor());
-            advancedSwatch.SetEmission(paintModification.CurrentBodyColour.Emission.ToColor());
-            advancedSwatch.SetMetallic(paintModification.CurrentBodyColour.Metallic);
-            advancedSwatch.SetSmoothness(paintModification.CurrentBodyColour.Smoothness);
-            advancedSwatch.SetClearcoat(paintModification.CurrentBodyColour.ClearCoat);
+            advancedSwatch.SetColor(paintModification.CurrentSwatch.Color.ToColor());
+            advancedSwatch.SetEmission(paintModification.CurrentSwatch.Emission.ToColor());
+            advancedSwatch.SetMetallic(paintModification.CurrentSwatch.Metallic);
+            advancedSwatch.SetSmoothness(paintModification.CurrentSwatch.Smoothness);
+            advancedSwatch.SetClearcoat(paintModification.CurrentSwatch.ClearCoat);
             
             //update the UI
             primaryColorPicker.AssignColor(advancedSwatch.Color);
@@ -117,14 +119,14 @@ namespace Gumball
             advancedMenu.gameObject.SetActive(true);
         }
         
-        private void PopulateSwatchScroll(PaintModification paintModification, bool showCustomSwatchOption)
+        private void PopulateSwatchScroll(BodyPaintModification bodyPaintModification, bool showCustomSwatchOption)
         {
             List<ScrollItem> scrollItems = new List<ScrollItem>();
             
             if (showCustomSwatchOption)
             {
                 //add an additional ScrollItem at the beginning with the advanced colour settings
-                ColourSwatchSerialized colourSwatch = paintModification.CurrentBodyColour;
+                ColourSwatchSerialized colourSwatch = bodyPaintModification.CurrentSwatch;
                 ScrollItem customSwatchItem = new ScrollItem();
                 
                 customSwatchItem.onLoad += () =>
@@ -136,15 +138,15 @@ namespace Gumball
 
                 customSwatchItem.onSelect += () =>
                 {
-                    paintModification.ApplySwatch(colourSwatch);
+                    bodyPaintModification.ApplySwatch(colourSwatch);
                 };
                 
                 scrollItems.Add(customSwatchItem);
             }
 
-            for (int index = 0; index < paintModification.SwatchPresets.Length; index++)
+            for (int index = 0; index < GlobalPaintPresets.Instance.BodySwatchPresets.Length; index++)
             {
-                ColourSwatch colourSwatch = paintModification.SwatchPresets[index];
+                ColourSwatch colourSwatch = GlobalPaintPresets.Instance.BodySwatchPresets[index];
                 ScrollItem scrollItem = new ScrollItem();
                 int finalIndex = index;
                 
@@ -157,15 +159,15 @@ namespace Gumball
 
                 scrollItem.onSelect += () =>
                 {
-                    paintModification.ApplySwatch(colourSwatch);
-                    paintModification.CurrentSelectedPresetIndex = finalIndex;
+                    bodyPaintModification.ApplySwatch(colourSwatch);
+                    bodyPaintModification.CurrentSelectedPresetIndex = finalIndex;
                 };
 
                 scrollItems.Add(scrollItem);
             }
 
-            int indexToShow = showCustomSwatchOption ? 0 : paintModification.CurrentSelectedPresetIndex;
-            bodyColourSwatchMagneticScroll.SetItems(scrollItems, indexToShow);
+            int indexToShow = showCustomSwatchOption ? 0 : bodyPaintModification.CurrentSelectedPresetIndex;
+            swatchMagneticScroll.SetItems(scrollItems, indexToShow);
         }
         
     }

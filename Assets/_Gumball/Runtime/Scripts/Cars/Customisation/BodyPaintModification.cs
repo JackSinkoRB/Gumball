@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class PaintModification : MonoBehaviour
+    public class BodyPaintModification : MonoBehaviour
     {
         
         public enum PaintMode
@@ -23,24 +23,20 @@ namespace Gumball
         public static readonly int ClearCoatShaderID = Shader.PropertyToID("_ClearCoat");
         public static readonly int SmoothnessShaderID = Shader.PropertyToID("_Smoothness");
         public static readonly int MetallicShaderID = Shader.PropertyToID("_Metallic");
-        
-        [SerializeField] private Material bodyMaterial;
-        [SerializeField] private ColourSwatch[] swatchPresets;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
-        [SerializeField, ReadOnly] private MeshRenderer[] colourableBodyParts;
+        [SerializeField, ReadOnly] private MeshRenderer[] colourableParts;
 
-        private string saveKey => $"{carBelongsTo.SaveKey}.Paint";
+        private string saveKey => $"{carBelongsTo.SaveKey}.Paint.Body";
 
-        public MeshRenderer[] ColourableBodyParts => colourableBodyParts;
-        public ColourSwatch[] SwatchPresets => swatchPresets;
-        public PaintMode CurrentBodyPaintMode => GetCurrentSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
+        public MeshRenderer[] ColourableParts => colourableParts;
+        public PaintMode CurrentPaintMode => GetCurrentSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
 
-        public ColourSwatchSerialized CurrentBodyColour
+        public ColourSwatchSerialized CurrentSwatch
         {
-            get => DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.BodyColour");
-            set => DataManager.Cars.Set($"{saveKey}.BodyColour", value);
+            get => DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
+            set => DataManager.Cars.Set($"{saveKey}.CurrentSwatch", value);
         }
         
         public int CurrentSelectedPresetIndex
@@ -59,17 +55,17 @@ namespace Gumball
             if (carBelongsTo == null)
                 carBelongsTo = transform.GetComponentInAllParents<AICar>();
             
-            FindBodyParts();
+            FindColourableParts();
             ApplySwatch(testSwatch);
         }
         
         [ButtonMethod]
         public void ClearTestSwatch()
         {
-            FindBodyParts();
-            foreach (MeshRenderer meshRenderer in colourableBodyParts)
+            FindColourableParts();
+            foreach (MeshRenderer meshRenderer in colourableParts)
             {
-                meshRenderer.sharedMaterial = bodyMaterial;
+                meshRenderer.sharedMaterial = GlobalPaintPresets.Instance.DefaultBodyMaterial;
             }
         }
 #endif
@@ -78,7 +74,7 @@ namespace Gumball
         {
             this.carBelongsTo = carBelongsTo;
             
-            FindBodyParts();
+            FindColourableParts();
 
             LoadFromSave();
         }
@@ -92,7 +88,7 @@ namespace Gumball
         {
             EnsureMaterialIsCopy();
             
-            foreach (MeshRenderer meshRenderer in colourableBodyParts)
+            foreach (MeshRenderer meshRenderer in colourableParts)
             {
                 meshRenderer.sharedMaterial.SetColor(BaseColorShaderID, swatch.Color.ToColor());
                 meshRenderer.sharedMaterial.SetColor(EmissionShaderID, swatch.Emission.ToColor());
@@ -103,28 +99,28 @@ namespace Gumball
                 meshRenderer.sharedMaterial.SetFloat(ClearCoatSmoothnessShaderID, swatch.ClearCoatSmoothness);
             }
 
-            CurrentBodyColour = swatch;
+            CurrentSwatch = swatch;
         }
 
         public void LoadFromSave()
         {
-            if (!DataManager.Cars.HasKey($"{saveKey}.BodyColour"))
+            if (!DataManager.Cars.HasKey($"{saveKey}.CurrentSwatch"))
             {
-                ApplySwatch(swatchPresets[0]); //apply the default
+                ApplySwatch(GlobalPaintPresets.Instance.BodySwatchPresets[0]); //apply the default
                 return;
             }
 
-            ColourSwatchSerialized saveData = DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.BodyColour");
+            ColourSwatchSerialized saveData = DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
             ApplySwatch(saveData);
         }
 
         /// <returns>Gets the index of the current swatch if it exists in the presets, else returns -1.</returns>
         public int GetCurrentSwatchIndexInPresets()
         {
-            for (int index = 0; index < swatchPresets.Length; index++)
+            for (int index = 0; index < GlobalPaintPresets.Instance.BodySwatchPresets.Length; index++)
             {
-                ColourSwatch colourSwatch = swatchPresets[index];
-                if (CurrentBodyColour.Equals(colourSwatch))
+                ColourSwatch colourSwatch = GlobalPaintPresets.Instance.BodySwatchPresets[index];
+                if (CurrentSwatch.Equals(colourSwatch))
                     return index;
             }
             
@@ -134,10 +130,10 @@ namespace Gumball
         /// <summary>
         /// Finds all the body parts and assigns a single material instance that can be modified.
         /// </summary>
-        private void FindBodyParts()
+        private void FindColourableParts()
         {
             List<MeshRenderer> meshRenderers = carBelongsTo.transform.GetComponentsInAllChildren<MeshRenderer>();
-            HashSet<MeshRenderer> bodyParts = new();
+            HashSet<MeshRenderer> parts = new();
             
             foreach (MeshRenderer meshRenderer in meshRenderers)
             {
@@ -145,12 +141,12 @@ namespace Gumball
                     continue;
                 
                 //check if it's a colourable body part
-                bool isCopy = meshRenderer.sharedMaterial.name.Replace("(Clone)", "").Equals(bodyMaterial.name);
-                if (meshRenderer.sharedMaterial == bodyMaterial || isCopy)
-                    bodyParts.Add(meshRenderer);
+                bool isCopy = meshRenderer.sharedMaterial.name.Replace("(Clone)", "").Equals(GlobalPaintPresets.Instance.DefaultBodyMaterial.name);
+                if (meshRenderer.sharedMaterial == GlobalPaintPresets.Instance.DefaultBodyMaterial || isCopy)
+                    parts.Add(meshRenderer);
             }
             
-            colourableBodyParts = bodyParts.ToArray();
+            colourableParts = parts.ToArray();
         }
 
         /// <summary>
@@ -158,7 +154,7 @@ namespace Gumball
         /// </summary>
         private void EnsureMaterialIsCopy()
         {
-            foreach (MeshRenderer meshRenderer in colourableBodyParts)
+            foreach (MeshRenderer meshRenderer in colourableParts)
             {
                 if (!meshRenderer.sharedMaterial.name.Contains("(Clone)"))
                     meshRenderer.sharedMaterial = Instantiate(meshRenderer.sharedMaterial);
