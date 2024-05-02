@@ -39,6 +39,7 @@ namespace Gumball
         
         public PaintMode CurrentPaintMode => GetCurrentSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
         public MeshRenderer[] ColourableParts => colourableParts;
+        public int DefaultSwatchIndex => defaultSwatchIndex;
         
         public ColourSwatchSerialized CurrentSwatch
         {

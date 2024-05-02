@@ -95,7 +95,7 @@ namespace Gumball.Runtime.Tests
                 //load from save, and ensure it is the first swatch preset
                 paintModification.LoadFromSave();
 
-                ColourSwatch defaultSwatch = GlobalPaintPresets.Instance.WheelSwatchPresets[0];
+                ColourSwatch defaultSwatch = GlobalPaintPresets.Instance.WheelSwatchPresets[paintModification.DefaultSwatchIndex];
                 Assert.AreEqual(defaultSwatch.Color, meshToTest.sharedMaterial.GetColor(WheelPaintModification.BaseColorShaderID));
                 Assert.AreEqual(defaultSwatch.Emission, meshToTest.sharedMaterial.GetColor(WheelPaintModification.EmissionShaderID));
                 Assert.AreEqual(defaultSwatch.Metallic, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.MetallicShaderID));
