@@ -26,6 +26,8 @@ namespace Gumball
             ADVANCED
         }
 
+        [SerializeField] private int defaultSwatchIndex;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
         [SerializeField, ReadOnly] private MeshRenderer[] colourableParts;
@@ -37,6 +39,7 @@ namespace Gumball
         
         public PaintMode CurrentPaintMode => GetCurrentSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
         public MeshRenderer[] ColourableParts => colourableParts;
+        public int DefaultSwatchIndex => defaultSwatchIndex;
         
         public ColourSwatchSerialized CurrentSwatch
         {
@@ -46,7 +49,7 @@ namespace Gumball
         
         public int CurrentSelectedPresetIndex
         {
-            get => DataManager.Cars.Get($"{saveKey}.SelectedPreset", 0);
+            get => DataManager.Cars.Get($"{saveKey}.SelectedPreset", defaultSwatchIndex);
             set => DataManager.Cars.Set($"{saveKey}.SelectedPreset", value);
         }
 
@@ -112,7 +115,7 @@ namespace Gumball
         {
             if (!DataManager.Cars.HasKey($"{saveKey}.CurrentSwatch"))
             {
-                ApplySwatch(GlobalPaintPresets.Instance.WheelSwatchPresets[0]); //apply the default
+                ApplySwatch(GlobalPaintPresets.Instance.WheelSwatchPresets[defaultSwatchIndex]); //apply the default
                 return;
             }
 
