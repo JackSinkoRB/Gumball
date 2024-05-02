@@ -18,7 +18,7 @@ namespace Gumball
         
         [PositiveValueOnly, SerializeField] private int resolution = 100;
         [PositiveValueOnly, SerializeField] private int resolutionLowLOD = 20;
-        [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 50;
+        [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 5;
 
         [Header("Road")]
         [Tooltip("Should the terrain match the road height? Or should it be above (eg. a highway overpass)?")]

@@ -43,7 +43,7 @@ namespace Gumball
 
         [Header("Terrains")]
         [Tooltip("The distance for the player to be within to use the high LOD.")]
-        [SerializeField] private float terrainHighLODDistance = 150;
+        [SerializeField] private float terrainHighLODDistance = 500;
         [SerializeField, ReadOnly] private TerrainLOD currentLOD;
         [SerializeField, ReadOnly] private GameObject terrainHighLOD;
         [SerializeField, ReadOnly] private GameObject terrainLowLOD;
@@ -333,6 +333,9 @@ namespace Gumball
         {
             if (!ChunkManager.ExistsRuntime || WarehouseManager.Instance.CurrentCar == null)
                 return;
+
+            if (!isFullyLoaded)
+                return; //don't switch to low until it's fully loaded, as the high LOD is needed for the collider for chunk objects
             
             if (timeSinceTerrainLODCheck < secondsBetweenTerrainLODChecks)
                 return;

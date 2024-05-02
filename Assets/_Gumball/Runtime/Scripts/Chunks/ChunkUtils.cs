@@ -153,31 +153,27 @@ namespace Gumball
             return uvs;
         }
         
-        public static void GroundObject(Transform transform)
+        /// <returns>True if the object was grounded, or false if it failed.</returns>
+        public static bool GroundObject(Transform transform)
         {
             float offset = 0;
-
+            bool hit = false;
+            
             Vector3 originalPosition = transform.position;
             try
             {
                 transform.position = transform.position.OffsetY(10000);
 
-                if (transform.gameObject.scene.GetPhysicsScene().Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Terrain)))
+                hit = transform.gameObject.scene.GetPhysicsScene().Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Terrain));
+                if (hit)
                     offset = -hitDown.distance;
             }
             finally
             {
-                if (offset == 0)
-                {
-                    //wasn't successful
-                    transform.position = originalPosition;
-                }
-                else
-                {
-                    //success
-                    transform.position = transform.position.OffsetY(offset);
-                }
+                transform.position = hit && offset != 0 ? transform.position.OffsetY(offset) : originalPosition;
             }
+
+            return hit;
         }
 
 #if UNITY_EDITOR
