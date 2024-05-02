@@ -140,11 +140,15 @@ jobs:
             COUNT=$(( $(echo "$COMMITS" | jq length) ))
             COMMIT_MESSAGES=""
             for ((i=0; i<$COUNT; i++)); do
-              COMMIT_MESSAGES+="$((i+1)). $(echo "$COMMITS" | jq -r .[$i].message)\\n"
+                # Get commit message and truncate at the first occurrence of '\n'
+                COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | sed 's/\\n.*//')
+                COMMIT_MESSAGES+="$((i+1)). $COMMIT_MESSAGE\\n"
             done
           else
             COUNT=1
-            COMMIT_MESSAGES="$(echo "$COMMITS" | jq -r .[0].message)\\n"
+            # Get commit message and truncate at the first occurrence of '\n'
+            COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | sed 's/\\n.*//')
+            COMMIT_MESSAGES="$COMMIT_MESSAGE\\n"
           fi
           echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"
           echo "commit-messages=$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
