@@ -24,11 +24,15 @@ namespace Gumball.Runtime.Tests
         public void Setup()
         {
             BootSceneClear.TrySetup();
+            
+            SingletonScriptableHelper.LazyLoadingEnabled = true;
         }
 
         public void Cleanup()
         {
             BootSceneClear.TryCleanup();
+            
+            SingletonScriptableHelper.LazyLoadingEnabled = false;
         }
         
         [OneTimeSetUp]

@@ -10,6 +10,15 @@ using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
+#if UNITY_EDITOR
+    public static class SingletonScriptableHelper
+    {
+        /// <summary>
+        /// This can be enabled to load the assets on demand.
+        /// </summary>
+        public static bool LazyLoadingEnabled = false;
+    }
+#endif
     public class SingletonScriptable<T> : ScriptableObject where T : SingletonScriptable<T>
     {
 
@@ -24,7 +33,7 @@ namespace Gumball
                     LoadInstanceAsync();
                     
 #if UNITY_EDITOR
-                    if (!Application.isPlaying)
+                    if (!Application.isPlaying || SingletonScriptableHelper.LazyLoadingEnabled)
                     {
                         instance = handle.WaitForCompletion();
                         stopwatch.Stop();
