@@ -39,7 +39,7 @@ namespace Gumball
             InputManager.Instance.CarInput.Handbrake.SetPressedOverride(false);
             InputManager.Instance.CarInput.ShiftUp.SetPressedOverride(false);
             InputManager.Instance.CarInput.ShiftDown.SetPressedOverride(false);
-            InputManager.Instance.CarInput.Steering.SetValueOverride(0);
+            InputManager.Instance.CarInput.Steering.SetValueOverride(null);
         }
 
         private void OnCarChanged(AICar newCar)
