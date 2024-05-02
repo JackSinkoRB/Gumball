@@ -211,7 +211,8 @@ namespace Gumball
                 
                 OnRemoveFromSource();
                 
-                GlobalLoggers.SaveDataLogger.Log($"Removed all keys from {identifier}.");
+                if (GlobalLoggers.HasLoaded)
+                    GlobalLoggers.SaveDataLogger.Log($"Removed all keys from {identifier}.");
             }
         }
         

@@ -47,10 +47,10 @@ namespace Gumball
 
         [Header("Customisation")]
         [SerializeField] private CarPartManager carPartManager;
-        [SerializeField] private PaintModification paintModification;
+        [SerializeField] private BodyPaintModification bodyPaintModification;
 
         public CarPartManager CarPartManager => carPartManager;
-        public PaintModification PaintModification => paintModification;
+        public BodyPaintModification BodyPaintModification => bodyPaintModification;
 
         [Header("Sizing")]
         [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
@@ -67,6 +67,8 @@ namespace Gumball
         private WheelMesh[] allWheelMeshesCached;
         private WheelCollider[] allWheelCollidersCached;
 
+        public WheelMesh[] FrontWheelMeshes => frontWheelMeshes;
+        public WheelMesh[] RearWheelMeshes => rearWheelMeshes;
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
         public WheelCollider[] RearWheelColliders => rearWheelColliders;
 
@@ -337,9 +339,16 @@ namespace Gumball
             if (carPartManager != null)
                 carPartManager.Initialise(this);
             
-            if (paintModification != null)
-                paintModification.Initialise(this);
+            if (bodyPaintModification != null)
+                bodyPaintModification.Initialise(this);
 
+            foreach (WheelMesh wheelMesh in AllWheelMeshes)
+            {
+                WheelPaintModification wheelPaintModification = wheelMesh.GetComponent<WheelPaintModification>();
+                if (wheelPaintModification != null)
+                    wheelPaintModification.Initialise(this);
+            }
+            
             InitialiseWheelStance();
         }
 
@@ -867,8 +876,13 @@ namespace Gumball
         private void CheckToReverse()
         {
             if (autoDrive)
-                //TODO: might want to handle cases if car is completely blocked ahead and reverse out
+            {
+                //for now, autodrive has no reverse, so make sure it is not in reverse
+                //might want to handle cases if car is completely blocked ahead and reverse out
+                if (isReversing)
+                    OnStopReversing();
                 return;
+            }
             
             if (isReversing && !InputManager.Instance.CarInput.Brake.IsPressed)
                 OnStopReversing();

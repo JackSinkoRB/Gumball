@@ -273,8 +273,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7576791136675941403}
   - {fileID: 6978679286292903102}
+  - {fileID: 7576791136675941403}
   - {fileID: 7831755652159390863}
   - {fileID: 5144348758853134650}
   - {fileID: 7880060370973760672}
@@ -328,7 +328,7 @@ MonoBehaviour:
   carIndex: 0
   id: 0
   carPartManager: {fileID: 0}
-  paintModification: {fileID: 6974816536114422547}
+  bodyPaintModification: {fileID: 6974816536114422547}
   frontOfCarPosition: {x: 0, y: 1, z: 2.3}
   carWidth: 2
   wheelConfiguration: 2
@@ -1164,6 +1164,7 @@ GameObject:
   m_Component:
   - component: {fileID: 61330546049198137}
   - component: {fileID: 2038216150897370914}
+  - component: {fileID: 7658804735513830144}
   m_Layer: 0
   m_Name: Rotation_RL
   m_TagString: Untagged
@@ -1202,6 +1203,149 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentRim: {fileID: 6492655967581693633}
   currentTyre: {fileID: 3497637223033072429}
+--- !u!114 &7658804735513830144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3268220798790823523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce4b6b7c12aa484bb5820e25a981651, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wheelMaterial: {fileID: 2100000, guid: 028ff16f3a3919b4492844827f397355, type: 2}
+  swatchPresets:
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.6784314, g: 0.67058825, b: 0.68235296, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.20000002, g: 0.20000002, b: 0.20784315, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0, g: 0, b: 0, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0.509434, g: 0.509434, b: 0.509434, a: 1}
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0, g: 0, b: 0, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8039216, g: 0.49803922, b: 0.19607843, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.72156864, g: 0.6117647, b: 0.5411765, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.64705884, g: 0.4862745, b: 0.39607844, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.30588236, g: 0.20392157, b: 0.09411765, a: 1}
+    metallic: 0.5
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.78431374, g: 0.5647059, b: 0.019607844, a: 1}
+    metallic: 0.5
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8862746, g: 0.46274513, b: 0.18431373, a: 1}
+    metallic: 0.2
+    smoothness: 1
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8588236, g: 0.13333334, b: 0.054901965, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.18823531, g: 0.58431375, b: 0.92549026, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.52156866, g: 0.12941177, b: 0.7176471, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.6784314, g: 0.9294118, b: 0.15294118, a: 1}
+    metallic: 0.2
+    smoothness: 1
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.46274513, g: 0.15294118, b: 0.18431373, a: 1}
+    metallic: 0.2
+    smoothness: 0.7
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8117647, g: 0.68235296, b: 0.16078432, a: 1}
+    metallic: 1
+    smoothness: 0.6
+    clearCoat: 0.2
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  carBelongsTo: {fileID: 0}
+  colourableParts: []
+  testSwatch:
+    color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &3354238788184411877
 GameObject:
   m_ObjectHideFlags: 0
@@ -1294,7 +1438,7 @@ GameObject:
   - component: {fileID: 7576791136675941403}
   - component: {fileID: 6974816536114422547}
   m_Layer: 8
-  m_Name: PaintModification
+  m_Name: BodyPaintModification
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1420,9 +1564,7 @@ MonoBehaviour:
     clearCoatSmoothness: 1
     emission: {r: 0, g: 0, b: 0, a: 1}
   carBelongsTo: {fileID: 4221895653879022365}
-  colourableBodyParts:
-  - {fileID: 750337925473403155}
-  - {fileID: 6922924910606962313}
+  colourableParts: []
   testSwatch:
     color: {r: 0.25485048, g: 0.2947121, b: 0.7830189, a: 1}
     metallic: 0.8
@@ -2310,6 +2452,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3229365723055604258}
   - component: {fileID: 3847474331386458576}
+  - component: {fileID: 7042706089900777179}
   m_Layer: 0
   m_Name: Rotation_FL
   m_TagString: Untagged
@@ -2348,6 +2491,149 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentRim: {fileID: 2322678378659909387}
   currentTyre: {fileID: 86783720983047775}
+--- !u!114 &7042706089900777179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5431302329689065085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce4b6b7c12aa484bb5820e25a981651, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wheelMaterial: {fileID: 2100000, guid: 028ff16f3a3919b4492844827f397355, type: 2}
+  swatchPresets:
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.6784314, g: 0.67058825, b: 0.68235296, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.20000002, g: 0.20000002, b: 0.20784315, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0, g: 0, b: 0, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0.509434, g: 0.509434, b: 0.509434, a: 1}
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0, g: 0, b: 0, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8039216, g: 0.49803922, b: 0.19607843, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.72156864, g: 0.6117647, b: 0.5411765, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.64705884, g: 0.4862745, b: 0.39607844, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.30588236, g: 0.20392157, b: 0.09411765, a: 1}
+    metallic: 0.5
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.78431374, g: 0.5647059, b: 0.019607844, a: 1}
+    metallic: 0.5
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8862746, g: 0.46274513, b: 0.18431373, a: 1}
+    metallic: 0.2
+    smoothness: 1
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8588236, g: 0.13333334, b: 0.054901965, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.18823531, g: 0.58431375, b: 0.92549026, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.52156866, g: 0.12941177, b: 0.7176471, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.6784314, g: 0.9294118, b: 0.15294118, a: 1}
+    metallic: 0.2
+    smoothness: 1
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.46274513, g: 0.15294118, b: 0.18431373, a: 1}
+    metallic: 0.2
+    smoothness: 0.7
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8117647, g: 0.68235296, b: 0.16078432, a: 1}
+    metallic: 1
+    smoothness: 0.6
+    clearCoat: 0.2
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  carBelongsTo: {fileID: 0}
+  colourableParts: []
+  testSwatch:
+    color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &5565742919077915471
 GameObject:
   m_ObjectHideFlags: 0
@@ -2973,6 +3259,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7035977652713155345}
   - component: {fileID: 7354015958491679312}
+  - component: {fileID: 2108453095902005789}
   m_Layer: 0
   m_Name: Rotation_FR
   m_TagString: Untagged
@@ -3011,6 +3298,149 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentRim: {fileID: 5168164864023551006}
   currentTyre: {fileID: 4523250951840189458}
+--- !u!114 &2108453095902005789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6726948783140660453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce4b6b7c12aa484bb5820e25a981651, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wheelMaterial: {fileID: 2100000, guid: 028ff16f3a3919b4492844827f397355, type: 2}
+  swatchPresets:
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.6784314, g: 0.67058825, b: 0.68235296, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.20000002, g: 0.20000002, b: 0.20784315, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0, g: 0, b: 0, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0.509434, g: 0.509434, b: 0.509434, a: 1}
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0, g: 0, b: 0, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8039216, g: 0.49803922, b: 0.19607843, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.72156864, g: 0.6117647, b: 0.5411765, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.64705884, g: 0.4862745, b: 0.39607844, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.30588236, g: 0.20392157, b: 0.09411765, a: 1}
+    metallic: 0.5
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.78431374, g: 0.5647059, b: 0.019607844, a: 1}
+    metallic: 0.5
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8862746, g: 0.46274513, b: 0.18431373, a: 1}
+    metallic: 0.2
+    smoothness: 1
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8588236, g: 0.13333334, b: 0.054901965, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.18823531, g: 0.58431375, b: 0.92549026, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.52156866, g: 0.12941177, b: 0.7176471, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.6784314, g: 0.9294118, b: 0.15294118, a: 1}
+    metallic: 0.2
+    smoothness: 1
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.46274513, g: 0.15294118, b: 0.18431373, a: 1}
+    metallic: 0.2
+    smoothness: 0.7
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8117647, g: 0.68235296, b: 0.16078432, a: 1}
+    metallic: 1
+    smoothness: 0.6
+    clearCoat: 0.2
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  carBelongsTo: {fileID: 0}
+  colourableParts: []
+  testSwatch:
+    color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &6761690458182168014
 GameObject:
   m_ObjectHideFlags: 0
@@ -3291,6 +3721,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8660295877278872594}
   - component: {fileID: 4763340866279385758}
+  - component: {fileID: 4106387879850371109}
   m_Layer: 0
   m_Name: Rotation_RR
   m_TagString: Untagged
@@ -3329,6 +3760,149 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentRim: {fileID: 4705159196235716475}
   currentTyre: {fileID: 1030377127223871516}
+--- !u!114 &4106387879850371109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7622253918402805726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce4b6b7c12aa484bb5820e25a981651, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wheelMaterial: {fileID: 2100000, guid: 028ff16f3a3919b4492844827f397355, type: 2}
+  swatchPresets:
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.6784314, g: 0.67058825, b: 0.68235296, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.20000002, g: 0.20000002, b: 0.20784315, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0, g: 0, b: 0, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0.509434, g: 0.509434, b: 0.509434, a: 1}
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0
+    smoothness: 0.5
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0, g: 0, b: 0, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8039216, g: 0.49803922, b: 0.19607843, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.72156864, g: 0.6117647, b: 0.5411765, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.64705884, g: 0.4862745, b: 0.39607844, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.30588236, g: 0.20392157, b: 0.09411765, a: 1}
+    metallic: 0.5
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.78431374, g: 0.5647059, b: 0.019607844, a: 1}
+    metallic: 0.5
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8862746, g: 0.46274513, b: 0.18431373, a: 1}
+    metallic: 0.2
+    smoothness: 1
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8588236, g: 0.13333334, b: 0.054901965, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.18823531, g: 0.58431375, b: 0.92549026, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.52156866, g: 0.12941177, b: 0.7176471, a: 1}
+    metallic: 1
+    smoothness: 1
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.6784314, g: 0.9294118, b: 0.15294118, a: 1}
+    metallic: 0.2
+    smoothness: 1
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.46274513, g: 0.15294118, b: 0.18431373, a: 1}
+    metallic: 0.2
+    smoothness: 0.7
+    clearCoat: 0
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  - color: {r: 0.8117647, g: 0.68235296, b: 0.16078432, a: 1}
+    metallic: 1
+    smoothness: 0.6
+    clearCoat: 0.2
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
+  carBelongsTo: {fileID: 0}
+  colourableParts: []
+  testSwatch:
+    color: {r: 1, g: 1, b: 1, a: 1}
+    metallic: 0.8
+    smoothness: 0.5
+    clearCoat: 1
+    clearCoatSmoothness: 1
+    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &7623618591654638415
 GameObject:
   m_ObjectHideFlags: 0
