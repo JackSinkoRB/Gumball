@@ -135,7 +135,10 @@ namespace Gumball
             meshToUse.RecalculateBounds();
 
             MeshFilter.sharedMesh = meshToUse;
-            MeshCollider.sharedMesh = meshToUse;
+            
+            if (meshToUse.vertices.Length < 3)
+                Debug.LogError($"The terrain mesh for {chunk.name} has too little vertices for a collider. Does it need to be rebaked?");
+            else MeshCollider.sharedMesh = meshToUse;
         }
 
         public void UpdateVertexColors(SerializableColor[] colors)

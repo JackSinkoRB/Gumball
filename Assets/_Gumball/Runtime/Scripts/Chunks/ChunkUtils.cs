@@ -249,6 +249,9 @@ namespace Gumball
                 assetKeys.Add(assetKey);
             }
 
+            //update spline meshes in original chunk in case they haven't had a chunk to save
+            originalChunk.GetComponent<Chunk>().FindSplineMeshes();
+
             string newChunkPath = GetRuntimeChunkPath(originalChunk);
             GameObject runtimePrefabInstance = Object.Instantiate(originalChunk);
 
@@ -303,7 +306,12 @@ namespace Gumball
             for (int index = 0; index < meshes.Length; index++)
             {
                 SplineMesh splineMesh = meshes[index];
-                splineMesh.GetComponent<MeshFilter>().sharedMesh = originalChunk.GetComponent<Chunk>().SplinesMeshes[index].GetComponent<MeshFilter>().sharedMesh;
+                
+                Mesh originalMesh = originalChunk.GetComponent<Chunk>().SplinesMeshes[index].GetComponent<MeshFilter>().sharedMesh;
+                splineMesh.GetComponent<MeshFilter>().sharedMesh = originalMesh;
+
+                //make sure all spline meshes are readable
+                //originalMesh.SetReadable(true);
             }
 
             //create raycast detector object

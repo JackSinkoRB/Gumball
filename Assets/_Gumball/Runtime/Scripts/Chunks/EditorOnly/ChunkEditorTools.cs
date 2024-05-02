@@ -37,8 +37,8 @@ namespace Gumball
         {
             if (prefabName.Equals(gameObject.name) && !isRuntimeChunk)
             {
-                ChunkUtils.BakeMeshes(chunk);
                 chunk.FindSplineMeshes();
+                ChunkUtils.BakeMeshes(chunk);
             }
         }
         
@@ -388,6 +388,7 @@ namespace Gumball
 
         private void UnbakeSplineMeshes()
         {
+            chunk.FindSplineMeshes();
             foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
             {
                 if (!splineMesh.gameObject.activeSelf)
