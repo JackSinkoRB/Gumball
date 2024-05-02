@@ -13,6 +13,7 @@ namespace Gumball
     {
         
         [SerializeField] private MeshFilter barrel;
+        [SerializeField] private MeshFilter spoke;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private int[] outsideVertices;

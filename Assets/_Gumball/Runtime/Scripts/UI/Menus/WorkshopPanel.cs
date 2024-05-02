@@ -8,9 +8,9 @@ namespace Gumball
     {
         
         [SerializeField] private PartsWorkshopMenu bodyKitMenu;
-        [SerializeField] private WorkshopSubMenu paintMenu;
-        [SerializeField] private WorkshopSubMenu liveryMenu;
-        [SerializeField] private WorkshopSubMenu stanceMenu;
+        [SerializeField] private BodyPaintWorkshopMenu bodyPaintMenu;
+        [SerializeField] private WheelPaintWorkshopMenu wheelPaintMenu;
+        [SerializeField] private StanceWorkshopMenu stanceMenu;
         
         public void OnClickBackButton()
         {
@@ -31,8 +31,8 @@ namespace Gumball
             
             //hide all other menus
             bodyKitMenu.Hide();
-            paintMenu.Hide();
-            liveryMenu.Hide();
+            bodyPaintMenu.Hide();
+            wheelPaintMenu.Hide();
             stanceMenu.Hide();
             
             //just show this menu

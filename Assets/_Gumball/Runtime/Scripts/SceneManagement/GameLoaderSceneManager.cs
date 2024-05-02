@@ -117,7 +117,8 @@ namespace Gumball
                 GlobalLoggers.LoadInstanceAsync(),
                 DecalManager.LoadInstanceAsync(),
                 AvatarManager.LoadInstanceAsync(),
-                WarehouseManager.LoadInstanceAsync()
+                WarehouseManager.LoadInstanceAsync(),
+                GlobalPaintPresets.LoadInstanceAsync()
             };
             return handles;
         }

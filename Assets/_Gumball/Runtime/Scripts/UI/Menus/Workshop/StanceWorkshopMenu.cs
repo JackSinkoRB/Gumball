@@ -31,16 +31,17 @@ namespace Gumball
         private WheelCollider[] wheelsToModify => wheelsToModifyPosition == WheelsToModifyPosition.ALL ? WarehouseManager.Instance.CurrentCar.AllWheelColliders
             : (wheelsToModifyPosition == WheelsToModifyPosition.FRONT ?
                 WarehouseManager.Instance.CurrentCar.FrontWheelColliders : WarehouseManager.Instance.CurrentCar.RearWheelColliders);
-        
-        private void OnEnable()
+
+        public override void Show()
         {
-            UpdateSliderValues();
+            base.Show();
+
+            SetWheelsToModifyPosition(WheelsToModifyPosition.ALL);
         }
 
         /// <summary>
         /// Set which wheels will be modified when using the sliders.
         /// </summary>
-        /// <param name="position"></param>
         public void SetWheelsToModifyPosition(WheelsToModifyPosition position)
         {
             wheelsToModifyPosition = position;
