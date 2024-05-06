@@ -31,6 +31,9 @@ namespace Gumball
         [SerializeField] protected float raceDistanceMetres;
         [SerializeField] private float racersStartingSpeed = 70;
 
+        [Header("Rewards")]
+        [SerializeField, DisplayInspector] private CorePart[] corePartRewards;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
         [SerializeField, ReadOnly] private AICar[] currentRacers;
@@ -119,6 +122,8 @@ namespace Gumball
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
+            
+            GiveRewards();
         }
         
         public virtual void UpdateWhenCurrent()
@@ -311,5 +316,16 @@ namespace Gumball
             EndSession();
         }
 
+        private void GiveRewards()
+        {
+            foreach (CorePart corePartReward in corePartRewards)
+            {
+                if (!corePartReward.IsUnlocked)
+                    RewardManager.GiveReward(corePartReward);
+            }
+            
+            //todo: sub parts
+        }
+        
     }
 }
