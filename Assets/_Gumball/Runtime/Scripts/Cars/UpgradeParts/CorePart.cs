@@ -33,6 +33,7 @@ namespace Gumball
         
         private string saveKey => $"{type.ToString()}-{name}-{uniqueID}";
 
+        public PartType Type => type;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
         

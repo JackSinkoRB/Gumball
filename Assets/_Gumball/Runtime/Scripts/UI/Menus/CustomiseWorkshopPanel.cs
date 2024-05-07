@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class WorkshopPanel : AnimatedPanel
+    public class CustomiseWorkshopPanel : AnimatedPanel
     {
         
         [SerializeField] private PartsWorkshopMenu bodyKitMenu;
@@ -14,7 +14,8 @@ namespace Gumball
         
         public void OnClickBackButton()
         {
-            WorkshopSceneManager.Instance.ExitWorkshopScene();
+            Hide();
+            PanelManager.GetPanel<WorkshopSelectPanel>().Show();
         }
 
         protected override void OnShow()
