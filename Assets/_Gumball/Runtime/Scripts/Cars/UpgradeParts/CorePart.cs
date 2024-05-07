@@ -42,6 +42,14 @@ namespace Gumball
             get => DataManager.Cars.Get($"Parts.Core.{saveKey}.IsUnlocked", false);
             private set => DataManager.Cars.Set($"Parts.Core.{saveKey}.IsUnlocked", value);
         }
+        
+        public int CarBelongsToIndex
+        {
+            get => DataManager.Cars.Get($"Parts.Core.{saveKey}.CarBelongsToIndex", -1);
+            private set => DataManager.Cars.Set($"Parts.Core.{saveKey}.CarBelongsToIndex", value);
+        }
+
+        public bool IsAppliedToCar => CarBelongsToIndex != -1;
 
         private void OnValidate()
         {
@@ -55,6 +63,28 @@ namespace Gumball
         public void SetUnlocked(bool unlocked)
         {
             IsUnlocked = unlocked;
+        }
+
+        public void ApplyToCar(int carIndex)
+        {
+            if (IsAppliedToCar)
+            {
+                Debug.LogError($"Trying to apply core part {name} to carIndex {carIndex}, but it is already applied to {CarBelongsToIndex}");
+                return;
+            }
+
+            CarBelongsToIndex = carIndex;
+        }
+
+        public void RemoveFromCar()
+        {
+            if (!IsAppliedToCar)
+            {
+                Debug.LogWarning($"Trying to remove core part {name} from car, but it is not applied to a car.");
+                return;
+            }
+            
+            CarBelongsToIndex = -1;
         }
         
     }

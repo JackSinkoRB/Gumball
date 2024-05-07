@@ -10,15 +10,13 @@ namespace Gumball
         
         [SerializeField] private CorePart.PartType partType;
         [SerializeField] private Button swapButton;
-
-        private CorePart[] spareCoreParts => CorePartManager.GetSpareParts(partType);
         
         public override void Show()
         {
             base.Show();
             
-            //TODO: disable swap button interactivity if no spare parts
-            swapButton.interactable = ;
+            //disable swap button interactivity if no spare parts
+            swapButton.interactable = CorePartManager.GetSpareParts(partType).Count > 0;
         }
 
         public void OnClickSwapButton()
