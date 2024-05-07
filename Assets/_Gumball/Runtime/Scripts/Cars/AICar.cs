@@ -36,14 +36,12 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isPlayerCar;
         [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
-        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int id;
 
         public bool IsPlayerCar => isPlayerCar;
         public CarIKManager AvatarIKManager => avatarIKManager;
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
-        public int ID => id;
-        public string SaveKey => $"CarData.{carIndex}.{id}";
+        public string SaveKey => $"CarData.{carIndex}";
 
         [Header("Customisation")]
         [SerializeField] private CarPartManager carPartManager;
@@ -324,12 +322,11 @@ namespace Gumball
             CachePoweredWheels();
         }
 
-        public void InitialiseAsPlayer(int carIndex, int id)
+        public void InitialiseAsPlayer(int carIndex)
         {
             isPlayerCar = true;
             
             this.carIndex = carIndex;
-            this.id = id;
             
             gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
             colliders.layer = (int)LayersAndTags.Layer.PlayerCar;

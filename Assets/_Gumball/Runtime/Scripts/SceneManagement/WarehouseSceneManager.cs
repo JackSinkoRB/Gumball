@@ -65,7 +65,7 @@ namespace Gumball
                 if (index == WarehouseManager.Instance.CurrentCar.CarIndex)
                     slot.PopulateWithCar(WarehouseManager.Instance.CurrentCar); //can reuse the car
                 else
-                    slotHandles.Add(new TrackedCoroutine(slot.PopulateWithCar(index, 0))); //spawn new car
+                    slotHandles.Add(new TrackedCoroutine(slot.PopulateWithCar(index))); //spawn new car
                 
                 index++;
             }
