@@ -18,6 +18,11 @@ namespace Gumball
     public class AICar : MonoBehaviour
     {
 
+        public static string GetSaveKeyFromIndex(int carIndex)
+        {
+            return $"CarData.{carIndex}";
+        }
+        
         public event Action onDisable;
 
         private enum WheelConfiguration
@@ -41,14 +46,16 @@ namespace Gumball
         public CarIKManager AvatarIKManager => avatarIKManager;
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
-        public string SaveKey => $"CarData.{carIndex}";
+        public string SaveKey => GetSaveKeyFromIndex(carIndex);
 
         [Header("Customisation")]
         [SerializeField] private CarPartManager carPartManager;
         [SerializeField] private BodyPaintModification bodyPaintModification;
+        [SerializeField] private PartModification partModification;
 
         public CarPartManager CarPartManager => carPartManager;
         public BodyPaintModification BodyPaintModification => bodyPaintModification;
+        public PartModification PartModification => partModification;
 
         [Header("Sizing")]
         [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
@@ -339,6 +346,9 @@ namespace Gumball
             if (bodyPaintModification != null)
                 bodyPaintModification.Initialise(this);
 
+            if (partModification != null)
+                partModification.Initialise(this);
+            
             foreach (WheelMesh wheelMesh in AllWheelMeshes)
             {
                 WheelPaintModification wheelPaintModification = wheelMesh.GetComponent<WheelPaintModification>();

@@ -3,12 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using MyBox;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Gumball
 {
     [CreateAssetMenu(menuName = "Gumball/Parts/Core Part")]
-    public class CorePart : ScriptableObject
+    public class CorePart : UniqueScriptableObject
     {
 
         public enum PartType
@@ -29,10 +28,7 @@ namespace Gumball
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
         
-        [Header("Debugging")]
-        [SerializeField, ReadOnly] private int uniqueID = -1;
-        
-        private string saveKey => $"{type.ToString()}-{name}-{uniqueID}";
+        private string saveKey => $"{type.ToString()}-{name}-{ID}";
 
         public PartType Type => type;
         public string DisplayName => displayName;
@@ -52,11 +48,10 @@ namespace Gumball
 
         public bool IsAppliedToCar => CarBelongsToIndex != -1;
 
-        private void OnValidate()
+        protected override void OnValidate()
         {
-            if (uniqueID == -1)
-                uniqueID = Random.Range(0, int.MaxValue);
-
+            base.OnValidate();
+            
             if (displayName.IsNullOrEmpty())
                 displayName = name;
         }

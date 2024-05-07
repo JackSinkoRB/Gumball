@@ -120,7 +120,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 5215090144272055711}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 5735444979532019374}
+        m_TargetAssemblyTypeName: Gumball.SwapCorePartPanel, Gumball
+        m_MethodName: OnClickInstallButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &2246814848935770134
 GameObject:
   m_ObjectHideFlags: 0
@@ -464,7 +476,10 @@ MonoBehaviour:
     showEase: 27
     hideEase: 26
   partsMagneticScroll: {fileID: 7216056911595996420}
+  installButton: {fileID: 2124846988620320899}
+  installButtonLabel: {fileID: 6457370800674015720}
   partType: 0
+  currentSelectedPart: {fileID: 0}
 --- !u!1 &3740567009641049863
 GameObject:
   m_ObjectHideFlags: 0
@@ -1044,7 +1059,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -300, y: -20, z: -300, w: -20}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1183,7 +1198,7 @@ MonoBehaviour:
   useMagnetSnapping: 1
   useInfiniteScroll: 0
   disableInfiniteScrollIfNotEnoughItems: 1
-  selectIconIfButtonClicked: 1
+  selectIconIfButtonClicked: 0
   scrollSpeed: 1
   elasticity: 5
   snapTime: 0.15
@@ -1709,7 +1724,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_RaycastPadding: {x: -300, y: -20, z: -300, w: -20}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:

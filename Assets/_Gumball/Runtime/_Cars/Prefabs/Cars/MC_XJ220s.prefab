@@ -275,6 +275,7 @@ Transform:
   m_Children:
   - {fileID: 6978679286292903102}
   - {fileID: 7576791136675941403}
+  - {fileID: 6613023856233851379}
   - {fileID: 7831755652159390863}
   - {fileID: 5144348758853134650}
   - {fileID: 7880060370973760672}
@@ -326,9 +327,9 @@ MonoBehaviour:
   isPlayerCar: 0
   isPlayerDrivingEnabled: 0
   carIndex: 0
-  id: 0
   carPartManager: {fileID: 0}
   bodyPaintModification: {fileID: 6974816536114422547}
+  partModification: {fileID: 8634644709985065581}
   frontOfCarPosition: {x: 0, y: 1, z: 2.3}
   carWidth: 2
   wheelConfiguration: 2
@@ -3121,6 +3122,51 @@ MonoBehaviour:
   sidewaysSlip: 0
   isSlidingSideways: 0
   isSlidingForward: 0
+--- !u!1 &7060682843371779463
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6613023856233851379}
+  - component: {fileID: 8634644709985065581}
+  m_Layer: 8
+  m_Name: PartModification
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6613023856233851379
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7060682843371779463}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 724044971135627713}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8634644709985065581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7060682843371779463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e55a6b19c4ab454bacb56427e6b3eb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  carBelongsTo: {fileID: 0}
 --- !u!1 &7340752111925485577
 GameObject:
   m_ObjectHideFlags: 0
