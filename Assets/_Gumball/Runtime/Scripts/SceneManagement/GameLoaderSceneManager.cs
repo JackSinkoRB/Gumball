@@ -41,6 +41,12 @@ namespace Gumball
             
         public static bool HasLoaded { get; private set; }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RuntimeInitialise()
+        {
+            HasLoaded = false;
+        }
+        
         private IEnumerator Start()
         {
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
