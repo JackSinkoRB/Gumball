@@ -16,17 +16,19 @@ namespace Gumball
 
         public string ID => uniqueID;
         
-#if UNITY_EDITOR
         protected virtual void OnValidate()
         {
+#if UNITY_EDITOR
             if (string.IsNullOrEmpty(lastKnownName)
                 || !lastKnownName.Equals(name)
                 || string.IsNullOrEmpty(uniqueID))
             {
                 GenerateNewID();
             }
+#endif
         }
 
+#if UNITY_EDITOR
         private void GenerateNewID()
         {
             lastKnownName = name;
