@@ -11,17 +11,34 @@ namespace Gumball
         [SerializeField] private SubPartsWorkshopSubMenu engineSubPartMenu;
         [SerializeField] private SubPartsWorkshopSubMenu wheelsSubPartMenu;
         [SerializeField] private SubPartsWorkshopSubMenu drivetrainSubPartMenu;
+
+        private SubPartsWorkshopSubMenu currentSubPartMenu;
+        
+        protected override void OnShow()
+        {
+            base.OnShow();
+            
+            OpenSubMenu(null);
+        }
         
         public void OnClickBackButton()
         {
             Hide();
             PanelManager.GetPanel<WorkshopSelectPanel>().Show();
         }
+
+        public void OnClickCancelButton()
+        {
+            if (currentSubPartMenu != null)
+                currentSubPartMenu.Hide();
+        }
         
-        public void OpenSubMenu(WorkshopSubMenu subMenu)
+        public void OpenSubMenu(SubPartsWorkshopSubMenu subMenu)
         {
             if (subMenu != null && subMenu.IsShowing)
                 return; //already open
+
+            currentSubPartMenu = subMenu;
             
             //hide all other menus
             engineSubPartMenu.Hide();

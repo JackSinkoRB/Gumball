@@ -150,7 +150,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5055586270887855253
 RectTransform:
   m_ObjectHideFlags: 0
@@ -163,13 +163,14 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 5681253330944983916}
   - {fileID: 3707099371114041771}
   - {fileID: 3657938605171976015}
   m_Father: {fileID: 140331945801531713}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 87, y: -23}
+  m_AnchoredPosition: {x: 87, y: -23.00003}
   m_SizeDelta: {x: 241.2, y: 0}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &8452366046751797476
@@ -924,9 +925,9 @@ RectTransform:
   - {fileID: 5225410852625821375}
   m_Father: {fileID: 3707099371114041771}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 50, y: -354}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 250, y: 236}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7470836288760865637
@@ -1017,7 +1018,7 @@ MonoBehaviour:
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 6710127131143656785}
-          m_ObjectArgumentAssemblyTypeName: Gumball.WorkshopSubMenu, Gumball
+          m_ObjectArgumentAssemblyTypeName: Gumball.SubPartsWorkshopSubMenu, Gumball
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1568,6 +1569,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   partType: 0
+  swapButton: {fileID: 5912656399731366076}
+  swapButtonLabel: {fileID: 4517190898059751269}
 --- !u!1 &2385532303288875587
 GameObject:
   m_ObjectHideFlags: 0
@@ -2245,7 +2248,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71ed3e21ac2648d489b1996572c822b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
+  partType: 2
+  swapButton: {fileID: 3533542821868904588}
+  swapButtonLabel: {fileID: 8818735917002629113}
 --- !u!1 &4572065806134880521
 GameObject:
   m_ObjectHideFlags: 0
@@ -2373,7 +2378,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71ed3e21ac2648d489b1996572c822b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  partType: 0
+  partType: 1
+  swapButton: {fileID: 8272087575510478385}
+  swapButtonLabel: {fileID: 5318773020245307825}
 --- !u!1 &4665596073437383339
 GameObject:
   m_ObjectHideFlags: 0
@@ -3310,9 +3317,9 @@ RectTransform:
   - {fileID: 4311179636715530249}
   m_Father: {fileID: 3707099371114041771}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 50, y: -590}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 250, y: 236}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8770894617073097089
@@ -3403,7 +3410,7 @@ MonoBehaviour:
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 3483276285128333659}
-          m_ObjectArgumentAssemblyTypeName: Gumball.WorkshopSubMenu, Gumball
+          m_ObjectArgumentAssemblyTypeName: Gumball.SubPartsWorkshopSubMenu, Gumball
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -3525,7 +3532,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 218999328475552416}
   m_OnClick:
     m_PersistentCalls:
@@ -3580,7 +3587,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 708}
+  m_SizeDelta: {x: 100, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6226712750165693673
 MonoBehaviour:
@@ -3622,6 +3629,119 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!1 &6765985877581316040
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5681253330944983916}
+  - component: {fileID: 4700744266971475241}
+  - component: {fileID: 512452374084045656}
+  - component: {fileID: 4268192013008025838}
+  m_Layer: 5
+  m_Name: CancelButton
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5681253330944983916
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6765985877581316040}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5055586270887855253}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 806.67957, y: 23.00002}
+  m_SizeDelta: {x: 1787.359, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &4700744266971475241
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6765985877581316040}
+  m_CullTransparentMesh: 1
+--- !u!114 &512452374084045656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6765985877581316040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4268192013008025838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6765985877581316040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c860658a76de64b856d047b3bf6da8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onStartPressing:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2687307542415867389}
+        m_TargetAssemblyTypeName: Gumball.UpgradeWorkshopPanel, Gumball
+        m_MethodName: OnClickCancelButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
+  onStopPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  canOnlyBePressedOnPointerDown: 1
+  pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 0
+  isPressingButton: 0
 --- !u!1 &6864955823343068016
 GameObject:
   m_ObjectHideFlags: 0
@@ -4069,7 +4189,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 8384756850972987073}
   m_OnClick:
     m_PersistentCalls:
@@ -4918,9 +5038,9 @@ RectTransform:
   - {fileID: 4751297545624441767}
   m_Father: {fileID: 3707099371114041771}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 50, y: -118}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 250, y: 236}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1773642127655945025
@@ -5011,7 +5131,7 @@ MonoBehaviour:
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 6404324440208484966}
-          m_ObjectArgumentAssemblyTypeName: Gumball.WorkshopSubMenu, Gumball
+          m_ObjectArgumentAssemblyTypeName: Gumball.SubPartsWorkshopSubMenu, Gumball
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -5464,7 +5584,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 8827206034470825354}
   m_OnClick:
     m_PersistentCalls:

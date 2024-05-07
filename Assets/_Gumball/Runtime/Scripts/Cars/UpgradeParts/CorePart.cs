@@ -14,7 +14,8 @@ namespace Gumball
         public enum PartType
         {
             ENGINE,
-            HANDLING
+            WHEELS,
+            DRIVETRAIN
         }
 
         public enum Rating
