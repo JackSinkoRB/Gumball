@@ -14,6 +14,7 @@ namespace Gumball
         [SerializeField] private MagneticScroll partsMagneticScroll;
         [SerializeField] private Button installButton;
         [SerializeField] private TextMeshProUGUI installButtonLabel;
+        [SerializeField] private TextMeshProUGUI countLabel;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private CorePart.PartType partType;
@@ -67,6 +68,7 @@ namespace Gumball
 
             scrollItem.onSelect += () =>
             {
+                countLabel.text = $"{partsMagneticScroll.Items.IndexOf(scrollItem) + 1} / {partsMagneticScroll.Items.Count}";
                 currentSelectedPart = part;
                 
                 //populate details
