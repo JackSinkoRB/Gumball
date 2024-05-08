@@ -171,14 +171,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(10, additionalPeakTorque);
 
             //ensure it is actually applied to the torque curve
-            float currentPeakTorque = 0;
-            foreach (Keyframe key in WarehouseManager.Instance.CurrentCar.TorqueCurve.keys)
-            {
-                float torque = key.value;
-                if (torque > currentPeakTorque)
-                    currentPeakTorque = torque;
-            }
-            Assert.AreEqual(defaultPeakTorque + additionalPeakTorque, currentPeakTorque);
+            Assert.AreEqual(defaultPeakTorque + additionalPeakTorque, WarehouseManager.Instance.CurrentCar.PeakTorque);
         }
 
         [UnityTest]
@@ -197,14 +190,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(15, additionalPeakTorque);
             
             //ensure it is actually applied to the torque curve
-            float currentPeakTorque = 0;
-            foreach (Keyframe key in WarehouseManager.Instance.CurrentCar.TorqueCurve.keys)
-            {
-                float torque = key.value;
-                if (torque > currentPeakTorque)
-                    currentPeakTorque = torque;
-            }
-            Assert.AreEqual(defaultPeakTorque + additionalPeakTorque, currentPeakTorque);
+            Assert.AreEqual(defaultPeakTorque + additionalPeakTorque, WarehouseManager.Instance.CurrentCar.PeakTorque);
         }
 
     }

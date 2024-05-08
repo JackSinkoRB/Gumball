@@ -134,7 +134,7 @@ namespace Gumball
         private bool isStationary => speed < stationarySpeed && !isAccelerating;
 
         [Header("Engine & Transmission")]
-        [Tooltip("The engine torque output (y) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
+        [Tooltip("The engine torque output (y) (in Newton metres) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
         [SerializeField] private AnimationCurve torqueCurve;
         [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
         [SerializeField] private float finalGearRatio = 3.42f;
@@ -242,6 +242,9 @@ namespace Gumball
         private int[] peakTorqueKeys;
 
         public float DefaultPeakTorque => defaultPeakTorque;
+        private Keyframe peakTorqueKey => torqueCurve.keys[peakTorqueKeys[^1]];
+        public float PeakTorque => peakTorqueKey.value;
+        public float Horsepower => DynoUtils.CalculateHorsepower(DynoUtils.ConvertNewtonMetresToFootPounds(peakTorqueKey.value), peakTorqueKey.time);
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool isInitialised;
