@@ -1086,6 +1086,63 @@ namespace Gumball
                 poweredWheel.motorTorque = wheelTorque;
             }
         }
+
+        [SerializeField, ReadOnly] private float topSpeed;
+        
+        [ButtonMethod]
+        public void CalculateTopSpeed()
+        {
+            topSpeed = 0;
+            float rpm = engineRpmRange.Min; //start at min
+            
+            while (true)
+            {
+                float[] wheelAngularVelocity = new float[poweredWheels.Length];
+                float totalForce = 0;
+
+                //calculate the current engine torque from the engine RPM
+                float engineRpmPercent = (rpm - engineRpmRange.Min) / engineRpmRange.Difference;
+                float engineTorque = torqueCurve.Evaluate(engineRpmPercent);
+
+                for (var index = 0; index < poweredWheels.Length; index++)
+                {
+                    WheelCollider poweredWheel = poweredWheels[index];
+                    //distribute the engine torque to the wheels based on gear ratios
+                    float engineTorqueDistributed = engineTorque / poweredWheels.Length; //TODO: might want to distribute this unevenly - eg. give more torque to the wheel with more traction
+                    float wheelTorque = engineTorqueDistributed * gearRatios[4] * finalGearRatio;
+
+                    float force = wheelTorque / poweredWheel.radius;
+                    totalForce += force;
+
+                    //calculate wheelRpm
+                    float momentOfInertia = poweredWheel.mass * (poweredWheel.radius * poweredWheel.radius);
+                    float angularAcceleration = wheelTorque / momentOfInertia;
+                    wheelAngularVelocity[index] += angularAcceleration;
+                }
+
+
+                float acceleration = totalForce / Rigidbody.mass;
+
+                topSpeed += acceleration;
+                
+                if (acceleration < 1)
+                    return;
+                
+                
+                //update engine rpm
+                float sumOfPoweredWheelRPM = 0;
+                for (var index = 0; index < poweredWheels.Length; index++)
+                {
+                    float wheelRpm = wheelAngularVelocity[index] * 60f / (2f * Mathf.PI);
+                    sumOfPoweredWheelRPM += wheelRpm;
+                }
+
+                float averagePoweredWheelRPM = sumOfPoweredWheelRPM / poweredWheels.Length;
+
+                float engineRpmUnclamped = engineRpmRange.Min + averagePoweredWheelRPM * gearRatios[currentGear] * finalGearRatio;
+                rpm = engineRpmRange.Clamp(engineRpmUnclamped);
+            }     
+        }
         
         private void ApplySteering()
         {
