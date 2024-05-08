@@ -318,12 +318,15 @@ namespace Gumball
 
         private void GiveRewards()
         {
-            foreach (CorePart corePartReward in corePartRewards)
+            if (corePartRewards != null)
             {
-                if (!corePartReward.IsUnlocked)
-                    RewardManager.GiveReward(corePartReward);
+                foreach (CorePart corePartReward in corePartRewards)
+                {
+                    if (!corePartReward.IsUnlocked)
+                        RewardManager.GiveReward(corePartReward);
+                }
             }
-            
+
             //todo: sub parts
         }
         
