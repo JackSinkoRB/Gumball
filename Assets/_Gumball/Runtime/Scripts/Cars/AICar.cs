@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using Dreamteck.Splines;
 #if UNITY_EDITOR
@@ -153,6 +154,7 @@ namespace Gumball
         public int CurrentGear => currentGear;
         public int NumberOfGears => gearRatios.Length;
         public float EngineRpm => engineRpm;
+        public AnimationCurve TorqueCurve => torqueCurve;
         
         [Header("Reversing")]
         [SerializeField] private float maxReverseSpeed = 25;
@@ -234,6 +236,13 @@ namespace Gumball
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[10];
         private bool allDirectionsAreBlocked;
 
+        [Header("Value modification")]
+        [SerializeField, ReadOnly] private float defaultPeakTorque;
+        
+        private int[] peakTorqueKeys;
+
+        public float DefaultPeakTorque => defaultPeakTorque;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool isInitialised;
         [Space(5)]
@@ -327,6 +336,7 @@ namespace Gumball
             OnChangeChunk(null, CurrentChunk);
             
             CachePoweredWheels();
+            CachePeakTorque();
         }
 
         public void InitialiseAsPlayer(int carIndex)
@@ -455,6 +465,16 @@ namespace Gumball
         {
             currentLaneDistance = laneDistance;
             currentLaneDirection = direction;
+        }
+        
+        public void SetPeakTorque(float peakTorque)
+        {
+            foreach (int peakTorqueKeyIndex in peakTorqueKeys)
+            {
+                Keyframe currentKeyframe = torqueCurve.keys[peakTorqueKeyIndex];
+                Keyframe newKeyframe = new Keyframe(currentKeyframe.time, peakTorque, currentKeyframe.inTangent, currentKeyframe.outTangent, currentKeyframe.inWeight, currentKeyframe.outWeight);
+                torqueCurve.MoveKey(peakTorqueKeyIndex, newKeyframe);
+            }
         }
         
         private void FixedUpdate()
@@ -1556,6 +1576,32 @@ namespace Gumball
                 if (stanceModification != null)
                     stanceModification.Initialise(this);
             }
+        }
+        
+        private void CachePeakTorque()
+        {
+            HashSet<int> keys = new();
+            
+            //set the default peak torque
+            float highestTorque = 0;
+            foreach (Keyframe key in torqueCurve.keys)
+            {
+                float torque = key.value;
+                if (torque > highestTorque)
+                    highestTorque = torque;
+            }
+            defaultPeakTorque = highestTorque;
+
+            //cache the peak torque keys
+            for (int index = 0; index < torqueCurve.keys.Length; index++)
+            {
+                Keyframe key = torqueCurve.keys[index];
+                float torque = key.value;
+                if (torque.Approximately(highestTorque, 1))
+                    keys.Add(index);
+            }
+
+            peakTorqueKeys = keys.ToArray();
         }
         
 #if UNITY_EDITOR

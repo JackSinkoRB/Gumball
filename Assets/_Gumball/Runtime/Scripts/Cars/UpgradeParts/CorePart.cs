@@ -27,6 +27,10 @@ namespace Gumball
         [SerializeField] private Rating rating;
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
+
+        [Header("Modifiers")]
+        [Tooltip("The amount of peak torque to add to the car.")]
+        [SerializeField] private float peakTorqueAddition;
         
         private string saveKey => $"{type.ToString()}-{name}-{ID}";
 
@@ -79,9 +83,26 @@ namespace Gumball
                 Debug.LogWarning($"Trying to remove core part {name} from car, but it is not applied to a car.");
                 return;
             }
+
+            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CarBelongsToIndex;
+            if (isAttachedToCurrentCar)
+            {
+                //update the modifiers
+                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
+            }
             
             CarBelongsToIndex = -1;
         }
         
+        /// <returns>Returns the total peak torque modifier of the part and all sub parts.</returns>
+        public float GetPeakTorqueModifier()
+        {
+            float total = peakTorqueAddition;
+            
+            //TODO: loop over sub parts
+            
+            return total;
+        }
+
     }
 }

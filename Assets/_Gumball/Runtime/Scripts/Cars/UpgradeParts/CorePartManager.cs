@@ -54,7 +54,7 @@ namespace Gumball
             return spareParts;
         }
 
-        public static void InstallPartOnCurrentCar(CorePart.PartType type, CorePart part, int carIndex)
+        public static void InstallPartOnCar(CorePart.PartType type, CorePart part, int carIndex)
         {
             //if car has a part already installed, remove the reference to set it as a spare
             CorePart existingPart = PartModification.GetCorePart(carIndex, type);
@@ -66,7 +66,12 @@ namespace Gumball
             
             //apply to part
             if (part != null)
-                part.ApplyToCar(WarehouseManager.Instance.CurrentCar.CarIndex);
+                part.ApplyToCar(carIndex);
+            
+            //update the cars modifiers
+            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == carIndex;
+            if (isAttachedToCurrentCar)
+                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
         }
 
         private static IEnumerator FindParts()

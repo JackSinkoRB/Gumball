@@ -32,6 +32,32 @@ namespace Gumball
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
+
+            ApplyModifiers();
+        }
+
+        public void ApplyModifiers()
+        {
+            carBelongsTo.SetPeakTorque(carBelongsTo.DefaultPeakTorque + GetTotalPeakTorqueModifiers());
+        }
+
+        public float GetTotalPeakTorqueModifiers()
+        {
+            float total = 0;
+            
+            CorePart currentEnginePart = GetCorePart(carBelongsTo.CarIndex, CorePart.PartType.ENGINE);
+            if (currentEnginePart != null)
+                total += currentEnginePart.GetPeakTorqueModifier();
+            
+            CorePart currentWheelsPart = GetCorePart(carBelongsTo.CarIndex, CorePart.PartType.WHEELS);
+            if (currentWheelsPart != null)
+                total += currentWheelsPart.GetPeakTorqueModifier();
+            
+            CorePart currentDrivetrainPart = GetCorePart(carBelongsTo.CarIndex, CorePart.PartType.DRIVETRAIN);
+            if (currentDrivetrainPart != null)
+                total += currentDrivetrainPart.GetPeakTorqueModifier();
+            
+            return total;
         }
 
     }

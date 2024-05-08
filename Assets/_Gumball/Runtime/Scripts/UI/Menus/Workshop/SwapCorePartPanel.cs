@@ -52,7 +52,7 @@ namespace Gumball
 
         public void OnClickInstallButton()
         {
-            CorePartManager.InstallPartOnCurrentCar(partType, currentSelectedPart, WarehouseManager.Instance.CurrentCar.CarIndex);
+            CorePartManager.InstallPartOnCar(partType, currentSelectedPart, WarehouseManager.Instance.CurrentCar.CarIndex);
             UpdateInstallButton(partType, currentSelectedPart);
         }
 
