@@ -23,7 +23,7 @@ namespace Gumball
         public bool IsSimulating { get; private set; }
 
         [ButtonMethod]
-        public void CalculateTopSpeed()
+        public void Simulate()
         {
             if (!Application.isPlaying)
                 throw new InvalidOperationException("Game must be playing to simulate.");

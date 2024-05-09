@@ -16,7 +16,7 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Gumball
 {
-    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(Rigidbody), typeof(CarSimulation))]
     public class AICar : MonoBehaviour
     {
 
@@ -102,7 +102,7 @@ namespace Gumball
         [Header("Auto drive")]
         [SerializeField] private bool autoDrive;
         
-        [Header("Max speed")]
+        [Header("Speed limit")]
         [Tooltip("Does the car obey the current chunks speed limit?")]
         [SerializeField] private bool obeySpeedLimit = true;
         [Tooltip("A speed limit that overrides the max speed to be changed at runtime.")]
@@ -133,7 +133,7 @@ namespace Gumball
         private const float stationarySpeed = 2;
         private bool isStationary => speed < stationarySpeed && !isAccelerating;
 
-        [Header("Engine & Transmission")]
+        [Header("Engine & Drivetrain")]
         [Tooltip("The engine torque output (y) (in Newton metres) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
         [SerializeField] private AnimationCurve torqueCurve;
         [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
