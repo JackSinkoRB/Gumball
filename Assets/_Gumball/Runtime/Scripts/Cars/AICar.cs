@@ -9,6 +9,7 @@ using Gumball.Editor;
 #endif
 using MyBox;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
@@ -104,7 +105,7 @@ namespace Gumball
         [Header("Max speed")]
         [Tooltip("Does the car obey the current chunks speed limit?")]
         [SerializeField] private bool obeySpeedLimit = true;
-        [SerializeField, ConditionalField(nameof(obeySpeedLimit), true), InitializationField] private float maxSpeed = 200;
+        [SerializeField, ConditionalField(nameof(obeySpeedLimit), true)] private float maxSpeed = 200;
         [Tooltip("A speed limit that overrides the max speed to be changed at runtime.")]
         [SerializeField] private float tempSpeedLimit = -1f;
         
@@ -403,6 +404,14 @@ namespace Gumball
         public void SetTemporarySpeedLimit(float speedKmh)
         {
             tempSpeedLimit = speedKmh;
+        }
+
+        /// <summary>
+        /// Movement should only be called in FixedUpdate, but this can be called manually if simulating.
+        /// </summary>
+        public void SimulateMovement()
+        {
+            Move();
         }
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -759,6 +768,10 @@ namespace Gumball
                 if (isPlayerDrivingEnabled && InputManager.Instance.CarInput.Accelerate.IsPressed && currentGear == 0)
                     ChangeGear(1);
             }
+
+            CarSimulation carSimulation = GetComponent<CarSimulation>();
+            if (carSimulation != null && carSimulation.IsSimulating)
+                isAccelerating = true;
         }
 
         private void ChangeGear(int newGear)
@@ -1090,63 +1103,6 @@ namespace Gumball
             }
         }
 
-        [SerializeField, ReadOnly] private float topSpeed;
-        
-        [ButtonMethod]
-        public void CalculateTopSpeed()
-        {
-            topSpeed = 0;
-            float rpm = engineRpmRange.Min; //start at min
-            
-            while (true)
-            {
-                float[] wheelAngularVelocity = new float[poweredWheels.Length];
-                float totalForce = 0;
-
-                //calculate the current engine torque from the engine RPM
-                float engineRpmPercent = (rpm - engineRpmRange.Min) / engineRpmRange.Difference;
-                float engineTorque = torqueCurve.Evaluate(engineRpmPercent);
-
-                for (var index = 0; index < poweredWheels.Length; index++)
-                {
-                    WheelCollider poweredWheel = poweredWheels[index];
-                    //distribute the engine torque to the wheels based on gear ratios
-                    float engineTorqueDistributed = engineTorque / poweredWheels.Length; //TODO: might want to distribute this unevenly - eg. give more torque to the wheel with more traction
-                    float wheelTorque = engineTorqueDistributed * gearRatios[4] * finalGearRatio;
-
-                    float force = wheelTorque / poweredWheel.radius;
-                    totalForce += force;
-
-                    //calculate wheelRpm
-                    float momentOfInertia = poweredWheel.mass * (poweredWheel.radius * poweredWheel.radius);
-                    float angularAcceleration = wheelTorque / momentOfInertia;
-                    wheelAngularVelocity[index] += angularAcceleration;
-                }
-
-
-                float acceleration = totalForce / Rigidbody.mass;
-
-                topSpeed += acceleration;
-                
-                if (acceleration < 1)
-                    return;
-                
-                
-                //update engine rpm
-                float sumOfPoweredWheelRPM = 0;
-                for (var index = 0; index < poweredWheels.Length; index++)
-                {
-                    float wheelRpm = wheelAngularVelocity[index] * 60f / (2f * Mathf.PI);
-                    sumOfPoweredWheelRPM += wheelRpm;
-                }
-
-                float averagePoweredWheelRPM = sumOfPoweredWheelRPM / poweredWheels.Length;
-
-                float engineRpmUnclamped = engineRpmRange.Min + averagePoweredWheelRPM * gearRatios[currentGear] * finalGearRatio;
-                rpm = engineRpmRange.Clamp(engineRpmUnclamped);
-            }     
-        }
-        
         private void ApplySteering()
         {
             foreach (WheelCollider frontWheel in frontWheelColliders)
