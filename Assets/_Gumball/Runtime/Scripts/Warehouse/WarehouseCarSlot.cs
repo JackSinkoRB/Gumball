@@ -14,9 +14,9 @@ namespace Gumball
 
         public PositionAndRotation CameraPosition => cameraPosition;
 
-        public IEnumerator PopulateWithCar(int index, int id)
+        public IEnumerator PopulateWithCar(int index)
         {
-            yield return WarehouseManager.Instance.SpawnCar(index, id, transform.position, transform.rotation, OnSpawnCar);
+            yield return WarehouseManager.Instance.SpawnCar(index, transform.position, transform.rotation, OnSpawnCar);
         }
 
         public void PopulateWithCar(AICar car)

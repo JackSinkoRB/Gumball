@@ -37,7 +37,11 @@ namespace Gumball.Runtime.Tests
         [SerializeField] private AssetReferenceGameObject testChunkPrefabB;
         [SerializeField] private AssetReferenceGameObject testChunkPrefabC;
         [SerializeField] private AssetReferenceGameObject testChunkPrefabCustomLoad;
-
+        
+        [Header("Core parts")]
+        [SerializeField] private CorePart corePartA;
+        [SerializeField] private CorePart corePartB;
+        
         public string DecalEditorScenePath => AssetDatabase.GetAssetPath(decalEditorScene);
         public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
         public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
@@ -49,6 +53,9 @@ namespace Gumball.Runtime.Tests
         public AssetReferenceGameObject TestChunkPrefabB => testChunkPrefabB;
         public AssetReferenceGameObject TestChunkPrefabC => testChunkPrefabC;
         public AssetReferenceGameObject TestChunkPrefabCustomLoad => testChunkPrefabCustomLoad;
-        
+
+        public CorePart CorePartA => corePartA;
+        public CorePart CorePartB => corePartB;
+
     }
 }

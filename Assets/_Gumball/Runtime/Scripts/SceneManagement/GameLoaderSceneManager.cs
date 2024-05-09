@@ -22,6 +22,7 @@ namespace Gumball
         {
             Checking_for_new_version,
             Loading_scriptable_singletons,
+            Initialising_core_parts,
             Loading_save_data,
             Loading_mainscene,
             Waiting_for_save_data_to_load,
@@ -40,6 +41,12 @@ namespace Gumball
             
         public static bool HasLoaded { get; private set; }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RuntimeInitialise()
+        {
+            HasLoaded = false;
+        }
+        
         private IEnumerator Start()
         {
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
@@ -53,6 +60,13 @@ namespace Gumball
             yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete());
 #if ENABLE_LOGS
             Debug.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+#endif
+            
+            currentStage = Stage.Initialising_core_parts;
+            stopwatch.Restart();
+            yield return CorePartManager.Initialise();
+#if ENABLE_LOGS
+            Debug.Log($"Core part loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
             
             currentStage = Stage.Checking_for_new_version;

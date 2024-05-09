@@ -55,7 +55,7 @@ namespace Gumball.Runtime.Tests
 
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(carIndexToUse, 0, 
+            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(carIndexToUse, 
                 Vector3.zero, 
                 Quaternion.Euler(Vector3.zero), 
                 (car) =>
