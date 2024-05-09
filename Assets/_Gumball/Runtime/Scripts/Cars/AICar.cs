@@ -105,7 +105,6 @@ namespace Gumball
         [Header("Max speed")]
         [Tooltip("Does the car obey the current chunks speed limit?")]
         [SerializeField] private bool obeySpeedLimit = true;
-        [SerializeField, ConditionalField(nameof(obeySpeedLimit), true)] private float maxSpeed = 200;
         [Tooltip("A speed limit that overrides the max speed to be changed at runtime.")]
         [SerializeField] private float tempSpeedLimit = -1f;
         
@@ -266,7 +265,7 @@ namespace Gumball
 
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
         public float Speed => speed;
-        public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed));
+        public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : Mathf.Infinity));
         
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk CurrentChunk
