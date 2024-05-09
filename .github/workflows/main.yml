@@ -136,22 +136,22 @@ jobs:
         env:
           COMMITS: ${{ toJson(github.event.commits) }}
         run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            COUNT=$(( $(echo "$COMMITS" | jq length) ))
-            COMMIT_MESSAGES=""
-            for ((i=0; i<$COUNT; i++)); do
-                # Get commit message and truncate at the first occurrence of '\n'
-                COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | sed 's/\\n.*//')
-                COMMIT_MESSAGES+="$((i+1)). $COMMIT_MESSAGE\\n"
-            done
-          else
-            COUNT=1
-            # Get commit message and truncate at the first occurrence of '\n'
-            COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | sed 's/\\n.*//')
-            COMMIT_MESSAGES="$COMMIT_MESSAGE\\n"
-          fi
-          echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"
-          echo "commit-messages=$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          COUNT=$(( $(echo "$COMMITS" | jq length) ))
+          COMMIT_MESSAGES=""
+          for ((i=0; i<$COUNT; i++)); do
+            # Get commit message, replace '\n' with a space, and remove '/'
+            COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | tr '\n' ' ' | tr -d '/')
+            COMMIT_MESSAGES+="$((i+1)). $COMMIT_MESSAGE\\n"
+          done
+        else
+          COUNT=1
+          # Get commit message, replace '\n' with a space, and remove '/'
+          COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | tr '\n' ' ' | tr -d '/')
+          COMMIT_MESSAGES="$COMMIT_MESSAGE\\n"
+        fi
+        echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"
+        echo "commit-messages=$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
 
       # Get short commit hash
       - uses: benjlevesque/short-sha@v2.1
