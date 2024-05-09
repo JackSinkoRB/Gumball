@@ -97,7 +97,7 @@ namespace Gumball
             return -1;
         }
         
-        public IEnumerator LoadMap(ChunkMap chunkMap)
+        public IEnumerator LoadMap(ChunkMap chunkMap, Vector3 positionToLoadAround)
         {
             GlobalLoggers.LoadingLogger.Log($"Loading map '{chunkMap.name}'");
             HasLoaded = false;
@@ -105,7 +105,7 @@ namespace Gumball
             currentChunks.Clear();
             
             //load the chunks in range
-            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(chunkMap.VehicleStartingPosition));
+            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(positionToLoadAround));
             yield return distanceLoadingCoroutine.Coroutine;
 
             HasLoaded = true;

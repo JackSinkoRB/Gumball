@@ -23,9 +23,15 @@ namespace Gumball
             public AssetReferenceGameObject AssetReference => assetReference;
             public PositionAndRotation StartingPosition => startingPosition;
         }
-
-        [SerializeField] private float introTime = 3;
+        
+        [Header("Map setup")]
+        [SerializeField] private AddressableSceneReference scene;
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
+        [SerializeField] private Vector3 vehicleStartingPosition;
+        [SerializeField] private Vector3 vehicleStartingRotation;
+        
+        [Header("Session setup")]
+        [SerializeField] private float introTime = 3;
         [SerializeField] private RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] protected float raceDistanceMetres;
@@ -45,6 +51,7 @@ namespace Gumball
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
         
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
+        public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
         public AICar[] CurrentRacers => currentRacers;
@@ -78,7 +85,7 @@ namespace Gumball
 
             //load the map chunks
             Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
-            yield return ChunkManager.Instance.LoadMap(currentChunkMapCached);
+            yield return ChunkManager.Instance.LoadMap(currentChunkMapCached, vehicleStartingPosition);
             chunkLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"Loaded chunks for map in {chunkLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
@@ -155,7 +162,7 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             yield return LoadChunkMap();
-            yield return currentChunkMapCached.LoadSceneIE();
+            yield return LoadScene();
             yield return SetupSession();
             
             GlobalLoggers.LoadingLogger.Log("Loading session...");
@@ -184,6 +191,16 @@ namespace Gumball
             
         }
 
+        private IEnumerator LoadScene()
+        {
+            GlobalLoggers.LoadingLogger.Log("Scene loading started...");
+
+            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
+            yield return Addressables.LoadSceneAsync(scene.SceneName);
+            sceneLoadingStopwatch.Stop();
+            GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+        }
+        
         private IEnumerator IntroCinematicIE()
         {
             if (introTime <= 0)
@@ -230,10 +247,8 @@ namespace Gumball
             WarehouseManager.Instance.CurrentCar.Rigidbody.constraints = RigidbodyConstraints.None;
             
             //move the car to the right position
-            Vector3 startingPosition = chunkMap.VehicleStartingPosition;
-            Vector3 startingRotation = chunkMap.VehicleStartingRotation;
-            currentCarRigidbody.Move(startingPosition, Quaternion.Euler(startingRotation));
-            GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {startingPosition}");
+            currentCarRigidbody.Move(vehicleStartingPosition, Quaternion.Euler(vehicleStartingRotation));
+            GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {vehicleStartingPosition}");
         }
         
         private IEnumerator InitialiseRacers()
