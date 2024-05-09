@@ -91,8 +91,7 @@ namespace Gumball.Runtime.Tests
 
             ColourSwatch defaultSwatch = GlobalPaintPresets.Instance.BodySwatchPresets[0];
             Assert.AreEqual(defaultSwatch.Color, meshToTest.sharedMaterial.GetColor(BodyPaintModification.BaseColorShaderID));
-            Assert.AreEqual(defaultSwatch.Emission, meshToTest.sharedMaterial.GetColor(BodyPaintModification.EmissionShaderID));
-            Assert.AreEqual(defaultSwatch.Metallic, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.MetallicShaderID));
+            Assert.AreEqual(defaultSwatch.Specular, meshToTest.sharedMaterial.GetColor(BodyPaintModification.SpecularShaderID));
             Assert.AreEqual(defaultSwatch.Smoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.SmoothnessShaderID));
             Assert.AreEqual(defaultSwatch.ClearCoat, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatShaderID));
             Assert.AreEqual(defaultSwatch.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatSmoothnessShaderID));
@@ -110,8 +109,7 @@ namespace Gumball.Runtime.Tests
             ColourSwatch swatchToTest = GlobalPaintPresets.Instance.BodySwatchPresets[1];
             BodyPaintModification.ApplySwatch(swatchToTest);
             Assert.AreEqual(swatchToTest.Color, meshToTest.sharedMaterial.GetColor(BodyPaintModification.BaseColorShaderID));
-            Assert.AreEqual(swatchToTest.Emission, meshToTest.sharedMaterial.GetColor(BodyPaintModification.EmissionShaderID));
-            Assert.AreEqual(swatchToTest.Metallic, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.MetallicShaderID));
+            Assert.AreEqual(swatchToTest.Specular, meshToTest.sharedMaterial.GetColor(BodyPaintModification.SpecularShaderID));
             Assert.AreEqual(swatchToTest.Smoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.SmoothnessShaderID));
             Assert.AreEqual(swatchToTest.ClearCoat, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatShaderID));
             Assert.AreEqual(swatchToTest.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatSmoothnessShaderID));
@@ -122,8 +120,7 @@ namespace Gumball.Runtime.Tests
             //load from save and assert it is the same
             BodyPaintModification.LoadFromSave();
             Assert.AreEqual(swatchToTest.Color, meshToTest.sharedMaterial.GetColor(BodyPaintModification.BaseColorShaderID));
-            Assert.AreEqual(swatchToTest.Emission, meshToTest.sharedMaterial.GetColor(BodyPaintModification.EmissionShaderID));
-            Assert.AreEqual(swatchToTest.Metallic, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.MetallicShaderID));
+            Assert.AreEqual(swatchToTest.Specular, meshToTest.sharedMaterial.GetColor(BodyPaintModification.SpecularShaderID));
             Assert.AreEqual(swatchToTest.Smoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.SmoothnessShaderID));
             Assert.AreEqual(swatchToTest.ClearCoat, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatShaderID));
             Assert.AreEqual(swatchToTest.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatSmoothnessShaderID));
@@ -146,15 +143,13 @@ namespace Gumball.Runtime.Tests
             
             ColourSwatch swatchToTest = new();
             swatchToTest.SetColor(primaryColor);
-            swatchToTest.SetEmission(secondaryColor);
-            swatchToTest.SetMetallic(metallic);
+            swatchToTest.SetSpecular(secondaryColor);
             swatchToTest.SetSmoothness(smoothness);
             swatchToTest.SetClearcoat(clearcoat);
             
             BodyPaintModification.ApplySwatch(swatchToTest);
             Assert.AreEqual(swatchToTest.Color, meshToTest.sharedMaterial.GetColor(BodyPaintModification.BaseColorShaderID));
-            Assert.AreEqual(swatchToTest.Emission, meshToTest.sharedMaterial.GetColor(BodyPaintModification.EmissionShaderID));
-            Assert.AreEqual(swatchToTest.Metallic, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.MetallicShaderID));
+            Assert.AreEqual(swatchToTest.Specular, meshToTest.sharedMaterial.GetColor(BodyPaintModification.SpecularShaderID));
             Assert.AreEqual(swatchToTest.Smoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.SmoothnessShaderID));
             Assert.AreEqual(swatchToTest.ClearCoat, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatShaderID));
             Assert.AreEqual(swatchToTest.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatSmoothnessShaderID));
@@ -165,8 +160,7 @@ namespace Gumball.Runtime.Tests
             //load from save and assert it is the same
             BodyPaintModification.LoadFromSave();
             Assert.AreEqual(swatchToTest.Color, meshToTest.sharedMaterial.GetColor(BodyPaintModification.BaseColorShaderID));
-            Assert.AreEqual(swatchToTest.Emission, meshToTest.sharedMaterial.GetColor(BodyPaintModification.EmissionShaderID));
-            Assert.AreEqual(swatchToTest.Metallic, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.MetallicShaderID));
+            Assert.AreEqual(swatchToTest.Specular, meshToTest.sharedMaterial.GetColor(BodyPaintModification.SpecularShaderID));
             Assert.AreEqual(swatchToTest.Smoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.SmoothnessShaderID));
             Assert.AreEqual(swatchToTest.ClearCoat, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatShaderID));
             Assert.AreEqual(swatchToTest.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatSmoothnessShaderID));

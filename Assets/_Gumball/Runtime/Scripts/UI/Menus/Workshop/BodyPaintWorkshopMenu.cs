@@ -17,7 +17,6 @@ namespace Gumball
         [Header("Advanced")]
         [SerializeField] private ColorPicker primaryColorPicker;
         [SerializeField] private ColorPicker secondaryColorPicker;
-        [SerializeField] private Slider metallicSlider;
         [SerializeField] private Slider glossSlider;
         [SerializeField] private Slider clearcoatSlider;
         
@@ -69,16 +68,10 @@ namespace Gumball
         
         public void OnSecondaryColourChange()
         {
-            advancedSwatch.SetEmission(secondaryColorPicker.CurrentColor);
+            advancedSwatch.SetSpecular(secondaryColorPicker.CurrentColor);
             paintModification.ApplySwatch(advancedSwatch);
         }
 
-        public void OnMetallicSliderChange()
-        {
-            advancedSwatch.SetMetallic(metallicSlider.value);
-            paintModification.ApplySwatch(advancedSwatch);
-        }
-        
         public void OnGlossSliderChange()
         {
             advancedSwatch.SetSmoothness(glossSlider.value);
@@ -103,15 +96,13 @@ namespace Gumball
         private void OnSelectAdvancedTab()
         {
             advancedSwatch.SetColor(paintModification.CurrentSwatch.Color.ToColor());
-            advancedSwatch.SetEmission(paintModification.CurrentSwatch.Emission.ToColor());
-            advancedSwatch.SetMetallic(paintModification.CurrentSwatch.Metallic);
+            advancedSwatch.SetSpecular(paintModification.CurrentSwatch.Specular.ToColor());
             advancedSwatch.SetSmoothness(paintModification.CurrentSwatch.Smoothness);
             advancedSwatch.SetClearcoat(paintModification.CurrentSwatch.ClearCoat);
             
             //update the UI
             primaryColorPicker.AssignColor(advancedSwatch.Color);
-            secondaryColorPicker.AssignColor(advancedSwatch.Emission);
-            metallicSlider.value = advancedSwatch.Metallic;
+            secondaryColorPicker.AssignColor(advancedSwatch.Specular);
             glossSlider.value = advancedSwatch.Smoothness;
             clearcoatSlider.value = advancedSwatch.ClearCoat;
 
@@ -133,7 +124,7 @@ namespace Gumball
                 {
                     ColourScrollIcon partsScrollIcon = (ColourScrollIcon)customSwatchItem.CurrentIcon;
                     partsScrollIcon.ImageComponent.color = colourSwatch.Color.ToColor();
-                    partsScrollIcon.SecondaryColour.color = colourSwatch.Emission.ToColor();
+                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular.ToColor();
                 };
 
                 customSwatchItem.onSelect += () =>
@@ -154,7 +145,7 @@ namespace Gumball
                 {
                     ColourScrollIcon partsScrollIcon = (ColourScrollIcon)scrollItem.CurrentIcon;
                     partsScrollIcon.ImageComponent.color = colourSwatch.Color;
-                    partsScrollIcon.SecondaryColour.color = colourSwatch.Emission;
+                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular;
                 };
 
                 scrollItem.onSelect += () =>

@@ -97,8 +97,7 @@ namespace Gumball.Runtime.Tests
 
                 ColourSwatch defaultSwatch = GlobalPaintPresets.Instance.WheelSwatchPresets[paintModification.DefaultSwatchIndex];
                 Assert.AreEqual(defaultSwatch.Color, meshToTest.sharedMaterial.GetColor(WheelPaintModification.BaseColorShaderID));
-                Assert.AreEqual(defaultSwatch.Emission, meshToTest.sharedMaterial.GetColor(WheelPaintModification.EmissionShaderID));
-                Assert.AreEqual(defaultSwatch.Metallic, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.MetallicShaderID));
+                Assert.AreEqual(defaultSwatch.Specular, meshToTest.sharedMaterial.GetColor(WheelPaintModification.SpecularShaderID));
                 Assert.AreEqual(defaultSwatch.Smoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.SmoothnessShaderID));
                 Assert.AreEqual(defaultSwatch.ClearCoat, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatShaderID));
                 Assert.AreEqual(defaultSwatch.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatSmoothnessShaderID));
@@ -120,8 +119,7 @@ namespace Gumball.Runtime.Tests
                 ColourSwatch swatchToTest = GlobalPaintPresets.Instance.WheelSwatchPresets[1];
                 paintModification.ApplySwatch(swatchToTest);
                 Assert.AreEqual(swatchToTest.Color, meshToTest.sharedMaterial.GetColor(WheelPaintModification.BaseColorShaderID));
-                Assert.AreEqual(swatchToTest.Emission, meshToTest.sharedMaterial.GetColor(WheelPaintModification.EmissionShaderID));
-                Assert.AreEqual(swatchToTest.Metallic, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.MetallicShaderID));
+                Assert.AreEqual(swatchToTest.Specular, meshToTest.sharedMaterial.GetColor(WheelPaintModification.SpecularShaderID));
                 Assert.AreEqual(swatchToTest.Smoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.SmoothnessShaderID));
                 Assert.AreEqual(swatchToTest.ClearCoat, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatShaderID));
                 Assert.AreEqual(swatchToTest.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatSmoothnessShaderID));
@@ -132,8 +130,7 @@ namespace Gumball.Runtime.Tests
                 //load from save and assert it is the same
                 paintModification.LoadFromSave();
                 Assert.AreEqual(swatchToTest.Color, meshToTest.sharedMaterial.GetColor(WheelPaintModification.BaseColorShaderID));
-                Assert.AreEqual(swatchToTest.Emission, meshToTest.sharedMaterial.GetColor(WheelPaintModification.EmissionShaderID));
-                Assert.AreEqual(swatchToTest.Metallic, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.MetallicShaderID));
+                Assert.AreEqual(swatchToTest.Specular, meshToTest.sharedMaterial.GetColor(WheelPaintModification.SpecularShaderID));
                 Assert.AreEqual(swatchToTest.Smoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.SmoothnessShaderID));
                 Assert.AreEqual(swatchToTest.ClearCoat, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatShaderID));
                 Assert.AreEqual(swatchToTest.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatSmoothnessShaderID));
@@ -154,21 +151,18 @@ namespace Gumball.Runtime.Tests
                 //create a custom swatch
                 Color primaryColor = Color.red;
                 Color secondaryColor = Color.blue;
-                const float metallic = 0.5f;
                 const float smoothness = 0.2f;
                 const float clearcoat = 0.1f;
 
                 ColourSwatch swatchToTest = new();
                 swatchToTest.SetColor(primaryColor);
-                swatchToTest.SetEmission(secondaryColor);
-                swatchToTest.SetMetallic(metallic);
+                swatchToTest.SetSpecular(secondaryColor);
                 swatchToTest.SetSmoothness(smoothness);
                 swatchToTest.SetClearcoat(clearcoat);
 
                 paintModification.ApplySwatch(swatchToTest);
                 Assert.AreEqual(swatchToTest.Color, meshToTest.sharedMaterial.GetColor(WheelPaintModification.BaseColorShaderID));
-                Assert.AreEqual(swatchToTest.Emission, meshToTest.sharedMaterial.GetColor(WheelPaintModification.EmissionShaderID));
-                Assert.AreEqual(swatchToTest.Metallic, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.MetallicShaderID));
+                Assert.AreEqual(swatchToTest.Specular, meshToTest.sharedMaterial.GetColor(WheelPaintModification.SpecularShaderID));
                 Assert.AreEqual(swatchToTest.Smoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.SmoothnessShaderID));
                 Assert.AreEqual(swatchToTest.ClearCoat, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatShaderID));
                 Assert.AreEqual(swatchToTest.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatSmoothnessShaderID));
@@ -179,8 +173,7 @@ namespace Gumball.Runtime.Tests
                 //load from save and assert it is the same
                 paintModification.LoadFromSave();
                 Assert.AreEqual(swatchToTest.Color, meshToTest.sharedMaterial.GetColor(WheelPaintModification.BaseColorShaderID));
-                Assert.AreEqual(swatchToTest.Emission, meshToTest.sharedMaterial.GetColor(WheelPaintModification.EmissionShaderID));
-                Assert.AreEqual(swatchToTest.Metallic, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.MetallicShaderID));
+                Assert.AreEqual(swatchToTest.Specular, meshToTest.sharedMaterial.GetColor(WheelPaintModification.SpecularShaderID));
                 Assert.AreEqual(swatchToTest.Smoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.SmoothnessShaderID));
                 Assert.AreEqual(swatchToTest.ClearCoat, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatShaderID));
                 Assert.AreEqual(swatchToTest.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(WheelPaintModification.ClearCoatSmoothnessShaderID));
