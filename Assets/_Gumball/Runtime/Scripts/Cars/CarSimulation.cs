@@ -45,10 +45,13 @@ namespace Gumball
                 plane.transform.localScale = Vector3.one * planeSize;
                 plane.transform.position = new Vector3(0, -1, 0);
             }
-
+            plane.SetActive(true);
+            
             IsSimulating = true;
             
             //move the car
+            car.Rigidbody.constraints = RigidbodyConstraints.None;
+            car.Rigidbody.isKinematic = false;
             Scene originalScene = gameObject.scene;
             Vector3 originalPosition = transform.position;
             Vector3 originalVelocity = car.Rigidbody.velocity;
@@ -88,6 +91,8 @@ namespace Gumball
             car.Rigidbody.Move(originalPosition, Quaternion.Euler(Vector3.zero));
             car.Rigidbody.velocity = originalVelocity;
             Physics.simulationMode = SimulationMode.FixedUpdate;
+            
+            plane.SetActive(false);
 
             GlobalLoggers.LoadingLogger.Log($"Cleanup took {stopwatch.Elapsed.ToPrettyString(true)}.");
         }
