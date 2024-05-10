@@ -800,7 +800,8 @@ namespace Gumball
             if (speed <= 0) 
                 return;
 
-            float speedPercent = Mathf.Clamp01(speed / DesiredSpeed);
+            const float speedForMaxAngle = 300;
+            float speedPercent = Mathf.Clamp01(speed / speedForMaxAngle);
             float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : maxSteerAngleCurve.Evaluate(speedPercent);
 
             if (autoDrive)
