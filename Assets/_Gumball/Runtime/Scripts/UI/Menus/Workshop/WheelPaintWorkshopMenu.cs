@@ -170,8 +170,8 @@ namespace Gumball
                 customSwatchItem.onLoad += () =>
                 {
                     ColourScrollIcon partsScrollIcon = (ColourScrollIcon)customSwatchItem.CurrentIcon;
-                    partsScrollIcon.ImageComponent.color = colourSwatch.Color.ToColor();
-                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular.ToColor();
+                    partsScrollIcon.ImageComponent.color = colourSwatch.Color.ToColor().WithAlphaSetTo(1);
+                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular.ToColor().WithAlphaSetTo(1);
                 };
 
                 customSwatchItem.onSelect += () =>
@@ -191,8 +191,8 @@ namespace Gumball
                 scrollItem.onLoad += () =>
                 {
                     ColourScrollIcon partsScrollIcon = (ColourScrollIcon)scrollItem.CurrentIcon;
-                    partsScrollIcon.ImageComponent.color = colourSwatch.Color;
-                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular;
+                    partsScrollIcon.ImageComponent.color = colourSwatch.Color.WithAlphaSetTo(1);
+                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular.WithAlphaSetTo(1);
                 };
 
                 scrollItem.onSelect += () =>
