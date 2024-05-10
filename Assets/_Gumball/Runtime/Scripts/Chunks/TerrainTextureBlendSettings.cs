@@ -11,9 +11,9 @@ namespace Gumball
     public class TerrainTextureBlendSettings
     {
         
-        private static readonly Color noiseColor = new(0, 1, 0, 0);
+        private static readonly Color lightColor = new(0, 0, 0, 1);
         private static readonly Color objectSurroundingColor = new(0, 0, 1, 0);
-        private static readonly Color slopeColor = new(0, 0, 0, 1);
+        private static readonly Color slopeColor = new(0, 1, 0, 0);
         
         [Header("Object surrounding texture")]
         [Tooltip("The distance around chunk objects to show the 'object surrrounding texture' at full strength.")]
@@ -22,10 +22,9 @@ namespace Gumball
         [SerializeField] private float objectSurroundingBlendRadius = 15;
         [SerializeField, Range(0, 1)] private float objectSurroundingMaxOpacity = 0.8f;
 
-        [Header("Noise texture")]
-        [SerializeField] private float noiseScale = 120;
-        [SerializeField, Range(0, 1)] private float noiseMaxOpacity = 0.8f;
-
+        [Header("Lighting")]
+        [SerializeField] private float naturalLight = 0.1f;
+        
         [Header("Slope texture")]
         [SerializeField] private MinMaxInt minMaxSlopeAngle = new(0, 50);
         [SerializeField, Range(0, 1)] private float slopeMaxOpacity = 0.8f;
@@ -43,13 +42,15 @@ namespace Gumball
                 // - the total of all 3 should be between 0 and 1
                 // - 1 meaning it completely overrides the base layer
                 // - 0.5 means the base is half showing, and the other half is a combination of the blends
-                float noiseWeight = GetNoiseWeight(vertexPositionWorld);
                 float objectSurroundingWeight = GetObjectSurroundingWeight(chunk, vertexPositionWorld);
                 float slopeWeight = GetSlopeWeight(i, mesh);
 
-                Color finalColor = noiseWeight * noiseColor + objectSurroundingWeight * objectSurroundingColor +
-                                   slopeWeight * slopeColor;
+                float greenColor = slopeWeight;
+                float blueColor = objectSurroundingWeight;
+                float redColor = Mathf.Clamp01(1 - (greenColor + blueColor));
                 
+                Color finalColor = new Color(redColor, greenColor, blueColor, naturalLight);
+
                 //apply chunk object colouring
                 //raycast upwards from vertex point (add 10,000 to start at top) to see if it's overlapping
                 const int maxChunkObjectsPerPosition = 15;
@@ -70,12 +71,6 @@ namespace Gumball
             }
 
             return vertexColors;
-        }
-
-        private float GetNoiseWeight(Vector3 vertexPositionWorld)
-        {
-            float perlinValue = Mathf.Clamp01(Mathf.PerlinNoise(vertexPositionWorld.x / noiseScale, vertexPositionWorld.z / noiseScale));
-            return perlinValue * noiseMaxOpacity;
         }
 
         private float GetObjectSurroundingWeight(Chunk chunk, Vector3 vertexPositionWorld)
