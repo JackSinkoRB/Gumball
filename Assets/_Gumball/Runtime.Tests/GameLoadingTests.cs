@@ -73,6 +73,16 @@ namespace Gumball.Runtime.Tests
             
             Assert.Less(totalTimeWaiting, maxLoadTimeAllowed);
         }
+        
+        [UnityTest]
+        [Order(2)]
+        public IEnumerator FoundCoreParts()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            Assert.IsTrue(GameLoaderSceneManager.HasLoaded);
+            
+            Assert.IsTrue(CorePartManager.AllParts.Count > 0);
+        }
 
     }
 }

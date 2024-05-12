@@ -2578,6 +2578,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ce4b6b7c12aa484bb5820e25a981651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultSwatchIndex: 0
   carBelongsTo: {fileID: 6333412833798203086}
   colourableParts:
   - {fileID: 4229807267808433857}
@@ -3209,6 +3210,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ce4b6b7c12aa484bb5820e25a981651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultSwatchIndex: 0
   carBelongsTo: {fileID: 0}
   colourableParts: []
   testSwatch:
@@ -5086,6 +5088,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ce4b6b7c12aa484bb5820e25a981651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultSwatchIndex: 0
   carBelongsTo: {fileID: 0}
   colourableParts: []
   testSwatch:
@@ -7995,6 +7998,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ce4b6b7c12aa484bb5820e25a981651, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultSwatchIndex: 0
   carBelongsTo: {fileID: 0}
   colourableParts: []
   testSwatch:
@@ -8933,6 +8937,7 @@ Transform:
   m_Children:
   - {fileID: 6836316462123091794}
   - {fileID: 8122091738299496973}
+  - {fileID: 9212970982777233993}
   - {fileID: 3598331306860555585}
   - {fileID: 1909353466429399051}
   - {fileID: 3053855281547784238}
@@ -8985,9 +8990,9 @@ MonoBehaviour:
   isPlayerCar: 0
   isPlayerDrivingEnabled: 0
   carIndex: 0
-  id: 0
   carPartManager: {fileID: 7904050704453231355}
   bodyPaintModification: {fileID: 659532544896480163}
+  partModification: {fileID: 2944274453556105580}
   frontOfCarPosition: {x: 0, y: 1, z: 2}
   carWidth: 2
   wheelConfiguration: 0
@@ -9289,6 +9294,51 @@ Transform:
   - {fileID: 7482763240405712190}
   m_Father: {fileID: 7954989847534529818}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6913766404091764556
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9212970982777233993}
+  - component: {fileID: 2944274453556105580}
+  m_Layer: 8
+  m_Name: PartModification
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9212970982777233993
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6913766404091764556}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6836390663536110284}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2944274453556105580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6913766404091764556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e55a6b19c4ab454bacb56427e6b3eb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  carBelongsTo: {fileID: 0}
 --- !u!1 &6942800007223883182
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,11 +14,11 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace Gumball
 {
-    /// <summary>
+        /// <summary>
     /// Listen for presses from all active touches.
     /// </summary>
-    [RequireComponent(typeof(Button))]
-    public class ButtonEvents : MonoBehaviour
+    [RequireComponent(typeof(Image))]
+    public class VirtualButton : MonoBehaviour
     {
         
         public event Action onPress;
@@ -34,30 +34,43 @@ namespace Gumball
         [SerializeField] private bool canOnlyBePressedOnPointerDown;
         [Tooltip("Should the press be cancelled if the pointer is no longer on top of the selectable?")]
         [SerializeField] private bool pointerMustBeOnRect = true;
+        [Tooltip("Can the button be pressed if it is blocked by graphics on top of this one?")]
+        [SerializeField] private bool canBePressedIfBlocked = true;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool isPressingButton;
         
-        public Button Button => GetComponent<Button>();
-        public bool IsPressingButton => isPressingButton;
-
         private Vector2 lastKnownPosition;
         private ReadOnlyArray<Touch> previousTouches;
+        private GraphicRaycaster graphicRaycasterCached;
+        
+        public bool IsPressingButton => isPressingButton;
+        
+        private Image image => GetComponent<Image>();
 
+        private GraphicRaycaster graphicRaycaster
+        {
+            get
+            {
+                if (graphicRaycasterCached == null)
+                    graphicRaycasterCached = transform.GetComponentInAllParents<GraphicRaycaster>();
+                return graphicRaycasterCached;
+            }
+        }
+        
         private void Update()
         {
             CheckIfButtonIsPressed();
             if (IsPressingButton)
                 OnHold();
         }
-        
+
         private void CheckIfButtonIsPressed()
         {
             bool isPressed = false;
             foreach (Touch touch in InputManager.ActiveTouches)
             {
-                if (IsScreenPositionWithinGraphic(Button.image, touch.screenPosition)
-                    && (!canOnlyBePressedOnPointerDown || !previousTouches.Contains(touch)))
+                if (IsButtonPressedWithTouch(touch))
                 {
                     isPressed = true;
                     break;
@@ -79,6 +92,24 @@ namespace Gumball
                 if (!PrimaryContactInput.IsPressed && IsPressingButton)
                     OnRelease();
             }
+        }
+        
+        private bool IsButtonPressedWithTouch(Touch touch)
+        {
+            if (canOnlyBePressedOnPointerDown && previousTouches.Contains(touch))
+                return false;
+
+            if (!IsScreenPositionWithinGraphic(image, touch.screenPosition))
+                return false;
+
+            if (!canBePressedIfBlocked)
+            {
+                Graphic graphicUnderPointer = GraphicUtils.GetClickableGraphic(graphicRaycaster, touch.screenPosition);
+                if (graphicUnderPointer != null && graphicUnderPointer != image)
+                    return false;
+            }
+
+            return true;
         }
 
         private void OnPress()
@@ -145,6 +176,6 @@ namespace Gumball
             Handles.DrawWireCube(rectToDraw.center, new Vector3(rectToDraw.width, rectToDraw.height, 0));
         }
 #endif
-        
+
     }
 }

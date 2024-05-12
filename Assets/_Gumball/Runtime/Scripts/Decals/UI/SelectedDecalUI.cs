@@ -22,13 +22,13 @@ namespace Gumball
         [SerializeField] private float fadeWhenModifying = 0.2f;
 
         [Header("Scale/Rotation handle")]
-        [SerializeField] private ButtonEvents scaleRotationHandle;
+        [SerializeField] private VirtualButton scaleRotationHandle;
         [SerializeField] private float scaleSpeed = 2;
         
         private LiveDecal selectedDecal => DecalEditor.Instance.CurrentSelected;
 
         public Image Ring => ring;
-        public ButtonEvents ScaleRotationHandle => scaleRotationHandle;
+        public VirtualButton ScaleRotationHandle => scaleRotationHandle;
 
         private Tween currentFadeTween;
         private bool isFaded;

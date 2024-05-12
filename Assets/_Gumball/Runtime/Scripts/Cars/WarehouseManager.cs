@@ -26,12 +26,6 @@ namespace Gumball
             get => DataManager.Warehouse.Get("CurrentCar.Index", 0);
             private set => DataManager.Warehouse.Set("CurrentCar.Index", value);
         }
-
-        public int SavedCarID
-        {
-            get => DataManager.Warehouse.Get("CurrentCar.ID", 0);
-            private set => DataManager.Warehouse.Set("CurrentCar.ID", value);
-        }
         
         public void SetCurrentCar(AICar car)
         {
@@ -43,7 +37,6 @@ namespace Gumball
 
             //save the values:
             SavedCarIndex = car.CarIndex;
-            SavedCarID = car.ID;
             
             onCurrentCarChanged?.Invoke(car);
             
@@ -54,10 +47,10 @@ namespace Gumball
         
         public IEnumerator SpawnSavedCar(Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
         {
-            yield return SpawnCar(SavedCarIndex, SavedCarID, position, rotation, onComplete);
+            yield return SpawnCar(SavedCarIndex, position, rotation, onComplete);
         }
 
-        public IEnumerator SpawnCar(int index, int id, Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
+        public IEnumerator SpawnCar(int index, Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             
@@ -68,7 +61,7 @@ namespace Gumball
             AICar car = Instantiate(handle.Result, position, rotation).GetComponent<AICar>();
             car.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             
-            car.InitialiseAsPlayer(index, id);
+            car.InitialiseAsPlayer(index);
             car.SetGrounded();
             
             yield return DecalManager.ApplyDecalDataToCar(car);

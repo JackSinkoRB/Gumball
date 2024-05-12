@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using Dreamteck.Splines;
 #if UNITY_EDITOR
@@ -8,16 +9,22 @@ using Gumball.Editor;
 #endif
 using MyBox;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Gumball
 {
-    [RequireComponent(typeof(Rigidbody))]
+    [RequireComponent(typeof(Rigidbody), typeof(CarSimulation))]
     public class AICar : MonoBehaviour
     {
 
+        public static string GetSaveKeyFromIndex(int carIndex)
+        {
+            return $"CarData.{carIndex}";
+        }
+        
         public event Action onDisable;
 
         private enum WheelConfiguration
@@ -36,21 +43,21 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isPlayerCar;
         [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
-        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int id;
 
         public bool IsPlayerCar => isPlayerCar;
         public CarIKManager AvatarIKManager => avatarIKManager;
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
-        public int ID => id;
-        public string SaveKey => $"CarData.{carIndex}.{id}";
+        public string SaveKey => GetSaveKeyFromIndex(carIndex);
 
         [Header("Customisation")]
         [SerializeField] private CarPartManager carPartManager;
         [SerializeField] private BodyPaintModification bodyPaintModification;
+        [SerializeField] private PartModification partModification;
 
         public CarPartManager CarPartManager => carPartManager;
         public BodyPaintModification BodyPaintModification => bodyPaintModification;
+        public PartModification PartModification => partModification;
 
         [Header("Sizing")]
         [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
@@ -95,10 +102,9 @@ namespace Gumball
         [Header("Auto drive")]
         [SerializeField] private bool autoDrive;
         
-        [Header("Max speed")]
+        [Header("Speed limit")]
         [Tooltip("Does the car obey the current chunks speed limit?")]
         [SerializeField] private bool obeySpeedLimit = true;
-        [SerializeField, ConditionalField(nameof(obeySpeedLimit), true), InitializationField] private float maxSpeed = 200;
         [Tooltip("A speed limit that overrides the max speed to be changed at runtime.")]
         [SerializeField] private float tempSpeedLimit = -1f;
         
@@ -127,8 +133,8 @@ namespace Gumball
         private const float stationarySpeed = 2;
         private bool isStationary => speed < stationarySpeed && !isAccelerating;
 
-        [Header("Engine & Transmission")]
-        [Tooltip("The engine torque output (y) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
+        [Header("Engine & Drivetrain")]
+        [Tooltip("The engine torque output (y) (in Newton metres) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
         [SerializeField] private AnimationCurve torqueCurve;
         [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
         [SerializeField] private float finalGearRatio = 3.42f;
@@ -148,6 +154,7 @@ namespace Gumball
         public int CurrentGear => currentGear;
         public int NumberOfGears => gearRatios.Length;
         public float EngineRpm => engineRpm;
+        public AnimationCurve TorqueCurve => torqueCurve;
         
         [Header("Reversing")]
         [SerializeField] private float maxReverseSpeed = 25;
@@ -229,6 +236,16 @@ namespace Gumball
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[10];
         private bool allDirectionsAreBlocked;
 
+        [Header("Value modification")]
+        [SerializeField, ReadOnly] private float defaultPeakTorque;
+        
+        private int[] peakTorqueKeys;
+
+        public float DefaultPeakTorque => defaultPeakTorque;
+        private Keyframe peakTorqueKey => torqueCurve.keys[peakTorqueKeys[^1]];
+        public float PeakTorque => peakTorqueKey.value;
+        public float Horsepower => DynoUtils.CalculateHorsepower(DynoUtils.ConvertNewtonMetresToFootPounds(peakTorqueKey.value), peakTorqueKey.time);
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool isInitialised;
         [Space(5)]
@@ -248,7 +265,7 @@ namespace Gumball
 
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
         public float Speed => speed;
-        public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : maxSpeed));
+        public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : Mathf.Infinity));
         
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk CurrentChunk
@@ -322,14 +339,14 @@ namespace Gumball
             OnChangeChunk(null, CurrentChunk);
             
             CachePoweredWheels();
+            CachePeakTorque();
         }
 
-        public void InitialiseAsPlayer(int carIndex, int id)
+        public void InitialiseAsPlayer(int carIndex)
         {
             isPlayerCar = true;
             
             this.carIndex = carIndex;
-            this.id = id;
             
             gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
             colliders.layer = (int)LayersAndTags.Layer.PlayerCar;
@@ -342,6 +359,9 @@ namespace Gumball
             if (bodyPaintModification != null)
                 bodyPaintModification.Initialise(this);
 
+            if (partModification != null)
+                partModification.Initialise(this);
+            
             foreach (WheelMesh wheelMesh in AllWheelMeshes)
             {
                 WheelPaintModification wheelPaintModification = wheelMesh.GetComponent<WheelPaintModification>();
@@ -383,6 +403,14 @@ namespace Gumball
         public void SetTemporarySpeedLimit(float speedKmh)
         {
             tempSpeedLimit = speedKmh;
+        }
+
+        /// <summary>
+        /// Movement should only be called in FixedUpdate, but this can be called manually if simulating.
+        /// </summary>
+        public void SimulateMovement()
+        {
+            Move();
         }
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -448,6 +476,16 @@ namespace Gumball
         {
             currentLaneDistance = laneDistance;
             currentLaneDirection = direction;
+        }
+        
+        public void SetPeakTorque(float peakTorque)
+        {
+            foreach (int peakTorqueKeyIndex in peakTorqueKeys)
+            {
+                Keyframe currentKeyframe = torqueCurve.keys[peakTorqueKeyIndex];
+                Keyframe newKeyframe = new Keyframe(currentKeyframe.time, peakTorque, currentKeyframe.inTangent, currentKeyframe.outTangent, currentKeyframe.inWeight, currentKeyframe.outWeight);
+                torqueCurve.MoveKey(peakTorqueKeyIndex, newKeyframe);
+            }
         }
         
         private void FixedUpdate()
@@ -729,6 +767,10 @@ namespace Gumball
                 if (isPlayerDrivingEnabled && InputManager.Instance.CarInput.Accelerate.IsPressed && currentGear == 0)
                     ChangeGear(1);
             }
+
+            CarSimulation carSimulation = GetComponent<CarSimulation>();
+            if (carSimulation != null && carSimulation.IsSimulating)
+                isAccelerating = true;
         }
 
         private void ChangeGear(int newGear)
@@ -758,7 +800,8 @@ namespace Gumball
             if (speed <= 0) 
                 return;
 
-            float speedPercent = Mathf.Clamp01(speed / DesiredSpeed);
+            const float speedForMaxAngle = 300;
+            float speedPercent = Mathf.Clamp01(speed / speedForMaxAngle);
             float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : maxSteerAngleCurve.Evaluate(speedPercent);
 
             if (autoDrive)
@@ -1059,7 +1102,7 @@ namespace Gumball
                 poweredWheel.motorTorque = wheelTorque;
             }
         }
-        
+
         private void ApplySteering()
         {
             foreach (WheelCollider frontWheel in frontWheelColliders)
@@ -1549,6 +1592,32 @@ namespace Gumball
                 if (stanceModification != null)
                     stanceModification.Initialise(this);
             }
+        }
+        
+        private void CachePeakTorque()
+        {
+            HashSet<int> keys = new();
+            
+            //set the default peak torque
+            float highestTorque = 0;
+            foreach (Keyframe key in torqueCurve.keys)
+            {
+                float torque = key.value;
+                if (torque > highestTorque)
+                    highestTorque = torque;
+            }
+            defaultPeakTorque = highestTorque;
+
+            //cache the peak torque keys
+            for (int index = 0; index < torqueCurve.keys.Length; index++)
+            {
+                Keyframe key = torqueCurve.keys[index];
+                float torque = key.value;
+                if (torque.Approximately(highestTorque, 1))
+                    keys.Add(index);
+            }
+
+            peakTorqueKeys = keys.ToArray();
         }
         
 #if UNITY_EDITOR

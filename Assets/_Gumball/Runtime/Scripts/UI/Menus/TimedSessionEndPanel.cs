@@ -4,13 +4,8 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class TimedSessionEndPanel : AnimatedPanel
+    public class TimedSessionEndPanel : GameSessionEndPanel
     {
-
-        public void OnClickExitButton()
-        {
-            MainSceneManager.LoadMainScene();
-        }
         
     }
 }

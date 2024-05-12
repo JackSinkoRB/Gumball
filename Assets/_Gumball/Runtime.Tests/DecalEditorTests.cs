@@ -62,7 +62,7 @@ namespace Gumball.Runtime.Tests
         
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(0, 0, 
+            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(0, 
                 Vector3.zero, 
                 Quaternion.Euler(Vector3.zero), 
                     (car) =>
@@ -119,7 +119,7 @@ namespace Gumball.Runtime.Tests
             Object.Destroy(WarehouseManager.Instance.CurrentCar.gameObject);
             Vector3 newCarPosition = new Vector3(-3, 3, -1);
             Vector3 newCarRotationEuler = new Vector3(5, 180, 20);
-            yield return WarehouseManager.Instance.SpawnCar(0, 0, 
+            yield return WarehouseManager.Instance.SpawnCar(0, 
                 newCarPosition, 
                 Quaternion.Euler(newCarRotationEuler), 
                 (car) => WarehouseManager.Instance.SetCurrentCar(car));
