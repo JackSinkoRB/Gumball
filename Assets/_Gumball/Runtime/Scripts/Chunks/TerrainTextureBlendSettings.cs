@@ -23,7 +23,7 @@ namespace Gumball
         [SerializeField, Range(0, 1)] private float objectSurroundingMaxOpacity = 0.8f;
 
         [Header("Lighting")]
-        [SerializeField] private float naturalLight = 0.1f;
+        [SerializeField] private float naturalLight;
         
         [Header("Slope texture")]
         [SerializeField] private MinMaxInt minMaxSlopeAngle = new(0, 50);
