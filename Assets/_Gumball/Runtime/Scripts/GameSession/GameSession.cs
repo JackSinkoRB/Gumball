@@ -24,12 +24,22 @@ namespace Gumball
             public PositionAndRotation StartingPosition => startingPosition;
         }
         
+        private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
+
         [Header("Map setup")]
         [SerializeField] private AddressableSceneReference scene;
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
         [SerializeField] private Vector3 vehicleStartingPosition;
         [SerializeField] private Vector3 vehicleStartingRotation;
         
+        [Header("Lighting")]
+        [Tooltip("This is directional light intensity value.")]
+        [SerializeField] private float globalLightIntensity = 1;
+        [Tooltip("This is environment reflections intensity multiplier value that is passed to the environment rendering settings.")]
+        [Range(0, 1), SerializeField] private float reflectionIntensity = 1;
+        [Tooltip("This is the value that is passed to the shader for fake lighting using the alpha channel.")]
+        [Range(0, 30), SerializeField] private float fakeLightingIntensity;
+
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
         [SerializeField] private RacerSessionData[] racerData;
@@ -194,11 +204,36 @@ namespace Gumball
         private IEnumerator LoadScene()
         {
             GlobalLoggers.LoadingLogger.Log("Scene loading started...");
-
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
+            
             yield return Addressables.LoadSceneAsync(scene.SceneName);
+            
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            
+            SetupLighting();
+        }
+
+        private void SetupLighting()
+        {
+            GlobalLoggers.LoadingLogger.Log("Setting up lighting...");
+            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
+            
+            //set the global light
+            GameObject directionalLightGameObject = GameObject.Find("Directional Light");
+            if (directionalLightGameObject != null)
+                directionalLightGameObject.GetComponent<Light>().intensity = globalLightIntensity;
+            else 
+                Debug.LogError("Could not find directional light in scene. Does it have the name 'Directional Light'?");
+            
+            //set reflection intensity
+            RenderSettings.reflectionIntensity = reflectionIntensity;
+            
+            //set the fake lighting
+            ChunkManager.Instance.TerrainMaterial.SetFloat(LightStrShaderID, fakeLightingIntensity);
+            
+            sceneLoadingStopwatch.Stop();
+            GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} lighting setup complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
         }
         
         private IEnumerator IntroCinematicIE()

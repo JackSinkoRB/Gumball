@@ -22,6 +22,7 @@ namespace Gumball
         private const float timeBetweenLoadingChecks = 0.5f;
 
         [SerializeField] private PhysicMaterial slipperyPhysicsMaterial;
+        [SerializeField] private Material terrainMaterial;
         
         [Header("Debugging")]
         [ReadOnly, SerializeField] private ChunkMap currentChunkMap;
@@ -48,6 +49,7 @@ namespace Gumball
         private readonly List<TrackedCoroutine> chunksAfterLoading = new();
 
         public PhysicMaterial SlipperyPhysicsMaterial => slipperyPhysicsMaterial;
+        public Material TerrainMaterial => terrainMaterial;
         
         public bool HasLoaded;
         public ChunkMap CurrentChunkMap => currentChunkMap;
