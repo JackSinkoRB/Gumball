@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
@@ -5,6 +6,27 @@ using UnityEngine;
 
 namespace Gumball
 {
+
+    public static class SubPartTypeHelper
+    {
+        public static CorePart.PartType GetCoreType(this SubPart.SubPartType subPartType)
+        {
+            string subPartTypeName = subPartType.ToString();
+            int underscoreIndex = subPartTypeName.IndexOf('_');
+            string corePartTypeName = subPartTypeName.Substring(0, underscoreIndex);
+            CorePart.PartType corePartType = Enum.Parse<CorePart.PartType>(corePartTypeName);
+            return corePartType;
+        }
+
+        public static string ToFriendlyString(this SubPart.SubPartType subPartType)
+        {
+            string subPartTypeName = subPartType.ToString();
+            int underscoreIndex = subPartTypeName.IndexOf('_');
+            string name = subPartTypeName.Substring(underscoreIndex + 1);
+            return name;
+        }
+    }
+    
     [CreateAssetMenu(menuName = "Gumball/Parts/Sub Part")]
     public class SubPart : UniqueScriptableObject
     {
@@ -12,16 +34,16 @@ namespace Gumball
         public enum SubPartType
         {
             ENGINE_ECU,
-            ENGINE_INTAKE,
-            ENGINE_EXHAUST,
+            ENGINE_Intake,
+            ENGINE_Exhaust,
             ENGINE_NOS,
-            ENGINE_TURBO,
-            WHEELS_TYRES,
-            WHEELS_BRAKES,
-            WHEELS_COILOVERS,
-            DRIVETRAIN_GEARBOX,
-            DRIVETRAIN_CLUTCH,
-            DRIVETRAIN_DIFFERENTIAL
+            ENGINE_Turbo,
+            WHEELS_Tyres,
+            WHEELS_Brakes,
+            WHEELS_Coilovers,
+            DRIVETRAIN_Gearbox,
+            DRIVETRAIN_Clutch,
+            DRIVETRAIN_Differential
         }
 
         [SerializeField] private SubPartType type;
