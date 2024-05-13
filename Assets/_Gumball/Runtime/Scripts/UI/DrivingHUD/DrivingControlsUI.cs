@@ -32,14 +32,17 @@ namespace Gumball
         {
             WarehouseManager.Instance.onCurrentCarChanged -= OnCarChanged;
             GearboxSetting.onSettingChanged -= OnGearboxSettingChanged;
-            
-            //disable the press overrides in case they were still pressed upon disabling
-            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(false);
-            InputManager.Instance.CarInput.Brake.SetPressedOverride(false);
-            InputManager.Instance.CarInput.Handbrake.SetPressedOverride(false);
-            InputManager.Instance.CarInput.ShiftUp.SetPressedOverride(false);
-            InputManager.Instance.CarInput.ShiftDown.SetPressedOverride(false);
-            InputManager.Instance.CarInput.Steering.SetValueOverride(null);
+
+            if (InputManager.ExistsRuntime)
+            {
+                //disable the press overrides in case they were still pressed upon disabling
+                InputManager.Instance.CarInput.Accelerate.SetPressedOverride(false);
+                InputManager.Instance.CarInput.Brake.SetPressedOverride(false);
+                InputManager.Instance.CarInput.Handbrake.SetPressedOverride(false);
+                InputManager.Instance.CarInput.ShiftUp.SetPressedOverride(false);
+                InputManager.Instance.CarInput.ShiftDown.SetPressedOverride(false);
+                InputManager.Instance.CarInput.Steering.SetValueOverride(null);
+            }
         }
 
         private void OnCarChanged(AICar newCar)
