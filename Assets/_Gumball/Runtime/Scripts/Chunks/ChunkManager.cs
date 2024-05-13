@@ -22,6 +22,7 @@ namespace Gumball
         private const float timeBetweenLoadingChecks = 0.5f;
 
         [SerializeField] private PhysicMaterial slipperyPhysicsMaterial;
+        [SerializeField] private Material terrainMaterial;
         
         [Header("Debugging")]
         [ReadOnly, SerializeField] private ChunkMap currentChunkMap;
@@ -48,6 +49,7 @@ namespace Gumball
         private readonly List<TrackedCoroutine> chunksAfterLoading = new();
 
         public PhysicMaterial SlipperyPhysicsMaterial => slipperyPhysicsMaterial;
+        public Material TerrainMaterial => terrainMaterial;
         
         public bool HasLoaded;
         public ChunkMap CurrentChunkMap => currentChunkMap;
@@ -97,7 +99,7 @@ namespace Gumball
             return -1;
         }
         
-        public IEnumerator LoadMap(ChunkMap chunkMap)
+        public IEnumerator LoadMap(ChunkMap chunkMap, Vector3 positionToLoadAround)
         {
             GlobalLoggers.LoadingLogger.Log($"Loading map '{chunkMap.name}'");
             HasLoaded = false;
@@ -105,7 +107,7 @@ namespace Gumball
             currentChunks.Clear();
             
             //load the chunks in range
-            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(chunkMap.VehicleStartingPosition));
+            distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(positionToLoadAround));
             yield return distanceLoadingCoroutine.Coroutine;
 
             HasLoaded = true;
@@ -502,7 +504,8 @@ namespace Gumball
 
             if (HasLoaded)
                 yield return null;
-            yield return LoadChunkObjects(chunk);
+            Coroutine courotine = chunk.StartCoroutine(LoadChunkObjects(chunk));
+            yield return courotine;
             
             stopwatch.Restart();
             OnChunkLoadedAndReady(loadedChunkData);

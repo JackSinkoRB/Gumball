@@ -18,7 +18,7 @@ namespace Gumball
                 
         //caching:
         public static readonly int BaseColorShaderID = Shader.PropertyToID("_BaseColor");
-        public static readonly int EmissionShaderID = Shader.PropertyToID("_Emission");
+        public static readonly int SpecularShaderID = Shader.PropertyToID("_Specular");
         public static readonly int ClearCoatSmoothnessShaderID = Shader.PropertyToID("_ClearCoatSmoothness");
         public static readonly int ClearCoatShaderID = Shader.PropertyToID("_ClearCoat");
         public static readonly int SmoothnessShaderID = Shader.PropertyToID("_Smoothness");
@@ -91,9 +91,8 @@ namespace Gumball
             foreach (MeshRenderer meshRenderer in colourableParts)
             {
                 meshRenderer.sharedMaterial.SetColor(BaseColorShaderID, swatch.Color.ToColor());
-                meshRenderer.sharedMaterial.SetColor(EmissionShaderID, swatch.Emission.ToColor());
+                meshRenderer.sharedMaterial.SetColor(SpecularShaderID, swatch.Specular.ToColor());
                 
-                meshRenderer.sharedMaterial.SetFloat(MetallicShaderID, swatch.Metallic);
                 meshRenderer.sharedMaterial.SetFloat(SmoothnessShaderID, swatch.Smoothness);
                 meshRenderer.sharedMaterial.SetFloat(ClearCoatShaderID, swatch.ClearCoat);
                 meshRenderer.sharedMaterial.SetFloat(ClearCoatSmoothnessShaderID, swatch.ClearCoatSmoothness);

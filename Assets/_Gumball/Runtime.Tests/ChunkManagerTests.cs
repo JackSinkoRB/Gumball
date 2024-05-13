@@ -90,7 +90,7 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
             
-            float carDistance = GameSession.ChunkMapAssetReference.editorAsset.VehicleStartingPosition.z;
+            float carDistance = GameSession.VehicleStartingPosition.z;
             Assert.AreEqual(Mathf.CeilToInt((GameSession.ChunkMapAssetReference.editorAsset.ChunkLoadDistance + carDistance) / chunkSplineLengths), ChunkManager.Instance.CurrentChunks.Count);
         }
         
@@ -163,7 +163,7 @@ namespace Gumball.Runtime.Tests
             //make sure the custom loaded chunk is no longer waiting to be accessible
             Assert.AreEqual(0, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);
             
-            yield return MoveAndLoadAroundPosition(GameSession.ChunkMapAssetReference.editorAsset.VehicleStartingPosition);
+            yield return MoveAndLoadAroundPosition(GameSession.VehicleStartingPosition);
             
             Assert.AreEqual(6, ChunkManager.Instance.CurrentChunks.Count);
             Assert.AreEqual(1, ChunkManager.Instance.CurrentCustomLoadedChunks.Count);
@@ -208,7 +208,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(0, ChunkManager.Instance.AccessibleChunksIndices.Min);
             Assert.AreEqual(10, ChunkManager.Instance.AccessibleChunksIndices.Max);
             
-            yield return MoveAndLoadAroundPosition(GameSession.ChunkMapAssetReference.editorAsset.VehicleStartingPosition);
+            yield return MoveAndLoadAroundPosition(GameSession.VehicleStartingPosition);
 
             //waiting again
             Assert.AreEqual(1, ChunkManager.Instance.ChunksWaitingToBeAccessible.Count);

@@ -17,14 +17,10 @@ namespace Gumball
     [CreateAssetMenu(menuName = "Gumball/Chunk Map")]
     public class ChunkMap : ScriptableObject
     {
-        //ChunkMap
-        [SerializeField] private int startingChunkIndex;
-        [SerializeField] private Vector3 vehicleStartingPosition;
-        [SerializeField] private Vector3 vehicleStartingRotation;
-
-        [Space(5)]
-        [SerializeField] private AddressableSceneReference scene;
+        
         [SerializeField] private float chunkLoadDistance = 700;
+        [Tooltip("The chunk index from the chunk references that gets loaded at the world origin.")]
+        [SerializeField] private int startingChunkIndex;
 #if UNITY_EDITOR
         [SerializeField] private AssetReferenceGameObject[] chunkReferences;
 #endif
@@ -39,25 +35,12 @@ namespace Gumball
 #if UNITY_EDITOR
         public AssetReferenceGameObject[] ChunkReferences => chunkReferences;
 #endif
-
-        public int StartingChunkIndex => startingChunkIndex;
-        public Vector3 VehicleStartingPosition => vehicleStartingPosition;
-        public Vector3 VehicleStartingRotation => vehicleStartingRotation;
-        public string[] RuntimeChunkAssetKeys => runtimeChunkAssetKeys;
         
+        public string[] RuntimeChunkAssetKeys => runtimeChunkAssetKeys;
+        public int StartingChunkIndex => startingChunkIndex;
         public List<int> ChunksWithCustomLoadDistance => chunksWithCustomLoadDistance;
         public float ChunkLoadDistance => chunkLoadDistance;
         public float TotalLengthMetres => totalLengthMetres;
-
-        public IEnumerator LoadSceneIE()
-        {
-            GlobalLoggers.LoadingLogger.Log("Map loading started...");
-
-            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(scene.SceneName);
-            sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
-        }
 
         public ChunkMapData GetChunkData(int index)
         {
