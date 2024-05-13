@@ -49,7 +49,8 @@ namespace Gumball
 
         [Header("Rewards")]
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards;
-        
+        [SerializeField, DisplayInspector] private SubPart[] subPartRewards;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
         [SerializeField, ReadOnly] private AICar[] currentRacers;
@@ -377,7 +378,14 @@ namespace Gumball
                 }
             }
 
-            //todo: sub parts
+            if (subPartRewards != null)
+            {
+                foreach (SubPart subPartReward in subPartRewards)
+                {
+                    if (!subPartReward.IsUnlocked)
+                        RewardManager.GiveReward(subPartReward);
+                }
+            }
         }
         
     }

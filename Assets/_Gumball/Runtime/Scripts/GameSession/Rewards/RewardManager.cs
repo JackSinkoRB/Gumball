@@ -13,5 +13,11 @@ namespace Gumball
             PanelManager.GetPanel<RewardPanel>().QueueReward(corePart);
         }
         
+        public static void GiveReward(SubPart subPart)
+        {
+            subPart.SetUnlocked(true);
+            PanelManager.GetPanel<RewardPanel>().QueueReward(subPart);
+        }
+        
     }
 }

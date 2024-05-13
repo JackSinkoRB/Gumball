@@ -13,8 +13,9 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<CorePart> rewardQueueCoreParts = new();
+        [SerializeField, ReadOnly] private List<SubPart> rewardQueueSubParts = new();
 
-        public int PendingRewards => rewardQueueCoreParts.Count; //TODO: add other reward counts
+        public int PendingRewards => rewardQueueCoreParts.Count + rewardQueueSubParts.Count;
         
         protected override void OnShow()
         {
@@ -32,6 +33,17 @@ namespace Gumball
             }
             
             rewardQueueCoreParts.Add(corePart);
+        }
+        
+        public void QueueReward(SubPart subPart)
+        {
+            if (rewardQueueSubParts.Contains(subPart))
+            {
+                Debug.LogWarning($"Tried queuing {subPart.name} but it is already queued.");
+                return;
+            }
+            
+            rewardQueueSubParts.Add(subPart);
         }
 
         public void Populate()
@@ -55,7 +67,22 @@ namespace Gumball
                 scrollItems.Add(scrollItem);
             }
 
-            //TODO: sub parts etc.
+            //show sub parts
+            if (rewardQueueSubParts.Count > 0)
+            {
+                SubPart subPart = rewardQueueSubParts[0];
+                rewardQueueSubParts.RemoveAt(0);
+                
+                ScrollItem scrollItem = new ScrollItem();
+
+                scrollItem.onLoad += () =>
+                {
+                    RewardScrollIcon rewardScrollIcon = (RewardScrollIcon) scrollItem.CurrentIcon;
+                    rewardScrollIcon.Initialise(subPart.DisplayName, subPart.Icon);
+                };
+                
+                scrollItems.Add(scrollItem);
+            }
             
             magneticScroll.SetItems(scrollItems);
         }

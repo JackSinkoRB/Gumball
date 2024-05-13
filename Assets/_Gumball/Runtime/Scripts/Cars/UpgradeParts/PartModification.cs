@@ -47,15 +47,17 @@ namespace Gumball
             
             CorePart currentEnginePart = GetCorePart(carBelongsTo.CarIndex, CorePart.PartType.ENGINE);
             if (currentEnginePart != null)
-                total += currentEnginePart.GetPeakTorqueModifier();
+                total += currentEnginePart.PeakTorqueAddition;
             
             CorePart currentWheelsPart = GetCorePart(carBelongsTo.CarIndex, CorePart.PartType.WHEELS);
             if (currentWheelsPart != null)
-                total += currentWheelsPart.GetPeakTorqueModifier();
+                total += currentWheelsPart.PeakTorqueAddition;
             
             CorePart currentDrivetrainPart = GetCorePart(carBelongsTo.CarIndex, CorePart.PartType.DRIVETRAIN);
             if (currentDrivetrainPart != null)
-                total += currentDrivetrainPart.GetPeakTorqueModifier();
+                total += currentDrivetrainPart.PeakTorqueAddition;
+            
+            //TODO: loop over all sub parts
             
             return total;
         }

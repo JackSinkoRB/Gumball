@@ -11,7 +11,7 @@ namespace Gumball
     {
         
         /// <summary>
-        /// The addressables address for the core parts data group.
+        /// The addressables label for the core parts data group.
         /// </summary>
         public const string CorePartsAssetLabel = "CorePart";
         

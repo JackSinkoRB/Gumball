@@ -37,6 +37,8 @@ namespace Gumball
         public PartType Type => type;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
+
+        public float PeakTorqueAddition => peakTorqueAddition;
         
         public bool IsUnlocked
         {
@@ -92,16 +94,6 @@ namespace Gumball
             }
             
             CarBelongsToIndex = -1;
-        }
-        
-        /// <returns>Returns the total peak torque modifier of the part and all sub parts.</returns>
-        public float GetPeakTorqueModifier()
-        {
-            float total = peakTorqueAddition;
-            
-            //TODO: loop over sub parts
-            
-            return total;
         }
 
     }
