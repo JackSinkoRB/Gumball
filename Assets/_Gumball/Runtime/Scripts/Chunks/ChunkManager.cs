@@ -504,7 +504,8 @@ namespace Gumball
 
             if (HasLoaded)
                 yield return null;
-            yield return LoadChunkObjects(chunk);
+            Coroutine courotine = chunk.StartCoroutine(LoadChunkObjects(chunk));
+            yield return courotine;
             
             stopwatch.Restart();
             OnChunkLoadedAndReady(loadedChunkData);
