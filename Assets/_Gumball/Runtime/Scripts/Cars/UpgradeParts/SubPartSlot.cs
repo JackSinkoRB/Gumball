@@ -15,24 +15,24 @@ namespace Gumball
         [SerializeField] private SubPart.SubPartType type;
         [SerializeField] private Sprite icon;
         
-        private AICar carBelongsTo;
-        private int id;
+        [SerializeField, HideInInspector] private CorePart corePartBelongsTo;
+        [SerializeField, HideInInspector] private int saveKeyID;
 
-        private string saveKey => $"{carBelongsTo.SaveKey}.SubPartSlot.{id}";
+        private string saveKey => $"{corePartBelongsTo.SaveKey}.SubPartSlot.{saveKeyID}";
         
         public SubPart.SubPartType Type => type;
         public Sprite Icon => icon;
         
-        public SubPart CurrentPart
+        public SubPart CurrentSubPart
         {
             get => SubPartManager.GetPartByID(DataManager.Cars.Get<string>($"{saveKey}.CurrentPartID", null));
             private set => DataManager.Cars.Set($"{saveKey}.CurrentPartID", value.ID);
         }
         
-        public void Initialise(AICar carBelongsTo, int id)
+        public void Initialise(CorePart corePartBelongsTo, int saveKeyID)
         {
-            this.carBelongsTo = carBelongsTo;
-            this.id = id;
+            this.corePartBelongsTo = corePartBelongsTo;
+            this.saveKeyID = saveKeyID;
         }
 
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MyBox;
 using UnityEngine;
 
@@ -17,50 +18,54 @@ namespace Gumball
             DRIVETRAIN
         }
 
-        public enum Rating
-        {
-            STREET,
-            SUPERCAR
-        }
-
         [SerializeField] private PartType type;
-        [SerializeField] private Rating rating;
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
 
+        [Header("SubParts")]
+        [SerializeField] private SubPartSlot[] subPartSlots;
+        [SerializeField] private CorePartLevel[] levels;
+        
         [Header("Modifiers")]
         [Tooltip("The amount of peak torque to add to the car.")]
         [SerializeField] private float peakTorqueAddition;
         
-        private string saveKey => $"{type.ToString()}-{name}-{ID}";
+        public string SaveKey => $"{type.ToString()}-{name}-{ID}";
 
         public PartType Type => type;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
-
+        public SubPartSlot[] SubPartSlots => subPartSlots;
         public float PeakTorqueAddition => peakTorqueAddition;
         
         public bool IsUnlocked
         {
-            get => DataManager.Cars.Get($"Parts.Core.{saveKey}.IsUnlocked", false);
-            private set => DataManager.Cars.Set($"Parts.Core.{saveKey}.IsUnlocked", value);
+            get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.IsUnlocked", false);
+            private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.IsUnlocked", value);
         }
         
         public int CarBelongsToIndex
         {
-            get => DataManager.Cars.Get($"Parts.Core.{saveKey}.CarBelongsToIndex", -1);
-            private set => DataManager.Cars.Set($"Parts.Core.{saveKey}.CarBelongsToIndex", value);
+            get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.CarBelongsToIndex", -1);
+            private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.CarBelongsToIndex", value);
         }
 
         public bool IsAppliedToCar => CarBelongsToIndex != -1;
 
+#if UNITY_EDITOR
         protected override void OnValidate()
         {
             base.OnValidate();
             
             if (displayName.IsNullOrEmpty())
                 displayName = name;
+
+            foreach (CorePartLevel level in levels)
+            {
+                level.SetupInspector(this);
+            }
         }
+#endif
 
         public void SetUnlocked(bool unlocked)
         {
@@ -76,6 +81,8 @@ namespace Gumball
             }
 
             CarBelongsToIndex = carIndex;
+
+            ApplySubPartsToCar();
         }
 
         public void RemoveFromCar()
@@ -96,5 +103,15 @@ namespace Gumball
             CarBelongsToIndex = -1;
         }
 
+        private void ApplySubPartsToCar()
+        {
+            for (int saveKeyID = 0; saveKeyID < subPartSlots.Length; saveKeyID++) //index is the ID
+            {
+                SubPartSlot slot = subPartSlots[saveKeyID];
+                
+                slot.Initialise(this, saveKeyID);
+            }
+        }
+        
     }
 }

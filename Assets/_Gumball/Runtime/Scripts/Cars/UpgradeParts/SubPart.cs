@@ -46,6 +46,16 @@ namespace Gumball
             DRIVETRAIN_Differential
         }
 
+        public enum SubPartRarity
+        {
+            Common,
+            Uncommon,
+            Rare,
+            Epic,
+            Exotic,
+            Legendary
+        }
+
         [SerializeField] private SubPartType type;
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;

@@ -17,6 +17,11 @@ namespace Gumball
             label.text = slot.Type.ToFriendlyString();
             icon.sprite = slot.Icon;
         }
+
+        public void OnClick()
+        {
+            PanelManager.GetPanel<SwapSubPartPanel>().Show();
+        }
         
     }
 }

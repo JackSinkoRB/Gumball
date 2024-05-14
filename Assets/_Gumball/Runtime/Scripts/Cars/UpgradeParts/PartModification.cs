@@ -21,35 +21,31 @@ namespace Gumball
             return CorePartManager.GetPartByID(partID);
         }
         
-        public static void SetSubPart(int carIndex, SubPart.SubPartType type, CorePart corePart)
-        {
-            DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}", corePart == null ? null : corePart.ID);
-        }
-        
-        public static SubPart GetSubPart(int carIndex, SubPart.SubPartType type)
-        {
-            string partID = DataManager.Cars.Get<string>($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}");
-            return SubPartManager.GetPartByID(partID);
-        }
+        //TODO: move to core part
+        // public static void SetSubPart(int carIndex, SubPart.SubPartType type, CorePart corePart)
+        // {
+        //     DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}", corePart == null ? null : corePart.ID);
+        // }
+        //
+        // public static SubPart GetSubPart(int carIndex, SubPart.SubPartType type)
+        // {
+        //     string partID = DataManager.Cars.Get<string>($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}");
+        //     return SubPartManager.GetPartByID(partID);
+        // }
         
         private static string GetSaveKeyFromIndex(int carIndex)
         {
             return $"{AICar.GetSaveKeyFromIndex(carIndex)}.Parts";
         }
         #endregion
-
-        [SerializeField] private SubPartSlot[] subPartSlots;
-
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
-
-        public SubPartSlot[] SubPartSlots => subPartSlots;
         
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
-
-            InitialiseSubParts();
+            
             ApplyModifiers();
         }
 
@@ -77,16 +73,6 @@ namespace Gumball
             //TODO: loop over all sub parts
             
             return total;
-        }
-
-        private void InitialiseSubParts()
-        {
-            for (int id = 0; id < subPartSlots.Length; id++) //index is the ID
-            {
-                SubPartSlot slot = subPartSlots[id];
-                
-                slot.Initialise(carBelongsTo, id);
-            }
         }
 
     }
