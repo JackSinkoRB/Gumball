@@ -12,6 +12,8 @@ namespace Gumball
 
         [SerializeField] private Button installButton;
         [SerializeField] private TextMeshProUGUI installButtonLabel;
+        [SerializeField] private Color installButtonColorInstall = Color.blue;
+        [SerializeField] private Color installButtonColorUninstall = Color.red;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private SubPartSlot slot;
@@ -42,6 +44,7 @@ namespace Gumball
                 //show uninstall
                 installButton.interactable = true;
                 installButtonLabel.text = "Uninstall";
+                installButton.image.color = installButtonColorUninstall;
                 return;
             }
             
@@ -51,11 +54,13 @@ namespace Gumball
                 //show not available
                 installButton.interactable = false;
                 installButtonLabel.text = "Not available";
+                installButton.image.color = installButtonColorInstall;
                 return;
             }
             
             installButton.interactable = true;
             installButtonLabel.text = "Install";
+            installButton.image.color = installButtonColorInstall;
         }
         
     }
