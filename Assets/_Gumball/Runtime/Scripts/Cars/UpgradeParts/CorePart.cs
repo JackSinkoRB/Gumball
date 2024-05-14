@@ -107,6 +107,9 @@ namespace Gumball
 
         private void ApplySubPartsToCar()
         {
+            if (subPartSlots == null)
+                return;
+            
             for (int saveKeyID = 0; saveKeyID < subPartSlots.Length; saveKeyID++) //index is the ID
             {
                 SubPartSlot slot = subPartSlots[saveKeyID];
