@@ -77,7 +77,7 @@ namespace Gumball
         public CorePart CorePartBelongsTo
         {
             get => CorePartManager.GetPartByID(DataManager.Cars.Get<string>($"Parts.Sub.{saveKey}.CorePartBelongsTo", null));
-            private set => DataManager.Cars.Set($"Parts.Sub.{saveKey}.CorePartBelongsTo", value.ID);
+            private set => DataManager.Cars.Set($"Parts.Sub.{saveKey}.CorePartBelongsTo", value == null ? null : value.ID);
         }
 
         public bool IsAppliedToCorePart => CorePartBelongsTo != null;

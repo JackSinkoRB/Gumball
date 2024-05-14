@@ -22,15 +22,15 @@ namespace Gumball
         {
             this.slot = slot;
 
-            //cache a spare part
-            sparePart = SubPartManager.GetSpareSubPart(slot.Type, slot.Rarity);
-            
             UpdateInstallButton();
         }
 
         public void OnClickInstallButton()
         {
-            slot.InstallSubPart(sparePart);
+            if (slot.CurrentSubPart != null)
+                slot.UninstallSubPart();
+            else
+                slot.InstallSubPart(sparePart);
             
             UpdateInstallButton();
         }
@@ -45,6 +45,7 @@ namespace Gumball
                 return;
             }
             
+            sparePart = SubPartManager.GetSpareSubPart(slot.Type, slot.Rarity);
             if (sparePart == null)
             {
                 //show not available

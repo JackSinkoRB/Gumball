@@ -59,9 +59,12 @@ namespace Gumball
             if (displayName.IsNullOrEmpty())
                 displayName = name;
 
-            foreach (CorePartLevel level in levels)
+            if (levels != null)
             {
-                level.SetupInspector(this);
+                foreach (CorePartLevel level in levels)
+                {
+                    level.SetupInspector(this);
+                }
             }
         }
 #endif

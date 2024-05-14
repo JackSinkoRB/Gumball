@@ -28,7 +28,7 @@ namespace Gumball
         public SubPart CurrentSubPart
         {
             get => SubPartManager.GetPartByID(DataManager.Cars.Get<string>($"{saveKey}.CurrentPartID", null));
-            private set => DataManager.Cars.Set($"{saveKey}.CurrentPartID", value.ID);
+            private set => DataManager.Cars.Set($"{saveKey}.CurrentPartID", value == null ? null : value.ID);
         }
         
         public void Initialise(CorePart corePartBelongsTo, int saveKeyID)
@@ -48,6 +48,26 @@ namespace Gumball
             
             //apply to sub part
             part.ApplyToCorePart(corePartBelongsTo);
+            
+            //update the cars modifiers
+            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == corePartBelongsTo.CarBelongsToIndex;
+            if (isAttachedToCurrentCar)
+                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
+        }
+
+        public void UninstallSubPart()
+        {
+            if (CurrentSubPart == null)
+            {
+                Debug.LogError($"Tried uninstalling a sub part, but there is no sub part attached to {corePartBelongsTo.name}.");
+                return;
+            }
+            
+            //remove from core part
+            CurrentSubPart.RemoveFromCorePart();
+            
+            //apply to slot
+            CurrentSubPart = null;
             
             //update the cars modifiers
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == corePartBelongsTo.CarBelongsToIndex;
