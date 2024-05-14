@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -48,8 +49,8 @@ namespace Gumball
         [SerializeField] private float racersStartingSpeed = 70;
 
         [Header("Rewards")]
-        [SerializeField, DisplayInspector] private CorePart[] corePartRewards;
-        [SerializeField, DisplayInspector] private SubPart[] subPartRewards;
+        [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
+        [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
@@ -58,7 +59,7 @@ namespace Gumball
         private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         private ChunkMap currentChunkMapCached;
         private Coroutine sessionCoroutine;
-
+        
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
         
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
@@ -74,6 +75,61 @@ namespace Gumball
             GameSessionManager.Instance.SetCurrentSession(this);
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
+        
+#if UNITY_EDITOR
+        [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
+        [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
+
+        private void OnValidate()
+        {
+            TrackCorePartRewards();
+            TrackSubPartRewards();
+        }
+
+        private void TrackCorePartRewards()
+        {
+            foreach (CorePart corePart in corePartRewards)
+            {
+                if (corePart == null)
+                    continue;
+                
+                corePart.TrackAsReward(this);
+            }
+            
+            foreach (CorePart corePart in previousCorePartRewards)
+            {
+                if (corePart == null)
+                    continue;
+                
+                if (!corePartRewards.Contains(corePart))
+                    corePart.UntrackAsReward(this);
+            }
+            
+            previousCorePartRewards = (CorePart[])corePartRewards.Clone();
+        }
+        
+        private void TrackSubPartRewards()
+        {
+            foreach (SubPart subPart in subPartRewards)
+            {
+                if (subPart == null)
+                    continue;
+                
+                subPart.TrackAsReward(this);
+            }
+            
+            foreach (SubPart subPart in previousSubPartRewards)
+            {
+                if (subPart == null)
+                    continue;
+                
+                if (!subPartRewards.Contains(subPart))
+                    subPart.UntrackAsReward(this);
+            }
+            
+            previousSubPartRewards = (SubPart[])subPartRewards.Clone();
+        }
+#endif
 
         public IEnumerator LoadChunkMap()
         {

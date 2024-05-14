@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
@@ -28,6 +31,9 @@ namespace Gumball
         [Header("Modifiers")]
         [Tooltip("The amount of peak torque to add to the car.")]
         [SerializeField] private float peakTorqueAddition;
+        
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private List<GameSession> sessionsThatGiveReward = new();
         
         public string SaveKey => $"{type.ToString()}-{name}-{ID}";
 
@@ -66,6 +72,26 @@ namespace Gumball
                     level.SetupInspector(this);
                 }
             }
+        }
+
+        public void TrackAsReward(GameSession session)
+        {
+            if (sessionsThatGiveReward.Contains(session))
+                return; //already tracked
+            
+            sessionsThatGiveReward.Add(session);
+            
+            EditorUtility.SetDirty(this);
+        }
+        
+        public void UntrackAsReward(GameSession session)
+        {
+            if (!sessionsThatGiveReward.Contains(session))
+                return; //already not tracked
+            
+            sessionsThatGiveReward.Remove(session);
+            
+            EditorUtility.SetDirty(this);
         }
 #endif
 

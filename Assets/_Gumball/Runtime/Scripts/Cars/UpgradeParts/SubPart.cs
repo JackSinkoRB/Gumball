@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
@@ -61,6 +64,9 @@ namespace Gumball
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
 
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private List<GameSession> sessionsThatGiveReward = new();
+        
         private string saveKey => $"{type.ToString()}-{name}-{ID}";
 
         public SubPartType Type => type;
@@ -81,7 +87,8 @@ namespace Gumball
         }
 
         public bool IsAppliedToCorePart => CorePartBelongsTo != null;
-        
+            
+#if UNITY_EDITOR
         protected override void OnValidate()
         {
             base.OnValidate();
@@ -89,6 +96,27 @@ namespace Gumball
             if (displayName.IsNullOrEmpty())
                 displayName = name;
         }
+
+        public void TrackAsReward(GameSession session)
+        {
+            if (sessionsThatGiveReward.Contains(session))
+                return; //already tracked
+            
+            sessionsThatGiveReward.Add(session);
+            
+            EditorUtility.SetDirty(this);
+        }
+        
+        public void UntrackAsReward(GameSession session)
+        {
+            if (!sessionsThatGiveReward.Contains(session))
+                return; //already not tracked
+            
+            sessionsThatGiveReward.Remove(session);
+            
+            EditorUtility.SetDirty(this);
+        }
+#endif
         
         public void SetUnlocked(bool unlocked)
         {
