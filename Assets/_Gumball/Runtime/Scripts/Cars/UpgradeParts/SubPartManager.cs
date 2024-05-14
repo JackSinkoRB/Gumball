@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 
@@ -17,6 +18,8 @@ namespace Gumball
         private static readonly List<SubPart> allParts = new();
         private static readonly Dictionary<string, SubPart> partsMappedByID = new();
         private static readonly Dictionary<SubPart.SubPartType, SubPart[]> allPartsGrouped = new();
+        
+        public static ReadOnlyCollection<SubPart> AllParts => allParts.AsReadOnly();
         
         public static IEnumerator Initialise()
         {
@@ -38,6 +41,22 @@ namespace Gumball
             }
 
             return null;
+        }
+        
+        public static HashSet<SubPart> GetSpareSubParts(SubPart.SubPartType type, SubPart.SubPartRarity rarity)
+        {
+            HashSet<SubPart> spares = new();
+            
+            if (!allPartsGrouped.ContainsKey(type))
+                return spares;
+            
+            foreach (SubPart subPart in allPartsGrouped[type])
+            {
+                if (subPart.Rarity == rarity && subPart.IsUnlocked && !subPart.IsAppliedToCorePart)
+                    spares.Add(subPart);
+            }
+
+            return spares;
         }
         
         public static SubPart GetPartByID(string ID)

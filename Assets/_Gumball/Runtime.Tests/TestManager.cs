@@ -41,6 +41,10 @@ namespace Gumball.Runtime.Tests
         [Header("Core parts")]
         [SerializeField] private CorePart corePartA;
         [SerializeField] private CorePart corePartB;
+
+        [Header("Sub parts")]
+        [SerializeField] private SubPart subPartA;
+        [SerializeField] private SubPart subPartB;
         
         public string DecalEditorScenePath => AssetDatabase.GetAssetPath(decalEditorScene);
         public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
@@ -57,5 +61,8 @@ namespace Gumball.Runtime.Tests
         public CorePart CorePartA => corePartA;
         public CorePart CorePartB => corePartB;
 
+        public SubPart SubPartA => subPartA;
+        public SubPart SubPartB => subPartB;
+        
     }
 }
