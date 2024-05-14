@@ -12,8 +12,12 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI label;
         [SerializeField] private Image icon;
 
+        private SubPartSlot slot;
+
         public void Initialise(SubPartSlot slot)
         {
+            this.slot = slot;
+            
             label.text = slot.Type.ToFriendlyString();
             icon.sprite = slot.Icon;
         }
@@ -21,6 +25,7 @@ namespace Gumball
         public void OnClick()
         {
             PanelManager.GetPanel<SwapSubPartPanel>().Show();
+            PanelManager.GetPanel<SwapSubPartPanel>().Initialise(slot);
         }
         
     }

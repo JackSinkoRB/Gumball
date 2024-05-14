@@ -57,20 +57,30 @@ namespace Gumball
         }
 
         [SerializeField] private SubPartType type;
+        [SerializeField] private SubPartRarity rarity;
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
 
         private string saveKey => $"{type.ToString()}-{name}-{ID}";
 
         public SubPartType Type => type;
+        public SubPartRarity Rarity => rarity;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
         
         public bool IsUnlocked
         {
-            get => DataManager.Cars.Get($"Parts.Core.{saveKey}.IsUnlocked", false);
-            private set => DataManager.Cars.Set($"Parts.Core.{saveKey}.IsUnlocked", value);
+            get => DataManager.Cars.Get($"Parts.Sub.{saveKey}.IsUnlocked", false);
+            private set => DataManager.Cars.Set($"Parts.Sub.{saveKey}.IsUnlocked", value);
         }
+        
+        public CorePart CorePartBelongsTo
+        {
+            get => CorePartManager.GetPartByID(DataManager.Cars.Get<string>($"Parts.Sub.{saveKey}.CorePartBelongsTo", null));
+            private set => DataManager.Cars.Set($"Parts.Sub.{saveKey}.CorePartBelongsTo", value.ID);
+        }
+
+        public bool IsAppliedToCorePart => CorePartBelongsTo != null;
         
         protected override void OnValidate()
         {
@@ -83,6 +93,35 @@ namespace Gumball
         public void SetUnlocked(bool unlocked)
         {
             IsUnlocked = unlocked;
+        }
+        
+        public void ApplyToCorePart(CorePart corePart)
+        {
+            if (IsAppliedToCorePart)
+            {
+                Debug.LogError($"Trying to apply sub part {name} to core part {corePart.name}, but it is already applied to {CorePartBelongsTo.name}");
+                return;
+            }
+
+            CorePartBelongsTo = corePart;
+        }
+        
+        public void RemoveFromCorePart()
+        {
+            if (!IsAppliedToCorePart)
+            {
+                Debug.LogWarning($"Trying to remove sub part {name} from core part, but it is not applied to a core part.");
+                return;
+            }
+
+            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CorePartBelongsTo.CarBelongsToIndex;
+            if (isAttachedToCurrentCar)
+            {
+                //update the modifiers
+                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
+            }
+            
+            CorePartBelongsTo = null;
         }
         
     }

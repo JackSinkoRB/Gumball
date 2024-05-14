@@ -76,6 +76,8 @@ namespace Gumball
 
         private static IEnumerator FindParts()
         {
+            allParts.Clear();
+            
             yield return AddressableUtils.LoadAssetsAsync(CorePartsAssetLabel, allParts, typeof(CorePart));
 
             GroupParts();
@@ -84,6 +86,8 @@ namespace Gumball
 
         private static void GroupParts()
         {
+            allPartsGrouped.Clear();
+            
             Dictionary<CorePart.PartType, HashSet<CorePart>> grouped = new();
         
             //group
@@ -104,6 +108,8 @@ namespace Gumball
 
         private static void CreateIDLookup()
         {
+            partsMappedByID.Clear();
+            
             foreach (CorePart corePart in allParts)
             {
                 if (partsMappedByID.ContainsKey(corePart.ID))

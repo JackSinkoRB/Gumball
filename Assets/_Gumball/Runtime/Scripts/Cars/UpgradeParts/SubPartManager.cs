@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Gumball
@@ -15,12 +16,28 @@ namespace Gumball
         
         private static readonly List<SubPart> allParts = new();
         private static readonly Dictionary<string, SubPart> partsMappedByID = new();
-
+        private static readonly Dictionary<SubPart.SubPartType, SubPart[]> allPartsGrouped = new();
+        
         public static IEnumerator Initialise()
         {
             yield return FindParts();
 
             CreateIDLookup();
+            GroupParts();
+        }
+
+        public static SubPart GetSpareSubPart(SubPart.SubPartType type, SubPart.SubPartRarity rarity)
+        {
+            if (!allPartsGrouped.ContainsKey(type))
+                return null;
+            
+            foreach (SubPart subPart in allPartsGrouped[type])
+            {
+                if (subPart.Rarity == rarity && subPart.IsUnlocked && !subPart.IsAppliedToCorePart)
+                    return subPart;
+            }
+
+            return null;
         }
         
         public static SubPart GetPartByID(string ID)
@@ -36,11 +53,37 @@ namespace Gumball
         
         private static IEnumerator FindParts()
         {
+            allParts.Clear();
+            
             yield return AddressableUtils.LoadAssetsAsync(SubPartsAssetLabel, allParts, typeof(SubPart));
+        }
+        
+        private static void GroupParts()
+        {
+            allPartsGrouped.Clear();
+            
+            Dictionary<SubPart.SubPartType, HashSet<SubPart>> grouped = new();
+        
+            //group
+            foreach (SubPart part in allParts)
+            {
+                if (!grouped.ContainsKey(part.Type))
+                    grouped[part.Type] = new HashSet<SubPart>();
+
+                grouped[part.Type].Add(part);
+            }
+
+            //convert to arrays
+            foreach (KeyValuePair<SubPart.SubPartType, HashSet<SubPart>> key in grouped)
+            {
+                allPartsGrouped[key.Key] = key.Value.ToArray();
+            }
         }
         
         private static void CreateIDLookup()
         {
+            partsMappedByID.Clear();
+            
             foreach (SubPart subPart in allParts)
             {
                 if (partsMappedByID.ContainsKey(subPart.ID))

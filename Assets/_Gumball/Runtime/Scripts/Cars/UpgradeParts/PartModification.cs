@@ -45,7 +45,8 @@ namespace Gumball
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
-            
+
+            LoadParts();
             ApplyModifiers();
         }
 
@@ -75,5 +76,19 @@ namespace Gumball
             return total;
         }
 
+        private void LoadParts()
+        {
+            CorePart currentEnginePart = GetCorePart(carBelongsTo.CarIndex, CorePart.PartType.ENGINE);
+            if (currentEnginePart != null)
+                CorePartManager.InstallPartOnCar(CorePart.PartType.ENGINE, currentEnginePart, carBelongsTo.CarIndex);
+            
+            CorePart currentWheelsPart = GetCorePart(carBelongsTo.CarIndex, CorePart.PartType.WHEELS);
+            if (currentWheelsPart != null)
+                CorePartManager.InstallPartOnCar(CorePart.PartType.WHEELS, currentWheelsPart, carBelongsTo.CarIndex);
+            
+            CorePart currentDrivetrainPart = GetCorePart(carBelongsTo.CarIndex, CorePart.PartType.DRIVETRAIN);
+            if (currentDrivetrainPart != null)
+                CorePartManager.InstallPartOnCar(CorePart.PartType.DRIVETRAIN, currentDrivetrainPart, carBelongsTo.CarIndex);
+        }
     }
 }
