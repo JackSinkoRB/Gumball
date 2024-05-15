@@ -64,6 +64,7 @@ namespace Gumball.Runtime.Tests
         {
             //load the core part manager
             yield return CorePartManager.Initialise();
+            yield return SubPartManager.Initialise();
             isInitialised = true;
         }
         
@@ -80,7 +81,7 @@ namespace Gumball.Runtime.Tests
 
         [UnityTest]
         [Order(2)]
-        public IEnumerator CorePartUnlocking()
+        public IEnumerator CorePartBecomesAvailableAfterUnlocking()
         {
             yield return new WaitUntil(() => isInitialised);
             
@@ -193,5 +194,78 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(defaultPeakTorque + additionalPeakTorque, WarehouseManager.Instance.CurrentCar.PeakTorque);
         }
 
+        [UnityTest]
+        [Order(7)]
+        public IEnumerator SubPartBecomesAvailableAfterUnlocking()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            //start with 0 spare parts
+            Assert.IsNull(SubPartManager.GetSpareSubPart(SubPart.SubPartType.ENGINE_Intake, SubPart.SubPartRarity.Common));
+            Assert.AreEqual(0, SubPartManager.GetSpareSubParts(SubPart.SubPartType.ENGINE_Intake, SubPart.SubPartRarity.Common).Count);
+
+            //unlock sub parts
+            TestManager.Instance.SubPartA.SetUnlocked(true);
+            
+            //ensure it is available
+            Assert.IsNotNull(SubPartManager.GetSpareSubPart(SubPart.SubPartType.ENGINE_Intake, SubPart.SubPartRarity.Common));
+            Assert.AreEqual(1, SubPartManager.GetSpareSubParts(SubPart.SubPartType.ENGINE_Intake, SubPart.SubPartRarity.Common).Count);
+        }
+        
+        [UnityTest]
+        [Order(8)]
+        public IEnumerator SubPartInstalling()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            //apply the part to a core part
+            CorePart corePartToApplyTo = TestManager.Instance.CorePartA;
+            SubPart subPartToApply = TestManager.Instance.SubPartA;
+            SubPartSlot intakeSlot = corePartToApplyTo.SubPartSlots[0];
+            
+            //should not be applied at the start
+            Assert.IsFalse(subPartToApply.IsAppliedToCorePart);
+
+            intakeSlot.InstallSubPart(subPartToApply);
+            
+            //check it applied to the part
+            Assert.IsTrue(subPartToApply.IsAppliedToCorePart);
+            Assert.AreEqual(corePartToApplyTo, TestManager.Instance.SubPartA.CorePartBelongsTo);
+
+            //check it applied to the core part
+            Assert.AreEqual(TestManager.Instance.SubPartA, intakeSlot.CurrentSubPart);
+            
+            //ensure it is removed from spare parts
+            Assert.IsNull(SubPartManager.GetSpareSubPart(SubPart.SubPartType.ENGINE_Intake, SubPart.SubPartRarity.Common));
+            Assert.AreEqual(0, SubPartManager.GetSpareSubParts(SubPart.SubPartType.ENGINE_Intake, SubPart.SubPartRarity.Common).Count);
+        }
+        
+        [UnityTest]
+        [Order(9)]
+        public IEnumerator SubPartRemoval()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            //apply the part to a core part
+            CorePart corePartToApplyTo = TestManager.Instance.CorePartA;
+            SubPart subPartToApply = TestManager.Instance.SubPartA;
+            SubPartSlot intakeSlot = corePartToApplyTo.SubPartSlots[0];
+            
+            //should be applied at the start
+            Assert.IsTrue(subPartToApply.IsAppliedToCorePart);
+
+            intakeSlot.UninstallSubPart();
+            
+            //check it applied to the part
+            Assert.IsFalse(subPartToApply.IsAppliedToCorePart);
+
+            //check it applied to the core part
+            Assert.IsNull(intakeSlot.CurrentSubPart);
+            
+            //ensure it is added back to spare parts
+            Assert.IsNotNull(SubPartManager.GetSpareSubPart(SubPart.SubPartType.ENGINE_Intake, SubPart.SubPartRarity.Common));
+            Assert.AreEqual(1, SubPartManager.GetSpareSubParts(SubPart.SubPartType.ENGINE_Intake, SubPart.SubPartRarity.Common).Count);
+        }
+        
     }
 }

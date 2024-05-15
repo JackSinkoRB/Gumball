@@ -21,8 +21,7 @@ namespace Gumball
         private enum Stage
         {
             Checking_for_new_version,
-            Loading_scriptable_singletons,
-            Initialising_core_parts,
+            Loading_scriptable_data_objects,
             Loading_save_data,
             Loading_mainscene,
             Waiting_for_save_data_to_load,
@@ -54,21 +53,18 @@ namespace Gumball
             Debug.Log($"{SceneManager.GameLoaderSceneName} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
 #endif
 
-            currentStage = Stage.Loading_scriptable_singletons;
+            currentStage = Stage.Loading_scriptable_data_objects;
             Stopwatch stopwatch = Stopwatch.StartNew();
+            
             singletonScriptableHandles = LoadSingletonScriptables();
-            yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete());
+            TrackedCoroutine initialiseCoreParts = new TrackedCoroutine(CorePartManager.Initialise());
+            TrackedCoroutine initialiseSubParts = new TrackedCoroutine(SubPartManager.Initialise());
+
+            yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete() && !initialiseCoreParts.IsPlaying && !initialiseSubParts.IsPlaying);
 #if ENABLE_LOGS
             Debug.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
-            
-            currentStage = Stage.Initialising_core_parts;
-            stopwatch.Restart();
-            yield return CorePartManager.Initialise();
-#if ENABLE_LOGS
-            Debug.Log($"Core part loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
-            
+
             currentStage = Stage.Checking_for_new_version;
             yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
             

@@ -253,6 +253,7 @@ GameObject:
   - component: {fileID: 724044971135627713}
   - component: {fileID: 4872057246868372384}
   - component: {fileID: 4221895653879022365}
+  - component: {fileID: 5560689863480058737}
   m_Layer: 8
   m_Name: MC_XJ220s
   m_TagString: Untagged
@@ -347,7 +348,6 @@ MonoBehaviour:
   - {fileID: 6488037141158947642}
   autoDrive: 1
   obeySpeedLimit: 0
-  maxSpeed: 350
   tempSpeedLimit: -1
   useRacingLine: 1
   currentLaneDistance: 0
@@ -511,9 +511,24 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 58112
   speedToBrakeToIfBlocked: 65
+  defaultPeakTorque: 0
   isInitialised: 0
   currentChunkCached: {fileID: 0}
   isFrozen: 0
+--- !u!114 &5560689863480058737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1422899270389967864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4df183f1f6b60e48befa6eefc36ac7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  topSpeed: 0
+  zeroTo100Time: 0
 --- !u!1 &1547205152086652757
 GameObject:
   m_ObjectHideFlags: 0
@@ -1221,11 +1236,10 @@ MonoBehaviour:
   colourableParts: []
   testSwatch:
     color: {r: 1, g: 1, b: 1, a: 1}
-    metallic: 0.8
+    specular: {r: 0, g: 0, b: 0, a: 1}
     smoothness: 0.5
     clearCoat: 1
     clearCoatSmoothness: 1
-    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &3354238788184411877
 GameObject:
   m_ObjectHideFlags: 0
@@ -1355,11 +1369,10 @@ MonoBehaviour:
   colourableParts: []
   testSwatch:
     color: {r: 0.25485048, g: 0.2947121, b: 0.7830189, a: 1}
-    metallic: 0.8
+    specular: {r: 0, g: 0, b: 0, a: 1}
     smoothness: 0.5
     clearCoat: 1
     clearCoatSmoothness: 1
-    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &3905756656652600902
 GameObject:
   m_ObjectHideFlags: 0
@@ -2296,11 +2309,10 @@ MonoBehaviour:
   colourableParts: []
   testSwatch:
     color: {r: 1, g: 1, b: 1, a: 1}
-    metallic: 0.8
+    specular: {r: 0, g: 0, b: 0, a: 1}
     smoothness: 0.5
     clearCoat: 1
     clearCoatSmoothness: 1
-    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &5565742919077915471
 GameObject:
   m_ObjectHideFlags: 0
@@ -2982,11 +2994,10 @@ MonoBehaviour:
   colourableParts: []
   testSwatch:
     color: {r: 1, g: 1, b: 1, a: 1}
-    metallic: 0.8
+    specular: {r: 0, g: 0, b: 0, a: 1}
     smoothness: 0.5
     clearCoat: 1
     clearCoatSmoothness: 1
-    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &6761690458182168014
 GameObject:
   m_ObjectHideFlags: 0
@@ -3166,6 +3177,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e55a6b19c4ab454bacb56427e6b3eb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  subPartSlots:
+  - type: 0
+    icon: {fileID: 21300000, guid: 6cd0fd1bd97e37e4986d0068adbe5586, type: 3}
+  - type: 6
+    icon: {fileID: 21300000, guid: cb43b70732d683c44af51efa5346d0a5, type: 3}
+  - type: 8
+    icon: {fileID: 21300000, guid: 52b64dff7d2f5cd47b7219c07437dc95, type: 3}
   carBelongsTo: {fileID: 0}
 --- !u!1 &7340752111925485577
 GameObject:
@@ -3368,11 +3386,10 @@ MonoBehaviour:
   colourableParts: []
   testSwatch:
     color: {r: 1, g: 1, b: 1, a: 1}
-    metallic: 0.8
+    specular: {r: 0, g: 0, b: 0, a: 1}
     smoothness: 0.5
     clearCoat: 1
     clearCoatSmoothness: 1
-    emission: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &7623618591654638415
 GameObject:
   m_ObjectHideFlags: 0

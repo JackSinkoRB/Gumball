@@ -83,6 +83,16 @@ namespace Gumball.Runtime.Tests
             
             Assert.IsTrue(CorePartManager.AllParts.Count > 0);
         }
+        
+        [UnityTest]
+        [Order(3)]
+        public IEnumerator FoundSubParts()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            Assert.IsTrue(GameLoaderSceneManager.HasLoaded);
+            
+            Assert.IsTrue(SubPartManager.AllParts.Count > 0);
+        }
 
     }
 }

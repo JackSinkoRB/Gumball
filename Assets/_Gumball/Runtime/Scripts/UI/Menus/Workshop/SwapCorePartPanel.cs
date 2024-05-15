@@ -54,6 +54,12 @@ namespace Gumball
         {
             CorePartManager.InstallPartOnCar(partType, currentSelectedPart, WarehouseManager.Instance.CurrentCar.CarIndex);
             UpdateInstallButton(partType, currentSelectedPart);
+            
+            //update the sub parts menu
+            if (currentSelectedPart == null)
+                PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(null);
+            else
+                PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(partType);
         }
 
         private ScrollItem CreateScrollItem(CorePart.PartType type, CorePart part)
