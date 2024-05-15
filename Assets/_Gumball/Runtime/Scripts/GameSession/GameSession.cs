@@ -27,6 +27,9 @@ namespace Gumball
         
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
+        [Header("Info")]
+        [SerializeField] private string description = "Description of session";
+        
         [Header("Map setup")]
         [SerializeField] private AddressableSceneReference scene;
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
@@ -61,7 +64,8 @@ namespace Gumball
         private Coroutine sessionCoroutine;
         
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
-        
+
+        public string Description => description;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;

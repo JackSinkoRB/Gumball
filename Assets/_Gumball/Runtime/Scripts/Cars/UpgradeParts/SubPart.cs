@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -73,6 +74,7 @@ namespace Gumball
         public SubPartRarity Rarity => rarity;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
+        public ReadOnlyCollection<GameSession> SessionsThatGiveReward => sessionsThatGiveReward.AsReadOnly();
         
         public bool IsUnlocked
         {

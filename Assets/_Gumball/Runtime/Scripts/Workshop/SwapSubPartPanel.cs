@@ -10,11 +10,16 @@ namespace Gumball
     public class SwapSubPartPanel : AnimatedPanel
     {
 
+        [Header("Install button")]
         [SerializeField] private Button installButton;
         [SerializeField] private TextMeshProUGUI installButtonLabel;
         [SerializeField] private Color installButtonColorInstall = Color.blue;
         [SerializeField] private Color installButtonColorUninstall = Color.red;
-        
+
+        [Header("Events")]
+        [SerializeField] private Transform eventHolder;
+        [SerializeField] private EventScrollItem eventPrefab;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private SubPartSlot slot;
 
@@ -24,6 +29,7 @@ namespace Gumball
         {
             this.slot = slot;
 
+            UpdateEvents();
             UpdateInstallButton();
         }
 
@@ -35,6 +41,20 @@ namespace Gumball
                 slot.InstallSubPart(sparePart);
             
             UpdateInstallButton();
+        }
+
+        private void UpdateEvents()
+        {
+            //for all parts that match the slot, show all the game sessions that reward it
+            foreach (SubPart matchingPart in SubPartManager.GetSubParts(slot.Type, slot.Rarity))
+            {
+                foreach (GameSession session in matchingPart.SessionsThatGiveReward)
+                {
+                    EventScrollItem eventScrollItem = eventPrefab.gameObject.GetSpareOrCreate<EventScrollItem>(eventHolder);
+                    eventScrollItem.transform.SetAsLastSibling();
+                    eventScrollItem.Initialise(session, matchingPart);
+                }
+            }
         }
         
         private void UpdateInstallButton()

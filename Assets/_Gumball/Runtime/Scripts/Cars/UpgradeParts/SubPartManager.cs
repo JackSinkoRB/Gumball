@@ -59,6 +59,22 @@ namespace Gumball
             return spares;
         }
         
+        public static HashSet<SubPart> GetSubParts(SubPart.SubPartType type, SubPart.SubPartRarity rarity)
+        {
+            HashSet<SubPart> parts = new();
+            
+            if (!allPartsGrouped.ContainsKey(type))
+                return parts;
+            
+            foreach (SubPart subPart in allPartsGrouped[type])
+            {
+                if (subPart.Rarity == rarity)
+                    parts.Add(subPart);
+            }
+
+            return parts;
+        }
+        
         public static SubPart GetPartByID(string ID)
         {
             if (ID == null)
