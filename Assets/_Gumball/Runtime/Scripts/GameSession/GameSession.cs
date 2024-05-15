@@ -71,6 +71,8 @@ namespace Gumball
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
         public AICar[] CurrentRacers => currentRacers;
+        public CorePart[] CorePartRewards => corePartRewards;
+        public SubPart[] SubPartRewards => subPartRewards;
         
         public abstract string GetName();
 

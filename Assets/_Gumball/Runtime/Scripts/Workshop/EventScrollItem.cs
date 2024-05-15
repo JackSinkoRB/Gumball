@@ -48,6 +48,8 @@ namespace Gumball
         public void OnClick()
         {
             //show confirmation panel - if yes: load the game session
+            PanelManager.GetPanel<ConfirmationPanel>().Show();
+            PanelManager.GetPanel<ConfirmationPanel>().Initialise("Start session?", session.Description, () => session.StartSession());
         }
 
     }
