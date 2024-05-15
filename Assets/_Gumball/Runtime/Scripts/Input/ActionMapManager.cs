@@ -8,7 +8,7 @@ namespace Gumball
     public abstract class ActionMapManager : MonoBehaviour
     {
 
-        private readonly Dictionary<string, InputAction> actionsCached = new();
+        protected readonly Dictionary<string, InputAction> actionsCached = new();
 
         private InputActionMap actionsMapCached;
 
@@ -25,6 +25,12 @@ namespace Gumball
 
         public void Enable(bool enable = true)
         {
+            if (ActionMap == null)
+            {
+                Debug.LogWarning($"Could not find action map with name {GetActionMapName()}");
+                return;
+            }
+            
             if (enable)
             {
                 ActionMap.Enable();

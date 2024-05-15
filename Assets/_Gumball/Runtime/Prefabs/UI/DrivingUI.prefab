@@ -89,12 +89,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1365165292833183327}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2310792560990281635}
+  m_Father: {fileID: 3054134034607711243}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -198,8 +198,8 @@ MonoBehaviour:
   onStartPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressSteerRightButton
         m_Mode: 6
         m_Arguments:
@@ -216,8 +216,8 @@ MonoBehaviour:
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressSteerRightButton
         m_Mode: 6
         m_Arguments:
@@ -230,6 +230,7 @@ MonoBehaviour:
         m_CallState: 2
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 1
   isPressingButton: 0
 --- !u!1 &1506616969015623836
 GameObject:
@@ -323,6 +324,41 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &2213178975050743432
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7191149952411323740}
+  m_Layer: 5
+  m_Name: ScreenSpace1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &7191149952411323740
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2213178975050743432}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8188872632410799127}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2964492968242583633
 GameObject:
   m_ObjectHideFlags: 0
@@ -413,6 +449,60 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &3011981527237292227
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3054134034607711243}
+  - component: {fileID: 6417663334066749253}
+  m_Layer: 5
+  m_Name: Buttons
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3054134034607711243
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3011981527237292227}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 549782617957510914}
+  - {fileID: 541011390054483249}
+  - {fileID: 5339124975128369957}
+  - {fileID: 8106332929425178945}
+  - {fileID: 4345861498475436291}
+  m_Father: {fileID: 8188872632410799127}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &6417663334066749253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3011981527237292227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbb54a5a046818a49aac837676e6e11b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actionMapName: Car
 --- !u!1 &3720800399497054759
 GameObject:
   m_ObjectHideFlags: 0
@@ -488,7 +578,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &4366881402874446087
+--- !u!1 &4567130858499817998
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -496,167 +586,50 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5744862811195761536}
-  - component: {fileID: 7414046856101758711}
-  - component: {fileID: 1686305551580509305}
-  - component: {fileID: 90633224372124430}
-  - component: {fileID: 5191252934365590825}
+  - component: {fileID: 8188872632410799127}
+  - component: {fileID: 9167802458435761432}
   m_Layer: 5
-  m_Name: 'GearUpButton '
+  m_Name: Layouts
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &5744862811195761536
+--- !u!224 &8188872632410799127
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4366881402874446087}
+  m_GameObject: {fileID: 4567130858499817998}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2310792560990281635}
+  m_Children:
+  - {fileID: 7191149952411323740}
+  - {fileID: 3054134034607711243}
+  m_Father: {fileID: 6557188955257155058}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -409, y: 370}
-  m_SizeDelta: {x: 150, y: 150}
-  m_Pivot: {x: 1, y: 0}
---- !u!222 &7414046856101758711
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4366881402874446087}
-  m_CullTransparentMesh: 1
---- !u!114 &1686305551580509305
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &9167802458435761432
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4366881402874446087}
+  m_GameObject: {fileID: 4567130858499817998}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 842c080d926fd4c4ca8483ed31d054f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: -100, y: -30, z: -60, w: -60}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: caa15bacee6fbc14b95152bbea428010, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 1
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!114 &90633224372124430
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4366881402874446087}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 0.56078434}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.6745098}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 1686305551580509305}
-  m_OnClick:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &5191252934365590825
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4366881402874446087}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6c860658a76de64b856d047b3bf6da8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  onStartPressing:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
-        m_MethodName: OnPressGearUpButton
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-  onHoldPress:
-    m_PersistentCalls:
-      m_Calls: []
-  onStopPressing:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
-        m_MethodName: OnPressGearUpButton
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  canOnlyBePressedOnPointerDown: 0
-  pointerMustBeOnRect: 1
-  isPressingButton: 0
+  layouts:
+  - {fileID: 6417663334066749253}
 --- !u!1 &4912107008984136447
 GameObject:
   m_ObjectHideFlags: 0
@@ -684,12 +657,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4912107008984136447}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2310792560990281635}
+  m_Father: {fileID: 3054134034607711243}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -793,8 +766,8 @@ MonoBehaviour:
   onStartPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressSteerLeftButton
         m_Mode: 6
         m_Arguments:
@@ -811,8 +784,8 @@ MonoBehaviour:
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressSteerLeftButton
         m_Mode: 6
         m_Arguments:
@@ -825,6 +798,7 @@ MonoBehaviour:
         m_CallState: 2
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 1
   isPressingButton: 0
 --- !u!1 &5121963124623513006
 GameObject:
@@ -855,8 +829,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8188872632410799127}
   - {fileID: 3144395828900470349}
-  - {fileID: 2310792560990281635}
   - {fileID: 3405930844429831306}
   - {fileID: 7681062576772628162}
   m_Father: {fileID: 0}
@@ -895,232 +869,7 @@ MonoBehaviour:
     showEase: 4
     hideEase: 4
   slideElements: []
---- !u!1 &5286779443057334468
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2310792560990281635}
-  - component: {fileID: 6626712166290735919}
-  m_Layer: 5
-  m_Name: Controls
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &2310792560990281635
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5286779443057334468}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 549782617957510914}
-  - {fileID: 541011390054483249}
-  - {fileID: 5339124975128369957}
-  - {fileID: 8106332929425178945}
-  - {fileID: 4345861498475436291}
-  - {fileID: 5744862811195761536}
-  - {fileID: 3290486789434368176}
-  m_Father: {fileID: 6557188955257155058}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &6626712166290735919
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5286779443057334468}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20c45de2aa34dad47b760d099f71819b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gearUpButton: {fileID: 90633224372124430}
-  gearDownButton: {fileID: 408835051425888928}
---- !u!1 &6033711776792025692
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3290486789434368176}
-  - component: {fileID: 3292435563982126627}
-  - component: {fileID: 8183259936170304876}
-  - component: {fileID: 408835051425888928}
-  - component: {fileID: 2460647633855578471}
-  m_Layer: 5
-  m_Name: GearDownButton
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &3290486789434368176
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6033711776792025692}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2310792560990281635}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 305, y: 370}
-  m_SizeDelta: {x: 150, y: 150}
-  m_Pivot: {x: 0, y: 0}
---- !u!222 &3292435563982126627
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6033711776792025692}
-  m_CullTransparentMesh: 1
---- !u!114 &8183259936170304876
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6033711776792025692}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: -150, y: -30, z: -150, w: -60}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a7244e8721dcbb04f8f949b498d986eb, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 1
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!114 &408835051425888928
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6033711776792025692}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 0.56078434}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 1, g: 1, b: 1, a: 0.6745098}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 8183259936170304876}
-  m_OnClick:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &2460647633855578471
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6033711776792025692}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c6c860658a76de64b856d047b3bf6da8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  onStartPressing:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
-        m_MethodName: OnPressGearDownButton
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-  onHoldPress:
-    m_PersistentCalls:
-      m_Calls: []
-  onStopPressing:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
-        m_MethodName: OnPressGearDownButton
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  canOnlyBePressedOnPointerDown: 0
-  pointerMustBeOnRect: 1
-  isPressingButton: 0
+  layoutManager: {fileID: 9167802458435761432}
 --- !u!1 &6514375824701573704
 GameObject:
   m_ObjectHideFlags: 0
@@ -1148,12 +897,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6514375824701573704}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2310792560990281635}
+  m_Father: {fileID: 3054134034607711243}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
@@ -1257,8 +1006,8 @@ MonoBehaviour:
   onStartPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressAccelerateButton
         m_Mode: 6
         m_Arguments:
@@ -1275,8 +1024,8 @@ MonoBehaviour:
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressAccelerateButton
         m_Mode: 6
         m_Arguments:
@@ -1289,6 +1038,7 @@ MonoBehaviour:
         m_CallState: 2
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 1
   isPressingButton: 0
 --- !u!1 &6979737217325510615
 GameObject:
@@ -1924,16 +1674,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8817308371874928971}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2310792560990281635}
+  m_Father: {fileID: 3054134034607711243}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -345.9, y: 40}
+  m_AnchoredPosition: {x: -345.90015, y: 40}
   m_SizeDelta: {x: 250, y: 250}
   m_Pivot: {x: 1, y: 0}
 --- !u!222 &4293975387412738405
@@ -2033,8 +1783,8 @@ MonoBehaviour:
   onStartPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressBrakeButton
         m_Mode: 6
         m_Arguments:
@@ -2051,8 +1801,8 @@ MonoBehaviour:
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressBrakeButton
         m_Mode: 6
         m_Arguments:
@@ -2065,6 +1815,7 @@ MonoBehaviour:
         m_CallState: 2
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 1
   isPressingButton: 0
 --- !u!1 &8918948073197146931
 GameObject:
@@ -2093,12 +1844,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8918948073197146931}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2310792560990281635}
+  m_Father: {fileID: 3054134034607711243}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
@@ -2202,8 +1953,8 @@ MonoBehaviour:
   onStartPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressHandbrakeButton
         m_Mode: 6
         m_Arguments:
@@ -2220,8 +1971,8 @@ MonoBehaviour:
   onStopPressing:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6626712166290735919}
-        m_TargetAssemblyTypeName: Gumball.DrivingControlsUI, Gumball
+      - m_Target: {fileID: 6417663334066749253}
+        m_TargetAssemblyTypeName: Gumball.ButtonsDrivingControlLayout, Gumball
         m_MethodName: OnPressHandbrakeButton
         m_Mode: 6
         m_Arguments:
@@ -2234,6 +1985,7 @@ MonoBehaviour:
         m_CallState: 2
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 1
   isPressingButton: 0
 --- !u!1 &9146973229076443311
 GameObject:
