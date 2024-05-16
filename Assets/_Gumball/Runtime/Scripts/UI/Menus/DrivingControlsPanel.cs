@@ -8,6 +8,8 @@ namespace Gumball
     {
 
         [SerializeField] private DrivingControlLayoutManager layoutManager;
+
+        public DrivingControlLayoutManager LayoutManager => layoutManager;
         
         protected override void OnShow()
         {

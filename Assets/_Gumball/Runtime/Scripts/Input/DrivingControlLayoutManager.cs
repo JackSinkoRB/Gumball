@@ -9,20 +9,21 @@ namespace Gumball
 
         [SerializeField] private DrivingControlLayout[] layouts;
 
-        private int currentLayoutIndex
+        public int CurrentLayoutIndex
         {
             get => DataManager.Settings.Get("CurrentDrivingLayoutIndex", 0);
-            set => DataManager.Settings.Set("CurrentDrivingLayoutIndex", value);
-        } 
-        
-        public DrivingControlLayout CurrentLayout => layouts[currentLayoutIndex];
+            private set => DataManager.Settings.Set("CurrentDrivingLayoutIndex", value);
+        }
+
+        public DrivingControlLayout[] Layouts => layouts;
+        public DrivingControlLayout CurrentLayout => layouts[CurrentLayoutIndex];
         
         public void SetCurrentLayout(int index)
         {
-            if (currentLayoutIndex == index)
+            if (CurrentLayoutIndex == index)
                 return; //already current
             
-            currentLayoutIndex = index;
+            CurrentLayoutIndex = index;
         }
 
         public void ShowCurrentLayout()

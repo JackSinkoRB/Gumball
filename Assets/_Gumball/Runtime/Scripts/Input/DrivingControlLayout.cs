@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public abstract class DrivingControlLayout : MonoBehaviour
+    public class DrivingControlLayout : MonoBehaviour
     {
 
         [SerializeField] private string actionMapName;
