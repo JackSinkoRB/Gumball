@@ -1,24 +1,42 @@
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
 {
     public class DrivingControlLayout : MonoBehaviour
     {
-
-        [SerializeField] private string actionMapName;
-
-        public virtual void SetActive()
+        
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private bool isActive;
+        
+        protected DrivingControlLayoutManager layoutManager => PanelManager.GetPanel<DrivingControlsPanel>().LayoutManager;
+        
+        public void SetActive()
         {
-            gameObject.SetActive(true);
+            if (isActive)
+                return; //already enabled
             
-            InputManager.Instance.CarInput.SetActionMapName(actionMapName);
+            OnActivate();
         }
 
-        public void Disable()
+        public void SetInactive()
         {
-            gameObject.SetActive(false);    
+            if (!isActive)
+                return; //already disabled
+
+            OnDeactivate();
+        }
+
+        protected virtual void OnActivate()
+        {
+            gameObject.SetActive(true);
+        }
+        
+        protected virtual void OnDeactivate()
+        {
+            gameObject.SetActive(false);
         }
         
     }

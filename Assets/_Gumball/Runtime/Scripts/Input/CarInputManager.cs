@@ -16,8 +16,6 @@ namespace Gumball
         
         public float SteeringInput => Steering?.Value ?? 0;
 
-        private string currentActionMapName;
-
         protected override void Initialise()
         {
             base.Initialise();
@@ -30,19 +28,9 @@ namespace Gumball
             ShiftDown = new VirtualInputActionButton(GetOrCacheAction("ShiftDown"));
         }
 
-        public void SetActionMapName(string actionMapName)
-        {
-            if (currentActionMapName != null && currentActionMapName.Equals(actionMapName))
-                return; //already selected
-            
-            currentActionMapName = actionMapName;
-            
-            actionsCached.Clear(); //reset so the cache can be updated
-        }
-        
         protected override string GetActionMapName()
         {
-            return currentActionMapName;
+            return "Driving";
         }
 
     }

@@ -28,12 +28,13 @@ namespace Gumball
 
         public void ShowCurrentLayout()
         {
-            foreach (var layout in layouts)
+            foreach (DrivingControlLayout layout in layouts)
             {
-                if (layout == CurrentLayout)
-                    layout.SetActive();
-                else layout.Disable();
+                if (layout != CurrentLayout)
+                    layout.SetInactive();
             }
+            
+            CurrentLayout.SetActive();
         }
     
     }

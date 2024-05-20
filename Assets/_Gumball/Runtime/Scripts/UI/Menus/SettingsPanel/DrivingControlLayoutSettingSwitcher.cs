@@ -37,12 +37,17 @@ namespace Gumball
             }
             dropdown.AddOptions(options);
             
+            //setup with current setting
             dropdown.SetValueWithoutNotify(layoutManager.CurrentLayoutIndex);
         }
         
         public void OnDropdownValueChange()
         {
             layoutManager.SetCurrentLayout(dropdown.value);
+            
+            //if driving controls is showing, update the layout
+            if (PanelManager.GetPanel<DrivingControlsPanel>().IsShowing)
+                layoutManager.ShowCurrentLayout();
         }
         
     }

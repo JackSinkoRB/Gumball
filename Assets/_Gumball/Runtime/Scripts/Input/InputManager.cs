@@ -17,15 +17,11 @@ namespace Gumball
         [SerializeField] private InputActionAsset controls;
         [SerializeField] private PlayerInput playerInput;
 
-        [Header("Driving")]
-        [SerializeField] private DrivingControlLayoutManager drivingControlLayoutManager;
-        
         [Header("Action maps")]
         [SerializeField] private GeneralInputManager generalInput;
         [SerializeField] private CarInputManager carInput;
 
         public InputActionAsset Controls => controls;
-        public DrivingControlLayoutManager DrivingControlLayoutManager => drivingControlLayoutManager;
         public GeneralInputManager GeneralInput => generalInput;
         public CarInputManager CarInput => carInput;
 
