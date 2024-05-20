@@ -24,18 +24,24 @@ namespace Gumball
         public void SetInactive()
         {
             if (!isActive)
-                return; //already disabled
+            {
+                //already disabled
+                gameObject.SetActive(false); //make sure it's disabled
+                return;
+            }
 
             OnDeactivate();
         }
 
         protected virtual void OnActivate()
         {
+            isActive = true;
             gameObject.SetActive(true);
         }
         
         protected virtual void OnDeactivate()
         {
+            isActive = false;
             gameObject.SetActive(false);
         }
         

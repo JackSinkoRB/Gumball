@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using MyBox;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace Gumball
 {
@@ -16,23 +17,26 @@ namespace Gumball
             TILT,
             SLIDE
         }
-
-        //TODO: remove this and just use DrivingControlLayout
         
+        /// <summary>
+        /// The maximum tilt required for full steering angle (from 0 to 1 - 0 being no tilt and 1 being device is rotated 90 degrees).
+        /// </summary>
+        private const float maxTilt = 0.15f;
+        //TODO: make this a setting in settings menu (lerp between a min max value)
+        private const float tiltMultiplier = 0.3f;
+        
+        /// <summary>
+        /// The amount of the screen to drag across for full steering angle with the slide input type.
+        /// </summary>
+        private const float slideScreenPercentForFullSteering = 0.2f;
+
         [SerializeField] private bool autoAccelerate;
         [SerializeField] private SteerInputType steerInputType;
 
         private bool isSteerLeftButtonPressed;
         private bool isSteerRightButtonPressed;
+        private Vector2 horizontalInputChangeSincePress;
 
-        /// <summary>
-        /// The maximum tilt required for full steering angle (from 0 to 1 - 0 being no tilt and 1 being device is rotated 90 degrees).
-        /// </summary>
-        private const float maxTilt = 0.2f;
-        
-        //TODO: make this a setting in settings menu
-        private const float tiltMultiplier = 0.5f;
-        
         protected override void OnActivate()
         {
             base.OnActivate();
@@ -126,20 +130,18 @@ namespace Gumball
             
             InputManager.Instance.CarInput.Steering.SetValueOverride(steeringValue);
         }
-        
+
         private void SetSteeringFromHorizontalInput()
         {
             if (!PrimaryContactInput.IsPressed)
-            {
-                InputManager.Instance.CarInput.Steering.SetValueOverride(0);
-                return;
-            }
+                //reset the offset
+                horizontalInputChangeSincePress = Vector2.zero;
 
-            float horizontalOffsetSincePress = PrimaryContactInput.OffsetSincePressedNormalised.x;
-            Debug.Log($"Horizontal offset since press = {horizontalOffsetSincePress}");
-            const float screenPercentForFullSteering = 0.1f;
-            
-            float steeringValue = Mathf.Clamp(-horizontalOffsetSincePress / screenPercentForFullSteering, -1, 1);
+            foreach (Touch touch in InputManager.ActiveTouches)
+                horizontalInputChangeSincePress += touch.delta;
+         
+            float horizontalPercent = GraphicUtils.GetNormalisedScreenPosition(horizontalInputChangeSincePress).x;
+            float steeringValue = Mathf.Clamp(horizontalPercent / slideScreenPercentForFullSteering, -1, 1);
             
             InputManager.Instance.CarInput.Steering.SetValueOverride(steeringValue);
         }
