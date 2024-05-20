@@ -35,6 +35,13 @@ namespace Gumball
         {
             if (IsActivated)
             {
+                //deactivate if braking
+                if (WarehouseManager.Instance.CurrentCar.IsBraking)
+                {
+                    Deactivate();
+                    return;
+                }
+
                 Deplete();
                 
                 //deactivate if no more NOS

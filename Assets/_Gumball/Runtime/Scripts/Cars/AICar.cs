@@ -192,6 +192,8 @@ namespace Gumball
         private const float brakingReactionTime = 0.95f;
         
         private bool wasBrakingLastFrame;
+
+        public bool IsBraking => isBraking;
         
         [Header("Handbrake")]
         [SerializeField] private float handbrakeEaseOffDuration = 1f;
