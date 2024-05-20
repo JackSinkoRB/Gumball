@@ -54,11 +54,14 @@ namespace Gumball
         [SerializeField] private CarPartManager carPartManager;
         [SerializeField] private BodyPaintModification bodyPaintModification;
         [SerializeField] private PartModification partModification;
+        [Tooltip("This gets added on initialise for every player car.")]
+        [SerializeField, ReadOnly] private NosManager nosManager;
 
         public CarPartManager CarPartManager => carPartManager;
         public BodyPaintModification BodyPaintModification => bodyPaintModification;
         public PartModification PartModification => partModification;
-
+        public NosManager NosManager => nosManager;
+        
         [Header("Sizing")]
         [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
         [SerializeField] private float carWidth = 2;
@@ -361,6 +364,9 @@ namespace Gumball
 
             if (partModification != null)
                 partModification.Initialise(this);
+
+            nosManager = transform.GetOrAddComponent<NosManager>();
+            nosManager.Initialise(this);
             
             foreach (WheelMesh wheelMesh in AllWheelMeshes)
             {

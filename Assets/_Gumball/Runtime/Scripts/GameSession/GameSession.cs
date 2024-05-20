@@ -150,7 +150,10 @@ namespace Gumball
         {
             PanelManager.GetPanel<DrivingControlsPanel>().Show();
             
+            //setup car:
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
+            //start with max NOS
+            WarehouseManager.Instance.CurrentCar.NosManager.SetNos(1);
             
             AvatarManager.Instance.HideAvatars(true);
 
@@ -195,6 +198,9 @@ namespace Gumball
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
+            
+            //disable NOS
+            WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
             
             //come to a stop
             WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);

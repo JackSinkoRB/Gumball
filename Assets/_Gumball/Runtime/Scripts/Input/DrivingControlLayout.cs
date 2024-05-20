@@ -122,6 +122,11 @@ namespace Gumball
         {
             InputManager.Instance.CarInput.Handbrake.SetPressedOverride(isPressed);
         }
+        
+        public void OnPressNosButton()
+        {
+            WarehouseManager.Instance.CurrentCar.NosManager.Activate();
+        }
 
         private void OnSteeringButtonUpdated()
         {
