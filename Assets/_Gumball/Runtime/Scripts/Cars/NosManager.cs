@@ -9,14 +9,16 @@ namespace Gumball
     public class NosManager : MonoBehaviour
     {
 
+        public const float MinPercentToActivate = 0.1f;
+        
         /// <summary>
         /// How long (in seconds) does a full tank of NOS last?
         /// </summary>
-        private const float depletionRate = 5; //TODO: might want to make this upgradable (use save data)
+        private const float depletionRate = 3; //TODO: might want to make this upgradable (use save data)
         /// <summary>
         /// How long (in seconds) does it take to regenerate a full tank of NOS?
         /// </summary>
-        private const float fillRate = 10; //TODO: might want to make this upgradable (use save data)
+        private const float fillRate = 30; //TODO: might want to make this upgradable (use save data)
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
@@ -32,9 +34,15 @@ namespace Gumball
         private void Update()
         {
             if (IsActivated)
+            {
                 Deplete();
+                if (AvailableNosPercent == 0)
+                    IsActivated = false;
+            }
             else
+            {
                 Fill();
+            }
         }
 
         public void SetNos(float percent)
