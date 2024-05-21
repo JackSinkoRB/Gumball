@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -26,6 +27,9 @@ namespace Gumball
         
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
+        [Header("Info")]
+        [SerializeField] private string description = "Description of session";
+        
         [Header("Map setup")]
         [SerializeField] private AddressableSceneReference scene;
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
@@ -48,8 +52,9 @@ namespace Gumball
         [SerializeField] private float racersStartingSpeed = 70;
 
         [Header("Rewards")]
-        [SerializeField, DisplayInspector] private CorePart[] corePartRewards;
-        
+        [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
+        [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
         [SerializeField, ReadOnly] private AICar[] currentRacers;
@@ -57,14 +62,17 @@ namespace Gumball
         private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         private ChunkMap currentChunkMapCached;
         private Coroutine sessionCoroutine;
-
-        private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
         
+        private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
+
+        public string Description => description;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
         public AICar[] CurrentRacers => currentRacers;
+        public CorePart[] CorePartRewards => corePartRewards;
+        public SubPart[] SubPartRewards => subPartRewards;
         
         public abstract string GetName();
 
@@ -73,6 +81,61 @@ namespace Gumball
             GameSessionManager.Instance.SetCurrentSession(this);
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
+        
+#if UNITY_EDITOR
+        [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
+        [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
+
+        private void OnValidate()
+        {
+            TrackCorePartRewards();
+            TrackSubPartRewards();
+        }
+
+        private void TrackCorePartRewards()
+        {
+            foreach (CorePart corePart in corePartRewards)
+            {
+                if (corePart == null)
+                    continue;
+                
+                corePart.TrackAsReward(this);
+            }
+            
+            foreach (CorePart corePart in previousCorePartRewards)
+            {
+                if (corePart == null)
+                    continue;
+                
+                if (!corePartRewards.Contains(corePart))
+                    corePart.UntrackAsReward(this);
+            }
+            
+            previousCorePartRewards = (CorePart[])corePartRewards.Clone();
+        }
+        
+        private void TrackSubPartRewards()
+        {
+            foreach (SubPart subPart in subPartRewards)
+            {
+                if (subPart == null)
+                    continue;
+                
+                subPart.TrackAsReward(this);
+            }
+            
+            foreach (SubPart subPart in previousSubPartRewards)
+            {
+                if (subPart == null)
+                    continue;
+                
+                if (!subPartRewards.Contains(subPart))
+                    subPart.UntrackAsReward(this);
+            }
+            
+            previousSubPartRewards = (SubPart[])subPartRewards.Clone();
+        }
+#endif
 
         public IEnumerator LoadChunkMap()
         {
@@ -87,7 +150,10 @@ namespace Gumball
         {
             PanelManager.GetPanel<DrivingControlsPanel>().Show();
             
+            //setup car:
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
+            //start with max NOS
+            WarehouseManager.Instance.CurrentCar.NosManager.SetNos(1);
             
             AvatarManager.Instance.HideAvatars(true);
 
@@ -132,6 +198,9 @@ namespace Gumball
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
+            
+            //disable NOS
+            WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
             
             //come to a stop
             WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
@@ -377,7 +446,14 @@ namespace Gumball
                 }
             }
 
-            //todo: sub parts
+            if (subPartRewards != null)
+            {
+                foreach (SubPart subPartReward in subPartRewards)
+                {
+                    if (!subPartReward.IsUnlocked)
+                        RewardManager.GiveReward(subPartReward);
+                }
+            }
         }
         
     }

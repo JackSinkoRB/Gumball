@@ -27,10 +27,10 @@ namespace Gumball
             ShiftUp = new VirtualInputActionButton(GetOrCacheAction("ShiftUp"));
             ShiftDown = new VirtualInputActionButton(GetOrCacheAction("ShiftDown"));
         }
-        
+
         protected override string GetActionMapName()
         {
-            return "Car";
+            return "Driving";
         }
 
     }

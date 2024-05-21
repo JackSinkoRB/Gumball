@@ -96,7 +96,7 @@ namespace MyBox.Internal
 			while (propertyObject.NextVisible(propertyObject.isExpanded && !expandedReorderable))
 			{
 #if UNITY_2020_2_OR_NEWER
-				expandedReorderable = propertyObject.isExpanded && propertyObject.isArray &&
+				expandedReorderable = propertyObject.isArray &&
 				                      !propertyObject.IsAttributeDefined<NonReorderableAttribute>();
 #endif
 				position.x = xPos + 10 * propertyObject.depth;

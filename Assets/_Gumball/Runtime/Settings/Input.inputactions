@@ -2,7 +2,77 @@
     "name": "Input",
     "maps": [
         {
-            "name": "Car",
+            "name": "General",
+            "id": "936a532a-da75-4a8a-84ee-de8412d81321",
+            "actions": [
+                {
+                    "name": "PrimaryContact",
+                    "type": "PassThrough",
+                    "id": "c8615d5b-c097-4e82-9b62-861f6176a436",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PrimaryPosition",
+                    "type": "PassThrough",
+                    "id": "216dfb9c-2db4-4166-b299-e22fbd69f51c",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "5dee6c19-210c-47fb-be17-734e48012a23",
+                    "path": "<Touchscreen>/primaryTouch/press",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PrimaryContact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6bcc12d7-23fc-4c09-9a7b-cf37955b4d5d",
+                    "path": "<Mouse>/press",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PrimaryContact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "82d3c9e3-ca6b-401b-a9c8-95178b13f03f",
+                    "path": "<Touchscreen>/primaryTouch/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PrimaryPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1f98d255-85a6-40e0-8a85-53c8cae6d1cd",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PrimaryPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Driving",
             "id": "363aed07-a3f5-40e3-afdc-80726318f002",
             "actions": [
                 {
@@ -366,76 +436,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "ShiftDown",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
-            ]
-        },
-        {
-            "name": "General",
-            "id": "936a532a-da75-4a8a-84ee-de8412d81321",
-            "actions": [
-                {
-                    "name": "PrimaryContact",
-                    "type": "PassThrough",
-                    "id": "c8615d5b-c097-4e82-9b62-861f6176a436",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "PrimaryPosition",
-                    "type": "PassThrough",
-                    "id": "216dfb9c-2db4-4166-b299-e22fbd69f51c",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                }
-            ],
-            "bindings": [
-                {
-                    "name": "",
-                    "id": "5dee6c19-210c-47fb-be17-734e48012a23",
-                    "path": "<Touchscreen>/primaryTouch/press",
-                    "interactions": "Press",
-                    "processors": "",
-                    "groups": "",
-                    "action": "PrimaryContact",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "6bcc12d7-23fc-4c09-9a7b-cf37955b4d5d",
-                    "path": "<Mouse>/press",
-                    "interactions": "Press",
-                    "processors": "",
-                    "groups": "",
-                    "action": "PrimaryContact",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "82d3c9e3-ca6b-401b-a9c8-95178b13f03f",
-                    "path": "<Touchscreen>/primaryTouch/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "PrimaryPosition",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "1f98d255-85a6-40e0-8a85-53c8cae6d1cd",
-                    "path": "<Mouse>/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "PrimaryPosition",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

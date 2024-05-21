@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -48,6 +49,24 @@ namespace Gumball
             //just show this menu
             if (subMenu != null)
                 subMenu.Show();
+        }
+
+        public void OpenSubMenu(CorePart.PartType type)
+        {
+            switch (type)
+            {
+                case CorePart.PartType.ENGINE:
+                    OpenSubMenu(engineSubPartMenu);
+                    break;
+                case CorePart.PartType.WHEELS:
+                    OpenSubMenu(wheelsSubPartMenu);
+                    break;
+                case CorePart.PartType.DRIVETRAIN:
+                    OpenSubMenu(drivetrainSubPartMenu);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
     }
