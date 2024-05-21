@@ -47,9 +47,10 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private GumballEvent currentSelectedEvent;
-        //TODO: make readonly after testing
-        [SerializeField] private GameSessionMap currentSelectedMap;
+        [SerializeField, ReadOnly] private GameSessionMap currentSelectedMap;
 
+        private Sequence currentNodesTween;
+        
         public GameSessionMap CurrentSelectedMap => currentSelectedMap;
         
         public GumballEvent LastPlayedEvent
@@ -148,8 +149,6 @@ namespace Gumball
                 }
             }
         }
-
-        private Sequence currentNodesTween;
         
         private void OnClickNode(GameSessionNode clickedNode)
         {
