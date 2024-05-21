@@ -30,6 +30,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1229020240171631144}
+  - {fileID: 1938331310860956359}
+  - {fileID: 8725800060165702539}
   - {fileID: 6816404527527180913}
   - {fileID: 3123130293420109088}
   m_Father: {fileID: 6339226346032666140}
@@ -80,11 +82,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecc4e7208838b6841b8ecf72be774815, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultState: {fileID: 1106808287208623235}
-  target: {fileID: 0}
+  defaultState: {fileID: 0}
   transitions:
-  - from: {fileID: 6014276090379262820}
-    to: {fileID: 1106808287208623235}
+  - from: {fileID: 8100453001760388865}
+    to: {fileID: 2867138450535570593}
     transitionTime: 2
     blendCurve:
       serializedVersion: 2
@@ -110,8 +111,62 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 0
-  - from: {fileID: 1106808287208623235}
-    to: {fileID: 3031186043028912081}
+  - from: {fileID: 8100453001760388865}
+    to: {fileID: 590865851716442983}
+    transitionTime: 2
+    blendCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+  - from: {fileID: 2867138450535570593}
+    to: {fileID: 8970949092867848097}
+    transitionTime: 2
+    blendCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+  - from: {fileID: 590865851716442983}
+    to: {fileID: 8970949092867848097}
     transitionTime: 2
     blendCurve:
       serializedVersion: 2
@@ -140,9 +195,12 @@ MonoBehaviour:
   currentState: {fileID: 0}
   previousState: {fileID: 0}
   timeSinceStateChange: 0
-  drivingState: {fileID: 1106808287208623235}
-  introState: {fileID: 6014276090379262820}
-  outroState: {fileID: 3031186043028912081}
+  drivingStates:
+  - {fileID: 2867138450535570593}
+  - {fileID: 590865851716442983}
+  rearViewMirrorState: {fileID: 649086923412430976}
+  introState: {fileID: 8100453001760388865}
+  outroState: {fileID: 8970949092867848097}
 --- !u!1 &4356335451156436081
 GameObject:
   m_ObjectHideFlags: 0
@@ -152,9 +210,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1229020240171631144}
-  - component: {fileID: 1106808287208623235}
+  - component: {fileID: 2867138450535570593}
   m_Layer: 0
-  m_Name: Driving
+  m_Name: Chase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -175,7 +233,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1130900604380814223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1106808287208623235
+--- !u!114 &2867138450535570593
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -184,15 +242,55 @@ MonoBehaviour:
   m_GameObject: {fileID: 4356335451156436081}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 522bb6339985af745b26e5b7e2459296, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
+--- !u!1 &4596535407123438642
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8725800060165702539}
+  - component: {fileID: 649086923412430976}
+  m_Layer: 0
+  m_Name: RearviewMirror
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8725800060165702539
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4596535407123438642}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1130900604380814223}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &649086923412430976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4596535407123438642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eb8cfe2fe24707e4792205588589a5f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetOffsetHorizontal: 0
-  targetOffsetVertical: 0.35
-  verticalLookAtOffset: 0
-  horizontalAngleOffset: 0
-  distance: 2.3
-  rotationSnapTime: 0.15
+  target: {fileID: 0}
 --- !u!1 &6273800991604008784
 GameObject:
   m_ObjectHideFlags: 0
@@ -202,7 +300,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6816404527527180913}
-  - component: {fileID: 6014276090379262820}
+  - component: {fileID: 8100453001760388865}
   m_Layer: 0
   m_Name: Intro
   m_TagString: Untagged
@@ -225,7 +323,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1130900604380814223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6014276090379262820
+--- !u!114 &8100453001760388865
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -234,15 +332,55 @@ MonoBehaviour:
   m_GameObject: {fileID: 6273800991604008784}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb8cfe2fe24707e4792205588589a5f7, type: 3}
+  m_Script: {fileID: 11500000, guid: a74251b2b30760b42a00a14e2ef96dcf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetOffsetHorizontal: 2
-  targetOffsetVertical: 1
-  verticalLookAtOffset: 1
-  horizontalAngleOffset: -40
-  distance: 4
-  rotationSnapTime: 0.15
+  target: {fileID: 0}
+--- !u!1 &7778578200891228419
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1938331310860956359}
+  - component: {fileID: 590865851716442983}
+  m_Layer: 0
+  m_Name: Cockpit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1938331310860956359
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7778578200891228419}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1130900604380814223}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &590865851716442983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7778578200891228419}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a97b2bca8eac7a41a83cf6a368e6a91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
 --- !u!1 &8625724026292006248
 GameObject:
   m_ObjectHideFlags: 0
@@ -271,7 +409,7 @@ Transform:
   m_GameObject: {fileID: 8625724026292006248}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5, z: -4.22}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -389,7 +527,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3123130293420109088}
-  - component: {fileID: 3031186043028912081}
+  - component: {fileID: 8970949092867848097}
   m_Layer: 0
   m_Name: Outro
   m_TagString: Untagged
@@ -412,7 +550,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1130900604380814223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3031186043028912081
+--- !u!114 &8970949092867848097
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -421,12 +559,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8923850077309717859}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb8cfe2fe24707e4792205588589a5f7, type: 3}
+  m_Script: {fileID: 11500000, guid: b48148a5dfb84264ca5799e0d4023f93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetOffsetHorizontal: 2
-  targetOffsetVertical: 1
-  verticalLookAtOffset: 1
-  horizontalAngleOffset: -40
-  distance: 4
-  rotationSnapTime: 0.15
+  target: {fileID: 0}

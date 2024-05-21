@@ -17,6 +17,11 @@ namespace Gumball
             
             layoutManager.ShowCurrentLayout();
         }
+
+        public void OnClickCameraSwitchButton()
+        {
+            ChunkMapSceneManager.Instance.DrivingCameraController.SetNextDrivingState();
+        }
         
     }
 }

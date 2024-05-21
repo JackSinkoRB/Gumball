@@ -9,7 +9,6 @@ namespace Gumball
     {
         
         [SerializeField] private CameraState defaultState;
-        [SerializeField] private Transform target;
 
         [Header("Transitions")]
         [SerializeField] private CameraTransition[] transitions;
@@ -36,20 +35,21 @@ namespace Gumball
             SetPositionAndRotation();
         }
 
-        public void SetTarget(Transform newTarget, bool snap = true)
-        {
-            if (newTarget == target)
-                return;
-            
-            target = newTarget;
-            
-            Rigidbody targetRigidbody = target.GetComponent<Rigidbody>();
-            if (targetRigidbody != null)
-                targetRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
-
-            if (snap && target != null)
-                CurrentState.SnapToTarget(this, target);
-        }
+        //TODO: remove as handled by camera states
+        // public void SetTarget(Transform newTarget, bool snap = true)
+        // {
+        //     if (newTarget == target)
+        //         return;
+        //     
+        //     target = newTarget;
+        //     
+        //     Rigidbody targetRigidbody = target.GetComponent<Rigidbody>();
+        //     if (targetRigidbody != null)
+        //         targetRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+        //
+        //     if (snap && target != null)
+        //         CurrentState.SnapToTarget(this, target);
+        // }
         
         public CameraTransition GetCurrentTransition()
         {
@@ -69,33 +69,39 @@ namespace Gumball
                 return;
 
             previousState = currentState;
+            if (previousState != null)
+                previousState.OnNoLongerCurrent();
+            
             currentState = state;
+            if (currentState != null)
+                currentState.OnSetCurrent(this);
+            
             timeSinceStateChange = 0;
         }
         
         public void SkipTransition()
         {
             timeSinceStateChange = Mathf.Infinity;
-            CurrentState.SnapToTarget(this, target);
+            CurrentState.SnapToTarget();
         }
 
         private void SetPositionAndRotation()
         {
-            if (target == null)
+            if (CurrentState == null)
                 return;
-            
+
             CameraTransition currentTransition = GetCurrentTransition();
             if (currentTransition == null)
             {
-                var (position, lookAtPosition) = CurrentState.Calculate(this, target);
+                var (position, rotation) = CurrentState.Calculate();
                 transform.position = position;
-                transform.LookAt(lookAtPosition);
+                transform.rotation = rotation;
             }
             else
             {
                 //blend between the 2 transitions
-                var (currentPosition, currentLookAtPosition) = CurrentState.Calculate(this, target);
-                var (previousPosition, previousLookAtPosition) = previousState.Calculate(this, target);
+                var (currentPosition, currentRotation) = CurrentState.Calculate();
+                var (previousPosition, previousRotation) = previousState.Calculate();
 
                 float timePercent = Mathf.Clamp01(timeSinceStateChange / currentTransition.TransitionTime);
                 float blendPercent = currentTransition.BlendCurve.Evaluate(timePercent);
@@ -103,8 +109,8 @@ namespace Gumball
                 Vector3 positionBlended = Vector3.Lerp(previousPosition, currentPosition, blendPercent);
                 transform.position = positionBlended;
 
-                Vector3 lookAtPositionBlended = Vector3.Lerp(previousLookAtPosition, currentLookAtPosition, blendPercent);
-                transform.LookAt(lookAtPositionBlended);
+                Quaternion rotationBlended = Quaternion.Slerp(previousRotation, currentRotation, blendPercent);
+                transform.rotation = rotationBlended;
             }
         }
         

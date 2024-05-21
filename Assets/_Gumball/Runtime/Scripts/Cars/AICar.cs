@@ -38,6 +38,12 @@ namespace Gumball
         [SerializeField] private bool canBeDrivenByPlayer;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private CarIKManager avatarIKManager;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private SteeringWheel steeringWheel;
+        
+        [Space(5)]
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform chaseCameraTarget;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform cockpitCameraTarget;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform introCameraTarget;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform outroCameraTarget;
 
         [Space(5)]
         [SerializeField, ReadOnly] private bool isPlayerCar;
@@ -49,6 +55,11 @@ namespace Gumball
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
         public string SaveKey => GetSaveKeyFromIndex(carIndex);
+        
+        public Transform ChaseCameraTarget => chaseCameraTarget;
+        public Transform CockpitCameraTarget => cockpitCameraTarget;
+        public Transform IntroCameraTarget => introCameraTarget;
+        public Transform OutroCameraTarget => outroCameraTarget;
 
         [Header("Customisation")]
         [SerializeField] private CarPartManager carPartManager;
