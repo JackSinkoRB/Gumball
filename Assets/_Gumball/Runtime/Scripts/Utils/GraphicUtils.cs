@@ -56,5 +56,10 @@ namespace Gumball
             return clickablesAtPosition;
         }
         
+        public static Vector2 GetNormalisedScreenPosition(Vector2 screenPosition)
+        {
+            return new Vector2(screenPosition.x / Screen.width, screenPosition.y / Screen.height);
+        }
+        
     }
 }

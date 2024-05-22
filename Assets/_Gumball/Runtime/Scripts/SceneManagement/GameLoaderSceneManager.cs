@@ -78,7 +78,7 @@ namespace Gumball
 #if ENABLE_LOGS
             Debug.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
-            
+
             stopwatch.Restart();
             currentStage = Stage.Waiting_for_save_data_to_load;
             yield return new WaitUntil(() => !loadSaveDataAsync.IsPlaying);

@@ -20,7 +20,7 @@ namespace Gumball
         [Header("Action maps")]
         [SerializeField] private GeneralInputManager generalInput;
         [SerializeField] private CarInputManager carInput;
-        
+
         public InputActionAsset Controls => controls;
         public GeneralInputManager GeneralInput => generalInput;
         public CarInputManager CarInput => carInput;
