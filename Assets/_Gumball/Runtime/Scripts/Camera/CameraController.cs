@@ -87,7 +87,9 @@ namespace Gumball
 
         
         //TODO: move this to CameraState - all the values should be relative to the state
-        [SerializeField] private float positionLerpSpeed = 6;
+        [SerializeField] private float rotationLerpSpeed = 6;
+        [SerializeField] private float rotationLerpSpeedToZero = 2;
+        [SerializeField] private float heightLerpSpeed = 6;
         [SerializeField] private Transform rotationPivot;
         [SerializeField] private Vector3 offset = new(0, 2, -6);
         [SerializeField] private Vector3 lookAtOffset = new(0, 1, 0);
@@ -104,22 +106,26 @@ namespace Gumball
 
             //TODO: move to property in CameraState
             AICar playerCar = WarehouseManager.Instance.CurrentCar;
-
+            Vector3 pivotPoint = playerCar.transform.position + lookAtOffset;
+            
             //TODO: cleanup - move to separate method
             //set the position to match the desired offset - but keep height relative to the car
             float heightRelativeToCar = playerCar.transform.TransformPoint(offset).y;
-            transform.position = playerCar.transform.position.SetY(heightRelativeToCar) + new Vector3(offset.x, 0, offset.z);
+            float heightInterpolated = Mathf.Lerp(transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed);
+            transform.position = playerCar.transform.position.SetY(heightInterpolated) + offset.SetY(0); //set the position, but interpolate height
             
             //TODO: cleanup - move to separate method
             //rotate the pivot around the car with some interpolation:
             //get the angle between the players velocity forward and pivot forward in the XZ plane
             // - if velocity is close to 0, use the players forward
-            const float velocityTolerance = 0.1f;
-            Vector3 targetDirection = playerCar.Rigidbody.velocity.sqrMagnitude < velocityTolerance ? playerCar.transform.forward : playerCar.Rigidbody.velocity;
+            const float velocityTolerance = 0.5f;
+            bool isMoving = playerCar.Rigidbody.velocity.sqrMagnitude > velocityTolerance;
+            Vector3 targetDirection = isMoving ? playerCar.Rigidbody.velocity.normalized : playerCar.transform.forward;
+            float speed = isMoving ? rotationLerpSpeed : rotationLerpSpeedToZero;
             float angleForDesiredRotation = Vector2.SignedAngle(rotationPivot.forward.FlattenAsVector2(), targetDirection.FlattenAsVector2());
-            rotationPivot.RotateAround(playerCar.transform.position + lookAtOffset, Vector3.up, -angleForDesiredRotation * Time.deltaTime * positionLerpSpeed);
-            
-            rotationPivot.LookAt(playerCar.transform.position + lookAtOffset);
+
+            rotationPivot.RotateAround(pivotPoint, Vector3.up, -angleForDesiredRotation * Time.deltaTime * speed);
+            rotationPivot.LookAt(pivotPoint);
         }
         
         private void SetPositionAndRotation()
