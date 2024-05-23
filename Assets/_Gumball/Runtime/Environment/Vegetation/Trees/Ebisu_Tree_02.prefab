@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9170745452097778764}
   - component: {fileID: 5676694635591890478}
-  m_Layer: 0
+  m_Layer: 17
   m_Name: Ebisu_Tree_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -45,13 +45,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ignoreAtRuntime: 0
+  loadSeparately: 1
   alwaysGrounded: 1
-  meshRendererToUseWhenGrounding: {fileID: 3150031951004746910}
   keepAtSpecificDistanceFromRoad: 0
   distanceFromRoad: 10
   flattenTerrain: 0
-  flattenTerrainRadius: 5
-  flattenTerrainBlendRadius: 20
+  colliderToFlattenTo: {fileID: 0}
+  flattenTerrainBlendDistance: 20
+  flattenTerrainBlendCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  colourTerrain: 0
+  colliderToColourAround: {fileID: 0}
+  colourTerrainColor: {r: 0, g: 0, b: 0, a: 0}
+  colourTerrainStrength: 0.5
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!1001 &4356877495017297946
@@ -149,6 +178,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
+      propertyPath: m_Layer
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 21cd2749e93acb447809ada418ac3304,
+        type: 3}
       propertyPath: m_StaticEditorFlags
       value: 4294967295
       objectReference: {fileID: 0}
@@ -157,12 +191,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 21cd2749e93acb447809ada418ac3304, type: 3}
---- !u!23 &3150031951004746910 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 21cd2749e93acb447809ada418ac3304,
-    type: 3}
-  m_PrefabInstance: {fileID: 4356877495017297946}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4322335798320644081 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,

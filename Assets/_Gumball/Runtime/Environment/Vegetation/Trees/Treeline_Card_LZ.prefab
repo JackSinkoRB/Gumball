@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3203039358124319869}
   - component: {fileID: 4376321567725283749}
-  m_Layer: 0
+  m_Layer: 17
   m_Name: Treeline_Card_LZ
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -53,8 +53,36 @@ MonoBehaviour:
   keepAtSpecificDistanceFromRoad: 0
   distanceFromRoad: 10
   flattenTerrain: 0
-  flattenTerrainRadius: 5
-  flattenTerrainBlendRadius: 20
+  colliderToFlattenTo: {fileID: 0}
+  flattenTerrainBlendDistance: 20
+  flattenTerrainBlendCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  colourTerrain: 0
+  colliderToColourAround: {fileID: 0}
+  colourTerrainColor: {r: 0, g: 0, b: 0, a: 0}
+  colourTerrainStrength: 0.5
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!1001 &1177146941494671817
@@ -171,6 +199,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8795007098908046726, guid: 8a124a9ea3f3c674b981cc2c2238321a,
         type: 3}
+      propertyPath: m_Layer
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: -8795007098908046726, guid: 8a124a9ea3f3c674b981cc2c2238321a,
+        type: 3}
       propertyPath: m_StaticEditorFlags
       value: 4294967295
       objectReference: {fileID: 0}
@@ -266,6 +299,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 8a124a9ea3f3c674b981cc2c2238321a,
         type: 3}
+      propertyPath: m_Layer
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 8a124a9ea3f3c674b981cc2c2238321a,
+        type: 3}
       propertyPath: m_StaticEditorFlags
       value: 4294967295
       objectReference: {fileID: 0}
@@ -284,6 +322,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: c3d56520c3d688a48b88233da6b113f6, type: 2}
+    - target: {fileID: 6969000488425360694, guid: 8a124a9ea3f3c674b981cc2c2238321a,
+        type: 3}
+      propertyPath: m_Layer
+      value: 17
+      objectReference: {fileID: 0}
     - target: {fileID: 6969000488425360694, guid: 8a124a9ea3f3c674b981cc2c2238321a,
         type: 3}
       propertyPath: m_StaticEditorFlags
