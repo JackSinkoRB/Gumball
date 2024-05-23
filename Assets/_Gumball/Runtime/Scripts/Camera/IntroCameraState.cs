@@ -4,15 +4,10 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class IntroCameraState : CameraState
+    public class IntroCameraState : DrivingCameraState
     {
         
-        public override void OnSetCurrent(CameraController controller)
-        {
-            base.OnSetCurrent(controller);
-
-            target = WarehouseManager.Instance.CurrentCar.IntroCameraTarget;
-        }
+        
 
     }
 }
