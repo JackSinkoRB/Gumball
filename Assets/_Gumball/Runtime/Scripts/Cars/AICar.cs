@@ -163,10 +163,13 @@ namespace Gumball
         public int NumberOfGears => gearRatios.Length;
         public float EngineRpm => engineRpm;
         public AnimationCurve TorqueCurve => torqueCurve;
+        public bool IsAccelerating => isAccelerating;
         
         [Header("Reversing")]
         [SerializeField] private float maxReverseSpeed = 25;
         [SerializeField, ReadOnly] private bool isReversing;
+        
+        public bool IsReversing => isReversing;
         
         [Header("Steering")]
         [Tooltip("The speed that the wheel collider turns if not auto driving.")]
@@ -209,6 +212,8 @@ namespace Gumball
         private float defaultRearWheelStiffness = -1;
         private float defaultAngularDrag;
         private readonly Sequence[] handbrakeEaseOffTweens = new Sequence[2];
+
+        public bool IsHandbrakeEngaged => isHandbrakeEngaged;
         
         [Header("Collisions")]
         [SerializeField] private GameObject colliders;
