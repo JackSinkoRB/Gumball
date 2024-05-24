@@ -48,7 +48,9 @@ namespace Gumball
         [SerializeField] private MomentumSettings accelerationEndMomentum;
         [SerializeField] private MomentumSettings brakingStartMomentum;
         [SerializeField] private MomentumSettings brakingEndMomentum;
-
+        [SerializeField] private MomentumSettings gearChangeStartMomentum;
+        [SerializeField] private MomentumSettings gearChangeEndMomentum;
+        
         [Header("Offsets")]
         [Tooltip("X = width - Y = height - Z = depth")]
         [SerializeField] private Vector3 offset = new(0, 2, -5);
@@ -67,7 +69,17 @@ namespace Gumball
         private Transform target => otherTarget != null ? otherTarget : WarehouseManager.Instance.CurrentCar.transform;
         private Rigidbody carRigidbody => WarehouseManager.Instance.CurrentCar.Rigidbody;
         private Vector3 pivotPoint => target.position + lookAtOffset;
-        
+
+        private void OnEnable()
+        {
+            WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
+        }
+
+        private void OnDisable()
+        {
+            WarehouseManager.Instance.CurrentCar.onGearChanged -= OnGearChange;
+        }
+
         public override TransformOperation[] Calculate()
         {
             // - should always be looking at the car centre (plus some offset for height)
@@ -103,7 +115,7 @@ namespace Gumball
             }
             
             fakeCameraPivot.LookAt(pivotPoint);
-            
+
             //do depth position
             if ((WarehouseManager.Instance.CurrentCar.IsBraking
                  || WarehouseManager.Instance.CurrentCar.IsHandbrakeEngaged)
@@ -111,7 +123,8 @@ namespace Gumball
             {
                 TryStartMomentumTween(brakingStartMomentum);
             }
-            else if (WarehouseManager.Instance.CurrentCar.IsAccelerating)
+            else if (WarehouseManager.Instance.CurrentCar.IsAccelerating
+                     && currentMomentum != gearChangeStartMomentum && (currentMomentum != gearChangeEndMomentum || (!momentumTween.IsActive() || momentumTween.IsComplete())))
             {
                 TryStartMomentumTween(accelerationStartMomentum);
             }
@@ -147,8 +160,14 @@ namespace Gumball
             rotationPivot.RotateAround(pivotPoint, Vector3.up, -angleForDesiredRotation);
             rotationPivot.LookAt(pivotPoint);
         }
+
+        private void OnGearChange(int previousGear, int currentGear)
+        {
+            if (currentGear > previousGear && WarehouseManager.Instance.CurrentCar.IsAccelerating)
+                TryStartMomentumTween(gearChangeStartMomentum, gearChangeEndMomentum);
+        }
         
-        private void TryStartMomentumTween(MomentumSettings settings)
+        private void TryStartMomentumTween(MomentumSettings settings, MomentumSettings settingsToUseOnComplete = null)
         {
             bool alreadyPlaying = currentMomentum == settings;
             if (alreadyPlaying)
@@ -160,6 +179,9 @@ namespace Gumball
             momentumTween = DOTween.Sequence()
                 .Join(DOTween.To(() => desiredDepth, x => desiredDepth = x, settings.Depth, settings.DepthDuration).SetEase(settings.DepthEase))
                 .Join(DOTween.To(() => desiredHeight, x => desiredHeight = x, settings.Height, settings.HeightDuration).SetEase(settings.HeightEase));
+
+            if (settingsToUseOnComplete != null)
+                momentumTween.OnComplete(() => TryStartMomentumTween(settingsToUseOnComplete));
         }
         
         private void TryStopMomentumTween()
