@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -9,6 +10,26 @@ namespace Gumball
     public class DrivingCameraState : CameraState
     {
 
+        [Serializable]
+        private class MomentumSettings
+        {
+            [SerializeField] private float depth = 1;
+            [SerializeField] private float depthDuration = 1;
+            [SerializeField] private Ease depthEase;
+            [Space(5)]
+            [SerializeField] private float height = 1;
+            [SerializeField] private float heightDuration = 1;
+            [SerializeField] private Ease heightEase;
+
+            public float Depth => depth;
+            public float DepthDuration => depthDuration;
+            public Ease DepthEase => depthEase;
+            
+            public float Height => height;
+            public float HeightDuration => heightDuration;
+            public Ease HeightEase => heightEase;
+        }
+        
         [SerializeField] private Transform fakeController;
         [SerializeField] private Transform fakeRotationPivot;
         [SerializeField] private Transform fakeDepthPivot;
@@ -22,22 +43,12 @@ namespace Gumball
         [SerializeField] private Transform depthPivot;
         [SerializeField] private Transform cameraPivot;
 
-        [Header("Depth")]
-        [SerializeField] private float brakingDepth = 0.4f;
-        [SerializeField] private float brakingHeight = 0.2f;
-        [SerializeField] private float brakingDuration = 1.5f;
-        [SerializeField] private float heightDelay = 0.1f;
-        [SerializeField] private Ease brakingDepthEase;
-        [SerializeField] private Ease brakingHeightEase;
-        [SerializeField] private float recoverDuration = 0.5f;
-        [SerializeField] private Ease recoverDepthEase;
-        [SerializeField] private Ease recoverHeightEase;
+        [Header("Momentum")]
+        [SerializeField] private MomentumSettings accelerationStartMomentum;
+        [SerializeField] private MomentumSettings accelerationEndMomentum;
+        [SerializeField] private MomentumSettings brakingStartMomentum;
+        [SerializeField] private MomentumSettings brakingEndMomentum;
 
-        private Sequence desiredDepthTween;
-        private bool isDoingBrakeAnimation;
-        private float desiredDepth;
-        private float desiredHeight;
-        
         [Header("Offsets")]
         [Tooltip("X = width - Y = height - Z = depth")]
         [SerializeField] private Vector3 offset = new(0, 2, -5);
@@ -48,14 +59,17 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected Transform otherTarget;
 
+        private MomentumSettings currentMomentum;
+        private Sequence momentumTween;
+        private float desiredDepth;
+        private float desiredHeight;
+        
         private Transform target => otherTarget != null ? otherTarget : WarehouseManager.Instance.CurrentCar.transform;
         private Rigidbody carRigidbody => WarehouseManager.Instance.CurrentCar.Rigidbody;
         private Vector3 pivotPoint => target.position + lookAtOffset;
         
         public override TransformOperation[] Calculate()
         {
-            //TODO: cleanup this method - separate into separate functions
-            
             // - should always be looking at the car centre (plus some offset for height)
             // - should always be the same distance away from the car centre
             // - should always have the same height above the car centre
@@ -91,35 +105,21 @@ namespace Gumball
             fakeCameraPivot.LookAt(pivotPoint);
             
             //do depth position
-            if (WarehouseManager.Instance.CurrentCar.IsAccelerating
-                && !WarehouseManager.Instance.CurrentCar.IsReversing
-                && !WarehouseManager.Instance.CurrentCar.IsBraking
-                && !WarehouseManager.Instance.CurrentCar.IsHandbrakeEngaged)
+            if ((WarehouseManager.Instance.CurrentCar.IsBraking
+                 || WarehouseManager.Instance.CurrentCar.IsHandbrakeEngaged)
+                && !WarehouseManager.Instance.CurrentCar.IsStationary)
             {
-                if (isDoingBrakeAnimation)
-                {
-                    isDoingBrakeAnimation = false;
-                    
-                    desiredDepthTween?.Kill();
-                    desiredDepthTween = DOTween.Sequence()
-                        .Join(DOTween.To(() => desiredDepth, x => desiredDepth = x, 0, recoverDuration).SetEase(recoverDepthEase))
-                        .Join(DOTween.To(() => desiredHeight, x => desiredHeight = x, 0, recoverDuration).SetEase(recoverHeightEase));
-                }
+                TryStartMomentumTween(brakingStartMomentum);
+            }
+            else if (WarehouseManager.Instance.CurrentCar.IsAccelerating)
+            {
+                TryStartMomentumTween(accelerationStartMomentum);
             }
             else
             {
-                if (!isDoingBrakeAnimation)
-                {
-                    isDoingBrakeAnimation = true;
-                    
-                    desiredDepthTween?.Kill();
-                    desiredDepthTween = DOTween.Sequence()
-                        .Join(DOTween.To(() => desiredDepth, x => desiredDepth = x, brakingDepth, brakingDuration).SetEase(brakingDepthEase))
-                        .Join(DOTween.To(() => desiredHeight, x => desiredHeight = x, brakingHeight, brakingDuration - heightDelay).SetEase(brakingHeightEase).SetDelay(heightDelay));
-
-                }
+                TryStopMomentumTween();
             }
-            
+
             Vector3 desiredDepthPosition = fakeRotationPivot.position + (targetDirection * desiredDepth) + (Vector3.up * desiredHeight);
             fakeDepthPivot.position = desiredDepthPosition;
             
@@ -147,5 +147,29 @@ namespace Gumball
             rotationPivot.RotateAround(pivotPoint, Vector3.up, -angleForDesiredRotation);
             rotationPivot.LookAt(pivotPoint);
         }
+        
+        private void TryStartMomentumTween(MomentumSettings settings)
+        {
+            bool alreadyPlaying = currentMomentum == settings;
+            if (alreadyPlaying)
+                return;
+            
+            currentMomentum = settings;
+            
+            momentumTween?.Kill();
+            momentumTween = DOTween.Sequence()
+                .Join(DOTween.To(() => desiredDepth, x => desiredDepth = x, settings.Depth, settings.DepthDuration).SetEase(settings.DepthEase))
+                .Join(DOTween.To(() => desiredHeight, x => desiredHeight = x, settings.Height, settings.HeightDuration).SetEase(settings.HeightEase));
+        }
+        
+        private void TryStopMomentumTween()
+        {
+            if (currentMomentum == accelerationStartMomentum)
+                TryStartMomentumTween(accelerationEndMomentum);
+            
+            if (currentMomentum == brakingStartMomentum)
+                TryStartMomentumTween(brakingEndMomentum);
+        }
+        
     }
 }

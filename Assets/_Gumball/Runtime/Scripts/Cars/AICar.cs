@@ -139,7 +139,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private float speed;
         private bool wasMovingLastFrame;
         private const float stationarySpeed = 2;
-        private bool isStationary => speed < stationarySpeed && !isAccelerating;
+        
+        public bool IsStationary => speed < stationarySpeed && !isAccelerating;
 
         [Header("Engine & Drivetrain")]
         [Tooltip("The engine torque output (y) (in Newton metres) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
@@ -913,7 +914,7 @@ namespace Gumball
             }
 
             //brake if stationary
-            if (isStationary)
+            if (IsStationary)
             {
                 speedToBrakeTo = 0;
                 isBraking = true;
@@ -947,7 +948,7 @@ namespace Gumball
             
             if (isReversing && !InputManager.Instance.CarInput.Brake.IsPressed)
                 OnStopReversing();
-            if (!isReversing && (isStationary || speed < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
+            if (!isReversing && (IsStationary || speed < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
                 OnStartReversing();
         }
         
