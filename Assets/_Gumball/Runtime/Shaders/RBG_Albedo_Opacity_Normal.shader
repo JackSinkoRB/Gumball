@@ -12,6 +12,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 		_Metal("Metal", Range( 0 , 1)) = 0
 		_Gloss("Gloss", Range( 0 , 1)) = 0
 		_Clip("Clip", Range( 0 , 2)) = 0.7
+		_Nrm_Str("Nrm_Str", Range( 0 , 5)) = 1
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -291,6 +292,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 			float4 _Color;
 			float4 _Albedo_ST;
 			float4 _Bumpmap_ST;
+			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
 			float _Clip;
@@ -544,10 +546,12 @@ Shader "RBG/Albedo_Opacity_Normal"
 				float4 tex2DNode5 = tex2D( _Albedo, uv_Albedo );
 				
 				float2 uv_Bumpmap = IN.ase_texcoord8.xy * _Bumpmap_ST.xy + _Bumpmap_ST.zw;
+				float3 unpack19 = UnpackNormalScale( tex2D( _Bumpmap, uv_Bumpmap ), _Nrm_Str );
+				unpack19.z = lerp( 1, unpack19.z, saturate(_Nrm_Str) );
 				
 
 				float3 BaseColor = ( _Color * tex2DNode5 ).rgb;
-				float3 Normal = tex2D( _Bumpmap, uv_Bumpmap ).rgb;
+				float3 Normal = unpack19;
 				float3 Emission = 0;
 				float3 Specular = 0.5;
 				float Metallic = _Metal;
@@ -866,6 +870,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 			float4 _Color;
 			float4 _Albedo_ST;
 			float4 _Bumpmap_ST;
+			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
 			float _Clip;
@@ -1183,6 +1188,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 			float4 _Color;
 			float4 _Albedo_ST;
 			float4 _Bumpmap_ST;
+			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
 			float _Clip;
@@ -1469,6 +1475,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 			float4 _Color;
 			float4 _Albedo_ST;
 			float4 _Bumpmap_ST;
+			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
 			float _Clip;
@@ -1758,6 +1765,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 			float4 _Color;
 			float4 _Albedo_ST;
 			float4 _Bumpmap_ST;
+			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
 			float _Clip;
@@ -2044,6 +2052,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 			float4 _Color;
 			float4 _Albedo_ST;
 			float4 _Bumpmap_ST;
+			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
 			float _Clip;
@@ -2248,12 +2257,14 @@ Shader "RBG/Albedo_Opacity_Normal"
 				#endif
 
 				float2 uv_Bumpmap = IN.ase_texcoord5.xy * _Bumpmap_ST.xy + _Bumpmap_ST.zw;
+				float3 unpack19 = UnpackNormalScale( tex2D( _Bumpmap, uv_Bumpmap ), _Nrm_Str );
+				unpack19.z = lerp( 1, unpack19.z, saturate(_Nrm_Str) );
 				
 				float2 uv_Albedo = IN.ase_texcoord5.xy * _Albedo_ST.xy + _Albedo_ST.zw;
 				float4 tex2DNode5 = tex2D( _Albedo, uv_Albedo );
 				
 
-				float3 Normal = tex2D( _Bumpmap, uv_Bumpmap ).rgb;
+				float3 Normal = unpack19;
 				float Alpha = tex2DNode5.a;
 				float AlphaClipThreshold = _Clip;
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -2419,6 +2430,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 			float4 _Color;
 			float4 _Albedo_ST;
 			float4 _Bumpmap_ST;
+			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
 			float _Clip;
@@ -2667,10 +2679,12 @@ Shader "RBG/Albedo_Opacity_Normal"
 				float4 tex2DNode5 = tex2D( _Albedo, uv_Albedo );
 				
 				float2 uv_Bumpmap = IN.ase_texcoord8.xy * _Bumpmap_ST.xy + _Bumpmap_ST.zw;
+				float3 unpack19 = UnpackNormalScale( tex2D( _Bumpmap, uv_Bumpmap ), _Nrm_Str );
+				unpack19.z = lerp( 1, unpack19.z, saturate(_Nrm_Str) );
 				
 
 				float3 BaseColor = ( _Color * tex2DNode5 ).rgb;
-				float3 Normal = tex2D( _Bumpmap, uv_Bumpmap ).rgb;
+				float3 Normal = unpack19;
 				float3 Emission = 0;
 				float3 Specular = 0.5;
 				float Metallic = _Metal;
@@ -2839,6 +2853,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 			float4 _Color;
 			float4 _Albedo_ST;
 			float4 _Bumpmap_ST;
+			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
 			float _Clip;
@@ -3091,6 +3106,7 @@ Shader "RBG/Albedo_Opacity_Normal"
 			float4 _Color;
 			float4 _Albedo_ST;
 			float4 _Bumpmap_ST;
+			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
 			float _Clip;
@@ -3306,10 +3322,11 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;17;0,0;Float;False;False;-1
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;7;-215,273.5;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;4;-624.5,335.5;Float;False;Property;_Gloss;Gloss;4;0;Create;True;0;0;0;False;0;False;0;1;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;3;-625.5,217.5;Float;False;Property;_Metal;Metal;3;0;Create;True;0;0;0;False;0;False;0;0.479;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SamplerNode;5;-585.5,8.045685;Inherit;True;Property;_Albedo;Albedo;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;9;369.2513,3.180203;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/Albedo_Opacity_Normal;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;1;638380557935424416;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
-Node;AmplifyShaderEditor.SamplerNode;19;-296.8237,-403.0605;Inherit;True;Property;_Bumpmap;Normal;2;0;Create;False;0;0;0;False;0;False;-1;None;None;True;0;False;bump;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;18;22.2213,383.5292;Inherit;False;Property;_Clip;Clip;5;0;Create;True;0;0;0;False;0;False;0.7;0.7;0;2;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;5;-607.5,3.045685;Inherit;True;Property;_Albedo;Albedo;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SamplerNode;19;-394.8237,-412.0605;Inherit;True;Property;_Bumpmap;Normal;2;0;Create;False;0;0;0;False;0;False;-1;None;None;True;0;False;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.RangedFloatNode;20;-722.785,-357.3563;Inherit;False;Property;_Nrm_Str;Nrm_Str;6;0;Create;True;0;0;0;False;0;False;1;1;0;5;0;1;FLOAT;0
 WireConnection;6;0;2;0
 WireConnection;6;1;5;0
 WireConnection;7;0;4;0
@@ -3320,5 +3337,6 @@ WireConnection;9;3;3;0
 WireConnection;9;4;7;0
 WireConnection;9;6;5;4
 WireConnection;9;7;18;0
+WireConnection;19;5;20;0
 ASEEND*/
-//CHKSM=BF65D2B445A962E9ACBF5B897F4657E2CB66B34B
+//CHKSM=5B030A99F5F224F5B7761AC425D5891369EC2F6E
