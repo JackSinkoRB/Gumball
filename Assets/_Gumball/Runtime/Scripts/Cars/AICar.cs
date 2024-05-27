@@ -1449,7 +1449,11 @@ namespace Gumball
             if (!isChunkLoaded)
                 return null; //current chunk isn't loaded
 
-            SampleCollection sampleCollection = useRacingLine ? CurrentChunk.TrafficManager.RacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
+#if UNITY_EDITOR
+            if (useRacingLine && CurrentChunk.TrafficManager.RacingLine == null)
+                Debug.LogWarning($"{gameObject.name} uses a racing line, but it is not setup in the current chunk {CurrentChunk.name}.");
+#endif
+            SampleCollection sampleCollection = useRacingLine && CurrentChunk.TrafficManager.RacingLine != null ? CurrentChunk.TrafficManager.RacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
             
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
             int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(Rigidbody.position).Item1;
@@ -1480,7 +1484,7 @@ namespace Gumball
                     if (newChunk.TrafficManager == null)
                         return null; //no traffic manager
 
-                    sampleCollection = useRacingLine ? chunkToUse.TrafficManager.RacingLine.SampleCollection : chunkToUse.SplineSampleCollection;
+                    sampleCollection = useRacingLine && CurrentChunk.TrafficManager.RacingLine != null ? chunkToUse.TrafficManager.RacingLine.SampleCollection : chunkToUse.SplineSampleCollection;
                     
                     //reset the values
                     previousSample = null;
