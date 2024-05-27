@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
@@ -9,6 +10,19 @@ namespace Gumball
     {
 
         [SerializeField, ReadOnly] protected CameraController controller;
+
+        private bool isInitialised;
+
+        protected virtual void OnEnable()
+        {
+            if (!isInitialised)
+                Initialise();
+        }
+
+        protected virtual void Initialise()
+        {
+            isInitialised = true;
+        }
 
         public virtual void OnSetCurrent(CameraController controller)
         {

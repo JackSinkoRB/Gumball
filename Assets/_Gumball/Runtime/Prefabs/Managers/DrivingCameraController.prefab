@@ -1,5 +1,52 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &470328318582210481
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2238982387291630442}
+  - component: {fileID: 7917530409841071695}
+  m_Layer: 0
+  m_Name: Shaker
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2238982387291630442
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 470328318582210481}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3041174817258160888}
+  m_Father: {fileID: 8226211066247002576}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7917530409841071695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 470328318582210481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4201afded0c14d94daf259bf985b1e8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dontDestroy: 0
+  cameraShakeInstances: []
 --- !u!1 &2485531941075954291
 GameObject:
   m_ObjectHideFlags: 0
@@ -60,7 +107,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3041174817258160888}
+  - {fileID: 2238982387291630442}
   m_Father: {fileID: 7674160820353800047}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3297529166357885239
@@ -427,6 +474,18 @@ MonoBehaviour:
   offset: {x: 0, y: 2, z: -5}
   offsetIsLocalised: 0
   lookAtOffset: {x: 0, y: 1, z: 0}
+  nosFov: 75
+  nosFovTweenDuration: 1.5
+  nosFovTweenEase: 27
+  nosShake:
+    magnitude: 1
+    roughness: 10
+    positionInfluence: {x: 0.05, y: 0.05, z: 0}
+    rotationInfluence: {x: 1, y: 1, z: 0.5}
+    fadeInDuration: 0
+    fadeOutDuration: 1
+    fadeOutInstantly: 0
+    currentState: 0
   otherTarget: {fileID: 0}
 --- !u!1 &4596535407123438642
 GameObject:
@@ -688,6 +747,18 @@ MonoBehaviour:
   offset: {x: 6, y: 2, z: -6}
   offsetIsLocalised: 1
   lookAtOffset: {x: 0, y: 1, z: 0}
+  nosFov: 75
+  nosFovTweenDuration: 1.5
+  nosFovTweenEase: 27
+  nosShake:
+    magnitude: 0
+    roughness: 0
+    positionInfluence: {x: 0, y: 0, z: 0}
+    rotationInfluence: {x: 0, y: 0, z: 0}
+    fadeInDuration: 0
+    fadeOutDuration: 0
+    fadeOutInstantly: 0
+    currentState: 0
   otherTarget: {fileID: 0}
 --- !u!1 &6326642543826660560
 GameObject:
@@ -885,6 +956,18 @@ MonoBehaviour:
   offset: {x: 0, y: 2, z: -6}
   offsetIsLocalised: 0
   lookAtOffset: {x: 0, y: 1, z: 0}
+  nosFov: 75
+  nosFovTweenDuration: 1.5
+  nosFovTweenEase: 27
+  nosShake:
+    magnitude: 0
+    roughness: 0
+    positionInfluence: {x: 0, y: 0, z: 0}
+    rotationInfluence: {x: 0, y: 0, z: 0}
+    fadeInDuration: 0
+    fadeOutDuration: 0
+    fadeOutInstantly: 0
+    currentState: 0
   otherTarget: {fileID: 0}
 --- !u!1 &8625724026292006248
 GameObject:
@@ -918,7 +1001,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8226211066247002576}
+  m_Father: {fileID: 2238982387291630442}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &389274273941257875
 Camera:
@@ -1124,4 +1207,16 @@ MonoBehaviour:
   offset: {x: 6, y: 2, z: -6}
   offsetIsLocalised: 1
   lookAtOffset: {x: 0, y: 3, z: 0}
+  nosFov: 75
+  nosFovTweenDuration: 1.5
+  nosFovTweenEase: 27
+  nosShake:
+    magnitude: 0
+    roughness: 0
+    positionInfluence: {x: 0, y: 0, z: 0}
+    rotationInfluence: {x: 0, y: 0, z: 0}
+    fadeInDuration: 0
+    fadeOutDuration: 0
+    fadeOutInstantly: 0
+    currentState: 0
   otherTarget: {fileID: 0}

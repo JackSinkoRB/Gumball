@@ -10,16 +10,16 @@ namespace Gumball
     {
         
         [Header("States")]
-        [SerializeField] private CameraState[] drivingStates;
-        [SerializeField] private CameraState rearViewMirrorState;
-        [SerializeField] private CameraState introState;
-        [SerializeField] private CameraState outroState;
+        [SerializeField] private DrivingCameraState[] drivingStates;
+        [SerializeField] private DrivingCameraState rearViewMirrorState;
+        [SerializeField] private DrivingCameraState introState;
+        [SerializeField] private DrivingCameraState outroState;
 
-        public CameraState RearViewMirrorState => rearViewMirrorState;
-        public CameraState IntroState => introState;
-        public CameraState OutroState => outroState;
+        public DrivingCameraState RearViewMirrorState => rearViewMirrorState;
+        public DrivingCameraState IntroState => introState;
+        public DrivingCameraState OutroState => outroState;
 
-        public CameraState CurrentDrivingState
+        public DrivingCameraState CurrentDrivingState
         {
             get => drivingStates[DataManager.Settings.Get($"Camera.CurrentDrivingState", 0)];
             set => DataManager.Settings.Set($"Camera.CurrentDrivingState", drivingStates.IndexOfItem(value));
@@ -36,7 +36,7 @@ namespace Gumball
             if (nextIndex >= drivingStates.Length)
                 nextIndex = 0;
             
-            CameraState nextDrivingState = drivingStates[nextIndex];
+            DrivingCameraState nextDrivingState = drivingStates[nextIndex];
             
             CurrentDrivingState = nextDrivingState;
             SetState(nextDrivingState);

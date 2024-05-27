@@ -58,6 +58,13 @@ namespace Gumball
         [Tooltip("X = width - Y = height - Z = depth")]
         [SerializeField] private Vector3 lookAtOffset = new(0, 1, 0);
         
+        [Header("NOS")]
+        [SerializeField] private float nosFov = 75;
+        [SerializeField] private float nosFovTweenDuration = 1.5f;
+        [SerializeField] private Ease nosFovTweenEase = Ease.OutBack;
+        [Space(5)]
+        [SerializeField] private CameraShakeInstance nosShake;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected Transform otherTarget;
 
@@ -66,20 +73,36 @@ namespace Gumball
         private float desiredDepth;
         private float desiredHeight;
         
+        private float initialFov;
+        private Tween fovTween;
+        
         private Transform target => otherTarget != null ? otherTarget : WarehouseManager.Instance.CurrentCar.transform;
         private Rigidbody carRigidbody => WarehouseManager.Instance.CurrentCar.Rigidbody;
         private Vector3 pivotPoint => target.position + lookAtOffset;
 
-        private void OnEnable()
+        protected override void Initialise()
         {
+            base.Initialise();
+            
+            initialFov = Camera.main.fieldOfView;
+        }
+        
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            
             WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
         }
 
         private void OnDisable()
         {
             WarehouseManager.Instance.CurrentCar.onGearChanged -= OnGearChange;
+            
+            //reset FOV in case it was in progress
+            fovTween?.Kill();
+            Camera.main.fieldOfView = initialFov;
         }
-
+        
         public override TransformOperation[] Calculate()
         {
             // - should always be looking at the car centre (plus some offset for height)
@@ -160,7 +183,30 @@ namespace Gumball
             rotationPivot.RotateAround(pivotPoint, Vector3.up, -angleForDesiredRotation);
             rotationPivot.LookAt(pivotPoint);
         }
+        
+        public void EnableNos(bool isUsingNos)
+        {
+            TweenFieldOfView(isUsingNos ? nosFov : initialFov, nosFovTweenDuration, nosFovTweenEase);
 
+            if (isUsingNos)
+            {
+                nosShake.DoShake();
+                nosShake.StartFadeIn();
+            }
+            else
+            {
+                nosShake.StartFadeOut();
+            }
+        }
+
+        private void TweenFieldOfView(float fov, float duration, Ease ease)
+        {
+            fovTween?.Kill();
+            fovTween = DOTween.To(() => Camera.main.fieldOfView, 
+                    x => Camera.main.fieldOfView = x, fov, duration)
+                .SetEase(ease);
+        }
+        
         private void OnGearChange(int previousGear, int currentGear)
         {
             if (currentGear > previousGear && WarehouseManager.Instance.CurrentCar.IsAccelerating)
@@ -192,6 +238,6 @@ namespace Gumball
             if (currentMomentum == brakingStartMomentum)
                 TryStartMomentumTween(brakingEndMomentum);
         }
-        
+
     }
 }

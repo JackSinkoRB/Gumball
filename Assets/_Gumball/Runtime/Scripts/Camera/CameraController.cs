@@ -28,28 +28,12 @@ namespace Gumball
             }
         }
 
-        private void LateUpdate()
+        private void Update()
         {
             timeSinceStateChange += Time.deltaTime;
             
             SetPositionAndRotation();
         }
-
-        //TODO: remove as handled by camera states
-        // public void SetTarget(Transform newTarget, bool snap = true)
-        // {
-        //     if (newTarget == target)
-        //         return;
-        //     
-        //     target = newTarget;
-        //     
-        //     Rigidbody targetRigidbody = target.GetComponent<Rigidbody>();
-        //     if (targetRigidbody != null)
-        //         targetRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
-        //
-        //     if (snap && target != null)
-        //         CurrentState.SnapToTarget(this, target);
-        // }
         
         public CameraTransition GetCurrentTransition()
         {
