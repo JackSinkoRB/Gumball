@@ -1686,6 +1686,7 @@ GameObject:
   - component: {fileID: 2708812335598609157}
   - component: {fileID: 5974823439251168409}
   - component: {fileID: 1156584296934732937}
+  - component: {fileID: 4990734537075554514}
   m_Layer: 9
   m_Name: TrafficCar-Kiri86
   m_TagString: Untagged
@@ -1757,8 +1758,10 @@ MonoBehaviour:
   isPlayerCar: 0
   isPlayerDrivingEnabled: 0
   carIndex: 0
-  id: 0
   carPartManager: {fileID: 0}
+  bodyPaintModification: {fileID: 0}
+  partModification: {fileID: 0}
+  nosManager: {fileID: 0}
   frontOfCarPosition: {x: 0, y: 1, z: 2}
   carWidth: 2
   wheelConfiguration: 0
@@ -1776,9 +1779,8 @@ MonoBehaviour:
   - {fileID: 8281378343497143908}
   autoDrive: 1
   obeySpeedLimit: 1
-  maxSpeed: 200
   tempSpeedLimit: -1
-  useRacingLine: 0
+  useRacingLine: 1
   currentLaneDistance: 0
   currentLaneDirection: 0
   racingLineOffset: 0
@@ -1932,9 +1934,24 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   speedToBrakeToIfBlocked: 50
+  defaultPeakTorque: 0
   isInitialised: 0
   currentChunkCached: {fileID: 0}
   isFrozen: 0
+--- !u!114 &4990734537075554514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3376700106487986623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4df183f1f6b60e48befa6eefc36ac7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  topSpeed: 0
+  zeroTo100Time: 0
 --- !u!1 &3415610770349403201
 GameObject:
   m_ObjectHideFlags: 0
