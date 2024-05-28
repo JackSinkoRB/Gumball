@@ -83,7 +83,7 @@ namespace Gumball
         
         private Transform target => otherTarget != null ? otherTarget : WarehouseManager.Instance.CurrentCar.transform;
         private Rigidbody carRigidbody => WarehouseManager.Instance.CurrentCar.Rigidbody;
-        private Vector3 pivotPoint => target.position + lookAtOffset;
+        private Vector3 pivotPoint => target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
 
         protected override void Initialise()
         {
