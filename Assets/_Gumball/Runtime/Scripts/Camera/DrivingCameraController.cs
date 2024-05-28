@@ -40,6 +40,7 @@ namespace Gumball
             
             CurrentDrivingState = nextDrivingState;
             SetState(nextDrivingState);
+            SkipTransition();
         }
         
     }

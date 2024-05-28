@@ -128,6 +128,19 @@ namespace Gumball
             WarehouseManager.Instance.CurrentCar.NosManager.Activate();
         }
 
+        public void OnPressRearViewMirrorButton()
+        {
+            DrivingCameraController cameraController = ChunkMapSceneManager.Instance.DrivingCameraController;
+            cameraController.SetState(cameraController.RearViewMirrorState);
+        }
+        
+        public void OnReleaseRearViewMirrorButton()
+        {
+            DrivingCameraController cameraController = ChunkMapSceneManager.Instance.DrivingCameraController;
+            if (cameraController.CurrentState == cameraController.RearViewMirrorState)
+                cameraController.SetState(cameraController.CurrentDrivingState);
+        }
+        
         private void OnSteeringButtonUpdated()
         {
             float? steeringValue = null;

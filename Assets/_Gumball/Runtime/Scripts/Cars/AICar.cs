@@ -41,6 +41,7 @@ namespace Gumball
         
         [Space(5)]
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform cockpitCameraTarget;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform rearViewCameraTarget;
         
         [Space(5)]
         [SerializeField, ReadOnly] private bool isPlayerCar;
@@ -54,7 +55,8 @@ namespace Gumball
         public string SaveKey => GetSaveKeyFromIndex(carIndex);
         
         public Transform CockpitCameraTarget => cockpitCameraTarget;
-
+        public Transform RearViewCameraTarget => rearViewCameraTarget;
+        
         [Header("Customisation")]
         [SerializeField] private CarPartManager carPartManager;
         [SerializeField] private BodyPaintModification bodyPaintModification;

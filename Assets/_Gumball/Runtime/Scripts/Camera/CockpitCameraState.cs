@@ -15,6 +15,9 @@ namespace Gumball
         {
             base.OnSetCurrent(controller);
             
+            if (WarehouseManager.Instance.CurrentCar.RearViewCameraTarget == null)
+                Debug.LogError($"{WarehouseManager.Instance.CurrentCar.name} is missing the cockpit camera target.");
+            
             otherTarget = WarehouseManager.Instance.CurrentCar.CockpitCameraTarget;
 
             //setup interior view
