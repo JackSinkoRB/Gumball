@@ -63,9 +63,9 @@ namespace Gumball
         public NosManager NosManager => nosManager;
         
         [Header("Sizing")]
-        [SerializeField] private Vector3 frontOfCarPosition = new(0, 1, 2);
-        [SerializeField] private float carWidth = 2;
-        
+        [SerializeField, ReadOnly] private Vector3 frontOfCarPosition;
+        [SerializeField, ReadOnly] private float carWidth;
+
         [Header("Wheels")]
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
         [SerializeField, InitializationField] private WheelMesh[] frontWheelMeshes;
@@ -116,8 +116,9 @@ namespace Gumball
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private ChunkTrafficManager.LaneDirection currentLaneDirection;
-        [ConditionalField(nameof(autoDrive), nameof(useRacingLine)), SerializeField] private float racingLineOffset;
-        [ConditionalField(nameof(autoDrive)), SerializeField] private float targetPositionOffset; //show in inspector
+        [Space(5)]
+        [Tooltip("An offset may be temporarily applied to the racing line, for example at the start of races.")]
+        [ConditionalField(nameof(autoDrive), nameof(useRacingLine)), SerializeField, ReadOnly] private float racingLineOffset;
         
         private Tween currentRacingLineOffsetTween;
 
@@ -229,10 +230,16 @@ namespace Gumball
         
         [Header("Obstacle avoidance")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useObstacleAvoidance;
-        [ConditionalField(nameof(autoDrive)), SerializeField] private LayerMask obstacleLayers;
         [Tooltip("The speed the car should brake to if all the directions are blocked (exlcuding the 'when blocked' layers).")]
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private float speedToBrakeToIfBlocked = 50;
+        [Space(5)]
+        [ConditionalField(nameof(autoDrive), nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private float targetPositionOffset; //show in inspector
 
+        private static readonly LayerMask obstacleLayers = 1 << (int)LayersAndTags.Layer.TrafficCar
+                                                           | 1 << (int)LayersAndTags.Layer.PlayerCar
+                                                           | 1 << (int)LayersAndTags.Layer.RacerCar
+                                                           | 1 << (int)LayersAndTags.Layer.Barrier
+                                                           | 1 << (int)LayersAndTags.Layer.MovementPath;
         /// <summary>
         /// The time that the autodriving car looks ahead for curves.
         /// </summary>
@@ -345,6 +352,8 @@ namespace Gumball
             
             CachePoweredWheels();
             CachePeakTorque();
+            
+            InitialiseSize();
         }
 
         public void InitialiseAsPlayer(int carIndex)
@@ -1440,7 +1449,11 @@ namespace Gumball
             if (!isChunkLoaded)
                 return null; //current chunk isn't loaded
 
-            SampleCollection sampleCollection = useRacingLine ? CurrentChunk.TrafficManager.RacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
+#if UNITY_EDITOR
+            if (useRacingLine && CurrentChunk.TrafficManager.RacingLine == null)
+                Debug.LogWarning($"{gameObject.name} uses a racing line, but it is not setup in the current chunk {CurrentChunk.name}.");
+#endif
+            SampleCollection sampleCollection = useRacingLine && CurrentChunk.TrafficManager.RacingLine != null ? CurrentChunk.TrafficManager.RacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
             
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
             int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(Rigidbody.position).Item1;
@@ -1471,7 +1484,7 @@ namespace Gumball
                     if (newChunk.TrafficManager == null)
                         return null; //no traffic manager
 
-                    sampleCollection = useRacingLine ? chunkToUse.TrafficManager.RacingLine.SampleCollection : chunkToUse.SplineSampleCollection;
+                    sampleCollection = useRacingLine && CurrentChunk.TrafficManager.RacingLine != null ? chunkToUse.TrafficManager.RacingLine.SampleCollection : chunkToUse.SplineSampleCollection;
                     
                     //reset the values
                     previousSample = null;
@@ -1517,6 +1530,41 @@ namespace Gumball
             
             if (canBeDrivenByPlayer)
                 OnGearboxSettingChanged(GearboxSetting.Setting);
+        }
+
+        /// <summary>
+        /// Calculates the front of the car position and the car width.
+        /// </summary>
+        private void InitialiseSize()
+        {
+            carWidth = 0;
+            float furthestDistanceRight = 0;
+            
+            frontOfCarPosition = Vector3.zero;
+            float furthestDistanceForward = 0;
+            
+            foreach (Collider collider in colliders.GetComponents<Collider>())
+            {
+                const float reallyFarAway = 1000;
+                Vector3 positionForward = collider.bounds.ClosestPoint(transform.position + transform.forward * reallyFarAway).SetY(Rigidbody.centerOfMass.y);
+                Vector3 localPosition = transform.InverseTransformPoint(positionForward);
+                float distanceSqrForward = Vector3.SqrMagnitude(localPosition);
+                if (distanceSqrForward > furthestDistanceForward)
+                {
+                    frontOfCarPosition = localPosition;
+                    furthestDistanceForward = distanceSqrForward;
+                }
+                
+                Vector3 positionRight = collider.bounds.ClosestPoint(transform.position + transform.right * reallyFarAway);
+                float distanceSqrRight = Vector3.SqrMagnitude(transform.InverseTransformPoint(positionRight));
+                if (distanceSqrRight > furthestDistanceRight)
+                {
+                    furthestDistanceRight = distanceSqrRight;
+                }
+            }
+            
+            //complete after to avoid square rooting each time
+            carWidth = Mathf.Sqrt(furthestDistanceRight) * 2; //multiply by 2 for total width
         }
 
         private void OnGearboxSettingChanged(GearboxSetting.GearboxOption newValue)

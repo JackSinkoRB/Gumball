@@ -16,6 +16,7 @@ namespace Gumball
 
         private const string defaultTerrainMaterialPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
         
+        [SerializeField] private Material terrainMaterial;
         [PositiveValueOnly, SerializeField] private int resolution = 100;
         [PositiveValueOnly, SerializeField] private int resolutionLowLOD = 20;
         [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 5;
@@ -51,15 +52,15 @@ namespace Gumball
         public ChunkGrid GridLowLOD { get; private set; }
         public ChunkGrid Grid { get; private set; }
 
-        public Dictionary<Chunk.TerrainLOD, GameObject> Create(Chunk chunkToUse, Material[] materialsToUse = null)
+        public Dictionary<Chunk.TerrainLOD, GameObject> Create(Chunk chunkToUse)
         {
             chunk = chunkToUse;
             UpdateGrid();
 
             Dictionary<Chunk.TerrainLOD, GameObject> terrains = new()
             {
-                [Chunk.TerrainLOD.LOW] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.LOW, materialsToUse),
-                [Chunk.TerrainLOD.HIGH] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.HIGH, materialsToUse)
+                [Chunk.TerrainLOD.LOW] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.LOW),
+                [Chunk.TerrainLOD.HIGH] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.HIGH)
             };
             
             return terrains;
@@ -71,7 +72,7 @@ namespace Gumball
             Grid = new ChunkGrid(chunk, resolution, widthAroundRoad);
         }
         
-        private GameObject GenerateTerrainMeshFromGrid(Chunk.TerrainLOD lod, Material[] materialsToAssign = null)
+        private GameObject GenerateTerrainMeshFromGrid(Chunk.TerrainLOD lod)
         {
             ChunkGrid grid = lod == Chunk.TerrainLOD.HIGH ? Grid : GridLowLOD;
             
@@ -84,9 +85,7 @@ namespace Gumball
             
             //apply materials
             MeshRenderer meshRenderer = terrain.AddComponent<MeshRenderer>();
-            meshRenderer.sharedMaterials = materialsToAssign.HasValidMaterials()
-                ? materialsToAssign
-                : new[] { GetDefaultMaterial() }; //set a material with the default shader if none
+            meshRenderer.sharedMaterial = GetTerrainMaterial(); //set a material with the default shader if none
 
             //apply mesh
             MeshFilter meshFilter = terrain.AddComponent<MeshFilter>();
@@ -414,9 +413,9 @@ namespace Gumball
             return newHeight;
         }
         
-        private static Material GetDefaultMaterial()
+        private Material GetTerrainMaterial()
         {
-            return AssetDatabase.LoadAssetAtPath<Material>(defaultTerrainMaterialPath);
+            return terrainMaterial != null ? terrainMaterial : AssetDatabase.LoadAssetAtPath<Material>(defaultTerrainMaterialPath);
         }
         
     }
