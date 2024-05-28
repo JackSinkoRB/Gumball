@@ -253,8 +253,7 @@ namespace Gumball
 
             OnSessionStart();
             
-            drivingCameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
-            drivingCameraController.SetState(drivingCameraController.DrivingState);
+            drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
 
@@ -311,11 +310,10 @@ namespace Gumball
                 yield break;
             
             drivingCameraController.SetState(drivingCameraController.IntroState);
-            drivingCameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
             drivingCameraController.SkipTransition();
                 
             //start the transition to driving start
-            drivingCameraController.SetState(drivingCameraController.DrivingState);
+            drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
                 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
                 
