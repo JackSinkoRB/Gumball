@@ -16,6 +16,8 @@ namespace Gumball
         public const AvatarBodyType DefaultCoDriverBodyType = AvatarBodyType.FEMALE;
         
         [SerializeField] private AssetReferenceGameObject avatarPrefab;
+        [SerializeField] private Shader invisibleShader;
+        [SerializeField] private Texture2D mouthMask;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Avatar driverAvatar;
@@ -25,6 +27,9 @@ namespace Gumball
         public Avatar DriverAvatar => driverAvatar;
         public Avatar CoDriverAvatar => coDriverAvatar;
 
+        public Shader InvisibleShader => invisibleShader;
+        public Texture2D MouthMask => mouthMask;
+        
         public void HideAvatars(bool hide)
         {
             if (driverAvatar != null)

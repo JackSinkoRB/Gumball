@@ -92,16 +92,18 @@ namespace Gumball
             initialFov = Camera.main.fieldOfView;
         }
         
-        protected override void OnEnable()
+        public override void OnSetCurrent(CameraController controller)
         {
-            base.OnEnable();
+            base.OnSetCurrent(controller);
             
             WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter += OnCollisionEnter;
         }
 
-        private void OnDisable()
+        public override void OnNoLongerCurrent()
         {
+            base.OnNoLongerCurrent();
+            
             WarehouseManager.Instance.CurrentCar.onGearChanged -= OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter -= OnCollisionEnter;
 
@@ -109,7 +111,7 @@ namespace Gumball
             fovTween?.Kill();
             Camera.main.fieldOfView = initialFov;
         }
-        
+
         public override TransformOperation[] Calculate()
         {
             // - should always be looking at the car centre (plus some offset for height)

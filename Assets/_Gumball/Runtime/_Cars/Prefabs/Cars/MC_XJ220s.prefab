@@ -242,41 +242,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7920201528351022173}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1309291259843044225
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 619313328730028516}
-  m_Layer: 0
-  m_Name: CameraPositions
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &619313328730028516
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1309291259843044225}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1410323983057993495}
-  - {fileID: 6760965102156923738}
-  - {fileID: 6208379956194427805}
-  - {fileID: 8095708942035503055}
-  m_Father: {fileID: 724044971135627713}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1422899270389967864
 GameObject:
   m_ObjectHideFlags: 0
@@ -312,7 +277,7 @@ Transform:
   - {fileID: 6978679286292903102}
   - {fileID: 7576791136675941403}
   - {fileID: 6613023856233851379}
-  - {fileID: 619313328730028516}
+  - {fileID: 6760965102156923738}
   - {fileID: 7831755652159390863}
   - {fileID: 5144348758853134650}
   - {fileID: 7880060370973760672}
@@ -361,10 +326,7 @@ MonoBehaviour:
   canBeDrivenByPlayer: 1
   avatarIKManager: {fileID: 3038809945755952107}
   steeringWheel: {fileID: 755326655889393961}
-  chaseCameraTarget: {fileID: 1410323983057993495}
   cockpitCameraTarget: {fileID: 6760965102156923738}
-  introCameraTarget: {fileID: 6208379956194427805}
-  outroCameraTarget: {fileID: 8095708942035503055}
   isPlayerCar: 0
   isPlayerDrivingEnabled: 0
   carIndex: 0
@@ -642,37 +604,6 @@ Transform:
   - {fileID: 4610684360064787934}
   m_Father: {fileID: 7226108640442910138}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1732177673642538833
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1410323983057993495}
-  m_Layer: 0
-  m_Name: Chase
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1410323983057993495
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1732177673642538833}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.06104851, y: 0, z: 0, w: 0.99813485}
-  m_LocalPosition: {x: 0, y: 2.1, z: -5.5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 619313328730028516}
-  m_LocalEulerAnglesHint: {x: 7, y: 0, z: 0}
 --- !u!1 &2027062300244652431
 GameObject:
   m_ObjectHideFlags: 0
@@ -2801,37 +2732,6 @@ MonoBehaviour:
   sidewaysSlip: 0
   isSlidingSideways: 0
   isSlidingForward: 0
---- !u!1 &5921655043861290245
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8095708942035503055}
-  m_Layer: 0
-  m_Name: Outro
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8095708942035503055
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5921655043861290245}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.035661694, y: -0.8771725, z: 0.06595492, w: 0.4742854}
-  m_LocalPosition: {x: 5.59, y: 3.7, z: 4.03}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 619313328730028516}
-  m_LocalEulerAnglesHint: {x: 8.6, y: -123.2, z: 0}
 --- !u!1 &6054565963001126080
 GameObject:
   m_ObjectHideFlags: 0
@@ -3677,7 +3577,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6760965102156923738}
   m_Layer: 0
-  m_Name: Cockpit
+  m_Name: CockpitCameraPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3692,11 +3592,11 @@ Transform:
   m_GameObject: {fileID: 7732518175493875592}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.311, y: 1, z: -0.042}
+  m_LocalPosition: {x: -0.2949, y: 1, z: 0.065}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 619313328730028516}
+  m_Father: {fileID: 724044971135627713}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7773046212694333287
 GameObject:
@@ -3729,37 +3629,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6545945027913140206}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &7902283198019704358
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6208379956194427805}
-  m_Layer: 0
-  m_Name: Intro
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &6208379956194427805
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7902283198019704358}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0.07036218, y: -0.250071, z: 0.01822436, w: 0.9654956}
-  m_LocalPosition: {x: 3.18, y: 1.5, z: -3.61}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 619313328730028516}
-  m_LocalEulerAnglesHint: {x: 8.336, y: -29.042, z: 0}
 --- !u!1 &7906114992493384061
 GameObject:
   m_ObjectHideFlags: 0
