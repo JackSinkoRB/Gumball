@@ -34,9 +34,15 @@ namespace Gumball
             
         }
 
-        public abstract TransformOperation[] Calculate();
-
-        public abstract void Snap();
+        public abstract TransformOperation[] Calculate(bool interpolate = true);
+        
+        public void Snap()
+        {
+            TransformOperation[] operations = Calculate(false);
+            
+            foreach (TransformOperation operation in operations)
+                operation.Apply();
+        }
 
     }
 }

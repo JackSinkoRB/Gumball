@@ -132,13 +132,17 @@ namespace Gumball
         {
             DrivingCameraController cameraController = ChunkMapSceneManager.Instance.DrivingCameraController;
             cameraController.SetState(cameraController.RearViewMirrorState);
+            cameraController.SkipTransition();
         }
         
         public void OnReleaseRearViewMirrorButton()
         {
             DrivingCameraController cameraController = ChunkMapSceneManager.Instance.DrivingCameraController;
             if (cameraController.CurrentState == cameraController.RearViewMirrorState)
+            {
                 cameraController.SetState(cameraController.CurrentDrivingState);
+                cameraController.SkipTransition();
+            }
         }
         
         private void OnSteeringButtonUpdated()

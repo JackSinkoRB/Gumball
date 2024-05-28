@@ -112,7 +112,7 @@ namespace Gumball
             Camera.main.fieldOfView = initialFov;
         }
 
-        public override TransformOperation[] Calculate()
+        public override TransformOperation[] Calculate(bool interpolate = true)
         {
             // - should always be looking at the car centre (plus some offset for height)
             // - should always be the same distance away from the car centre
@@ -124,7 +124,7 @@ namespace Gumball
             if (!offsetIsLocalised)
             {
                 float heightRelativeToCar = target.TransformPoint(offset).y;
-                float heightInterpolated = Mathf.Lerp(controller.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed);
+                float heightInterpolated = interpolate ? Mathf.Lerp(controller.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
                 fakeController.transform.position = target.position.SetY(heightInterpolated) + offset.SetY(0);
             }
             else
@@ -143,7 +143,7 @@ namespace Gumball
                 // - if velocity is close to 0, use the players forward
                 float speed = isMoving ? rotationLerpSpeed : rotationLerpSpeedToZero;
                 float angleForDesiredRotation = Vector2.SignedAngle(fakeRotationPivot.forward.FlattenAsVector2(), targetDirection.FlattenAsVector2());
-                fakeRotationPivot.RotateAround(pivotPoint, Vector3.up, -angleForDesiredRotation * Time.deltaTime * speed);
+                fakeRotationPivot.RotateAround(pivotPoint, Vector3.up, interpolate ? -angleForDesiredRotation * Time.deltaTime * speed : -angleForDesiredRotation);
             }
             
             fakeLookAtPivot.LookAt(pivotPoint);
@@ -177,22 +177,6 @@ namespace Gumball
             return operations;
         }
 
-        public override void Snap()
-        {
-            //get the position to match the desired offset - but keep height relative to the car (with rotation applied)
-            float heightRelativeToCar = target.TransformPoint(offset).y;
-            controller.transform.position = target.position.SetY(heightRelativeToCar) + offset.SetY(0);
-            
-            //rotation pivot:
-            const float velocityTolerance = 0.5f;
-            bool isMoving = carRigidbody.velocity.sqrMagnitude > velocityTolerance;
-            Vector3 targetDirection = isMoving ? carRigidbody.velocity.normalized : target.forward;
-            float angleForDesiredRotation = Vector2.SignedAngle(rotationPivot.forward.FlattenAsVector2(), targetDirection.FlattenAsVector2());
-            
-            rotationPivot.RotateAround(pivotPoint, Vector3.up, -angleForDesiredRotation);
-            rotationPivot.LookAt(pivotPoint);
-        }
-        
         public void EnableNos(bool isUsingNos)
         {
             TweenFieldOfView(isUsingNos ? nosFov : initialFov, nosFovTweenDuration, nosFovTweenEase);
