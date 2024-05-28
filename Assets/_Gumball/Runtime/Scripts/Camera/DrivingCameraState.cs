@@ -33,7 +33,7 @@ namespace Gumball
         [SerializeField] private Transform fakeController;
         [SerializeField] private Transform fakeRotationPivot;
         [SerializeField] private Transform fakeDepthPivot;
-        [SerializeField] private Transform fakeCameraPivot;
+        [SerializeField] private Transform fakeLookAtPivot;
 
         [Header("Rotation")]
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float rotationLerpSpeed = 6;
@@ -41,7 +41,7 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float heightLerpSpeed = 9;
         [SerializeField] private Transform rotationPivot;
         [SerializeField] private Transform depthPivot;
-        [SerializeField] private Transform cameraPivot;
+        [SerializeField] private Transform lookAtPivot;
 
         [Header("Momentum")]
         [SerializeField] private MomentumSettings accelerationStartMomentum;
@@ -50,6 +50,11 @@ namespace Gumball
         [SerializeField] private MomentumSettings brakingEndMomentum;
         [SerializeField] private MomentumSettings gearChangeStartMomentum;
         [SerializeField] private MomentumSettings gearChangeEndMomentum;
+        
+        private MomentumSettings currentMomentum;
+        private Sequence momentumTween;
+        private float desiredDepth;
+        private float desiredHeight;
         
         [Header("Offsets")]
         [Tooltip("X = width - Y = height - Z = depth")]
@@ -65,16 +70,16 @@ namespace Gumball
         [Space(5)]
         [SerializeField] private CameraShakeInstance nosShake;
         
-        [Header("Debugging")]
-        [SerializeField, ReadOnly] protected Transform otherTarget;
-
-        private MomentumSettings currentMomentum;
-        private Sequence momentumTween;
-        private float desiredDepth;
-        private float desiredHeight;
-        
         private float initialFov;
         private Tween fovTween;
+
+        [Header("Collisions")]
+        [SerializeField] private float minCollisionMagnitudeForShake;
+        [SerializeField] private float collisionMagnitudeForMaxShake;
+        [SerializeField] private CameraShakeInstance collisionMaxShake;
+        
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] protected Transform otherTarget;
         
         private Transform target => otherTarget != null ? otherTarget : WarehouseManager.Instance.CurrentCar.transform;
         private Rigidbody carRigidbody => WarehouseManager.Instance.CurrentCar.Rigidbody;
@@ -92,12 +97,14 @@ namespace Gumball
             base.OnEnable();
             
             WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
+            WarehouseManager.Instance.CurrentCar.onCollisionEnter += OnCollisionEnter;
         }
 
         private void OnDisable()
         {
             WarehouseManager.Instance.CurrentCar.onGearChanged -= OnGearChange;
-            
+            WarehouseManager.Instance.CurrentCar.onCollisionEnter -= OnCollisionEnter;
+
             //reset FOV in case it was in progress
             fovTween?.Kill();
             Camera.main.fieldOfView = initialFov;
@@ -137,7 +144,7 @@ namespace Gumball
                 fakeRotationPivot.RotateAround(pivotPoint, Vector3.up, -angleForDesiredRotation * Time.deltaTime * speed);
             }
             
-            fakeCameraPivot.LookAt(pivotPoint);
+            fakeLookAtPivot.LookAt(pivotPoint);
 
             //do depth position
             if ((WarehouseManager.Instance.CurrentCar.IsBraking
@@ -163,7 +170,7 @@ namespace Gumball
             operations[0] = new TransformOperation(controller.transform, fakeController.transform.position, fakeController.transform.rotation);
             operations[1] = new TransformOperation(rotationPivot, fakeRotationPivot.position, fakeRotationPivot.rotation);
             operations[2] = new TransformOperation(depthPivot, fakeDepthPivot.position, fakeDepthPivot.rotation);
-            operations[3] = new TransformOperation(cameraPivot, fakeCameraPivot.position, fakeCameraPivot.rotation);
+            operations[3] = new TransformOperation(lookAtPivot, fakeLookAtPivot.position, fakeLookAtPivot.rotation);
 
             return operations;
         }
@@ -237,6 +244,30 @@ namespace Gumball
             
             if (currentMomentum == brakingStartMomentum)
                 TryStartMomentumTween(brakingEndMomentum);
+        }
+        
+        private void OnCollisionEnter(Collision collision)
+        {
+            //don't overwrite if already shaking
+            if (collisionMaxShake.CurrentState != CameraShakeInstance.State.Inactive)
+                return;
+            
+            float magnitudeSqr = collision.impulse.sqrMagnitude;
+            float minMagnitudeSqrRequired = minCollisionMagnitudeForShake * minCollisionMagnitudeForShake;
+
+            if (magnitudeSqr < minMagnitudeSqrRequired)
+                return;
+
+            float magnitudeSqrForMaxShake = collisionMagnitudeForMaxShake * collisionMagnitudeForMaxShake;
+            if (magnitudeSqrForMaxShake == 0)
+                return;
+            
+            float percent = Mathf.Clamp01(magnitudeSqr / magnitudeSqrForMaxShake);
+
+            if (percent == 0)
+                return;
+            
+            collisionMaxShake.DoShake(percent);
         }
 
     }

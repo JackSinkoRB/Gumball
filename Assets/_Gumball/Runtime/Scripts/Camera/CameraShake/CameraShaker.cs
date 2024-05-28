@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using MyBox;
 using UnityEngine;
 
@@ -15,8 +14,6 @@ namespace Gumball
         [Header("Debugging")]
         [ReadOnly, SerializeField] private List<CameraShakeInstance> cameraShakeInstances = new();
         
-        public ReadOnlyCollection<CameraShakeInstance> ShakeInstances => cameraShakeInstances.AsReadOnly();
-
         private void LateUpdate()
         {
             Vector3 posAddShake = Vector3.zero;
@@ -31,7 +28,6 @@ namespace Gumball
                 
                 if (shake.CurrentState == CameraShakeInstance.State.Inactive)
                 {
-                    Debug.Log("Deactivate shake");
                     cameraShakeInstances.RemoveAt(i);
                     i--;
                 }
@@ -40,7 +36,6 @@ namespace Gumball
                     Vector3 shakeAmount = shake.UpdateShake();
                     posAddShake += shakeAmount.Multiply(shake.PositionInfluence);
                     rotAddShake += shakeAmount.Multiply(shake.RotationInfluence);
-                    Debug.Log($"Update shake : {shakeAmount}");
                 }
             }
 
@@ -52,16 +47,11 @@ namespace Gumball
             transform.localPosition = posAddShake;
             transform.localEulerAngles = rotAddShake;
         }
-
-        /// <summary>
-        /// Starts a shake.
-        /// </summary>
-        /// <returns>A CameraShakeInstance that can be used to alter the shake's properties.</returns>
-        public CameraShakeInstance DoShake(CameraShakeInstance shake)
+        
+        public void TrackShake(CameraShakeInstance shake)
         {
             cameraShakeInstances.Add(shake);
             shake.StartFadeIn();
-            return shake;
         }
         
     }

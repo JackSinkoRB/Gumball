@@ -225,6 +225,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isPushingAnotherRacer;
         [SerializeField, ReadOnly] private List<AICar> racersCollidingWith = new();
         
+        public event Action<Collision> onCollisionEnter;
+        
         private float timeOfLastCollision = -Mathf.Infinity;
         private BoxCollider movementPathCollider;
         
@@ -527,6 +529,8 @@ namespace Gumball
         
         private void OnCollisionEnter(Collision collision)
         {
+            onCollisionEnter?.Invoke(collision);
+            
             AICar car = collision.gameObject.GetComponent<AICar>();
             if (car == null)
                 return;

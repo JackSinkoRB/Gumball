@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2238982387291630442}
-  - component: {fileID: 7917530409841071695}
+  - component: {fileID: 6955470588699195823}
   m_Layer: 0
   m_Name: Shaker
   m_TagString: Untagged
@@ -25,15 +25,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 470328318582210481}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3041174817258160888}
-  m_Father: {fileID: 8226211066247002576}
+  m_Father: {fileID: 8022717951198104956}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7917530409841071695
+--- !u!114 &6955470588699195823
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -57,7 +57,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7721195789677832090}
   m_Layer: 0
-  m_Name: FakeCamera
+  m_Name: FakeLookAtPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -107,7 +107,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2238982387291630442}
+  - {fileID: 8022717951198104956}
   m_Father: {fileID: 7674160820353800047}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3297529166357885239
@@ -120,7 +120,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1666526802143909317}
   m_Layer: 0
-  m_Name: FakeCamera
+  m_Name: FakeLookAtPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -187,7 +187,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7088122836268771609}
   m_Layer: 0
-  m_Name: FakeCamera
+  m_Name: FakeLookAtPivot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -422,13 +422,13 @@ MonoBehaviour:
   fakeController: {fileID: 1229020240171631144}
   fakeRotationPivot: {fileID: 961558282498977149}
   fakeDepthPivot: {fileID: 5847629264015361176}
-  fakeCameraPivot: {fileID: 7721195789677832090}
+  fakeLookAtPivot: {fileID: 7721195789677832090}
   rotationLerpSpeed: 6
   rotationLerpSpeedToZero: 2
   heightLerpSpeed: 9
   rotationPivot: {fileID: 7674160820353800047}
   depthPivot: {fileID: 8226211066247002576}
-  cameraPivot: {fileID: 3041174817258160888}
+  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
     depth: -0.2
     depthDuration: 0.4
@@ -478,14 +478,27 @@ MonoBehaviour:
   nosFovTweenDuration: 1.5
   nosFovTweenEase: 27
   nosShake:
-    magnitude: 1
+    magnitude: 0.75
     roughness: 10
     positionInfluence: {x: 0.05, y: 0.05, z: 0}
     rotationInfluence: {x: 1, y: 1, z: 0.5}
-    fadeInDuration: 0
+    fadeInDuration: 0.1
     fadeOutDuration: 1
     fadeOutInstantly: 0
     currentState: 0
+    magnitudeModifier: 0
+  minCollisionMagnitudeForShake: 500
+  collisionMagnitudeForMaxShake: 10000
+  collisionMaxShake:
+    magnitude: 0.8
+    roughness: 8
+    positionInfluence: {x: 0.4, y: 0.4, z: 1}
+    rotationInfluence: {x: 5, y: 5, z: 5}
+    fadeInDuration: 0.1
+    fadeOutDuration: 0.5
+    fadeOutInstantly: 1
+    currentState: 0
+    magnitudeModifier: 0.006337843
   otherTarget: {fileID: 0}
 --- !u!1 &4596535407123438642
 GameObject:
@@ -695,13 +708,13 @@ MonoBehaviour:
   fakeController: {fileID: 4880751071222427762}
   fakeRotationPivot: {fileID: 4880751071222427762}
   fakeDepthPivot: {fileID: 2732334379521578949}
-  fakeCameraPivot: {fileID: 1666526802143909317}
+  fakeLookAtPivot: {fileID: 1666526802143909317}
   rotationLerpSpeed: 0
   rotationLerpSpeedToZero: 0
   heightLerpSpeed: 9
   rotationPivot: {fileID: 7674160820353800047}
   depthPivot: {fileID: 8226211066247002576}
-  cameraPivot: {fileID: 3041174817258160888}
+  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
     depth: 1
     depthDuration: 1
@@ -759,6 +772,19 @@ MonoBehaviour:
     fadeOutDuration: 0
     fadeOutInstantly: 0
     currentState: 0
+    magnitudeModifier: 0
+  minCollisionMagnitudeForShake: 0
+  collisionMagnitudeForMaxShake: 0
+  collisionMaxShake:
+    magnitude: 0
+    roughness: 0
+    positionInfluence: {x: 0, y: 0, z: 0}
+    rotationInfluence: {x: 0, y: 0, z: 0}
+    fadeInDuration: 0
+    fadeOutDuration: 0
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
   otherTarget: {fileID: 0}
 --- !u!1 &6326642543826660560
 GameObject:
@@ -791,6 +817,38 @@ Transform:
   m_Children:
   - {fileID: 5847629264015361176}
   m_Father: {fileID: 1229020240171631144}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6720915336686918505
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8022717951198104956}
+  m_Layer: 0
+  m_Name: LookAtPivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8022717951198104956
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6720915336686918505}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2238982387291630442}
+  m_Father: {fileID: 8226211066247002576}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6933109290163870152
 GameObject:
@@ -904,13 +962,13 @@ MonoBehaviour:
   fakeController: {fileID: 0}
   fakeRotationPivot: {fileID: 0}
   fakeDepthPivot: {fileID: 0}
-  fakeCameraPivot: {fileID: 0}
+  fakeLookAtPivot: {fileID: 0}
   rotationLerpSpeed: 6
   rotationLerpSpeedToZero: 2
   heightLerpSpeed: 9
   rotationPivot: {fileID: 7674160820353800047}
   depthPivot: {fileID: 0}
-  cameraPivot: {fileID: 0}
+  lookAtPivot: {fileID: 0}
   accelerationStartMomentum:
     depth: 1
     depthDuration: 1
@@ -968,6 +1026,19 @@ MonoBehaviour:
     fadeOutDuration: 0
     fadeOutInstantly: 0
     currentState: 0
+    magnitudeModifier: 0
+  minCollisionMagnitudeForShake: 0
+  collisionMagnitudeForMaxShake: 0
+  collisionMaxShake:
+    magnitude: 0
+    roughness: 0
+    positionInfluence: {x: 0, y: 0, z: 0}
+    rotationInfluence: {x: 0, y: 0, z: 0}
+    fadeInDuration: 0
+    fadeOutDuration: 0
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
   otherTarget: {fileID: 0}
 --- !u!1 &8625724026292006248
 GameObject:
@@ -1155,13 +1226,13 @@ MonoBehaviour:
   fakeController: {fileID: 3123130293420109088}
   fakeRotationPivot: {fileID: 8473699086619150081}
   fakeDepthPivot: {fileID: 8189775972105919124}
-  fakeCameraPivot: {fileID: 7088122836268771609}
+  fakeLookAtPivot: {fileID: 7088122836268771609}
   rotationLerpSpeed: 0
   rotationLerpSpeedToZero: 0
   heightLerpSpeed: 9
   rotationPivot: {fileID: 7674160820353800047}
   depthPivot: {fileID: 8226211066247002576}
-  cameraPivot: {fileID: 3041174817258160888}
+  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
     depth: 1
     depthDuration: 1
@@ -1219,4 +1290,17 @@ MonoBehaviour:
     fadeOutDuration: 0
     fadeOutInstantly: 0
     currentState: 0
+    magnitudeModifier: 0
+  minCollisionMagnitudeForShake: 0
+  collisionMagnitudeForMaxShake: 0
+  collisionMaxShake:
+    magnitude: 0
+    roughness: 0
+    positionInfluence: {x: 0, y: 0, z: 0}
+    rotationInfluence: {x: 0, y: 0, z: 0}
+    fadeInDuration: 0
+    fadeOutDuration: 0
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
   otherTarget: {fileID: 0}

@@ -14,10 +14,10 @@ namespace Gumball
         
         public enum State
         {
+            Inactive,
             FadingIn,
             FadingOut,
-            Sustaining,
-            Inactive
+            Sustaining
         }
         
         [Tooltip("The intensity of the shake.")]
@@ -35,6 +35,7 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private State currentState = State.Inactive;
+        [SerializeField, ReadOnly] private float magnitudeModifier = 1;
         
         private bool isInitialised;
         private float fadeAmount;
@@ -42,6 +43,7 @@ namespace Gumball
         private Vector3 tick;
         
         public State CurrentState => currentState;
+        public float CurrentMagnitude => magnitude * magnitudeModifier * fadeAmount;
         public Vector3 PositionInfluence => positionInfluence;
         public Vector3 RotationInfluence => rotationInfluence;
 
@@ -73,11 +75,13 @@ namespace Gumball
 
             tick += Vector3.one * (Time.deltaTime * roughness * fadeAmount);
             
-            return amount * (magnitude * fadeAmount);
+            return amount * CurrentMagnitude;
         }
 
         public void StartFadeIn()
         {
+            magnitudeModifier = 1; //reset
+            
             if (!isInitialised)
                 Initialise();
 
@@ -121,10 +125,13 @@ namespace Gumball
                     .OnComplete(() => currentState = State.Inactive);
             }
         }
-        
-        public void DoShake()
+
+        public void DoShake(float magnitudeModifier = 1)
         {
-            CameraShaker.Instance.DoShake(this);
+            StartFadeIn();
+            CameraShaker.Instance.TrackShake(this);
+            
+            this.magnitudeModifier = magnitudeModifier;
         }
         
     }
