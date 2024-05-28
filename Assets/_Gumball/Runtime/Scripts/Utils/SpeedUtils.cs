@@ -6,21 +6,20 @@ namespace Gumball
 {
     public static class SpeedUtils
     {
-
-        /// <summary>
-        /// Convert km/h to m/s
-        /// </summary>
-        public static float FromKmh(float speed)
+        
+        public static float FromKmhToMs(float speed)
         {
             return speed / 3.6f;
         }
         
-        /// <summary>
-        /// Convert km/h to m/s
-        /// </summary>
-        public static float ToKmh(float speed)
+        public static float FromMsToKmh(float speed)
         {
             return speed * 3.6f;
+        }
+
+        public static float FromKphToMph(float kmh)
+        {
+            return kmh * 0.621371f;
         }
         
     }
