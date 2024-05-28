@@ -8,7 +8,8 @@ namespace Gumball
 {
     public class SpeedUI : MonoBehaviour
     {
-        
+
+        [SerializeField] private TextMeshProUGUI unitLabel;
         [SerializeField] private TextMeshProUGUI speedLabel;
         [SerializeField] private float timeBetweenUpdating = 0.05f;
         
@@ -26,15 +27,21 @@ namespace Gumball
             if (timeSinceLastUpdate < timeBetweenUpdating)
                 return;
 
-            float speedAsKmh = Mathf.Abs(WarehouseManager.Instance.CurrentCar.Speed);
-            if (speedAsKmh < 1)
-                speedAsKmh = 0;
-            
-            float speedToDisplay = Mathf.RoundToInt(speedAsKmh);
-            
-            speedLabel.text = $"{speedToDisplay}";
+            UpdateSpeedLabel();
             
             timeOfLastUpdate = Time.realtimeSinceStartup;
+        }
+
+        private void UpdateSpeedLabel()
+        {
+            float speedLocalised = Mathf.Abs(UnitOfSpeedSetting.UseMiles ? SpeedUtils.FromKphToMph(WarehouseManager.Instance.CurrentCar.Speed) : WarehouseManager.Instance.CurrentCar.Speed);
+            
+            if (speedLocalised < 1)
+                speedLocalised = 0;
+            float speedToDisplay = Mathf.RoundToInt(speedLocalised);
+            speedLabel.text = $"{speedToDisplay}";
+            
+            unitLabel.text = UnitOfSpeedSetting.UseMiles ? "mph" : "km/h";
         }
         
     }

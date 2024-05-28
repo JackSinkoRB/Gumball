@@ -18,25 +18,25 @@ namespace Gumball
         [SerializeField] private Color deselectedLabelColor = Color.white;
         [SerializeField] private Color selectedLabelColor = Color.white;
 
-        private bool usingMiles
+        public static bool UseMiles
         {
             get => DataManager.Settings.Get("UnitOfSpeedIsMiles", false);
-            set => DataManager.Settings.Set("UnitOfSpeedIsMiles", value);
+            private set => DataManager.Settings.Set("UnitOfSpeedIsMiles", value);
         }
 
         private void OnEnable()
         {
-            SetToggle(usingMiles);
+            SetToggle(UseMiles);
         }
 
         public void OnClickToggle()
         {
-            SetToggle(!usingMiles);
+            SetToggle(!UseMiles);
         }
 
         public void SetToggle(bool rightSideEnabled)
         {
-            usingMiles = rightSideEnabled;
+            UseMiles = rightSideEnabled;
             
             selectorIcon.rectTransform.anchoredPosition = selectorIcon.rectTransform.anchoredPosition.SetX(rightSideEnabled ? selectorIconOffset : -selectorIconOffset);
             leftSideLabel.color = rightSideEnabled ? deselectedLabelColor : selectedLabelColor;

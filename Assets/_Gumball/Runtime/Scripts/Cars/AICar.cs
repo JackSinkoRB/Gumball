@@ -429,7 +429,7 @@ namespace Gumball
 
         public void SetSpeed(float speedKmh)
         {
-            Rigidbody.velocity = SpeedUtils.FromKmh(speedKmh) * transform.forward;
+            Rigidbody.velocity = SpeedUtils.FromKmhToMs(speedKmh) * transform.forward;
         }
         
         public void SetTemporarySpeedLimit(float speedKmh)
@@ -613,7 +613,7 @@ namespace Gumball
         
         private void Move()
         {
-            speed = SpeedUtils.ToKmh(Rigidbody.velocity.magnitude);
+            speed = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
             TryCreateMovementPathCollider();
             
             if (autoDrive)
@@ -1058,7 +1058,7 @@ namespace Gumball
         private void CheckForCorner()
         {
             const float min = 2;
-            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmh(speed));
+            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speed));
             float visionDistance = metresPerSecond * brakingReactionTime;
             
             var targetPos = GetPositionAhead(visionDistance);
@@ -1344,7 +1344,7 @@ namespace Gumball
         private float GetMovementTargetDistance()
         {
             const float min = 2;
-            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmh(speed));
+            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speed));
             return metresPerSecond * predictedPositionReactionTime;
         }
         
