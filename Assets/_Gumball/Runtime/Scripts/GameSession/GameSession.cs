@@ -151,6 +151,7 @@ namespace Gumball
             PanelManager.GetPanel<DrivingControlsPanel>().Show();
             
             //setup car:
+            WarehouseManager.Instance.CurrentCar.ResetState();
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
             //start with max NOS
             WarehouseManager.Instance.CurrentCar.NosManager.SetNos(1);
@@ -233,7 +234,6 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log("Loaded session");
 
             inProgress = true;
-            InputManager.Instance.CarInput.Enable();
         }
 
         private IEnumerator StartSessionIE()
@@ -248,7 +248,8 @@ namespace Gumball
             yield return LoadSession();
 
             PanelManager.GetPanel<LoadingPanel>().Hide();
-
+            InputManager.Instance.CarInput.Enable();
+            
             yield return IntroCinematicIE();
 
             OnSessionStart();
@@ -256,7 +257,7 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-
+            
             foreach (AICar racer in currentRacers)
             {
                 //tween the racing line offset to 0 for optimal driving
@@ -316,7 +317,7 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
                 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-                
+
             yield return IntroCountdownIE();
         }
         
