@@ -35,8 +35,11 @@ namespace Gumball
         
         private void LateUpdate()
         {
-            CheckIfPlayerIsTooFarFromRoad();
+            if (WarehouseManager.Instance.CurrentCar == null)
+                return;
             
+            CheckIfPlayerIsTooFarFromRoad();
+
             resetButton.gameObject.SetActive(WarehouseManager.Instance.CurrentCar.IsStuck);
         }
 
