@@ -328,9 +328,6 @@ namespace Gumball
         {
             if (!isInitialised)
                 Initialise();
-
-            if (canBeDrivenByPlayer)
-                GearboxSetting.onSettingChanged += OnGearboxSettingChanged;
             
             //reset steering
             visualSteerAngle = 0;
@@ -350,9 +347,6 @@ namespace Gumball
             wasAcceleratingLastFrame = false;
             racersCollidingWith.Clear();
             tempSpeedLimit = -1f; //clear the temp speed limit
-            
-            if (canBeDrivenByPlayer)
-                GearboxSetting.onSettingChanged -= OnGearboxSettingChanged;
             
             onGearChanged = null; //reset listeners
             
@@ -1576,9 +1570,6 @@ namespace Gumball
         private void InitialiseGearbox()
         {
             ChangeGear(1);
-            
-            if (canBeDrivenByPlayer)
-                OnGearboxSettingChanged(GearboxSetting.Setting);
         }
 
         /// <summary>
@@ -1616,18 +1607,6 @@ namespace Gumball
             carWidth = Mathf.Sqrt(furthestDistanceRight) * 2; //multiply by 2 for total width
         }
 
-        private void OnGearboxSettingChanged(GearboxSetting.GearboxOption newValue)
-        {
-            InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
-            InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
-            
-            if (newValue == GearboxSetting.GearboxOption.MANUAL)
-            {
-                InputManager.Instance.CarInput.ShiftUp.onPressed += ShiftUp;
-                InputManager.Instance.CarInput.ShiftDown.onPressed += ShiftDown;
-            }
-        }
-        
         private void ShiftUp()
         {
             if (currentGear >= NumberOfGears - 1)
