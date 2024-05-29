@@ -248,7 +248,8 @@ namespace Gumball
             yield return LoadSession();
 
             PanelManager.GetPanel<LoadingPanel>().Hide();
-
+            InputManager.Instance.CarInput.Enable();
+            
             yield return IntroCinematicIE();
 
             OnSessionStart();
@@ -256,7 +257,6 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-            InputManager.Instance.CarInput.Enable();
             
             foreach (AICar racer in currentRacers)
             {
@@ -317,8 +317,7 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
                 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-            InputManager.Instance.CarInput.Disable();
-            
+
             yield return IntroCountdownIE();
         }
         
