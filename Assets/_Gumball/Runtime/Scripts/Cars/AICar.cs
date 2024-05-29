@@ -441,6 +441,9 @@ namespace Gumball
 
         public void SetSpeed(float speedKmh)
         {
+            if (float.IsPositiveInfinity(speedKmh))
+                return;
+            
             Rigidbody.velocity = SpeedUtils.FromKmhToMs(speedKmh) * transform.forward;
         }
         
