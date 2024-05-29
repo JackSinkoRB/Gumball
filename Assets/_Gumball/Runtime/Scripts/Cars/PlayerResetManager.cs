@@ -27,6 +27,11 @@ namespace Gumball
             fadeObject.gameObject.SetActive(false);
         }
 
+        private void LateUpdate()
+        {
+            CheckIfPlayerIsTooFarFromRoad();
+        }
+
         public void ResetToNearestRandomLane()
         {
             if (isResetting)
@@ -52,13 +57,44 @@ namespace Gumball
         private void MoveToNearestRandomLane()
         {
             AICar playerCar = WarehouseManager.Instance.CurrentCar;
+
+            if (playerCar.LastKnownChunk == null)
+            {
+                Debug.LogError("Could not move player to nearest random line because the player hasn't been on a chunk yet.");
+                return;
+            }
             
             //get the desired position
-            var (closestSample, closestSampleDistance) = playerCar.LastKnownChunk.GetClosestSampleOnSpline(playerCar.transform.position);
+            var (closestSample, closestDistanceSqr) = playerCar.LastKnownChunk.GetClosestSampleOnSpline(playerCar.transform.position);
             var (randomLanePosition, randomLaneRotation) = playerCar.LastKnownChunk.TrafficManager.GetLanePosition(closestSample, playerCar.LastKnownChunk.TrafficManager.GetRandomLaneDistance(ChunkTrafficManager.LaneDirection.FORWARD), ChunkTrafficManager.LaneDirection.FORWARD);
 
             playerCar.Teleport(randomLanePosition, randomLaneRotation);
             ChunkMapSceneManager.Instance.DrivingCameraController.SkipTransition();
+        }
+        
+        /// <summary>
+        /// Check if the player is too far from the road spline, and reset them if so.
+        /// </summary>
+        private void CheckIfPlayerIsTooFarFromRoad()
+        {
+            bool isLoading = PanelManager.GetPanel<LoadingPanel>().IsShowing;
+            if (isLoading)
+                return;
+            
+            if (isResetting)
+                return;
+            
+            Chunk lastKnownChunk = WarehouseManager.Instance.CurrentCar.LastKnownChunk;
+            if (lastKnownChunk == null)
+                return; //may not be setup yet
+            
+            var (closestSplineSample, closestDistanceSqr) = lastKnownChunk.GetClosestSampleOnSpline(WarehouseManager.Instance.CurrentCar.transform.position);
+
+            float chunkDistanceLimitSqr = Mathf.Pow(WarehouseManager.Instance.CurrentCar.LastKnownChunk.DistanceFromRoadSplineToResetPlayer, 2);
+            if (closestDistanceSqr < chunkDistanceLimitSqr)
+                return;
+            
+            ResetToNearestRandomLane();
         }
         
     }

@@ -294,35 +294,32 @@ namespace Gumball
         public float Speed => speed;
         public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : Mathf.Infinity));
         
+        private Chunk lastKnownChunk;
+
         /// <summary>
         /// The chunk that the car is on or was last on.
         /// </summary>
-        public Chunk LastKnownChunk { get; private set; }
+        public Chunk LastKnownChunk
+        {
+            get
+            {
+                FindCurrentChunk();
+                return lastKnownChunk;
+            }
+        }
         
-        /// <returns>The chunk the player is on, else null if it can't be found.</returns>
+        /// <summary>
+        /// The chunk the player is on, else null if it can't be found.
+        /// </summary>
         public Chunk CurrentChunk
         {
             get
             {
-                if (lastFrameChunkWasCached != Time.frameCount)
-                {
-                    lastFrameChunkWasCached = Time.frameCount;
-
-                    Chunk previousChunk = currentChunkCached;
-                    
-                    //raycast down to terrain
-                    currentChunkCached = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
-                        ? hitDown.transform.parent.GetComponent<Chunk>()
-                        : null;
-                    
-                    if (currentChunkCached != previousChunk)
-                        OnChangeChunk(previousChunk, currentChunkCached);
-                }
-
+                FindCurrentChunk();
                 return currentChunkCached;
             }
         }
-        
+
         private void OnEnable()
         {
             if (!isInitialised)
@@ -1531,10 +1528,28 @@ namespace Gumball
             }
         }
         
+        private void FindCurrentChunk()
+        {
+            if (lastFrameChunkWasCached == Time.frameCount)
+                return; //only update once per frame
+            
+            lastFrameChunkWasCached = Time.frameCount;
+
+            Chunk previousChunk = currentChunkCached;
+                    
+            //raycast down to terrain
+            currentChunkCached = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
+                ? hitDown.transform.parent.GetComponent<Chunk>()
+                : null;
+                    
+            if (currentChunkCached != previousChunk)
+                OnChangeChunk(previousChunk, currentChunkCached);
+        }
+        
         private void OnChangeChunk(Chunk previous, Chunk current)
         {
             if (current != null)
-                LastKnownChunk = current;
+                lastKnownChunk = current;
             
             if (previous != null)
             {
