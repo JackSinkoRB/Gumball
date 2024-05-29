@@ -233,7 +233,6 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log("Loaded session");
 
             inProgress = true;
-            InputManager.Instance.CarInput.Enable();
         }
 
         private IEnumerator StartSessionIE()
@@ -256,7 +255,8 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-
+            InputManager.Instance.CarInput.Enable();
+            
             foreach (AICar racer in currentRacers)
             {
                 //tween the racing line offset to 0 for optimal driving
@@ -316,7 +316,8 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
                 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-                
+            InputManager.Instance.CarInput.Disable();
+            
             yield return IntroCountdownIE();
         }
         
