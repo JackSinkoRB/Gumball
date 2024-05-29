@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using MyBox;
 using UnityEngine;
 
@@ -22,7 +23,7 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
-        
+
         public float AvailableNosPercent { get; private set; }
         public bool IsActivated { get; private set; }
 
@@ -35,8 +36,9 @@ namespace Gumball
         {
             if (IsActivated)
             {
-                //deactivate if braking
-                if (WarehouseManager.Instance.CurrentCar.IsBraking)
+                if (WarehouseManager.Instance.CurrentCar.IsBraking
+                    || WarehouseManager.Instance.CurrentCar.IsHandbrakeEngaged
+                    || !WarehouseManager.Instance.CurrentCar.IsAccelerating)
                 {
                     Deactivate();
                     return;
@@ -80,6 +82,7 @@ namespace Gumball
             IsActivated = true;
 
             carBelongsTo.SetPeakTorque(carBelongsTo.PeakTorque + torqueAddition);
+            ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(true);
         }
         
         public void Deactivate()
@@ -93,6 +96,7 @@ namespace Gumball
             IsActivated = false;
             
             carBelongsTo.SetPeakTorque(carBelongsTo.PeakTorque - torqueAddition);
+            ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(false);
         }
         
         private void Deplete()

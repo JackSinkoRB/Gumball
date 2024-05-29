@@ -38,7 +38,11 @@ namespace Gumball
         [SerializeField] private bool canBeDrivenByPlayer;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private CarIKManager avatarIKManager;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private SteeringWheel steeringWheel;
-
+        
+        [Space(5)]
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform cockpitCameraTarget;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform rearViewCameraTarget;
+        
         [Space(5)]
         [SerializeField, ReadOnly] private bool isPlayerCar;
         [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
@@ -49,7 +53,10 @@ namespace Gumball
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
         public string SaveKey => GetSaveKeyFromIndex(carIndex);
-
+        
+        public Transform CockpitCameraTarget => cockpitCameraTarget;
+        public Transform RearViewCameraTarget => rearViewCameraTarget;
+        
         [Header("Customisation")]
         [SerializeField] private CarPartManager carPartManager;
         [SerializeField] private BodyPaintModification bodyPaintModification;
@@ -135,7 +142,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private float speed;
         private bool wasMovingLastFrame;
         private const float stationarySpeed = 2;
-        private bool isStationary => speed < stationarySpeed && !isAccelerating;
+        
+        public bool IsStationary => speed < stationarySpeed && !isAccelerating;
 
         [Header("Engine & Drivetrain")]
         [Tooltip("The engine torque output (y) (in Newton metres) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
@@ -159,10 +167,13 @@ namespace Gumball
         public int NumberOfGears => gearRatios.Length;
         public float EngineRpm => engineRpm;
         public AnimationCurve TorqueCurve => torqueCurve;
+        public bool IsAccelerating => isAccelerating;
         
         [Header("Reversing")]
         [SerializeField] private float maxReverseSpeed = 25;
         [SerializeField, ReadOnly] private bool isReversing;
+        
+        public bool IsReversing => isReversing;
         
         [Header("Steering")]
         [Tooltip("The speed that the wheel collider turns if not auto driving.")]
@@ -205,6 +216,8 @@ namespace Gumball
         private float defaultRearWheelStiffness = -1;
         private float defaultAngularDrag;
         private readonly Sequence[] handbrakeEaseOffTweens = new Sequence[2];
+
+        public bool IsHandbrakeEngaged => isHandbrakeEngaged;
         
         [Header("Collisions")]
         [SerializeField] private GameObject colliders;
@@ -214,6 +227,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private int numberOfCollisions;
         [SerializeField, ReadOnly] private bool isPushingAnotherRacer;
         [SerializeField, ReadOnly] private List<AICar> racersCollidingWith = new();
+        
+        public event Action<Collision> onCollisionEnter;
         
         private float timeOfLastCollision = -Mathf.Infinity;
         private BoxCollider movementPathCollider;
@@ -414,7 +429,7 @@ namespace Gumball
 
         public void SetSpeed(float speedKmh)
         {
-            Rigidbody.velocity = SpeedUtils.FromKmh(speedKmh) * transform.forward;
+            Rigidbody.velocity = SpeedUtils.FromKmhToMs(speedKmh) * transform.forward;
         }
         
         public void SetTemporarySpeedLimit(float speedKmh)
@@ -525,6 +540,8 @@ namespace Gumball
         
         private void OnCollisionEnter(Collision collision)
         {
+            onCollisionEnter?.Invoke(collision);
+            
             AICar car = collision.gameObject.GetComponent<AICar>();
             if (car == null)
                 return;
@@ -596,7 +613,7 @@ namespace Gumball
         
         private void Move()
         {
-            speed = SpeedUtils.ToKmh(Rigidbody.velocity.magnitude);
+            speed = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
             TryCreateMovementPathCollider();
             
             if (autoDrive)
@@ -912,7 +929,7 @@ namespace Gumball
             }
 
             //brake if stationary
-            if (isStationary)
+            if (IsStationary)
             {
                 speedToBrakeTo = 0;
                 isBraking = true;
@@ -946,7 +963,7 @@ namespace Gumball
             
             if (isReversing && !InputManager.Instance.CarInput.Brake.IsPressed)
                 OnStopReversing();
-            if (!isReversing && (isStationary || speed < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
+            if (!isReversing && (IsStationary || speed < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
                 OnStartReversing();
         }
         
@@ -1041,7 +1058,7 @@ namespace Gumball
         private void CheckForCorner()
         {
             const float min = 2;
-            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmh(speed));
+            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speed));
             float visionDistance = metresPerSecond * brakingReactionTime;
             
             var targetPos = GetPositionAhead(visionDistance);
@@ -1327,7 +1344,7 @@ namespace Gumball
         private float GetMovementTargetDistance()
         {
             const float min = 2;
-            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmh(speed));
+            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speed));
             return metresPerSecond * predictedPositionReactionTime;
         }
         
