@@ -167,43 +167,7 @@ namespace Gumball
             return (finalPos, rotation);
         }
         
-        public float GetOffsetFromRacingLine(Vector3 fromPoint)
-        {
-            var (splineSample, distanceSqr) = racingLine.SampleCollection.GetClosestSampleOnSpline(fromPoint);
-            float distance = Mathf.Sqrt(distanceSqr);
-            
-            //is the position to the left or right of the spline?
-            bool isRight = fromPoint.IsFurtherInDirection(splineSample.position, splineSample.right);
-            float offsetDirection = isRight ? 1 : -1;
-            
-            return distance * offsetDirection;
-        }
-        
-        private bool CanSpawnCarAtPosition(Vector3 position, float laneDistance)
-        {
-            const float minDistanceSqr = minDistanceRequiredToSpawn * minDistanceRequiredToSpawn;
-
-            //loop over all cars and get distance to their position
-            foreach (AICar trafficCar in TrafficCarSpawner.CurrentCars)
-            {
-                bool isSameLane = Mathf.Abs(trafficCar.CurrentLaneDistance - laneDistance) > randomLaneOffset.Max;
-                if (isSameLane)
-                    continue; //not in same lane
-                
-                float distanceSqr = Vector3.SqrMagnitude(position - trafficCar.transform.position);
-                if (distanceSqr <= minDistanceSqr)
-                    return false;
-            }
-
-            //get distance to the player car
-            float distanceToPlayerSqr = Vector3.SqrMagnitude(position - WarehouseManager.Instance.CurrentCar.transform.position);
-            if (distanceToPlayerSqr <= minDistanceSqr)
-                return false;
-            
-            return true;
-        }
-        
-        private float GetRandomLaneDistance(LaneDirection direction)
+        public float GetRandomLaneDistance(LaneDirection direction)
         {
             if (direction == LaneDirection.NONE)
             {
@@ -244,6 +208,42 @@ namespace Gumball
             throw new ArgumentOutOfRangeException();
         }
         
+        public float GetOffsetFromRacingLine(Vector3 fromPoint)
+        {
+            var (splineSample, distanceSqr) = racingLine.SampleCollection.GetClosestSampleOnSpline(fromPoint);
+            float distance = Mathf.Sqrt(distanceSqr);
+            
+            //is the position to the left or right of the spline?
+            bool isRight = fromPoint.IsFurtherInDirection(splineSample.position, splineSample.right);
+            float offsetDirection = isRight ? 1 : -1;
+            
+            return distance * offsetDirection;
+        }
+        
+        private bool CanSpawnCarAtPosition(Vector3 position, float laneDistance)
+        {
+            const float minDistanceSqr = minDistanceRequiredToSpawn * minDistanceRequiredToSpawn;
+
+            //loop over all cars and get distance to their position
+            foreach (AICar trafficCar in TrafficCarSpawner.CurrentCars)
+            {
+                bool isSameLane = Mathf.Abs(trafficCar.CurrentLaneDistance - laneDistance) > randomLaneOffset.Max;
+                if (isSameLane)
+                    continue; //not in same lane
+                
+                float distanceSqr = Vector3.SqrMagnitude(position - trafficCar.transform.position);
+                if (distanceSqr <= minDistanceSqr)
+                    return false;
+            }
+
+            //get distance to the player car
+            float distanceToPlayerSqr = Vector3.SqrMagnitude(position - WarehouseManager.Instance.CurrentCar.transform.position);
+            if (distanceToPlayerSqr <= minDistanceSqr)
+                return false;
+            
+            return true;
+        }
+
         private void InitialiseLanes()
         {
             //if no lanes, just create one in the centre

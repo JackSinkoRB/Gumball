@@ -294,6 +294,11 @@ namespace Gumball
         public float Speed => speed;
         public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : Mathf.Infinity));
         
+        /// <summary>
+        /// The chunk that the car is on or was last on.
+        /// </summary>
+        public Chunk LastKnownChunk { get; private set; }
+        
         /// <returns>The chunk the player is on, else null if it can't be found.</returns>
         public Chunk CurrentChunk
         {
@@ -1528,6 +1533,9 @@ namespace Gumball
         
         private void OnChangeChunk(Chunk previous, Chunk current)
         {
+            if (current != null)
+                LastKnownChunk = current;
+            
             if (previous != null)
             {
                 previous.onBecomeAccessible -= OnChunkCachedBecomeAccessible;

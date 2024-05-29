@@ -112,6 +112,16 @@ namespace Gumball
             Camera.main.fieldOfView = initialFov;
         }
 
+        public override void Snap()
+        {
+            desiredDepth = 0;
+            desiredHeight = 0;
+            momentumTween?.Kill();
+            currentMomentum = null;
+            
+            base.Snap();
+        }
+
         public override TransformOperation[] Calculate(bool interpolate = true)
         {
             // - should always be looking at the car centre (plus some offset for height)
@@ -133,7 +143,7 @@ namespace Gumball
                 fakeController.transform.position = offsetLocalised;
             }
 
-            const float velocityTolerance = 0.5f;
+            const float velocityTolerance = 1f;
             bool isMoving = carRigidbody.velocity.sqrMagnitude > velocityTolerance;
             Vector3 targetDirection = isMoving ? carRigidbody.velocity.normalized : target.forward;
             if (!offsetIsLocalised)
