@@ -240,7 +240,9 @@ namespace Gumball
             }
             
             //loop over all racers and get distance to their position
-            if (GameSessionManager.Instance.CurrentSession.CurrentRacers != null)
+            if (GameSessionManager.ExistsRuntime 
+                && GameSessionManager.Instance.CurrentSession != null 
+                && GameSessionManager.Instance.CurrentSession.CurrentRacers != null)
             {
                 foreach (AICar racerCar in GameSessionManager.Instance.CurrentSession.CurrentRacers)
                 {
