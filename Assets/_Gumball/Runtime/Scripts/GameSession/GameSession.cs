@@ -151,6 +151,7 @@ namespace Gumball
             PanelManager.GetPanel<DrivingControlsPanel>().Show();
             
             //setup car:
+            WarehouseManager.Instance.CurrentCar.ResetState();
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
             //start with max NOS
             WarehouseManager.Instance.CurrentCar.NosManager.SetNos(1);

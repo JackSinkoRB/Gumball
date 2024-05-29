@@ -340,21 +340,33 @@ namespace Gumball
         {
             onDisable?.Invoke();
             onDisable = null; //reset listener
+
+            ResetState();
             
-            //reset for pooled objects:
-            Unfreeze();
-            isAccelerating = false;
-            wasAcceleratingLastFrame = false;
-            racersCollidingWith.Clear();
-            tempSpeedLimit = -1f; //clear the temp speed limit
-            
-            onGearChanged = null; //reset listeners
+            onGearChanged = null; //reset listener
             
             if (InputManager.ExistsRuntime && canBeDrivenByPlayer)
             {
                 InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
                 InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
             }
+        }
+
+        /// <summary>
+        /// Resets the car state when reusing the object.
+        /// </summary>
+        public void ResetState()
+        {
+            //reset for pooled objects:
+            Unfreeze();
+            isAccelerating = false;
+            isBraking = false;
+            isHandbrakeEngaged = false;
+            wasAcceleratingLastFrame = false;
+            racersCollidingWith.Clear();
+            tempSpeedLimit = -1f; //clear the temp speed limit
+            isStuck = false;
+            timeAcceleratingSinceMovingSlowly = 0;
         }
 
         private void Initialise()
