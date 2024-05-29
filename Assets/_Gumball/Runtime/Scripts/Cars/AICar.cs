@@ -74,16 +74,20 @@ namespace Gumball
         [SerializeField, ReadOnly] private float carWidth;
 
         [Header("Wheels")]
+        [SerializeField, ReadOnly] private bool isStuck;
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
         [SerializeField, InitializationField] private WheelMesh[] frontWheelMeshes;
         [SerializeField, InitializationField] private WheelMesh[] rearWheelMeshes;
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
-        [Space(5)]
+        
+        private float timeAcceleratingSinceMovingSlowly;
+
         private WheelCollider[] poweredWheels;
         private WheelMesh[] allWheelMeshesCached;
         private WheelCollider[] allWheelCollidersCached;
-
+        
+        public bool IsStuck => isStuck;
         public WheelMesh[] FrontWheelMeshes => frontWheelMeshes;
         public WheelMesh[] RearWheelMeshes => rearWheelMeshes;
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
@@ -521,7 +525,12 @@ namespace Gumball
                 torqueCurve.MoveKey(peakTorqueKeyIndex, newKeyframe);
             }
         }
-        
+
+        private void Update()
+        {
+            CheckIfStuck();
+        }
+
         private void FixedUpdate()
         {
             if (!isInitialised)
@@ -1714,6 +1723,41 @@ namespace Gumball
             }
 
             peakTorqueKeys = keys.ToArray();
+        }
+        
+        private bool ShouldBeStuck()
+        {
+            const float minSpeedForStuckKmh = 0.5f;
+            if (speed > minSpeedForStuckKmh)
+            {
+                timeAcceleratingSinceMovingSlowly = 0;
+                return false;
+            }
+
+            if (IsAccelerating || IsReversing)
+                timeAcceleratingSinceMovingSlowly += Time.deltaTime;
+            
+            const float timeAcceleratingWithNoMovementForReset = 1;
+            if (timeAcceleratingSinceMovingSlowly > timeAcceleratingWithNoMovementForReset)
+                return true;
+
+            //if one of the powered wheels is grounded, it is not stuck
+            foreach (WheelCollider poweredWheel in poweredWheels)
+            {
+                if (poweredWheel.isGrounded)
+                    return false;
+            }
+            return true;
+        }
+        
+        private void CheckIfStuck()
+        {
+            bool shouldBeStuck = ShouldBeStuck();
+            
+            if (isStuck && !shouldBeStuck)
+                isStuck = false;
+            else if (!isStuck && shouldBeStuck)
+                isStuck = true;
         }
         
 #if UNITY_EDITOR

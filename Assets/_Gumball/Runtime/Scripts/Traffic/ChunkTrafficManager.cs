@@ -43,6 +43,9 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunk;
+
+        public float[] LaneDistancesForward => laneDistancesForward;
+        public float[] LaneDistancesBackward => laneDistancesBackward;
         
         public Chunk Chunk => chunk;
         public float SpeedLimitKmh => speedLimitKmh;
@@ -220,7 +223,7 @@ namespace Gumball
             return distance * offsetDirection;
         }
         
-        private bool CanSpawnCarAtPosition(Vector3 position, float laneDistance)
+        public bool CanSpawnCarAtPosition(Vector3 position, float laneDistance, bool ignorePlayer = false)
         {
             const float minDistanceSqr = minDistanceRequiredToSpawn * minDistanceRequiredToSpawn;
 
@@ -235,12 +238,29 @@ namespace Gumball
                 if (distanceSqr <= minDistanceSqr)
                     return false;
             }
-
-            //get distance to the player car
-            float distanceToPlayerSqr = Vector3.SqrMagnitude(position - WarehouseManager.Instance.CurrentCar.transform.position);
-            if (distanceToPlayerSqr <= minDistanceSqr)
-                return false;
             
+            //loop over all racers and get distance to their position
+            if (GameSessionManager.Instance.CurrentSession.CurrentRacers != null)
+            {
+                foreach (AICar racerCar in GameSessionManager.Instance.CurrentSession.CurrentRacers)
+                {
+                    if (racerCar == null || racerCar.IsPlayerCar)
+                        continue;
+                    
+                    float distanceSqr = Vector3.SqrMagnitude(position - racerCar.transform.position);
+                    if (distanceSqr <= minDistanceSqr)
+                        return false;
+                }
+            }
+
+            if (!ignorePlayer)
+            {
+                //get distance to the player car
+                float distanceToPlayerSqr = Vector3.SqrMagnitude(position - WarehouseManager.Instance.CurrentCar.transform.position);
+                if (distanceToPlayerSqr <= minDistanceSqr)
+                    return false;
+            }
+
             return true;
         }
 
