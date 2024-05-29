@@ -64,6 +64,7 @@ namespace Gumball
 
         public bool IsFullyLoaded => isFullyLoaded;
         public bool IsAccessible => isAccessible;
+        public GameObject ChunkDetector => chunkDetector;
         public ChunkMeshData ChunkMeshData => chunkMeshData;
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
@@ -148,6 +149,7 @@ namespace Gumball
             
             //move the chunk detector relative to the chunk (as it may have rotated)
             chunkDetector.transform.position = terrainHighLOD.transform.position.OffsetY(-500);
+            chunkDetector.SetActive(true);
         }
 
         public void OnBecomeAccessible()
