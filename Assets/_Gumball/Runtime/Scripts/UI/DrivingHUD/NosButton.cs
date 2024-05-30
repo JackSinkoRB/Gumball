@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,6 +18,14 @@ namespace Gumball
             fillImage.fillAmount = nosManager.AvailableNosPercent;
 
             button.interactable = nosManager.AvailableNosPercent > NosManager.MinPercentToActivate;
+        }
+        
+        public void OnPressNosButton()
+        {
+            if (!InputManager.Instance.CarInput.IsEnabled)
+                return;
+            
+            nosManager.Activate();
         }
         
     }

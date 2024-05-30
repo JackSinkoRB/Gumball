@@ -257,7 +257,8 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-            
+            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(true); //auto accelerate
+
             foreach (AICar racer in currentRacers)
             {
                 //tween the racing line offset to 0 for optimal driving
