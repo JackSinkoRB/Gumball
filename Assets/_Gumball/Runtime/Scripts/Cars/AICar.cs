@@ -74,16 +74,20 @@ namespace Gumball
         [SerializeField, ReadOnly] private float carWidth;
 
         [Header("Wheels")]
+        [SerializeField, ReadOnly] private bool isStuck;
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
         [SerializeField, InitializationField] private WheelMesh[] frontWheelMeshes;
         [SerializeField, InitializationField] private WheelMesh[] rearWheelMeshes;
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
-        [Space(5)]
+        
+        private float timeAcceleratingSinceMovingSlowly;
+
         private WheelCollider[] poweredWheels;
         private WheelMesh[] allWheelMeshesCached;
         private WheelCollider[] allWheelCollidersCached;
-
+        
+        public bool IsStuck => isStuck;
         public WheelMesh[] FrontWheelMeshes => frontWheelMeshes;
         public WheelMesh[] RearWheelMeshes => rearWheelMeshes;
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
@@ -294,37 +298,36 @@ namespace Gumball
         public float Speed => speed;
         public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : Mathf.Infinity));
         
-        /// <returns>The chunk the player is on, else null if it can't be found.</returns>
+        private Chunk lastKnownChunk;
+
+        /// <summary>
+        /// The chunk that the car is on or was last on.
+        /// </summary>
+        public Chunk LastKnownChunk
+        {
+            get
+            {
+                FindCurrentChunk();
+                return lastKnownChunk;
+            }
+        }
+        
+        /// <summary>
+        /// The chunk the player is on, else null if it can't be found.
+        /// </summary>
         public Chunk CurrentChunk
         {
             get
             {
-                if (lastFrameChunkWasCached != Time.frameCount)
-                {
-                    lastFrameChunkWasCached = Time.frameCount;
-
-                    Chunk previousChunk = currentChunkCached;
-                    
-                    //raycast down to terrain
-                    currentChunkCached = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
-                        ? hitDown.transform.parent.GetComponent<Chunk>()
-                        : null;
-                    
-                    if (currentChunkCached != previousChunk)
-                        OnChangeChunk(previousChunk, currentChunkCached);
-                }
-
+                FindCurrentChunk();
                 return currentChunkCached;
             }
         }
-        
+
         private void OnEnable()
         {
             if (!isInitialised)
                 Initialise();
-
-            if (canBeDrivenByPlayer)
-                GearboxSetting.onSettingChanged += OnGearboxSettingChanged;
             
             //reset steering
             visualSteerAngle = 0;
@@ -337,24 +340,33 @@ namespace Gumball
         {
             onDisable?.Invoke();
             onDisable = null; //reset listener
+
+            ResetState();
             
-            //reset for pooled objects:
-            Unfreeze();
-            isAccelerating = false;
-            wasAcceleratingLastFrame = false;
-            racersCollidingWith.Clear();
-            tempSpeedLimit = -1f; //clear the temp speed limit
-            
-            if (canBeDrivenByPlayer)
-                GearboxSetting.onSettingChanged -= OnGearboxSettingChanged;
-            
-            onGearChanged = null; //reset listeners
+            onGearChanged = null; //reset listener
             
             if (InputManager.ExistsRuntime && canBeDrivenByPlayer)
             {
                 InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
                 InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
             }
+        }
+
+        /// <summary>
+        /// Resets the car state when reusing the object.
+        /// </summary>
+        public void ResetState()
+        {
+            //reset for pooled objects:
+            Unfreeze();
+            isAccelerating = false;
+            isBraking = false;
+            isHandbrakeEngaged = false;
+            wasAcceleratingLastFrame = false;
+            racersCollidingWith.Clear();
+            tempSpeedLimit = -1f; //clear the temp speed limit
+            isStuck = false;
+            timeAcceleratingSinceMovingSlowly = 0;
         }
 
         private void Initialise()
@@ -429,6 +441,9 @@ namespace Gumball
 
         public void SetSpeed(float speedKmh)
         {
+            if (float.IsPositiveInfinity(speedKmh))
+                return;
+            
             Rigidbody.velocity = SpeedUtils.FromKmhToMs(speedKmh) * transform.forward;
         }
         
@@ -519,7 +534,12 @@ namespace Gumball
                 torqueCurve.MoveKey(peakTorqueKeyIndex, newKeyframe);
             }
         }
-        
+
+        private void Update()
+        {
+            CheckIfStuck();
+        }
+
         private void FixedUpdate()
         {
             if (!isInitialised)
@@ -1526,8 +1546,29 @@ namespace Gumball
             }
         }
         
+        private void FindCurrentChunk()
+        {
+            if (lastFrameChunkWasCached == Time.frameCount)
+                return; //only update once per frame
+            
+            lastFrameChunkWasCached = Time.frameCount;
+
+            Chunk previousChunk = currentChunkCached;
+                    
+            //raycast down to terrain
+            currentChunkCached = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
+                ? hitDown.transform.parent.GetComponent<Chunk>()
+                : null;
+                    
+            if (currentChunkCached != previousChunk)
+                OnChangeChunk(previousChunk, currentChunkCached);
+        }
+        
         private void OnChangeChunk(Chunk previous, Chunk current)
         {
+            if (current != null)
+                lastKnownChunk = current;
+            
             if (previous != null)
             {
                 previous.onBecomeAccessible -= OnChunkCachedBecomeAccessible;
@@ -1544,9 +1585,6 @@ namespace Gumball
         private void InitialiseGearbox()
         {
             ChangeGear(1);
-            
-            if (canBeDrivenByPlayer)
-                OnGearboxSettingChanged(GearboxSetting.Setting);
         }
 
         /// <summary>
@@ -1584,18 +1622,6 @@ namespace Gumball
             carWidth = Mathf.Sqrt(furthestDistanceRight) * 2; //multiply by 2 for total width
         }
 
-        private void OnGearboxSettingChanged(GearboxSetting.GearboxOption newValue)
-        {
-            InputManager.Instance.CarInput.ShiftUp.onPressed -= ShiftUp;
-            InputManager.Instance.CarInput.ShiftDown.onPressed -= ShiftDown;
-            
-            if (newValue == GearboxSetting.GearboxOption.MANUAL)
-            {
-                InputManager.Instance.CarInput.ShiftUp.onPressed += ShiftUp;
-                InputManager.Instance.CarInput.ShiftDown.onPressed += ShiftDown;
-            }
-        }
-        
         private void ShiftUp()
         {
             if (currentGear >= NumberOfGears - 1)
@@ -1691,6 +1717,41 @@ namespace Gumball
             }
 
             peakTorqueKeys = keys.ToArray();
+        }
+        
+        private bool ShouldBeStuck()
+        {
+            const float minSpeedForStuckKmh = 0.5f;
+            if (speed > minSpeedForStuckKmh)
+            {
+                timeAcceleratingSinceMovingSlowly = 0;
+                return false;
+            }
+
+            if (IsAccelerating || IsReversing)
+                timeAcceleratingSinceMovingSlowly += Time.deltaTime;
+            
+            const float timeAcceleratingWithNoMovementForReset = 1;
+            if (timeAcceleratingSinceMovingSlowly > timeAcceleratingWithNoMovementForReset)
+                return true;
+
+            //if one of the powered wheels is grounded, it is not stuck
+            foreach (WheelCollider poweredWheel in poweredWheels)
+            {
+                if (poweredWheel.isGrounded)
+                    return false;
+            }
+            return true;
+        }
+        
+        private void CheckIfStuck()
+        {
+            bool shouldBeStuck = ShouldBeStuck();
+            
+            if (isStuck && !shouldBeStuck)
+                isStuck = false;
+            else if (!isStuck && shouldBeStuck)
+                isStuck = true;
         }
         
 #if UNITY_EDITOR
