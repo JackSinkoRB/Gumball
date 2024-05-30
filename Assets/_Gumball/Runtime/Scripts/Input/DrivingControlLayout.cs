@@ -140,14 +140,6 @@ namespace Gumball
             
             InputManager.Instance.CarInput.Handbrake.SetPressedOverride(isPressed);
         }
-        
-        public void OnPressNosButton()
-        {
-            if (!InputManager.Instance.CarInput.IsEnabled)
-                return;
-            
-            WarehouseManager.Instance.CurrentCar.NosManager.Activate();
-        }
 
         public void OnPressRearViewMirrorButton()
         {
