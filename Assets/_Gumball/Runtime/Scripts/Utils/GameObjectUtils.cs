@@ -26,15 +26,10 @@ namespace Gumball
             PrefabAssetType assetType = PrefabUtility.GetPrefabAssetType(gameObject);
             if (assetType is PrefabAssetType.Regular or PrefabAssetType.Variant)
             {
-                GameObject prefabRoot = PrefabUtility.GetNearestPrefabInstanceRoot(gameObject);
-                if (prefabRoot != null)
+                path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(gameObject);
+                if (!path.IsNullOrEmpty() && !path.EndsWith(".prefab"))
                 {
-                    GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(prefabRoot);
-                    path = AssetDatabase.GetAssetPath(prefab);
-                }
-                else
-                {
-                    path = AssetDatabase.GetAssetPath(gameObject);
+                    return null;
                 }
             }
             else if (PrefabStageUtility.GetCurrentPrefabStage() != null
@@ -44,12 +39,12 @@ namespace Gumball
             }
             else
             {
-                GameObject prefabRoot = PrefabUtility.GetNearestPrefabInstanceRoot(gameObject);
-                if (prefabRoot == null)
-                    return null; //not a prefab
-                
-                GameObject prefab = PrefabUtility.GetCorrespondingObjectFromSource(prefabRoot);
-                path = AssetDatabase.GetAssetPath(prefab);
+                path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(gameObject);
+                if (!path.IsNullOrEmpty() && !path.EndsWith(".prefab"))
+                {
+                    Debug.LogError($"The prefab asset at {path} is not of correct format (it should end in .prefab).");
+                    return null;
+                }
             }
 
             return path.IsNullOrEmpty() ? null : path;
@@ -68,23 +63,33 @@ namespace Gumball
 
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
-            AddressableAssetEntry assetEntry = settings.FindAssetEntry(guid);
-            if (assetEntry == null)
-            {
-                Debug.Log($"Could not find asset entry for {gameObject.name}. Creating one.");
-                const string groupName = "ChunkObjects";
-                const string chunkObjectSuffix = "_ChunkObject";
-
-                AddressableAssetGroup group = settings.FindGroup(groupName);
+            const string groupName = "ChunkObjects";
+            const string chunkObjectSuffix = "_ChunkObject";
             
-                assetEntry = settings.CreateOrMoveEntry(guid, group);
-                assetEntry.address = $"{gameObject.name}{chunkObjectSuffix}";
+            AddressableAssetGroup group = settings.FindGroup(groupName);
             
-                settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, assetEntry, true);
-                AssetDatabase.SaveAssets();
-            }
+            AddressableAssetEntry assetEntry = settings.CreateOrMoveEntry(guid, group);
+            assetEntry.address = $"{assetPath}{chunkObjectSuffix}";
+            
+            settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, assetEntry, true);
+            AssetDatabase.SaveAssets();
             
             return assetEntry.address;
+        }
+
+        private static string GetPathToNearestPrefab(GameObject gameObject)
+        {
+            Transform parent = gameObject.transform;
+            while (parent != null)
+            {
+                string path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(parent);
+                if (path.EndsWith(".prefab"))
+                    return path;
+                
+                parent = parent.parent;
+            }
+
+            return null;
         }
 #endif
         

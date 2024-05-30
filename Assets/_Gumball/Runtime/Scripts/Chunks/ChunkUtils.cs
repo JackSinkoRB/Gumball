@@ -287,10 +287,8 @@ namespace Gumball
                     continue;
                 }
                 
-                chunkObject.transform.SetParent(runtimePrefabInstance.transform);
-                
                 List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
-                ChunkObjectData data = new ChunkObjectData(chunkObject);
+                ChunkObjectData data = new ChunkObjectData(originalChunk.GetComponent<Chunk>(), chunkObject);
                 chunkObjectList.Add(data);
                 chunkObjectData[assetKey] = chunkObjectList;
 
