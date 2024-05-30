@@ -51,9 +51,70 @@ namespace Gumball
         }
 
         /// <summary>
+        /// Checks whether the gameobject is empty, and all child gameobjects and childs children etc. are also empty.
+        /// </summary>
+        public static bool IsCompletelyEmpty(this GameObject gameObject)
+        {
+            // Helper function to check a single transform recursively
+            bool IsTransformEmpty(Transform currentTransform)
+            {
+                // Get all components attached to the transform
+                Component[] components = currentTransform.GetComponents<Component>();
+        
+                // If the transform has more than one component (i.e., components other than Transform itself), it's not empty
+                if (components.Length > 1)
+                {
+                    return false;
+                }
+
+                // Recursively check each child transform
+                foreach (Transform child in currentTransform)
+                {
+                    if (!IsTransformEmpty(child))
+                    {
+                        return false;
+                    }
+                }
+
+                // If this transform and all its children are empty, return true
+                return true;
+            }
+
+            // Start the recursive check from the provided transform
+            return IsTransformEmpty(gameObject.transform);
+        }
+        
+        /// <summary>
+        /// Returns the total number of children gameobjects under the given transform,
+        /// including all children, children's children, and so on.
+        /// </summary>
+        public static int GetTotalChildCount(this GameObject gameObject)
+        {
+            // Helper function to recursively count children
+            int CountChildren(Transform currentTransform)
+            {
+                int count = 0;
+
+                // Iterate through each child transform
+                foreach (Transform child in currentTransform)
+                {
+                    // Increment count for this child
+                    count++;
+                    // Recursively count this child's children
+                    count += CountChildren(child);
+                }
+
+                return count;
+            }
+
+            // Start the recursive count from the provided transform
+            return CountChildren(gameObject.transform);
+        }
+        
+        /// <summary>
         /// Gets the addressable key for the specified gameobject's prefab asset. If not addressable, it will be made addressable.
         /// </summary>
-        public static string GetAddressableKeyFromGameObject(GameObject gameObject)
+        public static string GetAddressableKeyFromGameObject(GameObject gameObject, bool saveAssets = true)
         {
             string assetPath = GetPathToPrefabAsset(gameObject);
             if (assetPath == null)
@@ -72,7 +133,8 @@ namespace Gumball
             assetEntry.address = $"{assetPath}{chunkObjectSuffix}";
             
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, assetEntry, true);
-            AssetDatabase.SaveAssets();
+            if (saveAssets)
+                AssetDatabase.SaveAssets();
             
             return assetEntry.address;
         }
