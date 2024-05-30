@@ -170,6 +170,7 @@ namespace Gumball
         public int CurrentGear => currentGear;
         public int NumberOfGears => gearRatios.Length;
         public float EngineRpm => engineRpm;
+        public MinMaxFloat EngineRpmRange => engineRpmRange;
         public AnimationCurve TorqueCurve => torqueCurve;
         public bool IsAccelerating => isAccelerating;
         
