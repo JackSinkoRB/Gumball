@@ -14,9 +14,11 @@ namespace Gumball
 
         private InputActionMap ActionMap =>
             actionsMapCached ??= InputManager.Instance.Controls.FindActionMap(GetActionMapName());
-
+        
         private bool isInitialised;
 
+        public bool IsEnabled { get; private set; }
+        
         private void OnEnable()
         {
             if (!isInitialised)
@@ -33,11 +35,17 @@ namespace Gumball
             
             if (enable)
             {
+                if (IsEnabled)
+                    return; //already enabled
+                
                 ActionMap.Enable();
                 OnEnableMap();
             }
             else
             {
+                if (!IsEnabled)
+                    return; //already disabled
+                
                 ActionMap.Disable();
                 OnDisableMap();
             }
@@ -54,11 +62,13 @@ namespace Gumball
         
         protected virtual void OnEnableMap()
         {
+            IsEnabled = true;
             GlobalLoggers.InputLogger.Log($"Enabled action map {GetActionMapName()}");
         }
 
         protected virtual void OnDisableMap()
         {
+            IsEnabled = false;
             GlobalLoggers.InputLogger.Log($"Disabled action map {GetActionMapName()}");
         }
 

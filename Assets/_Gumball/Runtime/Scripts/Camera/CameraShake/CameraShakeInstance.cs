@@ -128,6 +128,12 @@ namespace Gumball
 
         public void DoShake(float magnitudeModifier = 1)
         {
+            if (currentState != State.Inactive)
+            {
+                Debug.LogWarning("Cannot start shake because it is currently in progress.");
+                return;
+            }
+            
             StartFadeIn();
             CameraShaker.Instance.TrackShake(this);
             

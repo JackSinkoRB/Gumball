@@ -34,13 +34,15 @@ namespace Gumball
         [SerializeField] private ChunkTrafficManager trafficManager;
         [SerializeField] private ChunkPowerpoleManager powerpoleManager;
         [SerializeField] private Collider[] barriers;
-
+        
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, true, true)]
         [SerializeField] private bool hasCustomLoadDistance;
         [Tooltip("The distance that the player must be within for the chunk to be loaded.")]
         [ConditionalField(nameof(hasCustomLoadDistance)), SerializeField] private float customLoadDistance = 3000;
-
+        [Tooltip("If the players distance from the road is equal or greater to this distance, the player is reset.")]
+        [SerializeField] private float distanceFromRoadSplineToResetPlayer = 50;
+        
         [Header("Terrains")]
         [Tooltip("The distance for the player to be within to use the high LOD.")]
         [SerializeField] private float terrainHighLODDistance = 500;
@@ -62,6 +64,7 @@ namespace Gumball
 
         public bool IsFullyLoaded => isFullyLoaded;
         public bool IsAccessible => isAccessible;
+        public GameObject ChunkDetector => chunkDetector;
         public ChunkMeshData ChunkMeshData => chunkMeshData;
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
@@ -76,7 +79,8 @@ namespace Gumball
 
         public bool HasCustomLoadDistance => hasCustomLoadDistance;
         public float CustomLoadDistance => customLoadDistance;
-
+        public float DistanceFromRoadSplineToResetPlayer => distanceFromRoadSplineToResetPlayer;
+        
         public ChunkTrafficManager TrafficManager => trafficManager;
         public ChunkPowerpoleManager PowerpoleManager => powerpoleManager;
         
@@ -145,6 +149,7 @@ namespace Gumball
             
             //move the chunk detector relative to the chunk (as it may have rotated)
             chunkDetector.transform.position = terrainHighLOD.transform.position.OffsetY(-500);
+            chunkDetector.SetActive(true);
         }
 
         public void OnBecomeAccessible()

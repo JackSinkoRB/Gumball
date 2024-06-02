@@ -16,6 +16,11 @@ namespace Gumball
     public class ChunkObject : MonoBehaviour
     {
         
+        [Header("Setup check")]
+        [HelpBox("The object is not a valid prefab asset (ending in .prefab). ChunkObject can only be added to prefabs. Therefore this object will not show at runtime.", MessageType.Error, true)]
+        [SerializeField, ReadOnly] private bool isPrefab;
+
+        [Header("Settings")]
         [Tooltip("Should the object be ignored from the chunk at runtime? eg. if it is just to modify the terrain etc.")]
         [SerializeField] private bool ignoreAtRuntime;
         
@@ -143,6 +148,8 @@ namespace Gumball
             {
                 UpdatePosition();
                 CheckToSetColliderToFlattenTo();
+
+                isPrefab = GameObjectUtils.GetPathToPrefabAsset(gameObject) != null;
             }
         }
 

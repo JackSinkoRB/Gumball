@@ -36,7 +36,7 @@ namespace Gumball
 
         public abstract TransformOperation[] Calculate(bool interpolate = true);
         
-        public void Snap()
+        public virtual void Snap()
         {
             TransformOperation[] operations = Calculate(false);
             

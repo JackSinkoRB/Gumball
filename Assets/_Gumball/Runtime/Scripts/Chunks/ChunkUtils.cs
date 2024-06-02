@@ -241,7 +241,7 @@ namespace Gumball
             List<string> assetKeys = new();
             foreach (ChunkObject chunkObject in chunkObjectsInOriginalChunk)
             {
-                string assetKey = GameObjectUtils.GetAddressableKeyFromGameObject(chunkObject.gameObject);
+                string assetKey = GameObjectUtils.GetAddressableKeyFromGameObject(chunkObject.gameObject, false);
                 assetKeys.Add(assetKey);
             }
 
@@ -283,14 +283,13 @@ namespace Gumball
                 string assetKey = assetKeys[index];
                 if (assetKey == null)
                 {
-                    Debug.LogError($"Asset key was null for index {index} ({chunkObject.gameObject.name}. Is it a prefab?");
+                    Debug.LogError($"Asset key was null for index {index} ({chunkObject.gameObject.name}. It won't be shown at runtime. Is it a prefab asset ending in .prefab?");
+                    Object.DestroyImmediate(chunkObject.gameObject);
                     continue;
                 }
                 
-                chunkObject.transform.SetParent(runtimePrefabInstance.transform);
-                
                 List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
-                ChunkObjectData data = new ChunkObjectData(chunkObject);
+                ChunkObjectData data = new ChunkObjectData(originalChunk.GetComponent<Chunk>(), chunkObject);
                 chunkObjectList.Add(data);
                 chunkObjectData[assetKey] = chunkObjectList;
 
@@ -305,11 +304,26 @@ namespace Gumball
                 
                 Mesh originalMesh = originalChunk.GetComponent<Chunk>().SplinesMeshes[index].GetComponent<MeshFilter>().sharedMesh;
                 splineMesh.GetComponent<MeshFilter>().sharedMesh = originalMesh;
-
-                //make sure all spline meshes are readable
-                //originalMesh.SetReadable(true);
             }
 
+            //delete empty gameobjects
+            HashSet<GameObject> emptyObjects = new();
+            foreach (Transform child in runtimePrefabInstance.transform)
+            {
+                if (child.gameObject.IsCompletelyEmpty())
+                    emptyObjects.Add(child.gameObject);
+            }
+            foreach (GameObject emptyGameObject in emptyObjects)
+            {
+                Object.DestroyImmediate(emptyGameObject);
+            }
+
+            //show error if there's a large amount of objects (suggesting to use ChunkObjects)
+            const int maxChildrenBeforeError = 25;
+            int totalChildren = runtimePrefabInstance.GetTotalChildCount();
+            if (totalChildren > maxChildrenBeforeError)
+                Debug.LogError($"{runtimePrefabInstance.name} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
+            
             //create raycast detector object
             runtimePrefabInstance.GetComponent<Chunk>().TryCreateChunkDetector();
             
