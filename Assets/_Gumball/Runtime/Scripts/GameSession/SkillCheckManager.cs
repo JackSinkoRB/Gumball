@@ -14,10 +14,23 @@ namespace Gumball
     {
         
         [Header("Near miss")]
+        [SerializeField] private TextMeshProUGUI nearMissLabel;
+        [SerializeField] private float nearMissLabelDuration = 1;
+        [Tooltip("The minimum speed the player must be going for a near miss.")]
+        [SerializeField] private float minSpeedForNearMissKmh = 25;
+        [Tooltip("How long (in seconds) after a collision should it wait to have no collisions before checking for a near miss?")]
+        [SerializeField] private float minTimeWithNoCollisionForNearMiss = 1;
         [Tooltip("The max distance around a traffic car to consider a near miss.")]
         [SerializeField] private float nearMissMaxDistance = 1;
-        [SerializeField] private float nearMissNosBonus;
+        [SerializeField, Range(0,1)] private float nearMissNosBonus = 0.1f;
+        [SerializeField] private float nearMissPointBonus = 5;
+        [Space(5)]
+        [SerializeField, ReadOnly] private float timeSinceLastCollision;
 
+        private readonly Dictionary<AICar, float> timeTrafficCarEnteredNearMissRadius = new();
+        private readonly Collider[] tempNearMissHolder = new Collider[50];
+        private Coroutine nearMissLabelCoroutine;
+        
         [Header("Slip stream")]
         [SerializeField] private TextMeshProUGUI slipStreamLabel;
         [Tooltip("The minimum speed the player must be going to enable slip stream.")]
@@ -33,6 +46,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isSlipStreaming;
         [SerializeField, ReadOnly] private float pointsGainedSinceSlipStreamStarted;
 
+        private readonly RaycastHit[] tempSlipStreamHolder = new RaycastHit[1];
+        
         [Header("Air time")]
         [SerializeField] private float minimumSpeedForAirTimeKmh = 25;
         [Tooltip("A nos bonus (measured in percent) to give each second while the player has 0 wheels touching the ground and moving at the minimum speed.")]
@@ -44,8 +59,6 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private float currentPoints;
-
-        private readonly RaycastHit[] tempArrayHolder = new RaycastHit[1];
         
         public float CurrentPoints => currentPoints;
 
@@ -53,10 +66,19 @@ namespace Gumball
         {
             //start disabled
             slipStreamLabel.gameObject.SetActive(false);
+            nearMissLabel.gameObject.SetActive(false);
+
+            currentPoints = 0;
         }
 
         private void Update()
         {
+            if (GameSessionManager.Instance.CurrentSession == null
+                || !GameSessionManager.Instance.CurrentSession.HasStarted)
+            {
+                return;
+            }
+
             CheckForNearMiss();
             CheckForSlipStream();
             CheckForAirTime();
@@ -64,8 +86,53 @@ namespace Gumball
 
         private void CheckForNearMiss()
         {
-            //TODO: do overlay box each frame and check for traffic cars
-            // - if player was in radius last frame but is no longer in the radius, and there was not a collision - it is a near miss
+            if (WarehouseManager.Instance.CurrentCar.InCollision)
+            {
+                timeSinceLastCollision = 0;
+                return;
+            }
+
+            timeSinceLastCollision += Time.deltaTime;
+
+            if (timeSinceLastCollision < minTimeWithNoCollisionForNearMiss)
+                return;
+            
+            if (WarehouseManager.Instance.CurrentCar.Speed < minSpeedForNearMissKmh)
+                return;
+            
+            Vector3 halfExtents = new Vector3(WarehouseManager.Instance.CurrentCar.CarWidth / 2f + nearMissMaxDistance, 1, WarehouseManager.Instance.CurrentCar.FrontOfCarPosition.z + nearMissMaxDistance);
+            
+            int hits = Physics.OverlapBoxNonAlloc(WarehouseManager.Instance.CurrentCar.transform.position, halfExtents, tempNearMissHolder, WarehouseManager.Instance.CurrentCar.transform.rotation, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.TrafficCar));
+
+            HashSet<AICar> previousCarsInRadius = new HashSet<AICar>(timeTrafficCarEnteredNearMissRadius.Keys);
+            HashSet<AICar> carsInRadius = new();
+            
+            //track the cars that entered
+            for (int count = 0; count < hits; count++)
+            {
+                AICar trafficCar = tempNearMissHolder[count].transform.GetComponentInAllParents<AICar>();
+                carsInRadius.Add(trafficCar);
+                
+                if (!timeTrafficCarEnteredNearMissRadius.ContainsKey(trafficCar))
+                {
+                    //entered near miss radius
+                    OnTrafficCarEnterNearMissRadius(trafficCar);
+                }
+            }
+
+            //track the cars that exited
+            foreach (AICar trafficCar in previousCarsInRadius)
+            {
+                if (!carsInRadius.Contains(trafficCar))
+                {
+                    //no longer in near miss radius
+                    OnTrafficCarExitNearMissRadius(trafficCar);
+                }
+            }
+            
+#if UNITY_EDITOR
+            BoxCastUtils.DrawBox(WarehouseManager.Instance.CurrentCar.transform.position, halfExtents, WarehouseManager.Instance.CurrentCar.transform.rotation, hits > 0 ? Color.yellow : Color.grey);
+#endif
         }
         
         private void CheckForSlipStream()
@@ -82,10 +149,10 @@ namespace Gumball
                 return;
             }
 
-            Vector3 bounds = new Vector3(slipStreamWidth / 2f, 1, 0);
+            Vector3 halfExtents = new Vector3(slipStreamWidth / 2f, 1, 0);
             Vector3 frontOfCarPosition = WarehouseManager.Instance.CurrentCar.transform.TransformPoint(WarehouseManager.Instance.CurrentCar.FrontOfCarPosition);
             
-            int hits = Physics.BoxCastNonAlloc(frontOfCarPosition, bounds, WarehouseManager.Instance.CurrentCar.transform.forward, tempArrayHolder, WarehouseManager.Instance.CurrentCar.transform.rotation, slipStreamMaxDistance / 2f, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.RacerCar));
+            int hits = Physics.BoxCastNonAlloc(frontOfCarPosition, halfExtents, WarehouseManager.Instance.CurrentCar.transform.forward, tempSlipStreamHolder, WarehouseManager.Instance.CurrentCar.transform.rotation, slipStreamMaxDistance / 2f, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.RacerCar));
 
             if (hits > 0)
                 OnPerformSlipStream();
@@ -93,7 +160,7 @@ namespace Gumball
                 OnStopSlipStream();
 
 #if UNITY_EDITOR
-            BoxCastUtils.DrawBoxCastBox(frontOfCarPosition, bounds, WarehouseManager.Instance.CurrentCar.transform.rotation, WarehouseManager.Instance.CurrentCar.transform.forward, slipStreamMaxDistance / 2f, hits > 0 ? Color.green : Color.cyan);
+            BoxCastUtils.DrawBoxCastBox(frontOfCarPosition, halfExtents, WarehouseManager.Instance.CurrentCar.transform.rotation, WarehouseManager.Instance.CurrentCar.transform.forward, slipStreamMaxDistance / 2f, hits > 0 ? Color.green : Color.cyan);
 #endif
         }
 
@@ -108,7 +175,14 @@ namespace Gumball
 
         private void OnPerformNearMiss()
         {
-            
+            if (nearMissLabelCoroutine != null)
+                StopCoroutine(nearMissLabelCoroutine);
+
+            nearMissLabelCoroutine = StartCoroutine(ShowNearMissLabelIE());
+
+            WarehouseManager.Instance.CurrentCar.NosManager.AddNos(nearMissNosBonus);
+
+            currentPoints += nearMissPointBonus;
         }
 
         private void OnStartSlipStream()
@@ -132,6 +206,8 @@ namespace Gumball
             
             pointsGainedSinceSlipStreamStarted += slipStreamPointBonus * Time.deltaTime;
             slipStreamLabel.text = $"Slipstream +{Mathf.CeilToInt(pointsGainedSinceSlipStreamStarted)}";
+            
+            currentPoints += slipStreamPointBonus * Time.deltaTime;
         }
 
         private void OnStopSlipStream()
@@ -151,6 +227,30 @@ namespace Gumball
         private void OnPerformLanding()
         {
             
+        }
+
+        private void OnTrafficCarEnterNearMissRadius(AICar car)
+        {
+            timeTrafficCarEnteredNearMissRadius[car] = Time.time;
+        }
+
+        private void OnTrafficCarExitNearMissRadius(AICar car)
+        {
+            float timeSinceEntering = Time.time - timeTrafficCarEnteredNearMissRadius[car];
+            bool hasBeenInCollisionSinceEntering = timeSinceEntering > timeSinceLastCollision;
+            
+            if (!hasBeenInCollisionSinceEntering)
+                OnPerformNearMiss();
+            
+            timeTrafficCarEnteredNearMissRadius.Remove(car);
+        }
+        
+        private IEnumerator ShowNearMissLabelIE()
+        {
+            nearMissLabel.gameObject.SetActive(true);
+            nearMissLabel.text = $"Near miss +{nearMissPointBonus}";
+            yield return new WaitForSeconds(nearMissLabelDuration);
+            nearMissLabel.gameObject.SetActive(false);
         }
 
     }

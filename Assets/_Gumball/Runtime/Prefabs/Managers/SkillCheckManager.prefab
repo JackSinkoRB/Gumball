@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7356870420044310128}
   - component: {fileID: 8841572194980037690}
   m_Layer: 5
-  m_Name: Slipstreaming
+  m_Name: SlipStream
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -146,7 +146,7 @@ GameObject:
   - component: {fileID: 5046593398361504437}
   - component: {fileID: 7988378977748654137}
   m_Layer: 5
-  m_Name: TODO(
+  m_Name: NearMiss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -199,7 +199,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: TODO
+  m_text: Near miss +5
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -479,8 +479,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7856ce7473e2ee4aab03b9e24a74b03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nearMissMaxDistance: 1
-  nearMissNosBonus: 0
+  nearMissLabel: {fileID: 7988378977748654137}
+  nearMissLabelDuration: 1
+  minSpeedForNearMissKmh: 25
+  minTimeWithNoCollisionForNearMiss: 0.5
+  nearMissMaxDistance: 1.7
+  nearMissNosBonus: 0.1
+  nearMissPointBonus: 5
+  timeSinceLastCollision: 0
   slipStreamLabel: {fileID: 8841572194980037690}
   minSpeedForSlipStreamKmh: 25
   slipStreamWidth: 2
