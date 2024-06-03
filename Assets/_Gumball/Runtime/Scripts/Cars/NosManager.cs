@@ -16,7 +16,7 @@ namespace Gumball
         [SerializeField] private float depletionRate = 5; //TODO: might want to make this upgradable (use save data)
         
         [Tooltip("How long (in seconds) does it take to regenerate a full tank of NOS?")]
-        [SerializeField] private float fillRate = 30; //TODO: might want to make this upgradable (use save data)
+        [SerializeField] private float fillRate = 60; //TODO: might want to make this upgradable (use save data)
 
         [Tooltip("The multiplier to apply to the cars torque when NOS is activated.")]
         [SerializeField] private float torqueAddition = 1500; //TODO: might want to make this upgradable (use save data)

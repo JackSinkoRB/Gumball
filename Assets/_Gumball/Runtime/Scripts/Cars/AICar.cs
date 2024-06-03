@@ -73,6 +73,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private Vector3 frontOfCarPosition;
         [SerializeField, ReadOnly] private float carWidth;
 
+        public float CarWidth => carWidth;
+        public Vector3 FrontOfCarPosition => frontOfCarPosition;
+        
         [Header("Wheels")]
         [SerializeField, ReadOnly] private bool isStuck;
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
@@ -228,8 +231,7 @@ namespace Gumball
         [SerializeField] private GameObject colliders;
         [SerializeField] private float collisionRecoverDuration = 1;
         [Space(5)]
-        [SerializeField, ReadOnly] private bool inCollision;
-        [SerializeField, ReadOnly] private int numberOfCollisions;
+        [SerializeField, ReadOnly] private List<AICar> collisions = new();
         [SerializeField, ReadOnly] private bool isPushingAnotherRacer;
         [SerializeField, ReadOnly] private List<AICar> racersCollidingWith = new();
         
@@ -239,6 +241,7 @@ namespace Gumball
         private BoxCollider movementPathCollider;
         
         public GameObject Colliders => colliders;
+        public bool InCollision => collisions.Count > 0;
         
         [Header("Obstacle detection")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool brakeForObstacles = true;
@@ -290,7 +293,7 @@ namespace Gumball
         private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
-        private bool recoveringFromCollision => collisionRecoverDuration > 0 && (inCollision || timeSinceCollision < collisionRecoverDuration);
+        private bool recoveringFromCollision => collisionRecoverDuration > 0 && (InCollision || timeSinceCollision < collisionRecoverDuration);
         private bool faceForward => useRacingLine || currentLaneDirection == ChunkTrafficManager.LaneDirection.FORWARD;
         private bool isRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
         private bool isPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
@@ -573,8 +576,7 @@ namespace Gumball
 
             timeOfLastCollision = Time.time; //reset collision time
 
-            numberOfCollisions++;
-            inCollision = true;
+            collisions.Add(car);
         }
 
         private void OnCollisionExit(Collision collision)
@@ -589,9 +591,7 @@ namespace Gumball
             
             timeOfLastCollision = Time.time; //reset collision time
 
-            numberOfCollisions--;
-            if (numberOfCollisions == 0)
-                inCollision = false;
+            collisions.Remove(car);
         }
 
         private void OnChunkCachedBecomeInaccessible()
@@ -885,7 +885,7 @@ namespace Gumball
             isBraking = false;
             speedToBrakeTo = Mathf.Infinity;
             
-            if (inCollision && autoDrive && !isRacer && !isPlayer)
+            if (InCollision && autoDrive && !isRacer && !isPlayer)
                 return;
             
             if (isReversing)
