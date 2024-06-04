@@ -45,5 +45,17 @@ namespace Gumball
             return (sample, closestDistanceSqr);
         }
         
+        public static float GetOffsetFromSpline(this SampleCollection sampleCollection, Vector3 fromPoint)
+        {
+            var (splineSample, distanceSqr) = sampleCollection.GetClosestSampleOnSpline(fromPoint);
+            float distance = Mathf.Sqrt(distanceSqr);
+            
+            //is the position to the left or right of the spline?
+            bool isRight = fromPoint.IsFurtherInDirection(splineSample.position, splineSample.right);
+            float offsetDirection = isRight ? 1 : -1;
+            
+            return distance * offsetDirection;
+        }
+        
     }
 }
