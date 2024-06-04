@@ -61,10 +61,13 @@ namespace Gumball
         [SerializeField, ReadOnly] private float timeInAir;
 
         [Header("Landing")]
+        [SerializeField] private TextMeshProUGUI landingLabel;
+        [SerializeField] private float landingLabelDuration = 1;
         [SerializeField] private float minTimeInAirForLandingPoints = 0.3f;
         [Tooltip("A nos bonus (measured in percent) to give when the player performs a landing.")]
         [SerializeField, Range(0, 1)] private float landingNosBonus = 0.1f;
-        
+        [SerializeField] private float landingPointBonus = 5;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private float currentPoints;
         
@@ -75,6 +78,8 @@ namespace Gumball
             //start disabled
             slipStreamLabel.gameObject.SetActive(false);
             nearMissLabel.gameObject.SetActive(false);
+            airTimeLabel.gameObject.SetActive(false);
+            landingLabel.gameObject.SetActive(false);
 
             currentPoints = 0;
         }
@@ -256,6 +261,8 @@ namespace Gumball
             float pointsGainedSinceAirTimeStarted = airTimePointBonus * timeInAir;
             
             WarehouseManager.Instance.CurrentCar.NosManager.AddNos(airTimeNosBonus * Time.deltaTime);
+
+            currentPoints += airTimePointBonus * Time.deltaTime;
             
             airTimeLabel.text = $"Air time +{Mathf.CeilToInt(pointsGainedSinceAirTimeStarted)}";
         }
@@ -277,7 +284,11 @@ namespace Gumball
 
         private void OnPerformLanding()
         {
+            StartCoroutine(ShowLandingLabelIE());
             
+            WarehouseManager.Instance.CurrentCar.NosManager.AddNos(landingNosBonus);
+
+            currentPoints += landingPointBonus;
         }
         
         private void OnTrafficCarEnterNearMissRadius(AICar car)
@@ -303,6 +314,14 @@ namespace Gumball
             yield return new WaitForSeconds(nearMissLabelDuration);
             nearMissLabel.gameObject.SetActive(false);
         }
-
+        
+        private IEnumerator ShowLandingLabelIE()
+        {
+            landingLabel.gameObject.SetActive(true);
+            landingLabel.text = $"Landing +{landingPointBonus}";
+            yield return new WaitForSeconds(landingLabelDuration);
+            landingLabel.gameObject.SetActive(false);
+        }
+        
     }
 }
