@@ -256,6 +256,7 @@ namespace Gumball
         [Tooltip("The speed the car should brake to if all the directions are blocked (exlcuding the 'when blocked' layers).")]
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private float speedToBrakeToIfBlocked = 50;
         [Space(5)]
+        [SerializeField, ReadOnly] private RacingLine currentRacingLine;
         [ConditionalField(nameof(autoDrive), nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private float targetPositionOffset; //show in inspector
 
         private static readonly LayerMask obstacleLayers = 1 << (int)LayersAndTags.Layer.TrafficCar
@@ -270,6 +271,8 @@ namespace Gumball
         
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[10];
         private bool allDirectionsAreBlocked;
+
+        public RacingLine CurrentRacingLine => currentRacingLine;
 
         [Header("Value modification")]
         [SerializeField, ReadOnly] private float defaultPeakTorque;
@@ -648,37 +651,15 @@ namespace Gumball
         private void Move()
         {
             speed = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
+            
             TryCreateMovementPathCollider();
-            
-            if (autoDrive)
-            {
-                targetPos = GetPositionAhead(GetMovementTargetDistance());
-                if (targetPos == null)
-                {
-                    Despawn();
-                    return;
-                }
-
-                targetPosition = targetPos.Value.Item2;
-
-                //check to add racing line offset
-                if (useRacingLine)
-                {
-                    SplineSample targetPosSplineSample = targetPos.Value.Item4;
-                    Vector3 racingLineOffsetVector = transform.right * racingLineOffset;
-                    targetPosition += racingLineOffsetVector;
-                }
-            }
-            else
-            {
-                targetPosition = transform.position + (transform.forward * 100);
-            }
-            
             CheckIfPlayerDriving();
-            
+
             if (useObstacleAvoidance && autoDrive)
-                TryAvoidObstacles();
-            
+                UpdateTargetPositionWithAvoidance();
+            else
+                UpdateTargetPosition();
+
             if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
                 CalculateSteerAngle();
             
@@ -711,6 +692,63 @@ namespace Gumball
             //debug directions:
             Debug.DrawLine(transform.position, targetPosition, 
                 isBraking ? Color.red : (isAccelerating ? Color.green : Color.white));
+        }
+        
+        private void UpdateTargetPosition()
+        {
+            if (autoDrive)
+            {
+                targetPos = GetPositionAhead(GetMovementTargetDistance());
+                if (targetPos == null)
+                {
+                    Despawn();
+                    return;
+                }
+
+                targetPosition = targetPos.Value.Item2;
+
+                //check to add racing line offset
+                if (useRacingLine)
+                {
+                    SplineSample targetPosSplineSample = targetPos.Value.Item4;
+                    Vector3 racingLineOffsetVector = transform.right * racingLineOffset;
+                    targetPosition += racingLineOffsetVector;
+                }
+            }
+            else
+            {
+                targetPosition = transform.position + (transform.forward * 100);
+            }
+        }
+
+        private void UpdateTargetPositionWithAvoidance()
+        {
+            if (CurrentChunk.TrafficManager.RacingLines.Length == 0)
+            {
+                currentRacingLine = null;
+                UpdateTargetPosition();
+                TryAvoidObstacles();
+                return;
+            }
+            
+            foreach (RacingLine racingLine in CurrentChunk.TrafficManager.RacingLines)
+            {
+                currentRacingLine = racingLine;
+                UpdateTargetPosition();
+
+                if (targetPos == null)
+                    continue;
+                    
+                TryAvoidObstacles();
+                    
+                if (!allDirectionsAreBlocked)
+                    return;
+            }
+
+            //all directions were blocked
+            currentRacingLine = null;
+            UpdateTargetPosition();
+            TryAvoidObstacles();
         }
 
         private void UpdateDrag()
@@ -1462,15 +1500,15 @@ namespace Gumball
             
             if (CurrentChunk.TrafficManager == null)
             {
-                Debug.LogWarning($"A traffic car is on the chunk {CurrentChunk.gameObject.name}, but it doesn't have a traffic manager.");
+                Debug.LogWarning($"A car is on the chunk {CurrentChunk.gameObject.name}, but it doesn't have a traffic manager.");
                 return null;
             }
-
+            
             (SplineSample, Chunk)? splineSampleAhead = GetSplineSampleAhead(distance);
             if (splineSampleAhead == null)
                 return null; //no more chunks loaded
-
-            if (useRacingLine)
+            
+            if (useRacingLine && currentRacingLine != null)
             {
                 return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position, splineSampleAhead.Value.Item1.rotation, splineSampleAhead.Value.Item1);
             }
@@ -1499,15 +1537,14 @@ namespace Gumball
             bool isChunkLoaded = chunkIndex >= 0;
             if (!isChunkLoaded)
                 return null; //current chunk isn't loaded
-
-#if UNITY_EDITOR
-            if (useRacingLine && CurrentChunk.TrafficManager.RacingLine == null)
-                Debug.LogWarning($"{gameObject.name} uses a racing line, but it is not setup in the current chunk {CurrentChunk.name}.");
-#endif
-            SampleCollection sampleCollection = useRacingLine && CurrentChunk.TrafficManager.RacingLine != null ? CurrentChunk.TrafficManager.RacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
+            
+            SampleCollection sampleCollection = useRacingLine && currentRacingLine != null ? currentRacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
             
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
             int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(Rigidbody.position).Item1;
+            if (closestSplineIndex == sampleCollection.length - 1)
+                return null; //already passed the last sample
+            
             SplineSample closestSample = sampleCollection.samples[closestSplineIndex];
 
             SplineSample? previousSample = null;
@@ -1535,7 +1572,7 @@ namespace Gumball
                     if (newChunk.TrafficManager == null)
                         return null; //no traffic manager
 
-                    sampleCollection = useRacingLine && CurrentChunk.TrafficManager.RacingLine != null ? chunkToUse.TrafficManager.RacingLine.SampleCollection : chunkToUse.SplineSampleCollection;
+                    sampleCollection = useRacingLine && currentRacingLine != null ? currentRacingLine.SampleCollection : chunkToUse.SplineSampleCollection;
                     
                     //reset the values
                     previousSample = null;
