@@ -41,6 +41,7 @@ namespace Gumball
         [SerializeField] private float slipStreamMaxDistance = 3;
         [Tooltip("A nos bonus (measured in percent) to give each second while the player is within another racer cars slip stream bounds.")]
         [SerializeField, Range(0,1)] private float slipStreamNosBonus = 0.1f;
+        [Tooltip("The amount of points to give each second the player is slip streaming.")]
         [SerializeField] private float slipStreamPointBonus = 1;
         [Space(5)]
         [SerializeField, ReadOnly] private bool isSlipStreaming;
@@ -49,13 +50,20 @@ namespace Gumball
         private readonly RaycastHit[] tempSlipStreamHolder = new RaycastHit[1];
         
         [Header("Air time")]
+        [SerializeField] private TextMeshProUGUI airTimeLabel;
         [SerializeField] private float minimumSpeedForAirTimeKmh = 25;
         [Tooltip("A nos bonus (measured in percent) to give each second while the player has 0 wheels touching the ground and moving at the minimum speed.")]
-        [SerializeField] private float airTimeNosBonus = 1;
+        [SerializeField, Range(0,1)] private float airTimeNosBonus = 0.1f;
+        [Tooltip("The amount of points to give each second the player has air time.")]
+        [SerializeField] private float airTimePointBonus = 1;
+        [Space(5)]
+        [SerializeField, ReadOnly] private bool isInAir;
+        [SerializeField, ReadOnly] private float timeInAir;
 
         [Header("Landing")]
         [SerializeField] private float minTimeInAirForLandingPoints = 0.3f;
-        [SerializeField] private float landingNosBonus = 10;
+        [Tooltip("A nos bonus (measured in percent) to give when the player performs a landing.")]
+        [SerializeField, Range(0, 1)] private float landingNosBonus = 0.1f;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private float currentPoints;
@@ -166,11 +174,23 @@ namespace Gumball
 
         private void CheckForAirTime()
         {
-            //TODO: if all wheels are off the ground
-            //set inAir = true
-            //timeInAir++
+            if (WarehouseManager.Instance.CurrentCar.Speed < minimumSpeedForAirTimeKmh)
+            {
+                OnStopAirTime();
+                return;
+            }
             
-            // - if goes from inAir to !inAir and timeInAir > minTimeInAirForLandingPoints - do landing
+            if (WarehouseManager.Instance.CurrentCar.IsInAir && !isInAir)
+            {
+                OnStartAirTime();
+                OnPerformAirTime();
+            } else if (!WarehouseManager.Instance.CurrentCar.IsInAir && isInAir)
+            {
+                OnStopAirTime();
+            } else if (isInAir)
+            {
+                OnPerformAirTime();
+            }
         }
 
         private void OnPerformNearMiss()
@@ -219,16 +239,47 @@ namespace Gumball
             slipStreamLabel.gameObject.SetActive(false);
         }
 
+        private void OnStartAirTime()
+        {
+            if (isInAir)
+                return; //already in air
+            
+            isInAir = true;
+            timeInAir = 0;
+            
+            airTimeLabel.gameObject.SetActive(true);
+        }
+        
         private void OnPerformAirTime()
         {
+            timeInAir += Time.deltaTime;
+            float pointsGainedSinceAirTimeStarted = airTimePointBonus * timeInAir;
             
+            WarehouseManager.Instance.CurrentCar.NosManager.AddNos(airTimeNosBonus * Time.deltaTime);
+            
+            airTimeLabel.text = $"Air time +{Mathf.CeilToInt(pointsGainedSinceAirTimeStarted)}";
+        }
+
+        private void OnStopAirTime()
+        {
+            if (!isInAir)
+                return; //already landed
+            
+            isInAir = false;
+            
+            airTimeLabel.gameObject.SetActive(false);
+
+            if (timeInAir < minTimeInAirForLandingPoints)
+                return;
+
+            OnPerformLanding();
         }
 
         private void OnPerformLanding()
         {
             
         }
-
+        
         private void OnTrafficCarEnterNearMissRadius(AICar car)
         {
             timeTrafficCarEnteredNearMissRadius[car] = Time.time;

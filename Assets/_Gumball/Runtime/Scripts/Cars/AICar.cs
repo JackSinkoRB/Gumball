@@ -302,6 +302,19 @@ namespace Gumball
         public float Speed => speed;
         public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : Mathf.Infinity));
         
+        public bool IsInAir
+        {
+            get
+            {
+                foreach (WheelCollider wheelCollider in WarehouseManager.Instance.CurrentCar.AllWheelColliders)
+                {
+                    if (wheelCollider.isGrounded)
+                        return false;
+                }
+                return true;
+            }
+        }
+        
         private Chunk lastKnownChunk;
 
         /// <summary>
