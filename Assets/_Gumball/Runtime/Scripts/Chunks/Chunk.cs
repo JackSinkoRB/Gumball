@@ -385,6 +385,12 @@ namespace Gumball
         {
             foreach (Collider barrier in barriers)
             {
+                if (barrier == null)
+                {
+                    Debug.LogWarning($"Chunk {name} has a barrier that is null.");
+                    continue;
+                }
+                
                 barrier.gameObject.layer = (int) LayersAndTags.Layer.Barrier;
                 barrier.sharedMaterial = ChunkManager.Instance.SlipperyPhysicsMaterial;
             }
