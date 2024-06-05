@@ -689,7 +689,7 @@ namespace Gumball
             UpdateMovementPathCollider();
             
             //debug directions:
-            Debug.DrawLine(transform.position, targetPosition, 
+            Debug.DrawLine(transform.TransformPoint(frontOfCarPosition), targetPosition, 
                 isBraking ? Color.red : (isAccelerating ? Color.green : Color.white));
         }
         
@@ -1186,7 +1186,8 @@ namespace Gumball
         {
             movementPathCollider.transform.localPosition = frontOfCarPosition;
 
-            float distanceToPredictedPosition = Rigidbody.velocity.magnitude * predictedPositionReactionTime;
+            Vector3 direction = Rigidbody.velocity.sqrMagnitude > 1 ? Rigidbody.velocity : transform.forward;
+            float distanceToPredictedPosition = direction.magnitude * predictedPositionReactionTime;
             movementPathCollider.size = new Vector3(carWidth, carWidth, distanceToPredictedPosition);
             
             //center is half the size so it points outwards
@@ -1588,7 +1589,7 @@ namespace Gumball
             SampleCollection sampleCollection = canUseRacingLine && useRacingLine && currentRacingLine != null ? currentRacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
             
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
-            int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.position).Item1;
+            int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
             if (closestSplineIndex == sampleCollection.length - 1)
                 return null; //already passed the last sample (can happen for racing lines)
             
@@ -1621,7 +1622,7 @@ namespace Gumball
                     
                     //reset the values
                     previousSample = null;
-                    closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(Rigidbody.position).Item1;
+                    closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
                     offset = faceForward ? 1 : -1;
                     continue;
                 }
