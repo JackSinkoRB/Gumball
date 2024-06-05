@@ -261,12 +261,6 @@ namespace Gumball
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
             InputManager.Instance.CarInput.Accelerate.SetPressedOverride(true); //auto accelerate
-
-            foreach (AICar racer in currentRacers)
-            {
-                //tween the racing line offset to 0 for optimal driving
-                racer.SetRacingLineOffset(0, 3);
-            }
         }
 
         protected virtual void OnSessionStart()
@@ -377,13 +371,6 @@ namespace Gumball
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
 
                     racer.InitialiseAsRacer();
-
-                    //calculate the starting distance
-                    racer.PerformAfterTrue(() => racer.CurrentChunk != null, () =>
-                    {
-                        float distance = racer.CurrentChunk.TrafficManager.GetOffsetFromRacingLine(data.StartingPosition.Position);
-                        racer.SetRacingLineOffset(distance);
-                    });
 
                     currentRacers[finalIndex] = racer;
                 };
