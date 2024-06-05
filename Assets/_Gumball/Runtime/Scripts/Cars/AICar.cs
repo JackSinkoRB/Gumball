@@ -1361,7 +1361,25 @@ namespace Gumball
             float distanceToFuturePosition = GetMovementTargetDistance() / (Mathf.Abs((offset) * sizeModifierByOffset) + 1f); //make the length shorter as the offset gets wider
             
             int hits = Physics.BoxCastNonAlloc(startPosition, detectorSize, directionToFuturePosition, blockagesTemp, rotation, distanceToFuturePosition, obstacleLayers);
+            
+            //if it cannot cross the middle, check if crossing the middle and cancel if so
+            if (GameSessionManager.Instance.CurrentSession != null
+                && !GameSessionManager.Instance.CurrentSession.CurrentRacers[this].CanCrossMiddle
+                && autoDrive && useRacingLine)
+            {
+                //get cars current direction in relation to the chunk middle
+                var (closestSample, closestSampleDistance) = CurrentChunk.GetClosestSampleOnSpline(transform.position);
+                bool isCarCurrentlyRight = transform.position.IsFurtherInDirection(closestSample.position, closestSample.right);
 
+                bool isNewPositionRight = finalTargetPosition.IsFurtherInDirection(closestSample.position, closestSample.right);
+                
+                bool crossingLeft = isCarCurrentlyRight && !isNewPositionRight;
+                bool crossingRight = !isCarCurrentlyRight && isNewPositionRight;
+                
+                if (crossingLeft || crossingRight)
+                    return false;
+            }
+            
             RaycastHit? actualHit = null;
             for (int index = 0; index < hits; index++)
             {

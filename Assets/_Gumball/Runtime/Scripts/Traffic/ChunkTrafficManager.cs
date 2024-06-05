@@ -204,7 +204,7 @@ namespace Gumball
                 && GameSessionManager.Instance.CurrentSession != null 
                 && GameSessionManager.Instance.CurrentSession.CurrentRacers != null)
             {
-                foreach (AICar racerCar in GameSessionManager.Instance.CurrentSession.CurrentRacers)
+                foreach (AICar racerCar in GameSessionManager.Instance.CurrentSession.CurrentRacers.Keys)
                 {
                     if (racerCar == null || racerCar.IsPlayerCar)
                         continue;

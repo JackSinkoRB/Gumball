@@ -34,7 +34,7 @@ namespace Gumball
         private void UpdatePositionLabel()
         {
             int currentRank = currentSession.GetRacePosition(WarehouseManager.Instance.CurrentCar);
-            positionLabel.text = $"{currentRank} / {currentSession.CurrentRacers.Length}";
+            positionLabel.text = $"{currentRank} / {currentSession.CurrentRacers.Count}";
         }
         
     }
