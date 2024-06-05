@@ -73,6 +73,7 @@ namespace Gumball
         public AICar[] CurrentRacers => currentRacers;
         public CorePart[] CorePartRewards => corePartRewards;
         public SubPart[] SubPartRewards => subPartRewards;
+        public bool HasStarted { get; private set; }
         
         public abstract string GetName();
 
@@ -158,7 +159,7 @@ namespace Gumball
             
             AvatarManager.Instance.HideAvatars(true);
 
-            SetupPlayerCar(currentChunkMapCached);
+            SetupPlayerCar();
 
             //load the map chunks
             Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
@@ -196,6 +197,8 @@ namespace Gumball
 
         protected virtual void OnSessionEnd()
         {
+            HasStarted = false;
+            
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
@@ -268,7 +271,7 @@ namespace Gumball
 
         protected virtual void OnSessionStart()
         {
-            
+            HasStarted = true;
         }
 
         private IEnumerator LoadScene()
@@ -339,7 +342,7 @@ namespace Gumball
             PanelManager.GetPanel<SessionIntroPanel>().Hide();
         }
 
-        private void SetupPlayerCar(ChunkMap chunkMap)
+        private void SetupPlayerCar()
         {
             //freeze the car
             Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;

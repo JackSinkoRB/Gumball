@@ -6,11 +6,12 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 	{
 		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
+		_Color("Color", Color) = (1,1,1,0)
 		_Albedo_Gloss("Albedo_Gloss", 2D) = "white" {}
-		_Normal("Normal", 2D) = "bump" {}
-		_Nrm_Str("Nrm_Str", Float) = 1
 		_Gloss("Gloss", Range( 0 , 3)) = 1
 		_Metallic("Metallic", Range( 0 , 1)) = 0
+		_Normal("Normal", 2D) = "bump" {}
+		_Nrm_Str("Nrm_Str", Float) = 1
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -289,6 +290,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Albedo_Gloss_ST;
+			float4 _Color;
 			float4 _Normal_ST;
 			float _Nrm_Str;
 			float _Metallic;
@@ -555,7 +557,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 				float4 lerpResult188 = lerp( tex2DNode240 , lerpResult186 , 0.8);
 				
 
-				float3 BaseColor = tex2DNode240.rgb;
+				float3 BaseColor = ( tex2DNode240 * _Color ).rgb;
 				float3 Normal = tex2DNode242;
 				float3 Emission = saturate( ( lerpResult188 * lerpResult186 ) ).rgb;
 				float3 Specular = 0.5;
@@ -872,6 +874,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Albedo_Gloss_ST;
+			float4 _Color;
 			float4 _Normal_ST;
 			float _Nrm_Str;
 			float _Metallic;
@@ -1180,6 +1183,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Albedo_Gloss_ST;
+			float4 _Color;
 			float4 _Normal_ST;
 			float _Nrm_Str;
 			float _Metallic;
@@ -1459,6 +1463,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Albedo_Gloss_ST;
+			float4 _Color;
 			float4 _Normal_ST;
 			float _Nrm_Str;
 			float _Metallic;
@@ -1674,7 +1679,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 				float4 lerpResult188 = lerp( tex2DNode240 , lerpResult186 , 0.8);
 				
 
-				float3 BaseColor = tex2DNode240.rgb;
+				float3 BaseColor = ( tex2DNode240 * _Color ).rgb;
 				float3 Emission = saturate( ( lerpResult188 * lerpResult186 ) ).rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
@@ -1758,6 +1763,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Albedo_Gloss_ST;
+			float4 _Color;
 			float4 _Normal_ST;
 			float _Nrm_Str;
 			float _Metallic;
@@ -1946,7 +1952,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 				float4 tex2DNode240 = tex2D( _Albedo_Gloss, uv_Albedo_Gloss );
 				
 
-				float3 BaseColor = tex2DNode240.rgb;
+				float3 BaseColor = ( tex2DNode240 * _Color ).rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 
@@ -2042,6 +2048,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Albedo_Gloss_ST;
+			float4 _Color;
 			float4 _Normal_ST;
 			float _Nrm_Str;
 			float _Metallic;
@@ -2416,6 +2423,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Albedo_Gloss_ST;
+			float4 _Color;
 			float4 _Normal_ST;
 			float _Nrm_Str;
 			float _Metallic;
@@ -2677,7 +2685,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 				float4 lerpResult188 = lerp( tex2DNode240 , lerpResult186 , 0.8);
 				
 
-				float3 BaseColor = tex2DNode240.rgb;
+				float3 BaseColor = ( tex2DNode240 * _Color ).rgb;
 				float3 Normal = tex2DNode242;
 				float3 Emission = saturate( ( lerpResult188 * lerpResult186 ) ).rgb;
 				float3 Specular = 0.5;
@@ -2844,6 +2852,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Albedo_Gloss_ST;
+			float4 _Color;
 			float4 _Normal_ST;
 			float _Nrm_Str;
 			float _Metallic;
@@ -3087,6 +3096,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Albedo_Gloss_ST;
+			float4 _Color;
 			float4 _Normal_ST;
 			float _Nrm_Str;
 			float _Metallic;
@@ -3305,14 +3315,16 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;158;3386.589,-409.0846;Floa
 Node;AmplifyShaderEditor.ColorNode;169;1122.036,1117.3;Inherit;False;Constant;_Light_Color;Light_Color;17;0;Create;True;0;0;0;False;0;False;0.9529412,0.8823529,0.7333333,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;239;1449.434,1201.469;Inherit;False;Constant;_Lioght_Str;Lioght_Str;17;0;Create;True;0;0;0;False;0;False;10;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.BreakToComponentsNode;176;1637.608,817.9653;Inherit;False;FLOAT3;1;0;FLOAT3;0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
-Node;AmplifyShaderEditor.RangedFloatNode;53;1736.123,-181.3755;Float;False;Property;_Gloss;Gloss;3;0;Create;True;0;0;0;False;0;False;1;0;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.VertexColorNode;102;692.8369,680.5006;Inherit;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;99;2133.333,-86.67229;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;229;2485.04,-258.5566;Inherit;False;Property;_Metallic;Metallic;4;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SamplerNode;242;1341.436,372.4648;Inherit;True;Property;_Normal;Normal;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;240;1043.221,-259.3033;Inherit;True;Property;_Albedo_Gloss;Albedo_Gloss;0;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;198;1100.498,415.3198;Inherit;False;Property;_Nrm_Str;Nrm_Str;2;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;242;1341.436,372.4648;Inherit;True;Property;_Normal;Normal;4;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.RangedFloatNode;198;1100.498,415.3198;Inherit;False;Property;_Nrm_Str;Nrm_Str;5;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;243;2586.83,132.4274;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;240;1178.455,-403.3195;Inherit;True;Property;_Albedo_Gloss;Albedo_Gloss;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;99;2217.636,-86.67229;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;229;2472.746,-260.3129;Inherit;False;Property;_Metallic;Metallic;3;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;53;1808.132,-191.9133;Float;False;Property;_Gloss;Gloss;2;0;Create;True;0;0;0;False;0;False;1;0;0;3;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;244;2520.553,-517.1916;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.ColorNode;245;2160.51,-659.4519;Inherit;False;Property;_Color;Color;0;0;Create;True;0;0;0;False;0;False;1,1,1,0;1,1,1,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 WireConnection;168;0;102;4
 WireConnection;168;1;169;0
 WireConnection;170;0;168;0
@@ -3328,17 +3340,19 @@ WireConnection;188;2;189;0
 WireConnection;190;0;188;0
 WireConnection;190;1;186;0
 WireConnection;191;0;190;0
-WireConnection;158;0;240;0
+WireConnection;158;0;244;0
 WireConnection;158;1;242;0
 WireConnection;158;2;191;0
 WireConnection;158;3;229;0
 WireConnection;158;4;99;0
 WireConnection;158;5;243;0
 WireConnection;176;0;242;0
-WireConnection;99;0;53;0
-WireConnection;99;1;240;4
 WireConnection;242;5;198;0
 WireConnection;243;0;102;3
 WireConnection;243;1;102;3
+WireConnection;99;0;53;0
+WireConnection;99;1;240;4
+WireConnection;244;0;240;0
+WireConnection;244;1;245;0
 ASEEND*/
-//CHKSM=8B8FA50486088DB72D5DFA25CCBD90AC0432B753
+//CHKSM=52BF0411DECFC18291BD24835EEE27C860A075AA

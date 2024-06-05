@@ -181,7 +181,7 @@ namespace Gumball
         {
             foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
             {
-                if (!splineMesh.gameObject.activeSelf)
+                if (splineMesh == null || !splineMesh.gameObject.activeSelf)
                     continue;
                 
                 bool alreadyBaked = splineMesh.baked;
@@ -203,11 +203,18 @@ namespace Gumball
 
                 MeshCollider meshCollider = splineMesh.GetComponent<MeshCollider>();
                 Mesh savedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-                meshFilter.sharedMesh = savedMesh;
-                meshCollider.sharedMesh = savedMesh;
+                if (meshFilter != null)
+                {
+                    meshFilter.sharedMesh = savedMesh;
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
+                }
 
-                PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
-                PrefabUtility.RecordPrefabInstancePropertyModifications(meshCollider);
+                if (meshCollider != null)
+                {
+                    meshCollider.sharedMesh = savedMesh;
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(meshCollider);
+                }
+                
                 PrefabUtility.RecordPrefabInstancePropertyModifications(splineMesh);
                 EditorUtility.SetDirty(chunk.gameObject);
 
@@ -319,10 +326,10 @@ namespace Gumball
             }
 
             //show error if there's a large amount of objects (suggesting to use ChunkObjects)
-            const int maxChildrenBeforeError = 25;
+            const int maxChildrenBeforeError = 50;
             int totalChildren = runtimePrefabInstance.GetTotalChildCount();
             if (totalChildren > maxChildrenBeforeError)
-                Debug.LogError($"{runtimePrefabInstance.name} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
+                Debug.LogError($"{runtimePrefabInstance.name.Replace("(Clone)", "")} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
             
             //create raycast detector object
             runtimePrefabInstance.GetComponent<Chunk>().TryCreateChunkDetector();
