@@ -557,7 +557,7 @@ namespace Gumball
         {
             CheckIfStuck();
         }
-
+        
         private void FixedUpdate()
         {
             if (!isInitialised)
@@ -1696,25 +1696,27 @@ namespace Gumball
             foreach (Collider collider in colliders.GetComponents<Collider>())
             {
                 const float reallyFarAway = 1000;
-                Vector3 positionForward = collider.bounds.ClosestPoint(transform.position + transform.forward * reallyFarAway).SetY(Rigidbody.centerOfMass.y);
-                Vector3 localPosition = transform.InverseTransformPoint(positionForward);
-                float distanceSqrForward = Vector3.SqrMagnitude(localPosition);
-                if (distanceSqrForward > furthestDistanceForward)
+                
+                Vector3 positionForward = collider.ClosestPoint(transform.position + transform.forward * reallyFarAway).SetY(Rigidbody.centerOfMass.y);
+                Vector3 localPositionForward = transform.InverseTransformPoint(positionForward).SetX(0);
+                float distanceForward = localPositionForward.z;
+                if (distanceForward > furthestDistanceForward)
                 {
-                    frontOfCarPosition = localPosition;
-                    furthestDistanceForward = distanceSqrForward;
+                    frontOfCarPosition = localPositionForward;
+                    furthestDistanceForward = distanceForward;
                 }
                 
-                Vector3 positionRight = collider.bounds.ClosestPoint(transform.position + transform.right * reallyFarAway);
-                float distanceSqrRight = Vector3.SqrMagnitude(transform.InverseTransformPoint(positionRight));
-                if (distanceSqrRight > furthestDistanceRight)
+                Vector3 positionRight = collider.ClosestPoint(transform.position + transform.right * reallyFarAway);
+                Vector3 localPositionRight = transform.InverseTransformPoint(positionRight);
+                float distanceRight = localPositionRight.x;
+                if (distanceRight > furthestDistanceRight)
                 {
-                    furthestDistanceRight = distanceSqrRight;
+                    furthestDistanceRight = distanceRight;
                 }
             }
             
             //complete after to avoid square rooting each time
-            carWidth = Mathf.Sqrt(furthestDistanceRight) * 2; //multiply by 2 for total width
+            carWidth = furthestDistanceRight * 2; //multiply by 2 for total width
         }
 
         private void ShiftUp()
