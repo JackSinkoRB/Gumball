@@ -31,6 +31,7 @@ namespace Gumball
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
 
+        [Tooltip("The chunks racing lines. Can have none, one or multiple. If multiple, the first lines will take priority.")]
         [SerializeField] private RacingLine[] racingLines;
         
         //when map driving scene loads, load all the traffic cars (eg. a traffic manager that holds reference to all traffic cars)
