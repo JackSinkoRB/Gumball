@@ -9059,6 +9059,7 @@ MonoBehaviour:
   nosManager: {fileID: 0}
   frontOfCarPosition: {x: 0, y: 1, z: 2}
   carWidth: 2
+  isStuck: 0
   wheelConfiguration: 0
   frontWheelMeshes:
   - {fileID: 314294427718096920}
@@ -9079,7 +9080,6 @@ MonoBehaviour:
   currentLaneDistance: 0
   currentLaneDirection: 0
   racingLineOffset: 0
-  targetPositionOffset: 0
   dragWhenAccelerating: 0
   dragWhenIdle: 0.15
   dragWhenBraking: 1
@@ -9178,26 +9178,27 @@ MonoBehaviour:
   desiredSteerAngle: 0
   visualSteerAngle: 0
   brakeTorque: 1000
+  cornerReactionTime: 1.1
   cornerBrakingCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 300
-      inSlope: -12.710678
-      outSlope: -12.710678
+      inSlope: -6.622647
+      outSlope: -6.622647
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.037499998
+      outWeight: 0.08333333
     - serializedVersion: 3
       time: 50
-      value: 65
-      inSlope: -0.000001592221
-      outSlope: -0.000001592221
+      value: 75
+      inSlope: -1.2735827
+      outSlope: -1.2735827
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.19166672
+      inWeight: 0.21666671
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -9205,13 +9206,14 @@ MonoBehaviour:
   isBraking: 0
   corneringSpeed: Infinity
   speedToBrakeTo: 0
+  cornerAngleAhead: 0
+  isBrakingForCorner: 0
   handbrakeEaseOffDuration: 0.8
   handbrakeTorque: 5000
   isHandbrakeEngaged: 0
   colliders: {fileID: 6830272080298800554}
   collisionRecoverDuration: 0
-  inCollision: 0
-  numberOfCollisions: 0
+  collisions: []
   isPushingAnotherRacer: 0
   racersCollidingWith: []
   brakeForObstacles: 0
@@ -9233,10 +9235,10 @@ MonoBehaviour:
     Min: 10
     Max: 60
   useObstacleAvoidance: 1
-  obstacleLayers:
-    serializedVersion: 2
-    m_Bits: 58112
   speedToBrakeToIfBlocked: 65
+  currentRacingLine: {fileID: 0}
+  obstacleAvoidanceOffset: 0
+  allDirectionsAreBlocked: 0
   defaultPeakTorque: 0
   isInitialised: 0
   currentChunkCached: {fileID: 0}

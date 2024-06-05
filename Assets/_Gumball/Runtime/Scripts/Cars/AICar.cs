@@ -1585,15 +1585,21 @@ namespace Gumball
             bool isChunkLoaded = chunkIndex >= 0;
             if (!isChunkLoaded)
                 return null; //current chunk isn't loaded
-            
-            SampleCollection sampleCollection = canUseRacingLine && useRacingLine && currentRacingLine != null ? currentRacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
-            
+
+            bool isUsingRacingLine = canUseRacingLine && useRacingLine && currentRacingLine != null;
+            SampleCollection sampleCollection = isUsingRacingLine ? currentRacingLine.SampleCollection : CurrentChunk.SplineSampleCollection;
+
             //get the closest sample, then get the next, and next, until it is X distance away from the closest
             int closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
-            if (closestSplineIndex == sampleCollection.length - 1)
-                return null; //already passed the last sample (can happen for racing lines)
             
-            SplineSample closestSample = sampleCollection.samples[closestSplineIndex];
+            //racing line only: handle case if racing line ends before chunk ends
+            if (isUsingRacingLine && closestSplineIndex == sampleCollection.length - 1)
+            {
+                sampleCollection = CurrentChunk.SplineSampleCollection; //already passed the last sample
+                closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
+            }
+
+            SplineSample closestSampleToCar = sampleCollection.samples[closestSplineIndex];
 
             SplineSample? previousSample = null;
             float previousDistanceOffset = 0;
@@ -1618,17 +1624,19 @@ namespace Gumball
                     Chunk newChunk = loadedChunkData.Value.Chunk;
                     chunkToUse = newChunk;
 
-                    sampleCollection = canUseRacingLine && useRacingLine && currentRacingLine != null ? currentRacingLine.SampleCollection : chunkToUse.SplineSampleCollection;
+                    //if looking ahead, never use the racing line - just use the chunk spline
+                    //when the chunk is entered, it will find the racing line and set the offset
+                    sampleCollection = chunkToUse.SplineSampleCollection;
                     
                     //reset the values
                     previousSample = null;
-                    closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
+                    closestSplineIndex = faceForward ? 0 : sampleCollection.samples.Length - 1;
                     offset = faceForward ? 1 : -1;
                     continue;
                 }
                 
                 SplineSample sample = sampleCollection.samples[closestSplineIndex + offset];
-                float distanceToSampleSqr = Vector3.SqrMagnitude(sample.position - closestSample.position);
+                float distanceToSampleSqr = Vector3.SqrMagnitude(sample.position - closestSampleToCar.position);
                 float distanceOffset = Mathf.Abs(desiredDistanceSqr - distanceToSampleSqr);
                 
                 bool isFurtherAway = previousSample != null && distanceOffset > previousDistanceOffset;
