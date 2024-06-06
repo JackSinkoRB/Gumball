@@ -89,10 +89,6 @@ namespace Gumball
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
         
-#if UNITY_EDITOR
-        [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
-        [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
-        
         public void OnBeforeSerialize()
         {
 #if UNITY_EDITOR
@@ -109,6 +105,10 @@ namespace Gumball
             
         }
         
+#if UNITY_EDITOR
+        [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
+        [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
+
         private void OnValidate()
         {
             TrackCorePartRewards();
