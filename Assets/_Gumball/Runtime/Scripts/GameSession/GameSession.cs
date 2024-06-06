@@ -92,7 +92,7 @@ namespace Gumball
         public void OnBeforeSerialize()
         {
 #if UNITY_EDITOR
-            if (scene.IsDirty)
+            if (scene != null && scene.IsDirty)
             {
                 EditorUtility.SetDirty(this);
                 scene.SetDirty(false);
