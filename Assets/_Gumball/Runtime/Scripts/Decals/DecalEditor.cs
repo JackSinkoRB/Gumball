@@ -86,9 +86,9 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(SceneManager.DecalEditorSceneName, LoadSceneMode.Single, true);
+            yield return Addressables.LoadSceneAsync(SceneManager.DecalEditorSceneAddress, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
 
             AICar car = WarehouseManager.Instance.CurrentCar;
 

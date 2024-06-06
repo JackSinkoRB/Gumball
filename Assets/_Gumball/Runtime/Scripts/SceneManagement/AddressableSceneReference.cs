@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+using UnityEditor.AddressableAssets;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -19,8 +20,10 @@ namespace Gumball
 #endif
 
         [SerializeField, ReadOnly] private string sceneName;
-
+        [SerializeField, ReadOnly] private string address;
+        
         public string SceneName => sceneName;
+        public string Address => address;
 
 #if UNITY_EDITOR
         public SceneAsset EditorAsset => scene.editorAsset;
@@ -34,6 +37,10 @@ namespace Gumball
                 if (scene == null || scene.editorAsset == null)
                     sceneName = null;
                 else sceneName = scene.editorAsset.name;
+
+                if (scene == null || scene.editorAsset == null)
+                    address = null;
+                else address = scene.RuntimeKey.ToString();
             }
             catch (UnityException)
             {

@@ -276,7 +276,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log("Scene loading started...");
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
             
-            yield return Addressables.LoadSceneAsync(scene.SceneName);
+            yield return Addressables.LoadSceneAsync(scene.Address);
             
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");

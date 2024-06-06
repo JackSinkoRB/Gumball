@@ -161,11 +161,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 267e0976c6a2ec7488d5bb315f9dbb60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  splineComputer: {fileID: 6805132121740789151}
   trafficManager: {fileID: 2363621315821174552}
   powerpoleManager: {fileID: 0}
+  barriers: []
   hasCustomLoadDistance: 1
   customLoadDistance: 2000
+  distanceFromRoadSplineToResetPlayer: 50
   terrainHighLODDistance: 150
   currentLOD: 0
   terrainHighLOD: {fileID: 878874526688449320}
@@ -177,8 +178,13 @@ MonoBehaviour:
   chunkMeshData:
     chunk: {fileID: 0}
     vertices: []
-    lastEndVertices: []
-    firstEndVertices: []
+    normals: []
+    modifiedNormals:
+      list: []
+      keyCollision: 0
+    lastEndVertices: 
+    firstEndVertices: 
+    verticesExcludingEnds: 
     vertexColors: []
   chunkDetector: {fileID: 0}
   splineLengthCached: -1
@@ -5557,6 +5563,7 @@ MonoBehaviour:
   hasChunkConnected: 0
   updateImmediately: 0
   terrainData:
+    terrainMaterial: {fileID: 0}
     resolution: 200
     resolutionLowLOD: 20
     chunkBlendDistance: 50
@@ -5635,8 +5642,7 @@ MonoBehaviour:
       objectSurroundingRadius: 5
       objectSurroundingBlendRadius: 15
       objectSurroundingMaxOpacity: 0.8
-      noiseScale: 120
-      noiseMaxOpacity: 0.8
+      naturalLight: 0
       minMaxSlopeAngle:
         Min: 0
         Max: 50
@@ -5645,6 +5651,11 @@ MonoBehaviour:
     perlinHeight:
       Min: 0
       Max: 0
+  meshFilter1: {fileID: 0}
+  meshFilter2: {fileID: 0}
+  vertices1Before: []
+  vertices2Before: []
+  verticesCombined: []
   chunkToConnectWith: {fileID: 0}
   showDebugLines: 0
 --- !u!114 &6805132121740789151
@@ -12072,13 +12083,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driveOnLeft: 1
+  racingLine: {fileID: 0}
   speedLimitKmh: 40
   density: 100
-  laneDistances:
-  - 2.5
-  - -2.5
-  laneDistancesForwardCached: []
-  laneDistancesBackwardCached: []
+  laneDistancesForward: []
+  laneDistancesBackward: []
   chunk: {fileID: 1199367328873692756}
 --- !u!1 &8108657258714900232
 GameObject:
