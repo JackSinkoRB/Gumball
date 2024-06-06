@@ -25,9 +25,9 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(SceneManager.MapSceneName, LoadSceneMode.Single, true);
+            yield return Addressables.LoadSceneAsync(SceneManager.MapSceneAddress, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MapSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MapSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             yield return Instance.LoadLastPlayedMap();
             

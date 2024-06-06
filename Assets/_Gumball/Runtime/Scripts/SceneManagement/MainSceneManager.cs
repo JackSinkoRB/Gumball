@@ -28,7 +28,7 @@ namespace Gumball
         
         private void Start()
         {
-            this.PerformAfterTrue(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MainSceneName),
+            this.PerformAfterTrue(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MainSceneAddress),
                 () => PanelManager.GetPanel<MainMenuPanel>().Show());
         }
         
@@ -42,9 +42,9 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
             
             Stopwatch stopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Single, true);
+            yield return Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Single, true);
             stopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             
             //ensure car is showing
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
