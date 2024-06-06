@@ -4338,7 +4338,6 @@ Transform:
   - {fileID: 5736128174129826596}
   - {fileID: 5314617986791541016}
   - {fileID: 7367881602688631728}
-  - {fileID: 5621000188204950344}
   - {fileID: 6672766328692151531}
   - {fileID: 4698062689967963983}
   - {fileID: 7136751960658669071}
@@ -4362,6 +4361,7 @@ MonoBehaviour:
   - {fileID: 2431136863811645635}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
+  distanceFromRoadSplineToResetPlayer: 50
   terrainHighLODDistance: 500
   currentLOD: 1
   terrainHighLOD: {fileID: 425750611390031409}
@@ -9982,6 +9982,7 @@ MonoBehaviour:
   hasChunkConnected: 0
   updateImmediately: 0
   terrainData:
+    terrainMaterial: {fileID: 0}
     resolution: 100
     resolutionLowLOD: 20
     chunkBlendDistance: 5
@@ -11640,7 +11641,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5621000188204950344}
   m_Father: {fileID: 2531949587186233679}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3282393295540088737
@@ -11656,7 +11658,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driveOnLeft: 1
-  racingLine: {fileID: 6707206914398489339}
+  racingLines:
+  - {fileID: 6707206914398489339}
   speedLimitKmh: 40
   density: 100
   laneDistancesForward:
@@ -11774,12 +11777,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7732490136493265605}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2531949587186233679}
+  m_Father: {fileID: 5736128174129826596}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6707206914398489339
 MonoBehaviour:

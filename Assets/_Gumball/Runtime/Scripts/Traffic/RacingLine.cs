@@ -33,6 +33,6 @@ namespace Gumball
         {
             SplineComputer.GetSamples(sampleCollection);
         }
-        
+
     }
 }

@@ -27,6 +27,13 @@ namespace Gumball
 
 #if UNITY_EDITOR
         public SceneAsset EditorAsset => scene.editorAsset;
+        
+        public bool IsDirty { get; private set; }
+        
+        public void SetDirty(bool isDirty)
+        {
+            IsDirty = isDirty;
+        }
 #endif
 
         public void OnBeforeSerialize()
@@ -36,11 +43,27 @@ namespace Gumball
             {
                 if (scene == null || scene.editorAsset == null)
                     sceneName = null;
-                else sceneName = scene.editorAsset.name;
+                else
+                {
+                    string desiredName = scene.editorAsset.name;
+                    if (sceneName == null || !sceneName.Equals(desiredName))
+                    {
+                        sceneName = desiredName;
+                        SetDirty(true);
+                    }
+                }
 
                 if (scene == null || scene.editorAsset == null)
                     address = null;
-                else address = scene.RuntimeKey.ToString();
+                else
+                {
+                    string desiredAddress = scene.RuntimeKey.ToString();
+                    if (address == null || !address.Equals(desiredAddress))
+                    {
+                        address = desiredAddress;
+                        SetDirty(true);
+                    }
+                }
             }
             catch (UnityException)
             {
