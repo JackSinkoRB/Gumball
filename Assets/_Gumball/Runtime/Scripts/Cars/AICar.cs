@@ -130,6 +130,7 @@ namespace Gumball
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
+        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private CustomDrivingPath currentLaneCustom;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private ChunkTrafficManager.LaneDirection currentLaneDirection;
         [Space(5)]
         [Tooltip("An offset may be temporarily applied to the racing line, for example at the start of races.")]
@@ -256,7 +257,7 @@ namespace Gumball
         [Tooltip("The speed the car should brake to if all the directions are blocked (exlcuding the 'when blocked' layers).")]
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private float speedToBrakeToIfBlocked = 50;
         [Space(5)]
-        [SerializeField, ReadOnly] private RacingLine currentRacingLine;
+        [SerializeField, ReadOnly] private CustomDrivingPath currentRacingLine;
         [ConditionalField(nameof(autoDrive), nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private float obstacleAvoidanceOffset; //show in inspector
         [SerializeField, ReadOnly] private bool allDirectionsAreBlocked;
         
@@ -544,7 +545,15 @@ namespace Gumball
 
         public void SetLaneDistance(float laneDistance, ChunkTrafficManager.LaneDirection direction)
         {
+            currentLaneCustom = null;
             currentLaneDistance = laneDistance;
+            currentLaneDirection = direction;
+        }
+        
+        public void SetLaneDistance(CustomDrivingPath customLane, float offset, ChunkTrafficManager.LaneDirection direction)
+        {
+            currentLaneCustom = customLane;
+            currentLaneDistance = offset;
             currentLaneDirection = direction;
         }
         
@@ -741,7 +750,7 @@ namespace Gumball
                 return;
             }
             
-            foreach (RacingLine racingLine in CurrentChunk.TrafficManager.RacingLines)
+            foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
                 currentRacingLine = racingLine;
                 UpdateTargetPosition();
@@ -756,7 +765,7 @@ namespace Gumball
             }
 
             //all directions were blocked, try again but this time without cars blocking
-            foreach (RacingLine racingLine in CurrentChunk.TrafficManager.RacingLines)
+            foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
                 currentRacingLine = racingLine;
                 UpdateTargetPosition();

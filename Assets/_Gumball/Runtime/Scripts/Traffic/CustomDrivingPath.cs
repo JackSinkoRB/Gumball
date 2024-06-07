@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Gumball
 {
     [RequireComponent(typeof(SplineComputer))]
-    public class RacingLine : MonoBehaviour
+    public class CustomDrivingPath : MonoBehaviour
     {
         
         [Header("Debugging")]
@@ -16,7 +16,8 @@ namespace Gumball
 
         public SplineComputer SplineComputer => GetComponent<SplineComputer>();
         public SampleCollection SampleCollection => sampleCollection;
-
+        public SplineSample[] SplineSamples => sampleCollection.samples;
+        
         private void OnEnable()
         {
             UpdateSplineSampleData();
