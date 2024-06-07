@@ -11,6 +11,7 @@ using MyBox;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
+using Random = UnityEngine.Random;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
@@ -269,6 +270,7 @@ namespace Gumball
         /// </summary>
         private const float predictedPositionReactionTime = 0.65f;
         
+        private Chunk lastKnownChunkForRacingLineOffset;
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[10];
 
         [Header("Value modification")]
@@ -645,22 +647,18 @@ namespace Gumball
 
             currentRacingLineOffsetTween = DOTween.To(() => racingLineOffset, x => racingLineOffset = x, offset, interpolationDuration); 
         }
-        
+
         private void Move()
         {
             speed = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
             
             TryCreateMovementPathCollider();
             CheckIfPlayerDriving();
-
             
             if (autoDrive)
                 CheckForCorner();
-            
-            if (useObstacleAvoidance && autoDrive)
-                UpdateTargetPositionWithAvoidance();
-            else
-                UpdateTargetPosition();
+
+            CalculateTargetPosition();
 
             if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
                 CalculateSteerAngle();
@@ -692,24 +690,22 @@ namespace Gumball
             Debug.DrawLine(transform.TransformPoint(frontOfCarPosition), targetPosition, 
                 isBraking ? Color.red : (isAccelerating ? Color.green : Color.white));
         }
+
+        private void CalculateTargetPosition()
+        {
+            if (useObstacleAvoidance && autoDrive)
+            {
+                UpdateTargetPositionWithAvoidance();
+                CheckToUpdateRacingLineOffset();
+            }
+            else
+                UpdateTargetPosition();
+        }
         
         private void UpdateTargetPosition()
         {
             if (autoDrive)
             {
-                if (currentRacingLine == null)
-                {
-                    bool hasCalculatedOffset = racingLineOffset != 0;
-                    if (!hasCalculatedOffset)
-                    {
-                        //keep the current offset if there's no racing line
-                        float distance = CurrentChunk.SplineSampleCollection.GetOffsetFromSpline(transform.position);
-                        SetRacingLineOffset(distance);
-                    }
-                }
-                else if (racingLineOffset != 0)
-                    SetRacingLineOffset(0);
-                
                 targetPos = GetPositionAhead(GetMovementTargetDistance());
                 if (targetPos == null)
                 {
@@ -761,7 +757,28 @@ namespace Gumball
             UpdateTargetPosition();
             TryAvoidObstacles();
         }
-
+        
+        private void CheckToUpdateRacingLineOffset()
+        {
+            if (lastKnownChunkForRacingLineOffset == CurrentChunk)
+                return;
+            
+            if (currentRacingLine == null)
+            {
+                //keep the current offset if there's no racing line
+                float distance = CurrentChunk.SplineSampleCollection.GetOffsetFromSpline(transform.position);
+                SetRacingLineOffset(distance);
+            }
+            else
+            {
+                //if using racing line, set the imprecision range
+                float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers[this].RacingLineImprecisionMaxDistance;
+                SetRacingLineOffset(Random.Range(-distance, distance));
+            }
+            
+            lastKnownChunkForRacingLineOffset = CurrentChunk;
+        }
+        
         private void UpdateDrag()
         {
             if (isHandbrakeEngaged)

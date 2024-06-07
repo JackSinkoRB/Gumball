@@ -17,20 +17,7 @@ namespace Gumball
     [Serializable]
     public abstract class GameSession : ScriptableObject, ISerializationCallbackReceiver
     {
-        
-        [Serializable]
-        public class RacerSessionData
-        {
-            [SerializeField] private AssetReferenceGameObject assetReference;
-            [Tooltip("Can the racer cross the middle of the chunks? Disabling this will enable an invisible barrier for the car in the middle.")]
-            [SerializeField] private bool canCrossMiddle = true;
-            [SerializeField] private PositionAndRotation startingPosition;
 
-            public AssetReferenceGameObject AssetReference => assetReference;
-            public PositionAndRotation StartingPosition => startingPosition;
-            public bool CanCrossMiddle => canCrossMiddle;
-        }
-        
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
         [Header("Info")]
@@ -386,7 +373,6 @@ namespace Gumball
                 RacerSessionData data = racerData[index];
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
-                int finalIndex = index;
                 handle.Completed += h =>
                 {
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
