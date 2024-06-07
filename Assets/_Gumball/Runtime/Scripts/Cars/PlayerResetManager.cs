@@ -100,7 +100,7 @@ namespace Gumball
                 laneDistances.Remove(laneDistance);
                 
                 var (lanePosition, laneRotation) = trafficManager.GetLanePosition(closestSample, laneDistance, ChunkTrafficManager.LaneDirection.FORWARD);
-                if (!trafficManager.CanSpawnCarAtPosition(lanePosition, laneDistance, true))
+                if (!trafficManager.CanSpawnCarAtPosition(playerCar, closestSample.position, closestSample.rotation, true))
                     continue;
 
                 return (lanePosition, laneRotation);
