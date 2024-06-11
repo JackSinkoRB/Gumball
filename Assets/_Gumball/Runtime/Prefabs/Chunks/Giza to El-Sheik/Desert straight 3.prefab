@@ -7196,18 +7196,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 267e0976c6a2ec7488d5bb315f9dbb60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  splineComputer: {fileID: 5189599366127007462}
   trafficManager: {fileID: 0}
+  powerpoleManager: {fileID: 0}
+  barriers: []
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
-  currentTerrain: {fileID: 4487123165438282915}
+  distanceFromRoadSplineToResetPlayer: 50
+  terrainHighLODDistance: 500
+  currentLOD: 0
+  terrainHighLOD: {fileID: 4487123165438282915}
+  terrainLowLOD: {fileID: 0}
+  isFullyLoaded: 0
+  isAccessible: 0
   splineMeshes: []
   chunkMeshData:
     chunk: {fileID: 0}
     vertices: []
-    lastEndVertices: []
-    firstEndVertices: []
+    normals: []
+    modifiedNormals:
+      list: []
+      keyCollision: 0
+    lastEndVertices: 
+    firstEndVertices: 
+    verticesExcludingEnds: 
     vertexColors: []
+  chunkDetector: {fileID: 0}
+  splineLengthCached: -1
   splineSampleCollection:
     samples: []
     optimizedIndices: 
@@ -7231,7 +7245,9 @@ MonoBehaviour:
   hasChunkConnected: 0
   updateImmediately: 0
   terrainData:
+    terrainMaterial: {fileID: 0}
     resolution: 100
+    resolutionLowLOD: 20
     chunkBlendDistance: 50
     matchRoadHeight: 1
     terrainHeightFromRoad: 0
@@ -7308,8 +7324,7 @@ MonoBehaviour:
       objectSurroundingRadius: 5
       objectSurroundingBlendRadius: 15
       objectSurroundingMaxOpacity: 0.7
-      noiseScale: 1
-      noiseMaxOpacity: 0.7
+      naturalLight: 0
       minMaxSlopeAngle:
         Min: 0
         Max: 50
@@ -7318,6 +7333,11 @@ MonoBehaviour:
     perlinHeight:
       Min: 0
       Max: 0
+  meshFilter1: {fileID: 0}
+  meshFilter2: {fileID: 0}
+  vertices1Before: []
+  vertices2Before: []
+  verticesCombined: []
   chunkToConnectWith: {fileID: 0}
   showDebugLines: 0
 --- !u!114 &5189599366127007462

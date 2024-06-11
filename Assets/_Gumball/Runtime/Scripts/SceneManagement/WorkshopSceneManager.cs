@@ -25,9 +25,9 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(SceneManager.WorkshopSceneName, LoadSceneMode.Single, true);
+            yield return Addressables.LoadSceneAsync(SceneManager.WorkshopSceneAddress, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.WorkshopSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.WorkshopSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             AvatarManager.Instance.HideAvatars(true);
 

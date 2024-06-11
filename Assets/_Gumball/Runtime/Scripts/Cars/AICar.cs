@@ -11,6 +11,7 @@ using MyBox;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
+using Random = UnityEngine.Random;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
@@ -264,11 +265,15 @@ namespace Gumball
                                                            | 1 << (int)LayersAndTags.Layer.RacerCar
                                                            | 1 << (int)LayersAndTags.Layer.Barrier
                                                            | 1 << (int)LayersAndTags.Layer.MovementPath;
+        private static readonly LayerMask obstacleLayersNoCars = 1 << (int)LayersAndTags.Layer.Barrier
+                                                           | 1 << (int)LayersAndTags.Layer.MovementPath;
+        
         /// <summary>
         /// The time that the autodriving car looks ahead for curves.
         /// </summary>
         private const float predictedPositionReactionTime = 0.65f;
         
+        private Chunk lastKnownChunkForRacingLineOffset;
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[10];
 
         [Header("Value modification")]
@@ -645,22 +650,18 @@ namespace Gumball
 
             currentRacingLineOffsetTween = DOTween.To(() => racingLineOffset, x => racingLineOffset = x, offset, interpolationDuration); 
         }
-        
+
         private void Move()
         {
             speed = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
             
             TryCreateMovementPathCollider();
             CheckIfPlayerDriving();
-
             
             if (autoDrive)
                 CheckForCorner();
-            
-            if (useObstacleAvoidance && autoDrive)
-                UpdateTargetPositionWithAvoidance();
-            else
-                UpdateTargetPosition();
+
+            CalculateTargetPosition();
 
             if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
                 CalculateSteerAngle();
@@ -692,24 +693,22 @@ namespace Gumball
             Debug.DrawLine(transform.TransformPoint(frontOfCarPosition), targetPosition, 
                 isBraking ? Color.red : (isAccelerating ? Color.green : Color.white));
         }
+
+        private void CalculateTargetPosition()
+        {
+            if (useObstacleAvoidance && autoDrive)
+            {
+                UpdateTargetPositionWithAvoidance();
+                CheckToUpdateRacingLineOffset();
+            }
+            else
+                UpdateTargetPosition();
+        }
         
         private void UpdateTargetPosition()
         {
             if (autoDrive)
             {
-                if (currentRacingLine == null)
-                {
-                    bool hasCalculatedOffset = racingLineOffset != 0;
-                    if (!hasCalculatedOffset)
-                    {
-                        //keep the current offset if there's no racing line
-                        float distance = CurrentChunk.SplineSampleCollection.GetOffsetFromSpline(transform.position);
-                        SetRacingLineOffset(distance);
-                    }
-                }
-                else if (racingLineOffset != 0)
-                    SetRacingLineOffset(0);
-                
                 targetPos = GetPositionAhead(GetMovementTargetDistance());
                 if (targetPos == null)
                 {
@@ -756,12 +755,47 @@ namespace Gumball
                     return;
             }
 
-            //all directions were blocked
+            //all directions were blocked, try again but this time without cars blocking
+            foreach (RacingLine racingLine in CurrentChunk.TrafficManager.RacingLines)
+            {
+                currentRacingLine = racingLine;
+                UpdateTargetPosition();
+                
+                if (targetPos == null)
+                    continue;
+                
+                TryAvoidObstacles(false);
+                
+                if (!allDirectionsAreBlocked)
+                    return;
+            }
+            
             currentRacingLine = null;
             UpdateTargetPosition();
             TryAvoidObstacles();
         }
-
+        
+        private void CheckToUpdateRacingLineOffset()
+        {
+            if (lastKnownChunkForRacingLineOffset == CurrentChunk)
+                return;
+            
+            if (currentRacingLine == null)
+            {
+                //keep the current offset if there's no racing line
+                float distance = CurrentChunk.SplineSampleCollection.GetOffsetFromSpline(transform.position);
+                SetRacingLineOffset(distance);
+            }
+            else
+            {
+                //if using racing line, set the imprecision range
+                float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers[this].RacingLineImprecisionMaxDistance;
+                SetRacingLineOffset(Random.Range(-distance, distance));
+            }
+            
+            lastKnownChunkForRacingLineOffset = CurrentChunk;
+        }
+        
         private void UpdateDrag()
         {
             if (isHandbrakeEngaged)
@@ -1293,7 +1327,7 @@ namespace Gumball
             }
         }
 
-        private void TryAvoidObstacles()
+        private void TryAvoidObstacles(bool includeCars = true)
         {
             if (!autoDrive)
                 return;
@@ -1301,14 +1335,14 @@ namespace Gumball
             allDirectionsAreBlocked = false;
 
             Vector3 futurePosition = targetPosition.OffsetY(frontOfCarPosition.y);
-            if (TryBoxcast(futurePosition, 0))
+            if (TryBoxcast(futurePosition, 0, includeCars))
             {
                 SetObstacleAvoidanceOffset(0);
                 return;
             }
 
-            float? bestLeftOffset = TryBoxcastsInDirection(false);
-            float? bestRightOffset = TryBoxcastsInDirection(true);
+            float? bestLeftOffset = TryBoxcastsInDirection(false, includeCars);
+            float? bestRightOffset = TryBoxcastsInDirection(true, includeCars);
 
             bool bothFree = bestLeftOffset != null && bestRightOffset != null;
             if (bothFree)
@@ -1349,7 +1383,7 @@ namespace Gumball
         }
         
         /// <returns>True if the boxcast wasn't blocked, or false if it was blocked.</returns>
-        private bool TryBoxcast(Vector3 targetPosition, float offset)
+        private bool TryBoxcast(Vector3 targetPosition, float offset, bool includeCars = true)
         {
             Vector3 startPosition = transform.TransformPoint(frontOfCarPosition);
             Vector3 detectorSize = new Vector3(carWidth / 2f, carWidth / 2f, 0);
@@ -1361,7 +1395,7 @@ namespace Gumball
             const float sizeModifierByOffset = 0.1f; //the larger the offset, the smaller the distance is
             float distanceToFuturePosition = GetMovementTargetDistance() / (Mathf.Abs((offset) * sizeModifierByOffset) + 1f); //make the length shorter as the offset gets wider
             
-            int hits = Physics.BoxCastNonAlloc(startPosition, detectorSize, directionToFuturePosition, blockagesTemp, rotation, distanceToFuturePosition, obstacleLayers);
+            int hits = Physics.BoxCastNonAlloc(startPosition, detectorSize, directionToFuturePosition, blockagesTemp, rotation, distanceToFuturePosition, includeCars ? obstacleLayers : obstacleLayersNoCars);
             
             //if it cannot cross the middle, check if crossing the middle and cancel if so
             if (GameSessionManager.Instance.CurrentSession != null
@@ -1423,7 +1457,7 @@ namespace Gumball
         }
 
         /// <returns>The offset to the left that is unblocked, or -1 if none unblocked.</returns>
-        private float? TryBoxcastsInDirection(bool isRight)
+        private float? TryBoxcastsInDirection(bool isRight, bool includeCars = true)
         {
             const float distance = 2;
             const float distanceModifier = 0.7f; //as the angle gets larger, the distance offset gets smaller
@@ -1437,7 +1471,7 @@ namespace Gumball
             {
                 Vector3 futurePosition = targetPosition.OffsetY(frontOfCarPosition.y);
 
-                bool successful = TryBoxcast(futurePosition, offset);
+                bool successful = TryBoxcast(futurePosition, offset, includeCars);
                 if (successful)
                     return offset;
                 

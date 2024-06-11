@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -12,22 +15,9 @@ using Debug = UnityEngine.Debug;
 namespace Gumball
 {
     [Serializable]
-    public abstract class GameSession : ScriptableObject
+    public abstract class GameSession : ScriptableObject, ISerializationCallbackReceiver
     {
-        
-        [Serializable]
-        public class RacerSessionData
-        {
-            [SerializeField] private AssetReferenceGameObject assetReference;
-            [Tooltip("Can the racer cross the middle of the chunks? Disabling this will enable an invisible barrier for the car in the middle.")]
-            [SerializeField] private bool canCrossMiddle = true;
-            [SerializeField] private PositionAndRotation startingPosition;
 
-            public AssetReferenceGameObject AssetReference => assetReference;
-            public PositionAndRotation StartingPosition => startingPosition;
-            public bool CanCrossMiddle => canCrossMiddle;
-        }
-        
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
         [Header("Info")]
@@ -84,6 +74,22 @@ namespace Gumball
         {
             GameSessionManager.Instance.SetCurrentSession(this);
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
+        }
+        
+        public void OnBeforeSerialize()
+        {
+#if UNITY_EDITOR
+            if (scene != null && scene.IsDirty)
+            {
+                EditorUtility.SetDirty(this);
+                scene.SetDirty(false);
+            }
+#endif
+        }
+
+        public void OnAfterDeserialize()
+        {
+            
         }
         
 #if UNITY_EDITOR
@@ -276,7 +282,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log("Scene loading started...");
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
             
-            yield return Addressables.LoadSceneAsync(scene.SceneName);
+            yield return Addressables.LoadSceneAsync(scene.Address);
             
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
@@ -367,7 +373,6 @@ namespace Gumball
                 RacerSessionData data = racerData[index];
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
-                int finalIndex = index;
                 handle.Completed += h =>
                 {
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();

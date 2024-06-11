@@ -50,7 +50,7 @@ namespace Gumball
         {
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
-            Debug.Log($"{SceneManager.GameLoaderSceneName} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
+            Debug.Log($"{SceneManager.GameLoaderSceneAddress} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
 #endif
 
             currentStage = Stage.Loading_scriptable_data_objects;
@@ -73,10 +73,10 @@ namespace Gumball
             
             stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
-            mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Additive, true);
+            mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Additive, true);
             yield return mainSceneHandle;
 #if ENABLE_LOGS
-            Debug.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+            Debug.Log($"{SceneManager.MainSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
 
             stopwatch.Restart();
