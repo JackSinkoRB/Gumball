@@ -20,6 +20,9 @@ namespace Gumball
             Barrier = 13,
             RacerCar = 14,
             MovementPath = 15,
+            Grass = 16,
+            Trees = 17,
+            PlayerResetTrigger = 18,
         }
         
         public static LayerMask AllCarLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerCar | 1 << (int)Layer.RacerCar;

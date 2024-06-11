@@ -10,25 +10,26 @@ namespace Gumball
     [Serializable]
     public struct ChunkObjectData
     {
-        [SerializeField] private Vector3 localPosition;
-        [SerializeField] private Quaternion localRotation;
-        [SerializeField] private Vector3 localScale;
+        
+        [SerializeField] private Vector3 positionRelativeToChunk;
+        [SerializeField] private Quaternion rotation;
+        [SerializeField] private Vector3 scaleRelativeToChunk;
         [SerializeField] private bool alwaysGrounded;
 
-        public ChunkObjectData(ChunkObject chunkObject)
+        public ChunkObjectData(Chunk chunkReference, ChunkObject chunkObject)
         {
-            localPosition = chunkObject.transform.localPosition;
-            localRotation = chunkObject.transform.localRotation;
-            localScale = chunkObject.transform.localScale;
+            positionRelativeToChunk = chunkReference.transform.InverseTransformPoint(chunkObject.transform.position);
+            rotation = chunkObject.transform.rotation;
+            scaleRelativeToChunk = GetScaleRelativeToChunk(chunkReference, chunkObject);
             alwaysGrounded = chunkObject.AlwaysGrounded;
         }
 
         public GameObject LoadIntoChunk(AsyncOperationHandle<GameObject> handle, Chunk chunk)
         {
             GameObject chunkObject = Object.Instantiate(handle.Result, chunk.transform);
-            chunkObject.transform.localPosition = localPosition;
-            chunkObject.transform.localRotation = localRotation;
-            chunkObject.transform.localScale = localScale;
+            chunkObject.transform.localPosition = positionRelativeToChunk;
+            chunkObject.transform.localRotation = rotation;
+            chunkObject.transform.localScale = scaleRelativeToChunk;
             
             if (alwaysGrounded)
             {
@@ -40,5 +41,19 @@ namespace Gumball
             chunkObject.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             return chunkObject;
         }
+
+        private static Vector3 GetScaleRelativeToChunk(Chunk chunkReference, ChunkObject chunkObject)
+        {
+            Vector3 totalScale = Vector3.one;
+            Transform parent = chunkObject.transform;
+            while (parent != null && parent != chunkReference.transform)
+            {
+                totalScale = totalScale.Multiply(parent.localScale);
+                parent = parent.parent;
+            }
+
+            return totalScale;
+        }
+        
     }
 }

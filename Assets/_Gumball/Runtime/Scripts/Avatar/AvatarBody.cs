@@ -23,9 +23,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private AvatarCosmetic[] cosmetics;
         [SerializeField, ReadOnly] private Material[] attachedMaterialsCached;
         
-        private SkinnedMeshRenderer[] skinnedMeshRenderers;
-        private SkinnedMeshRenderer[] skinnedMeshRenderersCached => skinnedMeshRenderers ??= gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
-        
+        private SkinnedMeshRenderer[] skinnedMeshRenderersCached;
         private BlendshapeManager[] blendShapeManagers;
         
         public AvatarBodyType BodyType => bodyType;
@@ -34,7 +32,8 @@ namespace Gumball
         public DriverIK DriverIK => driverIK;
         public TransformBone TransformBone => transformBone;
         public Transform Pelvis => pelvis;
-
+        public SkinnedMeshRenderer[] SkinnedMeshRenderers => skinnedMeshRenderersCached ??= gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+        
         public Dictionary<AvatarCosmeticCategory, List<AvatarCosmetic>> CosmeticsGrouped { get; } = new();
 
         public Material[] AttachedMaterials
@@ -44,7 +43,7 @@ namespace Gumball
                 if (attachedMaterialsCached == null || attachedMaterialsCached.Length == 0)
                 {
                     HashSet<Material> attachedMaterials = new();
-                    foreach (SkinnedMeshRenderer mesh in skinnedMeshRenderersCached)
+                    foreach (SkinnedMeshRenderer mesh in SkinnedMeshRenderers)
                     {
                         foreach (Material material in mesh.materials)
                         {
@@ -128,7 +127,7 @@ namespace Gumball
         {
             HashSet<BlendshapeManager> managers = new();
             
-            foreach (SkinnedMeshRenderer mesh in skinnedMeshRenderersCached)
+            foreach (SkinnedMeshRenderer mesh in SkinnedMeshRenderers)
             {
                 managers.Add(mesh.gameObject.AddComponent<BlendshapeManager>());
             }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using MyBox;
 using UnityEngine;
 
@@ -15,14 +16,14 @@ namespace Gumball
         [SerializeField] private float depletionRate = 5; //TODO: might want to make this upgradable (use save data)
         
         [Tooltip("How long (in seconds) does it take to regenerate a full tank of NOS?")]
-        [SerializeField] private float fillRate = 30; //TODO: might want to make this upgradable (use save data)
+        [SerializeField] private float fillRate = 60; //TODO: might want to make this upgradable (use save data)
 
         [Tooltip("The multiplier to apply to the cars torque when NOS is activated.")]
         [SerializeField] private float torqueAddition = 1500; //TODO: might want to make this upgradable (use save data)
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
-        
+
         public float AvailableNosPercent { get; private set; }
         public bool IsActivated { get; private set; }
 
@@ -35,8 +36,9 @@ namespace Gumball
         {
             if (IsActivated)
             {
-                //deactivate if braking
-                if (WarehouseManager.Instance.CurrentCar.IsBraking)
+                if (WarehouseManager.Instance.CurrentCar.IsBraking
+                    || WarehouseManager.Instance.CurrentCar.IsHandbrakeEngaged
+                    || !WarehouseManager.Instance.CurrentCar.IsAccelerating)
                 {
                     Deactivate();
                     return;
@@ -80,6 +82,7 @@ namespace Gumball
             IsActivated = true;
 
             carBelongsTo.SetPeakTorque(carBelongsTo.PeakTorque + torqueAddition);
+            ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(true);
         }
         
         public void Deactivate()
@@ -93,6 +96,7 @@ namespace Gumball
             IsActivated = false;
             
             carBelongsTo.SetPeakTorque(carBelongsTo.PeakTorque - torqueAddition);
+            ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(false);
         }
         
         private void Deplete()

@@ -31,7 +31,8 @@ namespace Gumball
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
 
-        [SerializeField] private RacingLine racingLine;
+        [Tooltip("The chunks racing lines. Can have none, one or multiple. If multiple, the first lines will take priority.")]
+        [SerializeField] private RacingLine[] racingLines;
         
         //when map driving scene loads, load all the traffic cars (eg. a traffic manager that holds reference to all traffic cars)
 
@@ -43,11 +44,14 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private Chunk chunk;
+
+        public float[] LaneDistancesForward => laneDistancesForward;
+        public float[] LaneDistancesBackward => laneDistancesBackward;
         
         public Chunk Chunk => chunk;
         public float SpeedLimitKmh => speedLimitKmh;
         public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLengthCached / density);
-        public RacingLine RacingLine => racingLine;
+        public RacingLine[] RacingLines => racingLines;
         public bool HasBackwardLanes => laneDistancesBackward != null && laneDistancesBackward.Length > 0;
         public bool HasForwardLanes => laneDistancesForward != null && laneDistancesForward.Length > 0;
         
@@ -72,35 +76,6 @@ namespace Gumball
         private void OnChunkLoadedAndReady()
         {
             InitialiseCars();
-
-            TryConnectRacingLines();
-        }
-
-        private void TryConnectRacingLines()
-        {
-            if (racingLine == null)
-                return;
-            
-            int currentMapIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunk);
-            LoadedChunkData? previousChunk = ChunkManager.Instance.GetLoadedChunkDataByMapIndex(currentMapIndex - 1);
-            if (previousChunk == null)
-                return;
-
-            ChunkTrafficManager previousChunkTrafficManager = previousChunk.Value.Chunk.TrafficManager;
-            if (previousChunkTrafficManager == null)
-                return;
-
-            if (previousChunkTrafficManager.racingLine == null)
-                return;
-
-            SplineComputer currentSpline = racingLine.SplineComputer;
-            SplineComputer previousSpline = previousChunkTrafficManager.racingLine.SplineComputer;
-            
-            //insert to end of previous chunks racing line a point with other chunks first point
-            previousSpline.SetPoint(previousSpline.pointCount, currentSpline.GetPoint(0));
-            
-            //insert at start of chunks racing line a node with previous chunks last node
-            currentSpline.InsertPoint(0, previousSpline.GetPoint(previousSpline.pointCount-2));
         }
 
         /// <summary>
@@ -167,43 +142,7 @@ namespace Gumball
             return (finalPos, rotation);
         }
         
-        public float GetOffsetFromRacingLine(Vector3 fromPoint)
-        {
-            var (splineSample, distanceSqr) = racingLine.SampleCollection.GetClosestSampleOnSpline(fromPoint);
-            float distance = Mathf.Sqrt(distanceSqr);
-            
-            //is the position to the left or right of the spline?
-            bool isRight = fromPoint.IsFurtherInDirection(splineSample.position, splineSample.right);
-            float offsetDirection = isRight ? 1 : -1;
-            
-            return distance * offsetDirection;
-        }
-        
-        private bool CanSpawnCarAtPosition(Vector3 position, float laneDistance)
-        {
-            const float minDistanceSqr = minDistanceRequiredToSpawn * minDistanceRequiredToSpawn;
-
-            //loop over all cars and get distance to their position
-            foreach (AICar trafficCar in TrafficCarSpawner.CurrentCars)
-            {
-                bool isSameLane = Mathf.Abs(trafficCar.CurrentLaneDistance - laneDistance) > randomLaneOffset.Max;
-                if (isSameLane)
-                    continue; //not in same lane
-                
-                float distanceSqr = Vector3.SqrMagnitude(position - trafficCar.transform.position);
-                if (distanceSqr <= minDistanceSqr)
-                    return false;
-            }
-
-            //get distance to the player car
-            float distanceToPlayerSqr = Vector3.SqrMagnitude(position - WarehouseManager.Instance.CurrentCar.transform.position);
-            if (distanceToPlayerSqr <= minDistanceSqr)
-                return false;
-            
-            return true;
-        }
-        
-        private float GetRandomLaneDistance(LaneDirection direction)
+        public float GetRandomLaneDistance(LaneDirection direction)
         {
             if (direction == LaneDirection.NONE)
             {
@@ -243,7 +182,50 @@ namespace Gumball
 
             throw new ArgumentOutOfRangeException();
         }
-        
+
+        public bool CanSpawnCarAtPosition(Vector3 position, float laneDistance, bool ignorePlayer = false)
+        {
+            const float minDistanceSqr = minDistanceRequiredToSpawn * minDistanceRequiredToSpawn;
+
+            //loop over all cars and get distance to their position
+            foreach (AICar trafficCar in TrafficCarSpawner.CurrentCars)
+            {
+                bool isSameLane = Mathf.Abs(trafficCar.CurrentLaneDistance - laneDistance) > randomLaneOffset.Max;
+                if (isSameLane)
+                    continue; //not in same lane
+                
+                float distanceSqr = Vector3.SqrMagnitude(position - trafficCar.transform.position);
+                if (distanceSqr <= minDistanceSqr)
+                    return false;
+            }
+            
+            //loop over all racers and get distance to their position
+            if (GameSessionManager.ExistsRuntime 
+                && GameSessionManager.Instance.CurrentSession != null 
+                && GameSessionManager.Instance.CurrentSession.CurrentRacers != null)
+            {
+                foreach (AICar racerCar in GameSessionManager.Instance.CurrentSession.CurrentRacers.Keys)
+                {
+                    if (racerCar == null || racerCar.IsPlayerCar)
+                        continue;
+                    
+                    float distanceSqr = Vector3.SqrMagnitude(position - racerCar.transform.position);
+                    if (distanceSqr <= minDistanceSqr)
+                        return false;
+                }
+            }
+
+            if (!ignorePlayer)
+            {
+                //get distance to the player car
+                float distanceToPlayerSqr = Vector3.SqrMagnitude(position - WarehouseManager.Instance.CurrentCar.transform.position);
+                if (distanceToPlayerSqr <= minDistanceSqr)
+                    return false;
+            }
+
+            return true;
+        }
+
         private void InitialiseLanes()
         {
             //if no lanes, just create one in the centre
