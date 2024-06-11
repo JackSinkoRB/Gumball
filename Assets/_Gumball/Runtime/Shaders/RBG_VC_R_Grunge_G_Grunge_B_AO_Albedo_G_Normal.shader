@@ -585,7 +585,7 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				float3 lerpResult301 = lerp( lerpResult293 , tex2DNode292 , temp_output_279_0);
 				
 				float4 color303 = IsGammaSpace() ? float4(0.9716981,0.9300067,0.637104,0) : float4(0.9368213,0.8481022,0.3635845,0);
-				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.8989 );
+				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.0 );
 				float4 lerpResult310 = lerp( ( temp_output_306_0 * lerpResult293.y ) , temp_output_306_0 , 0.2);
 				float4 lerpResult313 = lerp( lerpResult282 , lerpResult310 , 0.25);
 				float4 break331 = lerpResult310;
@@ -1746,7 +1746,7 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				float4 lerpResult282 = lerp( lerpResult253 , _G_Grunge_Color , temp_output_279_0);
 				
 				float4 color303 = IsGammaSpace() ? float4(0.9716981,0.9300067,0.637104,0) : float4(0.9368213,0.8481022,0.3635845,0);
-				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.8989 );
+				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.0 );
 				float2 uv_BumpMap = IN.ase_texcoord4.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
 				float3 unpack235 = UnpackNormalScale( tex2D( _BumpMap, uv_BumpMap ), _Normal_Str );
 				unpack235.z = lerp( 1, unpack235.z, saturate(_Normal_Str) );
@@ -2841,7 +2841,7 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				float3 lerpResult301 = lerp( lerpResult293 , tex2DNode292 , temp_output_279_0);
 				
 				float4 color303 = IsGammaSpace() ? float4(0.9716981,0.9300067,0.637104,0) : float4(0.9368213,0.8481022,0.3635845,0);
-				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.8989 );
+				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.0 );
 				float4 lerpResult310 = lerp( ( temp_output_306_0 * lerpResult293.y ) , temp_output_306_0 , 0.2);
 				float4 lerpResult313 = lerp( lerpResult282 , lerpResult310 , 0.25);
 				float4 break331 = lerpResult310;
@@ -3502,7 +3502,7 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;201;6149.488,-1834.036;Floa
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;330;5278.852,-781.2451;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.LerpOp;313;4891.086,-849.0276;Inherit;True;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;306;3643.433,-252.3018;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.RangedFloatNode;304;3240.451,-130.7971;Inherit;False;Constant;_Light_Str;Light_Str;13;0;Create;True;0;0;0;False;0;False;38.8989;0;0;50;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;304;3240.451,-130.7971;Inherit;False;Constant;_Light_Str;Light_Str;13;0;Create;True;0;0;0;False;0;False;38;0;0;50;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;305;3244.162,-333.6491;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.ColorNode;303;2888.5,-167.4775;Inherit;False;Constant;_Light_Color;Light_Color;14;0;Create;True;0;0;0;False;0;False;0.9716981,0.9300067,0.637104,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;296;3449.499,-1143.472;Inherit;False;Property;_G_Grundge_Gloss;G_Grundge_Gloss;15;0;Create;True;0;0;0;False;0;False;0.8293218;0.8293218;0;3;0;1;FLOAT;0
@@ -3607,4 +3607,4 @@ WireConnection;266;2;261;0
 WireConnection;355;0;356;0
 WireConnection;355;1;282;0
 ASEEND*/
-//CHKSM=C4CB93A5EAB9D74DF409624B60C7231B0D4A04CC
+//CHKSM=F577982978C6141994DC50958DD00CEB883FD264
