@@ -10,11 +10,11 @@ namespace Gumball
         public float LaneOffset { get; }
         public CustomDrivingPath CustomLane { get; }
         public float RandomLaneDistance { get; }
-        public (Vector3, Quaternion) LanePosition { get; }
+        public PositionAndRotation LanePosition { get; }
             
         public bool IsCustomLane => CustomLane != null;
             
-        public LaneData(float laneOffset, CustomDrivingPath customLane, float randomLaneDistance, (Vector3, Quaternion) lanePosition)
+        public LaneData(float laneOffset, CustomDrivingPath customLane, float randomLaneDistance, PositionAndRotation lanePosition)
         {
             LaneOffset = laneOffset;
             CustomLane = customLane;

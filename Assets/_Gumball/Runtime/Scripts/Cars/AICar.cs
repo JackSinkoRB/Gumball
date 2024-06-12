@@ -1605,8 +1605,8 @@ namespace Gumball
             }
             else
             {
-                var (position, rotation) = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance, currentLaneDirection);
-                return (splineSampleAhead.Value.Item2, position, rotation, splineSampleAhead.Value.Item1);
+                PositionAndRotation lanePosition = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance, currentLaneDirection);
+                return (splineSampleAhead.Value.Item2, lanePosition.Position, lanePosition.Rotation, splineSampleAhead.Value.Item1);
             }
 
             return null;
@@ -1639,6 +1639,13 @@ namespace Gumball
             if (isUsingRacingLine && closestSplineIndex == sampleCollection.length - 1)
             {
                 sampleCollection = CurrentChunk.SplineSampleCollection; //already passed the last sample
+                closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
+            }
+            
+            //traffic custom path only
+            if (currentLaneCustom != null && closestSplineIndex != sampleCollection.length - 1)
+            {
+                sampleCollection = currentLaneCustom.SampleCollection;
                 closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
             }
 
@@ -1749,8 +1756,8 @@ namespace Gumball
             {
                 const float reallyFarAway = 1000;
                 
-                Vector3 positionForward = collider.ClosestPoint(transform.position + transform.forward * reallyFarAway).SetY(Rigidbody.centerOfMass.y);
-                Vector3 localPositionForward = transform.InverseTransformPoint(positionForward).SetX(0);
+                Vector3 positionForward = collider.ClosestPoint(transform.position + transform.forward * reallyFarAway);
+                Vector3 localPositionForward = transform.InverseTransformPoint(positionForward).SetXY(0, Rigidbody.centerOfMass.y);
                 float distanceForward = localPositionForward.z;
                 if (distanceForward > furthestDistanceForward)
                 {
