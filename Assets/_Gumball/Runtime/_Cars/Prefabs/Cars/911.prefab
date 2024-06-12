@@ -4862,37 +4862,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6405336643606454606}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &3228971601505665731
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2707095060420362409}
-  m_Layer: 8
-  m_Name: RearView
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2707095060420362409
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3228971601505665731}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.47, z: -0.11}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7744041517038116879}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3383615947878741820
 GameObject:
   m_ObjectHideFlags: 0
@@ -5243,39 +5212,6 @@ Transform:
   - {fileID: 9179285777309729718}
   - {fileID: 4962156450098671599}
   m_Father: {fileID: 5306973082130418207}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &4329975642604603962
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7744041517038116879}
-  m_Layer: 8
-  m_Name: CameraPositions
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7744041517038116879
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4329975642604603962}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 4888363105939381109}
-  - {fileID: 2707095060420362409}
-  m_Father: {fileID: 6836390663536110284}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4364118109728668194
 GameObject:
@@ -8998,7 +8934,6 @@ Transform:
   - {fileID: 6836316462123091794}
   - {fileID: 8122091738299496973}
   - {fileID: 9212970982777233993}
-  - {fileID: 7744041517038116879}
   - {fileID: 3598331306860555585}
   - {fileID: 1909353466429399051}
   - {fileID: 3053855281547784238}
@@ -9048,8 +8983,6 @@ MonoBehaviour:
   canBeDrivenByPlayer: 1
   avatarIKManager: {fileID: 2543841123063907618}
   steeringWheel: {fileID: 7747513796075811436}
-  cockpitCameraTarget: {fileID: 4888363105939381109}
-  rearViewCameraTarget: {fileID: 2707095060420362409}
   isPlayerCar: 0
   isPlayerDrivingEnabled: 0
   carIndex: 0
@@ -9059,7 +8992,6 @@ MonoBehaviour:
   nosManager: {fileID: 0}
   frontOfCarPosition: {x: 0, y: 1, z: 2}
   carWidth: 2
-  isStuck: 0
   wheelConfiguration: 0
   frontWheelMeshes:
   - {fileID: 314294427718096920}
@@ -9080,6 +9012,7 @@ MonoBehaviour:
   currentLaneDistance: 0
   currentLaneDirection: 0
   racingLineOffset: 0
+  targetPositionOffset: 0
   dragWhenAccelerating: 0
   dragWhenIdle: 0.15
   dragWhenBraking: 1
@@ -9178,27 +9111,26 @@ MonoBehaviour:
   desiredSteerAngle: 0
   visualSteerAngle: 0
   brakeTorque: 1000
-  cornerReactionTime: 1.1
   cornerBrakingCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 300
-      inSlope: -6.622647
-      outSlope: -6.622647
+      inSlope: -12.710678
+      outSlope: -12.710678
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.08333333
+      outWeight: 0.037499998
     - serializedVersion: 3
       time: 50
-      value: 75
-      inSlope: -1.2735827
-      outSlope: -1.2735827
+      value: 65
+      inSlope: -0.000001592221
+      outSlope: -0.000001592221
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.21666671
+      inWeight: 0.19166672
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -9206,14 +9138,13 @@ MonoBehaviour:
   isBraking: 0
   corneringSpeed: Infinity
   speedToBrakeTo: 0
-  cornerAngleAhead: 0
-  isBrakingForCorner: 0
   handbrakeEaseOffDuration: 0.8
   handbrakeTorque: 5000
   isHandbrakeEngaged: 0
   colliders: {fileID: 6830272080298800554}
   collisionRecoverDuration: 0
-  collisions: []
+  inCollision: 0
+  numberOfCollisions: 0
   isPushingAnotherRacer: 0
   racersCollidingWith: []
   brakeForObstacles: 0
@@ -9235,10 +9166,10 @@ MonoBehaviour:
     Min: 10
     Max: 60
   useObstacleAvoidance: 1
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 58112
   speedToBrakeToIfBlocked: 65
-  currentRacingLine: {fileID: 0}
-  obstacleAvoidanceOffset: 0
-  allDirectionsAreBlocked: 0
   defaultPeakTorque: 0
   isInitialised: 0
   currentChunkCached: {fileID: 0}
@@ -9451,37 +9382,6 @@ Transform:
   - {fileID: 2006744379183794384}
   - {fileID: 4314266978765317264}
   m_Father: {fileID: 5306973082130418207}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &7003789446804076578
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4888363105939381109}
-  m_Layer: 8
-  m_Name: Cockpit
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4888363105939381109
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7003789446804076578}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.28, y: 1.0335, z: -0.26}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7744041517038116879}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7006293714823581746
 GameObject:
