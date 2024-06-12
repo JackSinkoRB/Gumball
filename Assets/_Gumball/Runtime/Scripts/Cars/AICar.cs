@@ -129,8 +129,8 @@ namespace Gumball
         [Header("Lanes")]
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
-        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
-        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private CustomDrivingPath currentLaneCustom;
+        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private TrafficLane currentLane;
+        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float additionalLaneOffset;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private ChunkTrafficManager.LaneDirection currentLaneDirection;
         [Space(5)]
         [Tooltip("An offset may be temporarily applied to the racing line, for example at the start of races.")]
@@ -138,8 +138,6 @@ namespace Gumball
         
         private Tween currentRacingLineOffsetTween;
 
-        public float CurrentLaneDistance => currentLaneDistance;
-        
         [Header("Drag")]
         [SerializeField] private float dragWhenAccelerating;
         [SerializeField] private float dragWhenIdle = 0.15f;
@@ -543,18 +541,15 @@ namespace Gumball
             }
         }
 
-        public void SetLaneDistance(float laneDistance, ChunkTrafficManager.LaneDirection direction)
+        public void SetCurrentLane(TrafficLane lane, ChunkTrafficManager.LaneDirection direction = ChunkTrafficManager.LaneDirection.NONE, float additionalLaneOffset = float.NaN)
         {
-            currentLaneCustom = null;
-            currentLaneDistance = laneDistance;
-            currentLaneDirection = direction;
-        }
-        
-        public void SetLaneDistance(CustomDrivingPath customLane, float offset, ChunkTrafficManager.LaneDirection direction)
-        {
-            currentLaneCustom = customLane;
-            currentLaneDistance = offset;
-            currentLaneDirection = direction;
+            currentLane = lane;
+            
+            if (direction != ChunkTrafficManager.LaneDirection.NONE)
+                currentLaneDirection = direction;
+            
+            if (!float.IsNaN(additionalLaneOffset))
+                this.additionalLaneOffset = additionalLaneOffset;
         }
         
         public void SetPeakTorque(float peakTorque)
@@ -1599,17 +1594,14 @@ namespace Gumball
             if (splineSampleAhead == null)
                 return null; //no more chunks loaded
             
-            if (useRacingLine && currentRacingLine != null)
-            {
-                return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position, splineSampleAhead.Value.Item1.rotation, splineSampleAhead.Value.Item1);
-            }
-            else
-            {
-                PositionAndRotation lanePosition = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance, currentLaneDirection);
-                return (splineSampleAhead.Value.Item2, lanePosition.Position, lanePosition.Rotation, splineSampleAhead.Value.Item1);
-            }
-
-            return null;
+            //get the lane distance
+            float laneDistance = additionalLaneOffset;
+            if (currentLane.Type == TrafficLane.LaneType.DISTANCE_FROM_CENTER)
+                laneDistance += currentLane.DistanceFromCenter;
+            
+            //get the lane position
+            PositionAndRotation lanePosition = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, laneDistance, currentLaneDirection);
+            return (splineSampleAhead.Value.Item2, lanePosition.Position, lanePosition.Rotation, splineSampleAhead.Value.Item1);
         }
 
         /// <summary>
@@ -1643,9 +1635,9 @@ namespace Gumball
             }
             
             //traffic custom path only
-            if (currentLaneCustom != null && closestSplineIndex != sampleCollection.length - 1)
+            if (currentLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE && closestSplineIndex != sampleCollection.length - 1)
             {
-                sampleCollection = currentLaneCustom.SampleCollection;
+                sampleCollection = currentLane.Path.SampleCollection;
                 closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
             }
 
@@ -1673,10 +1665,18 @@ namespace Gumball
                     
                     Chunk newChunk = loadedChunkData.Value.Chunk;
                     chunkToUse = newChunk;
-
-                    //if looking ahead, never use the racing line - just use the chunk spline
-                    //when the chunk is entered, it will find the racing line and set the offset
+                    
                     sampleCollection = chunkToUse.SplineSampleCollection;
+
+                    //for traffic cars, update the lane with the closest one on the new chunk
+                    if (!useRacingLine)
+                    {
+                        TrafficLane closestLane = GetClosestLaneToCurrentLane(chunkToUse);
+                        SetCurrentLane(closestLane);
+                        
+                        if (closestLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE)
+                            sampleCollection = closestLane.Path.SampleCollection;
+                    }
                     
                     //reset the values
                     previousSample = null;
@@ -1734,6 +1734,29 @@ namespace Gumball
                 current.onBecomeAccessible += OnChunkCachedBecomeAccessible;
                 current.onBecomeInaccessible += OnChunkCachedBecomeInaccessible;
             }
+        }
+
+        private TrafficLane GetClosestLaneToCurrentLane(Chunk chunk)
+        {
+            //choose the closest lane to the current lane offset in the new chunk
+            float currentLaneDistance = currentLane.GetDistanceFromCenter(this);
+                    
+            TrafficLane[] lanes = currentLaneDirection == ChunkTrafficManager.LaneDirection.FORWARD ? chunk.TrafficManager.LanesForward : chunk.TrafficManager.LanesBackward;
+            float closestLaneDifference = Mathf.Infinity; //lane distance is the distance from the lane to the center of the chunk
+            TrafficLane closestLane = null;
+                    
+            foreach (TrafficLane lane in lanes)
+            {
+                float laneDifference = Mathf.Abs(lane.GetDistanceFromCenter(this) - currentLaneDistance);
+
+                if (laneDifference < closestLaneDifference)
+                {
+                    closestLane = lane;
+                    closestLaneDifference = laneDifference;
+                }
+            }
+
+            return closestLane;
         }
         
         private void InitialiseGearbox()

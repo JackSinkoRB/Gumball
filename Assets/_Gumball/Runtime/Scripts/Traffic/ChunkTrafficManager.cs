@@ -176,47 +176,25 @@ namespace Gumball
 
         private bool TrySpawnCarInDirection(LaneDirection direction)
         {
-            LaneData laneData = GetRandomLane(direction);
-            
+            //get a random lane
+            TrafficLane randomLane = direction == LaneDirection.FORWARD ? lanesForward.GetRandom() : lanesBackward.GetRandom();
+            float additionalOffset = Random.Range(-randomLaneOffset, randomLaneOffset);
+            PositionAndRotation lanePosition = randomLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE
+                ? GetLanePosition(randomLane.Path.SplineSamples.GetRandom(), additionalOffset, direction)
+                : GetLanePosition(chunk.SplineSamples.GetRandom(), randomLane.DistanceFromCenter + additionalOffset, direction);
+
             AICar randomVariant = TrafficCarSpawner.Instance.GetRandomCarPrefab();
-            if (!CanSpawnCarAtPosition(randomVariant, laneData.LanePosition.Position, laneData.LanePosition.Rotation))
+            if (!CanSpawnCarAtPosition(randomVariant, lanePosition.Position, lanePosition.Rotation))
                 return false;
 
             //spawn an instance of the car and intialise
-            AICar car = TrafficCarSpawner.Instance.SpawnCar(laneData.LanePosition.Position, laneData.LanePosition.Rotation, randomVariant);
+            AICar car = TrafficCarSpawner.Instance.SpawnCar(lanePosition.Position, lanePosition.Rotation, randomVariant);
             
-            if (laneData.IsCustomLane)
-                car.SetLaneDistance(laneData.CustomLane, laneData.LaneOffset, direction);
-            else
-                car.SetLaneDistance(laneData.RandomLaneDistance + laneData.LaneOffset, direction);
-            
+            car.SetCurrentLane(randomLane, direction, additionalOffset);
             car.SetSpeed(car.DesiredSpeed);
             return true;
         }
-        
-        private LaneData GetRandomLane(LaneDirection direction)
-        {
-            //decide whether it will be a custom lane or distance based
-            float laneOffset = Random.Range(-randomLaneOffset, randomLaneOffset);
-            CustomDrivingPath customLane = null;
-            float randomLaneDistance = -1;
-            PositionAndRotation lanePosition;
-            
-            TrafficLane randomLane = direction == LaneDirection.FORWARD ? lanesForward.GetRandom() : lanesBackward.GetRandom();
-            if (randomLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE)
-            {
-                customLane = randomLane.Path;
-                lanePosition = GetLanePosition(customLane.SplineSamples.GetRandom(), laneOffset, direction);
-            }
-            else
-            {
-                randomLaneDistance = randomLane.DistanceFromCenter;
-                lanePosition = GetLanePosition(chunk.SplineSamples.GetRandom(), randomLaneDistance, direction);
-            }
 
-            return new LaneData(laneOffset, customLane, randomLaneDistance, lanePosition);
-        }
-        
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {

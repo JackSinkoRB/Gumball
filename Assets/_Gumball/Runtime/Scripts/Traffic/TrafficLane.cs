@@ -62,6 +62,24 @@ namespace Gumball
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
+        public float GetDistanceFromCenter(AICar playerCar)
+        {
+            //if a path,
+
+            if (type == LaneType.DISTANCE_FROM_CENTER)
+                return distanceFromCenter;
+
+            if (type == LaneType.CUSTOM_SPLINE)
+            {
+                //get the closest sample on the path to the player
+                var (closestSample, closestSampleDistance) = path.SampleCollection.GetClosestSampleOnSpline(playerCar.transform.position);
+                //then get the distance to the closest sample on the chunk spline
+                var (closestSampleOnChunk, closestSampleDistanceOnChunk) = playerCar.LastKnownChunk.GetClosestSampleOnSpline(closestSample.position);
+                return closestSampleDistanceOnChunk;
+            }
+
+            throw new NotImplementedException();
+        }
     }
 }
