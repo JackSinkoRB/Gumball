@@ -545,6 +545,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 				float2 uv_Albedo_Gloss = IN.ase_texcoord8.xy * _Albedo_Gloss_ST.xy + _Albedo_Gloss_ST.zw;
 				float4 tex2DNode240 = tex2D( _Albedo_Gloss, uv_Albedo_Gloss );
+				float4 temp_output_244_0 = ( tex2DNode240 * _Color );
 				
 				float2 uv_Normal = IN.ase_texcoord8.xy * _Normal_ST.xy + _Normal_ST.zw;
 				float3 unpack242 = UnpackNormalScale( tex2D( _Normal, uv_Normal ), _Nrm_Str );
@@ -554,12 +555,12 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 				float4 color169 = IsGammaSpace() ? float4(0.9529412,0.8823529,0.7333333,0) : float4(0.8962694,0.7529422,0.496933,0);
 				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 10.0 );
 				float4 lerpResult186 = lerp( ( tex2DNode242.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
-				float4 lerpResult188 = lerp( tex2DNode240 , lerpResult186 , 0.8);
+				float4 lerpResult188 = lerp( temp_output_244_0 , lerpResult186 , 0.8);
 				
 				float temp_output_246_0 = ( 1.0 - IN.ase_color.b );
 				
 
-				float3 BaseColor = ( tex2DNode240 * _Color ).rgb;
+				float3 BaseColor = temp_output_244_0.rgb;
 				float3 Normal = tex2DNode242;
 				float3 Emission = saturate( ( lerpResult188 * lerpResult186 ) ).rgb;
 				float3 Specular = 0.5;
@@ -1670,6 +1671,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 				float2 uv_Albedo_Gloss = IN.ase_texcoord4.xy * _Albedo_Gloss_ST.xy + _Albedo_Gloss_ST.zw;
 				float4 tex2DNode240 = tex2D( _Albedo_Gloss, uv_Albedo_Gloss );
+				float4 temp_output_244_0 = ( tex2DNode240 * _Color );
 				
 				float2 uv_Normal = IN.ase_texcoord4.xy * _Normal_ST.xy + _Normal_ST.zw;
 				float3 unpack242 = UnpackNormalScale( tex2D( _Normal, uv_Normal ), _Nrm_Str );
@@ -1678,10 +1680,10 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 				float4 color169 = IsGammaSpace() ? float4(0.9529412,0.8823529,0.7333333,0) : float4(0.8962694,0.7529422,0.496933,0);
 				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 10.0 );
 				float4 lerpResult186 = lerp( ( tex2DNode242.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
-				float4 lerpResult188 = lerp( tex2DNode240 , lerpResult186 , 0.8);
+				float4 lerpResult188 = lerp( temp_output_244_0 , lerpResult186 , 0.8);
 				
 
-				float3 BaseColor = ( tex2DNode240 * _Color ).rgb;
+				float3 BaseColor = temp_output_244_0.rgb;
 				float3 Emission = saturate( ( lerpResult188 * lerpResult186 ) ).rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
@@ -1952,9 +1954,10 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 				float2 uv_Albedo_Gloss = IN.ase_texcoord2.xy * _Albedo_Gloss_ST.xy + _Albedo_Gloss_ST.zw;
 				float4 tex2DNode240 = tex2D( _Albedo_Gloss, uv_Albedo_Gloss );
+				float4 temp_output_244_0 = ( tex2DNode240 * _Color );
 				
 
-				float3 BaseColor = ( tex2DNode240 * _Color ).rgb;
+				float3 BaseColor = temp_output_244_0.rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 
@@ -2675,6 +2678,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 
 				float2 uv_Albedo_Gloss = IN.ase_texcoord8.xy * _Albedo_Gloss_ST.xy + _Albedo_Gloss_ST.zw;
 				float4 tex2DNode240 = tex2D( _Albedo_Gloss, uv_Albedo_Gloss );
+				float4 temp_output_244_0 = ( tex2DNode240 * _Color );
 				
 				float2 uv_Normal = IN.ase_texcoord8.xy * _Normal_ST.xy + _Normal_ST.zw;
 				float3 unpack242 = UnpackNormalScale( tex2D( _Normal, uv_Normal ), _Nrm_Str );
@@ -2684,12 +2688,12 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 				float4 color169 = IsGammaSpace() ? float4(0.9529412,0.8823529,0.7333333,0) : float4(0.8962694,0.7529422,0.496933,0);
 				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 10.0 );
 				float4 lerpResult186 = lerp( ( tex2DNode242.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
-				float4 lerpResult188 = lerp( tex2DNode240 , lerpResult186 , 0.8);
+				float4 lerpResult188 = lerp( temp_output_244_0 , lerpResult186 , 0.8);
 				
 				float temp_output_246_0 = ( 1.0 - IN.ase_color.b );
 				
 
-				float3 BaseColor = ( tex2DNode240 * _Color ).rgb;
+				float3 BaseColor = temp_output_244_0.rgb;
 				float3 Normal = tex2DNode242;
 				float3 Emission = saturate( ( lerpResult188 * lerpResult186 ) ).rgb;
 				float3 Specular = 0.5;
@@ -3323,13 +3327,13 @@ Node;AmplifyShaderEditor.VertexColorNode;102;692.8369,680.5006;Inherit;False;0;5
 Node;AmplifyShaderEditor.SamplerNode;242;1341.436,372.4648;Inherit;True;Property;_Normal;Normal;4;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;198;1100.498,415.3198;Inherit;False;Property;_Nrm_Str;Nrm_Str;5;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;243;2586.83,132.4274;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.SamplerNode;240;1178.455,-403.3195;Inherit;True;Property;_Albedo_Gloss;Albedo_Gloss;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;99;2217.636,-86.67229;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;229;2472.746,-260.3129;Inherit;False;Property;_Metallic;Metallic;3;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;53;1808.132,-191.9133;Float;False;Property;_Gloss;Gloss;2;0;Create;True;0;0;0;False;0;False;1;0;0;3;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;244;2520.553,-517.1916;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.ColorNode;245;2160.51,-659.4519;Inherit;False;Property;_Color;Color;0;0;Create;True;0;0;0;False;0;False;1,1,1,0;1,1,1,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.OneMinusNode;246;1206.716,686.0994;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;240;1052.751,-331.7383;Inherit;True;Property;_Albedo_Gloss;Albedo_Gloss;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.ColorNode;245;1746.736,-619.2963;Inherit;False;Property;_Color;Color;0;0;Create;True;0;0;0;False;0;False;1,1,1,0;1,1,1,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;244;2092.813,-466.561;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;99;2151.294,-76.19696;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;53;1771.469,-183.1839;Float;False;Property;_Gloss;Gloss;2;0;Create;True;0;0;0;False;0;False;1;0;0;3;0;1;FLOAT;0
 WireConnection;168;0;102;4
 WireConnection;168;1;169;0
 WireConnection;170;0;168;0
@@ -3339,7 +3343,7 @@ WireConnection;175;1;170;0
 WireConnection;186;0;175;0
 WireConnection;186;1;170;0
 WireConnection;186;2;181;0
-WireConnection;188;0;240;0
+WireConnection;188;0;244;0
 WireConnection;188;1;186;0
 WireConnection;188;2;189;0
 WireConnection;190;0;188;0
@@ -3355,10 +3359,10 @@ WireConnection;176;0;242;0
 WireConnection;242;5;198;0
 WireConnection;243;0;246;0
 WireConnection;243;1;246;0
-WireConnection;99;0;53;0
-WireConnection;99;1;240;4
+WireConnection;246;0;102;3
 WireConnection;244;0;240;0
 WireConnection;244;1;245;0
-WireConnection;246;0;102;3
+WireConnection;99;0;53;0
+WireConnection;99;1;240;4
 ASEEND*/
-//CHKSM=F1B389B02C64976486B7FB4FB4F3818C2A6B8A7B
+//CHKSM=9821B966DAADA7FE60BFD7DDB2272DE45E963903
