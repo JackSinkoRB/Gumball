@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -12,19 +15,9 @@ using Debug = UnityEngine.Debug;
 namespace Gumball
 {
     [Serializable]
-    public abstract class GameSession : ScriptableObject
+    public abstract class GameSession : ScriptableObject, ISerializationCallbackReceiver
     {
-        
-        [Serializable]
-        public struct RacerSessionData
-        {
-            [SerializeField] private AssetReferenceGameObject assetReference;
-            [SerializeField] private PositionAndRotation startingPosition;
 
-            public AssetReferenceGameObject AssetReference => assetReference;
-            public PositionAndRotation StartingPosition => startingPosition;
-        }
-        
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
         [Header("Info")]
@@ -57,7 +50,7 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
-        [SerializeField, ReadOnly] private AICar[] currentRacers;
+        [SerializeField, ReadOnly] private GenericDictionary<AICar, RacerSessionData> currentRacers = new();
 
         private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         private ChunkMap currentChunkMapCached;
@@ -70,7 +63,7 @@ namespace Gumball
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
-        public AICar[] CurrentRacers => currentRacers;
+        public GenericDictionary<AICar, RacerSessionData> CurrentRacers => currentRacers;
         public CorePart[] CorePartRewards => corePartRewards;
         public SubPart[] SubPartRewards => subPartRewards;
         public bool HasStarted { get; private set; }
@@ -81,6 +74,22 @@ namespace Gumball
         {
             GameSessionManager.Instance.SetCurrentSession(this);
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
+        }
+        
+        public void OnBeforeSerialize()
+        {
+#if UNITY_EDITOR
+            if (scene != null && scene.IsDirty)
+            {
+                EditorUtility.SetDirty(this);
+                scene.SetDirty(false);
+            }
+#endif
+        }
+
+        public void OnAfterDeserialize()
+        {
+            
         }
         
 #if UNITY_EDITOR
@@ -261,12 +270,6 @@ namespace Gumball
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
             InputManager.Instance.CarInput.Accelerate.SetPressedOverride(true); //auto accelerate
-
-            foreach (AICar racer in currentRacers)
-            {
-                //tween the racing line offset to 0 for optimal driving
-                racer.SetRacingLineOffset(0, 3);
-            }
         }
 
         protected virtual void OnSessionStart()
@@ -279,7 +282,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log("Scene loading started...");
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
             
-            yield return Addressables.LoadSceneAsync(scene.SceneName);
+            yield return Addressables.LoadSceneAsync(scene.Address);
             
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
@@ -362,7 +365,7 @@ namespace Gumball
         {
             racerData ??= Array.Empty<RacerSessionData>();
                 
-            currentRacers = new AICar[racerData.Length + 1];
+            currentRacers.Clear();
             List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
 
             for (int index = 0; index < racerData.Length; index++)
@@ -370,7 +373,6 @@ namespace Gumball
                 RacerSessionData data = racerData[index];
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
-                int finalIndex = index;
                 handle.Completed += h =>
                 {
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
@@ -378,25 +380,18 @@ namespace Gumball
 
                     racer.InitialiseAsRacer();
 
-                    //calculate the starting distance
-                    racer.PerformAfterTrue(() => racer.CurrentChunk != null, () =>
-                    {
-                        float distance = racer.CurrentChunk.TrafficManager.GetOffsetFromRacingLine(data.StartingPosition.Position);
-                        racer.SetRacingLineOffset(distance);
-                    });
-
-                    currentRacers[finalIndex] = racer;
+                    currentRacers[racer] = data;
                 };
                 handles.Add(handle);
             }
 
             //add the player's car as a racer
-            currentRacers[^1] = WarehouseManager.Instance.CurrentCar;
+            currentRacers[WarehouseManager.Instance.CurrentCar] = new RacerSessionData();
 
             yield return new WaitUntil(() => handles.AreAllComplete());
             
             //set initial speeds
-            foreach (AICar racer in currentRacers)
+            foreach (AICar racer in currentRacers.Keys)
             {
                 racer.SetSpeed(racersStartingSpeed);
             }
@@ -405,7 +400,7 @@ namespace Gumball
         private void InitialiseRaceMode()
         {
             //add distance calculators to racers
-            foreach (AICar racer in currentRacers)
+            foreach (AICar racer in currentRacers.Keys)
             {
                 racer.gameObject.AddComponent<SplineTravelDistanceCalculator>();
             }
@@ -415,7 +410,7 @@ namespace Gumball
         
         private void RemoveDistanceCalculators()
         {
-            foreach (AICar racer in currentRacers)
+            foreach (AICar racer in currentRacers.Keys)
             {
                 Destroy(racer.gameObject.GetComponent<SplineTravelDistanceCalculator>());
             }

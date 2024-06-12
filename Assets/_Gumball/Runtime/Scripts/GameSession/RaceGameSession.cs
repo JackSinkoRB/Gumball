@@ -40,7 +40,7 @@ namespace Gumball
         public int GetRacePosition(AICar car)
         {
             //sort the cars based on distanceTraveled (descending order)
-            racersInPositionOrder = CurrentRacers.OrderByDescending(
+            racersInPositionOrder = CurrentRacers.Keys.OrderByDescending(
                 c => c.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled 
                      + c.GetComponent<SplineTravelDistanceCalculator>().InitialDistance).ToArray();
             
