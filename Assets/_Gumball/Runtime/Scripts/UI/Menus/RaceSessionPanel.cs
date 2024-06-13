@@ -3,14 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Gumball
 {
     public class RaceSessionPanel : AnimatedPanel
     {
         
-        [SerializeField] private TextMeshProUGUI distanceLabel;
         [SerializeField] private TextMeshProUGUI positionLabel;
+        [SerializeField] private Image progressBarFill;
 
         private RaceGameSession currentSession => (RaceGameSession) GameSessionManager.Instance.CurrentSession;
         private SplineTravelDistanceCalculator playersDistanceCalculator => WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
@@ -21,20 +22,20 @@ namespace Gumball
             if (session == null || !session.InProgress || session is not RaceGameSession)
                 return;
             
-            UpdateDistanceLabel();
             UpdatePositionLabel();
+            UpdateProgressBar();
         }
-        
-        private void UpdateDistanceLabel()
-        {
-            float distancePercent = Mathf.FloorToInt((playersDistanceCalculator.DistanceTraveled / currentSession.RaceDistanceMetres) * 100f);
-            distanceLabel.text = $"{distancePercent}%";
-        }
-        
+
         private void UpdatePositionLabel()
         {
             int currentRank = currentSession.GetRacePosition(WarehouseManager.Instance.CurrentCar);
             positionLabel.text = $"{currentRank} / {currentSession.CurrentRacers.Count}";
+        }
+
+        private void UpdateProgressBar()
+        {
+            float percent = playersDistanceCalculator.DistanceTraveled / currentSession.RaceDistanceMetres;
+            progressBarFill.fillAmount = Mathf.Clamp01(percent);
         }
         
     }
