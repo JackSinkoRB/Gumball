@@ -55,18 +55,10 @@ namespace Gumball
         [Tooltip("When enabled, the specified vertex colour is blended into the current vertex colours around the supplied mesh.")]
         [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, true, true)]
         [SerializeField] private bool colourTerrain;
-        [Tooltip("Assign a collider for the terrain to colour around.")]
-        [SerializeField, ConditionalField(nameof(colourTerrain))]
-        private Collider colliderToColourAround;
-        [SerializeField, ConditionalField(nameof(colourTerrain))]
-        private Color colourTerrainColor;
-        [SerializeField, ConditionalField(nameof(colourTerrain))]
-        private float colourTerrainStrength = 0.5f;
-        
-        public bool CanColourTerrain => isActiveAndEnabled && colourTerrain && colliderToColourAround != null;
-        public Collider ColliderToColourAround => colliderToColourAround;
-        public Color ColourTerrainColor => colourTerrainColor;
-        public float ColourTerrainStrength => colourTerrainStrength;
+        [SerializeField, ConditionalField(nameof(colourTerrain))] private ChunkObjectColorModifier colorModifier;
+
+        public ChunkObjectColorModifier ColorModifier => colorModifier;
+        public bool CanColourTerrain => isActiveAndEnabled && colourTerrain && colorModifier.ColliderToColourAround != null;
 
         public bool CanFlattenTerrain => isActiveAndEnabled && flattenTerrain && colliderToFlattenTo != null;
         public Collider ColliderToFlattenTo => colliderToFlattenTo;
