@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Gumball
 {
@@ -16,8 +17,8 @@ namespace Gumball
         
         [SerializeField] private TextMeshProUGUI timerLabel;
         [SerializeField] private Color timeNearlyOutTimerLabelColor = Color.red;
-        [SerializeField] private TextMeshProUGUI distanceLabel;
-
+        [SerializeField] private Image progressBarFill;
+        
         private Color defaultTimerLabelColor;
         
         private TimedGameSession currentSession => (TimedGameSession) GameSessionManager.Instance.CurrentSession;
@@ -36,22 +37,22 @@ namespace Gumball
             if (session == null || !session.InProgress || session is not TimedGameSession)
                 return;
 
-            UpdateDistanceLabel();
             UpdateTimerLabel();
+            UpdateProgressBar();
         }
-        
-        private void UpdateDistanceLabel()
-        {
-            float distancePercent = Mathf.FloorToInt((playersDistanceCalculator.DistanceTraveled / currentSession.RaceDistanceMetres) * 100f);
-            distanceLabel.text = $"{distancePercent}%";
-        }
-        
+
         private void UpdateTimerLabel()
         {
             timerLabel.text = TimeSpan.FromSeconds(currentSession.TimeRemainingSeconds).ToPrettyString(currentSession.TimeRemainingSeconds < timeNearlyOutTime, precise: false);
 
             timerLabel.color = currentSession.TimeRemainingSeconds > timeNearlyOutTime ? defaultTimerLabelColor : timeNearlyOutTimerLabelColor;
         }
-
+        
+        private void UpdateProgressBar()
+        {
+            float percent = playersDistanceCalculator.DistanceTraveled / currentSession.RaceDistanceMetres;
+            progressBarFill.fillAmount = Mathf.Clamp01(percent);
+        }
+        
     }
 }

@@ -92,11 +92,11 @@ namespace Gumball
         {
             foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
             {
-                if (chunkObject.CanFlattenTerrain)
+                if (chunkObject.CanFlattenTerrain && chunkObject.ColliderToFlattenTo != null)
                     chunkObject.ColliderToFlattenTo.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
                 
-                if (chunkObject.CanColourTerrain)
-                    chunkObject.ColliderToColourAround.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
+                if (chunkObject.CanColourTerrain && chunkObject.ColorModifier.ColliderToColourAround != null)
+                    chunkObject.ColorModifier.ColliderToColourAround.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
             }
         }
         

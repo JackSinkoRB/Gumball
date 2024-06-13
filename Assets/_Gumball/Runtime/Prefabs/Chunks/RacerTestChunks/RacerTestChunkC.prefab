@@ -131,11 +131,17 @@ MonoBehaviour:
   racingLines: []
   speedLimitKmh: 40
   density: 100
-  laneDistancesForward:
-  - -7
-  - 0
-  - 7
-  laneDistancesBackward: []
+  lanesForward:
+  - type: 0
+    distanceFromCenter: 7
+    path: {fileID: 0}
+  - type: 0
+    distanceFromCenter: -7
+    path: {fileID: 0}
+  - type: 0
+    distanceFromCenter: 0
+    path: {fileID: 0}
+  lanesBackward: []
   chunk: {fileID: 8528545629630941118}
 --- !u!1 &3534017816628757462
 GameObject:
@@ -6149,7 +6155,7 @@ MonoBehaviour:
   - 0.9868501652906896
   - 1
   _is2D: 0
-  hasSamples: 0
+  hasSamples: 1
   _optimizeAngleThreshold: 0.5
   _space: 1
   _sampleMode: 1

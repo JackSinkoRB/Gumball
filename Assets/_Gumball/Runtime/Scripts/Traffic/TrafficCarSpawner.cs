@@ -43,10 +43,16 @@ namespace Gumball
         private float lastSpawnCheckTime;
         
         private float timeSinceLastSpawnCheck => Time.realtimeSinceStartup - lastSpawnCheckTime;
-        
-        public AICar SpawnCar(Vector3 position, Quaternion rotation)
+
+        public AICar GetRandomCarPrefab()
         {
-            AICar randomCarVariant = trafficCarPrefabs.GetRandom().gameObject.GetSpareOrCreate<AICar>(transform, position, rotation);
+            return trafficCarPrefabs.GetRandom();
+        }
+        
+        public AICar SpawnCar(Vector3 position, Quaternion rotation, AICar prefab = null)
+        {
+            AICar prefabToUse = prefab == null ? GetRandomCarPrefab() : prefab;
+            AICar randomCarVariant = prefabToUse.gameObject.GetSpareOrCreate<AICar>(transform, position, rotation);
             
             randomCarVariant.InitialiseAsTraffic();
             TrackCar(randomCarVariant);

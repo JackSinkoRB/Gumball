@@ -129,7 +129,8 @@ namespace Gumball
         [Header("Lanes")]
         [Tooltip("Does the car try to take the optimal race line, or does it stay in a single (random) lane?")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private bool useRacingLine;
-        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float currentLaneDistance;
+        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private TrafficLane currentLane;
+        [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private float additionalLaneOffset;
         [ConditionalField(new[]{ nameof(useRacingLine), nameof(autoDrive) }, new[]{ true, false }), SerializeField, ReadOnly] private ChunkTrafficManager.LaneDirection currentLaneDirection;
         [Space(5)]
         [Tooltip("An offset may be temporarily applied to the racing line, for example at the start of races.")]
@@ -137,8 +138,6 @@ namespace Gumball
         
         private Tween currentRacingLineOffsetTween;
 
-        public float CurrentLaneDistance => currentLaneDistance;
-        
         [Header("Drag")]
         [SerializeField] private float dragWhenAccelerating;
         [SerializeField] private float dragWhenIdle = 0.15f;
@@ -256,7 +255,7 @@ namespace Gumball
         [Tooltip("The speed the car should brake to if all the directions are blocked (exlcuding the 'when blocked' layers).")]
         [ConditionalField(nameof(useObstacleAvoidance), nameof(autoDrive)), SerializeField] private float speedToBrakeToIfBlocked = 50;
         [Space(5)]
-        [SerializeField, ReadOnly] private RacingLine currentRacingLine;
+        [SerializeField, ReadOnly] private CustomDrivingPath currentRacingLine;
         [ConditionalField(nameof(autoDrive), nameof(useObstacleAvoidance)), SerializeField, ReadOnly] private float obstacleAvoidanceOffset; //show in inspector
         [SerializeField, ReadOnly] private bool allDirectionsAreBlocked;
         
@@ -542,10 +541,15 @@ namespace Gumball
             }
         }
 
-        public void SetLaneDistance(float laneDistance, ChunkTrafficManager.LaneDirection direction)
+        public void SetCurrentLane(TrafficLane lane, ChunkTrafficManager.LaneDirection direction = ChunkTrafficManager.LaneDirection.NONE, float additionalLaneOffset = float.NaN)
         {
-            currentLaneDistance = laneDistance;
-            currentLaneDirection = direction;
+            currentLane = lane;
+            
+            if (direction != ChunkTrafficManager.LaneDirection.NONE)
+                currentLaneDirection = direction;
+            
+            if (!float.IsNaN(additionalLaneOffset))
+                this.additionalLaneOffset = additionalLaneOffset;
         }
         
         public void SetPeakTorque(float peakTorque)
@@ -741,7 +745,7 @@ namespace Gumball
                 return;
             }
             
-            foreach (RacingLine racingLine in CurrentChunk.TrafficManager.RacingLines)
+            foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
                 currentRacingLine = racingLine;
                 UpdateTargetPosition();
@@ -756,7 +760,7 @@ namespace Gumball
             }
 
             //all directions were blocked, try again but this time without cars blocking
-            foreach (RacingLine racingLine in CurrentChunk.TrafficManager.RacingLines)
+            foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
                 currentRacingLine = racingLine;
                 UpdateTargetPosition();
@@ -1590,17 +1594,14 @@ namespace Gumball
             if (splineSampleAhead == null)
                 return null; //no more chunks loaded
             
-            if (useRacingLine && currentRacingLine != null)
-            {
-                return (splineSampleAhead.Value.Item2, splineSampleAhead.Value.Item1.position, splineSampleAhead.Value.Item1.rotation, splineSampleAhead.Value.Item1);
-            }
-            else
-            {
-                var (position, rotation) = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, currentLaneDistance, currentLaneDirection);
-                return (splineSampleAhead.Value.Item2, position, rotation, splineSampleAhead.Value.Item1);
-            }
-
-            return null;
+            //get the lane distance
+            float laneDistance = additionalLaneOffset;
+            if (currentLane.Type == TrafficLane.LaneType.DISTANCE_FROM_CENTER)
+                laneDistance += currentLane.DistanceFromCenter;
+            
+            //get the lane position
+            PositionAndRotation lanePosition = CurrentChunk.TrafficManager.GetLanePosition(splineSampleAhead.Value.Item1, laneDistance, currentLaneDirection);
+            return (splineSampleAhead.Value.Item2, lanePosition.Position, lanePosition.Rotation, splineSampleAhead.Value.Item1);
         }
 
         /// <summary>
@@ -1632,6 +1633,13 @@ namespace Gumball
                 sampleCollection = CurrentChunk.SplineSampleCollection; //already passed the last sample
                 closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
             }
+            
+            //traffic custom path only
+            if (currentLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE && closestSplineIndex != sampleCollection.length - 1)
+            {
+                sampleCollection = currentLane.Path.SampleCollection;
+                closestSplineIndex = sampleCollection.GetClosestSampleIndexOnSpline(transform.TransformPoint(frontOfCarPosition)).Item1;
+            }
 
             SplineSample closestSampleToCar = sampleCollection.samples[closestSplineIndex];
 
@@ -1657,10 +1665,18 @@ namespace Gumball
                     
                     Chunk newChunk = loadedChunkData.Value.Chunk;
                     chunkToUse = newChunk;
-
-                    //if looking ahead, never use the racing line - just use the chunk spline
-                    //when the chunk is entered, it will find the racing line and set the offset
+                    
                     sampleCollection = chunkToUse.SplineSampleCollection;
+
+                    //for traffic cars, update the lane with the closest one on the new chunk
+                    if (!useRacingLine)
+                    {
+                        TrafficLane closestLane = GetClosestLaneToCurrentLane(chunkToUse);
+                        SetCurrentLane(closestLane);
+                        
+                        if (closestLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE)
+                            sampleCollection = closestLane.Path.SampleCollection;
+                    }
                     
                     //reset the values
                     previousSample = null;
@@ -1719,6 +1735,29 @@ namespace Gumball
                 current.onBecomeInaccessible += OnChunkCachedBecomeInaccessible;
             }
         }
+
+        private TrafficLane GetClosestLaneToCurrentLane(Chunk chunk)
+        {
+            //choose the closest lane to the current lane offset in the new chunk
+            float currentLaneDistance = currentLane.GetDistanceFromCenter(this);
+                    
+            TrafficLane[] lanes = currentLaneDirection == ChunkTrafficManager.LaneDirection.FORWARD ? chunk.TrafficManager.LanesForward : chunk.TrafficManager.LanesBackward;
+            float closestLaneDifference = Mathf.Infinity; //lane distance is the distance from the lane to the center of the chunk
+            TrafficLane closestLane = null;
+                    
+            foreach (TrafficLane lane in lanes)
+            {
+                float laneDifference = Mathf.Abs(lane.GetDistanceFromCenter(this) - currentLaneDistance);
+
+                if (laneDifference < closestLaneDifference)
+                {
+                    closestLane = lane;
+                    closestLaneDifference = laneDifference;
+                }
+            }
+
+            return closestLane;
+        }
         
         private void InitialiseGearbox()
         {
@@ -1740,8 +1779,8 @@ namespace Gumball
             {
                 const float reallyFarAway = 1000;
                 
-                Vector3 positionForward = collider.ClosestPoint(transform.position + transform.forward * reallyFarAway).SetY(Rigidbody.centerOfMass.y);
-                Vector3 localPositionForward = transform.InverseTransformPoint(positionForward).SetX(0);
+                Vector3 positionForward = collider.ClosestPoint(transform.position + transform.forward * reallyFarAway);
+                Vector3 localPositionForward = transform.InverseTransformPoint(positionForward).SetXY(0, Rigidbody.centerOfMass.y);
                 float distanceForward = localPositionForward.z;
                 if (distanceForward > furthestDistanceForward)
                 {

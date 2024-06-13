@@ -78,36 +78,36 @@ namespace Gumball
             }
             
             //get the desired position
-            var (randomLanePosition, randomLaneRotation) = GetUnblockedLane();
-            playerCar.Teleport(randomLanePosition, randomLaneRotation);
+            PositionAndRotation unblockedLane = GetUnblockedLane();
+            playerCar.Teleport(unblockedLane.Position, unblockedLane.Rotation);
             ChunkMapSceneManager.Instance.DrivingCameraController.SkipTransition();
             
             const float speedAfterResetKmh = 60;
             playerCar.SetSpeed(speedAfterResetKmh);
         }
         
-        private (Vector3, Quaternion) GetUnblockedLane()
+        private PositionAndRotation GetUnblockedLane()
         {
             AICar playerCar = WarehouseManager.Instance.CurrentCar;
             ChunkTrafficManager trafficManager = playerCar.LastKnownChunk.TrafficManager;
 
-            List<float> laneDistances = new List<float>(trafficManager.LaneDistancesForward);
+            List<TrafficLane> lanes = new List<TrafficLane>(trafficManager.LanesForward);
             
-            var (closestSample, closestDistanceSqr) = playerCar.LastKnownChunk.GetClosestSampleOnSpline(playerCar.transform.position);
-            while (laneDistances.Count > 0)
+            while (lanes.Count > 0)
             {
-                float laneDistance = laneDistances.GetRandom();
-                laneDistances.Remove(laneDistance);
-                
-                var (lanePosition, laneRotation) = trafficManager.GetLanePosition(closestSample, laneDistance, ChunkTrafficManager.LaneDirection.FORWARD);
-                if (!trafficManager.CanSpawnCarAtPosition(lanePosition, laneDistance, true))
-                    continue;
+                TrafficLane lane = lanes.GetRandom();
+                lanes.Remove(lane);
 
-                return (lanePosition, laneRotation);
+                var (isBlocked, lanePosition) = lane.CanMoveCarToLane(playerCar, ChunkTrafficManager.LaneDirection.FORWARD);
+                if (isBlocked)
+                    continue;
+                
+                return lanePosition;
             }
             
-            //all are blocked, just use a random one
-            return trafficManager.GetLanePosition(closestSample, trafficManager.GetRandomLaneDistance(ChunkTrafficManager.LaneDirection.FORWARD), ChunkTrafficManager.LaneDirection.FORWARD);
+            //all are blocked, just use a random one and spawn anyway
+            TrafficLane randomLane = trafficManager.LanesForward.GetRandom();
+            return randomLane.CanMoveCarToLane(playerCar, ChunkTrafficManager.LaneDirection.FORWARD).Item2;
         }
         
         /// <summary>
