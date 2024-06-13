@@ -63,8 +63,8 @@ namespace Gumball
                     
                     if (chunkObject == null || !chunkObject.CanColourTerrain)
                         continue;
-                    
-                    finalColor = Color.Lerp(finalColor, chunkObject.ColourTerrainColor, chunkObject.ColourTerrainStrength);
+
+                    finalColor = chunkObject.ColorModifier.GetDesiredColor(finalColor);
                 }
                 
                 vertexColors[i] = finalColor;
