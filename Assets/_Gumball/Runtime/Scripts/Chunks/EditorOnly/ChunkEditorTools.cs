@@ -40,6 +40,9 @@ namespace Gumball
                     //rebake
                     oldChunk.chunk.FindSplineMeshes();
                     ChunkUtils.BakeMeshes(oldChunk.chunk);
+                    
+                    //rebuild the runtime chunk
+                    ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, false);
                 }
             }
             
