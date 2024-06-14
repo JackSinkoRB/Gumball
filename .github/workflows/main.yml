@@ -31,12 +31,13 @@ jobs:
       - name: Install Git
         run: sudo apt-get update && sudo apt-get install git
 
-  setupTestsProject:
+  setupTests:
     needs: setup
     name: Setup tests
     runs-on: self-hosted
     strategy:
       fail-fast: false
+    steps:
 
       # Checkout
       - uses: actions/checkout@v4
