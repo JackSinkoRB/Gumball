@@ -117,8 +117,24 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: mv Gumball-${{ matrix.targetPlatform }}.zip /var/www/html
 
+  cleanup:
+    needs: build
+    name: Cleanup for ${{ matrix.targetPlatform }}
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - Android
+          - StandaloneWindows
+    steps:
+
+      # Delete library folder to save space
+      - name: Delete library folder (cached)
+        run: rm -rf Library
+
       # Delete build folder to save space
-      - name: Delete build folder
+      - name: Delete build folder (moved)
         run: rm -rf build
 
   deploy:
