@@ -42,6 +42,8 @@ namespace Gumball
                     ChunkUtils.BakeMeshes(oldChunk.chunk);
                 }
             }
+            
+            AssetDatabase.SaveAssets();
         }
         
         private Chunk chunk => GetComponent<Chunk>();
