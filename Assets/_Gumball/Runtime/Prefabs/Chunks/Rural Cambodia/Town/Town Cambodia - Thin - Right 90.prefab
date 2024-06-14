@@ -2614,7 +2614,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &1733522535850230311
 Transform:
@@ -2638,7 +2638,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5707063137678266690}
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 4300000, guid: bc7a26f5720cd8c4fb81a0a31b2c667a, type: 2}
 --- !u!23 &1857331996351661433
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2735,7 +2735,7 @@ MonoBehaviour:
   multithreaded: 0
   buildOnAwake: 1
   buildOnEnable: 0
-  _baked: 0
+  _baked: 1
   _markDynamic: 1
   _size: 1
   _color: {r: 1, g: 1, b: 1, a: 1}
@@ -2752,7 +2752,7 @@ MonoBehaviour:
   _uvOffset: {x: 0, y: 0}
   _uvRotation: 0
   _meshIndexFormat: 0
-  _bakedMesh: {fileID: 0}
+  _bakedMesh: {fileID: 4300000, guid: bc7a26f5720cd8c4fb81a0a31b2c667a, type: 2}
   colliderUpdateRate: 0.2
   _channels:
   - name: Barrier
@@ -10770,7 +10770,7 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 4300000, guid: bc7a26f5720cd8c4fb81a0a31b2c667a, type: 2}
 --- !u!1 &5880195038603426398
 GameObject:
   m_ObjectHideFlags: 0
@@ -20724,8 +20724,7 @@ MonoBehaviour:
   _optimizeAngleThreshold: 0.5
   _space: 1
   _sampleMode: 1
-  _subscribers:
-  - {fileID: 2837289874062574368}
+  _subscribers: []
   _rawSamples:
   - position: {x: 0, y: 0, z: 0}
     up: {x: 0, y: 1, z: 0}
@@ -21471,7 +21470,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driveOnLeft: 1
-  racingLine: {fileID: 4503799474479618766}
+  racingLines:
+  - {fileID: 4503799474479618766}
   speedLimitKmh: 60
   density: 70
   laneDistancesForward:
