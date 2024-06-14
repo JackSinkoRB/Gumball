@@ -31,12 +31,17 @@ jobs:
       - name: Install Git
         run: sudo apt-get update && sudo apt-get install git
 
-  setupTests:
+
+  testAllModes:
     needs: setup
-    name: Setup tests
+    name: Test in ${{ matrix.testMode }}
     runs-on: self-hosted
     strategy:
       fail-fast: false
+      matrix:
+        testMode:
+          - playmode
+          - editmode
     steps:
 
       # Checkout
@@ -48,19 +53,7 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-Editor-${{ matrix.testMode }}
-
-  testAllModes:
-    needs: setupTests
-    name: Test in ${{ matrix.testMode }}
-    runs-on: self-hosted
-    strategy:
-      fail-fast: false
-      matrix:
-        testMode:
-          - playmode
-          - editmode
-    steps:
+          key: Library-Editor
 
       # Test
       - uses: game-ci/unity-test-runner@v4
@@ -89,6 +82,11 @@ jobs:
           - Android
           - StandaloneWindows
     steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
