@@ -30,7 +30,7 @@ namespace Gumball
             Color newColor = currentColor;
             if (useColor)
                 //lerp from the current color to the new color but at the specified strength - keeping the alpha the same
-                newColor = Color.Lerp(currentColor, new Color(color.r, color.g, color.g, currentColor.a), colorStrength);
+                newColor = Color.Lerp(currentColor, new Color(color.r, color.g, color.b, currentColor.a), colorStrength);
             
             if (useAlpha)
                 newColor = newColor.WithAlphaSetTo(alpha);
