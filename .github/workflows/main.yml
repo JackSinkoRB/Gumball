@@ -51,7 +51,7 @@ jobs:
           key: Library-Editor-${{ matrix.testMode }}
 
   testAllModes:
-    needs: loadTestCache
+    needs: setupTests
     name: Test in ${{ matrix.testMode }}
     runs-on: self-hosted
     strategy:
