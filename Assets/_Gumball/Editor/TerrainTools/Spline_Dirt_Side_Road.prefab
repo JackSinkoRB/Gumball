@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8832949708805220410}
   - component: {fileID: 506681275296680928}
   - component: {fileID: 3001885385380709293}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: Set_Terrain_Blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -423,9 +423,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   colourTerrain: 1
-  colliderToColourAround: {fileID: 3001885385380709293}
-  colourTerrainColor: {r: 0, g: 0, b: 1, a: 0}
-  colourTerrainStrength: 1
+  colorModifier:
+    colliderToColourAround: {fileID: 3001885385380709293}
+    useColor: 1
+    color: {r: 0, g: 0, b: 1, a: 1}
+    useAlpha: 0
+    alpha: 0
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!64 &3001885385380709293
@@ -1877,9 +1880,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   colourTerrain: 1
-  colliderToColourAround: {fileID: 0}
-  colourTerrainColor: {r: 0.024262667, g: 1, b: 0, a: 0}
-  colourTerrainStrength: 1
+  colorModifier:
+    colliderToColourAround: {fileID: 0}
+    useColor: 0
+    color: {r: 1, g: 0, b: 0, a: 0.5}
+    useAlpha: 0
+    alpha: 0
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!1 &5933449593683782901
@@ -1896,7 +1902,7 @@ GameObject:
   - component: {fileID: 1864313658629870038}
   - component: {fileID: 1641618808533037000}
   - component: {fileID: 3526712942907032853}
-  m_Layer: 0
+  m_Layer: 19
   m_Name: Flatten_Terrain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2305,9 +2311,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   colourTerrain: 1
-  colliderToColourAround: {fileID: 3526712942907032853}
-  colourTerrainColor: {r: 0, g: 0, b: 1, a: 0}
-  colourTerrainStrength: 1
+  colorModifier:
+    colliderToColourAround: {fileID: 0}
+    useColor: 0
+    color: {r: 1, g: 0, b: 0, a: 0.5}
+    useAlpha: 0
+    alpha: 0
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!64 &3526712942907032853
