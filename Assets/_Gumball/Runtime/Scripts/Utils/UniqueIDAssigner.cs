@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using MyBox;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 using Gumball;
@@ -16,6 +18,25 @@ public class UniqueIDAssigner : MonoBehaviour
     
 #if UNITY_EDITOR
     private static readonly Dictionary<string, UniqueIDAssigner> allIDs = new();
+    
+    public static UniqueIDAssigner FindAssignerWithIDInDirectory(string oldID, string directory)
+    {
+        //loop all the assets in the folder and load them, and check if the ID matches
+        string[] filesAtPath = Directory.GetFiles(directory, "*.prefab", SearchOption.TopDirectoryOnly);
+
+        foreach (string objectAtPath in filesAtPath)
+        {
+            GameObject gameObject = AssetDatabase.LoadAssetAtPath(objectAtPath, typeof(GameObject)) as GameObject;
+            if (gameObject == null)
+                continue;
+                        
+            UniqueIDAssigner idAssigner = gameObject.GetComponent<UniqueIDAssigner>();
+            if (idAssigner != null && idAssigner.uniqueID.Equals(oldID))
+                return idAssigner;
+        }
+
+        return null;
+    }
 #endif
 
     [Tooltip("Whether the object is unique per scene, or whether it is just unique on a global scale.")]
@@ -41,8 +62,8 @@ public class UniqueIDAssigner : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    public delegate void OnAssignIDDelegate(UniqueIDAssigner uniqueIDAssigner, string previousID, string newID);
-    public static event OnAssignIDDelegate OnAssignID;
+    public delegate void OnAssignNewIDDelegate(UniqueIDAssigner uniqueIDAssigner, string oldID, string newID);
+    public static event OnAssignNewIDDelegate onAssignNewID;
     
     private void Update()
     {
@@ -79,13 +100,13 @@ public class UniqueIDAssigner : MonoBehaviour
         string sceneName = GetSceneName();
         string scenePrefix = perSceneUniqueness ? $"{sceneName}_" : "";
         
-        string previousId = uniqueID;
+        string oldID = uniqueID;
         uniqueID = scenePrefix + Guid.NewGuid();
         EditorUtility.SetDirty(this);
         EditorSceneManager.MarkSceneDirty(gameObject.scene);
         Debug.Log($"Generating new ID for {gameObject.name}");
 
-        OnAssignID?.Invoke(this, previousId, uniqueID);
+        onAssignNewID?.Invoke(this, oldID, uniqueID);
     }
     
     private string GetSceneName()
@@ -116,12 +137,12 @@ public class UniqueIDAssigner : MonoBehaviour
             if (DetectDuplicates.newAssets.Count == 0)
                 return;
             
-            foreach (string str in importedAssets)
+            foreach (string path in importedAssets)
             {
-                if (!DetectDuplicates.newAssets.Contains(str))
+                if (!DetectDuplicates.newAssets.Contains(path))
                     continue;
                 
-                GameObject obj = AssetDatabase.LoadAssetAtPath(str,typeof(GameObject)) as GameObject;
+                GameObject obj = AssetDatabase.LoadAssetAtPath(path, typeof(GameObject)) as GameObject;
                 if (obj == null)
                     continue;
                 
@@ -129,18 +150,24 @@ public class UniqueIDAssigner : MonoBehaviour
                 if (uniqueIDAssigner == null)
                     continue;
                 
-                if (str.Contains(ChunkUtils.RuntimeChunkSuffix))
+                if (path.Contains(ChunkUtils.RuntimeChunkSuffix))
                     continue;
 
                 if (uniqueIDAssigner.isPersistent)
                     continue;
 
+                string oldID = uniqueIDAssigner.uniqueID;
                 uniqueIDAssigner.GenerateNewID();
+
+                //check if duplicated a chunk
+                ChunkEditorTools chunk = obj.GetComponent<ChunkEditorTools>();
+                if (chunk != null)
+                    ChunkEditorTools.OnDuplicateChunkAsset(oldID, path, chunk);
             }
             
             DetectDuplicates.newAssets.Clear();
         }
     }
 #endif
-
+    
 }
