@@ -31,17 +31,12 @@ jobs:
       - name: Install Git
         run: sudo apt-get update && sudo apt-get install git
 
-  testAllModes:
+  setupTestsProject:
     needs: setup
-    name: Test in ${{ matrix.testMode }}
+    name: Setup tests
     runs-on: self-hosted
     strategy:
       fail-fast: false
-      matrix:
-        testMode:
-          - playmode
-          - editmode
-    steps:
 
       # Checkout
       - uses: actions/checkout@v4
@@ -52,23 +47,18 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-Editor-${{ matrix.testMode }}
 
-      # Test
-      - uses: game-ci/unity-test-runner@v4
-        id: tests
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          testMode: ${{ matrix.testMode }}
-          artifactsPath: ${{ matrix.testMode }}-artifacts
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: ${{ matrix.testMode }} Test Results
-          customParameters: -nographics
-          dockerMemoryLimit: 7500m
-          dockerCpuLimit: 2
+  testAllModes:
+    needs: loadTestCache
+    name: Test in ${{ matrix.testMode }}
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        testMode:
+          - playmode
+          - editmode
 
   build:
     needs: testAllModes
@@ -82,10 +72,9 @@ jobs:
           - StandaloneWindows
     steps:
 
-      # Checkout
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -93,49 +82,22 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
 
-      # Build
-      - uses: game-ci/unity-builder@v4
-        id: buildStep
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-          dockerMemoryLimit: 7500m
-          dockerCpuLimit: 2
-          buildName: 'Gumball'
-
-      # Zip Build Files
-      - name: Zip Build Files
-        run: |
-          find build/${{ matrix.targetPlatform }} -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
-          zip -r Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}
-
-      # Move Build Files
-      - name: Move Build Files
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-        run: mv Gumball-${{ matrix.targetPlatform }}.zip /var/www/html
+      # Delete build folder to save space
+      - name: Delete build folder (moved)
+        run: rm -rf build
 
   cleanup:
     needs: build
-    name: Cleanup for ${{ matrix.targetPlatform }}
+    name: Cleanup
     runs-on: self-hosted
     strategy:
       fail-fast: false
-      matrix:
-        targetPlatform:
-          - Android
-          - StandaloneWindows
+
     steps:
 
       # Delete library folder to save space
       - name: Delete library folder (cached)
         run: rm -rf Library
-
-      # Delete build folder to save space
-      - name: Delete build folder (moved)
-        run: rm -rf build
 
   deploy:
     needs: build
