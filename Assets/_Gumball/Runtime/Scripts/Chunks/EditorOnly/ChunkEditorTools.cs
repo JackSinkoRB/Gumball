@@ -5,6 +5,7 @@ using Dreamteck.Splines;
 using JBooth.VertexPainterPro;
 using MyBox;
 #if UNITY_EDITOR
+using System.IO;
 using Gumball.Editor;
 using UnityEditor;
 #endif
@@ -18,6 +19,31 @@ namespace Gumball
     {
 
 #if UNITY_EDITOR
+        public static void OnDuplicateChunkAsset(string oldID, string newChunkPath, ChunkEditorTools newChunk)
+        {
+            if (newChunk != null)
+            {
+                //rebake
+                newChunk.chunk.FindSplineMeshes();
+                ChunkUtils.BakeMeshes(newChunk.chunk);
+            }
+
+            //find the old chunk
+            string directory = Path.GetDirectoryName(newChunkPath);
+            UniqueIDAssigner idAssigner = UniqueIDAssigner.FindAssignerWithIDInDirectory(oldID, directory);
+
+            if (idAssigner != null)
+            {
+                ChunkEditorTools oldChunk = idAssigner.GetComponent<ChunkEditorTools>();
+                if (oldChunk != null)
+                {
+                    //rebake
+                    oldChunk.chunk.FindSplineMeshes();
+                    ChunkUtils.BakeMeshes(oldChunk.chunk);
+                }
+            }
+        }
+        
         private Chunk chunk => GetComponent<Chunk>();
         private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
 
@@ -534,5 +560,6 @@ namespace Gumball
         public bool ShowDebugLines => showDebugLines;
         
 #endif
+        
     }
 }
