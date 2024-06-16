@@ -1,19 +1,24 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(BezierPipeMesh))]
-[CanEditMultipleObjects]
-public class BezierPipeMeshEditor : Editor
+namespace BezierPath
 {
-    public override void OnInspectorGUI()
+    [CustomEditor(typeof(BezierPipeMesh))]
+    [CanEditMultipleObjects]
+    public class BezierPipeMeshEditor : Editor
     {
-        base.OnInspectorGUI();
-
-        foreach (Object t in targets)
+        public override void OnInspectorGUI()
         {
-            BezierPipeMesh bpm = (BezierPipeMesh)t;
-            if (bpm.isActiveAndEnabled)
-                bpm.Generate();
+            base.OnInspectorGUI();
+
+            foreach (Object t in targets)
+            {
+                BezierPipeMesh bpm = (BezierPipeMesh)t;
+                if (bpm.isActiveAndEnabled)
+                    bpm.Generate();
+            }
         }
-    }
+    }   
 }
+#endif

@@ -114,7 +114,7 @@ namespace Gumball
         /// <summary>
         /// Gets the addressable key for the specified gameobject's prefab asset. If not addressable, it will be made addressable.
         /// </summary>
-        public static string GetAddressableKeyFromGameObject(GameObject gameObject, bool saveAssets = true)
+        public static string GetOrSetAddressableKeyFromGameObject(GameObject gameObject, string addressableGroup, string addressSuffix = "", bool saveAssets = true)
         {
             string assetPath = GetPathToPrefabAsset(gameObject);
             if (assetPath == null)
@@ -124,13 +124,11 @@ namespace Gumball
 
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
-            const string groupName = "ChunkObjects";
-            const string chunkObjectSuffix = "_ChunkObject";
-            
-            AddressableAssetGroup group = settings.FindGroup(groupName);
+
+            AddressableAssetGroup group = settings.FindGroup(addressableGroup);
             
             AddressableAssetEntry assetEntry = settings.CreateOrMoveEntry(guid, group);
-            assetEntry.address = $"{assetPath}{chunkObjectSuffix}";
+            assetEntry.address = $"{assetPath}{addressSuffix}";
             
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, assetEntry, true);
             if (saveAssets)

@@ -98,8 +98,32 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
 
+      # Build
+      - uses: game-ci/unity-builder@v4
+        id: buildStep
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          dockerMemoryLimit: 7500m
+          dockerCpuLimit: 2
+          buildName: 'Gumball'
+
+      # Zip Build Files
+      - name: Zip Build Files
+        run: |
+          find build/${{ matrix.targetPlatform }} -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
+          zip -r Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}
+
+      # Move Build Files
+      - name: Move Build Files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: mv Gumball-${{ matrix.targetPlatform }}.zip /var/www/html
+
       # Delete build folder to save space
-      - name: Delete build folder (moved)
+      - name: Delete build folder
         run: rm -rf build
 
   cleanup:
@@ -111,8 +135,8 @@ jobs:
 
     steps:
 
-      # Delete library folder to save space
-      - name: Delete library folder (cached)
+      # Delete library folder to save space - must do this after build job as post-cache needs to cache it
+      - name: Delete library folder
         run: rm -rf Library
 
   deploy:
@@ -134,12 +158,16 @@ jobs:
             for ((i=0; i<$COUNT; i++)); do
               # Get commit message, replace '\n' with a space, and remove '/'
               COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | tr '\n\t' ' ' | tr -d '/')
+              # Remove any occurrence of "JackSinkoRB"
+              COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
               COMMIT_MESSAGES+="$((i+1)). $COMMIT_MESSAGE\\n"
             done
           else
             COUNT=1
             # Get commit message, replace '\n' with a space, and remove '/'
             COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | tr '\n\t' ' ' | tr -d '/')
+            # Remove any occurrence of "JackSinkoRB"
+            COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
             COMMIT_MESSAGES="$COMMIT_MESSAGE\\n"
           fi
           echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"
