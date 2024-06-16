@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.1149, y: 1.1149, z: 1.1149}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4322335798320644081}
@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPrefab: 0
   ignoreAtRuntime: 0
   loadSeparately: 1
   alwaysGrounded: 1
@@ -78,9 +79,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   colourTerrain: 0
-  colliderToColourAround: {fileID: 0}
-  colourTerrainColor: {r: 0, g: 0, b: 0, a: 0}
-  colourTerrainStrength: 0.5
+  colorModifier:
+    colliderToColourAround: {fileID: 0}
+    useColor: 0
+    color: {r: 1, g: 0, b: 0, a: 0.5}
+    useAlpha: 0
+    alpha: 0
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!1001 &4356877495017297946
@@ -99,17 +103,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.8544678
+      value: 1.4568162
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.9201264
+      value: 1.5687602
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.9445474
+      value: 1.6103966
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
@@ -119,7 +123,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.058
+      value: -0.282
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
@@ -170,7 +174,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 9279a57f3eeaea349b870f9c7d9bf582, type: 2}
+      objectReference: {fileID: 2100000, guid: 28347dcc0ee496043acb4ca16b48c45d, type: 2}
     - target: {fileID: 919132149155446097, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}
       propertyPath: m_Name
