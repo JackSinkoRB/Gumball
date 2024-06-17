@@ -8,6 +8,7 @@ using MyBox;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using System.IO;
+using BezierPath;
 using UnityEditor;
 #endif
 using UnityEngine;
@@ -232,8 +233,8 @@ namespace Gumball
         {
             return $"{RuntimeChunksPath}/{chunk.name}{RuntimeChunkSuffix}.prefab";
         }
-        
-        public static void CombineMeshesUnderChunkWithLayers(Chunk chunk, LayerMask layers)
+
+        public static void CombineMeshesUnderChunkWithLayers(Chunk chunk, LayerMask layers, MeshRendererUtils.CombineMeshCleanup cleanup = MeshRendererUtils.CombineMeshCleanup.DISABLE)
         {
             //get the gameobjects that match in the chunk
             List<GameObject> gameObjects = new List<GameObject>();
@@ -248,13 +249,16 @@ namespace Gumball
                 
                 gameObjects.Add(child.gameObject);
             }
+
+            if (gameObjects.Count == 0)
+                return;
             
             string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
             string prefabPath = $"{chunkDirectory}/Combined_Layers_{layers.value}.prefab";
             if (!Directory.Exists(chunkDirectory))
                 Directory.CreateDirectory(chunkDirectory);
             
-            GameObject prefab = MeshRendererUtils.CombineMeshesIntoPrefab(gameObjects, prefabPath, MeshRendererUtils.CombineMeshCleanup.DISABLE);
+            GameObject prefab = MeshRendererUtils.CombineMeshesIntoPrefab(gameObjects, prefabPath, cleanup);
             
             //instantiate
             GameObject instance = Object.Instantiate(prefab, Vector3.zero, Quaternion.Euler(Vector3.zero), chunk.transform);
@@ -277,22 +281,30 @@ namespace Gumball
                 return null;
             }
 
+            //update spline meshes in original chunk in case they haven't had a chunk to save
+            originalChunk.GetComponent<Chunk>().FindSplineMeshes();
+            
+            //create runtime chunk
             GameObject runtimePrefabInstance = Object.Instantiate(originalChunk);
             Chunk runtimeInstanceChunk = runtimePrefabInstance.GetComponent<Chunk>();
             runtimePrefabInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
 
-            //update spline meshes in original chunk in case they haven't had a chunk to save
-            originalChunk.GetComponent<Chunk>().FindSplineMeshes();
+            //apply bezier object placers
+            foreach (BezierObjectPlacer bezierObjectPlacer in runtimePrefabInstance.transform.GetComponentsInAllChildren<BezierObjectPlacer>())
+            {
+                bezierObjectPlacer.Apply();
+            }
             
             //combine trees, grass
+            CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Trees), MeshRendererUtils.CombineMeshCleanup.DESTROY);
+            CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Grass), MeshRendererUtils.CombineMeshCleanup.DESTROY);
             //TODO: add undergrowth layer
-            CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Trees));
-            CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Grass));
-
+            
+            List<ChunkObject> chunkObjects = runtimeInstanceChunk.transform.GetComponentsInAllChildren<ChunkObject>();
+            
             //get chunk objects and make sure they're addressable
-            List<ChunkObject> chunkObjectsInOriginalChunk = originalChunk.transform.GetComponentsInAllChildren<ChunkObject>();
             List<string> assetKeys = new();
-            foreach (ChunkObject chunkObject in chunkObjectsInOriginalChunk)
+            foreach (ChunkObject chunkObject in chunkObjects)
             {
                 const string addressableGroup = "ChunkObjects";
                 const string suffix = "_ChunkObject";
@@ -302,7 +314,6 @@ namespace Gumball
             
             //find all chunk object references and save the data
             // - then destroy all the chunk objects
-            List<ChunkObject> chunkObjects = runtimePrefabInstance.transform.GetComponentsInAllChildren<ChunkObject>();
             Dictionary<string, List<ChunkObjectData>> chunkObjectData = new();
             
             for (int index = 0; index < chunkObjects.Count; index++)
@@ -319,6 +330,14 @@ namespace Gumball
                     continue;
                 
                 if (chunkObject.IgnoreAtRuntime)
+                {
+                    Object.DestroyImmediate(chunkObject.gameObject);
+                    continue;
+                }
+
+                //check if there's at least 1 mesh renderer - otherwise just delete it
+                bool nothingToRender = chunkObject.transform.HasActiveComponentsInChildren<MeshRenderer>();
+                if (nothingToRender)
                 {
                     Object.DestroyImmediate(chunkObject.gameObject);
                     continue;
