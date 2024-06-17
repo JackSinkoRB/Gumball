@@ -20,9 +20,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Car_Mesh
-  m_Shader: {fileID: -6465566751694194690, guid: 3d9d978bd27b9d240ab8dbcfe63b7c79,
-    type: 3}
+  m_Name: Car_Mesh_Cap
+  m_Shader: {fileID: 4800000, guid: 559b2587aca69c24f81ab525d2bd6260, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -37,6 +36,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _Alpha:
+        m_Texture: {fileID: 2800000, guid: e66932dbf9b901e409828fc5c2be0e46, type: 3}
+        m_Scale: {x: 100, y: 100}
+        m_Offset: {x: 0, y: 0}
     - _BaseMap:
         m_Texture: {fileID: 2800000, guid: d5d21b7e83440324f990718c82363b34, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -73,6 +76,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: fcc5dc5143ec9154ea096d5d0a8ed365, type: 3}
+        m_Scale: {x: 100, y: 100}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -82,6 +89,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texcoord:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -100,6 +111,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AlphaClip: 0
+    - _AlphaCutoff: 0.5
     - _AlphaToMask: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
@@ -114,11 +126,14 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
+    - _Gloss: 0.671
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _Metal: 1
     - _Metallic: 0.238
     - _Mode: 0
+    - _Normal: -1.5
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueControl: 0
@@ -136,7 +151,9 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 1}
     - _Color: {r: 0.28301886, g: 0.28301886, b: 0.28301886, a: 1}
+    - _Color_Opacity: {r: 0.2641509, g: 0.2641509, b: 0.2641509, a: 0.41960785}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _Specular: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
