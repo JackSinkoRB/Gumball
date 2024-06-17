@@ -73,7 +73,7 @@ namespace DigitalOpus.MB.Core
                         atlasRenderTexture.LOG_LEVEL = LOG_LEVEL;
                         atlasRenderTexture.width = atlasSizeX;
                         atlasRenderTexture.height = atlasSizeY;
-                        atlasRenderTexture.padding = data._atlasPadding;
+                        atlasRenderTexture.padding = data._atlasPadding_pix;
                         atlasRenderTexture.rects = uvRects;
                         atlasRenderTexture.textureSets = data.distinctMaterialTextures;
                         atlasRenderTexture.indexOfTexSetToRender = propIdx;

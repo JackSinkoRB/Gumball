@@ -3,16 +3,10 @@
 // Copyright © 2011-2012 Ian Deane
 //----------------------------------------------
 using UnityEngine;
-using System.Collections;
-using System.Collections.Specialized;
-using System;
 using System.Collections.Generic;
-using System.Text;
-using DigitalOpus.MB.Core;
 
 namespace DigitalOpus.MB.Core
 {
-
     /// <summary>
     /// This class is an endless mesh. You don't need to worry about the 65k limit when adding meshes. It is like a List of combined meshes. Internally it manages
     /// a collection of MB2_MeshComber objects to which meshes added and deleted as necessary. 
@@ -25,7 +19,6 @@ namespace DigitalOpus.MB.Core
     [System.Serializable]
     public class MB3_MultiMeshCombiner : MB3_MeshCombiner
     {
-
         [System.Serializable]
         public class CombinedMesh
         {
@@ -209,27 +202,44 @@ namespace DigitalOpus.MB.Core
             return true;
         }
 
-        public override void Apply(MB3_MeshCombiner.GenerateUV2Delegate uv2GenerationMethod)
+        public override bool Apply(MB3_MeshCombiner.GenerateUV2Delegate uv2GenerationMethod)
         {
+            bool success = true;
+#if DEBUG
+            int numInCombined = 0;
+#endif
             for (int i = 0; i < meshCombiners.Count; i++)
             {
                 if (meshCombiners[i].isDirty)
                 {
-                    meshCombiners[i].combinedMesh.Apply(uv2GenerationMethod);
+                    success &= meshCombiners[i].combinedMesh.Apply(uv2GenerationMethod);
                     meshCombiners[i].isDirty = false;
                 }
+#if DEBUG
+                numInCombined += meshCombiners[i].combinedMesh.GetNumObjectsInCombined();
+#endif
             }
+
+            if (settings.clearBuffersAfterBake)
+            {
+                // Don't do full ClearBuffers because meshCombiners[i].combinedMesh.Apply(..) did that
+                obj2MeshCombinerMap.Clear();
+            }
+#if DEBUG
+            Debug.Assert(obj2MeshCombinerMap.Count == numInCombined, "num mismatch: " +  obj2MeshCombinerMap.Count + "  " +  numInCombined);
+#endif
+            return success;
         }
 
-        public override void Apply(bool triangles, bool vertices, bool normals, bool tangents, bool uvs, bool uv2, bool uv3, bool uv4, bool colors, bool bones = false, bool blendShapeFlag = false, GenerateUV2Delegate uv2GenerationMethod = null)
+        public override bool Apply(bool triangles, bool vertices, bool normals, bool tangents, bool uvs, bool uv2, bool uv3, bool uv4, bool colors, bool bones = false, bool blendShapeFlag = false, GenerateUV2Delegate uv2GenerationMethod = null)
         {
-            Apply(triangles, vertices, normals, tangents,
+            return Apply(triangles, vertices, normals, tangents,
                 uvs, uv2, uv3, uv4,
                 false, false, false, false,
                 colors, bones, blendShapeFlag, uv2GenerationMethod);
         }
 
-        public override void Apply(bool triangles,
+        public override bool Apply(bool triangles,
                           bool vertices,
                           bool normals,
                           bool tangents,
@@ -246,14 +256,33 @@ namespace DigitalOpus.MB.Core
                           bool blendShapesFlag = false,
                           MB3_MeshCombiner.GenerateUV2Delegate uv2GenerationMethod = null)
         {
+#if DEBUG
+            int numInCombined = 0;
+#endif
+            bool success = true;
             for (int i = 0; i < meshCombiners.Count; i++)
             {
                 if (meshCombiners[i].isDirty)
                 {
-                    meshCombiners[i].combinedMesh.Apply(triangles, vertices, normals, tangents, uvs, uv2, uv3, uv4, colors, bones, blendShapesFlag, uv2GenerationMethod);
+                    success &= meshCombiners[i].combinedMesh.Apply(triangles, vertices, normals, tangents, uvs, uv2, uv3, uv4, colors, bones, blendShapesFlag, uv2GenerationMethod);
                     meshCombiners[i].isDirty = false;
                 }
+
+#if DEBUG
+                numInCombined += meshCombiners[i].combinedMesh.GetNumObjectsInCombined();
+#endif
             }
+
+            if (settings.clearBuffersAfterBake)
+            {
+                // Don't do full ClearBuffers because meshCombiners[i].combinedMesh.Apply(..) did that
+                obj2MeshCombinerMap.Clear();
+            }
+#if DEBUG
+            Debug.Assert(numInCombined == obj2MeshCombinerMap.Count);
+#endif
+
+            return success;
         }
 
         public override void UpdateSkinnedMeshApproximateBounds()
@@ -531,7 +560,7 @@ namespace DigitalOpus.MB.Core
                 }
                 else
                 {
-                    if (cm.combinedMesh.targetRenderer.transform.parent != resultSceneObject.transform)
+                    if (resultSceneObject != null && cm.combinedMesh.targetRenderer.transform.parent != resultSceneObject.transform)
                     {
                         Debug.LogError("targetRender objects must be children of resultSceneObject");
                         return false;
@@ -639,11 +668,11 @@ namespace DigitalOpus.MB.Core
             DestroyMeshEditor(editorMethods);
         }
 
-        public override void DisposeRuntimeCreated()
+        internal override void _DisposeRuntimeCreated()
         {
             for (int i = 0; i < meshCombiners.Count; i++)
             {
-                meshCombiners[i].combinedMesh.DisposeRuntimeCreated();
+                meshCombiners[i].combinedMesh._DisposeRuntimeCreated();
             }
         }
 
@@ -656,7 +685,7 @@ namespace DigitalOpus.MB.Core
                     MB_Utility.Destroy(meshCombiners[i].combinedMesh.targetRenderer.gameObject);
                 }
                 
-                meshCombiners[i].combinedMesh.DestroyMesh();
+                meshCombiners[i].combinedMesh.Dispose();
             }
 
             obj2MeshCombinerMap.Clear();

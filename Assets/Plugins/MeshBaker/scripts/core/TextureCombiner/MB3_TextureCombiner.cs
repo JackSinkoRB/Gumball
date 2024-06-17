@@ -90,6 +90,8 @@ namespace DigitalOpus.MB.Core
     [System.Serializable]
     public class MB3_TextureCombiner
     {
+        public const int TEMP_SOLID_COLOR_TEXTURE_SIZE = 16;
+
         public class CreateAtlasesCoroutineResult
         {
             public bool success = true;
@@ -145,7 +147,7 @@ namespace DigitalOpus.MB.Core
         }
 
         [SerializeField]
-        protected int _maxAtlasWidthOverride = 4096;
+        protected int _maxAtlasWidthOverride = MB2_TexturePacker.MAX_ATLAS_SIZE;
         public virtual int maxAtlasWidthOverride
         {
             get { return _maxAtlasWidthOverride; }
@@ -153,7 +155,7 @@ namespace DigitalOpus.MB.Core
         }
 
         [SerializeField]
-        protected int _maxAtlasHeightOverride = 4096;
+        protected int _maxAtlasHeightOverride = MB2_TexturePacker.MAX_ATLAS_SIZE;
         public virtual int maxAtlasHeightOverride
         {
             get { return _maxAtlasHeightOverride; }
@@ -382,7 +384,7 @@ namespace DigitalOpus.MB.Core
                     yield break;
                 }
 
-                if (_maxTilingBakeSize < 2 || _maxTilingBakeSize > 4096)
+                if (_maxTilingBakeSize < 2 || _maxTilingBakeSize > MB2_TexturePacker.MAX_ATLAS_SIZE)
                 {
                     Debug.LogError("Invalid value for max tiling bake size.");
                     result.success = false;
@@ -466,7 +468,7 @@ namespace DigitalOpus.MB.Core
         {
             MB3_TextureCombinerPipeline.TexturePipelineData data = new MB3_TextureCombinerPipeline.TexturePipelineData();
             data._textureBakeResults = _textureBakeResults;
-            data._atlasPadding = _atlasPadding;
+            data._atlasPadding_pix = _atlasPadding;
             if (_packingAlgorithm == MB2_PackingAlgorithmEnum.MeshBakerTexturePacker_Vertical && _useMaxAtlasHeightOverride)
             {
                 data._maxAtlasHeight = _maxAtlasHeightOverride;
@@ -717,7 +719,7 @@ namespace DigitalOpus.MB.Core
                         sb.AppendFormat("\nObject {0} submesh={1} material={2} uses UVs outside the range 0,0 .. 1,1 to create tiling that tiles the box {3},{4} .. {5},{6}. This is a problem because the UVs outside the 0,0 .. 1,1 " +
                                         "rectangle will pick up neighboring textures in the atlas. Possible Treatments:\n", obj, j, ms[j], r.x.ToString("G4"), r.y.ToString("G4"), (r.x + r.width).ToString("G4"), (r.y + r.height).ToString("G4"));
                         sb.AppendFormat("    1) Ignore the problem. The tiling may not affect result significantly.\n");
-                        sb.AppendFormat("    2) Use the 'fix out of bounds UVs' feature to bake the tiling and scale the UVs to fit in the 0,0 .. 1,1 rectangle.\n");
+                        sb.AppendFormat("    2) Use the 'Consider Mesh UVs' feature to bake the tiling and scale the UVs to fit in the 0,0 .. 1,1 rectangle.\n");
                         sb.AppendFormat("    3) Use the Multiple Materials feature to map the material on this submesh to its own submesh in the combined mesh. No other materials should map to this submesh. This will result in only one texture in the atlas(es) and the UVs should tile correctly.\n");
                         sb.AppendFormat("    4) Combine only meshes that use the same (or subset of) the set of materials on this mesh. The original material(s) can be applied to the result\n");
                     }

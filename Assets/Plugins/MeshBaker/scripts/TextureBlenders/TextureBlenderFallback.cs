@@ -89,19 +89,36 @@ namespace DigitalOpus.MB.Core
             {
                 if (mat != null && mat.HasProperty("_Color"))
                 {
+                    /*
                     try
                     { //need try because can't garantee _Color is a color
                         return mat.GetColor("_Color");
                     }
                     catch (Exception) { }
+                    */
+                    // Why don't we return _Color here?
+                    // Source object has:  no-texture,   _Color  ==>   look like _Color
+                    // Atlas needs:
+                    //   CORRECT:                whiteBlock,  _Color  ==>   look like _Color
+                    //   WRONG:              solidTex_Color,  _Color ==>  look like _Color * _Color
+
+                    return Color.white;
                 }
 				else if (mat != null && mat.HasProperty("_TintColor"))
 				{
+                    /*
 					try
 					{ //need try because can't garantee _TintColor is a color
 						return mat.GetColor("_TintColor");
 					}
 					catch (Exception) { }
+                    */
+                    // Why don't we return _Color here?
+                    // Source object has:  no-texture,   _Color  ==>   look like _Color
+                    // Atlas needs:
+                    //   CORRECT:                whiteBlock,  _Color  ==>   look like _Color
+                    //   WRONG:              solidTex_Color,  _Color ==>  look like _Color * _Color
+                    return Color.white;
 				}
             }
             else if (texProperty.name.Equals("_SpecGlossMap"))
@@ -119,7 +136,6 @@ namespace DigitalOpus.MB.Core
                             }
                             catch (Exception) { }
                         }
-                        Debug.LogWarning(c);
                         return c;
                     }
                     catch (Exception) { }

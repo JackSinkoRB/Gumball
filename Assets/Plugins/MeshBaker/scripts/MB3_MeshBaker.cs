@@ -38,19 +38,24 @@ public class MB3_MeshBaker : MB3_MeshBakerCommon {
 	}
 	
 	public override bool AddDeleteGameObjects(GameObject[] gos, GameObject[] deleteGOs, bool disableRendererInSource){
-//		if ((_meshCombiner.outputOption == MB2_OutputOptions.bakeIntoSceneObject || (_meshCombiner.outputOption == MB2_OutputOptions.bakeIntoPrefab && _meshCombiner.renderType == MB_RenderType.skinnedMeshRenderer) )) BuildSceneMeshObject();
+		UpgradeToCurrentVersionIfNecessary();
+		//		if ((_meshCombiner.outputOption == MB2_OutputOptions.bakeIntoSceneObject || (_meshCombiner.outputOption == MB2_OutputOptions.bakeIntoPrefab && _meshCombiner.renderType == MB_RenderType.skinnedMeshRenderer) )) BuildSceneMeshObject();
 		_meshCombiner.name = name + "-mesh";
 		return _meshCombiner.AddDeleteGameObjects(gos,deleteGOs,disableRendererInSource);		
 	}
 	
 	public override bool AddDeleteGameObjectsByID(GameObject[] gos, int[] deleteGOinstanceIDs, bool disableRendererInSource){
-//		if ((_meshCombiner.outputOption == MB2_OutputOptions.bakeIntoSceneObject || (_meshCombiner.outputOption == MB2_OutputOptions.bakeIntoPrefab && _meshCombiner.renderType == MB_RenderType.skinnedMeshRenderer) )) BuildSceneMeshObject();
+		UpgradeToCurrentVersionIfNecessary();
+		//		if ((_meshCombiner.outputOption == MB2_OutputOptions.bakeIntoSceneObject || (_meshCombiner.outputOption == MB2_OutputOptions.bakeIntoPrefab && _meshCombiner.renderType == MB_RenderType.skinnedMeshRenderer) )) BuildSceneMeshObject();
 		_meshCombiner.name = name + "-mesh";
 		return _meshCombiner.AddDeleteGameObjectsByID(gos,deleteGOinstanceIDs,disableRendererInSource);
 	}
 
     public void OnDestroy()
     {
-        _meshCombiner.DisposeRuntimeCreated();
+		if (meshCombiner != null)
+		{
+            meshCombiner.Dispose();
+		}
     }
 }

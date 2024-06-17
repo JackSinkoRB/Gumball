@@ -94,7 +94,7 @@ namespace DigitalOpus.MB.Core
                 renderAtlasesGO = new GameObject("MBrenderAtlasesGO");
                 cameraGameObject = new GameObject("MBCameraGameObject");
                 MB3_AtlasPackerRenderTextureUsingMesh atlasRenderer = new MB3_AtlasPackerRenderTextureUsingMesh();
-                OneTimeSetup(atlasRenderer, renderAtlasesGO, cameraGameObject, atlasSizeX, atlasSizeY, data._atlasPadding, layer, LOG_LEVEL);
+                OneTimeSetup(atlasRenderer, renderAtlasesGO, cameraGameObject, atlasSizeX, atlasSizeY, data._atlasPadding_pix, layer, LOG_LEVEL);
 
                 if (data._considerNonTextureProperties && LOG_LEVEL >= MB2_LogLevel.warn) Debug.LogWarning("Blend Non-Texture Properties has limited functionality when used with Mesh Baker Texture Packer Fast.");
 

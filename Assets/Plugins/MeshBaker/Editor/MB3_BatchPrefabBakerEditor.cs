@@ -94,9 +94,9 @@ namespace DigitalOpus.MB.MBEditor
                                     " that share a combined material. Source assets are not touched.\n\n" +
                                     "1) Create instances of source prefabs to this scene.\n" +
                                     "2) Add these instances to the TextureBaker on this GameObject and bake the textures used by the prefabs.\n" +
-                                    "2) Using the BatchPrefabBaker component, click 'Populate Prefab Rows From Texture Baker' or manually set up Prefab Rows by dragging to the Prefab Rows list.\n" +
+                                    "3) Using the BatchPrefabBaker component, click 'Populate Prefab Rows From Texture Baker' or manually set up Prefab Rows by dragging to the Prefab Rows list.\n" +
                                     "4) Choose a folder where the result prefabs will be stored and click 'Create Empty Result Prefabs'\n" +
-                                    "5) click 'Batch Bake Prefabs'\n" +
+                                    "5) Click 'Batch Bake Prefabs'\n" +
                                     "6) Check the console for messages and errors\n" +
                                     "7) (Optional) If you want to compare the source objects to the result objects use the BatchPrefabBaker '...' menu command 'Create Instances For Prefab Rows'. This will create aligned instances of the prefabs in the scene so that it is easy to see any differences.\n", MessageType.Info);
             EditorGUILayout.PropertyField(logLevel, GUIContentLogLevelContent);
@@ -155,7 +155,17 @@ namespace DigitalOpus.MB.MBEditor
             List<GameObject> gos = texBaker.GetObjectsToCombine();
             for (int i = 0; i < gos.Count; i++)
             {
+                if (gos[i] == null)
+                {
+                    Debug.LogError("Prefab in Objects To Be Combined at index " + i + " is null. Make sure that all objects to be batched are non-null prefabs.");
+                    return;
+                }
                 GameObject go = (GameObject)MBVersionEditor.PrefabUtility_FindPrefabRoot(gos[i]);
+                if (go == null)
+                {
+                    Debug.LogError("Could not find prefab root for " + gos[i] + " at index " + i + ". Make sure that all objects to be batched are non-null prefabs.");
+                    return;
+                }
                 UnityEngine.Object obj = MBVersionEditor.PrefabUtility_GetCorrespondingObjectFromSource(go);
 
                 if (obj != null && obj is GameObject)

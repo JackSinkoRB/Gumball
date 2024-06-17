@@ -434,8 +434,19 @@ namespace DigitalOpus.MB.Core
                         rectInAtlas = new Rect();
                         encapsulatingRectOut = new Rect();
                         sourceMaterialTilingOut = new Rect();
+
                         sliceIdx = -1;
-                        errorMsg = String.Format("Could not find a tiled rectangle in the atlas capable of containing the uv and material tiling on mesh {0} for material {1}. Was this mesh included when atlases were baked?", m.name, mat);
+                        errorMsg = String.Format("Objects To Be Combined mesh {0} uses material {1} on submesh {2}. This material requires a rectangle in the atlas that tiles the texture {3}. However, MeshBaker could not find a rectangle in the atlas that can contain this tiled rectangle.\n\n" +
+                                                 "To explain in greater detail, suppose there are two meshes:\n\n" + 
+                                                 " - A single-brick mesh that uses a small UV rectangle in a brick-wall.png texture.\n" + 
+                                                 " - A brick-wall mesh that tiles the same brick-wall.png texture three times.\n\n" + 
+                                                 "If TextureBaker is used to bake a texture atlas that includes only the single-brick mesh (NOT the brick-wall mesh) and the \"considerUVs\" feature is used, " + 
+                                                 "then the TextureBaker will copy only the small UV rectangle (the single brick) with the brick-wall.png texture to the texture atlas.\n\n" + 
+                                                 "THE PROBLEM: If one now attempts to use the same atlas in a MeshBaker-bake with the brick-wall-mesh, this will not work " + 
+                                                 "because the brick-wall mesh requires more of the brick-wall.png texture than was copied to the atlas. " + 
+                                                 "The brick-wall mesh needs the entire brick-wall.png texture tiled three times.\n\n" + 
+                                                 "THE SOLUTION: To resolve this issue, both the \"single-brick mesh\" and the \"brick-wall mesh\" in the original texture bake, " + 
+                                                 "then the TextureBaker will copy the entire brick-wall.png to the atlas tiled three times. This atlas rectangle will work for both the single-brick mesh and the brick-wall mesh.", m.name, mat, submeshIdx, mar[submeshIdx].uvRect.ToString());
                         return false;
                     }
                 }

@@ -58,11 +58,14 @@ namespace DigitalOpus.MB.Core
             {
                 if (m != null && m.HasProperty("_Color"))
                 {
+                    /*
                     try
                     { //need try because can't garantee _Color is a color
                         return m.GetColor("_Color");
                     }
                     catch (Exception) { }
+                    */
+                    return Color.white;
                 }
             }
             return new Color(1,1,1,0);

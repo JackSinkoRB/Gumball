@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace DigitalOpus.MB.Core{
-	
 	public delegate void ProgressUpdateDelegate(string msg, float progress);
     public delegate bool ProgressUpdateCancelableDelegate(string msg, float progress);
 
@@ -63,6 +62,13 @@ namespace DigitalOpus.MB.Core{
 		robust
 	}
 
+	public enum MB_TextureCompressionQuality
+    {
+		fast = 0,
+		normal = 50,
+		best = 100
+    }
+
 	/// <summary>
 	/// M b2_ texture combiner editor methods.
 	/// Contains functionality such as changeing texture formats
@@ -75,7 +81,7 @@ namespace DigitalOpus.MB.Core{
 		void RestoreReadFlagsAndFormats(ProgressUpdateDelegate progressInfo);
 		void SetReadWriteFlag(Texture2D tx, bool isReadable, bool addToList);
 		void ConvertTextureFormat_DefaultPlatform(Texture2D tx, TextureFormat targetFormat, bool isNormalMap);
-		void ConvertTextureFormat_PlatformOverride(Texture2D tx, TextureFormat targetFormat, bool isNormalMap);
+		void ConvertTextureFormat_PlatformOverride(Texture2D tx, TextureFormat targetFormat, MB_TextureCompressionQuality compressionQuality, bool isNormalMap);
 		void SaveTextureArrayToAssetDatabase(Texture2DArray atlas, TextureFormat foramt, string texPropertyName, int atlasNum, Material resMat);
         void SaveAtlasToAssetDatabase(Texture2D atlas, ShaderTextureProperty texPropertyName, int atlasNum, bool doAnySrcMatsHaveProperty, Material resMat);
 		bool IsNormalMap(Texture2D tx);

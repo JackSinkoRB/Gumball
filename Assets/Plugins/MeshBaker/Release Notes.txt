@@ -1,3 +1,40 @@
+Version 3.36.1 June 8, 2023
+    Fix build error
+    BatchPrefabBaker null checks
+
+Version 3.36.0 June 5, 2023
+    ** Important ** The clear buffers after bake behaviour has changed. It may be necessary to uncheck
+    "Clear Buffers After Bake" if you are baking repeatedly.
+    Changed "clear buffers after bake" feature so that buffers are cleared when "Apply" is called. Previously this only happened when editor buttons were pressed.
+    Fixed typos in some of the text in the inspector and error messages.
+    Fixed exception when there are zero rows in inspector and we press the delete row button.
+    Fixed NullReferenceException if there is a null material when using "Configure Multiple Materials From Objects To Be Combined".
+    Updated MeshCombiner to use new Unity Mesh API for setting and getting BoneWeights.
+    Better validation and error handling when baking skinned meshes.
+    Added EncodeToTGA so that it is possible to save atlases in TGA format.
+    Fixed display of TextureShaderProperty.
+    Some lists don't display properly in Unity 2021. The first row is overwritten. Fixed by adding [NonReorderable].
+    MeshCombiners implement the IDisposable interface and are Disposed in OnDestroy.
+    Apply and UpdateGameObjects return a bool to indicate success or failure.
+    Added function MBVersion.IsAssetInProject(Object).
+    Added interface MB_IMeshCombinerSimpleBones to better encapsulate functionality for processing bone data in skinned meshes.
+
+Version 3.35.1 Sept 16, 2022
+    Added ASMDEF file to Examples folder. This fixes compile errors if the MeshBaker folder is added to a folder that has an ASMDEF
+    Fix error "Could not find a tiling rect..."
+    Fix Blend-Non-Texture-Properties bug when there are no textures, only color tints.
+    Created TEMP_SOLID_COLOR_TEXTURE_SIZE constant.
+
+Version 3.35.0 July 26, 2022
+    Fix bug where parentSceneObject can loose its reference.
+    Made MAX_ATLAS_SIZE a constant so it is easy to update.
+    Added a TextureBakerEditorInternal.isCombiningTexture variable so other scripts can detect if texture baking is in progress.
+    Added TextureCompressionFormat to MB_TextureArrayFormat.
+    Correct handling of TextureFormat.CompressionQuality.
+    Updated TextureBlenders for Standard and URP to handle alphaClipping
+    Refactored MeshCombinerSimple so that combining functions are handled by a separate class. This is a first step toward migrating to NativeArrays
+    Fix bug with URP texture tiling where material tiling was only being applied to BaseMap. This is encapsulated in ShadersThatShareTiling.cs
+
 Version 3.34.3 Mar 10, 2022
     Fix serializing lightmapping after using the "Preserve Current Lightmapping" and saving the scene.
     Fix "Preserve Current Lightmapping" when source meshes do not have a UV2 channel

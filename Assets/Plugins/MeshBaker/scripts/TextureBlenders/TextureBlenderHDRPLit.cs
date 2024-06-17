@@ -353,12 +353,19 @@ namespace DigitalOpus.MB.Core
             {
                 if (mat != null && mat.HasProperty("_BaseColor"))
                 {
+                    /*
                     try
                     { //need try because can't garantee _Color is a color
                         Color c = mat.GetColor("_BaseColor");
                         sourceMaterialPropertyCache.CacheMaterialProperty(mat, "_BaseColor", c);
                     }
                     catch (Exception) { }
+                    */
+                    // Why don't we return _BaseColor here?
+                    // Source object has:  no-texture,   _BaseColor  ==>   look like _BaseColor
+                    // Atlas needs:
+                    //   CORRECT:                whiteBlock,  _BaseColor  ==>   look like _BaseColor
+                    //   WRONG:              solidTex_Color,  _BaseColor ==>  look like _Color * _BaseColor
                     return m_notGeneratingAtlasDefaultColor;
                 }
             }            

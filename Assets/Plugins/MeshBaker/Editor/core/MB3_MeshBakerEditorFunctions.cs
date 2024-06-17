@@ -99,7 +99,7 @@ public class MB3_MeshBakerEditorFunctions
                     List<GameObject> gos = mom.GetObjectsToCombine();
                     if (mom.GetNumObjectsInCombined() > 0)
                     {
-                        if (mom.clearBuffersAfterBake) { mom.ClearMesh(); }
+                        if (mom.meshCombiner.clearBuffersAfterBake) { mom.ClearMesh(); }
                         else
                         {
                             Debug.LogError("'Texture Bake Result' must be set to add more objects to a combined mesh that already contains objects. Try enabling 'clear buffers after bake'");
@@ -121,20 +121,32 @@ public class MB3_MeshBakerEditorFunctions
 
         // Add Delete Game Objects
         bool success;
-        if (prefabOrSceneObject == MB2_OutputOptions.bakeIntoSceneObject)
+        try
         {
-            success = _BakeIntoCombinedSceneObject(mom, createdDummyTextureBakeResults, ref so);
+            if (prefabOrSceneObject == MB2_OutputOptions.bakeIntoSceneObject)
+            {
+                success = _BakeIntoCombinedSceneObject(mom, createdDummyTextureBakeResults, ref so);
+            }
+            else if (prefabOrSceneObject == MB2_OutputOptions.bakeIntoPrefab)
+            {
+                success = _BakeIntoCombinedPrefab(mom, createdDummyTextureBakeResults, ref so);
+            }
+            else
+            {
+                Debug.LogError("Should be impossible.");
+                success = false;
+            }
         }
-        else if (prefabOrSceneObject == MB2_OutputOptions.bakeIntoPrefab)
+        catch
         {
-            success = _BakeIntoCombinedPrefab(mom, createdDummyTextureBakeResults, ref so);
-        } else
-        {
-            Debug.LogError("Should be impossible.");
             success = false;
+            throw;
+        }
+        finally
+        {
+            mom.meshCombiner.Dispose();
         }
 
-        if (mom.clearBuffersAfterBake) { mom.meshCombiner.ClearBuffers(); }
         if (createdDummyTextureBakeResults) MB_Utility.Destroy(mom.textureBakeResults);
         return success;
     }
@@ -143,11 +155,10 @@ public class MB3_MeshBakerEditorFunctions
     {
         bool success;
         mom.ClearMesh();
-        if (mom.AddDeleteGameObjects(mom.GetObjectsToCombine().ToArray(), null, false))
+        if (mom.AddDeleteGameObjects(mom.GetObjectsToCombine().ToArray(), null, false) &&
+            mom.Apply(UnwrapUV2))
         {
             success = true;
-            mom.Apply(UnwrapUV2);
-
             if (createdDummyTextureBakeResults)
             {
                 Debug.Log(String.Format("Successfully baked {0} meshes each material is mapped to its own submesh.", mom.GetObjectsToCombine().Count));

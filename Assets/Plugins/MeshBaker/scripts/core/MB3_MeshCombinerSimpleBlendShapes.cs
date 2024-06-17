@@ -68,12 +68,17 @@ namespace DigitalOpus.MB.Core
             }
         }
 
-        void ApplyBlendShapeFramesToMeshAndBuildMap()
+        static void ApplyBlendShapeFramesToMeshAndBuildMap(MB3_MeshCombinerSingle combiner)
         {
+            Vector3[] verts = combiner.verts;
+            MBBlendShape[] blendShapes = combiner.blendShapes;
+            Renderer _targetRenderer = combiner._targetRenderer;
+            Mesh _mesh = combiner._mesh;
+
             if (MBVersion.GetMajorVersion() > 5 ||
                                 (MBVersion.GetMajorVersion() == 5 && MBVersion.GetMinorVersion() >= 3))
             {
-                if (blendShapesInCombined.Length != blendShapes.Length) blendShapesInCombined = new MBBlendShape[blendShapes.Length];
+                if (combiner.blendShapesInCombined.Length != blendShapes.Length) combiner.blendShapesInCombined = new MBBlendShape[blendShapes.Length];
                 Vector3[] targVerts = new UnityEngine.Vector3[verts.Length];
                 Vector3[] targNorms = new UnityEngine.Vector3[verts.Length];
                 Vector3[] targTans = new UnityEngine.Vector3[verts.Length];
@@ -84,7 +89,7 @@ namespace DigitalOpus.MB.Core
                 for (int bsIdx = 0; bsIdx < blendShapes.Length; bsIdx++)
                 {
                     MBBlendShape blendShape = blendShapes[bsIdx];
-                    MB_DynamicGameObject dgo = instance2Combined_MapGet(blendShape.gameObject);
+                    MB_DynamicGameObject dgo = combiner.instance2Combined_MapGet(blendShape.gameObject);
                     if (dgo != null)
                     {
                         int destIdx = dgo.vertIdx;
@@ -105,7 +110,7 @@ namespace DigitalOpus.MB.Core
                     {
                         Debug.LogError("InstanceID in blend shape that was not in instance2combinedMap");
                     }
-                    blendShapesInCombined[bsIdx] = blendShape;
+                    combiner.blendShapesInCombined[bsIdx] = blendShape;
                 }
                 
                 //this is necessary to get the renderer to refresh its data about the blendshapes.
@@ -113,12 +118,12 @@ namespace DigitalOpus.MB.Core
                 ((SkinnedMeshRenderer)_targetRenderer).sharedMesh = _mesh;
 
                 // Add the map to the target renderer.
-                if (settings.doBlendShapes)
+                if (combiner.settings.doBlendShapes)
                 {
                     MB_BlendShape2CombinedMap mapComponent = _targetRenderer.GetComponent<MB_BlendShape2CombinedMap>();
                     if (mapComponent == null) mapComponent = _targetRenderer.gameObject.AddComponent<MB_BlendShape2CombinedMap>();
                     SerializableSourceBlendShape2Combined map = mapComponent.GetMap();
-                    BuildSrcShape2CombinedMap(map, blendShapes);
+                    BuildSrcShape2CombinedMap(combiner, map, blendShapes);
                 }
             }
         }
@@ -127,7 +132,7 @@ namespace DigitalOpus.MB.Core
         /// The source blend shape may have parts that should be stripped away.
         /// Use this method to strip away the unused parts.
         /// </summary>
-        string ConvertBlendShapeNameToOutputName(string bs)
+        static string ConvertBlendShapeNameToOutputName(string bs)
         {
             // remove everything before the final '.'
             string[] nameParts = bs.Split('.');
@@ -136,8 +141,13 @@ namespace DigitalOpus.MB.Core
             return lastPart;
         }
 
-        void ApplyBlendShapeFramesToMeshAndBuildMap_MergeBlendShapesWithTheSameName()
+        static void ApplyBlendShapeFramesToMeshAndBuildMap_MergeBlendShapesWithTheSameName(MB3_MeshCombinerSingle combiner)
         {
+            Vector3[] verts = combiner.verts;
+            MBBlendShape[] blendShapes = combiner.blendShapes;
+            Renderer _targetRenderer = combiner._targetRenderer;
+            Mesh _mesh = combiner._mesh;
+
             if (MBVersion.GetMajorVersion() > 5 ||
                                 (MBVersion.GetMajorVersion() == 5 && MBVersion.GetMinorVersion() >= 3))
             {
@@ -176,7 +186,7 @@ namespace DigitalOpus.MB.Core
 
                 if (numFramesError) return;
 
-                if (blendShapesInCombined.Length != blendShapes.Length) blendShapesInCombined = new MBBlendShape[shapeName2objs.Keys.Count];
+                if (combiner.blendShapesInCombined.Length != blendShapes.Length) combiner.blendShapesInCombined = new MBBlendShape[shapeName2objs.Keys.Count];
 
                 int bsInCombinedIdx = 0;
                 foreach (string shapeName in shapeName2objs.Keys)
@@ -195,7 +205,7 @@ namespace DigitalOpus.MB.Core
                         for (int dgoIdx = 0; dgoIdx < groupOfSrcObjs.Count; dgoIdx++)
                         {
                             MBBlendShape blendShape = groupOfSrcObjs[dgoIdx];
-                            MB_DynamicGameObject dgo = instance2Combined_MapGet(blendShape.gameObject);
+                            MB_DynamicGameObject dgo = combiner.instance2Combined_MapGet(blendShape.gameObject);
                             int destIdx = dgo.vertIdx;
                             Debug.Assert(blendShape.frames.Length == numFrames);
                             MBBlendShapeFrame frame = blendShape.frames[frmIdx];
@@ -219,7 +229,7 @@ namespace DigitalOpus.MB.Core
                         _ZeroArray(targTans, 0, targTans.Length);
                     }
 
-                    blendShapesInCombined[bsInCombinedIdx] = firstBlendShape;
+                    combiner.blendShapesInCombined[bsInCombinedIdx] = firstBlendShape;
                     bsInCombinedIdx++;
                 }
 
@@ -230,18 +240,20 @@ namespace DigitalOpus.MB.Core
                 ((SkinnedMeshRenderer)_targetRenderer).sharedMesh = _mesh;
 
                 // Add the map to the target renderer.
-                if (settings.doBlendShapes)
+                if (combiner.settings.doBlendShapes)
                 {
                     MB_BlendShape2CombinedMap mapComponent = _targetRenderer.GetComponent<MB_BlendShape2CombinedMap>();
                     if (mapComponent == null) mapComponent = _targetRenderer.gameObject.AddComponent<MB_BlendShape2CombinedMap>();
                     SerializableSourceBlendShape2Combined map = mapComponent.GetMap();
-                    BuildSrcShape2CombinedMap(map, blendShapesInCombined);
+                    BuildSrcShape2CombinedMap(combiner, map, combiner.blendShapesInCombined);
                 }
             }
         }
 
-        void BuildSrcShape2CombinedMap(SerializableSourceBlendShape2Combined map, MBBlendShape[] bs)
+        static void BuildSrcShape2CombinedMap(MB3_MeshCombinerSingle combiner, SerializableSourceBlendShape2Combined map, MBBlendShape[] bs)
         {
+            MBBlendShape[] blendShapesInCombined = combiner.blendShapesInCombined;
+            Renderer _targetRenderer = combiner._targetRenderer;
             Debug.Assert(_targetRenderer.gameObject != null, "Target Renderer was null.");
             GameObject[] srcGameObjects = new GameObject[bs.Length];
             int[] srcBlendShapeIdxs = new int[bs.Length];
@@ -267,7 +279,7 @@ namespace DigitalOpus.MB.Core
             return mapComponent.srcToCombinedMap.GenerateMapFromSerializedData();
         }
 
-        void _ZeroArray(Vector3[] arr, int idx, int length)
+        static void _ZeroArray(Vector3[] arr, int idx, int length)
         {
             int bound = idx + length;
             for (int i = idx; i < bound; i++)

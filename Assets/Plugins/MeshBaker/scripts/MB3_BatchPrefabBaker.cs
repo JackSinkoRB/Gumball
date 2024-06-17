@@ -12,6 +12,9 @@ public class MB3_BatchPrefabBaker : MonoBehaviour {
         public GameObject resultPrefab;
     }
 
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public MB3_PrefabBakerRow[] prefabRows = new MB3_PrefabBakerRow[0];
 
     public string outputPrefabFolder = "";

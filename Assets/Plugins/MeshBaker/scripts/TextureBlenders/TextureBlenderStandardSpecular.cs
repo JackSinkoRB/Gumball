@@ -24,6 +24,8 @@ namespace DigitalOpus.MB.Core
 
         // These are cached values read in OnBeforeTintTexture and used when blending pixels.
         Color m_tintColor;
+        bool m_doScaleAlphaCutoff;
+        float m_alphaCutoff;
         float m_glossiness;
         float m_SpecGlossMapScale;
         Color m_specColor;
@@ -43,6 +45,7 @@ namespace DigitalOpus.MB.Core
         float m_generatingTintedAtlaSpecGlossMapScale = 1f;
         float m_generatingTintedAtlaBumpScale = 1f;
         Color m_generatingTintedAtlaEmission = Color.white;
+        const float m_generatedAlphaCutoff = .5f;
 
         // These are the default property values that will be assigned to the result materials if 
         // none of the source materials have a value for these properties.
@@ -68,6 +71,20 @@ namespace DigitalOpus.MB.Core
                 else
                 {
                     m_tintColor = m_generatingTintedAtlaColor;
+                }
+
+                if (sourceMat.HasProperty("_Mode") && 
+                    sourceMat.HasProperty("_Cutoff") &&
+                    sourceMat.GetFloat("_Mode") == 1  // Standard shader Cutout mode
+                    )
+                {
+                    m_doScaleAlphaCutoff = true;
+                    m_alphaCutoff = sourceMat.GetFloat("_Cutoff");
+                    m_alphaCutoff = Mathf.Clamp(m_alphaCutoff, .0001f, .9999f);
+                } else
+                {
+                    m_doScaleAlphaCutoff = false;
+                    m_alphaCutoff = .5f;
                 }
             }
             else if (shaderTexturePropertyName.Equals("_SpecGlossMap"))
@@ -141,7 +158,21 @@ namespace DigitalOpus.MB.Core
         {
             if (propertyToDo == Prop.doColor)
             {
-                return new Color(pixelColor.r * m_tintColor.r, pixelColor.g * m_tintColor.g, pixelColor.b * m_tintColor.b, pixelColor.a * m_tintColor.a);
+                Color c = new Color(pixelColor.r * m_tintColor.r, pixelColor.g * m_tintColor.g, pixelColor.b * m_tintColor.b, pixelColor.a * m_tintColor.a);
+                if (m_doScaleAlphaCutoff)
+                {
+                    // The source mat is in AlphaCutoff mode. We need to blend the alpha cutoff into the alpha channel.
+                    // The result-material will have Alpha cutoff of .5f. Scale the alpha channel pixels to account for this.
+                    if (c.a >= m_alphaCutoff)
+                    {
+                        c.a = m_generatedAlphaCutoff + (1f - m_generatedAlphaCutoff) * (c.a - m_alphaCutoff) / (1f - m_alphaCutoff);
+                    } else
+                    {
+                        c.a = (m_generatedAlphaCutoff) * (c.a) / (m_alphaCutoff);
+                    }
+                }
+
+                return c;
             }
             else if (propertyToDo == Prop.doSpecular)
             {
@@ -184,6 +215,17 @@ namespace DigitalOpus.MB.Core
             if (!TextureBlenderFallback._compareColor(a, b, m_generatingTintedAtlaSpecular, "_SpecColor"))
             {
                 return false;
+            }
+
+            if (a.HasProperty("_Mode") && b.HasProperty("_Mode") &&
+                a.GetFloat("_Mode") == 1 && b.GetFloat("_Mode") == 1 &&
+                a.HasProperty("_Cutoff") && b.HasProperty("_Cutoff"))
+            {
+                // Compare alpha cutoff values
+                if (a.HasProperty("_Cutoff") != b.HasProperty("_Cutoff"))
+                {
+                    return false;
+                }
             }
 
             bool aHasSpecTex = a.HasProperty("_SpecGlossMap") && a.GetTexture("_SpecGlossMap") != null;
@@ -233,6 +275,10 @@ namespace DigitalOpus.MB.Core
             if (resultMaterial.GetTexture("_MainTex") != null)
             {
                 resultMaterial.SetColor("_Color", m_generatingTintedAtlaColor);
+                if (resultMaterial.GetFloat("_Mode") == 1) // Alpha cutoff
+                {
+                    resultMaterial.SetFloat("_Cutoff", m_generatedAlphaCutoff);
+                }
             }
             else
             {
@@ -280,6 +326,7 @@ namespace DigitalOpus.MB.Core
             {
                 if (mat != null && mat.HasProperty("_Color"))
                 {
+                    /*
                     try
                     { //need try because can't garantee _Color is a color
                         Color c = mat.GetColor("_Color");
@@ -287,6 +334,7 @@ namespace DigitalOpus.MB.Core
                         return c;
                     }
                     catch (Exception) { }
+                    */
                     return Color.white;
                 }
             }

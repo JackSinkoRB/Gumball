@@ -47,8 +47,8 @@ namespace DigitalOpus.MB.Core
                     for (int texSetIdx = 0; texSetIdx < data.distinctMaterialTextures.Count; texSetIdx++)
                     {
                         MB_TexSet txs = data.distinctMaterialTextures[texSetIdx];
-                        int tWidth = txs.idealWidth;
-                        int tHeight = txs.idealHeight;
+                        int tWidth = txs.idealWidth_pix;
+                        int tHeight = txs.idealHeight_pix;
                         Texture2D tx = txs.ts[propIdx].GetTexture2D();
                         if (progressInfo != null)
                         {
@@ -82,9 +82,9 @@ namespace DigitalOpus.MB.Core
 
                     if (textureEditorMethods != null) textureEditorMethods.CheckBuildSettings(estArea);
 
-                    if (Math.Sqrt(estArea) > 3500f)
+                    if (Math.Sqrt(estArea) > MB2_TexturePacker.MAX_ATLAS_SIZE * .75f)
                     {
-                        if (LOG_LEVEL >= MB2_LogLevel.warn) Debug.LogWarning("The maximum possible atlas size is 4096. Textures may be shrunk");
+                        if (LOG_LEVEL >= MB2_LogLevel.warn) Debug.LogWarning("The maximum possible atlas size is " + MB2_TexturePacker.MAX_ATLAS_SIZE + ". Textures may be shrunk");
                     }
 
                     atlas = new Texture2D(1, 1, TextureFormat.ARGB32, true);
@@ -93,8 +93,7 @@ namespace DigitalOpus.MB.Core
                     {
                         if (progressInfo != null) progressInfo("Estimated min size of atlases: " + Math.Sqrt(estArea).ToString("F0"), .1f);
                         if (LOG_LEVEL >= MB2_LogLevel.info) Debug.Log("Estimated atlas minimum size:" + Math.Sqrt(estArea).ToString("F0"));
-                        int maxAtlasSize = 4096;
-                        uvRects = atlas.PackTextures(texToPack, data._atlasPadding, maxAtlasSize, false);
+                        uvRects = atlas.PackTextures(texToPack, data._atlasPadding_pix, MB2_TexturePacker.MAX_ATLAS_SIZE, false);
                         if (LOG_LEVEL >= MB2_LogLevel.info) Debug.Log("After pack textures atlas numTextures " + texToPack.Length + " size " + atlas.width + " " + atlas.height);
                         atlasSizeX = atlas.width;
                         atlasSizeY = atlas.height;
@@ -103,7 +102,7 @@ namespace DigitalOpus.MB.Core
                     else
                     {
                         if (progressInfo != null) progressInfo("Copying Textures Into: " + prop.name, .1f);
-                        atlas = _copyTexturesIntoAtlas(texToPack, data._atlasPadding, uvRects, atlasSizeX, atlasSizeY, combiner);
+                        atlas = _copyTexturesIntoAtlas(texToPack, data._atlasPadding_pix, uvRects, atlasSizeX, atlasSizeY, combiner);
                     }
                 }
 

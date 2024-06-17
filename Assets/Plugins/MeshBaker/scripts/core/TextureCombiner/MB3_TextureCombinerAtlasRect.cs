@@ -162,7 +162,7 @@ namespace DigitalOpus.MB.Core
             {
                 if (_t != null) return _t.width;
                 //else if (_procT != null) return _procT.width;
-                throw new Exception("Texture was null. can't get width");
+                return MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE;
             }
         }
 
@@ -172,7 +172,7 @@ namespace DigitalOpus.MB.Core
             {
                 if (_t != null) return _t.height;
                 //else if (_procT != null) return _procT.height;
-                throw new Exception("Texture was null. can't get height");
+                return MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE;
             }
         }
 
@@ -530,8 +530,8 @@ namespace DigitalOpus.MB.Core
 
         public Vector2 obUVoffset { get; private set; }
         public Vector2 obUVscale { get; private set; }
-        public int idealWidth; //all textures will be resized to this size
-        public int idealHeight;
+        public int idealWidth_pix; //all textures will be resized to this size
+        public int idealHeight_pix;
 
         private PipelineVariation pipelineVariation;
 
@@ -649,7 +649,7 @@ namespace DigitalOpus.MB.Core
         public void CreateColoredTexToReplaceNull(string propName, int propIdx, bool considerMeshUVs, MB3_TextureCombiner combiner, Color col, bool isLinear)
         {
             MeshBakerMaterialTexture matTex = ts[propIdx];
-            Texture2D tt = combiner._createTemporaryTexture(propName, 16, 16, TextureFormat.ARGB32, true, isLinear);
+            Texture2D tt = combiner._createTemporaryTexture(propName, MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE, MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE, TextureFormat.ARGB32, true, isLinear);
             matTex.t = tt;
             MB_Utility.setSolidColor(matTex.GetTexture2D(), col);
         }

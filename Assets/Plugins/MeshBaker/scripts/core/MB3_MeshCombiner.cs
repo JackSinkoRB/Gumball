@@ -10,7 +10,7 @@ namespace DigitalOpus.MB.Core {
 
     //TODO bug with triangles if using showHide with AddDelete reproduce by using the AddDeleteParts script and changeing some of it to show hide
     [System.Serializable]
-    public abstract class MB3_MeshCombiner : MB_IMeshBakerSettings
+    public abstract class MB3_MeshCombiner : MB_IMeshBakerSettings, IDisposable
     {
         public delegate void GenerateUV2Delegate(Mesh m, float hardAngle, float packMargin);
 
@@ -344,9 +344,12 @@ namespace DigitalOpus.MB.Core {
         /// </summary>
         public virtual bool clearBuffersAfterBake
         {
-            get { return _clearBuffersAfterBake; }
-            set {
-                Debug.LogError("Not implemented.");
+            get 
+            { 
+                return _clearBuffersAfterBake; 
+            }
+            set 
+            {
                 _clearBuffersAfterBake = value;
             }
         }
@@ -434,11 +437,31 @@ namespace DigitalOpus.MB.Core {
         }
 
         protected bool _usingTemporaryTextureBakeResult;
+
+        private bool _disposed = false;
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public bool IsDisposed()
+        {
+            return _disposed;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            _DisposeRuntimeCreated();
+            _disposed = true;
+        }
+
         public abstract int GetLightmapIndex();
 		public abstract void ClearBuffers();
 		public abstract void ClearMesh();
         public abstract void ClearMesh(MB2_EditorMethodsInterface editorMethods);
-        public abstract void DisposeRuntimeCreated();
+        internal abstract void _DisposeRuntimeCreated();
         public abstract void DestroyMesh();
 		public abstract void DestroyMeshEditor(MB2_EditorMethodsInterface editorMethods);
 		public abstract List<GameObject> GetObjectsInCombined();
@@ -456,8 +479,9 @@ namespace DigitalOpus.MB.Core {
         /// <summary>
         /// Copies Mesh Baker internal data to the mesh.
         /// </summary>		
-        public virtual void Apply(){
-			Apply(null);
+        public virtual bool Apply()
+        {
+			return Apply(null);
 		}
 		
 		/// <summary>
@@ -466,7 +490,7 @@ namespace DigitalOpus.MB.Core {
 		/// <param name='uv2GenerationMethod'>
 		/// Uv2 generation method. This is normally editor class method Unwrapping.GenerateSecondaryUVSet
 		/// </param>
-		public abstract void Apply(GenerateUV2Delegate uv2GenerationMethod);
+		public abstract bool Apply(GenerateUV2Delegate uv2GenerationMethod);
 
         /// <summary>
         /// Apply the specified triangles, vertices, normals, tangents, uvs, colors, uv1, uv2, bones and uv2GenerationMethod.
@@ -504,7 +528,7 @@ namespace DigitalOpus.MB.Core {
         /// <param name='uv2GenerationMethod'>
         /// Uv2 generation method. This is normally method Unwrapping.GenerateSecondaryUVSet. This should be null when calling Apply at runtime.
         /// </param>
-        public abstract void Apply(bool triangles,
+        public abstract bool Apply(bool triangles,
                           bool vertices,
                           bool normals,
                           bool tangents,
@@ -558,7 +582,7 @@ namespace DigitalOpus.MB.Core {
         /// <param name='uv2GenerationMethod'>
         /// Uv2 generation method. This is normally method Unwrapping.GenerateSecondaryUVSet. This should be null when calling Apply at runtime.
         /// </param>		
-        public abstract void Apply(bool triangles,
+        public abstract bool Apply(bool triangles,
 						  bool vertices,
 						  bool normals,
 						  bool tangents,
@@ -683,6 +707,7 @@ namespace DigitalOpus.MB.Core {
                 Debug.LogError("Can't add objects if there are already objects in combined mesh when 'Texture Bake Result' is not set. Perhaps enable 'Clear Buffers After Bake'");
                 return false;
             }
+
 			_usingTemporaryTextureBakeResult = true;
 			_textureBakeResults = MB2_TextureBakeResults.CreateForMaterialsOnRenderer(gos, matsOnTargetRenderer);
 			return true;

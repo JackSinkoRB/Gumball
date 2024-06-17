@@ -17,6 +17,11 @@ namespace DigitalOpus.MB.MBEditor
 {
     public class MB3_TextureBakerEditorInternal
     {
+        public static bool IsCombiningTexture
+        {
+            private set;
+            get;
+        }
 
         public class MultiMatSubmeshInfo
         {
@@ -113,7 +118,7 @@ namespace DigitalOpus.MB.MBEditor
             createPrefabAndMaterialLabelContent = new GUIContent("Create Empty Assets For Combined Material", "Creates a material asset and a 'MB2_TextureBakeResult' asset. You should set the shader on the material. Mesh Baker uses the Texture properties on the material to decide what atlases need to be created. The MB2_TextureBakeResult asset should be used in the 'Texture Bake Result' field."),
             logLevelContent = new GUIContent("Log Level"),
             openToolsWindowLabelContent = new GUIContent("Open Tools For Adding Objects", "Use these tools to find out what can be combined, discover possible problems with meshes, and quickly add objects."),
-            fixOutOfBoundsGUIContent = new GUIContent("Consider Mesh UVs", "(Previously called 'fix out of bounds UVs') Textures copied to the atlas will be clipped to the mesh UV rectangle as well as the texture material tiling. This can have two effects:\n\n" +
+            fixOutOfBoundsGUIContent = new GUIContent("Consider Mesh UVs", "Textures copied to the atlas will be clipped to the mesh UV rectangle as well as the texture material tiling. This can have two effects:\n\n" +
                                                         "1) If the mesh only uses a small rectangle of it's source texture (atlas) then only that small rectangle will be copied to the atlas.\n\n" +
                                                         "2) If the mesh has uvs outside the 0,1 range (tiling) then this tiling will be copied to the atlas."),
             resizePowerOfTwoGUIContent = new GUIContent("Resize Power-Of-Two Textures", "Shrinks textures so they have a clear border of width 'Atlas Padding' around them. Improves texture packing efficiency."),
@@ -126,7 +131,7 @@ namespace DigitalOpus.MB.MBEditor
 
             objectsToCombineGUIContent = new GUIContent("Objects To Be Combined", "These can be prefabs or scene objects. They must be game objects with Renderer components, not the parent objects. Materials on these objects will baked into the combined material(s)"),
             textureBakeResultsGUIContent = new GUIContent("Texture Bake Result", "This asset contains a mapping of materials to UV rectangles in the atlases. It is needed to create combined meshes or adjust meshes so they can use the combined material(s). Create it using 'Create Empty Assets For Combined Material'. Drag it to the 'Texture Bake Result' field to use it."),
-            texturePackingAgorithmGUIContent = new GUIContent("Texture Packer", "Unity's PackTextures: Atlases are always a power of two. Can crash when trying to generate large atlases. \n\n " +
+            texturePackingAgorithmGUIContent = new GUIContent("Texture Packer", "Unity's PackTextures: Atlases are always a power of two. Can crash when trying to generate large atlases. \n\n" +
                                                               "Mesh Baker Texture Packer: Atlases will be most efficient size and shape (not limited to a power of two). More robust for large atlases. \n\n" +
                                                               "Mesh Baker Texture Packer Fast: Same as Mesh Baker Texture Packer but creates atlases on the graphics card using RenderTextures instead of the CPU. Source textures can be compressed. May not be pixel perfect. \n\n" +
                                                               "Mesh Baker Texture Packer Horizontal (Experimental): Packs all images vertically to allow horizontal-only UV-tiling.\n\n" +
@@ -429,6 +434,7 @@ namespace DigitalOpus.MB.MBEditor
             GUI.color = buttonColor;
             if (GUILayout.Button("Bake Materials Into Combined Material"))
             {
+                IsCombiningTexture = true;
                 List<MB3_TextureBaker> selectedBakers = _getBakersFromTargets(targets);
                 foreach (MB3_TextureBaker tb in selectedBakers)
                 {
@@ -436,6 +442,7 @@ namespace DigitalOpus.MB.MBEditor
                     EditorUtility.ClearProgressBar();
                     if (tb.textureBakeResults != null) EditorUtility.SetDirty(momm.textureBakeResults);
                 }
+                IsCombiningTexture = false;
             }
             GUI.backgroundColor = oldColor;
             textureBaker.ApplyModifiedProperties();

@@ -146,7 +146,7 @@ public class MB_TextureCombinerRenderTexture{
             if (LOG_LEVEL >= MB2_LogLevel.trace)
             {
                 Debug.Log("TempTexture ");
-                if (tempTexture.height <= 16 && tempTexture.width <= 16) _printTexture(tempTexture);
+                if (tempTexture.height <= TEMP_SOLID_COLOR_TEXTURE_SIZE && tempTexture.width <= TEMP_SOLID_COLOR_TEXTURE_SIZE) _printTexture(tempTexture);
             }
 			myCamera.targetTexture = null;
 			RenderTexture.active = null;

@@ -17,7 +17,7 @@ namespace DigitalOpus.MB.MBEditor
         const int NUM_FILTERS = 5;
         bool writeReportFile = false;
         bool splitAtlasesSoMeshesFit = false;
-        int atlasSize = 4096;
+        int atlasSize = MB2_TexturePacker.MAX_ATLAS_SIZE;
         string generate_AssetsFolder = "";
         List<List<GameObjectFilterInfo>> sceneAnalysisResults = new List<List<GameObjectFilterInfo>>();
         bool[] sceneAnalysisResultsFoldouts = new bool[0];
@@ -382,7 +382,7 @@ namespace DigitalOpus.MB.MBEditor
                 Renderer mr = gameObjects[i].go.GetComponent<Renderer>();
                 if (!MB_Utility.AreAllSharedMaterialsDistinct(mr.sharedMaterials))
                 {
-                    gameObjects[i].warning += " [WARNING: Object uses same material on multiple submeshes. This may produce poor results when used with multiple materials or fix out of bounds uvs.]";
+                    gameObjects[i].warning += " [WARNING: Object uses same material on multiple submeshes. This may produce poor results when used with multiple materials or Consider Mesh UVs.]";
                 }
             }
 

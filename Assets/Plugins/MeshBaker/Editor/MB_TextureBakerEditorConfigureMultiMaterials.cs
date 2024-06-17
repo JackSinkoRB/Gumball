@@ -2,12 +2,8 @@
 // Copyright © 2011-2012 Ian Deane
 //---------------------------------------------- 
 using UnityEngine;
-using System.Collections;
 using System.IO;
-using System;
-using System.Collections.Specialized;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using DigitalOpus.MB.Core;
 
 using UnityEditor;
@@ -54,7 +50,8 @@ namespace DigitalOpus.MB.MBEditor
                     tbEditor.resultMaterials.GetArrayElementAtIndex(idx + 1).FindPropertyRelative("considerMeshUVs").boolValue = momm.fixOutOfBoundsUVs;
                 }
             }
-            if (GUILayout.Button(MB3_TextureBakerEditorInternal.deleteContent, EditorStyles.miniButtonRight, MB3_TextureBakerEditorInternal.buttonWidth))
+            if (GUILayout.Button(MB3_TextureBakerEditorInternal.deleteContent, EditorStyles.miniButtonRight, MB3_TextureBakerEditorInternal.buttonWidth) 
+                && tbEditor.resultMaterials.arraySize > 0)
             {
                 tbEditor.resultMaterials.DeleteArrayElementAtIndex(tbEditor.resultMaterials.arraySize - 1);
             }
@@ -194,7 +191,7 @@ namespace DigitalOpus.MB.MBEditor
                 Renderer mr = gameObjects[i].go.GetComponent<Renderer>();
                 if (!MB_Utility.AreAllSharedMaterialsDistinct(mr.sharedMaterials))
                 {
-                    gameObjects[i].warning += " [WARNING: Object uses same material on multiple submeshes. This may produce poor results when used with multiple materials or fix out of bounds uvs.]";
+                    gameObjects[i].warning += " [WARNING: Object uses same material on multiple submeshes. This may produce poor results when used with multiple materials or Consider Mesh UVs.]";
                 }
             }
 
@@ -248,44 +245,47 @@ namespace DigitalOpus.MB.MBEditor
             Dictionary<Material, Mesh> obUVobject2mesh_map = new Dictionary<Material, Mesh>();
 
             //validate that the objects to be combined are valid
-            for (int i = 0; i < mom.GetObjectsToCombine().Count; i++)
+            for (int goIdx = 0; goIdx < mom.GetObjectsToCombine().Count; goIdx++)
             {
-                GameObject go = mom.GetObjectsToCombine()[i];
+                GameObject go = mom.GetObjectsToCombine()[goIdx];
                 if (go == null)
                 {
-                    Debug.LogError("Null object in list of objects to combine at position " + i);
+                    Debug.LogError("Null object in list of objects to combine at position " + goIdx);
                     return;
                 }
                 Renderer r = go.GetComponent<Renderer>();
                 if (r == null || (!(r is MeshRenderer) && !(r is SkinnedMeshRenderer)))
                 {
-                    Debug.LogError("GameObject at position " + i + " in list of objects to combine did not have a renderer");
+                    Debug.LogError("GameObject at position " + goIdx + " in list of objects to combine did not have a renderer");
                     return;
                 }
-                if (r.sharedMaterial == null)
+                for (int matIdx = 0; matIdx < r.sharedMaterials.Length; matIdx++)
                 {
-                    Debug.LogError("GameObject at position " + i + " in list of objects to combine has a null material");
-                    return;
+                    if (r.sharedMaterials[matIdx] == null)
+                    {
+                        Debug.LogError("GameObject " + go + " at position " + goIdx + " in list of objects to combine has one or more null materials");
+                        return;
+                    }
                 }
             }
 
             //first pass put any meshes with obUVs on their own submesh if not fixing OB uvs
             if (mom.doMultiMaterialSplitAtlasesIfOBUVs)
             {
-                for (int i = 0; i < mom.GetObjectsToCombine().Count; i++)
+                for (int goIdx = 0; goIdx < mom.GetObjectsToCombine().Count; goIdx++)
                 {
-                    GameObject go = mom.GetObjectsToCombine()[i];
+                    GameObject go = mom.GetObjectsToCombine()[goIdx];
                     Mesh m = MB_Utility.GetMesh(go);
                     MB_Utility.MeshAnalysisResult dummyMar = new MB_Utility.MeshAnalysisResult();
                     Renderer r = go.GetComponent<Renderer>();
-                    for (int j = 0; j < r.sharedMaterials.Length; j++)
+                    for (int matIdx = 0; matIdx < r.sharedMaterials.Length; matIdx++)
                     {
-                        if (MB_Utility.hasOutOfBoundsUVs(m, ref dummyMar, j))
+                        if (MB_Utility.hasOutOfBoundsUVs(m, ref dummyMar, matIdx))
                         {
-                            if (!obUVobject2mesh_map.ContainsKey(r.sharedMaterials[j]))
+                            if (!obUVobject2mesh_map.ContainsKey(r.sharedMaterials[matIdx]))
                             {
-                                Debug.LogWarning("Object " + go + " submesh " + j + " uses UVs outside the range 0,0..1,1 to generate tiling. This object has been mapped to its own submesh in the combined mesh. It can share a submesh with other objects that use different materials if you use the fix out of bounds UVs feature which will bake the tiling");
-                                obUVobject2mesh_map.Add(r.sharedMaterials[j], m);
+                                Debug.LogWarning("Object " + go + " submesh " + matIdx + " uses UVs outside the range 0,0..1,1 to generate tiling. This object has been mapped to its own submesh in the combined mesh. It can share a submesh with other objects that use different materials if you use the Consider Mesh UVs feature which will bake the tiling");
+                                obUVobject2mesh_map.Add(r.sharedMaterials[matIdx], m);
                             }
                         }
                     }
@@ -293,23 +293,23 @@ namespace DigitalOpus.MB.MBEditor
             }
 
             //second pass  put other materials without OB uvs in a shader to material map
-            for (int i = 0; i < mom.GetObjectsToCombine().Count; i++)
+            for (int goIdx = 0; goIdx < mom.GetObjectsToCombine().Count; goIdx++)
             {
-                Renderer r = mom.GetObjectsToCombine()[i].GetComponent<Renderer>();
-                for (int j = 0; j < r.sharedMaterials.Length; j++)
+                Renderer r = mom.GetObjectsToCombine()[goIdx].GetComponent<Renderer>();
+                for (int matIdx = 0; matIdx < r.sharedMaterials.Length; matIdx++)
                 {
-                    if (!obUVobject2mesh_map.ContainsKey(r.sharedMaterials[j]))
+                    if (!obUVobject2mesh_map.ContainsKey(r.sharedMaterials[matIdx]))
                     { //if not already added
-                        if (r.sharedMaterials[j] == null) continue;
+                        if (r.sharedMaterials[matIdx] == null) continue;
                         List<List<Material>> binsOfMatsThatUseShader = null;
-                        MB3_TextureBakerEditorInternal.MultiMatSubmeshInfo newKey = new MB3_TextureBakerEditorInternal.MultiMatSubmeshInfo(r.sharedMaterials[j].shader, r.sharedMaterials[j]);
+                        MB3_TextureBakerEditorInternal.MultiMatSubmeshInfo newKey = new MB3_TextureBakerEditorInternal.MultiMatSubmeshInfo(r.sharedMaterials[matIdx].shader, r.sharedMaterials[matIdx]);
                         if (!shader2Material_map.TryGetValue(newKey, out binsOfMatsThatUseShader))
                         {
                             binsOfMatsThatUseShader = new List<List<Material>>();
                             binsOfMatsThatUseShader.Add(new List<Material>());
                             shader2Material_map.Add(newKey, binsOfMatsThatUseShader);
                         }
-                        if (!binsOfMatsThatUseShader[0].Contains(r.sharedMaterials[j])) binsOfMatsThatUseShader[0].Add(r.sharedMaterials[j]);
+                        if (!binsOfMatsThatUseShader[0].Contains(r.sharedMaterials[matIdx])) binsOfMatsThatUseShader[0].Add(r.sharedMaterials[matIdx]);
                     }
                 }
             }
@@ -341,14 +341,14 @@ namespace DigitalOpus.MB.MBEditor
                         MB_AtlasesAndRects atlasesAndRects = new MB_AtlasesAndRects();
                         combiner.CombineTexturesIntoAtlases(null, atlasesAndRects, tempMat, mom.GetObjectsToCombine(), allMatsThatUserShader, mom.texturePropNamesToIgnore, null, packingResults,
                             onlyPackRects:true, splitAtlasWhenPackingIfTooBig:true);
-                        for (int i = 0; i < packingResults.Count; i++)
+                        for (int aprIdx = 0; aprIdx < packingResults.Count; aprIdx++)
                         {
 
-                            List<MB_MaterialAndUVRect> matsData = (List<MB_MaterialAndUVRect>)packingResults[i].data;
+                            List<MB_MaterialAndUVRect> matsData = (List<MB_MaterialAndUVRect>)packingResults[aprIdx].data;
                             List<Material> mats = new List<Material>();
-                            for (int j = 0; j < matsData.Count; j++)
+                            for (int mdIdx = 0; mdIdx < matsData.Count; mdIdx++)
                             {
-                                Material mat = matsData[j].material;
+                                Material mat = matsData[mdIdx].material;
                                 if (!mats.Contains(mat))
                                 {
                                     mats.Add(mat);

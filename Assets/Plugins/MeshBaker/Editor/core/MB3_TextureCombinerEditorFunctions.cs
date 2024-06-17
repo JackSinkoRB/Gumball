@@ -108,13 +108,15 @@ namespace DigitalOpus.MB.Core
         class TextureFormatInfo_PlatformOverride
         {
             public TextureImporterFormat format;
+            public UnityEditor.TextureCompressionQuality compressionQuality;
             public String platform;
             public bool isNormalMap;
             public bool doPlatformOverride;
 
-            public TextureFormatInfo_PlatformOverride(string platformString, TextureImporterFormat platformFormat, bool isNormMap, bool overridden)
+            public TextureFormatInfo_PlatformOverride(string platformString, TextureImporterFormat platformFormat, UnityEditor.TextureCompressionQuality compQuality, bool isNormMap, bool overridden)
             {
                 platform = platformString;
+                compressionQuality = compQuality;
                 format = platformFormat;
                 this.isNormalMap = isNormMap;
                 doPlatformOverride = overridden;
@@ -147,7 +149,7 @@ namespace DigitalOpus.MB.Core
             _SetTextureFormat_DefaultPlatform(tx, toFormat, true, false);
         }
 
-        public void ConvertTextureFormat_PlatformOverride(Texture2D tx, TextureFormat targetFormat, bool isNormalMap)
+        public void ConvertTextureFormat_PlatformOverride(Texture2D tx, TextureFormat targetFormat, MB_TextureCompressionQuality compressionQuality, bool isNormalMap)
         {
             //pixel values don't copy correctly from one texture to another when isNormal is set so unset it.
             bool isFormatMapping;
@@ -157,7 +159,7 @@ namespace DigitalOpus.MB.Core
                 importerFormat = TextureImporterFormat.RGBA32;
             }
 
-            TextureFormatInfo_PlatformOverride toFormat = new TextureFormatInfo_PlatformOverride(MBVersionEditor.GetPlatformString(), importerFormat, isNormalMap, true);
+            TextureFormatInfo_PlatformOverride toFormat = new TextureFormatInfo_PlatformOverride(MBVersionEditor.GetPlatformString(), importerFormat, (UnityEditor.TextureCompressionQuality) compressionQuality, isNormalMap, true);
             _SetTextureFormat_PlatformOverride(tx, toFormat, true, false);
         }
 
@@ -169,10 +171,10 @@ namespace DigitalOpus.MB.Core
                 TextureImporter textureImporter = (TextureImporter)ai;
                 bool doImport = false;
 
-                bool is2017 = Application.unityVersion.StartsWith("20");
-                if (is2017)
+                bool is2017orNewer = Application.unityVersion.StartsWith("20");
+                if (is2017orNewer)
                 {
-                    doImport = _Set_DefaultPlatform_TextureFormatAndEnableDisablePlatformOverride_2017(tx, toThisFormat, addToList, setNormalMap, textureImporter);
+                    doImport = _Set_DefaultPlatform_TextureFormatAndEnableDisablePlatformOverride_2017orNewer(tx, toThisFormat, addToList, setNormalMap, textureImporter);
                 }
                 else
                 {
@@ -245,7 +247,11 @@ namespace DigitalOpus.MB.Core
             TextureImporterPlatformSettings platformOverriddenTips = textureImporter.GetPlatformTextureSettings(restoreBuildPlatform);
             TextureFormatInfo_PlatformOverride restoreTfi;
             {
-                restoreTfi = new TextureFormatInfo_PlatformOverride(restoreBuildPlatform, platformOverriddenTips.format, textureImporter.textureType == TextureImporterType.NormalMap, platformOverriddenTips.overridden);
+                UnityEditor.TextureCompressionQuality compressionQuality;
+                if (platformOverriddenTips.compressionQuality < 25) compressionQuality = UnityEditor.TextureCompressionQuality.Fast;
+                else if (platformOverriddenTips.compressionQuality < 75) compressionQuality = UnityEditor.TextureCompressionQuality.Normal;
+                else compressionQuality = UnityEditor.TextureCompressionQuality.Best;
+                restoreTfi = new TextureFormatInfo_PlatformOverride(restoreBuildPlatform, platformOverriddenTips.format, compressionQuality, textureImporter.textureType == TextureImporterType.NormalMap, platformOverriddenTips.overridden);
             }
 
             string targetBuildPlatform = toThisFormat.platform;
@@ -274,6 +280,13 @@ namespace DigitalOpus.MB.Core
                     textureImporter.SetPlatformTextureSettings(platformOverriddenTips);
                     doImport = true;
                 }
+
+                if (platformOverriddenTips.compressionQuality != (int) toThisFormat.compressionQuality)
+                {
+                    platformOverriddenTips.compressionQuality = (int) toThisFormat.compressionQuality;
+                    textureImporter.SetPlatformTextureSettings(platformOverriddenTips);
+                    doImport = true;
+                }
             }
 
             if (doImport)
@@ -287,9 +300,9 @@ namespace DigitalOpus.MB.Core
                 {
                     s = "Restoring texture platform override for ";
                 }
-                s += String.Format("{0}  FROM: isNormal{1} format={2} hadOverride={3} TO: isNormal={4} format={5} hadOverride={6}",
+                s += String.Format("{0}  FROM: isNormal{1} format={2} compression:{7} hadOverride={3} TO: isNormal={4} format={5} compression:{8} hadOverride={6}",
                                 tx, restoreTfi.isNormalMap, restoreTfi.format, restoreTfi.doPlatformOverride,
-                                    setNormalMap, toThisFormat.format, toThisFormat.doPlatformOverride);
+                                    setNormalMap, toThisFormat.format, toThisFormat.doPlatformOverride, restoreTfi.compressionQuality, toThisFormat.compressionQuality);
 
                 Debug.Log(s);
                 if (doImport && rememberRestoreSettings && !_textureFormatMap_PlatformOverride.ContainsKey(tx))
@@ -308,7 +321,7 @@ namespace DigitalOpus.MB.Core
         /// Importer has "Default" PlatformImportSettings which can be overridden by "platform overrides".
         /// This enables/disables the override and sets the "Defalut" to/from something compressed.
         /// </summary>
-        private bool _Set_DefaultPlatform_TextureFormatAndEnableDisablePlatformOverride_2017(Texture2D tx, TextureFormatInfo_AbstractDefaultPlatform toThisFormat, bool rememberRestoreSettings, bool setNormalMap, TextureImporter textureImporter)
+        private bool _Set_DefaultPlatform_TextureFormatAndEnableDisablePlatformOverride_2017orNewer(Texture2D tx, TextureFormatInfo_AbstractDefaultPlatform toThisFormat, bool rememberRestoreSettings, bool setNormalMap, TextureImporter textureImporter)
         {
             /*
              * HOW THE TEXTURE IMPORTER WORKS.
@@ -332,8 +345,8 @@ namespace DigitalOpus.MB.Core
              *          Set default to "uncompressed", "RGB or ARGB"
              *      
             */
-            bool is2017 = Application.unityVersion.StartsWith("20");
-            if (!is2017)
+            bool is2017orNewer = Application.unityVersion.StartsWith("20");
+            if (!is2017orNewer)
             {
                 Debug.LogError("Wrong texture format converter. 2017 Should not be called for Unity Version " + Application.unityVersion);
                 return false;
@@ -780,19 +793,15 @@ namespace DigitalOpus.MB.Core
                         byte[] bytes = newTex.EncodeToPNG();
                         System.IO.File.WriteAllBytes(pth, bytes);
                     }
-                    else
+#if UNITY_2018_3_OR_NEWER
+                    else if (SAVE_FORMAT == saveTextureFormat.tga)
                     {
                         pth += ".tga";
                         relativePath += ".tga";
-                        if (File.Exists(pth))
-                        {
-                            File.Delete(pth);
-                        }
-
-                        //Create the file.
-                        FileStream fs = File.Create(pth);
-                        MB_TGAWriter.Write(newTex.GetPixels(), newTex.width, newTex.height, fs);
+                        byte[] bytes = newTex.EncodeToTGA();
+                        System.IO.File.WriteAllBytes(pth, bytes);
                     }
+#endif
                     Editor.DestroyImmediate(newTex);
                     AssetDatabase.Refresh();
                     Debug.Log(String.Format("Wrote atlas for {0} to file:{1}", texPropertyName.name, pth));
@@ -832,6 +841,8 @@ namespace DigitalOpus.MB.Core
             if (size > 512) maxSize = 1024;
             if (size > 1024) maxSize = 2048;
             if (size > 2048) maxSize = 4096;
+            if (size > 4096) maxSize = 8192;
+            if (size > 8192) maxSize = 16384;
 
             bool isSettingsChanged = false;
             if (ai.maxTextureSize != maxSize)
@@ -879,13 +890,7 @@ namespace DigitalOpus.MB.Core
 
         public void CheckBuildSettings(long estimatedArea)
         {
-            if (Math.Sqrt(estimatedArea) > 1000f)
-            {
-                if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.Standalone)
-                {
-                    Debug.LogWarning("If the current selected build target is not standalone then the generated atlases may be capped at size 1024. If build target is Standalone then atlases of 4096 can be built");
-                }
-            }
+
         }
 
         public bool CheckPrefabTypes(MB_ObjsToCombineTypes objToCombineType, List<GameObject> objsToMesh)

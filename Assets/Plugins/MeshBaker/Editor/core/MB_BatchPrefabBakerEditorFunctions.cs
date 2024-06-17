@@ -130,6 +130,7 @@ namespace DigitalOpus.MB.MBEditor
             }
 
             MB3_MeshBaker mb = pb.GetComponent<MB3_MeshBaker>();
+            mb.UpgradeToCurrentVersionIfNecessary();
             if (mb == null)
             {
                 Debug.LogError("Prefab baker needs to be attached to a Game Object with a MB3_MeshBaker component.");

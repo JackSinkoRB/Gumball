@@ -65,20 +65,6 @@ namespace DigitalOpus.MB.MBEditor
         public void OnEnable(SerializedProperty meshBakerSettingsData)
         {
             _InitCommon(meshBakerSettingsData);
-            clearBuffersAfterBake = meshBakerSettingsData.FindPropertyRelative("_clearBuffersAfterBake");
-        }
-
-        /// <summary>
-        /// This is necessary for backward compatibility. MeshCombinerCommon does not contain the 
-        /// clearBuffersAfterBake field. It is stored in the MeshBaker and is serialized in many, many
-        /// scenes. This Init method is only used for MeshCombinerCommon.
-        /// </summary>
-        /// <param name="combiner"></param>
-        /// <param name="meshBaker"></param>
-        public void OnEnable(SerializedProperty combiner, SerializedObject meshBaker)
-        {
-            _InitCommon(combiner);
-            clearBuffersAfterBake = meshBaker.FindProperty("clearBuffersAfterBake");
         }
 
         public void OnDisable()
@@ -109,6 +95,7 @@ namespace DigitalOpus.MB.MBEditor
             assignToMeshCustomizer = combiner.FindPropertyRelative("_assignToMeshCustomizer");
             smrNoExtraBonesWhenCombiningMeshRenderers = combiner.FindPropertyRelative("_smrNoExtraBonesWhenCombiningMeshRenderers");
             smrMergeBlendShapesWithSameNames = combiner.FindPropertyRelative("_smrMergeBlendShapesWithSameNames");
+            clearBuffersAfterBake = combiner.FindPropertyRelative("_clearBuffersAfterBake");
             editorStyles.Init();
         }
 

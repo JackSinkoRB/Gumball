@@ -29,7 +29,7 @@ namespace DigitalOpus.MB.Core
 
             public void SortTexSetIntoBins(MB_TexSet texSet, List<MB_TexSet> horizontalVert, List<MB_TexSet> regular, int maxAtlasWidth, int maxAtlasHeight)
             {
-                if (texSet.idealHeight >= maxAtlasHeight &&
+                if (texSet.idealHeight_pix >= maxAtlasHeight &&
                     texSet.ts[0].GetEncapsulatingSamplingRect().height >= 1f)
                 {
                     horizontalVert.Add(texSet);
@@ -107,7 +107,7 @@ namespace DigitalOpus.MB.Core
 
             public void SortTexSetIntoBins(MB_TexSet texSet, List<MB_TexSet> horizontalVert, List<MB_TexSet> regular, int maxAtlasWidth, int maxAtlasHeight)
             {
-                if (texSet.idealWidth >= maxAtlasWidth &&
+                if (texSet.idealWidth_pix >= maxAtlasWidth &&
                     texSet.ts[0].GetEncapsulatingSamplingRect().width >= 1f)
                 {
                     horizontalVert.Add(texSet);
@@ -221,9 +221,9 @@ namespace DigitalOpus.MB.Core
                         }
                         else
                         {
-                            w = ts.idealWidth;
+                            w = ts.idealWidth_pix;
                         }
-                        if (ts.idealWidth > maxWidth) maxWidth = w;
+                        if (ts.idealWidth_pix > maxWidth) maxWidth = w;
                     }
                     if (LOG_LEVEL >= MB2_LogLevel.debug) Debug.Log("Calculated max atlas width: " + maxWidth);
                     data._maxAtlasWidth = maxWidth;
@@ -243,9 +243,9 @@ namespace DigitalOpus.MB.Core
                             h = (int) rawHeightWidth.y;
                         } else
                         {
-                            h = ts.idealHeight;
+                            h = ts.idealHeight_pix;
                         }
-                        if (ts.idealHeight > maxHeight) maxHeight = h;
+                        if (ts.idealHeight_pix > maxHeight) maxHeight = h;
                     }
                     if (LOG_LEVEL >= MB2_LogLevel.debug) Debug.Log("Calculated max atlas height: " + maxHeight);
                     data._maxAtlasHeight = maxHeight;
@@ -273,7 +273,7 @@ namespace DigitalOpus.MB.Core
                 for (int i = 0; i < horizontalVerticalDistinctMaterialTextures.Count; i++)
                 {
                     horizontalVerticalDistinctMaterialTextures[i].SetTilingTreatmentAndAdjustEncapsulatingSamplingRect(pipeline.GetEdge2EdgeTreatment());
-                    imageSizesHorizontalVertical.Add(new Vector2(horizontalVerticalDistinctMaterialTextures[i].idealWidth, horizontalVerticalDistinctMaterialTextures[i].idealHeight));
+                    imageSizesHorizontalVertical.Add(new Vector2(horizontalVerticalDistinctMaterialTextures[i].idealWidth_pix, horizontalVerticalDistinctMaterialTextures[i].idealHeight_pix));
                 }
 
                 tp = MB3_TextureCombinerPipeline.CreateTexturePacker(packingAlgorithm);
@@ -282,7 +282,7 @@ namespace DigitalOpus.MB.Core
                 for (int i = 0; i < imageSizesHorizontalVertical.Count; i++)
                 {
                     AtlasPadding padding = new AtlasPadding();
-                    pipeline.InitializeAtlasPadding(ref padding, data._atlasPadding);
+                    pipeline.InitializeAtlasPadding(ref padding, data._atlasPadding_pix);
                     paddingsHorizontalVertical.Add(padding);
                 }
 
@@ -303,7 +303,7 @@ namespace DigitalOpus.MB.Core
                 List<Vector2> imageSizesRegular = new List<Vector2>();
                 for (int i = 0; i < regularTextures.Count; i++)
                 {
-                    imageSizesRegular.Add(new Vector2(regularTextures[i].idealWidth, regularTextures[i].idealHeight));
+                    imageSizesRegular.Add(new Vector2(regularTextures[i].idealWidth_pix, regularTextures[i].idealHeight_pix));
                 }
 
                 tp = MB3_TextureCombinerPipeline.CreateTexturePacker(MB2_PackingAlgorithmEnum.MeshBakerTexturePacker);
@@ -312,8 +312,8 @@ namespace DigitalOpus.MB.Core
                 for (int i = 0; i < imageSizesRegular.Count; i++)
                 {
                     AtlasPadding padding = new AtlasPadding();
-                    padding.topBottom = data._atlasPadding;
-                    padding.leftRight = data._atlasPadding;
+                    padding.topBottom = data._atlasPadding_pix;
+                    padding.leftRight = data._atlasPadding_pix;
                     paddingsRegular.Add(padding);
                 }
  

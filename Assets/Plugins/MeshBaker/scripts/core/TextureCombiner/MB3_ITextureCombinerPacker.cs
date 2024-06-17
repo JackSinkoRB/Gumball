@@ -71,7 +71,7 @@ namespace DigitalOpus.MB.Core
             List<Vector2> imageSizes = new List<Vector2>();
             for (int i = 0; i < data.distinctMaterialTextures.Count; i++)
             {
-                imageSizes.Add(new Vector2(data.distinctMaterialTextures[i].idealWidth, data.distinctMaterialTextures[i].idealHeight));
+                imageSizes.Add(new Vector2(data.distinctMaterialTextures[i].idealWidth_pix, data.distinctMaterialTextures[i].idealHeight_pix));
             }
 
             MB2_TexturePacker tp = MB3_TextureCombinerPipeline.CreateTexturePacker(data._packingAlgorithm);
@@ -80,8 +80,8 @@ namespace DigitalOpus.MB.Core
             for (int i = 0; i < imageSizes.Count; i++)
             {
                 AtlasPadding padding = new AtlasPadding();
-                padding.topBottom = data._atlasPadding;
-                padding.leftRight = data._atlasPadding;
+                padding.topBottom = data._atlasPadding_pix;
+                padding.leftRight = data._atlasPadding_pix;
                 if (data._packingAlgorithm == MB2_PackingAlgorithmEnum.MeshBakerTexturePacker_Horizontal) padding.leftRight = 0;
                 if (data._packingAlgorithm == MB2_PackingAlgorithmEnum.MeshBakerTexturePacker_Vertical) padding.topBottom = 0;
                 paddings.Add(padding);

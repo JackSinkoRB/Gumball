@@ -46,7 +46,7 @@ public class MB3_TextureBaker : MB3_MeshBakerRoot
     }
 
     [SerializeField]
-    protected int _maxAtlasSize = 4096;
+    protected int _maxAtlasSize = MB2_TexturePacker.MAX_ATLAS_SIZE;
     public virtual int maxAtlasSize
     {
         get { return _maxAtlasSize; }
@@ -62,7 +62,7 @@ public class MB3_TextureBaker : MB3_MeshBakerRoot
     }
 
     [SerializeField]
-    protected int _maxAtlasWidthOverride = 4096;
+    protected int _maxAtlasWidthOverride = MB2_TexturePacker.MAX_ATLAS_SIZE;
     public virtual int maxAtlasWidthOverride
     {
         get { return _maxAtlasWidthOverride; }
@@ -78,7 +78,7 @@ public class MB3_TextureBaker : MB3_MeshBakerRoot
     }
 
     [SerializeField]
-    protected int _maxAtlasHeightOverride = 4096;
+    protected int _maxAtlasHeightOverride = MB2_TexturePacker.MAX_ATLAS_SIZE;
     public virtual int maxAtlasHeightOverride
     {
         get { return _maxAtlasHeightOverride; }
@@ -134,6 +134,9 @@ public class MB3_TextureBaker : MB3_MeshBakerRoot
     }
 
     [SerializeField]
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     protected List<ShaderTextureProperty> _customShaderProperties = new List<ShaderTextureProperty>();
     public virtual List<ShaderTextureProperty> customShaderProperties
     {
@@ -143,6 +146,9 @@ public class MB3_TextureBaker : MB3_MeshBakerRoot
 
     
     [SerializeField]
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     protected List<string> _texturePropNamesToIgnore = new List<string>();
     public virtual List<string> texturePropNamesToIgnore
     {
@@ -224,12 +230,25 @@ public class MB3_TextureBaker : MB3_MeshBakerRoot
         }
     }
 
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public MB_MultiMaterial[] resultMaterials = new MB_MultiMaterial[0];
 
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public MB_MultiMaterialTexArray[] resultMaterialsTexArray = new MB_MultiMaterialTexArray[0];
 
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public MB_TextureArrayFormatSet[] textureArrayOutputFormats;
 
+    
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public List<GameObject> objsToMesh; //todo make this Renderer
 
     public override List<GameObject> GetObjectsToCombine()

@@ -420,5 +420,10 @@ public class MB_Utility{
 			//       - is null if is a prefab assigned from the project folder
 			return go.scene.name != null;
 		}
-	}
+
+        public static string BoneWeightToString(BoneWeight bw)
+        {
+			return String.Format("BoneWeight  {0}:{1},  {2}:{3},  {4}:{5}, {6}:{7}", bw.boneIndex0, bw.weight0, bw.boneIndex1, bw.weight1, bw.boneIndex2, bw.weight2, bw.boneIndex3, bw.weight3);
+        }
+    }
 }

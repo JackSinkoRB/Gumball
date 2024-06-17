@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using DigitalOpus.MB.Core;
+using Unity.Collections;
 
 namespace DigitalOpus.MB.Core
 {
@@ -22,6 +23,12 @@ namespace DigitalOpus.MB.Core
             CreatedInEditor,
             CreatedAtRuntime,
             AssignedByUser,
+        }
+
+        public enum MeshCombiningStatus
+        {
+            preAddDeleteOrUpdate,
+            readyForApply,
         }
 
         //2D arrays are not serializable but arrays  of arrays are.
@@ -52,6 +59,7 @@ namespace DigitalOpus.MB.Core
             public int blendShapeIdx;
             public int numVerts;
             public int numBlendShapes;
+            public int numBoneWeights;
 
             public bool isSkinnedMeshWithBones = false; // it is possible for a skinned mesh to have blend shapes but no bones.
 
@@ -114,23 +122,75 @@ namespace DigitalOpus.MB.Core
 
             public Material[] sourceSharedMaterials;
 
-            public bool _beingDeleted = false;
-            public int _triangleIdxAdjustment = 0;
+            // ---------------------- NonSerialized data used internally
+            [NonSerialized]
+            internal bool _initialized = false;
+
+            [NonSerialized]
+            internal bool _beingDeleted = false;
+
+            [NonSerialized]
+            internal Mesh _mesh;
+
+            [NonSerialized]
+            internal Renderer _renderer;
 
             // temporary buffers used within a single bake. Not cached between bakes
             // used so we don't have to call GetBones and GetBindposes multiple Times
             [NonSerialized]
-            public SerializableIntArray[] _tmpSubmeshTris;
+            internal SerializableIntArray[] _tmpSubmeshTris;
 
-            // temporary buffers for bone baking
+            // Temporary buffers for Skinned Mesh Renderer baking =========
             [NonSerialized]
-            public Transform[] _tmpSMR_CachedBones;
+            internal Transform[] _tmpSMR_CachedBones;  // 1 per bone in source mesh
             [NonSerialized]
-            public Matrix4x4[] _tmpSMR_CachedBindposes;
+            internal Matrix4x4[] _tmpSMR_CachedBindposes;  // 1 per bone in source mesh
+
             [NonSerialized]
-            public BoneWeight[] _tmpSMR_CachedBoneWeights;
+            internal BoneAndBindpose[] _tmpSMR_CachedBoneAndBindPose; // 1 per bone in source mesh
+
             [NonSerialized]
-            public int[] _tmpSMRIndexesOfSourceBonesUsed;
+            internal int[] _tmpSMR_srcMeshBoneIdx2masterListBoneIdx; // 1 per bone in source mesh
+
+            [NonSerialized]
+            internal BoneWeight[] _tmpSMR_CachedBoneWeights; // used by old API  mesh.boneWeights 
+
+            [NonSerialized]
+            internal BoneWeightDataForMesh _tmpSMR_CachedBoneWeightData; // used by new API  mesh.GetAllBoneWeights
+
+            public bool Initialize(bool beingDeleted)
+            {
+                _initialized = true;
+                _beingDeleted = beingDeleted;
+                if (!beingDeleted)
+                {
+                    _mesh = MB_Utility.GetMesh(gameObject);
+                    _renderer = MB_Utility.GetRenderer(gameObject);
+                    return _mesh != null && _renderer != null;
+                } else
+                {
+                    return true;
+                }
+            }
+
+            public bool InitializeNew(bool beingDeleted, GameObject go)
+            {
+                Debug.Assert(go != null);
+                Debug.Assert(name == null, "Should only call InitializeNew on a newly created DGO.");
+                gameObject = go;
+                name = String.Format("{0} {1}", gameObject.ToString(), gameObject.GetInstanceID());
+                if (go == null) return false;
+                instanceID = gameObject.GetInstanceID();
+                return Initialize(beingDeleted);
+            }
+
+            public void UnInitialize()
+            {
+                _initialized = false;
+                _beingDeleted = false;
+                _mesh = null;
+                _renderer = null;
+            }
 
             public int CompareTo(MB_DynamicGameObject b)
             {
@@ -139,8 +199,9 @@ namespace DigitalOpus.MB.Core
         }
 
         //if baking many instances of the same sharedMesh, want to cache these results rather than grab them multiple times from the mesh 
-        public class MeshChannels
+        public class MeshChannels : IDisposable
         {
+            private bool _disposed = false;
             public Vector3[] vertices;
             public Vector3[] normals;
             public Vector4[] tangents;
@@ -159,6 +220,77 @@ namespace DigitalOpus.MB.Core
             public Matrix4x4[] bindPoses;
             public int[] triangles;
             public MBBlendShape[] blendShapes;
+
+            public BoneWeightDataForMesh boneWeightData;
+
+            public void Dispose()
+            {
+                Dispose(true);
+            }
+
+            public bool IsDisposed()
+            {
+                return _disposed;
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (_disposed) return;
+                _disposed = true;
+                boneWeightData.Dispose();
+                vertices = null;
+                normals = null;
+                tangents = null;
+                uv0raw = null;
+                uv0modified = null;
+                uv2raw = null;
+                uv2modified = null;
+                uv3 = null;
+                uv4 = null;
+                uv5 = null;
+                uv6 = null;
+                uv7 = null;
+                uv8 = null;
+                colors = null;
+                boneWeights = null;
+                bindPoses = null;
+                triangles = null;
+                blendShapes = null;
+            }
+        }
+
+        public struct BoneWeightDataForMesh
+        {
+            private bool _disposed;
+            public bool initialized;
+
+            /// <summary>
+            /// We might be getting the NativeArrays from the Mesh using mesh.GetAllBoneWeights & mesh.GetBonesPerVertex. We don't dispose these.
+            /// We might be allocating the native arrays using:   new NativeArrays(..., Allocator.XX).   We are responsible for disposing these.
+            /// </summary>
+            public bool weMustDispose;
+#if UNITY_2019_1_OR_NEWER
+            public NativeArray<byte> bonesPerVertex;
+            public NativeArray<BoneWeight1> boneWeights;
+#endif
+            public bool[] UsedBoneIdxsInSrcMesh;
+            public int numUsedbones;
+
+            internal void Dispose()
+            {
+                Dispose(true);
+            }
+
+            private void Dispose(bool disposing)
+            {
+                if (_disposed) return;
+                _disposed = true;
+                initialized = false;
+#if UNITY_2019_1_OR_NEWER
+                if (bonesPerVertex.IsCreated && weMustDispose) bonesPerVertex.Dispose();
+                if (boneWeights.IsCreated && weMustDispose) boneWeights.Dispose();
+#endif
+            }
         }
 
         [Serializable]
@@ -180,11 +312,12 @@ namespace DigitalOpus.MB.Core
             public MBBlendShapeFrame[] frames;
         }
 
-        public class MeshChannelsCache
+        public class MeshChannelsCache : IDisposable
         {
             MB2_LogLevel LOG_LEVEL;
             MB2_LightmapOptions lightmapOption;
             protected Dictionary<int, MeshChannels> meshID2MeshChannels = new Dictionary<int, MeshChannels>();
+            private bool _disposed;
 
             public MeshChannelsCache(MB2_LogLevel ll, MB2_LightmapOptions lo)
             {
@@ -192,8 +325,24 @@ namespace DigitalOpus.MB.Core
                 lightmapOption = lo;
             }
 
+            public void Dispose()
+            {
+                Dispose(true);
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (_disposed) return;
+                _disposed = true;
+                foreach (MeshChannels mc in meshID2MeshChannels.Values)
+                {
+                    mc.Dispose();
+                }
+            }
+
             internal Vector3[] GetVertices(Mesh m)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
                 {
@@ -209,6 +358,7 @@ namespace DigitalOpus.MB.Core
 
             internal Vector3[] GetNormals(Mesh m)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
                 {
@@ -224,6 +374,7 @@ namespace DigitalOpus.MB.Core
 
             internal Vector4[] GetTangents(Mesh m)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
                 {
@@ -239,6 +390,7 @@ namespace DigitalOpus.MB.Core
 
             internal Vector2[] GetUv0Raw(Mesh m)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
                 {
@@ -254,6 +406,7 @@ namespace DigitalOpus.MB.Core
 
             internal Vector2[] GetUv0Modified(Mesh m)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
                 {
@@ -270,6 +423,7 @@ namespace DigitalOpus.MB.Core
 
             internal Vector2[] GetUv2Modified(Mesh m)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
                 {
@@ -285,6 +439,7 @@ namespace DigitalOpus.MB.Core
 
             internal Vector2[] GetUVChannel(int channel, Mesh m)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
                 {
@@ -352,6 +507,7 @@ namespace DigitalOpus.MB.Core
 
             internal Color[] GetColors(Mesh m)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
                 {
@@ -367,6 +523,7 @@ namespace DigitalOpus.MB.Core
 
             internal Matrix4x4[] GetBindposes(Renderer r, out bool isSkinnedMeshWithBones)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 Mesh m = MB_Utility.GetMesh(r.gameObject);
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
@@ -396,6 +553,7 @@ namespace DigitalOpus.MB.Core
 
             internal BoneWeight[] GetBoneWeights(Renderer r, int numVertsInMeshBeingAdded, bool isSkinnedMeshWithBones)
             {
+                Debug.Assert(!_disposed);
                 MeshChannels mc;
                 Mesh m = MB_Utility.GetMesh(r.gameObject);
                 if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
@@ -408,6 +566,26 @@ namespace DigitalOpus.MB.Core
                     mc.boneWeights = _getBoneWeights(r, numVertsInMeshBeingAdded, isSkinnedMeshWithBones);
                 }
                 return mc.boneWeights;
+            }
+
+            internal BoneWeightDataForMesh GetBoneWeightData(Renderer r, int numbones, bool isSkinnedMeshWithBones)
+            {
+                Debug.Assert(!_disposed);
+                MeshChannels mc;
+                Mesh m = MB_Utility.GetMesh(r.gameObject);
+                if (!meshID2MeshChannels.TryGetValue(m.GetInstanceID(), out mc))
+                {
+                    mc = new MeshChannels();
+                    meshID2MeshChannels.Add(m.GetInstanceID(), mc);
+                }
+
+                if (!mc.boneWeightData.initialized)
+                {
+                    _getBoneWeightData(ref mc.boneWeightData, r, numbones, isSkinnedMeshWithBones);
+                }
+
+
+                return mc.boneWeightData;
             }
 
             internal int[] GetTriangles(Mesh m)
@@ -528,9 +706,8 @@ namespace DigitalOpus.MB.Core
                 if (r is MeshRenderer || 
                    (r is SkinnedMeshRenderer && !isSkinnedMeshWithBones)) // It is possible for a skinned mesh to have blend shapes but no bones. These need to be treated like MeshRenderer meshes.
                 {
-                    Matrix4x4 bindPose = Matrix4x4.identity;
                     poses = new Matrix4x4[1];
-                    poses[0] = bindPose;
+                    poses[0] = Matrix4x4.identity;
                 }
                 
                 if (poses == null) {
@@ -539,6 +716,55 @@ namespace DigitalOpus.MB.Core
                 }
 
                 return poses;
+            }
+
+            static void _getBoneWeightData(ref BoneWeightDataForMesh bwd, Renderer r, int numBones, bool isSkinnedMeshWithBones)
+            {
+#if UNITY_2019_1_OR_NEWER
+                Debug.Assert(!bwd.bonesPerVertex.IsCreated, "Should only create native arrays once.");
+                Debug.Assert(!bwd.boneWeights.IsCreated, "Should only create native arrays once.");
+                if (isSkinnedMeshWithBones)
+                {
+                    Mesh m = ((SkinnedMeshRenderer)r).sharedMesh;
+                    bwd.initialized = true;
+                    bwd.weMustDispose = false;
+                    bwd.bonesPerVertex = m.GetBonesPerVertex();
+                    bwd.boneWeights = m.GetAllBoneWeights();
+                }
+                else if (r is MeshRenderer ||
+                    (r is SkinnedMeshRenderer && !isSkinnedMeshWithBones)) // It is possible for a skinned mesh to have blend shapes but no bones. These need to be treated like MeshRenderer meshes
+                {
+                    Mesh m = MB_Utility.GetMesh(r.gameObject);
+                    bwd.initialized = true;
+                    bwd.weMustDispose = true;
+                    bwd.boneWeights = new NativeArray<BoneWeight1>(m.vertexCount, Allocator.Temp);
+                    bwd.bonesPerVertex = new NativeArray<byte>(m.vertexCount, Allocator.Temp);
+                    BoneWeight1 bw = new BoneWeight1();
+                    bw.boneIndex = 0;
+                    bw.weight = 1f;
+                    for (int i = 0; i < m.vertexCount; i++)
+                    {
+                        bwd.bonesPerVertex[i] = 1;
+                        bwd.boneWeights[i] = bw;
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Could not _getBoneWeights. Object does not have a renderer");
+                }
+
+                bwd.UsedBoneIdxsInSrcMesh = new bool[numBones];
+                for (int i = 0; i < bwd.boneWeights.Length; i++)
+                {
+                    bwd.UsedBoneIdxsInSrcMesh[bwd.boneWeights[i].boneIndex] = true;
+                }
+
+                bwd.numUsedbones = 0;
+                for (int i = 0; i < bwd.UsedBoneIdxsInSrcMesh.Length; i++)
+                {
+                    if (bwd.UsedBoneIdxsInSrcMesh[i]) bwd.numUsedbones++;
+                }
+#endif
             }
 
             public static BoneWeight[] _getBoneWeights(Renderer r, int numVertsInMeshBeingAdded, bool isSkinnedMeshWithBones)
@@ -563,6 +789,8 @@ namespace DigitalOpus.MB.Core
                     return null;
                 }
             }
+
+
 
 
             void _generateTangents(int[] triangles, Vector3[] verts, Vector2[] uvs, Vector3[] normals, Vector4[] outTangents)

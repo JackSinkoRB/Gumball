@@ -44,6 +44,9 @@ namespace DigitalOpus.MB.Core
         // These are cached values read in OnBeforeTintTexture and used when blending pixels.
         Color m_tintColor;
 
+        bool m_doScaleAlphaCutoff;
+        float m_alphaCutoff;
+
         float m_smoothness; // shared by both metallic maps and spec maps
         
         Color m_specColor;   // Used if no spec map
@@ -69,6 +72,7 @@ namespace DigitalOpus.MB.Core
         float m_generatingTintedAtlasSpecular_somoothness = 1f;
         float m_generatingTintedAtlaBumpScale = 1f;
         Color m_generatingTintedAtlaEmission = Color.white;
+        const float m_generatedAlphaCutoff = .5f;
 
         // These are the default property values that will be assigned to the result materials if 
         // none of the source materials have a value for these properties.
@@ -176,6 +180,23 @@ namespace DigitalOpus.MB.Core
                 {
                     m_tintColor = m_generatingTintedAtlaColor;
                 }
+
+                if (sourceMat.HasProperty("_Surface") &&  // _Surface is transparent or opaque
+                    sourceMat.HasProperty("_AlphaClip") &&
+                    sourceMat.HasProperty("_Cutoff") &&
+                    sourceMat.GetFloat("_Surface") == 1 && // transparent
+                    sourceMat.GetFloat("_AlphaClip") == 1  // alpha clipping is turned on
+                    )
+                {
+                    m_doScaleAlphaCutoff = true;
+                    m_alphaCutoff = sourceMat.GetFloat("_Cutoff");
+                    m_alphaCutoff = Mathf.Clamp(m_alphaCutoff, .0001f, .9999f);
+                }
+                else
+                {
+                    m_doScaleAlphaCutoff = false;
+                    m_alphaCutoff = .5f;
+                }
             }
             else if (shaderTexturePropertyName.Equals("_SpecGlossMap"))
             {
@@ -201,7 +222,6 @@ namespace DigitalOpus.MB.Core
                 if (sourceMat.HasProperty("_Smoothness") && m_workflowMode == WorkflowMode.specular)
                 {
                     m_smoothness = sourceMat.GetFloat("_Smoothness");
-                    Debug.LogError("TODO smooth " + sourceMat + "  " + m_smoothness);
                 }
                 else if (m_workflowMode == WorkflowMode.specular)
                 {
@@ -272,7 +292,22 @@ namespace DigitalOpus.MB.Core
         {
             if (propertyToDo == Prop.doColor)
             {
-                return new Color(pixelColor.r * m_tintColor.r, pixelColor.g * m_tintColor.g, pixelColor.b * m_tintColor.b, pixelColor.a * m_tintColor.a);
+                Color c = new Color(pixelColor.r * m_tintColor.r, pixelColor.g * m_tintColor.g, pixelColor.b * m_tintColor.b, pixelColor.a * m_tintColor.a);
+                if (m_doScaleAlphaCutoff)
+                {
+                    // The source mat is in AlphaCutoff mode. We need to blend the alpha cutoff into the alpha channel.
+                    // The result-material will have Alpha cutoff of .5f. Scale the alpha channel pixels to account for this.
+                    if (c.a >= m_alphaCutoff)
+                    {
+                        c.a = m_generatedAlphaCutoff + (1f - m_generatedAlphaCutoff) * (c.a - m_alphaCutoff) / (1f - m_alphaCutoff);
+                    }
+                    else
+                    {
+                        c.a = (m_generatedAlphaCutoff) * (c.a) / (m_alphaCutoff);
+                    }
+                }
+
+                return c;
             }
             else if (propertyToDo == Prop.doMetallic)
             {
@@ -328,6 +363,17 @@ namespace DigitalOpus.MB.Core
                 return false;
             }
 
+            if (a.HasProperty("_Surface") && b.HasProperty("_Surface") &&
+                a.GetFloat("_AlphaClip") == 1 && b.GetFloat("_AlphaClip") == 1 &&
+                a.HasProperty("_Cutoff") && b.HasProperty("_Cutoff"))
+            {
+                // Compare alpha cutoff values
+                if (a.HasProperty("_Cutoff") != b.HasProperty("_Cutoff"))
+                {
+                    return false;
+                }
+            }
+
             if (m_workflowMode == WorkflowMode.specular){
                 bool aHasSpecTex = a.HasProperty("_SpecGlossMap") && a.GetTexture("_SpecGlossMap") != null;
                 bool bHasSpecTex = b.HasProperty("_SpecGlossMap") && b.GetTexture("_SpecGlossMap") != null;
@@ -336,7 +382,6 @@ namespace DigitalOpus.MB.Core
                 {
                     if (!TextureBlenderFallback._compareFloat(a, b, m_notGeneratingAtlasDefaultSmoothness_SpecularWorkflow, "_Smoothness"))
                     {
-                        Debug.LogError("Are equal A");
                         return false;
                     }
                 }
@@ -345,13 +390,11 @@ namespace DigitalOpus.MB.Core
                     if (!TextureBlenderFallback._compareColor(a, b, m_notGeneratingAtlasDefaultSpecularColor, "_SpecColor") &&
                         !TextureBlenderFallback._compareFloat(a, b, m_notGeneratingAtlasDefaultSmoothness_SpecularWorkflow, "_Smoothness"))
                     {
-                        Debug.LogError("Are equal B");
                         return false;
                     }
                 }
                 else
                 {
-                    Debug.LogError("Are equal C");
                     return false;
                 }
             }
@@ -415,6 +458,12 @@ namespace DigitalOpus.MB.Core
             if (resultMaterial.GetTexture("_BaseMap") != null)
             {
                 resultMaterial.SetColor("_BaseColor", m_generatingTintedAtlaColor);
+                if (resultMaterial.GetFloat("_Surface") == 1 &&   // transparent
+                    resultMaterial.GetFloat("_AlphaClip") == 1 &&  // alpha clipping mode.
+                    resultMaterial.HasProperty("_Cutoff")) // Alpha cutoff
+                {
+                    resultMaterial.SetFloat("_Cutoff", m_generatedAlphaCutoff);
+                }
             }
             else
             {
@@ -425,13 +474,11 @@ namespace DigitalOpus.MB.Core
             {
                 if (resultMaterial.GetTexture("_SpecGlossMap") != null)
                 {
-                    Debug.LogError("Setting A " + m_smoothness);
                     resultMaterial.SetColor("_SpecColor", m_generatingTintedAtlaSpecular);
                     resultMaterial.SetFloat("_Smoothness", m_generatingTintedAtlasSpecular_somoothness);
                 }
                 else
                 {
-                    Debug.LogError("Setting B " + m_smoothness);
                     resultMaterial.SetColor("_SpecColor", (Color)sourceMaterialPropertyCache.GetValueIfAllSourceAreTheSameOrDefault("_SpecColor", m_notGeneratingAtlasDefaultSpecularColor));
                     resultMaterial.SetFloat("_Smoothness", m_smoothness);
                 }
@@ -481,6 +528,7 @@ namespace DigitalOpus.MB.Core
             }
             else if (texPropertyName.name.Equals("_BaseMap"))
             {
+                /*
                 if (mat != null && mat.HasProperty("_BaseColor"))
                 {
                     try
@@ -491,6 +539,13 @@ namespace DigitalOpus.MB.Core
                     catch (Exception) { }
                     return Color.white;
                 }
+                */
+                // Why don't we return _BaseColor here?
+                // Source object has:  no-texture,   _BaseColor  ==>   look like _BaseColor
+                // Atlas needs:
+                //   CORRECT:                whiteBlock,  _BaseColor  ==>   look like _BaseColor
+                //   WRONG:              solidTex_Color,  _BaseColor ==>  look like _Color * _BaseColor
+                return Color.white;
             }
             else if (texPropertyName.name.Equals("_SpecGlossMap"))
             {

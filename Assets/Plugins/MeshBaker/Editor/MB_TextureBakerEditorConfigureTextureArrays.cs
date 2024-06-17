@@ -67,7 +67,8 @@ namespace DigitalOpus.MB.MBEditor
                 }
             }
 
-            if (GUILayout.Button(MB3_TextureBakerEditorInternal.deleteContent, EditorStyles.miniButtonRight, MB3_TextureBakerEditorInternal.buttonWidth))
+            if (GUILayout.Button(MB3_TextureBakerEditorInternal.deleteContent, EditorStyles.miniButtonRight, MB3_TextureBakerEditorInternal.buttonWidth)
+                && editorInternal.resultMaterialsTexArray.arraySize > 0)
             {
                 editorInternal.resultMaterialsTexArray.DeleteArrayElementAtIndex(editorInternal.resultMaterialsTexArray.arraySize - 1);
             }

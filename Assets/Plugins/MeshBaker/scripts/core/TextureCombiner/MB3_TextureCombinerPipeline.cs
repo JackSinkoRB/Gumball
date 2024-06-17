@@ -88,7 +88,7 @@ namespace DigitalOpus.MB.Core
         internal class TexturePipelineData
         {
             internal MB2_TextureBakeResults _textureBakeResults;
-            internal int _atlasPadding = 1;
+            internal int _atlasPadding_pix = 1;
             internal int _maxAtlasWidth = 1;
             internal int _maxAtlasHeight = 1;
             internal bool _useMaxAtlasHeightOverride = false;
@@ -335,7 +335,7 @@ namespace DigitalOpus.MB.Core
                     {
                         if (!MB_Utility.AreAllSharedMaterialsDistinct(sharedMaterials))
                         {
-                            if (LOG_LEVEL >= MB2_LogLevel.warn) Debug.LogWarning("Object " + obj.name + " uses the same material on multiple submeshes. This may generate strange resultAtlasesAndRects especially when used with fix out of bounds uvs. Try duplicating the material.");
+                            if (LOG_LEVEL >= MB2_LogLevel.warn) Debug.LogWarning("Object " + obj.name + " uses the same material on multiple submeshes. This may generate strange resultAtlasesAndRects especially when used with Consider Mesh UVs. Try duplicating the material.");
                         }
                     }
 
@@ -643,11 +643,11 @@ namespace DigitalOpus.MB.Core
             }
 
             //calculate size of rectangles in atlas
-            int _padding = data._atlasPadding;
+            int _padding_pix = data._atlasPadding_pix;
             if (data.distinctMaterialTextures.Count == 1 && data._fixOutOfBoundsUVs == false && data._considerNonTextureProperties == false)
             {
                 if (LOG_LEVEL >= MB2_LogLevel.info) Debug.Log("All objects use the same textures in this set of atlases. Original textures will be reused instead of creating atlases.");
-                _padding = 0;
+                _padding_pix = 0;
                 data.distinctMaterialTextures[0].SetThisIsOnlyTexSetInAtlasTrue();
                 data.distinctMaterialTextures[0].SetTilingTreatmentAndAdjustEncapsulatingSamplingRect(MB_TextureTilingTreatment.edgeToEdgeXY);
             }
@@ -657,10 +657,10 @@ namespace DigitalOpus.MB.Core
             {
                 if (LOG_LEVEL >= MB2_LogLevel.debug) Debug.Log("Calculating ideal sizes for texSet TexSet " + i + " of " + data.distinctMaterialTextures.Count);
                 MB_TexSet txs = data.distinctMaterialTextures[i];
-                txs.idealWidth = 1;
-                txs.idealHeight = 1;
-                int tWidth = 1;
-                int tHeight = 1;
+                txs.idealWidth_pix = 1;
+                txs.idealHeight_pix = 1;
+                int tWidth_pix = 1;
+                int tHeight_pix = 1;
                 Debug.Assert(txs.ts.Length == data.texPropertyNames.Count, "length of arrays in each element of distinctMaterialTextures must be texPropertyNames.Count");
 
                 //get the best size all textures in a TexSet must be the same size.
@@ -682,18 +682,26 @@ namespace DigitalOpus.MB.Core
 
                         if (matTex.isNull)
                         {
-                            txs.SetEncapsulatingRect(propIdx, data._fixOutOfBoundsUVs);
+                            //Debug.LogError("TODO this is wrong.  w=" + matTex.width + "  h=" + matTex.height);
+                            Vector2 dim_pix = MB3_TextureCombinerPipeline.GetAdjustedForScaleAndOffset2Dimensions(matTex, txs.obUVoffset, txs.obUVscale, data, LOG_LEVEL);
+                            if ((int)(dim_pix.x * dim_pix.y) > tWidth_pix * tHeight_pix)
+                            {
+                                if (LOG_LEVEL >= MB2_LogLevel.trace) Debug.Log("    matTex " + matTex.GetTexName() + " " + dim_pix + " has a bigger size than " + tWidth_pix + " " + tHeight_pix);
+                                tWidth_pix = (int) dim_pix.x;
+                                tHeight_pix = (int) dim_pix.y;
+                            }
+
                             if (LOG_LEVEL >= MB2_LogLevel.trace) Debug.Log(String.Format("No source texture creating a 16x16 texture for {0} texSet {1} srcMat {2}", data.texPropertyNames[propIdx].name, i, txs.matsAndGOs.mats[0].GetMaterialName()));
                         }
 
                         if (!matTex.isNull)
                         {
-                            Vector2 dim = MB3_TextureCombinerPipeline.GetAdjustedForScaleAndOffset2Dimensions(matTex, txs.obUVoffset, txs.obUVscale, data, LOG_LEVEL);
-                            if ((int)(dim.x * dim.y) > tWidth * tHeight)
+                            Vector2 dim_pix = MB3_TextureCombinerPipeline.GetAdjustedForScaleAndOffset2Dimensions(matTex, txs.obUVoffset, txs.obUVscale, data, LOG_LEVEL);
+                            if ((int)(dim_pix.x * dim_pix.y) > tWidth_pix * tHeight_pix)
                             {
-                                if (LOG_LEVEL >= MB2_LogLevel.trace) Debug.Log("    matTex " + matTex.GetTexName() + " " + dim + " has a bigger size than " + tWidth + " " + tHeight);
-                                tWidth = (int)dim.x;
-                                tHeight = (int)dim.y;
+                                if (LOG_LEVEL >= MB2_LogLevel.trace) Debug.Log("    matTex " + matTex.GetTexName() + " " + dim_pix + " has a bigger size than " + tWidth_pix + " " + tHeight_pix);
+                                tWidth_pix = (int) dim_pix.x;
+                                tHeight_pix = (int) dim_pix.y;
                             }
                         }
                     }
@@ -701,30 +709,30 @@ namespace DigitalOpus.MB.Core
 
                 if (data._resizePowerOfTwoTextures)
                 {
-                    if (tWidth <= _padding * 5)
+                    if (tWidth_pix <= _padding_pix * 5)
                     {
                         Debug.LogWarning(String.Format("Some of the textures have widths close to the size of the padding. It is not recommended to use _resizePowerOfTwoTextures with widths this small.", txs.ToString()));
                     }
-                    if (tHeight <= _padding * 5)
+                    if (tHeight_pix <= _padding_pix * 5)
                     {
                         Debug.LogWarning(String.Format("Some of the textures have heights close to the size of the padding. It is not recommended to use _resizePowerOfTwoTextures with heights this small.", txs.ToString()));
                     }
-                    if (IsPowerOfTwo(tWidth))
+                    if (IsPowerOfTwo(tWidth_pix))
                     {
-                        tWidth -= _padding * 2;
+                        tWidth_pix -= _padding_pix * 2;
                     }
-                    if (IsPowerOfTwo(tHeight))
+                    if (IsPowerOfTwo(tHeight_pix))
                     {
-                        tHeight -= _padding * 2;
+                        tHeight_pix -= _padding_pix * 2;
                     }
-                    if (tWidth < 1) tWidth = 1;
-                    if (tHeight < 1) tHeight = 1;
+                    if (tWidth_pix < 1) tWidth_pix = 1;
+                    if (tHeight_pix < 1) tHeight_pix = 1;
                 }
-                if (LOG_LEVEL >= MB2_LogLevel.trace) Debug.Log("    Ideal size is " + tWidth + " " + tHeight);
-                txs.idealWidth = tWidth;
-                txs.idealHeight = tHeight;
+                if (LOG_LEVEL >= MB2_LogLevel.trace) Debug.Log("    Ideal size is " + tWidth_pix + " " + tHeight_pix);
+                txs.idealWidth_pix = tWidth_pix;
+                txs.idealHeight_pix = tHeight_pix;
             }
-            data._atlasPadding = _padding;
+            data._atlasPadding_pix = _padding_pix;
             if (LOG_LEVEL >= MB2_LogLevel.debug) Debug.Log("Total time Step2 Calculate Ideal Sizes part1: " + sw.Elapsed.ToString());
             yield break;
         }
@@ -942,7 +950,7 @@ namespace DigitalOpus.MB.Core
                 {
                     MB_TexSet txs = data.distinctMaterialTextures[i];
                     report.AppendLine("----------");
-                    report.Append("This set of textures will be a rectangle in the atlas. It will be resized to:" + txs.idealWidth + "x" + txs.idealHeight + "\n");
+                    report.Append("This set of textures will be a rectangle in the atlas. It will be resized to:" + txs.idealWidth_pix + "x" + txs.idealHeight_pix + "\n");
                     for (int j = 0; j < txs.ts.Length; j++)
                     {
                         if (!txs.ts[j].isNull)
@@ -997,10 +1005,10 @@ namespace DigitalOpus.MB.Core
                     dmt = data.distinctMaterialTextures[0].ts[0];
 
                 }
-                packerRects[0].atlasX = dmt.isNull ? 16 : dmt.width;
-                packerRects[0].atlasY = dmt.isNull ? 16 : dmt.height;
-                packerRects[0].usedW = dmt.isNull ? 16 : dmt.width;
-                packerRects[0].usedH = dmt.isNull ? 16 : dmt.height;
+                packerRects[0].atlasX = dmt.isNull ? MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE : dmt.width;
+                packerRects[0].atlasY = dmt.isNull ? MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE : dmt.height;
+                packerRects[0].usedW = dmt.isNull ? MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE : dmt.width;
+                packerRects[0].usedH = dmt.isNull ? MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE : dmt.height;
             }
             else
             {
@@ -1071,9 +1079,9 @@ namespace DigitalOpus.MB.Core
             }
 
             if (LOG_LEVEL >= MB2_LogLevel.debug) Debug.Log("GetAdjustedForScaleAndOffset2Dimensions: " + source.GetTexName() + " " + obUVoffset + " " + obUVscale);
-            Rect encapsulatingSamplingRect = source.GetEncapsulatingSamplingRect().GetRect();
-            float newWidth = encapsulatingSamplingRect.width * source.width;
-            float newHeight = encapsulatingSamplingRect.height * source.height;
+            Rect encapsulatingSamplingRect_01 = source.GetEncapsulatingSamplingRect().GetRect();
+            float newWidth = encapsulatingSamplingRect_01.width * source.width;
+            float newHeight = encapsulatingSamplingRect_01.height * source.height;
 
             if (newWidth > data._maxTilingBakeSize) newWidth = data._maxTilingBakeSize;
             if (newHeight > data._maxTilingBakeSize) newHeight = data._maxTilingBakeSize;
@@ -1118,17 +1126,11 @@ namespace DigitalOpus.MB.Core
                 Debug.LogError("Material was null. Should never happen.");
                 offset = Vector2.zero;
                 scale = Vector2.one;
+                return;
             }
 
-            if ((mat.shader.name.Equals("Standard") || mat.shader.name.Equals("Standard (Specular setup)")) && mat.HasProperty("_MainTex"))
-            {
-                offset = mat.GetTextureOffset("_MainTex");
-                scale = mat.GetTextureScale("_MainTex");
-            } else 
-            {
-                offset = mat.GetTextureOffset(propertyName);
-                scale = mat.GetTextureScale(propertyName);
-            }
+            MB3_ShadersThatShareTiling.GetScaleAndOffsetForTextureProp(mat, propertyName, out offset, out scale);
+            return;
         }
 
         internal static float GetSubmeshArea(Mesh m, int submeshIdx)

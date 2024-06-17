@@ -30,6 +30,9 @@ public class MB_TextureArrayResultMaterial
 public class MB_MultiMaterial{
 	public Material combinedMaterial;
     public bool considerMeshUVs;
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
 	public List<Material> sourceMaterials = new List<Material>();
 }
 
@@ -44,6 +47,9 @@ public class MB_TexArraySliceRendererMatPair
 public class MB_TexArraySlice
 {
     public bool considerMeshUVs;
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public List<MB_TexArraySliceRendererMatPair> sourceMaterials = new List<MB_TexArraySliceRendererMatPair>();
     public bool ContainsMaterial(Material mat)
     {
@@ -124,6 +130,9 @@ public class MB_TextureArrayReference
 public class MB_TexArrayForProperty
 {
     public string texPropertyName;
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public MB_TextureArrayReference[] formats = new MB_TextureArrayReference[0];
 
     public MB_TexArrayForProperty(string name, MB_TextureArrayReference[] texRefs)
@@ -137,7 +146,13 @@ public class MB_TexArrayForProperty
 public class MB_MultiMaterialTexArray
 {
     public Material combinedMaterial;
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public List<MB_TexArraySlice> slices = new List<MB_TexArraySlice>();
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public List<MB_TexArrayForProperty> textureProperties = new List<MB_TexArrayForProperty>();
 }
 
@@ -146,6 +161,9 @@ public class MB_TextureArrayFormat
 {
     public string propertyName;
     public TextureFormat format;
+    [Tooltip("The ammount of time Unity takes exploring different compression options to find the compressed version of a texture that most closely matches the original art." +
+             "This is only used For iOS (and some Android formats)")]
+    public MB_TextureCompressionQuality compressionQuality = MB_TextureCompressionQuality.normal;
 }
 
 [System.Serializable]
@@ -153,6 +171,13 @@ public class MB_TextureArrayFormatSet
 {
     public string name;
     public TextureFormat defaultFormat;
+
+    [Tooltip("The ammount of time Unity takes exploring different compression options to find the compressed version of a texture that most closely matches the original art." +
+         "This is only used For iOS (and some Android formats)")]
+    public MB_TextureCompressionQuality defaultCompressionQuality = MB_TextureCompressionQuality.normal;
+#if UNITY_2020_2_OR_NEWER  
+    [NonReorderable]  //see MB-136 for why this is here
+#endif
     public MB_TextureArrayFormat[] formatOverrides;
 
     public bool ValidateTextureImporterFormatsExistsForTextureFormats(MB2_EditorMethodsInterface editorMethods, int idx)
@@ -175,16 +200,18 @@ public class MB_TextureArrayFormatSet
         return true;
     }
 
-    public TextureFormat GetFormatForProperty(string propName)
+    public TextureFormat GetFormatForProperty(string propName, out MB_TextureCompressionQuality compressionQuality)
     {
         for (int i = 0; i < formatOverrides.Length; i++)
         {
             if (formatOverrides.Equals(formatOverrides[i].propertyName))
             {
+                compressionQuality = formatOverrides[i].compressionQuality;
                 return formatOverrides[i].format;
             }
         }
 
+        compressionQuality = defaultCompressionQuality;
         return defaultFormat;
     }
 }
@@ -225,6 +252,9 @@ public class MB_MaterialAndUVRect
 
     public int textureArraySliceIdx = -1;
 
+    /// <summary>
+    /// True if the albedoMap, normalMap, specMap, etc... all use the same tiling.
+    /// </summary>
     public bool allPropsUseSameTiling = true;
 
     /// <summary>
@@ -256,7 +286,11 @@ public class MB_MaterialAndUVRect
     public List<GameObject> objectsThatUse;
 
     /// <summary>
-    /// The tilling type for this rectangle in the atlas.
+    /// The tiling type for this rectangle in the atlas.
+    /// Usually use:
+    ///     considerUVs if we baked with the considerUVs feature
+    ///     none if we didn't bake with the considerUVs feature
+    ///     the edge to edge options are for atlases that stretch from one edge to the other with no padding (can be tiled)
     /// </summary>
     public MB_TextureTilingTreatment tilingTreatment = MB_TextureTilingTreatment.unknown;
 

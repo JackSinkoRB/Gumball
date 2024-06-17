@@ -3,13 +3,7 @@
 // Copyright © 2011-2012 Ian Deane
 //----------------------------------------------
 using UnityEngine;
-using System.Collections;
-using System.Collections.Specialized;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using DigitalOpus.MB.Core;
-using System.Text.RegularExpressions;
 
 /// <summary>
 /// Component that is an endless mesh. You don't need to worry about the 65k limit when adding meshes. It is like a List of combined meshes. Internally it manages
@@ -29,7 +23,9 @@ public class MB3_MultiMeshBaker : MB3_MeshBakerCommon {
 		get {return _meshCombiner;}	
 	}		
 	
-	public override bool AddDeleteGameObjects(GameObject[] gos, GameObject[] deleteGOs, bool disableRendererInSource){
+	public override bool AddDeleteGameObjects(GameObject[] gos, GameObject[] deleteGOs, bool disableRendererInSource)
+	{
+		UpgradeToCurrentVersionIfNecessary();
 		if (_meshCombiner.resultSceneObject == null){
 			_meshCombiner.resultSceneObject = new GameObject("CombinedMesh-" + name);	
 		}
@@ -37,7 +33,9 @@ public class MB3_MultiMeshBaker : MB3_MeshBakerCommon {
 		return _meshCombiner.AddDeleteGameObjects(gos,deleteGOs,disableRendererInSource);		
 	}
 	
-	public override bool AddDeleteGameObjectsByID(GameObject[] gos, int[] deleteGOs, bool disableRendererInSource){
+	public override bool AddDeleteGameObjectsByID(GameObject[] gos, int[] deleteGOs, bool disableRendererInSource)
+	{
+		UpgradeToCurrentVersionIfNecessary();
 		if (_meshCombiner.resultSceneObject == null){
 			_meshCombiner.resultSceneObject = new GameObject("CombinedMesh-" + name);	
 		}
@@ -47,6 +45,9 @@ public class MB3_MultiMeshBaker : MB3_MeshBakerCommon {
 
     public void OnDestroy()
     {
-        _meshCombiner.DisposeRuntimeCreated();
+		if (_meshCombiner != null)
+		{
+			_meshCombiner.Dispose();
+		}
     }
 }

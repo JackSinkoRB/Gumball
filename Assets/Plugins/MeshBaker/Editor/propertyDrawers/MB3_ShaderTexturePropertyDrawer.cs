@@ -11,13 +11,6 @@ namespace DigitalOpus.MB.MBEditor
         {
             label = EditorGUI.BeginProperty(position, label, property);
             Rect contentPosition = EditorGUI.PrefixLabel(position, label);
-            if (position.height > 16f)
-            {
-                position.height = 16f;
-                EditorGUI.indentLevel += 1;
-                contentPosition = EditorGUI.IndentedRect(position);
-                contentPosition.y += 18f;
-            }
             contentPosition.width *= 0.75f;
             EditorGUI.indentLevel = 0;
             EditorGUI.PropertyField(contentPosition, property.FindPropertyRelative("name"), GUIContent.none);

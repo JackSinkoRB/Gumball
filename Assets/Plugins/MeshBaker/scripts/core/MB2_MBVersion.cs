@@ -44,6 +44,8 @@ namespace DigitalOpus.MB.Core{
         string UnescapeURL(string url);
 
         IEnumerator FindRuntimeMaterialsFromAddresses(MB2_TextureBakeResults textureBakeResult, MB2_TextureBakeResults.CoroutineResult isComplete);
+
+        bool IsAssetInProject(UnityEngine.Object target);
     }
 
     public class MBVersion
@@ -61,6 +63,12 @@ namespace DigitalOpus.MB.Core{
 
         private static MBVersionInterface _MBVersion;
 
+        /// <summary>
+        /// Why this complicated way to create?  Because MBVersionConcrete is outside the MeshBaker.dll assembly.
+        /// Classes inside MeshBaker.dll, can't see out into the Assembly-CSharp.dll. We don't want to do any
+        /// Conditional compilation inside the MeshBaker.dll assembly because the evaluation version compiles this 
+        /// assembly in the editor.
+        /// </summary>
 		private static MBVersionInterface _CreateMBVersionConcrete(){
 			Type vit = null;
 #if EVAL_VERSION
@@ -210,7 +218,7 @@ namespace DigitalOpus.MB.Core{
             _MBVersion.DoSpecialRenderPipeline_TexturePackerFastSetup(cameraGameObject);
         }
 
-        internal static ColorSpace GetProjectColorSpace()
+        public static ColorSpace GetProjectColorSpace()
         {
             if (_MBVersion == null) _MBVersion = _CreateMBVersionConcrete();
             return _MBVersion.GetProjectColorSpace();
@@ -226,6 +234,12 @@ namespace DigitalOpus.MB.Core{
         {
             if (_MBVersion == null) _MBVersion = _CreateMBVersionConcrete();
             return _MBVersion.UnescapeURL(url);
+        }
+
+        public static bool IsAssetInProject(UnityEngine.Object target)
+        {
+            if (_MBVersion == null) _MBVersion = _CreateMBVersionConcrete();
+            return _MBVersion.IsAssetInProject(target);
         }
 
         public static bool IsUsingAddressables()

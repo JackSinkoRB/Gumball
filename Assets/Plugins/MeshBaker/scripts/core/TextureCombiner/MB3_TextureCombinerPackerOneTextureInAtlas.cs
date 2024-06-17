@@ -34,7 +34,7 @@ namespace DigitalOpus.MB.Core
             Debug.Assert(data.OnlyOneTextureInAtlasReuseTextures());
             if (LOG_LEVEL >= MB2_LogLevel.debug) Debug.Log("Only one image per atlas. Will re-use original texture");
             AtlasPackingResult[] packerRects = new AtlasPackingResult[1];
-            AtlasPadding[] paddings = new AtlasPadding[] { new AtlasPadding(data._atlasPadding) };
+            AtlasPadding[] paddings = new AtlasPadding[] { new AtlasPadding(data._atlasPadding_pix) };
             packerRects[0] = new AtlasPackingResult(paddings);
             packerRects[0].rects = new Rect[1];
             packerRects[0].srcImgIdxs = new int[] { 0 };
@@ -48,10 +48,10 @@ namespace DigitalOpus.MB.Core
             }
             if (dmt == null || dmt.isNull)
             {
-                packerRects[0].atlasX = 16;
-                packerRects[0].atlasY = 16;
-                packerRects[0].usedW = 16;
-                packerRects[0].usedH = 16;
+                packerRects[0].atlasX = MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE;
+                packerRects[0].atlasY = MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE;
+                packerRects[0].usedW = MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE;
+                packerRects[0].usedH = MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE;
             }
             else
             {

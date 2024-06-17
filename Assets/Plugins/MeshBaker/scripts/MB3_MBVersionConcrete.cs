@@ -24,7 +24,7 @@ namespace DigitalOpus.MB.Core
     {
         public string version()
         {
-            return "3.34.3";
+            return "3.36.1";
         }
 
         public int GetMajorVersion()
@@ -761,6 +761,22 @@ namespace DigitalOpus.MB.Core
             Debug.LogError("The MB_USING_ADDRESSABLES define was not set in PlayerSettings -> Script Define Symbols. If you are using addressables and you want to use this method, that must be set.");
             isComplete.isComplete = true;
             yield break;
+#endif
+        }
+
+        public bool IsAssetInProject(UnityEngine.Object target)
+        {
+#if UNITY_EDITOR
+            if (UnityEditor.AssetDatabase.Contains(target))
+            {
+                return true;
+            } 
+            else
+            {
+                return false;
+            }
+#else
+            return false;
 #endif
         }
     }

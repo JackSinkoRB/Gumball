@@ -135,7 +135,7 @@ namespace DigitalOpus.MB.MBEditor
             sortOrderAxis = meshBaker.FindProperty("sortAxis");
             settingsHolder = combiner.FindPropertyRelative("_settingsHolder");
             meshBakerSettingsThis = new MB_MeshBakerSettingsEditor();
-            meshBakerSettingsThis.OnEnable(combiner, meshBaker);
+            meshBakerSettingsThis.OnEnable(combiner);
             editorStyles.Init();
         }
 
@@ -153,6 +153,7 @@ namespace DigitalOpus.MB.MBEditor
 
         public void OnInspectorGUI(SerializedObject meshBaker, MB3_MeshBakerCommon target, UnityEngine.Object[] targets, System.Type editorWindowType)
         {
+            target.UpgradeToCurrentVersionIfNecessary();
             DrawGUI(meshBaker, target, targets, editorWindowType);
         }
 
@@ -172,8 +173,8 @@ namespace DigitalOpus.MB.MBEditor
                                         "2. If necessary set the 'Texture Bake Results' field.\n\n" +
                                         "3. Add scene objects or prefabs to combine or check 'Same As Texture Baker'. For best results these should use the same shader as result material.\n\n" +
                                         "4. Select options and 'Bake'.\n\n" +
-                                        "6. Look at warnings/errors in console. Decide if action needs to be taken.\n\n" +
-                                        "7. (optional) Disable renderers in source objects.", UnityEditor.MessageType.None);
+                                        "5. Look at warnings/errors in console. Decide if action needs to be taken.\n\n" +
+                                        "6. (optional) Disable renderers in source objects.", UnityEditor.MessageType.None);
 
                 EditorGUILayout.Separator();
             }
@@ -256,14 +257,18 @@ namespace DigitalOpus.MB.MBEditor
             EditorGUILayout.PropertyField(outputOptions, gc_outputOptoinsGUIContent);
             if (momm.meshCombiner.outputOption == MB2_OutputOptions.bakeIntoSceneObject)
             {
+                EditorGUI.BeginChangeCheck();
                 Transform pgo = (Transform)EditorGUILayout.ObjectField(gc_parentSceneObject, parentSceneObject.objectReferenceValue, typeof(Transform), true);
-                if (pgo != null && MB_Utility.IsSceneInstance(pgo.gameObject))
+                if (EditorGUI.EndChangeCheck())
                 {
-                    parentSceneObject.objectReferenceValue = pgo;
-                }
-                else
-                {
-                    parentSceneObject.objectReferenceValue = null;
+                    if (pgo != null && MB_Utility.IsSceneInstance(pgo.gameObject))
+                    {
+                        parentSceneObject.objectReferenceValue = pgo;
+                    }
+                    else
+                    {
+                        parentSceneObject.objectReferenceValue = null;
+                    }
                 }
 
                 //todo switch to renderer
@@ -280,7 +285,9 @@ namespace DigitalOpus.MB.MBEditor
                     if (nm != m)
                     {
                         Undo.RecordObject(momm, "Assign Mesh");
-                        ((MB3_MeshCombinerSingle)momm.meshCombiner).SetMesh(nm);
+                        MB3_MeshCombinerSingle.MeshCreationConditions meshBirthType = ((MB3_MeshCombinerSingle)momm.meshCombiner).SetMesh(nm);
+                        SerializedProperty meshBirth = combiner.FindPropertyRelative("_meshBirth"); // SetMesh sets the _meshBirth field but it doesn't get remembered unless we do this.
+                        meshBirth.enumValueIndex = (int) meshBirthType;
                         mesh.objectReferenceValue = nm;
                     }
                 }
@@ -293,14 +300,18 @@ namespace DigitalOpus.MB.MBEditor
                         "It is no longer necessary to manually copy bones to the target prefab after baking. This should happen automatically.", MessageType.Info);
                 }
 
+                EditorGUI.BeginChangeCheck();
                 Transform pgo = (Transform)EditorGUILayout.ObjectField(gc_parentSceneObject, parentSceneObject.objectReferenceValue, typeof(Transform), true);
-                if (pgo != null && MB_Utility.IsSceneInstance(pgo.gameObject)) 
+                if (EditorGUI.EndChangeCheck())
                 {
-                    parentSceneObject.objectReferenceValue = pgo;
-                }
-                else
-                {
-                    parentSceneObject.objectReferenceValue = null;
+                    if (pgo != null && MB_Utility.IsSceneInstance(pgo.gameObject))
+                    {
+                        parentSceneObject.objectReferenceValue = pgo;
+                    }
+                    else
+                    {
+                        parentSceneObject.objectReferenceValue = null;
+                    }
                 }
 
                 EditorGUILayout.BeginHorizontal();
@@ -480,6 +491,7 @@ namespace DigitalOpus.MB.MBEditor
                     SerializedProperty meshBakerSettings = new SerializedObject(targetObj).FindProperty(propertyName);
                     meshBakerSettingsExternal.OnEnable(meshBakerSettings);
                 }
+
                 meshBakerSettingsExternal.DrawGUI(((MB_IMeshBakerSettingsHolder)settingsHolder.objectReferenceValue).GetMeshBakerSettings(), settingsEnabled, doingTextureArray);
             }
 
@@ -599,7 +611,7 @@ namespace DigitalOpus.MB.MBEditor
                             if (!MB3_MeshBakerRoot.DoCombinedValidate(mom, MB_ObjsToCombineTypes.prefabOnly, new MB3_EditorMethods(), vl)) return false;
 
                             List<GameObject> objsToMesh = mom.GetObjectsToCombine();
-                            success = MB3_BakeInPlace.BakeMeshesInPlace((MB3_MeshCombinerSingle)((MB3_MeshBaker)mom).meshCombiner, objsToMesh, mom.bakeAssetsInPlaceFolderPath, mom.clearBuffersAfterBake, updateProgressBar);
+                            success = MB3_BakeInPlace.BakeMeshesInPlace((MB3_MeshCombinerSingle)((MB3_MeshBaker)mom).meshCombiner, objsToMesh, mom.bakeAssetsInPlaceFolderPath, mom.meshCombiner.clearBuffersAfterBake, updateProgressBar);
                         }
                     }
                     else
@@ -620,6 +632,8 @@ namespace DigitalOpus.MB.MBEditor
                     MB_Utility.Destroy(mom.textureBakeResults);
                     mom.textureBakeResults = null;
                 }
+
+                mom.meshCombiner.Dispose();
                 EditorUtility.ClearProgressBar();
             }
             return success;

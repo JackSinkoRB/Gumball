@@ -60,6 +60,7 @@ namespace DigitalOpus.MB.Core
             }
             if (texPropertyName.name.Equals("_MainTex"))
             {
+                /*
                 if (m != null && m.HasProperty("_Color"))
                 {
                     try
@@ -68,6 +69,13 @@ namespace DigitalOpus.MB.Core
                     }
                     catch (Exception) { }
                 }
+                */
+                // Why don't we return _Color here?
+                // Source object has:  no-texture,   _Color  ==>   look like _Color
+                // Atlas needs:
+                //   CORRECT:                whiteBlock,  _Color  ==>   look like _Color
+                //   WRONG:              solidTex_Color,  _Color ==>  look like _Color * _Color
+                return Color.white;
             }
             return new Color(1,1,1,0);
         }

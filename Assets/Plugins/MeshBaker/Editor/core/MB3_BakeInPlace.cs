@@ -53,7 +53,6 @@ namespace DigitalOpus.MB.Core
             }
             mom.settings.renderType = originalRenderType;
             MB_Utility.Destroy(mom.resultSceneObject);
-            if (clearBuffersAfterBake) { mom.ClearBuffers(); }
             return success;
         }
 
@@ -88,18 +87,33 @@ namespace DigitalOpus.MB.Core
                 Debug.LogError("Unsupported Renderer type on object. Must be SkinnedMesh or MeshFilter.");
                 return false;
             }
-            if (mom.AddDeleteGameObjects(objs, null, false))
+
+            bool success;
+            try
             {
-                mom.Apply(MB3_MeshBakerEditorFunctions.UnwrapUV2);
-                Mesh mf = MB_Utility.GetMesh(objToBake);
-                if (mf == null)
+                success = mom.AddDeleteGameObjects(objs, null, false);
+                if (success)
                 {
-                    Debug.LogError("Failed to create mesh for " + objToBake.name);
-                    return false;
+                    mom.Apply(MB3_MeshBakerEditorFunctions.UnwrapUV2);
+                    Mesh mf = MB_Utility.GetMesh(objToBake);
+                    if (mf == null)
+                    {
+                        Debug.LogError("Failed to create mesh for " + objToBake.name);
+                        success = false;
+                    }
                 }
             }
+            catch
+            {
+                success = false;
+                throw;
+            }
+            finally
+            {
+                mom.Dispose();
+            }
 
-            return true;
+            return success;
         }
 
         public static string[] GenerateNames(List<GameObject> objsToMesh)

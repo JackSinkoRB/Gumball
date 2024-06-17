@@ -71,6 +71,7 @@ namespace DigitalOpus.MB.Core{
 
     public abstract class MB2_TexturePacker
     {
+        public const int MAX_ATLAS_SIZE = 8192;
 
         public MB2_LogLevel LOG_LEVEL = MB2_LogLevel.info;
 

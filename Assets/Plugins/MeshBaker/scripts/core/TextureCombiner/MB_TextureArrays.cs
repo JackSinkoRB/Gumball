@@ -12,6 +12,7 @@ namespace DigitalOpus.MB.Core
             public bool[] doMips;
             public int[] numMipMaps;
             public TextureFormat[] formats;
+            public MB_TextureCompressionQuality[] compressionQualities;
             public Vector2[] sizes;
         }
 
@@ -119,7 +120,9 @@ namespace DigitalOpus.MB.Core
                     if (isCopy) MB_Utility.Destroy(srcTex);
                 }
 
-                texArray.Apply();
+                // We don't call "Apply" on the texture array be cause we didn't create it through the AssetImporter
+                // Instead we set the import settings for each slice texture and copied the slices over with mips etc... intact.
+                // texArray.Apply();
                 texArrays[propIdx] = texArray;
             }
 
@@ -139,6 +142,7 @@ namespace DigitalOpus.MB.Core
                 if (!hasTexForProperty[propIdx]) continue;
 
                 TextureFormat format = texturePropertyData.formats[propIdx];
+                MB_TextureCompressionQuality compressionQuality = texturePropertyData.compressionQualities[propIdx];
 
                 if (textureEditorMethods != null && !textureEditorMethods.TextureImporterFormatExistsForTextureFormat(format))
                 {
@@ -194,7 +198,7 @@ namespace DigitalOpus.MB.Core
                             }
                             else if (sliceTex.format != format)
                             {
-                                textureEditorMethods.ConvertTextureFormat_PlatformOverride(sliceTex, format, textureShaderProperties[propIdx].isNormalMap);
+                                textureEditorMethods.ConvertTextureFormat_PlatformOverride(sliceTex, format, compressionQuality, textureShaderProperties[propIdx].isNormalMap);
                             }
                         }
                     }
@@ -226,10 +230,11 @@ namespace DigitalOpus.MB.Core
             texturePropertyData.doMips = new bool[texPropertyNames.Count];
             texturePropertyData.numMipMaps = new int[texPropertyNames.Count];
             texturePropertyData.formats = new TextureFormat[texPropertyNames.Count];
+            texturePropertyData.compressionQualities = new MB_TextureCompressionQuality[texPropertyNames.Count];
             for (int propIdx = 0; propIdx < texPropertyNames.Count; propIdx++)
             {
                 int numSlices = resultAtlasesAndRectSlices.Length;
-                texturePropertyData.sizes[propIdx] = new Vector3(16, 16, 1);
+                texturePropertyData.sizes[propIdx] = new Vector3(MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE, MB3_TextureCombiner.TEMP_SOLID_COLOR_TEXTURE_SIZE, 1);
                 bool hasMips = false;
                 int mipCount = 1;
                 for (int sliceIdx = 0; sliceIdx < numSlices; sliceIdx++)
@@ -244,7 +249,7 @@ namespace DigitalOpus.MB.Core
                         texturePropertyData.sizes[propIdx].x = Mathf.Min(Mathf.Max(texturePropertyData.sizes[propIdx].x, sliceTex.width), maxAtlasSize);
                         texturePropertyData.sizes[propIdx].y = Mathf.Min(Mathf.Max(texturePropertyData.sizes[propIdx].y, sliceTex.height), maxAtlasSize);
                         //texturePropertyData.sizes[propIdx].z = Mathf.Max(texturePropertyData.sizes[propIdx].z, sliceTex.mipmapCount);
-                        texturePropertyData.formats[propIdx] = targetFormatSet.GetFormatForProperty(texPropertyNames[propIdx].name);
+                        texturePropertyData.formats[propIdx] = targetFormatSet.GetFormatForProperty(texPropertyNames[propIdx].name, out texturePropertyData.compressionQualities[propIdx]);
                     }
                 }
 
@@ -408,8 +413,7 @@ namespace DigitalOpus.MB.Core
                     if (MB_TextureArrays.ConvertTexturesToReadableFormat(texPropertyData, bakedMatsAndSlicesResMat.slices, hasTexForProperty, texPropertyNames, combiner, LOG_LEVEL, temporaryTextureAssets, editorMethods))
                     {
                         // We now have a set of slices (one per textureProperty). Build these into Texture2DArray's.
-                        if (LOG_LEVEL >= MB2_LogLevel.debug) Debug.Log("Creating texture arrays");
-                        if (LOG_LEVEL >= MB2_LogLevel.info) Debug.Log("THERE MAY BE ERRORS IN THE CONSOLE ABOUT 'Rebuilding mipmaps ... not supported'. THESE ARE PROBABLY FALSE POSITIVES AND CAN BE IGNORED.");
+                        if (LOG_LEVEL >= MB2_LogLevel.debug) Debug.Log("Creating texture array");
                         Texture2DArray[] textureArrays = MB_TextureArrays.CreateTextureArraysForResultMaterial(texPropertyData, texPropertyNames, bakedMatsAndSlicesResMat.slices, hasTexForProperty, combiner, LOG_LEVEL);
 
 
@@ -422,8 +426,9 @@ namespace DigitalOpus.MB.Core
                                 resTexArraysByProperty[texPropertyNames[propIdx].name].formats[texFormatSetIdx] = texRef;
                                 if (saveAtlasesAsAssets)
                                 {
+                                    MB_TextureCompressionQuality compressionQuality;
                                     editorMethods.SaveTextureArrayToAssetDatabase(textureArrays[propIdx],
-                                        textureArrayFormatSet.GetFormatForProperty(texPropertyNames[propIdx].name),
+                                        textureArrayFormatSet.GetFormatForProperty(texPropertyNames[propIdx].name, out compressionQuality),
                                         bakedMatsAndSlicesResMat.slices[0].texPropertyNames[propIdx],
                                         propIdx, resMaterial.combinedMaterial);
                                 }
