@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Dreamteck.Splines;
 using MyBox;
 #if UNITY_EDITOR
@@ -232,6 +233,38 @@ namespace Gumball
             return $"{RuntimeChunksPath}/{chunk.name}{RuntimeChunkSuffix}.prefab";
         }
         
+        public static void CombineMeshesUnderChunkWithLayers(Chunk chunk, LayerMask layers)
+        {
+            //get the gameobjects that match in the chunk
+            List<GameObject> gameObjects = new List<GameObject>();
+            foreach (Transform child in chunk.transform.GetComponentsInAllChildren<Transform>())
+            {
+                MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
+                if (!child.gameObject.activeInHierarchy
+                    || meshRenderer == null
+                    || !meshRenderer.enabled
+                    || !layers.ContainsLayer(child.gameObject.layer))
+                    continue;
+                
+                gameObjects.Add(child.gameObject);
+            }
+            
+            string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
+            string prefabPath = $"{chunkDirectory}/Combined_Layers_{layers.value}.prefab";
+            if (!Directory.Exists(chunkDirectory))
+                Directory.CreateDirectory(chunkDirectory);
+            
+            GameObject prefab = MeshRendererUtils.CombineMeshesIntoPrefab(gameObjects, prefabPath, MeshRendererUtils.CombineMeshCleanup.DISABLE);
+            
+            //instantiate
+            GameObject instance = Object.Instantiate(prefab, Vector3.zero, Quaternion.Euler(Vector3.zero), chunk.transform);
+            
+            //need to reattach the mesh renderer
+            string meshPath = $"{chunkDirectory}/Combined_Layers_{layers.value}-mesh.asset";
+            Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
+            instance.transform.GetComponentsInAllChildren<MeshFilter>()[0].sharedMesh = mesh; //just set the first as there should only be one
+        }
+        
         /// <summary>
         /// Creates a runtime version of the original chunk that is stripped of chunk objects.
         /// </summary>
@@ -243,7 +276,20 @@ namespace Gumball
                 Debug.LogError($"Cannot create runtime chunk from another runtime chunk ({originalChunk.name}).");
                 return null;
             }
+
+            GameObject runtimePrefabInstance = Object.Instantiate(originalChunk);
+            Chunk runtimeInstanceChunk = runtimePrefabInstance.GetComponent<Chunk>();
+            runtimePrefabInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
+
+            //update spline meshes in original chunk in case they haven't had a chunk to save
+            originalChunk.GetComponent<Chunk>().FindSplineMeshes();
             
+            //combine trees, grass
+            //TODO: add undergrowth layer
+            CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Trees));
+            CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Grass));
+
+            //get chunk objects and make sure they're addressable
             List<ChunkObject> chunkObjectsInOriginalChunk = originalChunk.transform.GetComponentsInAllChildren<ChunkObject>();
             List<string> assetKeys = new();
             foreach (ChunkObject chunkObject in chunkObjectsInOriginalChunk)
@@ -253,14 +299,6 @@ namespace Gumball
                 string assetKey = GameObjectUtils.GetOrSetAddressableKeyFromGameObject(chunkObject.gameObject, addressableGroup, suffix, false);
                 assetKeys.Add(assetKey);
             }
-
-            //update spline meshes in original chunk in case they haven't had a chunk to save
-            originalChunk.GetComponent<Chunk>().FindSplineMeshes();
-
-            string newChunkPath = GetRuntimeChunkPath(originalChunk);
-            GameObject runtimePrefabInstance = Object.Instantiate(originalChunk);
-
-            runtimePrefabInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
             
             //find all chunk object references and save the data
             // - then destroy all the chunk objects
@@ -306,7 +344,7 @@ namespace Gumball
             }
 
             //need to reattach the meshes as the references get lost:
-            SplineMesh[] meshes = runtimePrefabInstance.GetComponent<Chunk>().SplinesMeshes;
+            SplineMesh[] meshes = runtimeInstanceChunk.SplinesMeshes;
             for (int index = 0; index < meshes.Length; index++)
             {
                 SplineMesh splineMesh = meshes[index];
@@ -334,14 +372,15 @@ namespace Gumball
                 Debug.LogError($"{runtimePrefabInstance.name.Replace("(Clone)", "")} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
             
             //create raycast detector object
-            runtimePrefabInstance.GetComponent<Chunk>().TryCreateChunkDetector();
+            runtimeInstanceChunk.TryCreateChunkDetector();
             
             //update the data
-            runtimePrefabInstance.GetComponent<Chunk>().SetChunkObjectData(chunkObjectData);
+            runtimeInstanceChunk.SetChunkObjectData(chunkObjectData);
 
             //calculate the spline length
-            runtimePrefabInstance.GetComponent<Chunk>().CalculateSplineLength();
+            runtimeInstanceChunk.CalculateSplineLength();
             
+            string newChunkPath = GetRuntimeChunkPath(originalChunk);
             PrefabUtility.SaveAsPrefabAsset(runtimePrefabInstance, newChunkPath);
 
             //dispose of instance
