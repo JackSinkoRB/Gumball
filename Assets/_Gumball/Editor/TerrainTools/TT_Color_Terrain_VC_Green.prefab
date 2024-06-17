@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5630974601386700360}
   - component: {fileID: 6905556186995343891}
   - component: {fileID: 6796651568160044920}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: TT_Color_Terrain_VC_Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,6 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPrefab: 0
   ignoreAtRuntime: 1
   loadSeparately: 1
   alwaysGrounded: 1
@@ -151,8 +152,11 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   colourTerrain: 1
-  colliderToColourAround: {fileID: 6905556186995343891}
-  colourTerrainColor: {r: 0, g: 1, b: 0, a: 0}
-  colourTerrainStrength: 1
+  colorModifier:
+    colliderToColourAround: {fileID: 6905556186995343891}
+    useColor: 1
+    color: {r: 0, g: 1, b: 0, a: 1}
+    useAlpha: 0
+    alpha: 0
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
