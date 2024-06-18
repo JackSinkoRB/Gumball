@@ -31,6 +31,7 @@ jobs:
       - name: Install Git
         run: sudo apt-get update && sudo apt-get install git
 
+
   testAllModes:
     needs: setup
     name: Test in ${{ matrix.testMode }}
@@ -52,8 +53,7 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+          key: Library-Editor
 
       # Test
       - uses: game-ci/unity-test-runner@v4
@@ -88,12 +88,15 @@ jobs:
         with:
           lfs: true
 
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
+
       # Cache
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
 
       # Build
       - uses: game-ci/unity-builder@v4
@@ -123,6 +126,19 @@ jobs:
       - name: Delete build folder
         run: rm -rf build
 
+  cleanup:
+    needs: build
+    name: Cleanup
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      # Delete library folder to save space - must do this after build job as post-cache needs to cache it
+      - name: Delete library folder
+        run: rm -rf Library
+
   deploy:
     needs: build
     name: Deploy
@@ -142,12 +158,16 @@ jobs:
             for ((i=0; i<$COUNT; i++)); do
               # Get commit message, replace '\n' with a space, and remove '/'
               COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | tr '\n\t' ' ' | tr -d '/')
+              # Remove any occurrence of "JackSinkoRB"
+              COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
               COMMIT_MESSAGES+="$((i+1)). $COMMIT_MESSAGE\\n"
             done
           else
             COUNT=1
             # Get commit message, replace '\n' with a space, and remove '/'
             COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | tr '\n\t' ' ' | tr -d '/')
+            # Remove any occurrence of "JackSinkoRB"
+            COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
             COMMIT_MESSAGES="$COMMIT_MESSAGE\\n"
           fi
           echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"

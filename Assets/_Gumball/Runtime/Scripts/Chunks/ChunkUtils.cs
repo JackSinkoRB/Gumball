@@ -248,7 +248,9 @@ namespace Gumball
             List<string> assetKeys = new();
             foreach (ChunkObject chunkObject in chunkObjectsInOriginalChunk)
             {
-                string assetKey = GameObjectUtils.GetAddressableKeyFromGameObject(chunkObject.gameObject, false);
+                const string addressableGroup = "ChunkObjects";
+                const string suffix = "_ChunkObject";
+                string assetKey = GameObjectUtils.GetOrSetAddressableKeyFromGameObject(chunkObject.gameObject, addressableGroup, suffix, false);
                 assetKeys.Add(assetKey);
             }
 
