@@ -66,6 +66,10 @@ namespace Gumball
             meshBaker.useObjsToMeshFromTexBaker = false;
             meshBaker.objsToMesh = gameObjects;
             
+            //settings for reducing file size
+            meshBaker.meshCombiner.settings.doTan = false;
+            meshBaker.meshCombiner.settings.clearBuffersAfterBake = true;
+
             //check if the result prefab already exists, if yes - use it - else create one
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 
