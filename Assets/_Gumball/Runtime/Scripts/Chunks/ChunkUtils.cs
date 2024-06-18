@@ -28,11 +28,26 @@ namespace Gumball
             AFTER
         }
 
+        private struct ChunkObjectHandling
+        {
+            public readonly bool CanDestroy;
+            public readonly bool CanSaveData;
+
+            public ChunkObjectHandling(bool destroy, bool saveData)
+            {
+                CanDestroy = destroy;
+                CanSaveData = saveData;
+            }
+        }
+        
         public const string TerrainTag = "Terrain";
         public const string ChunkMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Chunks";
         public const string ChunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
         public const string RuntimeChunkSuffix = "_runtime";
         public const string RuntimeChunksPath = "Assets/_Gumball/Runtime/Prefabs/Chunks/_Runtime";
+        
+        private const string chunkObjectAddressableGroup = "ChunkObjects";
+        private const string chunkObjectAddressableSuffix = "_ChunkObject";
         
 #if UNITY_EDITOR
         /// <summary>
@@ -234,7 +249,10 @@ namespace Gumball
             return $"{RuntimeChunksPath}/{chunk.name}{RuntimeChunkSuffix}.prefab";
         }
 
-        public static void CombineMeshesUnderChunkWithLayers(Chunk chunk, LayerMask layers, MeshRendererUtils.CombineMeshCleanup cleanup = MeshRendererUtils.CombineMeshCleanup.DISABLE)
+        /// <summary>
+        /// Combines the meshes under the specified chunks with the specified layers into a single mesh prefab/gameobject and returns the combined instance.
+        /// </summary>
+        public static GameObject CombineMeshesUnderChunkWithLayers(Chunk chunk, LayerMask layers, MeshRendererUtils.CombineMeshCleanup cleanup = MeshRendererUtils.CombineMeshCleanup.DISABLE)
         {
             //get the gameobjects that match in the chunk
             List<GameObject> gameObjects = new List<GameObject>();
@@ -251,7 +269,7 @@ namespace Gumball
             }
 
             if (gameObjects.Count == 0)
-                return;
+                return null;
             
             string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
             string prefabPath = $"{chunkDirectory}/Combined_Layers_{layers.value}.prefab";
@@ -267,6 +285,40 @@ namespace Gumball
             string meshPath = $"{chunkDirectory}/Combined_Layers_{layers.value}-mesh.asset";
             Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
             instance.transform.GetComponentsInAllChildren<MeshFilter>()[0].sharedMesh = mesh; //just set the first as there should only be one
+
+            return instance;
+        }
+        
+        private static ChunkObjectHandling GetChunkObjectHandling(ChunkObject chunkObject)
+        {
+            if (chunkObject == null || !chunkObject.isActiveAndEnabled)
+                return new ChunkObjectHandling(false, false);
+            
+            if (chunkObject.IsChildOfAnotherChunkObject)
+            {
+                Debug.LogWarning($"Chunk object {chunkObject.gameObject.name} could not be saved as it is a child of another chunk object that was removed.");
+                return new ChunkObjectHandling(false, false);
+            }
+            
+            if (chunkObject.IgnoreAtRuntime)
+                return new ChunkObjectHandling(true, false);
+            
+            //check if there's at least 1 mesh renderer - otherwise just delete it - may have been removed after combining meshes
+            bool nothingToRender = chunkObject.GetComponent<MeshRenderer>() == null && chunkObject.transform.GetComponentsInAllChildren<MeshRenderer>().Count == 0;
+            if (nothingToRender)
+                return new ChunkObjectHandling(true, false);
+            
+            if (!chunkObject.LoadSeparately)
+                return new ChunkObjectHandling(false, false); //not destroying
+            
+            string assetKey = GameObjectUtils.GetOrSetAddressableKeyFromGameObject(chunkObject.gameObject, chunkObjectAddressableGroup, chunkObjectAddressableSuffix, false);
+            if (assetKey == null)
+            {
+                Debug.LogError($"Asset key was null for {chunkObject.gameObject.name}, therefore it won't be treated as a ChunkObject. Is it a prefab asset ending in .prefab?");
+                return new ChunkObjectHandling(false, false);
+            }
+            
+            return new ChunkObjectHandling(true, true);
         }
         
         /// <summary>
@@ -285,81 +337,27 @@ namespace Gumball
             originalChunk.GetComponent<Chunk>().FindSplineMeshes();
             
             //create runtime chunk
-            GameObject runtimePrefabInstance = Object.Instantiate(originalChunk);
-            Chunk runtimeInstanceChunk = runtimePrefabInstance.GetComponent<Chunk>();
-            runtimePrefabInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
+            GameObject runtimeInstance = Object.Instantiate(originalChunk);
+            Chunk runtimeInstanceChunk = runtimeInstance.GetComponent<Chunk>();
+            runtimeInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
 
             //apply bezier object placers
-            foreach (BezierObjectPlacer bezierObjectPlacer in runtimePrefabInstance.transform.GetComponentsInAllChildren<BezierObjectPlacer>())
+            foreach (BezierObjectPlacer bezierObjectPlacer in runtimeInstance.transform.GetComponentsInAllChildren<BezierObjectPlacer>())
             {
                 bezierObjectPlacer.Apply();
             }
             
-            //combine trees, grass
+            //combine meshes and destroy objects that were involved
             CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Trees), MeshRendererUtils.CombineMeshCleanup.DESTROY);
             CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Grass), MeshRendererUtils.CombineMeshCleanup.DESTROY);
-            //TODO: add undergrowth layer
-            
+
             List<ChunkObject> chunkObjects = runtimeInstanceChunk.transform.GetComponentsInAllChildren<ChunkObject>();
             
-            //get chunk objects and make sure they're addressable
-            List<string> assetKeys = new();
+            //check to remove any chunk objects
             foreach (ChunkObject chunkObject in chunkObjects)
             {
-                const string addressableGroup = "ChunkObjects";
-                const string suffix = "_ChunkObject";
-                string assetKey = GameObjectUtils.GetOrSetAddressableKeyFromGameObject(chunkObject.gameObject, addressableGroup, suffix, false);
-                assetKeys.Add(assetKey);
-            }
-            
-            //find all chunk object references and save the data
-            // - then destroy all the chunk objects
-            Dictionary<string, List<ChunkObjectData>> chunkObjectData = new();
-            
-            for (int index = 0; index < chunkObjects.Count; index++)
-            {
-                ChunkObject chunkObject = chunkObjects[index];
-
-                if (chunkObject == null || chunkObject.IsChildOfAnotherChunkObject)
-                {
-                    Debug.LogWarning($"Chunk object at index {index} could not be saved as it is a child of another chunk object that was removed.");
-                    continue;
-                }
-
-                if (!chunkObject.isActiveAndEnabled)
-                    continue;
-                
-                if (chunkObject.IgnoreAtRuntime)
-                {
+                if (GetChunkObjectHandling(chunkObject).CanDestroy)
                     Object.DestroyImmediate(chunkObject.gameObject);
-                    continue;
-                }
-
-                //check if there's at least 1 mesh renderer - otherwise just delete it
-                bool nothingToRender = chunkObject.transform.HasActiveComponentsInChildren<MeshRenderer>();
-                if (nothingToRender)
-                {
-                    Object.DestroyImmediate(chunkObject.gameObject);
-                    continue;
-                }
-                
-                if (!chunkObject.LoadSeparately)
-                    continue;
-                
-                string assetKey = assetKeys[index];
-                if (assetKey == null)
-                {
-                    Debug.LogError($"Asset key was null for index {index} ({chunkObject.gameObject.name}. It won't be shown at runtime. Is it a prefab asset ending in .prefab?");
-                    Object.DestroyImmediate(chunkObject.gameObject);
-                    continue;
-                }
-                
-                List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
-                ChunkObjectData data = new ChunkObjectData(originalChunk.GetComponent<Chunk>(), chunkObject);
-                chunkObjectList.Add(data);
-                chunkObjectData[assetKey] = chunkObjectList;
-
-                Object.DestroyImmediate(chunkObject.gameObject);
             }
 
             //need to reattach the meshes as the references get lost:
@@ -374,7 +372,7 @@ namespace Gumball
 
             //delete empty gameobjects
             HashSet<GameObject> emptyObjects = new();
-            foreach (Transform child in runtimePrefabInstance.transform)
+            foreach (Transform child in runtimeInstance.transform)
             {
                 if (child.gameObject.IsCompletelyEmpty())
                     emptyObjects.Add(child.gameObject);
@@ -386,31 +384,29 @@ namespace Gumball
 
             //show error if there's a large amount of objects (suggesting to use ChunkObjects)
             const int maxChildrenBeforeError = 50;
-            int totalChildren = runtimePrefabInstance.GetTotalChildCount();
+            int totalChildren = runtimeInstance.GetTotalChildCount();
             if (totalChildren > maxChildrenBeforeError)
-                Debug.LogError($"{runtimePrefabInstance.name.Replace("(Clone)", "")} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
+                Debug.LogError($"{runtimeInstance.name.Replace("(Clone)", "")} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
             
             //create raycast detector object
             runtimeInstanceChunk.TryCreateChunkDetector();
-            
-            //update the data
-            runtimeInstanceChunk.SetChunkObjectData(chunkObjectData);
 
             //calculate the spline length
             runtimeInstanceChunk.CalculateSplineLength();
             
-            string newChunkPath = GetRuntimeChunkPath(originalChunk);
-            PrefabUtility.SaveAsPrefabAsset(runtimePrefabInstance, newChunkPath);
+            //save the runtime chunk asset
+            string runtimeChunkPath = GetRuntimeChunkPath(originalChunk);
+            PrefabUtility.SaveAsPrefabAsset(runtimeInstance, runtimeChunkPath);
 
             //dispose of instance
-            Object.DestroyImmediate(runtimePrefabInstance);
+            Object.DestroyImmediate(runtimeInstance);
             
             //set the asset as addressable
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             
             const string groupName = "RuntimeChunks";
             AddressableAssetGroup group = settings.FindGroup(groupName);
-            string guid = AssetDatabase.AssetPathToGUID(newChunkPath);
+            string guid = AssetDatabase.AssetPathToGUID(runtimeChunkPath);
             
             AddressableAssetEntry entry = settings.CreateOrMoveEntry(guid, group);
             entry.address = $"{originalChunk.name}{RuntimeChunkSuffix}";
@@ -422,8 +418,56 @@ namespace Gumball
             
             return entry.address;
         }
+
+        public static Dictionary<string, List<ChunkObjectData>> CreateChunkObjectData(GameObject originalChunkPrefab, Chunk chunkInstance)
+        {
+            Dictionary<string, List<ChunkObjectData>> chunkObjectData = new();
+            
+            Chunk chunkInstanceCopy = Object.Instantiate(chunkInstance.gameObject).GetComponent<Chunk>(); //create a copy as the runtime chunk may be used multiple times
+            
+            //apply bezier object placers
+            foreach (BezierObjectPlacer bezierObjectPlacer in chunkInstanceCopy.transform.GetComponentsInAllChildren<BezierObjectPlacer>())
+            {
+                bezierObjectPlacer.Apply();
+            }
+            
+            //combine trees
+            GameObject treesCombined = CombineMeshesUnderChunkWithLayers(chunkInstanceCopy, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Trees), MeshRendererUtils.CombineMeshCleanup.DESTROY);
+            if (treesCombined != null)
+                treesCombined.GetOrAddComponent<ChunkObject>().SetChunkBelongsTo(chunkInstanceCopy);
+
+            //combine grass
+            GameObject grassCombined = CombineMeshesUnderChunkWithLayers(chunkInstanceCopy, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Grass), MeshRendererUtils.CombineMeshCleanup.DESTROY);
+            if (grassCombined != null)
+                grassCombined.GetOrAddComponent<ChunkObject>().SetChunkBelongsTo(chunkInstanceCopy);
+            
+            //TODO: add undergrowth layer
+
+            //find all chunk objects and save the data
+            List<ChunkObject> chunkObjects = chunkInstanceCopy.transform.GetComponentsInAllChildren<ChunkObject>();
+            
+            foreach (ChunkObject chunkObject in chunkObjects)
+            {
+                if (!GetChunkObjectHandling(chunkObject).CanSaveData)
+                    continue;
+             
+                //make sure chunk objects have updated (eg. applied grounded, distance from road spline)
+                chunkObject.UpdatePosition();
+                
+                string assetKey = GameObjectUtils.GetOrSetAddressableKeyFromGameObject(chunkObject.gameObject, chunkObjectAddressableGroup, chunkObjectAddressableSuffix, false);
+                
+                List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
+                ChunkObjectData data = new ChunkObjectData(originalChunkPrefab.GetComponent<Chunk>(), chunkObject);
+                chunkObjectList.Add(data);
+                chunkObjectData[assetKey] = chunkObjectList;
+            }
+            
+            Object.DestroyImmediate(chunkInstanceCopy.gameObject);
+
+            return chunkObjectData;
+        }
 #endif
-        
+
         private static void MoveChunkToOther(Chunk chunk1, Chunk chunk2, LoadDirection direction)
         {
             //align the rotation of chunk2 to match chunk1

@@ -119,9 +119,6 @@ namespace Gumball
         [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
         public SampleCollection SplineSampleCollection => splineSampleCollection;
 
-        [SerializedDictionary("AssetKey", "Data")]
-        public SerializedDictionary<string, List<ChunkObjectData>> ChunkObjectData = new();
-
         private const float secondsBetweenTerrainLODChecks = 1;
         private float timeOfLastLODCheck = -secondsBetweenTerrainLODChecks;
         private float timeSinceTerrainLODCheck => Time.realtimeSinceStartup - timeOfLastLODCheck;
@@ -167,12 +164,6 @@ namespace Gumball
         public void OnChunkUnload()
         {
             onChunkUnload?.Invoke();
-        }
-        
-        public void SetChunkObjectData(Dictionary<string, List<ChunkObjectData>> chunkObjectData)
-        {
-            ChunkObjectData = new SerializedDictionary<string, List<ChunkObjectData>>(chunkObjectData);
-            Debug.Log($"Setting {chunkObjectData.Keys.Count} chunk object data for {gameObject.name}");
         }
 
         public void SetMeshData(ChunkMeshData data)

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
@@ -40,24 +41,6 @@ namespace Gumball
             }
 
             return null; //no component
-        }
-        
-        /// <summary>
-        /// Checks if the transform has the component T enabled, or if any of the children have it enabled.
-        /// </summary>
-        public static bool HasActiveComponentsInChildren<T>(this Transform transform)
-        {
-            T self = transform.GetComponent<T>();
-            if (self != null && (self is not MonoBehaviour selfMonoBehaviour || selfMonoBehaviour.enabled))
-                return true;
-
-            foreach (T child in transform.GetComponentsInAllChildren<T>())
-            {
-                if (child != null && (child is not MonoBehaviour childMonoBehaviour || childMonoBehaviour.enabled))
-                    return true;
-            }
-
-            return false;
         }
 
         public static Transform FindChildByName(this Transform parent, string name)

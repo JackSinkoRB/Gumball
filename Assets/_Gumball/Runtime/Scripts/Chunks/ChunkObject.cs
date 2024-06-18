@@ -97,6 +97,11 @@ namespace Gumball
             }
         }
 
+        public void SetChunkBelongsTo(Chunk chunk)
+        {
+            chunkBelongsTo = chunk;
+        }
+
         private void Initialise()
         {
             //unsubscribe if already subscribed
@@ -193,7 +198,7 @@ namespace Gumball
             transform.position = desiredPosition.SetY(transform.position.y);
         }
 
-        private void UpdatePosition()
+        public void UpdatePosition()
         {
             if (!gameObject.scene.IsValid())
                 return;
