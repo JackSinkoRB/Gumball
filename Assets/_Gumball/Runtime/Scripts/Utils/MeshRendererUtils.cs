@@ -67,7 +67,7 @@ namespace Gumball
             meshBaker.objsToMesh = gameObjects;
             
             //settings for reducing file size
-            meshBaker.meshCombiner.settings.doTan = false;
+            meshBaker.meshCombiner.settings.doTan = false; //will need to reenable if the mesh uses bump maps
             meshBaker.meshCombiner.settings.clearBuffersAfterBake = true;
 
             //check if the result prefab already exists, if yes - use it - else create one

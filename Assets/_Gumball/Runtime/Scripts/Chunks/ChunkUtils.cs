@@ -278,8 +278,11 @@ namespace Gumball
             
             GameObject prefab = MeshRendererUtils.CombineMeshesIntoPrefab(gameObjects, prefabPath, cleanup);
             
-            //instantiate
-            GameObject instance = Object.Instantiate(prefab, Vector3.zero, Quaternion.Euler(Vector3.zero), chunk.transform);
+            //instantiate (and keep the prefab reference)
+            GameObject instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            instance.transform.SetParent(chunk.transform);
+            instance.transform.localPosition = Vector3.zero;
+            instance.transform.localRotation = Quaternion.Euler(Vector3.zero);
             
             //need to reattach the mesh renderer
             string meshPath = $"{chunkDirectory}/Combined_Layers_{layers.value}-mesh.asset";
