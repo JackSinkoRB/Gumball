@@ -333,7 +333,7 @@ namespace Gumball
             const int maxChildrenBeforeError = 50;
             int totalChildren = runtimePrefabInstance.GetTotalChildCount();
             if (totalChildren > maxChildrenBeforeError)
-                Debug.LogError($"{runtimePrefabInstance.name.Replace("(Clone)", "")} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
+                Debug.LogWarning($"{runtimePrefabInstance.name.Replace("(Clone)", "")} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
             
             //create raycast detector object
             runtimePrefabInstance.GetComponent<Chunk>().TryCreateChunkDetector();
@@ -344,6 +344,7 @@ namespace Gumball
             //calculate the spline length
             runtimePrefabInstance.GetComponent<Chunk>().CalculateSplineLength();
             
+            //save the runtime chunk asset
             PrefabUtility.SaveAsPrefabAsset(runtimePrefabInstance, newChunkPath);
 
             //dispose of instance
