@@ -36,17 +36,24 @@ namespace Gumball
 
         private static void RemoveUnusedSplineMeshes(string path)
         {
-            GameObject chunk = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            string chunkDirectory = $"{ChunkUtils.ChunkMeshAssetFolderPath}/{chunk.GetComponent<Chunk>().UniqueID}";
+            GameObject chunkAsset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (chunkAsset == null)
+                return; //no asset at path
+
+            Chunk chunk = chunkAsset.GetComponent<Chunk>();
+            if (chunk == null)
+                return; //not a chunk asset
+            
+            string chunkDirectory = $"{ChunkUtils.ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
 
             if (!Directory.Exists(chunkDirectory))
                 return; //nothing to delete
             
             //find the assets that are used
             List<string> safeFileNames = new List<string>();
-            foreach (SplineMesh splineMeshInChunk in chunk.transform.GetComponentsInAllChildren<SplineMesh>())
+            foreach (SplineMesh splineMeshInChunk in chunkAsset.transform.GetComponentsInAllChildren<SplineMesh>())
             {
-                string splineMeshAssetName = $"{splineMeshInChunk.gameObject.name}_{chunk.transform.InverseTransformPoint(splineMeshInChunk.transform.position.Round(1))}";
+                string splineMeshAssetName = $"{splineMeshInChunk.gameObject.name}_{chunkAsset.transform.InverseTransformPoint(splineMeshInChunk.transform.position.Round(1))}";
                 safeFileNames.Add(splineMeshAssetName);
             }
             //ignore terrain
