@@ -310,6 +310,8 @@ namespace Gumball
             for (int index = 0; index < meshes.Length; index++)
             {
                 SplineMesh splineMesh = meshes[index];
+                if (splineMesh == null)
+                    continue; //has been removed, can ignore
                 
                 Mesh originalMesh = originalChunk.GetComponent<Chunk>().SplinesMeshes[index].GetComponent<MeshFilter>().sharedMesh;
                 splineMesh.GetComponent<MeshFilter>().sharedMesh = originalMesh;
