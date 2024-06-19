@@ -196,7 +196,7 @@ namespace Gumball
                 string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
                 if (!Directory.Exists(chunkDirectory))
                     Directory.CreateDirectory(chunkDirectory);
-                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{splineMesh.GetComponent<UniqueIDAssigner>().UniqueID}.asset";
+                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{chunk.transform.InverseTransformPoint(splineMesh.transform.position.Round(1))}.asset";
                 if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                     AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);

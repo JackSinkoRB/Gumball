@@ -311,15 +311,6 @@ namespace Gumball
         public void FindSplineMeshes()
         {
             splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
-            foreach (SplineMesh splineMesh in splineMeshes)
-            {
-                if (splineMesh == null)
-                    continue;
-                
-                UniqueIDAssigner uniqueIDAssigner = splineMesh.GetOrAddComponent<UniqueIDAssigner>();
-                if (uniqueIDAssigner.UniqueID.IsNullOrEmpty())
-                    uniqueIDAssigner.GenerateNewID();
-            }
             GlobalLoggers.ChunkLogger.Log($"Found {splineMeshes.Length} spline meshes under {gameObject.name}.");
         }
 #endif

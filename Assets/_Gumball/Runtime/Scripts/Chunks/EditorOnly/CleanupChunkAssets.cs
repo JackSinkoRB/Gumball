@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,7 @@ using Dreamteck.Splines;
 using Gumball.Editor;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Gumball
 {
@@ -24,7 +26,7 @@ namespace Gumball
 
         private static void OnSavePrefab(string sceneName, string path)
         {
-            RemoveUnusedMeshes(path);
+            RemoveUnusedSplineMeshes(path);
         }
 
         private static void OnSaveScene(string sceneName, string path)
@@ -32,19 +34,27 @@ namespace Gumball
             RemoveUnusedChunks();
         }
 
-        private static void RemoveUnusedMeshes(string path)
+        private static void RemoveUnusedSplineMeshes(string path)
         {
-            GameObject chunk = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path));
+            GameObject chunk = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             string chunkDirectory = $"{ChunkUtils.ChunkMeshAssetFolderPath}/{chunk.GetComponent<Chunk>().UniqueID}";
+
+            if (!Directory.Exists(chunkDirectory))
+                return; //nothing to delete
             
             //find the assets that are used
             List<string> safeFileNames = new List<string>();
             foreach (SplineMesh splineMeshInChunk in chunk.transform.GetComponentsInAllChildren<SplineMesh>())
             {
-                string splineMeshAssetName = $"{splineMeshInChunk.gameObject.name}_{splineMeshInChunk.GetComponent<UniqueIDAssigner>().UniqueID}";
+                string splineMeshAssetName = $"{splineMeshInChunk.gameObject.name}_{chunk.transform.InverseTransformPoint(splineMeshInChunk.transform.position.Round(1))}";
                 safeFileNames.Add(splineMeshAssetName);
             }
-            
+            //ignore terrain
+            foreach (Chunk.TerrainLOD lod in Enum.GetValues(typeof(Chunk.TerrainLOD)))
+            {
+                safeFileNames.Add($"Terrain-{lod.ToString()}");
+            }
+
             //delete any assets that aren't used in the chunk directory
             string[] filePaths = Directory.GetFiles(chunkDirectory);
             foreach (string filePath in filePaths)
