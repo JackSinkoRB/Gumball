@@ -431,7 +431,8 @@ namespace Gumball
         {
             Dictionary<string, List<ChunkObjectData>> chunkObjectData = new();
             
-            Chunk chunkInstanceCopy = Object.Instantiate(chunkInstance.gameObject).GetComponent<Chunk>(); //create a copy as the runtime chunk may be used multiple times
+            //create a copy as the chunk may be used multiple times
+            Chunk chunkInstanceCopy = ((GameObject)PrefabUtility.InstantiatePrefab(originalChunkPrefab)).GetComponent<Chunk>(); //instantiate but keep prefab references
             
             //apply bezier object placers
             foreach (BezierObjectPlacer bezierObjectPlacer in chunkInstanceCopy.transform.GetComponentsInAllChildren<BezierObjectPlacer>())
