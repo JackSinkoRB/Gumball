@@ -78,7 +78,6 @@ namespace Gumball
                 //create the prefab asset if it hasn't been created before
                 GameObject temp = new GameObject();
                 PrefabUtility.SaveAsPrefabAsset(temp, prefabPath);
-                AssetDatabase.SaveAssets();
                 
                 Object.DestroyImmediate(temp);
                 
