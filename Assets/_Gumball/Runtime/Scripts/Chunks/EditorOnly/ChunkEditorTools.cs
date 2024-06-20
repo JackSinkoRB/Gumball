@@ -25,7 +25,7 @@ namespace Gumball
             {
                 //rebake
                 newChunk.chunk.FindSplineMeshes();
-                ChunkUtils.BakeMeshes(newChunk.chunk);
+                ChunkUtils.BakeMeshes(newChunk.chunk, saveAssets: false);
             }
 
             //find the old chunk
@@ -39,7 +39,7 @@ namespace Gumball
                 {
                     //rebake
                     oldChunk.chunk.FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(oldChunk.chunk);
+                    ChunkUtils.BakeMeshes(oldChunk.chunk, saveAssets: false);
                     
                     //rebuild the runtime chunk
                     ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, false);
@@ -390,7 +390,7 @@ namespace Gumball
             
             //need to ensure all the splinemesh are set up
             chunk.FindSplineMeshes();
-            ChunkUtils.BakeMeshes(chunk);
+            ChunkUtils.BakeMeshes(chunk, false, saveAssets: false);
             
             RecreateTerrainLODs();
 

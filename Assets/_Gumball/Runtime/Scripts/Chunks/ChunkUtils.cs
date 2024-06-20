@@ -194,14 +194,20 @@ namespace Gumball
         }
 
 #if UNITY_EDITOR
-        public static void BakeMeshes(Chunk chunk, bool replace = true)
+        public static void BakeMeshes(Chunk chunk, bool replace = true, bool saveAssets = true)
         {
             foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
             {
                 if (splineMesh == null || !splineMesh.gameObject.activeSelf)
                     continue;
+
+                string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
+                if (!Directory.Exists(chunkDirectory))
+                    Directory.CreateDirectory(chunkDirectory);
+                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{chunk.transform.InverseTransformPoint(splineMesh.transform.position.Round(1))}.asset";
+                Mesh existingAsset = AssetDatabase.LoadAssetAtPath<Mesh>(path);
                 
-                bool alreadyBaked = splineMesh.baked;
+                bool alreadyBaked = splineMesh.baked && existingAsset != null;
                 if (alreadyBaked && !replace)
                     continue;
 
@@ -209,12 +215,8 @@ namespace Gumball
                 splineMesh.Bake(true, true);
 
                 MeshFilter meshFilter = splineMesh.GetComponent<MeshFilter>();
-
-                string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
-                if (!Directory.Exists(chunkDirectory))
-                    Directory.CreateDirectory(chunkDirectory);
-                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{chunk.transform.InverseTransformPoint(splineMesh.transform.position.Round(1))}.asset";
-                if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
+                
+                if (existingAsset != null)
                     AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
 
@@ -234,11 +236,12 @@ namespace Gumball
                 
                 PrefabUtility.RecordPrefabInstancePropertyModifications(splineMesh);
                 EditorUtility.SetDirty(chunk.gameObject);
-
-                AssetDatabase.SaveAssets();
-
+                
                 GlobalLoggers.ChunkLogger.Log("Baked " + path);
             }
+            
+            if (saveAssets)
+                AssetDatabase.SaveAssets();
         }
 
         /// <summary>

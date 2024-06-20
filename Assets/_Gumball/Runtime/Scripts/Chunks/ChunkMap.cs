@@ -63,6 +63,14 @@ namespace Gumball
                 chunksWithCustomLoadDistance.Clear();
                 chunkData = new ChunkMapData[chunkReferences.Length];
                 runtimeChunkAssetKeys = new string[chunkReferences.Length];
+
+                //ensure meshes are baked
+                foreach (AssetReferenceGameObject chunkReference in chunkReferences)
+                {
+                    Chunk chunk = chunkReference.editorAsset.GetComponent<Chunk>();
+                    chunk.FindSplineMeshes();
+                    ChunkUtils.BakeMeshes(chunk, false, saveAssets: false);
+                }
                 
                 CreateRuntimeChunks();
                 
@@ -71,6 +79,7 @@ namespace Gumball
                 {
                     GlobalLoggers.ChunkLogger.Log($"Instantiating {runtimeChunkAssetKeys[index]}");
                     AssetReferenceGameObject chunkReference = chunkReferences[index];
+
                     GameObject chunkInstance = Instantiate(chunkReference.editorAsset, Vector3.zero, Quaternion.Euler(Vector3.zero));
                     Chunk chunk = chunkInstance.GetComponent<Chunk>();
                     chunkInstances[index] = chunk;
