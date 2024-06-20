@@ -90,7 +90,7 @@ public class UniqueIDAssigner : MonoBehaviour
             GenerateNewID();
         }
 
-        if (!allIDs.ContainsKey(uniqueID) || allIDs[uniqueID] == null)
+        if (uniqueID != null && (!allIDs.ContainsKey(uniqueID) || allIDs[uniqueID] == null))
             allIDs[uniqueID] = this;
     }
     
