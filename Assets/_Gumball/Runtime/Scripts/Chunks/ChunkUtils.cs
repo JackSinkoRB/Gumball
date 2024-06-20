@@ -196,7 +196,7 @@ namespace Gumball
                 string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
                 if (!Directory.Exists(chunkDirectory))
                     Directory.CreateDirectory(chunkDirectory);
-                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}.asset";
+                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{chunk.transform.InverseTransformPoint(splineMesh.transform.position.Round(1))}.asset";
                 if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
                     AssetDatabase.DeleteAsset(path);
                 AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
@@ -310,6 +310,8 @@ namespace Gumball
             for (int index = 0; index < meshes.Length; index++)
             {
                 SplineMesh splineMesh = meshes[index];
+                if (splineMesh == null)
+                    continue; //has been removed, can ignore
                 
                 Mesh originalMesh = originalChunk.GetComponent<Chunk>().SplinesMeshes[index].GetComponent<MeshFilter>().sharedMesh;
                 splineMesh.GetComponent<MeshFilter>().sharedMesh = originalMesh;
@@ -331,7 +333,7 @@ namespace Gumball
             const int maxChildrenBeforeError = 50;
             int totalChildren = runtimePrefabInstance.GetTotalChildCount();
             if (totalChildren > maxChildrenBeforeError)
-                Debug.LogError($"{runtimePrefabInstance.name.Replace("(Clone)", "")} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
+                Debug.LogWarning($"{runtimePrefabInstance.name.Replace("(Clone)", "")} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
             
             //create raycast detector object
             runtimePrefabInstance.GetComponent<Chunk>().TryCreateChunkDetector();
@@ -342,6 +344,7 @@ namespace Gumball
             //calculate the spline length
             runtimePrefabInstance.GetComponent<Chunk>().CalculateSplineLength();
             
+            //save the runtime chunk asset
             PrefabUtility.SaveAsPrefabAsset(runtimePrefabInstance, newChunkPath);
 
             //dispose of instance

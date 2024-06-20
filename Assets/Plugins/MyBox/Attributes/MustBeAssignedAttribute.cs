@@ -35,8 +35,9 @@ namespace MyBox.Internal
 
 		static MustBeAssignedAttributeChecker()
 		{
-			MyEditorEvents.OnSave += AssertComponentsInScene;
-			PrefabStage.prefabSaved += AssertComponentsInPrefab;
+			// - takes too much time - disabled
+			//MyEditorEvents.OnSave += AssertComponentsInScene;
+			//PrefabStage.prefabSaved += AssertComponentsInPrefab;
 		}
 
 		private static void AssertComponentsInScene()
