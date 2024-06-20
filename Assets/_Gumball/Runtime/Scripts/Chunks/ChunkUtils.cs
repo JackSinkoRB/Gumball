@@ -1,19 +1,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Dreamteck.Splines;
 using MyBox;
 #if UNITY_EDITOR
+using System.Diagnostics;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using System.IO;
 using BezierPath;
 using UnityEditor;
+using Gumball.Editor;
 #endif
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 namespace Gumball
@@ -32,11 +32,13 @@ namespace Gumball
         {
             public readonly bool CanDestroy;
             public readonly bool CanSaveData;
+            public readonly string AssetKey;
 
-            public ChunkObjectHandling(bool destroy, bool saveData)
+            public ChunkObjectHandling(bool destroy, bool saveData, string assetKey)
             {
                 CanDestroy = destroy;
                 CanSaveData = saveData;
+                AssetKey = assetKey;
             }
         }
         
@@ -239,7 +241,7 @@ namespace Gumball
                 
                 GlobalLoggers.ChunkLogger.Log("Baked " + path);
             }
-            
+
             if (saveAssets)
                 AssetDatabase.SaveAssets();
         }
@@ -255,33 +257,33 @@ namespace Gumball
         private static ChunkObjectHandling GetChunkObjectHandling(ChunkObject chunkObject)
         {
             if (chunkObject == null || !chunkObject.isActiveAndEnabled)
-                return new ChunkObjectHandling(false, false);
+                return new ChunkObjectHandling(false, false, null);
             
             if (chunkObject.IsChildOfAnotherChunkObject)
             {
-                Debug.LogWarning($"Chunk object {chunkObject.gameObject.name} could not be saved as it is a child of another chunk object that was removed.");
-                return new ChunkObjectHandling(false, false);
+                Debug.LogWarning($"Chunk object {chunkObject.gameObject.name} will not be treated as a chunk object, as it is a child of another chunk object.");
+                return new ChunkObjectHandling(false, false, null);
             }
             
             if (chunkObject.IgnoreAtRuntime)
-                return new ChunkObjectHandling(true, false);
+                return new ChunkObjectHandling(true, false, null);
             
             //check if there's at least 1 mesh renderer - otherwise just delete it - may have been removed after combining meshes
             bool nothingToRender = chunkObject.GetComponent<MeshRenderer>() == null && chunkObject.transform.GetComponentsInAllChildren<MeshRenderer>().Count == 0;
             if (nothingToRender)
-                return new ChunkObjectHandling(true, false);
+                return new ChunkObjectHandling(true, false, null);
             
             if (!chunkObject.LoadSeparately)
-                return new ChunkObjectHandling(false, false); //not destroying
+                return new ChunkObjectHandling(false, false, null); //not destroying
             
             string assetKey = GameObjectUtils.GetOrSetAddressableKeyFromGameObject(chunkObject.gameObject, chunkObjectAddressableGroup, chunkObjectAddressableSuffix, false);
             if (assetKey == null)
             {
                 Debug.LogError($"Asset key was null for {chunkObject.gameObject.name}, therefore it won't be treated as a ChunkObject. Is it a prefab asset ending in .prefab?");
-                return new ChunkObjectHandling(false, false);
+                return new ChunkObjectHandling(false, false, null);
             }
             
-            return new ChunkObjectHandling(true, true);
+            return new ChunkObjectHandling(true, true, assetKey);
         }
         
         /// <summary>
@@ -300,7 +302,10 @@ namespace Gumball
             originalChunk.GetComponent<Chunk>().FindSplineMeshes();
             
             //create runtime chunk
-            GameObject runtimeInstance = Object.Instantiate(originalChunk);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            GameObject runtimeInstance = PrefabUtility.InstantiatePrefab(originalChunk) as GameObject;
+            GlobalLoggers.ChunkLogger.Log($"Took {stopwatch.Elapsed.ToPrettyString(true)} to instantiate {runtimeInstance.gameObject.name}");
+            
             Chunk runtimeInstanceChunk = runtimeInstance.GetComponent<Chunk>();
             runtimeInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
 
@@ -384,27 +389,25 @@ namespace Gumball
         {
             Dictionary<string, List<ChunkObjectData>> chunkObjectData = new();
             
-            //create a copy as the chunk may be used multiple times
-            Chunk chunkInstanceCopy = ((GameObject)PrefabUtility.InstantiatePrefab(originalChunkPrefab)).GetComponent<Chunk>(); //instantiate but keep prefab references
-            
             //apply bezier object placers
-            foreach (BezierObjectPlacer bezierObjectPlacer in chunkInstanceCopy.transform.GetComponentsInAllChildren<BezierObjectPlacer>())
+            foreach (BezierObjectPlacer bezierObjectPlacer in chunkInstance.transform.GetComponentsInAllChildren<BezierObjectPlacer>())
             {
                 bezierObjectPlacer.Apply();
             }
 
             //find all chunk objects and save the data
-            List<ChunkObject> chunkObjects = chunkInstanceCopy.transform.GetComponentsInAllChildren<ChunkObject>();
+            List<ChunkObject> chunkObjects = chunkInstance.transform.GetComponentsInAllChildren<ChunkObject>();
             
             foreach (ChunkObject chunkObject in chunkObjects)
             {
-                if (!GetChunkObjectHandling(chunkObject).CanSaveData)
+                ChunkObjectHandling chunkObjectHandling = GetChunkObjectHandling(chunkObject);
+                if (!chunkObjectHandling.CanSaveData)
                     continue;
              
                 //make sure chunk objects have updated (eg. applied grounded, distance from road spline)
                 chunkObject.UpdatePosition();
                 
-                string assetKey = GameObjectUtils.GetOrSetAddressableKeyFromGameObject(chunkObject.gameObject, chunkObjectAddressableGroup, chunkObjectAddressableSuffix, false);
+                string assetKey = chunkObjectHandling.AssetKey;
                 
                 List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
                 ChunkObjectData data = new ChunkObjectData(originalChunkPrefab.GetComponent<Chunk>(), chunkObject);
@@ -412,8 +415,6 @@ namespace Gumball
                 chunkObjectData[assetKey] = chunkObjectList;
             }
             
-            Object.DestroyImmediate(chunkInstanceCopy.gameObject);
-
             return chunkObjectData;
         }
 #endif

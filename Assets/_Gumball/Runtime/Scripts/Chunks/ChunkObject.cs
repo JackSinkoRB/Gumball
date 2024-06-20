@@ -19,7 +19,9 @@ namespace Gumball
         [Header("Setup check")]
         [HelpBox("The object is not a valid prefab asset (ending in .prefab). ChunkObject can only be added to prefabs. Therefore this object will not show at runtime.", MessageType.Error, true)]
         [SerializeField, ReadOnly] private bool isPrefab;
-
+        [HelpBox("This ChunkObject will not function properly because it is a child of another ChunkObject.", MessageType.Error, true, true)]
+        [SerializeField, ReadOnly] private bool isChildOfAnotherChunkObject;
+        
         [Header("Settings")]
         [Tooltip("Should the object be ignored from the chunk at runtime? eg. if it is just to modify the terrain etc.")]
         [SerializeField] private bool ignoreAtRuntime;
@@ -147,6 +149,7 @@ namespace Gumball
                 CheckToSetColliderToFlattenTo();
 
                 isPrefab = GameObjectUtils.GetPathToPrefabAsset(gameObject) != null;
+                isChildOfAnotherChunkObject = IsChildOfAnotherChunkObject;
             }
         }
 
