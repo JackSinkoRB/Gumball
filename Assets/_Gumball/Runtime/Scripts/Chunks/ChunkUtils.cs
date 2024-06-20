@@ -252,49 +252,6 @@ namespace Gumball
             return $"{RuntimeChunksPath}/{chunk.name}{RuntimeChunkSuffix}.prefab";
         }
 
-        /// <summary>
-        /// Combines the meshes under the specified chunks with the specified layers into a single mesh prefab/gameobject and returns the combined instance.
-        /// </summary>
-        public static GameObject CombineMeshesUnderChunkWithLayers(Chunk chunk, LayerMask layers, MeshRendererUtils.CombineMeshCleanup cleanup = MeshRendererUtils.CombineMeshCleanup.DISABLE)
-        {
-            //get the gameobjects that match in the chunk
-            List<GameObject> gameObjects = new List<GameObject>();
-            foreach (Transform child in chunk.transform.GetComponentsInAllChildren<Transform>())
-            {
-                MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
-                if (!child.gameObject.activeInHierarchy
-                    || meshRenderer == null
-                    || !meshRenderer.enabled
-                    || !layers.ContainsLayer(child.gameObject.layer))
-                    continue;
-                
-                gameObjects.Add(child.gameObject);
-            }
-
-            if (gameObjects.Count == 0)
-                return null;
-            
-            string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
-            string prefabPath = $"{chunkDirectory}/Combined_Layers_{layers.value}.prefab";
-            if (!Directory.Exists(chunkDirectory))
-                Directory.CreateDirectory(chunkDirectory);
-            
-            GameObject prefab = MeshRendererUtils.CombineMeshesIntoPrefab(gameObjects, prefabPath, cleanup);
-            
-            //instantiate (and keep the prefab reference)
-            GameObject instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-            instance.transform.SetParent(chunk.transform);
-            instance.transform.localPosition = Vector3.zero;
-            instance.transform.localRotation = Quaternion.Euler(Vector3.zero);
-            
-            //need to reattach the mesh renderer
-            string meshPath = $"{chunkDirectory}/Combined_Layers_{layers.value}-mesh.asset";
-            Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(meshPath);
-            instance.transform.GetComponentsInAllChildren<MeshFilter>()[0].sharedMesh = mesh; //just set the first as there should only be one
-
-            return instance;
-        }
-        
         private static ChunkObjectHandling GetChunkObjectHandling(ChunkObject chunkObject)
         {
             if (chunkObject == null || !chunkObject.isActiveAndEnabled)
@@ -353,10 +310,6 @@ namespace Gumball
                 bezierObjectPlacer.Apply();
             }
             
-            //combine meshes and destroy objects that were involved
-            CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Trees), MeshRendererUtils.CombineMeshCleanup.DESTROY);
-            CombineMeshesUnderChunkWithLayers(runtimeInstanceChunk, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Grass), MeshRendererUtils.CombineMeshCleanup.DESTROY);
-
             List<ChunkObject> chunkObjects = runtimeInstanceChunk.transform.GetComponentsInAllChildren<ChunkObject>();
             
             //check to remove any chunk objects
@@ -439,18 +392,6 @@ namespace Gumball
             {
                 bezierObjectPlacer.Apply();
             }
-            
-            //combine trees
-            GameObject treesCombined = CombineMeshesUnderChunkWithLayers(chunkInstanceCopy, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Trees), MeshRendererUtils.CombineMeshCleanup.DESTROY);
-            if (treesCombined != null)
-                treesCombined.GetOrAddComponent<ChunkObject>().SetChunkBelongsTo(chunkInstanceCopy);
-
-            //combine grass
-            GameObject grassCombined = CombineMeshesUnderChunkWithLayers(chunkInstanceCopy, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Grass), MeshRendererUtils.CombineMeshCleanup.DESTROY);
-            if (grassCombined != null)
-                grassCombined.GetOrAddComponent<ChunkObject>().SetChunkBelongsTo(chunkInstanceCopy);
-            
-            //TODO: add undergrowth layer
 
             //find all chunk objects and save the data
             List<ChunkObject> chunkObjects = chunkInstanceCopy.transform.GetComponentsInAllChildren<ChunkObject>();
