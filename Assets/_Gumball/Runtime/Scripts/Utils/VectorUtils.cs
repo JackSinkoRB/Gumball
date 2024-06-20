@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,11 @@ namespace Gumball
 {
     public static class VectorUtils
     {
+
+        public static Vector3 Round(this Vector3 vector, int decimals)
+        {
+            return new Vector3((float)Math.Round(vector.x, decimals), (float)Math.Round(vector.y, decimals), (float)Math.Round(vector.z, decimals));
+        }
         
         public static SerializedVector3 ToSerializedVector(this Vector3 vector)
         {

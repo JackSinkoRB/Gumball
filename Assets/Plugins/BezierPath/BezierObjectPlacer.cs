@@ -64,10 +64,24 @@ namespace BezierPath
 
         [SerializeField] private bool updateImmediately = true;
 
+        private Transform[] oldChildren;
+        
         private void OnValidate()
         {
             if (isActiveAndEnabled && updateImmediately)
                 Apply();
+        }
+
+        private void DestroyChildren()
+        {
+            if (oldChildren == null)
+                return;
+
+            foreach (Transform child in oldChildren)
+            {
+                if (child != null)
+                    DestroyImmediate(child.gameObject);
+            }
         }
 
         [ButtonMethod]
@@ -81,15 +95,15 @@ namespace BezierPath
                 return;
 
             // destroy old objects
-            foreach (Transform child in objectParent)
+            oldChildren = new Transform[objectParent.childCount];
+            for (int index = 0; index < oldChildren.Length; index++)
             {
-                EditorApplication.delayCall += () =>
-                {
-                    if (child != null)
-                        DestroyImmediate(child.gameObject);
-                };
+                Transform child = objectParent.GetChild(index);
+                oldChildren[index] = child;
             }
-
+            EditorApplication.delayCall -= DestroyChildren;
+            EditorApplication.delayCall += DestroyChildren;
+            
             Random.InitState(seed);
             const float forwardcheck = 0.01f;
             int objectindex = 0;
