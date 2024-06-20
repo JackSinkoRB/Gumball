@@ -63,14 +63,29 @@ namespace Gumball
         private float timeWhenUnityLastUpdated;
 
         private bool isRuntimeChunk => name.Contains(ChunkUtils.RuntimeChunkSuffix);
+
+        public static bool IsBakingMeshes;
         
         private void OnSavePrefab(string prefabName, string path)
         {
-            if (prefabName.Equals(gameObject.name) && !isRuntimeChunk)
-            {
-                chunk.FindSplineMeshes();
-                ChunkUtils.BakeMeshes(chunk);
-            }
+            if (!prefabName.Equals(gameObject.name))
+                return;
+            
+            CheckToBakeMeshes();
+        }
+
+        private void CheckToBakeMeshes()
+        {
+            if (IsBakingMeshes)
+                return;
+
+            if (isRuntimeChunk)
+                return;
+
+            IsBakingMeshes = true;
+            chunk.FindSplineMeshes();
+            ChunkUtils.BakeMeshes(chunk, false, true);
+            IsBakingMeshes = false;
         }
         
         private void OnEnable()
