@@ -464,12 +464,12 @@ namespace Gumball
             Stopwatch stopwatch = Stopwatch.StartNew();
             GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), transform);
             instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-            Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
-            chunk.ChunkDetector.SetActive(false);
+            Chunk chunkInstance = instantiatedChunk.GetComponent<Chunk>();
+            chunkInstance.ChunkDetector.SetActive(false);
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to instantiate.");
             stopwatch.Restart();
             
-            LoadedChunkData loadedChunkData = new LoadedChunkData(chunk, chunkAddressableKey, mapIndex);
+            LoadedChunkData loadedChunkData = new LoadedChunkData(chunkInstance, chunkAddressableKey, mapIndex);
             
             if (loadDirection == ChunkUtils.LoadDirection.CUSTOM)
             {
@@ -486,7 +486,7 @@ namespace Gumball
             
             stopwatch.Restart();
 
-            chunkMapData.ApplyToChunk(chunk);
+            chunkMapData.ApplyToChunk(chunkInstance);
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to apply chunk data.");
             
             if (HasLoaded)
@@ -495,17 +495,17 @@ namespace Gumball
 
             //TODO: can this just be unity_editor?
             //should create a copy of the mesh so it doesn't directly edit the saved mesh in runtime
-            MeshFilter meshFilter = chunk.TerrainHighLOD.GetComponent<MeshFilter>();
+            MeshFilter meshFilter = chunkInstance.TerrainHighLOD.GetComponent<MeshFilter>();
             Mesh meshCopy = Instantiate(meshFilter.sharedMesh);
-            chunk.TerrainHighLOD.GetComponent<MeshFilter>().sharedMesh = meshCopy;
-            chunk.TerrainHighLOD.GetComponent<MeshCollider>().sharedMesh = meshCopy;
+            chunkInstance.TerrainHighLOD.GetComponent<MeshFilter>().sharedMesh = meshCopy;
+            chunkInstance.TerrainHighLOD.GetComponent<MeshCollider>().sharedMesh = meshCopy;
             
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to update components.");
             stopwatch.Restart();
 
             if (HasLoaded)
                 yield return null;
-            Coroutine courotine = chunk.StartCoroutine(LoadChunkObjects(chunk));
+            Coroutine courotine = chunkInstance.StartCoroutine(LoadChunkObjects(chunkInstance, chunkMapData));
             yield return courotine;
             
             stopwatch.Restart();
@@ -529,14 +529,14 @@ namespace Gumball
             loadedChunkData.Chunk.OnFullyLoaded();
         }
         
-        private IEnumerator LoadChunkObjects(Chunk chunk)
+        private IEnumerator LoadChunkObjects(Chunk chunkInstance, ChunkMapData chunkMapData)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             
             //load all the chunk object assets
             Dictionary<string, AsyncOperationHandle<GameObject>> handlesLookup = new();
             
-            foreach (string assetKey in chunk.ChunkObjectData.Keys)
+            foreach (string assetKey in chunkMapData.ChunkObjectData.Keys)
             {
                 if (assetKey.IsNullOrEmpty())
                 {
@@ -556,15 +556,15 @@ namespace Gumball
             const float maxTimeAllowedPerFrameMs = 4;
             
             //instantiate all the instances across multiple frames
-            foreach (string assetKey in chunk.ChunkObjectData.Keys)
+            foreach (string assetKey in chunkMapData.ChunkObjectData.Keys)
             {
                 AsyncOperationHandle<GameObject> handle = handlesLookup[assetKey];
-                foreach (ChunkObjectData chunkObjectData in chunk.ChunkObjectData[assetKey])
+                foreach (ChunkObjectData chunkObjectData in chunkMapData.ChunkObjectData[assetKey])
                 {
-                    GameObject chunkObject = chunkObjectData.LoadIntoChunk(handle, chunk);
+                    GameObject chunkObject = chunkObjectData.LoadIntoChunk(handle, chunkInstance);
 
                     //initialise if power pole
-                    ChunkPowerpoleManager.OnLoadChunkObject(chunk, chunkObject);
+                    ChunkPowerpoleManager.OnLoadChunkObject(chunkInstance, chunkObject);
 
                     GlobalLoggers.LoadingLogger.Log($"Loaded {chunkObject.name} at {stopwatch.ElapsedMilliseconds}ms.");
                     

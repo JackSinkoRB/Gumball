@@ -56,12 +56,11 @@ namespace Gumball
                 string splineMeshAssetName = $"{splineMeshInChunk.gameObject.name}_{chunkAsset.transform.InverseTransformPoint(splineMeshInChunk.transform.position.Round(1))}";
                 safeFileNames.Add(splineMeshAssetName);
             }
+            
             //ignore terrain
             foreach (Chunk.TerrainLOD lod in Enum.GetValues(typeof(Chunk.TerrainLOD)))
-            {
                 safeFileNames.Add($"Terrain-{lod.ToString()}");
-            }
-
+            
             //delete any assets that aren't used in the chunk directory
             string[] filePaths = Directory.GetFiles(chunkDirectory);
             foreach (string filePath in filePaths)
@@ -71,6 +70,8 @@ namespace Gumball
 
                 //remove the asset
                 AssetDatabase.DeleteAsset(filePath);
+                
+                GlobalLoggers.ChunkLogger.Log($" - Deleted asset at {filePath}");
             }
         }
 

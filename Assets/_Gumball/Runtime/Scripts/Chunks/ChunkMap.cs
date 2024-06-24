@@ -3,13 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using BezierPath;
 using MyBox;
 #if UNITY_EDITOR
+using UnityEditor.SceneManagement;
 using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using Debug = UnityEngine.Debug;
 
 namespace Gumball
@@ -52,73 +53,95 @@ namespace Gumball
 
 #if UNITY_EDITOR
         [ButtonMethod]
-        public async Task RebuildData()
+        public void RebuildData()
         {
-            bool failed = false;
-            Chunk[] runtimeChunks = new Chunk[chunkReferences.Length];
+            Chunk[] chunkInstances = new Chunk[chunkReferences.Length];
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            
             try
             {
+                //save the current scene
+                EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+                
                 totalLengthMetres = 0;
                 chunksWithCustomLoadDistance.Clear();
                 chunkData = new ChunkMapData[chunkReferences.Length];
-
-                AsyncOperationHandle[] handles = new AsyncOperationHandle[chunkReferences.Length];
                 runtimeChunkAssetKeys = new string[chunkReferences.Length];
+                
+                GlobalLoggers.ChunkLogger.Log($"Setup = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
+                
+                //instantiate chunks
+                for (int index = 0; index < chunkReferences.Length; index++)
+                {
+                    GlobalLoggers.ChunkLogger.Log($"Instantiating {runtimeChunkAssetKeys[index]}");
+                    AssetReferenceGameObject chunkReference = chunkReferences[index];
 
+                    GameObject chunkInstance = Instantiate(chunkReference.editorAsset.gameObject); //instantiate but keep the prefab references
+                    Chunk chunk = chunkInstance.GetComponent<Chunk>();
+                    chunkInstances[index] = chunk;
+                    
+                    if (chunk.HasCustomLoadDistance)
+                        chunksWithCustomLoadDistance.Add(index);
+
+                    totalLengthMetres += chunk.SplineLengthCached;
+                }
+                
+                GlobalLoggers.ChunkLogger.Log($"Instantiate chunks = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
+                
+                //ensure meshes are baked (only check each chunk once)
+                HashSet<string> chunksBaked = new HashSet<string>();
+                for (int index = 0; index < chunkInstances.Length; index++)
+                {
+                    AssetReferenceGameObject chunkReference = chunkReferences[index];
+                    Chunk chunkInstance = chunkInstances[index];
+                    
+                    if (chunksBaked.Contains(chunkReference.editorAsset.name))
+                        continue;
+
+                    chunksBaked.Add(chunkReference.editorAsset.name);
+                    
+                    chunkInstance.FindSplineMeshes();
+                    ChunkUtils.BakeMeshes(chunkInstance, false, saveAssets: false);
+                }
+                
+                GlobalLoggers.ChunkLogger.Log($"Baking meshes = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
+                
                 HashSet<string> runtimeChunksCreated = new HashSet<string>();
-
                 for (int index = 0; index < chunkReferences.Length; index++)
                 {
                     AssetReferenceGameObject chunkReference = chunkReferences[index];
-                    
+                    Chunk chunkInstance = chunkInstances[index];
+
                     //only create the runtime chunk once
                     if (!runtimeChunksCreated.Contains(chunkReference.editorAsset.name))
                     {
-                        GlobalLoggers.ChunkLogger.Log($"Updating runtime reference for {chunkReference.editorAsset.name}");
-                        runtimeChunkAssetKeys[index] = ChunkUtils.CreateRuntimeChunk(chunkReference.editorAsset.gameObject, false);
                         runtimeChunksCreated.Add(chunkReference.editorAsset.name);
+                        
+                        GlobalLoggers.ChunkLogger.Log($"Updating runtime reference for {chunkReference.editorAsset.name}");
+                        runtimeChunkAssetKeys[index] = ChunkUtils.CreateRuntimeChunk(chunkReference.editorAsset.gameObject, chunkInstance.gameObject, false);
                     }
                     else
                     {
                         //already exists
                         runtimeChunkAssetKeys[index] = $"{chunkReference.editorAsset.gameObject.name}{ChunkUtils.RuntimeChunkSuffix}";
                     }
-
-                    GlobalLoggers.ChunkLogger.Log($"Loading {runtimeChunkAssetKeys[index]}");
-                    AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(runtimeChunkAssetKeys[index]);
-
-                    handles[index] = handle;
-
-                    int finalIndex = index;
-                    handle.Completed += x =>
-                    {
-                        if (failed)
-                            return;
-
-                        GlobalLoggers.ChunkLogger.Log($"Instantiating {runtimeChunkAssetKeys[finalIndex]}");
-                        GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero));
-                        instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-                        Chunk chunk = instantiatedChunk.GetComponent<Chunk>();
-                        runtimeChunks[finalIndex] = chunk;
-
-                        if (chunk.HasCustomLoadDistance)
-                            chunksWithCustomLoadDistance.Add(finalIndex);
-
-                        totalLengthMetres += chunk.SplineLengthCached;
-                    };
                 }
-
-                await runtimeChunks.WaitForNoNulls(15);
+                
+                GlobalLoggers.ChunkLogger.Log($"Create runtime chunks = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
 
                 //connect the chunks
                 for (int index = 1; index < chunkReferences.Length; index++)
                 {
-                    Chunk previousChunk = runtimeChunks[index - 1];
-                    Chunk chunk = runtimeChunks[index];
+                    Chunk previousChunk = chunkInstances[index - 1];
+                    Chunk chunk = chunkInstances[index];
 
                     GlobalLoggers.ChunkLogger.Log($"Connecting {chunk.name} and {previousChunk.name}");
 
-                    //create the chunk data
+                    //create the blend data
                     ChunkBlendData newBlendData = ChunkUtils.ConnectChunksWithNewBlendData(previousChunk, chunk, ChunkUtils.LoadDirection.AFTER);
                     chunkData[index - 1] = new ChunkMapData(previousChunk, newBlendData.BlendedFirstChunkMeshData);
                     chunkData[index] = new ChunkMapData(chunk, newBlendData.BlendedLastChunkMeshData);
@@ -127,23 +150,42 @@ namespace Gumball
                     previousChunk.SetMeshData(newBlendData.BlendedFirstChunkMeshData);
                     chunk.SetMeshData(newBlendData.BlendedLastChunkMeshData);
                 }
-
+                
+                GlobalLoggers.ChunkLogger.Log($"Connect chunks = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
+                
+                //once connected, create the chunk object data
+                for (int index = 0; index < chunkInstances.Length; index++)
+                {
+                    AssetReferenceGameObject chunkReference = chunkReferences[index];
+                    Chunk blendedChunk = chunkInstances[index];
+                    
+                    Dictionary<string, List<ChunkObjectData>> data = ChunkUtils.CreateChunkObjectData(chunkReference.editorAsset.gameObject, blendedChunk);
+                    chunkData[index].SetChunkObjectData(data);
+                }
+                
+                GlobalLoggers.ChunkLogger.Log($"Create chunk object data = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
+                
                 EditorUtility.SetDirty(this);
-                AssetDatabase.SaveAssets(); //saves this map data and also saves the runtime chunks
+                AssetDatabase.SaveAssets();
+                
+                GlobalLoggers.ChunkLogger.Log($"Asset saving = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
             }
             catch (Exception e)
             {
                 //button method won't log the error if it's in a separate thread - so make sure it is logged
                 Debug.LogException(e);
-                failed = true;
             }
             finally
             {
-                foreach (Chunk chunk in runtimeChunks)
-                {
-                    GlobalLoggers.ChunkLogger.Log($"Destroying {chunk.name}");
-                    DestroyImmediate(chunk.gameObject);
-                }
+                //reopen the scene to discard changes
+                string currentScenePath = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
+                EditorSceneManager.OpenScene(currentScenePath);
+                
+                GlobalLoggers.ChunkLogger.Log($"Destroying = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
             }
         }
 #endif

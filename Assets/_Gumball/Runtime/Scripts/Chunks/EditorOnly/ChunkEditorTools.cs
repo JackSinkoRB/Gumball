@@ -25,7 +25,7 @@ namespace Gumball
             {
                 //rebake
                 newChunk.chunk.FindSplineMeshes();
-                ChunkUtils.BakeMeshes(newChunk.chunk);
+                ChunkUtils.BakeMeshes(newChunk.chunk, saveAssets: false);
             }
 
             //find the old chunk
@@ -39,10 +39,10 @@ namespace Gumball
                 {
                     //rebake
                     oldChunk.chunk.FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(oldChunk.chunk);
+                    ChunkUtils.BakeMeshes(oldChunk.chunk, saveAssets: false);
                     
                     //rebuild the runtime chunk
-                    ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, false);
+                    ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, saveAssetsOnComplete: false);
                 }
             }
             
@@ -63,14 +63,29 @@ namespace Gumball
         private float timeWhenUnityLastUpdated;
 
         private bool isRuntimeChunk => name.Contains(ChunkUtils.RuntimeChunkSuffix);
+
+        public static bool IsBakingMeshes;
         
         private void OnSavePrefab(string prefabName, string path)
         {
-            if (prefabName.Equals(gameObject.name) && !isRuntimeChunk)
-            {
-                chunk.FindSplineMeshes();
-                ChunkUtils.BakeMeshes(chunk);
-            }
+            if (!prefabName.Equals(gameObject.name))
+                return;
+            
+            CheckToBakeMeshes();
+        }
+
+        private void CheckToBakeMeshes()
+        {
+            if (IsBakingMeshes)
+                return;
+
+            if (isRuntimeChunk)
+                return;
+
+            IsBakingMeshes = true;
+            chunk.FindSplineMeshes();
+            ChunkUtils.BakeMeshes(chunk, false, true);
+            IsBakingMeshes = false;
         }
         
         private void OnEnable()
@@ -386,12 +401,12 @@ namespace Gumball
             DestroyImmediate(chunk.TerrainHighLOD);
             DestroyImmediate(chunk.TerrainLowLOD);
 
-            chunk.SplineComputer.RebuildImmediate();
-            
             //need to ensure all the splinemesh are set up
             chunk.FindSplineMeshes();
-            ChunkUtils.BakeMeshes(chunk);
+            ChunkUtils.BakeMeshes(chunk, false, saveAssets: false);
             
+            chunk.SplineComputer.RebuildImmediate();
+
             RecreateTerrainLODs();
 
             if (paintData != null)

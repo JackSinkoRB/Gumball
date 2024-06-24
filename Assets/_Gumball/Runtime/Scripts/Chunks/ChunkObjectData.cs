@@ -30,13 +30,6 @@ namespace Gumball
             chunkObject.transform.localPosition = positionRelativeToChunk;
             chunkObject.transform.localRotation = rotation;
             chunkObject.transform.localScale = scaleRelativeToChunk;
-            
-            if (alwaysGrounded)
-            {
-                bool groundedSuccessfully = ChunkUtils.GroundObject(chunkObject.transform);
-                if (!groundedSuccessfully)
-                    chunkObject.SetActive(false); //don't allow floating object
-            }
 
             chunkObject.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             return chunkObject;
