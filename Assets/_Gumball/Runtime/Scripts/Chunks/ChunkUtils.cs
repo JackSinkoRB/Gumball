@@ -290,21 +290,21 @@ namespace Gumball
         /// Creates a runtime version of the original chunk that is stripped of chunk objects.
         /// </summary>
         /// <returns>The addressable runtime key for the runtime chunk.</returns>
-        public static string CreateRuntimeChunk(GameObject originalChunk, bool saveAssetsOnComplete = true)
+        public static string CreateRuntimeChunk(GameObject prefab, GameObject instanceToCopy = null, bool saveAssetsOnComplete = true)
         {
-            if (originalChunk.name.Contains(RuntimeChunkSuffix))
+            if (prefab.name.Contains(RuntimeChunkSuffix))
             {
-                Debug.LogError($"Cannot create runtime chunk from another runtime chunk ({originalChunk.name}).");
+                Debug.LogError($"Cannot create runtime chunk from another runtime chunk ({prefab.name}).");
                 return null;
             }
 
             //create runtime chunk
-            GameObject runtimeInstance = Object.Instantiate(originalChunk);
+            GameObject runtimeInstance = Object.Instantiate(instanceToCopy == null ? prefab : instanceToCopy);
             
             Chunk runtimeInstanceChunk = runtimeInstance.GetComponent<Chunk>();
             runtimeInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
 
-            List<ChunkObject> chunkObjectsInPrefab = originalChunk.transform.GetComponentsInAllChildren<ChunkObject>();
+            List<ChunkObject> chunkObjectsInPrefab = prefab.transform.GetComponentsInAllChildren<ChunkObject>();
             List<ChunkObject> chunkObjectsInInstance = runtimeInstance.transform.GetComponentsInAllChildren<ChunkObject>();
 
             //check to remove any chunk objects
@@ -315,18 +315,6 @@ namespace Gumball
 
                 if (GetChunkObjectHandling(chunkObjectInPrefab).CanDestroy)
                     Object.DestroyImmediate(chunkObjectInInstance.gameObject);
-            }
-
-            //need to reattach the meshes as the references get lost:
-            SplineMesh[] meshes = runtimeInstanceChunk.SplinesMeshes;
-            for (int index = 0; index < meshes.Length; index++)
-            {
-                SplineMesh splineMesh = meshes[index];
-                if (splineMesh == null)
-                    continue; //has been removed, can ignore
-                
-                Mesh originalMesh = originalChunk.GetComponent<Chunk>().SplinesMeshes[index].GetComponent<MeshFilter>().sharedMesh;
-                splineMesh.GetComponent<MeshFilter>().sharedMesh = originalMesh;
             }
 
             //delete empty gameobjects
@@ -354,7 +342,7 @@ namespace Gumball
             runtimeInstanceChunk.CalculateSplineLength();
             
             //save the runtime chunk asset
-            string runtimeChunkPath = GetRuntimeChunkPath(originalChunk);
+            string runtimeChunkPath = GetRuntimeChunkPath(prefab);
             PrefabUtility.SaveAsPrefabAsset(runtimeInstance, runtimeChunkPath);
             
             //dispose of instance
@@ -368,7 +356,7 @@ namespace Gumball
             string guid = AssetDatabase.AssetPathToGUID(runtimeChunkPath);
             
             AddressableAssetEntry entry = settings.CreateOrMoveEntry(guid, group);
-            entry.address = $"{originalChunk.name}{RuntimeChunkSuffix}";
+            entry.address = $"{prefab.name}{RuntimeChunkSuffix}";
             
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entry, true);
             

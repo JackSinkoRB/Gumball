@@ -42,7 +42,7 @@ namespace Gumball
                     ChunkUtils.BakeMeshes(oldChunk.chunk, saveAssets: false);
                     
                     //rebuild the runtime chunk
-                    ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, false);
+                    ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, saveAssetsOnComplete: false);
                 }
             }
             
