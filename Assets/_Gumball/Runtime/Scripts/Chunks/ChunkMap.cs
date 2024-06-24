@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using BezierPath;
 using MyBox;
 #if UNITY_EDITOR
-using Gumball.Editor;
+using UnityEditor.SceneManagement;
 using UnityEditor;
 #endif
 using UnityEngine;
@@ -60,6 +60,9 @@ namespace Gumball
             
             try
             {
+                //save the current scene
+                EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+                
                 totalLengthMetres = 0;
                 chunksWithCustomLoadDistance.Clear();
                 chunkData = new ChunkMapData[chunkReferences.Length];
@@ -81,6 +84,7 @@ namespace Gumball
                     chunk.FindSplineMeshes();
                     ChunkUtils.BakeMeshes(chunk, false, saveAssets: false);
                 }
+                
                 GlobalLoggers.ChunkLogger.Log($"Baking meshes = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
                 
@@ -95,7 +99,7 @@ namespace Gumball
                     GlobalLoggers.ChunkLogger.Log($"Instantiating {runtimeChunkAssetKeys[index]}");
                     AssetReferenceGameObject chunkReference = chunkReferences[index];
 
-                    GameObject chunkInstance = PrefabUtility.InstantiatePrefab(chunkReference.editorAsset.gameObject) as GameObject; //instantiate but keep the prefab references
+                    GameObject chunkInstance = Instantiate(chunkReference.editorAsset.gameObject); //instantiate but keep the prefab references
                     Chunk chunk = chunkInstance.GetComponent<Chunk>();
                     chunkInstances[index] = chunk;
                     
@@ -155,11 +159,12 @@ namespace Gumball
             }
             finally
             {
-                foreach (Chunk chunk in chunkInstances)
-                {
-                    GlobalLoggers.ChunkLogger.Log($"Destroying {chunk.gameObject.name}");
-                    DestroyImmediate(chunk.gameObject);
-                }
+                //reopen the scene to discard changes
+                string currentScenePath = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
+                EditorSceneManager.OpenScene(currentScenePath);
+                
+                GlobalLoggers.ChunkLogger.Log($"Destroying = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
             }
         }
         

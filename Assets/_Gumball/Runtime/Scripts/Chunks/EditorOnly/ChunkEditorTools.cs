@@ -401,12 +401,12 @@ namespace Gumball
             DestroyImmediate(chunk.TerrainHighLOD);
             DestroyImmediate(chunk.TerrainLowLOD);
 
-            chunk.SplineComputer.RebuildImmediate();
-            
             //need to ensure all the splinemesh are set up
             chunk.FindSplineMeshes();
             ChunkUtils.BakeMeshes(chunk, false, saveAssets: false);
             
+            chunk.SplineComputer.RebuildImmediate();
+
             RecreateTerrainLODs();
 
             if (paintData != null)

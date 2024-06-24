@@ -33,7 +33,7 @@ namespace Gumball
                 newColor = Color.Lerp(currentColor, new Color(color.r, color.g, color.b, currentColor.a), colorStrength);
             
             if (useAlpha)
-                newColor = newColor.WithAlphaSetTo(alpha);
+                newColor = currentColor.WithAlphaSetTo(alpha); //TODO: may want to blend this rather than override in case there's multiple chunk objects on the vertex affecting light
 
             return newColor;
         }

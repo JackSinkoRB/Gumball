@@ -49,8 +49,6 @@ namespace Gumball
             if (!Directory.Exists(chunkDirectory))
                 return; //nothing to delete
             
-            GlobalLoggers.ChunkLogger.Log($"Cleaning up {path}");
-            
             //find the assets that are used
             List<string> safeFileNames = new List<string>();
             foreach (SplineMesh splineMeshInChunk in chunkAsset.transform.GetComponentsInAllChildren<SplineMesh>())

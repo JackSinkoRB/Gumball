@@ -209,7 +209,7 @@ namespace Gumball
                 string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{chunk.transform.InverseTransformPoint(splineMesh.transform.position.Round(1))}.asset";
                 Mesh existingAsset = AssetDatabase.LoadAssetAtPath<Mesh>(path);
                 
-                bool alreadyBaked = splineMesh.baked && existingAsset != null;
+                bool alreadyBaked = splineMesh.baked && existingAsset != null && splineMesh.GetComponent<MeshFilter>().sharedMesh != null;
                 if (alreadyBaked && !replace)
                     continue;
 
@@ -256,7 +256,7 @@ namespace Gumball
 
         private static ChunkObjectHandling GetChunkObjectHandling(ChunkObject chunkObject)
         {
-            if (chunkObject == null || !chunkObject.isActiveAndEnabled)
+            if (chunkObject == null)
                 return new ChunkObjectHandling(false, false, null);
             
             if (chunkObject.IsChildOfAnotherChunkObject)
@@ -265,9 +265,9 @@ namespace Gumball
                 return new ChunkObjectHandling(false, false, null);
             }
             
-            if (chunkObject.IgnoreAtRuntime)
+            if (chunkObject.IgnoreAtRuntime || !chunkObject.gameObject.activeSelf || !chunkObject.enabled)
                 return new ChunkObjectHandling(true, false, null);
-            
+
             //check if there's at least 1 mesh renderer - otherwise just delete it - may have been removed after combining meshes
             bool nothingToRender = chunkObject.GetComponent<MeshRenderer>() == null && chunkObject.transform.GetComponentsInAllChildren<MeshRenderer>().Count == 0;
             if (nothingToRender)
@@ -298,30 +298,23 @@ namespace Gumball
                 return null;
             }
 
-            //update spline meshes in original chunk in case they haven't had a chunk to save
-            originalChunk.GetComponent<Chunk>().FindSplineMeshes();
-            
             //create runtime chunk
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            GameObject runtimeInstance = PrefabUtility.InstantiatePrefab(originalChunk) as GameObject;
-            GlobalLoggers.ChunkLogger.Log($"Took {stopwatch.Elapsed.ToPrettyString(true)} to instantiate {runtimeInstance.gameObject.name}");
+            GameObject runtimeInstance = Object.Instantiate(originalChunk);
             
             Chunk runtimeInstanceChunk = runtimeInstance.GetComponent<Chunk>();
             runtimeInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
 
-            //apply bezier object placers
-            foreach (BezierObjectPlacer bezierObjectPlacer in runtimeInstance.transform.GetComponentsInAllChildren<BezierObjectPlacer>())
-            {
-                bezierObjectPlacer.Apply();
-            }
-            
-            List<ChunkObject> chunkObjects = runtimeInstanceChunk.transform.GetComponentsInAllChildren<ChunkObject>();
-            
+            List<ChunkObject> chunkObjectsInPrefab = originalChunk.transform.GetComponentsInAllChildren<ChunkObject>();
+            List<ChunkObject> chunkObjectsInInstance = runtimeInstance.transform.GetComponentsInAllChildren<ChunkObject>();
+
             //check to remove any chunk objects
-            foreach (ChunkObject chunkObject in chunkObjects)
+            for (int index = 0; index < chunkObjectsInPrefab.Count; index++)
             {
-                if (GetChunkObjectHandling(chunkObject).CanDestroy)
-                    Object.DestroyImmediate(chunkObject.gameObject);
+                ChunkObject chunkObjectInPrefab = chunkObjectsInPrefab[index];
+                ChunkObject chunkObjectInInstance = chunkObjectsInInstance[index];
+
+                if (GetChunkObjectHandling(chunkObjectInPrefab).CanDestroy)
+                    Object.DestroyImmediate(chunkObjectInInstance.gameObject);
             }
 
             //need to reattach the meshes as the references get lost:
@@ -385,36 +378,34 @@ namespace Gumball
             return entry.address;
         }
 
-        public static Dictionary<string, List<ChunkObjectData>> CreateChunkObjectData(GameObject originalChunkPrefab, Chunk chunkInstance)
+        public static Dictionary<string, List<ChunkObjectData>> CreateChunkObjectData(GameObject chunkPrefab, Chunk chunkInstance)
         {
             Dictionary<string, List<ChunkObjectData>> chunkObjectData = new();
             
-            //apply bezier object placers
-            foreach (BezierObjectPlacer bezierObjectPlacer in chunkInstance.transform.GetComponentsInAllChildren<BezierObjectPlacer>())
-            {
-                bezierObjectPlacer.Apply();
-            }
-
             //find all chunk objects and save the data
-            List<ChunkObject> chunkObjects = chunkInstance.transform.GetComponentsInAllChildren<ChunkObject>();
-            
-            foreach (ChunkObject chunkObject in chunkObjects)
+            List<ChunkObject> chunkObjectsFromPrefab = chunkPrefab.transform.GetComponentsInAllChildren<ChunkObject>();
+            List<ChunkObject> chunkObjectsFromInstance = chunkInstance.transform.GetComponentsInAllChildren<ChunkObject>();
+
+            for (int index = 0; index < chunkObjectsFromPrefab.Count; index++)
             {
-                ChunkObjectHandling chunkObjectHandling = GetChunkObjectHandling(chunkObject);
+                ChunkObject chunkObjectFromPrefab = chunkObjectsFromPrefab[index];
+                ChunkObject chunkObjectFromInstance = chunkObjectsFromInstance[index];
+                
+                ChunkObjectHandling chunkObjectHandling = GetChunkObjectHandling(chunkObjectFromPrefab);
                 if (!chunkObjectHandling.CanSaveData)
                     continue;
-             
+
                 //make sure chunk objects have updated (eg. applied grounded, distance from road spline)
-                chunkObject.UpdatePosition();
-                
+                chunkObjectFromInstance.UpdatePosition();
+
                 string assetKey = chunkObjectHandling.AssetKey;
-                
+
                 List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
-                ChunkObjectData data = new ChunkObjectData(originalChunkPrefab.GetComponent<Chunk>(), chunkObject);
+                ChunkObjectData data = new ChunkObjectData(chunkInstance, chunkObjectFromInstance);
                 chunkObjectList.Add(data);
                 chunkObjectData[assetKey] = chunkObjectList;
             }
-            
+
             return chunkObjectData;
         }
 #endif
