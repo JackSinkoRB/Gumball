@@ -186,4 +186,21 @@ public class GenericDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISeria
     // IEnumerable
     public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => dict.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => dict.GetEnumerator();
+    
+    /// <summary>
+    /// Converts a standard Dictionary into a GenericDictionary.
+    /// </summary>
+    /// <param name="dictionary">The dictionary to convert.</param>
+    /// <returns>A new GenericDictionary containing the same key-value pairs.</returns>
+    public static GenericDictionary<TKey, TValue> FromDictionary(Dictionary<TKey, TValue> dictionary)
+    {
+        GenericDictionary<TKey, TValue> genericDictionary = new GenericDictionary<TKey, TValue>();
+
+        foreach (KeyValuePair<TKey, TValue> keyValuePair in dictionary)
+        {
+            genericDictionary.Add(keyValuePair.Key, keyValuePair.Value);
+        }
+
+        return genericDictionary;
+    }
 }

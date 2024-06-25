@@ -15,6 +15,24 @@ namespace Gumball
     public static class GameObjectUtils
     {
 
+        /// <summary>
+        /// Checks if the transform has the component T enabled, or if any of the children have it enabled.
+        /// </summary>
+        public static bool HasActiveComponentsInChildren<T>(this GameObject gameObject)
+        {
+            T self = gameObject.GetComponent<T>();
+            if (self != null)
+                return true;
+
+            foreach (T child in gameObject.transform.GetComponentsInAllChildren<T>())
+            {
+                if (child != null)
+                    return true;
+            }
+
+            return false;
+        }
+        
 #if UNITY_EDITOR
 
         /// <summary>

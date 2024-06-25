@@ -381,6 +381,9 @@ namespace Gumball
             //check to blend
             foreach (ChunkObject chunkObject in chunkObjects)
             {
+                if (!chunkObject.isActiveAndEnabled)
+                    continue;
+                
                 if (desiredOffsets.ContainsKey(chunkObject) || !chunkObject.CanFlattenTerrain || chunkObject.FlattenTerrainBlendDistance <= 0)
                     continue;
                 

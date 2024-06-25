@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using Random = UnityEngine.Random;
 
 namespace Gumball
 {
@@ -20,7 +21,10 @@ namespace Gumball
         public AssetReferenceGameObject AssetReference => assetReference;
         public PositionAndRotation StartingPosition => startingPosition;
         public bool CanCrossMiddle => canCrossMiddle;
-        public float RacingLineImprecisionMaxDistance => racingLineImprecisionMaxDistance;
-
+        
+        public float GetRandomRacingLineImprecision()
+        {
+            return Random.Range(-racingLineImprecisionMaxDistance, racingLineImprecisionMaxDistance);
+        }
     }
 }

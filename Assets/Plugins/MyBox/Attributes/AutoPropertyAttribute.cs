@@ -117,12 +117,14 @@ namespace MyBox.Internal
 
 		static AutoPropertyHandler()
 		{
-			// this event is for GameObjects in the project.
-			MyEditorEvents.OnSave += CheckAssets;
-			MyEditorEvents.BeforePlaymode += CheckAssets;
-			// this event is for prefabs saved in edit mode.
-			PrefabStage.prefabSaved += CheckComponentsInPrefab;
-			PrefabStage.prefabStageOpened += stage => CheckComponentsInPrefab(stage.prefabContentsRoot);
+			// - takes too much time - disabled
+			
+			// // this event is for GameObjects in the project.
+			// MyEditorEvents.OnSave += CheckAssets;
+			// MyEditorEvents.BeforePlaymode += CheckAssets;
+			// // this event is for prefabs saved in edit mode.
+			// PrefabStage.prefabSaved += CheckComponentsInPrefab;
+			// PrefabStage.prefabStageOpened += stage => CheckComponentsInPrefab(stage.prefabContentsRoot);
 		}
 
 		private static void CheckAssets()

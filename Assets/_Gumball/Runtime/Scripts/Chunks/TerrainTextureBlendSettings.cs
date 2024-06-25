@@ -11,10 +11,6 @@ namespace Gumball
     public class TerrainTextureBlendSettings
     {
         
-        private static readonly Color lightColor = new(0, 0, 0, 1);
-        private static readonly Color objectSurroundingColor = new(0, 0, 1, 0);
-        private static readonly Color slopeColor = new(0, 1, 0, 0);
-        
         [Header("Object surrounding texture")]
         [Tooltip("The distance around chunk objects to show the 'object surrrounding texture' at full strength.")]
         [SerializeField] private float objectSurroundingRadius = 5;
@@ -31,6 +27,11 @@ namespace Gumball
 
         public Color[] GetVertexColors(Chunk chunk, Vector3[] vertexPositions, Transform terrainTransform, Mesh mesh)
         {
+            //force update the physics system for the chunk object raycasts in case objects have moved
+            Physics.SyncTransforms();
+            
+            PhysicsScene scene = chunk.gameObject.scene.GetPhysicsScene();
+            
             //calculate the automatic vertex colours
             Color[] vertexColors = new Color[vertexPositions.Length];
             for (int i = 0; i < vertexPositions.Length; i++)
@@ -55,7 +56,7 @@ namespace Gumball
                 //raycast upwards from vertex point (add 10,000 to start at top) to see if it's overlapping
                 const int maxChunkObjectsPerPosition = 15;
                 RaycastHit[] hits = new RaycastHit[maxChunkObjectsPerPosition];
-                int numberOfHits = chunk.gameObject.scene.GetPhysicsScene().Raycast(vertexPositionWorld.OffsetY(10000), Vector3.down, hits, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkObject));
+                int numberOfHits = scene.Raycast(vertexPositionWorld.OffsetY(10000), Vector3.down, hits, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkObject));
                 for (int count = 0; count < numberOfHits; count++)
                 {
                     RaycastHit hit = hits[count];

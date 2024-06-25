@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using Dreamteck.Splines;
 using JBooth.VertexPainterPro;
 using MyBox;
@@ -37,13 +36,13 @@ namespace Gumball
 
                 if (firstChunk == null || firstChunk.ChunkMeshData == null || firstChunk.ChunkMeshData.Mesh == null)
                 {
-                    Debug.LogError($"There's an issue with the chunk '{firstChunk.gameObject.name}'. Does the mesh need to be rebaked?");
+                    Debug.LogError($"There's an issue with the chunk '{firstChunk.gameObject.name}'. Does the terrain need to be rebaked?");
                     return;
                 }
                 
                 if (lastChunk == null || lastChunk.ChunkMeshData == null || lastChunk.ChunkMeshData.Mesh == null)
                 {
-                    Debug.LogError($"There's an issue with the chunk '{lastChunk.gameObject.name}'. Does the mesh need to be rebaked?");
+                    Debug.LogError($"There's an issue with the chunk '{lastChunk.gameObject.name}'. Does the terrain need to be rebaked?");
                     return;
                 }
                 
