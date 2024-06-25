@@ -586,6 +586,18 @@ namespace Gumball
             currentCustomLoadedChunks.Remove(chunkData);
             chunksWaitingToBeAccessible.Remove(chunkData);
         }
+
+        public Chunk GetNextChunk(Chunk currentChunk)
+        {
+            int currentIndex = GetMapIndexOfLoadedChunk(currentChunk);
+            int nextIndex = currentIndex + 1;
+            LoadedChunkData? nextChunk = GetLoadedChunkDataByMapIndex(nextIndex);
+            
+            if (!nextChunk.HasValue)
+                return null; //chunk hasn't loaded or is the end of the map
+
+            return nextChunk.Value.Chunk;
+        }
         
     }
 }
