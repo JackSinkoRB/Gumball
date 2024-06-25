@@ -845,23 +845,24 @@ namespace Gumball
 
         private void UpdateRacingLineOffsetInCurrentChunk()
         {
-            if (lastKnownChunkForRacingLineOffset == CurrentChunk)
-                return;
-            
-            if (currentRacingLine == null)
+            if (lastKnownChunkForRacingLineOffset != CurrentChunk || lastKnownRacingLineForRacingLineOffset != currentRacingLine)
             {
-                //keep the current offset if there's no racing line
-                float distance = CurrentChunk.SplineSampleCollection.GetOffsetFromSpline(transform.position);
-                SetRacingLineOffset(distance);
+                if (currentRacingLine == null)
+                {
+                    //keep the current offset if there's no racing line
+                    float distance = CurrentChunk.SplineSampleCollection.GetOffsetFromSpline(transform.position);
+                    SetRacingLineOffset(distance);
+                }
+                else
+                {
+                    //if using racing line, set the imprecision range
+                    float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this) ? GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision() : 0;
+                    SetRacingLineOffset(distance);
+                }
+
+                lastKnownChunkForRacingLineOffset = CurrentChunk;
+                lastKnownRacingLineForRacingLineOffset = currentRacingLine;
             }
-            else
-            {
-                //if using racing line, set the imprecision range
-                float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision();
-                SetRacingLineOffset(distance);
-            }
-            
-            lastKnownChunkForRacingLineOffset = CurrentChunk;
         }
         
         private void UpdateDrag()
