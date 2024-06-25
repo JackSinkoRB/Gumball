@@ -57,7 +57,6 @@ namespace Gumball
                 const int maxChunkObjectsPerPosition = 15;
                 RaycastHit[] hits = new RaycastHit[maxChunkObjectsPerPosition];
                 int numberOfHits = scene.Raycast(vertexPositionWorld.OffsetY(10000), Vector3.down, hits, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkObject));
-                Debug.DrawRay(vertexPositionWorld.OffsetY(50), Vector3.down * 100, numberOfHits > 0 ? Color.green : Color.red, 15);
                 for (int count = 0; count < numberOfHits; count++)
                 {
                     RaycastHit hit = hits[count];

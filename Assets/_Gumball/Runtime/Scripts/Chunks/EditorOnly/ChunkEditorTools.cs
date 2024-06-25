@@ -5,6 +5,7 @@ using Dreamteck.Splines;
 using JBooth.VertexPainterPro;
 using MyBox;
 #if UNITY_EDITOR
+using UnityEditor.SceneManagement;
 using System.IO;
 using Gumball.Editor;
 using UnityEditor;
@@ -129,6 +130,22 @@ namespace Gumball
         {
             CheckToUpdateMeshesImmediately();
             CheckIfTerrainIsRaycastable();
+            
+            EditorApplication.delayCall -= CheckToBakeMeshesIfPrefabMode;
+            EditorApplication.delayCall += CheckToBakeMeshesIfPrefabMode;
+        }
+
+        private void CheckToBakeMeshesIfPrefabMode()
+        {
+            try
+            {
+                if (PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject)
+                    CheckToBakeMeshes();
+            }
+            catch (MissingReferenceException)
+            {
+                //safely ignore - prefab may have closed
+            }
         }
 
         /// <summary>
