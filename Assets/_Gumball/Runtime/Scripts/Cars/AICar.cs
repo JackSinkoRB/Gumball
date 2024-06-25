@@ -737,6 +737,16 @@ namespace Gumball
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
                 Vector3 startOfRacingLine = racingLine.SplineSamples[0].position;
+                
+                //check if blocked
+                Vector3 frontOfCar = transform.TransformPoint(frontOfCarPosition);
+                Vector3 direction = Vector3.Normalize(startOfRacingLine - frontOfCar);
+                int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Barrier));
+                Debug.DrawRay(frontOfCar, direction * Vector3.Distance(frontOfCar, startOfRacingLine), hits > 0 ? Color.red : Color.blue);
+                bool isBlocked = hits > 0;
+                if (isBlocked)
+                    continue;
+                    
                 int startOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(startOfRacingLine).Item1;
                 if (closestSampleIndexToPlayer >= startOfRacingLineSampleIndex)
                     continue;
