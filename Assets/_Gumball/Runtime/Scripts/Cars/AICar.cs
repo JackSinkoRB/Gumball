@@ -274,6 +274,7 @@ namespace Gumball
         private const float predictedPositionReactionTime = 0.65f;
         
         private Chunk lastKnownChunkForRacingLineOffset;
+        private CustomDrivingPath lastKnownRacingLineForRacingLineOffset;
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[10];
 
         [Header("Value modification")]
@@ -725,6 +726,8 @@ namespace Gumball
             }
         }
 
+        private readonly RaycastHit[] racingLineBlockedTemp = new RaycastHit[1];
+        
         private void UpdateTargetPositionWithAvoidance()
         {
             //check if there's a racing line with interpolation distance in current or next chunk
@@ -732,10 +735,13 @@ namespace Gumball
             CustomDrivingPath nearestRacingLine = null;
             float nearestDistanceSqr = Mathf.Infinity;
             
-            //get the splines in the current chunk
+            //get the racing lines in the current chunk
             int closestSampleIndexToPlayer = CurrentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
+                if (racingLine.SplineSamples == null || racingLine.SplineSamples.Length == 0)
+                    continue;
+                
                 Vector3 startOfRacingLine = racingLine.SplineSamples[0].position;
                 
                 //check if blocked
@@ -759,17 +765,33 @@ namespace Gumball
                 }
             }
 
-            //get the splines in the next chunk
+            //get the racing lines in the next chunk
             Chunk nextChunk = ChunkManager.Instance.GetNextChunk(CurrentChunk);
-            foreach (CustomDrivingPath racingLine in nextChunk.TrafficManager.RacingLines)
+            if (nextChunk != null)
             {
-                Vector3 startOfRacingLine = racingLine.SplineSamples[0].position;
-                float distanceSqr = Vector2.SqrMagnitude(startOfRacingLine.FlattenAsVector2() - transform.position.FlattenAsVector2());
-
-                if (distanceSqr < nearestDistanceSqr)
+                foreach (CustomDrivingPath racingLine in nextChunk.TrafficManager.RacingLines)
                 {
-                    nearestDistanceSqr = distanceSqr;
-                    nearestRacingLine = racingLine;
+                    if (racingLine.SplineSamples == null || racingLine.SplineSamples.Length == 0)
+                        continue;
+                    
+                    Vector3 startOfRacingLine = racingLine.SplineSamples[0].position;
+                    
+                    //check if blocked
+                    Vector3 frontOfCar = transform.TransformPoint(frontOfCarPosition);
+                    Vector3 direction = Vector3.Normalize(startOfRacingLine - frontOfCar);
+                    int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Barrier));
+                    Debug.DrawRay(frontOfCar, direction * Vector3.Distance(frontOfCar, startOfRacingLine), hits > 0 ? Color.red : Color.blue);
+                    bool isBlocked = hits > 0;
+                    if (isBlocked)
+                        continue;
+                    
+                    float distanceSqr = Vector2.SqrMagnitude(startOfRacingLine.FlattenAsVector2() - transform.position.FlattenAsVector2());
+
+                    if (distanceSqr < nearestDistanceSqr)
+                    {
+                        nearestDistanceSqr = distanceSqr;
+                        nearestRacingLine = racingLine;
+                    }
                 }
             }
 
@@ -814,12 +836,19 @@ namespace Gumball
             
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
-                currentRacingLine = racingLine;
                 UpdateAutoDriveTargetPosition();
-
+                
                 if (targetPos == null)
                     continue;
-                    
+                
+                Vector3 endOfRacingLine = racingLine.SplineSamples[^1].position;
+                int endOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(endOfRacingLine).Item1;
+                int targetPositionSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(targetPosition).Item1;
+                bool hasPassedRacingLine = targetPositionSampleIndex >= endOfRacingLineSampleIndex;
+                if (hasPassedRacingLine)
+                    continue;
+                
+                currentRacingLine = racingLine;
                 TryAvoidObstacles();
 
                 if (!allDirectionsAreBlocked)
@@ -832,12 +861,19 @@ namespace Gumball
             //all directions were blocked, try again but this time without cars blocking
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
-                currentRacingLine = racingLine;
                 UpdateAutoDriveTargetPosition();
                 
                 if (targetPos == null)
                     continue;
                 
+                Vector3 endOfRacingLine = racingLine.SplineSamples[^1].position;
+                int endOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(endOfRacingLine).Item1;
+                int targetPositionSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(targetPosition).Item1;
+                bool hasPassedRacingLine = targetPositionSampleIndex >= endOfRacingLineSampleIndex;
+                if (hasPassedRacingLine)
+                    continue;
+                
+                currentRacingLine = racingLine;
                 TryAvoidObstacles(false);
 
                 if (!allDirectionsAreBlocked)
