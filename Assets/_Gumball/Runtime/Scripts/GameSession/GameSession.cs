@@ -39,10 +39,18 @@ namespace Gumball
 
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
+        [SerializeField] protected float raceDistanceMetres;
+
+        [Header("Racers")]
         [SerializeField] private RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
-        [SerializeField] protected float raceDistanceMetres;
         [SerializeField] private float racersStartingSpeed = 70;
+
+        [Header("Traffic")]
+        [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the list below.", MessageType.Info, true)]
+        [Tooltip("If enabled, each frame it will check to spawn traffic to keep the desired traffic density designated in the chunks.")]
+        [SerializeField] private bool trafficIsProcedural = true;
+        [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficLanePosition trafficSpawnPositions;
 
         [Header("Rewards")]
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
@@ -67,9 +75,18 @@ namespace Gumball
         public CorePart[] CorePartRewards => corePartRewards;
         public SubPart[] SubPartRewards => subPartRewards;
         public bool HasStarted { get; private set; }
+        public bool TrafficIsProcedural => trafficIsProcedural;
+        public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
+        public ChunkMap CurrentChunkMap => currentChunkMapCached;
         
         public abstract string GetName();
 
+        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
+        public void RandomiseTraffic()
+        {
+            
+        }
+        
         public void StartSession()
         {
             GameSessionManager.Instance.SetCurrentSession(this);
