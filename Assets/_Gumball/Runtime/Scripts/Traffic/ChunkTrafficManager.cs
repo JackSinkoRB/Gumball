@@ -169,7 +169,7 @@ namespace Gumball
                 lanesForward = new[] { new TrafficLane(0) };
         }
         
-        private LaneDirection? ChooseRandomLaneDirection()
+        public LaneDirection? ChooseRandomLaneDirection()
         {
             if (HasBackwardLanes && HasForwardLanes)
                 return Random.Range(0, 2) == 0 ? LaneDirection.FORWARD : LaneDirection.BACKWARD;

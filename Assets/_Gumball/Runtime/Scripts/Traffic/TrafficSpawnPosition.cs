@@ -18,5 +18,12 @@ namespace Gumball
         public ChunkTrafficManager.LaneDirection LaneDirection => laneDirection;
         public int LaneIndex => laneIndex;
 
+        public TrafficSpawnPosition(float distanceFromMapStart, ChunkTrafficManager.LaneDirection laneDirection, int laneIndex)
+        {
+            this.distanceFromMapStart = distanceFromMapStart;
+            this.laneDirection = laneDirection;
+            this.laneIndex = laneIndex;
+        }
+
     }
 }

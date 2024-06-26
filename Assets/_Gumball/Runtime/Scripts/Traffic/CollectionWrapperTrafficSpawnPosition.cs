@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Gumball
 {
     [Serializable]
-    public class CollectionWrapperTrafficLanePosition : CollectionWrapper<TrafficSpawnPosition>
+    public class CollectionWrapperTrafficSpawnPosition : CollectionWrapper<TrafficSpawnPosition>
     {
         
     }

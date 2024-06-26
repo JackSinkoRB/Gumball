@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Debug = UnityEngine.Debug;
+using Random = UnityEngine.Random;
 
 namespace Gumball
 {
@@ -50,7 +51,7 @@ namespace Gumball
         [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the list below.", MessageType.Info, true)]
         [Tooltip("If enabled, each frame it will check to spawn traffic to keep the desired traffic density designated in the chunks.")]
         [SerializeField] private bool trafficIsProcedural = true;
-        [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficLanePosition trafficSpawnPositions;
+        [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
@@ -81,12 +82,6 @@ namespace Gumball
         
         public abstract string GetName();
 
-        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
-        public void RandomiseTraffic()
-        {
-            
-        }
-        
         public void StartSession()
         {
             GameSessionManager.Instance.SetCurrentSession(this);
@@ -119,6 +114,49 @@ namespace Gumball
             TrackSubPartRewards();
         }
 
+#if UNITY_EDITOR
+        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
+        public void RandomiseTraffic()
+        {
+            List<TrafficSpawnPosition> spawnPositions = new();
+
+            ChunkMap chunkMap = chunkMapAssetReference.editorAsset;
+            
+            float chunkStartDistance = 0;
+            for (int chunkIndex = 0; chunkIndex < chunkMap.ChunkReferences.Length; chunkIndex++)
+            {
+                AssetReferenceGameObject chunkReference = chunkMap.ChunkReferences[chunkIndex];
+                Chunk chunk = chunkReference.editorAsset.gameObject.GetComponent<Chunk>();
+                
+                float chunkEndDistance = chunkStartDistance + chunk.SplineLengthCached;
+                
+                int desiredCars = chunk.TrafficManager.NumberOfCarsToSpawn;
+
+                for (int count = 0; count < desiredCars; count++)
+                {
+                    float randomDistance = Random.Range(chunkStartDistance, chunkEndDistance);
+                    
+                    ChunkTrafficManager.LaneDirection? randomDirection = chunk.TrafficManager.ChooseRandomLaneDirection();
+                    if (randomDirection == null)
+                    {
+                        Debug.LogError($"Could not spawn traffic car at index {count} because there are no lanes in {chunk.name}.");
+                        continue;
+                    }
+                    
+                    TrafficLane[] lanes = randomDirection == ChunkTrafficManager.LaneDirection.FORWARD ? chunk.TrafficManager.LanesForward : chunk.TrafficManager.LanesBackward;
+                    int randomLaneIndex = Random.Range(0, lanes.Length);
+                    
+                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex));
+                }
+
+                chunkStartDistance += chunk.SplineLengthCached;
+            }
+
+            trafficSpawnPositions = new CollectionWrapperTrafficSpawnPosition();
+            trafficSpawnPositions.Value = spawnPositions.ToArray();
+        }
+#endif
+        
         private void TrackCorePartRewards()
         {
             foreach (CorePart corePart in corePartRewards)
