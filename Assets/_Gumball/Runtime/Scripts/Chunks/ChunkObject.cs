@@ -29,6 +29,9 @@ namespace Gumball
         [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
         [HelpBox("The object is not loading separately, which can contribute to lag when the chunk is loaded.", MessageType.Warning, true)]
         [SerializeField, ConditionalField(nameof(ignoreAtRuntime), true)] private bool loadSeparately = true;
+
+        [Tooltip("Is the object hidden when the high terrain LOD is hidden?")]
+        [SerializeField] private bool hideWhenFarAway;
         
         [Space(10)]
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
@@ -69,6 +72,7 @@ namespace Gumball
         
         public bool LoadSeparately => loadSeparately;
         public bool IgnoreAtRuntime => ignoreAtRuntime;
+        public bool HideWhenFarAway => hideWhenFarAway;
         public bool AlwaysGrounded => alwaysGrounded;
         public Chunk Chunk => chunkBelongsTo;
         
