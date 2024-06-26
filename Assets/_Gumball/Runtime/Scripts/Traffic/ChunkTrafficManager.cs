@@ -93,6 +93,9 @@ namespace Gumball
         /// </summary>
         private void InitialiseCars()
         {
+            if (GameSessionManager.Instance.CurrentSession == null)
+                return;
+            
             if (GameSessionManager.Instance.CurrentSession.TrafficIsProcedural)
             {
                 for (int count = 0; count < NumberOfCarsToSpawn; count++)
