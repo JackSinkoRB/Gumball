@@ -323,10 +323,11 @@ namespace Gumball
                 string path = GameObjectUtils.GetPathToPrefabAsset(gameObject);
                 if (path.IsNullOrEmpty())
                     return;
-                
-                GameObject prefab = PrefabUtility.LoadPrefabContents(path);
 
-                SplineMesh[] splineMeshesInPrefab = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+
+                SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
                 foreach (SplineMesh splineMeshInPrefab in splineMeshesInPrefab)
                 {
                     if (!splineMeshInPrefab.HasComponent<UniqueIDAssigner>())
@@ -335,10 +336,9 @@ namespace Gumball
                         id.Initialise();
                     }
                 }
-
-                EditorUtility.SetDirty(prefab);
-                PrefabUtility.SaveAsPrefabAsset(prefab, path);
-                PrefabUtility.UnloadPrefabContents(prefab);
+                
+                PrefabUtility.SaveAsPrefabAsset(prefabInstance, path);
+                DestroyImmediate(prefabInstance);
             }
         }
 #endif
