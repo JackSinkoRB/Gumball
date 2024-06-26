@@ -238,7 +238,7 @@ namespace Gumball
             float[] chunkLengths = GameSessionManager.Instance.CurrentSession.CurrentChunkMap.ChunkLengthsCalculated;
             if (chunkLengths == null || chunkLengths.Length == 0)
             {
-                Debug.LogError($"The chunk map {GameSessionManager.Instance.CurrentSession.CurrentChunkMap.name.Replace("(Clone)", "")} hasn't calculate the chunk lengths. You need to rebuild the map data for manual spawn positions to work.");
+                Debug.LogError($"The chunk map {GameSessionManager.Instance.CurrentSession.CurrentChunkMap.name.Replace("(Clone)", "")} hasn't calculated the chunk lengths. You need to rebuild the map data for manual traffic spawn positions to work.");
                 return spawnPositionsInChunk;
             }
             
