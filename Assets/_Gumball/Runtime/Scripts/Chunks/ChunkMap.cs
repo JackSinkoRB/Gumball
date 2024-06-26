@@ -74,6 +74,24 @@ namespace Gumball
                 GlobalLoggers.ChunkLogger.Log($"Setup = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
                 
+                //ensure meshes are baked (only check each chunk once)
+                HashSet<string> chunksBaked = new HashSet<string>();
+                for (int index = 0; index < chunkInstances.Length; index++)
+                {
+                    AssetReferenceGameObject chunkReference = chunkReferences[index];
+                    
+                    if (chunksBaked.Contains(chunkReference.editorAsset.name))
+                        continue;
+
+                    chunksBaked.Add(chunkReference.editorAsset.name);
+                    
+                    chunkReference.editorAsset.GetComponent<Chunk>().FindSplineMeshes();
+                    ChunkUtils.BakeMeshes(chunkReference.editorAsset.GetComponent<Chunk>(), false, saveAssets: false);
+                }
+                
+                GlobalLoggers.ChunkLogger.Log($"Baking meshes = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
+                
                 //instantiate chunks
                 for (int index = 0; index < chunkReferences.Length; index++)
                 {
@@ -93,26 +111,7 @@ namespace Gumball
                 
                 GlobalLoggers.ChunkLogger.Log($"Instantiate chunks = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
-                
-                //ensure meshes are baked (only check each chunk once)
-                HashSet<string> chunksBaked = new HashSet<string>();
-                for (int index = 0; index < chunkInstances.Length; index++)
-                {
-                    AssetReferenceGameObject chunkReference = chunkReferences[index];
-                    Chunk chunkInstance = chunkInstances[index];
-                    
-                    if (chunksBaked.Contains(chunkReference.editorAsset.name))
-                        continue;
 
-                    chunksBaked.Add(chunkReference.editorAsset.name);
-                    
-                    chunkInstance.FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(chunkInstance, false, saveAssets: false);
-                }
-                
-                GlobalLoggers.ChunkLogger.Log($"Baking meshes = {stopwatch.Elapsed.ToPrettyString(true)}");
-                stopwatch.Restart();
-                
                 HashSet<string> runtimeChunksCreated = new HashSet<string>();
                 for (int index = 0; index < chunkReferences.Length; index++)
                 {
