@@ -302,7 +302,44 @@ namespace Gumball
         public void FindSplineMeshes()
         {
             splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+
+            EnsureSplineMeshHaveUniqueID();
+
             GlobalLoggers.ChunkLogger.Log($"Found {splineMeshes.Length} spline meshes under {gameObject.name}.");
+        }
+
+        private void EnsureSplineMeshHaveUniqueID()
+        {
+            bool prefabNeedsChanging = false;
+            
+            foreach (SplineMesh splineMesh in splineMeshes)
+            {
+                if (!splineMesh.HasComponent<UniqueIDAssigner>())
+                    prefabNeedsChanging = true;
+            }
+
+            if (prefabNeedsChanging)
+            {
+                string path = GameObjectUtils.GetPathToPrefabAsset(gameObject);
+                if (path.IsNullOrEmpty())
+                    return;
+
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+
+                SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+                foreach (SplineMesh splineMeshInPrefab in splineMeshesInPrefab)
+                {
+                    if (!splineMeshInPrefab.HasComponent<UniqueIDAssigner>())
+                    {
+                        UniqueIDAssigner id = splineMeshInPrefab.gameObject.AddComponent<UniqueIDAssigner>();
+                        id.Initialise();
+                    }
+                }
+                
+                PrefabUtility.SaveAsPrefabAsset(prefabInstance, path);
+                DestroyImmediate(prefabInstance);
+            }
         }
 #endif
 
