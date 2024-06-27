@@ -75,7 +75,9 @@ namespace Gumball.Runtime.Tests
             {
                 AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCars[index];
                 AICar car = carAsset.editorAsset.GetComponent<AICar>();
-
+                if (car == null)
+                    continue;
+                
                 PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(car.gameObject);
                 GameObject rootPrefab = PrefabUtility.GetCorrespondingObjectFromSource(car.gameObject);
 
@@ -107,6 +109,26 @@ namespace Gumball.Runtime.Tests
             }
             
             Assert.IsTrue(carsMissingCameraPositions.IsNullOrEmpty(), $"Cars missing camera positions: {carsMissingCameraPositions}");
+        }
+        
+        [Test]
+        [Order(5)]
+        public void NoAvatarsExistInCars()
+        {
+            string carsWithAvatars = "";
+            for (int index = 0; index < WarehouseManager.Instance.AllCars.Count; index++)
+            {
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCars[index];
+                AICar car = carAsset.editorAsset.GetComponent<AICar>();
+                if (car == null)
+                    continue;
+
+                List<Avatar> avatarsInCar = car.transform.GetComponentsInAllChildren<Avatar>();
+                if (avatarsInCar.Count > 0)
+                    carsWithAvatars += $"\n - {car.name} (index {index})";
+            }
+            
+            Assert.IsTrue(carsWithAvatars.IsNullOrEmpty(), $"Cars with avatars: {carsWithAvatars}");
         }
         
     }
