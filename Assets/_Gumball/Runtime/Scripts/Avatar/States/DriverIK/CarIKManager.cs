@@ -27,9 +27,11 @@ namespace Gumball
         
         private void OnEnable()
         {
-            DeleteTestAvatar();
+            if (avatar != null)
+                DestroyImmediate(avatar.gameObject);
         }
 
+#if UNITY_EDITOR
         [ButtonMethod]
         public void SpawnDriverAvatar()
         {
@@ -75,6 +77,7 @@ namespace Gumball
             avatarDrivingState.SetupEditMode(currentCar, isDriver);
             avatarDrivingState.OnSetCurrent();
         }
-
+#endif
+        
     }
 }
