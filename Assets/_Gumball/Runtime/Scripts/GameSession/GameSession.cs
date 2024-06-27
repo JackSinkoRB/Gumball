@@ -434,14 +434,15 @@ namespace Gumball
                 }
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
-                if (handle.Result == null)
-                {
-                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
-                    continue;
-                }
-                
+
                 handle.Completed += h =>
                 {
+                    if (handle.Result == null)
+                    {
+                        Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                        return;
+                    }
+                    
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
 
