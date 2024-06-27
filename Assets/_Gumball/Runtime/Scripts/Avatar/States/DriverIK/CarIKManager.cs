@@ -17,20 +17,64 @@ namespace Gumball
     public class CarIKManager : MonoBehaviour
     {
 
-        //todo: button to spawn male drivers (and set up with the IK points)
+        [SerializeField] private IKPositionsInCar driver;
+        [SerializeField] private IKPositionsInCar passenger;
+
+        public IKPositionsInCar Driver => driver;
+        public IKPositionsInCar Passenger => passenger;
+
+        [SerializeField, HideInInspector] private Avatar avatar;
         
-        [Header("Driver")]
-        [SerializeField] private IKPositionsInCar maleDriver;
-        [SerializeField] private IKPositionsInCar femaleDriver;
+        private void OnEnable()
+        {
+            DeleteTestAvatar();
+        }
 
-        [Header("Passenger")]
-        [SerializeField] private IKPositionsInCar malePassenger;
-        [SerializeField] private IKPositionsInCar femalePassenger;
+        [ButtonMethod]
+        public void SpawnDriverAvatar()
+        {
+            SpawnAvatarEditMode(true);
+        }
 
-        public IKPositionsInCar MaleDriver => maleDriver;
-        public IKPositionsInCar FemaleDriver => femaleDriver;
-        public IKPositionsInCar MalePassenger => malePassenger;
-        public IKPositionsInCar FemalePassenger => femalePassenger;
+        [ButtonMethod]
+        public void SpawnPassengerAvatar()
+        {
+            SpawnAvatarEditMode(false);
+        }
+
+        [ButtonMethod]
+        public void DeleteTestAvatar()
+        {
+            if (avatar != null)
+                DestroyImmediate(avatar.gameObject);
+        }
+
+        private void SpawnAvatarEditMode(bool isDriver)
+        {
+            DeleteTestAvatar();
+            
+            //spawn the base
+            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(AvatarManager.Instance.AvatarPrefab);
+            handle.WaitForCompletion();
+            
+            avatar = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), transform).GetComponent<Avatar>();
+            avatar.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            
+            //spawn the body
+            AsyncOperationHandle<GameObject> bodyHandle = Addressables.LoadAssetAsync<GameObject>(avatar.MaleBodyReference);
+            bodyHandle.WaitForCompletion();
+
+            AvatarBody newBody = Instantiate(bodyHandle.Result, avatar.transform).GetComponent<AvatarBody>();
+            newBody.GetComponent<AddressableReleaseOnDestroy>(true).Init(bodyHandle);
+            
+            avatar.ForceSetBodyType(newBody);
+            
+            //setup the driving state
+            AICar currentCar = transform.GetComponentInAllParents<AICar>();
+            AvatarDrivingState avatarDrivingState = avatar.transform.GetComponentsInAllChildren<AvatarDrivingState>()[0];
+            avatarDrivingState.SetupEditMode(currentCar, isDriver);
+            avatarDrivingState.OnSetCurrent();
+        }
 
     }
 }

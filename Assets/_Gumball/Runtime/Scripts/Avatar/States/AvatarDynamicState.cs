@@ -7,8 +7,8 @@ namespace Gumball
     public class AvatarDynamicState : DynamicState
     {
 
-        protected new AvatarStateManager manager => base.manager as AvatarStateManager;
-        protected Avatar avatar => manager.Avatar;
+        protected AvatarStateManager avatarStateManager => Manager as AvatarStateManager;
+        protected Avatar avatar => avatarStateManager.Avatar;
 
     }
 }

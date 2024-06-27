@@ -48,6 +48,8 @@ namespace Gumball
         public AvatarBody CurrentMaleBody { get; private set; }
         public AvatarBody CurrentFemaleBody { get; private set; }
 
+        public AssetReferenceGameObject MaleBodyReference => maleBodyReference;
+        
         public void Initialise(AvatarBodyType defaultBodyType)
         {
             this.defaultBodyType = defaultBodyType;
@@ -79,6 +81,17 @@ namespace Gumball
             
             newBody.Initialise(this);
         }
+        
+#if UNITY_EDITOR
+        public void ForceSetBodyType(AvatarBody body)
+        {
+            currentBodyType = body.BodyType;
+            if (currentBodyType == AvatarBodyType.MALE)
+                CurrentMaleBody = body;
+            if (currentBodyType == AvatarBodyType.FEMALE)
+                CurrentFemaleBody = body;
+        }        
+#endif
 
         public void ChangeBodyType(AvatarBodyType newBodyType)
         {
