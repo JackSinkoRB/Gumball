@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using MyBox;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.TestTools;
@@ -64,6 +65,30 @@ namespace Gumball.Runtime.Tests
         
         [Test]
         [Order(3)]
+        public void AllCarsAreVariantOfTemplate()
+        {
+            GameObject carTemplatePrefab = TestManager.Instance.CarTemplatePrefab;
+            Assert.IsNotNull(carTemplatePrefab);
+            
+            string carsThatArentUsingTemplate = "";
+            for (int index = 0; index < WarehouseManager.Instance.AllCars.Count; index++)
+            {
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCars[index];
+                AICar car = carAsset.editorAsset.GetComponent<AICar>();
+
+                PrefabAssetType prefabAssetType = PrefabUtility.GetPrefabAssetType(car.gameObject);
+                GameObject rootPrefab = PrefabUtility.GetCorrespondingObjectFromSource(car.gameObject);
+
+                bool isUsingTemplate = prefabAssetType == PrefabAssetType.Variant && rootPrefab == carTemplatePrefab;
+                if (!isUsingTemplate)
+                    carsThatArentUsingTemplate += $"\n - {car.name} (index {index})";
+            }
+            
+            Assert.IsTrue(carsThatArentUsingTemplate.IsNullOrEmpty(), $"Cars that aren't using the car template prefab: {carsThatArentUsingTemplate}");
+        }
+        
+        [Test]
+        [Order(4)]
         public void AllCarsHaveCameraPositionsAssigned()
         {
             string carsMissingCameraPositions = "";
