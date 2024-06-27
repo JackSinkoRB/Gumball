@@ -591,6 +591,11 @@ namespace Gumball
         {
             onCollisionEnter?.Invoke(collision);
             
+            //limit the y velocity to prevent car getting flung into the air and keep it more solid on the ground
+            const float maxVerticalVelocity = 0.1f;
+            if (Rigidbody.velocity.y > maxVerticalVelocity)
+                Rigidbody.velocity = Rigidbody.velocity.SetY(maxVerticalVelocity);
+            
             AICar car = collision.gameObject.GetComponent<AICar>();
             if (car == null)
                 return;
