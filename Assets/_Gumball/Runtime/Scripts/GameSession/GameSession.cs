@@ -426,8 +426,20 @@ namespace Gumball
             for (int index = 0; index < racerData.Length; index++)
             {
                 RacerSessionData data = racerData[index];
+
+                if (data.AssetReference == null)
+                {
+                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                    continue;
+                }
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
+                if (handle.Result == null)
+                {
+                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                    continue;
+                }
+                
                 handle.Completed += h =>
                 {
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
