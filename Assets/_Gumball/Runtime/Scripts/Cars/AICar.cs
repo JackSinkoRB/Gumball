@@ -1783,10 +1783,13 @@ namespace Gumball
                     if (!useRacingLine)
                     {
                         TrafficLane closestLane = GetClosestLaneToCurrentLane(chunkToUse);
-                        SetCurrentLane(closestLane);
-                        
-                        if (closestLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE)
-                            sampleCollection = closestLane.Path.SampleCollection;
+                        if (closestLane != null) //may be null if there are no lanes in the chunk in the current direction
+                        {
+                            SetCurrentLane(closestLane);
+
+                            if (closestLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE)
+                                sampleCollection = closestLane.Path.SampleCollection;
+                        }
                     }
                     
                     //reset the values
