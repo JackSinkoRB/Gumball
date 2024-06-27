@@ -1430,6 +1430,7 @@ namespace Gumball
                 
                 //set the steer amount
                 Transform steerPivot = frontWheelMesh.transform.parent;
+                steerPivot.transform.position = wheelPosition;
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
             }
 
