@@ -107,7 +107,8 @@ namespace Gumball
                 }
             }
             
-            AssetDatabase.SaveAssets();
+            if (!EditorApplication.isUpdating)
+                AssetDatabase.SaveAssets();
         }
 
     }
