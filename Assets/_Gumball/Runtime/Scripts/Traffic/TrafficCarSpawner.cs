@@ -37,21 +37,13 @@ namespace Gumball
 #endif
         
         private const float timeBetweenSpawnChecks = 1;
-        
-        [SerializeField] private AICar[] trafficCarPrefabs;
 
         private float lastSpawnCheckTime;
         
         private float timeSinceLastSpawnCheck => Time.realtimeSinceStartup - lastSpawnCheckTime;
 
-        public AICar GetRandomCarPrefab()
+        public AICar SpawnCar(Vector3 position, Quaternion rotation, AICar prefabToUse)
         {
-            return trafficCarPrefabs.GetRandom();
-        }
-        
-        public AICar SpawnCar(Vector3 position, Quaternion rotation, AICar prefab = null)
-        {
-            AICar prefabToUse = prefab == null ? GetRandomCarPrefab() : prefab;
             AICar randomCarVariant = prefabToUse.gameObject.GetSpareOrCreate<AICar>(transform, position, rotation);
             
             randomCarVariant.InitialiseAsTraffic();

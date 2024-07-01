@@ -53,6 +53,9 @@ namespace Gumball
         [SerializeField] private bool trafficIsProcedural = true;
         [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
         [SerializeField] private int trafficDensity = 100;
+        [SerializeField] private AICar[] trafficBikes;
+        [SerializeField] private AICar[] trafficCars;
+        [SerializeField] private AICar[] trafficTrucks;
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
@@ -80,6 +83,9 @@ namespace Gumball
         public bool HasStarted { get; private set; }
         public bool TrafficIsProcedural => trafficIsProcedural;
         public int TrafficDensity => trafficDensity;
+        public AICar[] TrafficBikes => trafficBikes;
+        public AICar[] TrafficCars => trafficCars;
+        public AICar[] TrafficTrucks => trafficTrucks;
         public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
         
