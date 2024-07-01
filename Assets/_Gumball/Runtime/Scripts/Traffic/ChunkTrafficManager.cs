@@ -35,9 +35,7 @@ namespace Gumball
         [Tooltip("The chunks racing lines. Can have none, one or multiple. If multiple, the first lines will take priority.")]
         [SerializeField] private CustomDrivingPath[] racingLines;
         [SerializeField] private float speedLimitKmh = 40;
-        [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
-        [SerializeField] private int density = 100;
-        
+
         [Header("Traffic lanes")]
         [SerializeField] private TrafficLane[] lanesForward;
         [SerializeField] private TrafficLane[] lanesBackward;
@@ -60,7 +58,7 @@ namespace Gumball
         public TrafficLane[] LanesBackward => lanesBackward;
         public Chunk Chunk => chunk;
         public float SpeedLimitKmh => speedLimitKmh;
-        public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLengthCached / density);
+        public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLengthCached / GameSessionManager.Instance.CurrentSession.TrafficDensity);
         public CustomDrivingPath[] RacingLines => racingLines;
         public bool HasBackwardLanes => lanesBackward != null && lanesBackward.Length > 0;
         public bool HasForwardLanes => lanesForward != null && lanesForward.Length > 0;

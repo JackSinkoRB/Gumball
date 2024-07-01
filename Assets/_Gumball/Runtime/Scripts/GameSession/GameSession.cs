@@ -51,6 +51,8 @@ namespace Gumball
         [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the list below.", MessageType.Info, true)]
         [Tooltip("If enabled, each frame it will check to spawn traffic to keep the desired traffic density designated in the chunks.")]
         [SerializeField] private bool trafficIsProcedural = true;
+        [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
+        [SerializeField] private int trafficDensity = 100;
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
@@ -77,6 +79,7 @@ namespace Gumball
         public SubPart[] SubPartRewards => subPartRewards;
         public bool HasStarted { get; private set; }
         public bool TrafficIsProcedural => trafficIsProcedural;
+        public int TrafficDensity => trafficDensity;
         public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
         
