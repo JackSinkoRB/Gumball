@@ -60,9 +60,6 @@ namespace CC
 
             //Load character
             LoadFromJSON();
-
-            //Initialize all UI elements (sliders, pickers etc)
-            if (UI != null) UI.GetComponent<CC_UI_Util>().Initialize(this);
         }
 
         #endregion Initialize script
