@@ -37,6 +37,7 @@ namespace Gumball
         /// </summary>
         public bool IsSlidingForwards => isSlidingForward;
 
+#if UNITY_EDITOR
         private void LateUpdate()
         {
             isGrounded = wheelCollider.isGrounded;
@@ -53,6 +54,7 @@ namespace Gumball
             isSlidingSideways = Mathf.Abs(wheelHit.sidewaysSlip / wheelCollider.sidewaysFriction.extremumSlip) > 1;
             isSlidingForward = Mathf.Abs(wheelHit.forwardSlip / wheelCollider.forwardFriction.extremumSlip) > 1;
         }
+#endif
 
     }
 }

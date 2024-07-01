@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine;
 namespace Gumball
 {
     /// <summary>
-    /// To be applied to a
+    /// To be applied to a IK position for additional settings.
     /// </summary>
     public class IKPositionData : MonoBehaviour
     {
@@ -14,6 +15,6 @@ namespace Gumball
         [SerializeField] private bool endBoneCopiesRotation;
         
         public bool EndBoneCopiesRotation => endBoneCopiesRotation;
-        
+
     }
 }

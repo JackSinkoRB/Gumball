@@ -68,8 +68,12 @@ namespace Gumball
 
         private void LateUpdate()
         {
-            if (timeSinceLastSpawnCheck >= timeBetweenSpawnChecks)
+            if (GameSessionManager.Instance.CurrentSession != null
+                && GameSessionManager.Instance.CurrentSession.TrafficIsProcedural
+                && timeSinceLastSpawnCheck >= timeBetweenSpawnChecks)
+            {
                 CheckToSpawnCars();
+            }
         }
 
         private void CheckToSpawnCars()

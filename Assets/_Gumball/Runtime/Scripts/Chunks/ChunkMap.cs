@@ -30,6 +30,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private string[] runtimeChunkAssetKeys;
         [SerializeField, ReadOnly] private List<int> chunksWithCustomLoadDistance = new();
         [SerializeField, ReadOnly] private ChunkMapData[] chunkData;
+        [SerializeField, ReadOnly] private float[] chunkLengthsCalculated;
         [Tooltip("The sum of all the chunk spline lengths.")]
         [SerializeField, ReadOnly] private float totalLengthMetres;
 
@@ -42,6 +43,7 @@ namespace Gumball
         public List<int> ChunksWithCustomLoadDistance => chunksWithCustomLoadDistance;
         public float ChunkLoadDistance => chunkLoadDistance;
         public float TotalLengthMetres => totalLengthMetres;
+        public float[] ChunkLengthsCalculated => chunkLengthsCalculated;
 
         public ChunkMapData GetChunkData(int index)
         {
@@ -67,8 +69,27 @@ namespace Gumball
                 chunksWithCustomLoadDistance.Clear();
                 chunkData = new ChunkMapData[chunkReferences.Length];
                 runtimeChunkAssetKeys = new string[chunkReferences.Length];
+                chunkLengthsCalculated = new float[chunkReferences.Length];
                 
                 GlobalLoggers.ChunkLogger.Log($"Setup = {stopwatch.Elapsed.ToPrettyString(true)}");
+                stopwatch.Restart();
+                
+                //ensure meshes are baked (only check each chunk once)
+                HashSet<string> chunksBaked = new HashSet<string>();
+                for (int index = 0; index < chunkInstances.Length; index++)
+                {
+                    AssetReferenceGameObject chunkReference = chunkReferences[index];
+                    
+                    if (chunksBaked.Contains(chunkReference.editorAsset.name))
+                        continue;
+
+                    chunksBaked.Add(chunkReference.editorAsset.name);
+                    
+                    chunkReference.editorAsset.GetComponent<Chunk>().FindSplineMeshes();
+                    ChunkUtils.BakeMeshes(chunkReference.editorAsset.GetComponent<Chunk>(), false, saveAssets: false);
+                }
+                
+                GlobalLoggers.ChunkLogger.Log($"Baking meshes = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
                 
                 //instantiate chunks
@@ -85,30 +106,12 @@ namespace Gumball
                         chunksWithCustomLoadDistance.Add(index);
 
                     totalLengthMetres += chunk.SplineLengthCached;
+                    chunkLengthsCalculated[index] = totalLengthMetres;
                 }
                 
                 GlobalLoggers.ChunkLogger.Log($"Instantiate chunks = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
-                
-                //ensure meshes are baked (only check each chunk once)
-                HashSet<string> chunksBaked = new HashSet<string>();
-                for (int index = 0; index < chunkInstances.Length; index++)
-                {
-                    AssetReferenceGameObject chunkReference = chunkReferences[index];
-                    Chunk chunkInstance = chunkInstances[index];
-                    
-                    if (chunksBaked.Contains(chunkReference.editorAsset.name))
-                        continue;
 
-                    chunksBaked.Add(chunkReference.editorAsset.name);
-                    
-                    chunkInstance.FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(chunkInstance, false, saveAssets: false);
-                }
-                
-                GlobalLoggers.ChunkLogger.Log($"Baking meshes = {stopwatch.Elapsed.ToPrettyString(true)}");
-                stopwatch.Restart();
-                
                 HashSet<string> runtimeChunksCreated = new HashSet<string>();
                 for (int index = 0; index < chunkReferences.Length; index++)
                 {
