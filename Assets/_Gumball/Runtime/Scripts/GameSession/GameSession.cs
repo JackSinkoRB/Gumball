@@ -53,9 +53,9 @@ namespace Gumball
         [SerializeField] private bool trafficIsProcedural = true;
         [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
         [SerializeField] private int trafficDensity = 100;
-        [SerializeField] private AICar[] trafficBikes;
-        [SerializeField] private AICar[] trafficCars;
-        [SerializeField] private AICar[] trafficTrucks;
+        [SerializeField] private AssetReferenceGameObject[] trafficBikes;
+        [SerializeField] private AssetReferenceGameObject[] trafficCars;
+        [SerializeField] private AssetReferenceGameObject[] trafficTrucks;
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
@@ -69,6 +69,7 @@ namespace Gumball
         private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         private ChunkMap currentChunkMapCached;
         private Coroutine sessionCoroutine;
+        private Dictionary<AssetReferenceGameObject, AsyncOperationHandle> trafficPrefabHandles = new();
         
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
 
@@ -83,12 +84,12 @@ namespace Gumball
         public bool HasStarted { get; private set; }
         public bool TrafficIsProcedural => trafficIsProcedural;
         public int TrafficDensity => trafficDensity;
-        public AICar[] TrafficBikes => trafficBikes;
-        public AICar[] TrafficCars => trafficCars;
-        public AICar[] TrafficTrucks => trafficTrucks;
+        public AssetReferenceGameObject[] TrafficBikes => trafficBikes;
+        public AssetReferenceGameObject[] TrafficCars => trafficCars;
+        public AssetReferenceGameObject[] TrafficTrucks => trafficTrucks;
         public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
-        
+
         public abstract string GetName();
 
         public void StartSession()
@@ -261,11 +262,22 @@ namespace Gumball
                 CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
             
             OnSessionEnd();
-            
-            GameSessionManager.Instance.SetCurrentSession(null);
+        }
 
+        public void UnloadSession()
+        {
+            GameSessionManager.Instance.SetCurrentSession(null);
+            
             if (chunkMapHandle.IsValid())
                 Addressables.Release(chunkMapHandle);
+            
+            Destroy(currentChunkMapCached);
+            trafficPrefabHandles.Clear(); //remove the traffic car references so they can be unloaded 
+        }
+        
+        public AsyncOperationHandle GetTrafficVehicleHandle(AssetReferenceGameObject assetReference)
+        {
+            return trafficPrefabHandles[assetReference];
         }
 
         protected virtual void OnSessionEnd()
@@ -318,6 +330,7 @@ namespace Gumball
 
             yield return LoadChunkMap();
             yield return LoadScene();
+            yield return LoadTrafficVehicles();
             yield return SetupSession();
             
             GlobalLoggers.LoadingLogger.Log("Loading session...");
@@ -472,6 +485,40 @@ namespace Gumball
             {
                 racer.SetSpeed(racersStartingSpeed);
             }
+        }
+
+        private IEnumerator LoadTrafficVehicles()
+        {
+            trafficPrefabHandles.Clear();
+            
+            AssetReferenceGameObject[] allVehicles = trafficBikes
+                .Concat(trafficCars)
+                .Concat(trafficTrucks)
+                .ToArray();
+            
+            foreach (AssetReferenceGameObject assetReference in allVehicles)
+            {
+                if (assetReference == null)
+                {
+                    Debug.LogError($"There is a null traffic vehicle in {name}. Skipping it.");
+                    continue;
+                }
+
+                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
+                trafficPrefabHandles[assetReference] = handle;
+                
+                handle.Completed += h =>
+                {
+                    if (handle.Result == null)
+                    {
+                        trafficPrefabHandles.Remove(assetReference);
+                        Debug.LogError($"There is a null traffic vehicle in {name}. Skipping it.");
+                    }
+                };
+            }
+            
+            //wait until all cars have loaded
+            yield return new WaitUntil(() => trafficPrefabHandles.Values.AreAllComplete());
         }
 
         private void InitialiseRaceMode()

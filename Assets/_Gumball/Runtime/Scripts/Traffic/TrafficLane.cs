@@ -67,7 +67,7 @@ namespace Gumball
             this.path = path;
         }
         
-        public AICar GetVehicleToSpawn()
+        public GameObject GetVehicleToSpawn()
         {
             GameSession session = GameSessionManager.Instance.CurrentSession;
 
@@ -89,9 +89,9 @@ namespace Gumball
 
             return randomType switch
             {
-                VehicleType.BIKE => session.TrafficBikes.GetRandom(),
-                VehicleType.CAR => session.TrafficCars.GetRandom(),
-                VehicleType.TRUCK => session.TrafficTrucks.GetRandom(),
+                VehicleType.BIKE => session.GetTrafficVehicleHandle(session.TrafficBikes.GetRandom()).Result as GameObject,
+                VehicleType.CAR => session.GetTrafficVehicleHandle(session.TrafficCars.GetRandom()).Result as GameObject,
+                VehicleType.TRUCK => session.GetTrafficVehicleHandle(session.TrafficTrucks.GetRandom()).Result as GameObject,
                 _ => null
             };
         }

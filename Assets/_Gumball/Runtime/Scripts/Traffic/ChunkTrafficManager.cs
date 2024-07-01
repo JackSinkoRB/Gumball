@@ -189,12 +189,16 @@ namespace Gumball
                 ? GetLanePosition(lane.Path.SplineSamples.GetRandom(), additionalOffset, direction)
                 : GetLanePosition(chunk.SplineSamples.GetRandom(), lane.DistanceFromCenter + additionalOffset, direction);
 
-            AICar randomVariant = lane.GetVehicleToSpawn();
-            if (randomVariant == null || !CanSpawnCarAtPosition(randomVariant, lanePosition.Position, lanePosition.Rotation))
+            GameObject randomVariantPrefab = lane.GetVehicleToSpawn();
+            if (randomVariantPrefab == null)
+                return false;
+
+            AICar carToSpawn = randomVariantPrefab.GetComponent<AICar>();
+            if (!CanSpawnCarAtPosition(carToSpawn, lanePosition.Position, lanePosition.Rotation))
                 return false;
             
             //spawn an instance of the car and intialise
-            AICar car = TrafficCarSpawner.Instance.SpawnCar(lanePosition.Position, lanePosition.Rotation, randomVariant);
+            AICar car = TrafficCarSpawner.Instance.SpawnCar(lanePosition.Position, lanePosition.Rotation, carToSpawn);
             
             car.SetCurrentLane(lane, direction, additionalOffset);
             car.SetSpeed(car.DesiredSpeed);
