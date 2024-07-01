@@ -136,8 +136,9 @@ namespace Gumball
         [Tooltip("An offset may be temporarily applied to the racing line, for example at the start of races.")]
         [ConditionalField(nameof(autoDrive), nameof(useRacingLine)), SerializeField, ReadOnly] private float racingLineOffset;
         
-        private Tween currentRacingLineOffsetTween;
-
+        private float racingLineStartOffset;
+        private float racingLineDesiredOffset;
+        
         [Header("Drag")]
         [SerializeField] private float dragWhenAccelerating;
         [SerializeField] private float dragWhenIdle = 0.15f;
@@ -273,6 +274,7 @@ namespace Gumball
         private const float predictedPositionReactionTime = 0.65f;
         
         private Chunk lastKnownChunkForRacingLineOffset;
+        private CustomDrivingPath lastKnownRacingLineForRacingLineOffset;
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[10];
 
         [Header("Value modification")]
@@ -589,6 +591,11 @@ namespace Gumball
         {
             onCollisionEnter?.Invoke(collision);
             
+            //limit the y velocity to prevent car getting flung into the air and keep it more solid on the ground
+            const float maxVerticalVelocity = 0.1f;
+            if (Rigidbody.velocity.y > maxVerticalVelocity)
+                Rigidbody.velocity = Rigidbody.velocity.SetY(maxVerticalVelocity);
+            
             AICar car = collision.gameObject.GetComponent<AICar>();
             if (car == null)
                 return;
@@ -642,17 +649,9 @@ namespace Gumball
             Rigidbody.isKinematic = false;
         }
 
-        public void SetRacingLineOffset(float offset, float interpolationDuration = 0)
+        public void SetRacingLineOffset(float offset)
         {
-            currentRacingLineOffsetTween?.Kill();
-
-            if (interpolationDuration == 0)
-            {
-                racingLineOffset = offset;
-                return;
-            }
-
-            currentRacingLineOffsetTween = DOTween.To(() => racingLineOffset, x => racingLineOffset = x, offset, interpolationDuration); 
+            racingLineOffset = offset;
         }
 
         private void Move()
@@ -700,104 +699,221 @@ namespace Gumball
 
         private void CalculateTargetPosition()
         {
-            if (useObstacleAvoidance && autoDrive)
-            {
-                UpdateTargetPositionWithAvoidance();
-                CheckToUpdateRacingLineOffset();
-            }
-            else
-                UpdateTargetPosition();
-        }
-        
-        private void UpdateTargetPosition()
-        {
             if (autoDrive)
             {
-                targetPos = GetPositionAhead(GetMovementTargetDistance());
-                if (targetPos == null)
-                {
-                    Despawn();
-                    return;
-                }
-
-                targetPosition = targetPos.Value.Item2;
-
-                //check to add racing line offset
-                if (useRacingLine)
-                {
-                    Vector3 racingLineOffsetVector = transform.right * racingLineOffset;
-                    targetPosition += racingLineOffsetVector;
-                }
+                if (useObstacleAvoidance)
+                    UpdateTargetPositionWithAvoidance();
+                else
+                    UpdateAutoDriveTargetPosition();
             }
             else
             {
                 targetPosition = transform.position + (transform.forward * 100);
             }
         }
+        
+        private void UpdateAutoDriveTargetPosition()
+        {
+            targetPos = GetPositionAhead(GetMovementTargetDistance());
+            if (targetPos == null)
+            {
+                Despawn();
+                return;
+            }
 
+            targetPosition = targetPos.Value.Item2;
+
+            //check to add racing line offset
+            if (useRacingLine)
+            {
+                Vector3 racingLineOffsetVector = transform.right * racingLineOffset;
+                targetPosition += racingLineOffsetVector;
+            }
+        }
+
+        private readonly RaycastHit[] racingLineBlockedTemp = new RaycastHit[1];
+        
         private void UpdateTargetPositionWithAvoidance()
         {
+            //check if there's a racing line with interpolation distance in current or next chunk
+            
+            CustomDrivingPath nearestRacingLine = null;
+            float nearestDistanceSqr = Mathf.Infinity;
+            
+            //get the racing lines in the current chunk
+            int closestSampleIndexToPlayer = CurrentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
+            foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
+            {
+                if (racingLine.SplineSamples == null || racingLine.SplineSamples.Length == 0)
+                    continue;
+                
+                Vector3 startOfRacingLine = racingLine.SplineSamples[0].position;
+                
+                //check if blocked
+                Vector3 frontOfCar = transform.TransformPoint(frontOfCarPosition);
+                Vector3 direction = Vector3.Normalize(startOfRacingLine - frontOfCar);
+                int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Barrier));
+                Debug.DrawRay(frontOfCar, direction * Vector3.Distance(frontOfCar, startOfRacingLine), hits > 0 ? Color.red : Color.blue);
+                bool isBlocked = hits > 0;
+                if (isBlocked)
+                    continue;
+                    
+                int startOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(startOfRacingLine).Item1;
+                if (closestSampleIndexToPlayer >= startOfRacingLineSampleIndex)
+                    continue;
+                
+                float distanceSqr = Vector2.SqrMagnitude(startOfRacingLine.FlattenAsVector2() - transform.position.FlattenAsVector2());
+                if (distanceSqr < nearestDistanceSqr)
+                {
+                    nearestDistanceSqr = distanceSqr;
+                    nearestRacingLine = racingLine;
+                }
+            }
+
+            //get the racing lines in the next chunk
+            Chunk nextChunk = ChunkManager.Instance.GetNextChunk(CurrentChunk);
+            if (nextChunk != null)
+            {
+                foreach (CustomDrivingPath racingLine in nextChunk.TrafficManager.RacingLines)
+                {
+                    if (racingLine.SplineSamples == null || racingLine.SplineSamples.Length == 0)
+                        continue;
+                    
+                    Vector3 startOfRacingLine = racingLine.SplineSamples[0].position;
+                    
+                    //check if blocked
+                    Vector3 frontOfCar = transform.TransformPoint(frontOfCarPosition);
+                    Vector3 direction = Vector3.Normalize(startOfRacingLine - frontOfCar);
+                    int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Barrier));
+                    Debug.DrawRay(frontOfCar, direction * Vector3.Distance(frontOfCar, startOfRacingLine), hits > 0 ? Color.red : Color.blue);
+                    bool isBlocked = hits > 0;
+                    if (isBlocked)
+                        continue;
+                    
+                    float distanceSqr = Vector2.SqrMagnitude(startOfRacingLine.FlattenAsVector2() - transform.position.FlattenAsVector2());
+
+                    if (distanceSqr < nearestDistanceSqr)
+                    {
+                        nearestDistanceSqr = distanceSqr;
+                        nearestRacingLine = racingLine;
+                    }
+                }
+            }
+
+            if (nearestRacingLine != null)
+            {
+                float interpolationDistanceSqr = nearestRacingLine.RacerInterpolationDistance * nearestRacingLine.RacerInterpolationDistance;
+                if (nearestDistanceSqr < interpolationDistanceSqr)
+                {
+                    //is within interpolation distance
+                    
+                    float percent = 1 - Mathf.Clamp01(nearestDistanceSqr / interpolationDistanceSqr);
+                    if (currentRacingLine != nearestRacingLine)
+                    {
+                        //set start offset
+                        racingLineStartOffset = CurrentChunk.SplineSampleCollection.GetOffsetFromSpline(transform.position);
+                        //set desired offset
+                        racingLineDesiredOffset = GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision();
+                    }
+                    
+                    currentRacingLine = nearestRacingLine;
+                    UpdateAutoDriveTargetPosition();
+                    TryAvoidObstacles();
+                    
+                    //interpolate the racing line offset
+                    float offset = Mathf.Lerp(racingLineStartOffset, racingLineDesiredOffset, percent);
+                    SetRacingLineOffset(offset);
+                    
+                    return;
+                }
+            }
+            
+            //no racing line to interpolate with - check if it's currently on a racing line instead
+            
             if (CurrentChunk.TrafficManager.RacingLines.Length == 0)
             {
                 currentRacingLine = null;
-                UpdateTargetPosition();
+                UpdateAutoDriveTargetPosition();
                 TryAvoidObstacles();
+                UpdateRacingLineOffsetInCurrentChunk();
                 return;
             }
             
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
-                currentRacingLine = racingLine;
-                UpdateTargetPosition();
-
+                UpdateAutoDriveTargetPosition();
+                
                 if (targetPos == null)
                     continue;
-                    
+                
+                Vector3 endOfRacingLine = racingLine.SplineSamples[^1].position;
+                int endOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(endOfRacingLine).Item1;
+                int targetPositionSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(targetPosition).Item1;
+                bool hasPassedRacingLine = targetPositionSampleIndex >= endOfRacingLineSampleIndex;
+                if (hasPassedRacingLine)
+                    continue;
+                
+                currentRacingLine = racingLine;
                 TryAvoidObstacles();
-                    
+
                 if (!allDirectionsAreBlocked)
+                {
+                    UpdateRacingLineOffsetInCurrentChunk();
                     return;
+                }
             }
 
             //all directions were blocked, try again but this time without cars blocking
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
-                currentRacingLine = racingLine;
-                UpdateTargetPosition();
+                UpdateAutoDriveTargetPosition();
                 
                 if (targetPos == null)
                     continue;
                 
-                TryAvoidObstacles(false);
+                Vector3 endOfRacingLine = racingLine.SplineSamples[^1].position;
+                int endOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(endOfRacingLine).Item1;
+                int targetPositionSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(targetPosition).Item1;
+                bool hasPassedRacingLine = targetPositionSampleIndex >= endOfRacingLineSampleIndex;
+                if (hasPassedRacingLine)
+                    continue;
                 
+                currentRacingLine = racingLine;
+                TryAvoidObstacles(false);
+
                 if (!allDirectionsAreBlocked)
+                {
+                    UpdateRacingLineOffsetInCurrentChunk();
                     return;
+                }
             }
             
             currentRacingLine = null;
-            UpdateTargetPosition();
+            UpdateAutoDriveTargetPosition();
             TryAvoidObstacles();
+            UpdateRacingLineOffsetInCurrentChunk();
         }
-        
-        private void CheckToUpdateRacingLineOffset()
+
+        private void UpdateRacingLineOffsetInCurrentChunk()
         {
-            if (lastKnownChunkForRacingLineOffset == CurrentChunk)
-                return;
-            
-            if (currentRacingLine == null)
+            if (lastKnownChunkForRacingLineOffset != CurrentChunk || lastKnownRacingLineForRacingLineOffset != currentRacingLine)
             {
-                //keep the current offset if there's no racing line
-                float distance = CurrentChunk.SplineSampleCollection.GetOffsetFromSpline(transform.position);
-                SetRacingLineOffset(distance);
+                if (currentRacingLine == null)
+                {
+                    //keep the current offset if there's no racing line
+                    float distance = CurrentChunk.SplineSampleCollection.GetOffsetFromSpline(transform.position);
+                    SetRacingLineOffset(distance);
+                }
+                else
+                {
+                    //if using racing line, set the imprecision range
+                    float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this) ? GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision() : 0;
+                    SetRacingLineOffset(distance);
+                }
+
+                lastKnownChunkForRacingLineOffset = CurrentChunk;
+                lastKnownRacingLineForRacingLineOffset = currentRacingLine;
             }
-            else
-            {
-                //if using racing line, set the imprecision range
-                float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers[this].RacingLineImprecisionMaxDistance;
-                SetRacingLineOffset(Random.Range(-distance, distance));
-            }
-            
-            lastKnownChunkForRacingLineOffset = CurrentChunk;
         }
         
         private void UpdateDrag()
@@ -1319,6 +1435,7 @@ namespace Gumball
                 
                 //set the steer amount
                 Transform steerPivot = frontWheelMesh.transform.parent;
+                steerPivot.transform.position = wheelPosition;
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
             }
 
@@ -1672,10 +1789,13 @@ namespace Gumball
                     if (!useRacingLine)
                     {
                         TrafficLane closestLane = GetClosestLaneToCurrentLane(chunkToUse);
-                        SetCurrentLane(closestLane);
-                        
-                        if (closestLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE)
-                            sampleCollection = closestLane.Path.SampleCollection;
+                        if (closestLane != null) //may be null if there are no lanes in the chunk in the current direction
+                        {
+                            SetCurrentLane(closestLane);
+
+                            if (closestLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE)
+                                sampleCollection = closestLane.Path.SampleCollection;
+                        }
                     }
                     
                     //reset the values

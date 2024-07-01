@@ -122,6 +122,9 @@ namespace Gumball
 
         public void ApplyChanges()
         {
+            if (Mesh == null)
+                throw new NullReferenceException($"Terrain is missing its mesh on {chunk.gameObject.name}. The baked asset may have been lost. Try recreating the terrain.");
+
             Mesh meshToUse = Object.Instantiate(Mesh); //use a mesh copy so that we're not editing the actual shared mesh, and so that it can be undone in editor
 
             meshToUse.SetVertices(vertices);

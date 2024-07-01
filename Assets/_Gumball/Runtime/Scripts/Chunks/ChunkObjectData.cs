@@ -11,32 +11,26 @@ namespace Gumball
     public struct ChunkObjectData
     {
         
-        [SerializeField] private Vector3 positionRelativeToChunk;
+        [SerializeField] private bool hideWhenFarAway;
+        [SerializeField] private Vector3 positionRelativeToParent;
         [SerializeField] private Quaternion rotation;
         [SerializeField] private Vector3 scaleRelativeToChunk;
-        [SerializeField] private bool alwaysGrounded;
 
         public ChunkObjectData(Chunk chunkReference, ChunkObject chunkObject)
         {
-            positionRelativeToChunk = chunkReference.transform.InverseTransformPoint(chunkObject.transform.position);
+            hideWhenFarAway = chunkObject.HideWhenFarAway;
+            Transform desiredParent = hideWhenFarAway ? chunkReference.TerrainHighLOD.transform : chunkReference.transform;
+            positionRelativeToParent = desiredParent.InverseTransformPoint(chunkObject.transform.position);
             rotation = chunkObject.transform.rotation;
             scaleRelativeToChunk = GetScaleRelativeToChunk(chunkReference, chunkObject);
-            alwaysGrounded = chunkObject.AlwaysGrounded;
         }
 
         public GameObject LoadIntoChunk(AsyncOperationHandle<GameObject> handle, Chunk chunk)
         {
-            GameObject chunkObject = Object.Instantiate(handle.Result, chunk.transform);
-            chunkObject.transform.localPosition = positionRelativeToChunk;
+            GameObject chunkObject = Object.Instantiate(handle.Result, hideWhenFarAway ? chunk.TerrainHighLOD.transform : chunk.transform);
+            chunkObject.transform.localPosition = positionRelativeToParent;
             chunkObject.transform.localRotation = rotation;
             chunkObject.transform.localScale = scaleRelativeToChunk;
-            
-            if (alwaysGrounded)
-            {
-                bool groundedSuccessfully = ChunkUtils.GroundObject(chunkObject.transform);
-                if (!groundedSuccessfully)
-                    chunkObject.SetActive(false); //don't allow floating object
-            }
 
             chunkObject.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             return chunkObject;

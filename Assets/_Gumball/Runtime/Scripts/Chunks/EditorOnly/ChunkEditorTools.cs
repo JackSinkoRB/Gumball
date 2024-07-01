@@ -5,6 +5,7 @@ using Dreamteck.Splines;
 using JBooth.VertexPainterPro;
 using MyBox;
 #if UNITY_EDITOR
+using UnityEditor.SceneManagement;
 using System.IO;
 using Gumball.Editor;
 using UnityEditor;
@@ -25,7 +26,7 @@ namespace Gumball
             {
                 //rebake
                 newChunk.chunk.FindSplineMeshes();
-                ChunkUtils.BakeMeshes(newChunk.chunk);
+                ChunkUtils.BakeMeshes(newChunk.chunk, saveAssets: false);
             }
 
             //find the old chunk
@@ -39,10 +40,10 @@ namespace Gumball
                 {
                     //rebake
                     oldChunk.chunk.FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(oldChunk.chunk);
+                    ChunkUtils.BakeMeshes(oldChunk.chunk, saveAssets: false);
                     
                     //rebuild the runtime chunk
-                    ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, false);
+                    ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, saveAssetsOnComplete: false);
                 }
             }
             
@@ -63,14 +64,29 @@ namespace Gumball
         private float timeWhenUnityLastUpdated;
 
         private bool isRuntimeChunk => name.Contains(ChunkUtils.RuntimeChunkSuffix);
+
+        public static bool IsBakingMeshes;
         
         private void OnSavePrefab(string prefabName, string path)
         {
-            if (prefabName.Equals(gameObject.name) && !isRuntimeChunk)
-            {
-                chunk.FindSplineMeshes();
-                ChunkUtils.BakeMeshes(chunk);
-            }
+            if (!prefabName.Equals(gameObject.name))
+                return;
+            
+            CheckToBakeMeshes();
+        }
+
+        private void CheckToBakeMeshes()
+        {
+            if (IsBakingMeshes)
+                return;
+
+            if (isRuntimeChunk)
+                return;
+
+            IsBakingMeshes = true;
+            chunk.FindSplineMeshes();
+            ChunkUtils.BakeMeshes(chunk, false, true);
+            IsBakingMeshes = false;
         }
         
         private void OnEnable()
@@ -114,6 +130,22 @@ namespace Gumball
         {
             CheckToUpdateMeshesImmediately();
             CheckIfTerrainIsRaycastable();
+            
+            EditorApplication.delayCall -= CheckToBakeMeshesIfPrefabMode;
+            EditorApplication.delayCall += CheckToBakeMeshesIfPrefabMode;
+        }
+
+        private void CheckToBakeMeshesIfPrefabMode()
+        {
+            try
+            {
+                if (PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject)
+                    CheckToBakeMeshes();
+            }
+            catch (MissingReferenceException)
+            {
+                //safely ignore - prefab may have closed
+            }
         }
 
         /// <summary>
@@ -386,6 +418,10 @@ namespace Gumball
             DestroyImmediate(chunk.TerrainHighLOD);
             DestroyImmediate(chunk.TerrainLowLOD);
 
+            //need to ensure all the splinemesh are set up
+            chunk.FindSplineMeshes();
+            ChunkUtils.BakeMeshes(chunk, false, saveAssets: false);
+            
             chunk.SplineComputer.RebuildImmediate();
 
             RecreateTerrainLODs();

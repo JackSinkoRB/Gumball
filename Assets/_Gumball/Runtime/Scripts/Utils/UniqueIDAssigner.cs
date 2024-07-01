@@ -50,7 +50,7 @@ public class UniqueIDAssigner : MonoBehaviour
     {
         get
         {
-            if (uniqueID == null)
+            if (uniqueID.IsNullOrEmpty())
                 throw new NullReferenceException($"Object has not been generated an ID: {gameObject.name}");
             return uniqueID;
         }
@@ -64,6 +64,12 @@ public class UniqueIDAssigner : MonoBehaviour
 #if UNITY_EDITOR
     public delegate void OnAssignNewIDDelegate(UniqueIDAssigner uniqueIDAssigner, string oldID, string newID);
     public static event OnAssignNewIDDelegate onAssignNewID;
+    
+    public void Initialise()
+    {
+        if (uniqueID.IsNullOrEmpty())
+            GenerateNewID();
+    }
     
     private void Update()
     {
@@ -90,7 +96,7 @@ public class UniqueIDAssigner : MonoBehaviour
             GenerateNewID();
         }
 
-        if (!allIDs.ContainsKey(uniqueID) || allIDs[uniqueID] == null)
+        if (uniqueID != null && (!allIDs.ContainsKey(uniqueID) || allIDs[uniqueID] == null))
             allIDs[uniqueID] = this;
     }
     

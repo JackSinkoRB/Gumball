@@ -19,7 +19,9 @@ namespace Gumball
         [Header("Setup check")]
         [HelpBox("The object is not a valid prefab asset (ending in .prefab). ChunkObject can only be added to prefabs. Therefore this object will not show at runtime.", MessageType.Error, true)]
         [SerializeField, ReadOnly] private bool isPrefab;
-
+        [HelpBox("This ChunkObject will not function properly because it is a child of another ChunkObject.", MessageType.Error, true, true)]
+        [SerializeField, ReadOnly] private bool isChildOfAnotherChunkObject;
+        
         [Header("Settings")]
         [Tooltip("Should the object be ignored from the chunk at runtime? eg. if it is just to modify the terrain etc.")]
         [SerializeField] private bool ignoreAtRuntime;
@@ -27,6 +29,9 @@ namespace Gumball
         [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
         [HelpBox("The object is not loading separately, which can contribute to lag when the chunk is loaded.", MessageType.Warning, true)]
         [SerializeField, ConditionalField(nameof(ignoreAtRuntime), true)] private bool loadSeparately = true;
+
+        [Tooltip("Is the object hidden when the high terrain LOD is hidden?")]
+        [SerializeField] private bool hideWhenFarAway;
         
         [Space(10)]
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
@@ -67,6 +72,7 @@ namespace Gumball
         
         public bool LoadSeparately => loadSeparately;
         public bool IgnoreAtRuntime => ignoreAtRuntime;
+        public bool HideWhenFarAway => hideWhenFarAway;
         public bool AlwaysGrounded => alwaysGrounded;
         public Chunk Chunk => chunkBelongsTo;
         
@@ -95,6 +101,11 @@ namespace Gumball
 
                 return false;
             }
+        }
+
+        public void SetChunkBelongsTo(Chunk chunk)
+        {
+            chunkBelongsTo = chunk;
         }
 
         private void Initialise()
@@ -142,6 +153,7 @@ namespace Gumball
                 CheckToSetColliderToFlattenTo();
 
                 isPrefab = GameObjectUtils.GetPathToPrefabAsset(gameObject) != null;
+                isChildOfAnotherChunkObject = IsChildOfAnotherChunkObject;
             }
         }
 
@@ -193,7 +205,7 @@ namespace Gumball
             transform.position = desiredPosition.SetY(transform.position.y);
         }
 
-        private void UpdatePosition()
+        public void UpdatePosition()
         {
             if (!gameObject.scene.IsValid())
                 return;

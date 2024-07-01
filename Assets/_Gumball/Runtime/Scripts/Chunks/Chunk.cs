@@ -119,9 +119,6 @@ namespace Gumball
         [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
         public SampleCollection SplineSampleCollection => splineSampleCollection;
 
-        [SerializedDictionary("AssetKey", "Data")]
-        public SerializedDictionary<string, List<ChunkObjectData>> ChunkObjectData = new();
-
         private const float secondsBetweenTerrainLODChecks = 1;
         private float timeOfLastLODCheck = -secondsBetweenTerrainLODChecks;
         private float timeSinceTerrainLODCheck => Time.realtimeSinceStartup - timeOfLastLODCheck;
@@ -167,12 +164,6 @@ namespace Gumball
         public void OnChunkUnload()
         {
             onChunkUnload?.Invoke();
-        }
-        
-        public void SetChunkObjectData(Dictionary<string, List<ChunkObjectData>> chunkObjectData)
-        {
-            ChunkObjectData = new SerializedDictionary<string, List<ChunkObjectData>>(chunkObjectData);
-            Debug.Log($"Setting {chunkObjectData.Keys.Count} chunk object data for {gameObject.name}");
         }
 
         public void SetMeshData(ChunkMeshData data)
@@ -311,7 +302,44 @@ namespace Gumball
         public void FindSplineMeshes()
         {
             splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+
+            EnsureSplineMeshHaveUniqueID();
+
             GlobalLoggers.ChunkLogger.Log($"Found {splineMeshes.Length} spline meshes under {gameObject.name}.");
+        }
+
+        private void EnsureSplineMeshHaveUniqueID()
+        {
+            bool prefabNeedsChanging = false;
+            
+            foreach (SplineMesh splineMesh in splineMeshes)
+            {
+                if (!splineMesh.HasComponent<UniqueIDAssigner>())
+                    prefabNeedsChanging = true;
+            }
+
+            if (prefabNeedsChanging)
+            {
+                string path = GameObjectUtils.GetPathToPrefabAsset(gameObject);
+                if (path.IsNullOrEmpty())
+                    return;
+
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+
+                SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+                foreach (SplineMesh splineMeshInPrefab in splineMeshesInPrefab)
+                {
+                    if (!splineMeshInPrefab.HasComponent<UniqueIDAssigner>())
+                    {
+                        UniqueIDAssigner id = splineMeshInPrefab.gameObject.AddComponent<UniqueIDAssigner>();
+                        id.Initialise();
+                    }
+                }
+                
+                PrefabUtility.SaveAsPrefabAsset(prefabInstance, path);
+                DestroyImmediate(prefabInstance);
+            }
         }
 #endif
 

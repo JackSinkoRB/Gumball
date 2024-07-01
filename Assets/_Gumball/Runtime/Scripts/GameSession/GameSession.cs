@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Debug = UnityEngine.Debug;
+using Random = UnityEngine.Random;
 
 namespace Gumball
 {
@@ -39,10 +40,18 @@ namespace Gumball
 
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
+        [SerializeField] protected float raceDistanceMetres;
+
+        [Header("Racers")]
         [SerializeField] private RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
-        [SerializeField] protected float raceDistanceMetres;
         [SerializeField] private float racersStartingSpeed = 70;
+
+        [Header("Traffic")]
+        [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the list below.", MessageType.Info, true)]
+        [Tooltip("If enabled, each frame it will check to spawn traffic to keep the desired traffic density designated in the chunks.")]
+        [SerializeField] private bool trafficIsProcedural = true;
+        [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
@@ -67,6 +76,9 @@ namespace Gumball
         public CorePart[] CorePartRewards => corePartRewards;
         public SubPart[] SubPartRewards => subPartRewards;
         public bool HasStarted { get; private set; }
+        public bool TrafficIsProcedural => trafficIsProcedural;
+        public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
+        public ChunkMap CurrentChunkMap => currentChunkMapCached;
         
         public abstract string GetName();
 
@@ -102,6 +114,49 @@ namespace Gumball
             TrackSubPartRewards();
         }
 
+#if UNITY_EDITOR
+        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
+        public void RandomiseTraffic()
+        {
+            List<TrafficSpawnPosition> spawnPositions = new();
+
+            ChunkMap chunkMap = chunkMapAssetReference.editorAsset;
+            
+            float chunkStartDistance = 0;
+            for (int chunkIndex = 0; chunkIndex < chunkMap.ChunkReferences.Length; chunkIndex++)
+            {
+                AssetReferenceGameObject chunkReference = chunkMap.ChunkReferences[chunkIndex];
+                Chunk chunk = chunkReference.editorAsset.gameObject.GetComponent<Chunk>();
+                
+                float chunkEndDistance = chunkStartDistance + chunk.SplineLengthCached;
+                
+                int desiredCars = chunk.TrafficManager.NumberOfCarsToSpawn;
+
+                for (int count = 0; count < desiredCars; count++)
+                {
+                    float randomDistance = Random.Range(chunkStartDistance, chunkEndDistance);
+                    
+                    ChunkTrafficManager.LaneDirection? randomDirection = chunk.TrafficManager.ChooseRandomLaneDirection();
+                    if (randomDirection == null)
+                    {
+                        Debug.LogError($"Could not spawn traffic car at index {count} because there are no lanes in {chunk.name}.");
+                        continue;
+                    }
+                    
+                    TrafficLane[] lanes = randomDirection == ChunkTrafficManager.LaneDirection.FORWARD ? chunk.TrafficManager.LanesForward : chunk.TrafficManager.LanesBackward;
+                    int randomLaneIndex = Random.Range(0, lanes.Length);
+                    
+                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex));
+                }
+
+                chunkStartDistance += chunk.SplineLengthCached;
+            }
+
+            trafficSpawnPositions = new CollectionWrapperTrafficSpawnPosition();
+            trafficSpawnPositions.Value = spawnPositions.ToArray();
+        }
+#endif
+        
         private void TrackCorePartRewards()
         {
             foreach (CorePart corePart in corePartRewards)
@@ -371,10 +426,23 @@ namespace Gumball
             for (int index = 0; index < racerData.Length; index++)
             {
                 RacerSessionData data = racerData[index];
+
+                if (data.AssetReference == null)
+                {
+                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                    continue;
+                }
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
+
                 handle.Completed += h =>
                 {
+                    if (handle.Result == null)
+                    {
+                        Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                        return;
+                    }
+                    
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
 

@@ -33,27 +33,27 @@ namespace Gumball.Editor
             DrawBox(topBox, color);
         }
 
-        public static void DrawBox(Vector3 origin, Vector3 halfExtents, Quaternion orientation, Color color)
+        public static void DrawBox(Vector3 origin, Vector3 halfExtents, Quaternion orientation, Color color, float duration = 0)
         {
-            DrawBox(new Box(origin, halfExtents, orientation), color);
+            DrawBox(new Box(origin, halfExtents, orientation), color, duration);
         }
 
-        public static void DrawBox(Box box, Color color)
+        public static void DrawBox(Box box, Color color, float duration = 0)
         {
-            Debug.DrawLine(box.frontTopLeft, box.frontTopRight, color);
-            Debug.DrawLine(box.frontTopRight, box.frontBottomRight, color);
-            Debug.DrawLine(box.frontBottomRight, box.frontBottomLeft, color);
-            Debug.DrawLine(box.frontBottomLeft, box.frontTopLeft, color);
+            Debug.DrawLine(box.frontTopLeft, box.frontTopRight, color, duration);
+            Debug.DrawLine(box.frontTopRight, box.frontBottomRight, color, duration);
+            Debug.DrawLine(box.frontBottomRight, box.frontBottomLeft, color, duration);
+            Debug.DrawLine(box.frontBottomLeft, box.frontTopLeft, color, duration);
 
-            Debug.DrawLine(box.backTopLeft, box.backTopRight, color);
-            Debug.DrawLine(box.backTopRight, box.backBottomRight, color);
-            Debug.DrawLine(box.backBottomRight, box.backBottomLeft, color);
-            Debug.DrawLine(box.backBottomLeft, box.backTopLeft, color);
+            Debug.DrawLine(box.backTopLeft, box.backTopRight, color, duration);
+            Debug.DrawLine(box.backTopRight, box.backBottomRight, color, duration);
+            Debug.DrawLine(box.backBottomRight, box.backBottomLeft, color, duration);
+            Debug.DrawLine(box.backBottomLeft, box.backTopLeft, color, duration);
 
-            Debug.DrawLine(box.frontTopLeft, box.backTopLeft, color);
-            Debug.DrawLine(box.frontTopRight, box.backTopRight, color);
-            Debug.DrawLine(box.frontBottomRight, box.backBottomRight, color);
-            Debug.DrawLine(box.frontBottomLeft, box.backBottomLeft, color);
+            Debug.DrawLine(box.frontTopLeft, box.backTopLeft, color, duration);
+            Debug.DrawLine(box.frontTopRight, box.backTopRight, color, duration);
+            Debug.DrawLine(box.frontBottomRight, box.backBottomRight, color, duration);
+            Debug.DrawLine(box.frontBottomLeft, box.backBottomLeft, color, duration);
         }
 
         public struct Box

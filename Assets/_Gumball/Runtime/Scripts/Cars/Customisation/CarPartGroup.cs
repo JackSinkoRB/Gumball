@@ -9,13 +9,12 @@ namespace Gumball
 {
     public class CarPartGroup : MonoBehaviour
     {
-
-        [SerializeField] private int currentPartIndex = -1;
-
+        
         [Header("Debugging")]
         [Tooltip("The car parts are retrieved and cached from under this object lazilly when required.")]
         [SerializeField, ReadOnly] private CarPart[] carPartsCached;
         [SerializeField, ReadOnly] private AICar carBelongsTo;
+        [SerializeField, ReadOnly] private int currentPartIndex = -1;
         
         private string groupID => gameObject.name;
         private string savedPartIndexKey => $"{carBelongsTo.SaveKey}.{groupID}";

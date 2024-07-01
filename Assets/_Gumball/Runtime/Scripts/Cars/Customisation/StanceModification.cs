@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Gumball
 {
+    [ExecuteAlways]
     [RequireComponent(typeof(WheelCollider))]
     public class StanceModification : MonoBehaviour
     {
@@ -54,6 +55,12 @@ namespace Gumball
         }
 
 #if UNITY_EDITOR
+        private void LateUpdate()
+        {
+            if (!Application.isPlaying)
+                ForceUpdateDefaultData();
+        }
+        
         private void OnValidate()
         {
             //if application isn't playing, set all the default values on the car so it can be visualised
