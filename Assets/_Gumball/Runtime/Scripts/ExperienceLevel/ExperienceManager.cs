@@ -27,8 +27,8 @@ namespace Gumball
         
         public static int TotalXP
         {
-            get => DataManager.Player.Get("TotalXP", 0);
-            private set => DataManager.Player.Set("TotalXP", value);
+            get => DataManager.Player.Get("Experience.TotalXP", 0);
+            private set => DataManager.Player.Set("Experience.TotalXP", value);
         }
 
         public static int Level => GetLevelIndexFromTotalXP(TotalXP) + 1; //add 1 as using index
