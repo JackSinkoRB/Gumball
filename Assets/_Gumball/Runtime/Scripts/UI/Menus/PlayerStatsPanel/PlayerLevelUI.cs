@@ -50,7 +50,7 @@ namespace Gumball
 
         private void RefreshExperienceBar()
         {
-            int currentLevelIndex = ExperienceManager.LevelValue;
+            int currentLevelIndex = ExperienceManager.LevelValue - 1;
             int nextLevelIndex = currentLevelIndex + 1;
 
             int totalXPForCurrentLevel = ExperienceManager.GetXPRequiredForLevel(currentLevelIndex);
