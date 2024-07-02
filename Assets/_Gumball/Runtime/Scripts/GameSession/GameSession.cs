@@ -491,9 +491,9 @@ namespace Gumball
         {
             trafficPrefabHandles.Clear();
             
-            AssetReferenceGameObject[] allVehicles = trafficBikes
-                .Concat(trafficCars)
-                .Concat(trafficTrucks)
+            AssetReferenceGameObject[] allVehicles = (trafficBikes ?? Array.Empty<AssetReferenceGameObject>())
+                .Concat(trafficCars ?? Array.Empty<AssetReferenceGameObject>())
+                .Concat(trafficTrucks ?? Array.Empty<AssetReferenceGameObject>())
                 .ToArray();
             
             foreach (AssetReferenceGameObject assetReference in allVehicles)
