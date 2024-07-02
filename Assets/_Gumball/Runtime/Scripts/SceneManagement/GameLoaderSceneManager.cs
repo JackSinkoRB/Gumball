@@ -128,7 +128,8 @@ namespace Gumball
                 DecalManager.LoadInstanceAsync(),
                 AvatarManager.LoadInstanceAsync(),
                 WarehouseManager.LoadInstanceAsync(),
-                GlobalPaintPresets.LoadInstanceAsync()
+                GlobalPaintPresets.LoadInstanceAsync(),
+                ExperienceManager.LoadInstanceAsync()
             };
             return handles;
         }
