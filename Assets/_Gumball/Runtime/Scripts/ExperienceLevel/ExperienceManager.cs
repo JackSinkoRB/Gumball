@@ -20,18 +20,22 @@ namespace Gumball
         [ButtonMethod]
         public void TestLevelUp()
         {
-            AddXP(XPForNextLevel);
+            AddXP(RemainingXPForNextLevel);
         }
 #endif
         #endregion
         
         public delegate void OnLevelChangeDelegate(int previousLevel, int newLevel);
         public static OnLevelChangeDelegate onLevelChange;
+        
+        public delegate void OnXPChangeDelegate(int previousXP, int newXP);
+        public static OnXPChangeDelegate onXPChange;
 
-        [RuntimeInitializeOnLoadMethod]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void RuntimeInitialise()
         {
             onLevelChange = null;
+            onXPChange = null;
         }
         
         public static int TotalXP
@@ -40,7 +44,7 @@ namespace Gumball
             private set => DataManager.Player.Set("Experience.TotalXP", value);
         }
 
-        public static int XPForNextLevel => GetXPForNextLevel(TotalXP);
+        public static int RemainingXPForNextLevel => GetRemainingXPForNextLevel(TotalXP);
         
         public static int LevelValue => GetLevelIndexFromTotalXP(TotalXP) + 1; //add 1 as using index
         public static PlayerLevel Level => GetLevelFromTotalXP(TotalXP);
@@ -55,10 +59,17 @@ namespace Gumball
         /// </summary>
         public static void SetTotalXP(int xp)
         {
+            if (TotalXP == xp)
+                return; //nothing changed
+            
+            int previousXP = TotalXP;
             int previousLevel = LevelValue;
             TotalXP = xp;
             int newLevel = LevelValue;
-
+            int newXP = TotalXP;
+            
+            onXPChange?.Invoke(previousXP, newXP);
+            
             if (newLevel != previousLevel)
             {
                 onLevelChange?.Invoke(previousLevel, newLevel);
@@ -94,7 +105,7 @@ namespace Gumball
             throw new ArgumentOutOfRangeException(nameof(levelIndex));
         }
         
-        public static int GetXPForNextLevel(int currentTotalXP)
+        public static int GetRemainingXPForNextLevel(int currentTotalXP)
         {
             int currentLevelIndex = GetLevelIndexFromTotalXP(currentTotalXP);
             int nextLevelIndex = currentLevelIndex + 1;

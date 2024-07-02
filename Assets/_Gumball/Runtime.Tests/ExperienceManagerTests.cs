@@ -107,13 +107,13 @@ namespace Gumball.Runtime.Tests
             int currentLevel = ExperienceManager.LevelValue;
             Assert.AreEqual(1, currentLevel);
             
-            Assert.AreEqual(ExperienceManager.Instance.Levels[1].XPRequired, ExperienceManager.XPForNextLevel);
+            Assert.AreEqual(ExperienceManager.Instance.Levels[1].XPRequired, ExperienceManager.RemainingXPForNextLevel);
             
             ExperienceManager.SetLevel(1);
             currentLevel = ExperienceManager.LevelValue;
             Assert.AreEqual(2, currentLevel);
             
-            int xpForLevel3 = ExperienceManager.XPForNextLevel;
+            int xpForLevel3 = ExperienceManager.RemainingXPForNextLevel;
             Assert.AreEqual(ExperienceManager.Instance.Levels[2].XPRequired, xpForLevel3);
 
             //try with a difference
@@ -122,7 +122,7 @@ namespace Gumball.Runtime.Tests
             currentLevel = ExperienceManager.LevelValue;
             Assert.AreEqual(3, currentLevel);
             
-            Assert.AreEqual(ExperienceManager.Instance.Levels[3].XPRequired - difference, ExperienceManager.XPForNextLevel);
+            Assert.AreEqual(ExperienceManager.Instance.Levels[3].XPRequired - difference, ExperienceManager.RemainingXPForNextLevel);
         }
 
         [Test]
@@ -133,7 +133,7 @@ namespace Gumball.Runtime.Tests
 
             int premiumCoinsBefore = 0; //TODO
             
-            ExperienceManager.AddXP(ExperienceManager.XPForNextLevel);
+            ExperienceManager.AddXP(ExperienceManager.RemainingXPForNextLevel);
 
             int premiumCoinsAfter = 0; //TODO
             int expectedPremiumCoinsAfter = premiumCoinsBefore + ExperienceManager.Instance.Levels[1].PremiumCurrencyReward;
