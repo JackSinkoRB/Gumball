@@ -83,6 +83,47 @@ namespace Gumball.Runtime.Tests
             int newLevel = ExperienceManager.Level;
             Assert.AreEqual(2, newLevel);
         }
+
+        [Test]
+        [Order(3)]
+        public void GetXPRequiredForLevel()
+        {
+            Assert.AreEqual(ExperienceManager.Instance.Levels[0].XPRequired, ExperienceManager.GetXPRequiredForLevel(0));
+            
+            Assert.AreEqual(ExperienceManager.Instance.Levels[0].XPRequired +
+                            ExperienceManager.Instance.Levels[1].XPRequired, ExperienceManager.GetXPRequiredForLevel(1));
+
+            Assert.AreEqual(ExperienceManager.Instance.Levels[0].XPRequired +
+                            ExperienceManager.Instance.Levels[1].XPRequired +
+                            ExperienceManager.Instance.Levels[2].XPRequired, ExperienceManager.GetXPRequiredForLevel(2));
+        }
+
+        [Test]
+        [Order(4)]
+        public void GetXPForNextLevel()
+        {
+            ExperienceManager.SetTotalXP(ExperienceManager.GetXPRequiredForLevel(0));
+            
+            int currentLevel = ExperienceManager.Level;
+            Assert.AreEqual(1, currentLevel);
+            
+            Assert.AreEqual(ExperienceManager.Instance.Levels[1].XPRequired, ExperienceManager.XPForNextLevel);
+            
+            ExperienceManager.SetTotalXP(ExperienceManager.GetXPRequiredForLevel(1));
+            currentLevel = ExperienceManager.Level;
+            Assert.AreEqual(2, currentLevel);
+            
+            int xpForLevel3 = ExperienceManager.XPForNextLevel;
+            Assert.AreEqual(ExperienceManager.Instance.Levels[2].XPRequired, xpForLevel3);
+
+            //try with a difference
+            const int difference = 5;
+            ExperienceManager.SetTotalXP(ExperienceManager.GetXPRequiredForLevel(2) + difference);
+            currentLevel = ExperienceManager.Level;
+            Assert.AreEqual(3, currentLevel);
+            
+            Assert.AreEqual(ExperienceManager.Instance.Levels[3].XPRequired - difference, ExperienceManager.XPForNextLevel);
+        }
         
     }
 }

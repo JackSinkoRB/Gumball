@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
@@ -9,11 +11,18 @@ namespace Gumball
     {
 
         #region SCRIPTABLE SETTINGS
-
         [SerializeField] private PlayerLevel[] levels;
 
         public PlayerLevel[] Levels => levels;
-        
+
+#if UNITY_EDITOR
+        /// <remarks>Only for testing.</remarks>
+        [ButtonMethod]
+        public void TestLevelUp()
+        {
+            AddXP(XPForNextLevel);
+        }
+#endif
         #endregion
         
         public delegate void OnLevelChangeDelegate(int previousLevel, int newLevel);
@@ -31,6 +40,8 @@ namespace Gumball
             private set => DataManager.Player.Set("Experience.TotalXP", value);
         }
 
+        public static int XPForNextLevel => GetXPForNextLevel(TotalXP);
+        
         public static int Level => GetLevelIndexFromTotalXP(TotalXP) + 1; //add 1 as using index
         
         /// <summary>
@@ -45,11 +56,37 @@ namespace Gumball
             if (newLevel != previousLevel)
                 onLevelChange?.Invoke(previousLevel, newLevel);
         }
-
+        
         public static void AddXP(int xp)
         {
             int newTotalXP = TotalXP + xp;
             SetTotalXP(newTotalXP);
+        }
+
+        public static int GetXPRequiredForLevel(int levelIndex)
+        {
+            int totalXPOfLevel = 0;
+            for (int index = 0; index < Instance.levels.Length; index++)
+            {
+                totalXPOfLevel += Instance.levels[index].XPRequired;
+                if (index == levelIndex)
+                    return totalXPOfLevel;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(levelIndex));
+        }
+        
+        public static int GetXPForNextLevel(int currentTotalXP)
+        {
+            int currentLevelIndex = GetLevelIndexFromTotalXP(currentTotalXP);
+            int nextLevelIndex = currentLevelIndex + 1;
+
+            int totalXPForCurrentLevel = GetXPRequiredForLevel(currentLevelIndex);
+            int totalXPForNextLevel = GetXPRequiredForLevel(nextLevelIndex);
+            
+            int xpGainedSinceLastLevel = currentTotalXP - totalXPForCurrentLevel;
+            
+            return totalXPForNextLevel - totalXPForCurrentLevel - xpGainedSinceLastLevel;
         }
         
         public static PlayerLevel GetLevelFromTotalXP(int totalXP)
