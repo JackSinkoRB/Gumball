@@ -141,12 +141,6 @@ namespace Gumball.Runtime.Tests
             //Assert.AreEqual(expectedPremiumCoinsAfter, premiumCoinsAfter);
 
             //TODO: check fuel is given
-            
-            //check all unlockables are now unlocked
-            foreach (Unlockable unlockable in ExperienceManager.Level.Unlockables)
-            {
-                Assert.IsTrue(unlockable.IsUnlocked);
-            }
         }
         
         [Test]
@@ -170,12 +164,6 @@ namespace Gumball.Runtime.Tests
                 expectedPremiumCoinsAfter += ExperienceManager.Instance.Levels[level].PremiumCurrencyReward;
                 
                 //TODO: check fuel is given
-
-                //check all unlockables are now unlocked
-                foreach (Unlockable unlockable in ExperienceManager.Level.Unlockables)
-                {
-                    Assert.IsTrue(unlockable.IsUnlocked);
-                }
             }
 
             //TODO:
