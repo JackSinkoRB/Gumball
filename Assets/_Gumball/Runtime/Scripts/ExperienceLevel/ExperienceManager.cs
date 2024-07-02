@@ -42,19 +42,37 @@ namespace Gumball
 
         public static int XPForNextLevel => GetXPForNextLevel(TotalXP);
         
-        public static int Level => GetLevelIndexFromTotalXP(TotalXP) + 1; //add 1 as using index
+        public static int LevelValue => GetLevelIndexFromTotalXP(TotalXP) + 1; //add 1 as using index
+        public static PlayerLevel Level => GetLevelFromTotalXP(TotalXP);
+        
+        public static void SetLevel(int level)
+        {
+            SetTotalXP(GetXPRequiredForLevel(level));
+        }
         
         /// <summary>
         /// Overrides the player's total XP with the value.
         /// </summary>
         public static void SetTotalXP(int xp)
         {
-            int previousLevel = Level;
+            int previousLevel = LevelValue;
             TotalXP = xp;
-            int newLevel = Level;
-            
+            int newLevel = LevelValue;
+
             if (newLevel != previousLevel)
+            {
                 onLevelChange?.Invoke(previousLevel, newLevel);
+
+                if (newLevel > previousLevel)
+                {
+                    //give rewards for all the levels in between
+                    for (int level = previousLevel + 1; level <= newLevel; level++)
+                    {
+                        int levelIndex = level - 1;
+                        Instance.levels[levelIndex].GiveRewards();
+                    }
+                }
+            }
         }
         
         public static void AddXP(int xp)

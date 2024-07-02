@@ -75,12 +75,12 @@ namespace Gumball.Runtime.Tests
         [Order(2)]
         public void AddXPChangesLevel()
         {
-            int previousLevel = ExperienceManager.Level;
+            int previousLevel = ExperienceManager.LevelValue;
             Assert.AreEqual(1, previousLevel);
             
             ExperienceManager.AddXP(ExperienceManager.Instance.Levels[1].XPRequired);
             
-            int newLevel = ExperienceManager.Level;
+            int newLevel = ExperienceManager.LevelValue;
             Assert.AreEqual(2, newLevel);
         }
 
@@ -102,15 +102,15 @@ namespace Gumball.Runtime.Tests
         [Order(4)]
         public void GetXPForNextLevel()
         {
-            ExperienceManager.SetTotalXP(ExperienceManager.GetXPRequiredForLevel(0));
+            ExperienceManager.SetLevel(0);
             
-            int currentLevel = ExperienceManager.Level;
+            int currentLevel = ExperienceManager.LevelValue;
             Assert.AreEqual(1, currentLevel);
             
             Assert.AreEqual(ExperienceManager.Instance.Levels[1].XPRequired, ExperienceManager.XPForNextLevel);
             
-            ExperienceManager.SetTotalXP(ExperienceManager.GetXPRequiredForLevel(1));
-            currentLevel = ExperienceManager.Level;
+            ExperienceManager.SetLevel(1);
+            currentLevel = ExperienceManager.LevelValue;
             Assert.AreEqual(2, currentLevel);
             
             int xpForLevel3 = ExperienceManager.XPForNextLevel;
@@ -119,10 +119,67 @@ namespace Gumball.Runtime.Tests
             //try with a difference
             const int difference = 5;
             ExperienceManager.SetTotalXP(ExperienceManager.GetXPRequiredForLevel(2) + difference);
-            currentLevel = ExperienceManager.Level;
+            currentLevel = ExperienceManager.LevelValue;
             Assert.AreEqual(3, currentLevel);
             
             Assert.AreEqual(ExperienceManager.Instance.Levels[3].XPRequired - difference, ExperienceManager.XPForNextLevel);
+        }
+
+        [Test]
+        [Order(5)]
+        public void RewardsGivenOnSingleLevelUp()
+        {
+            ExperienceManager.SetLevel(0);
+
+            int premiumCoinsBefore = 0; //TODO
+            
+            ExperienceManager.AddXP(ExperienceManager.XPForNextLevel);
+
+            int premiumCoinsAfter = 0; //TODO
+            int expectedPremiumCoinsAfter = premiumCoinsBefore + ExperienceManager.Instance.Levels[1].PremiumCurrencyReward;
+            //TODO:
+            //Assert.AreEqual(expectedPremiumCoinsAfter, premiumCoinsAfter);
+
+            //TODO: check fuel is given
+            
+            //check all unlockables are now unlocked
+            foreach (Unlockable unlockable in ExperienceManager.Level.Unlockables)
+            {
+                Assert.IsTrue(unlockable.IsUnlocked);
+            }
+        }
+        
+        [Test]
+        [Order(6)]
+        public void RewardsGivenOnMultipleLevelUp()
+        {
+            const int startingLevelIndex = 0;
+            const int desiredLevelIndex = 3;
+            
+            ExperienceManager.SetLevel(startingLevelIndex);
+            
+            int premiumCoinsBefore = 0; //TODO
+            
+            int xpRequired = ExperienceManager.GetXPRequiredForLevel(desiredLevelIndex) - ExperienceManager.TotalXP;
+            ExperienceManager.AddXP(xpRequired);
+
+            int premiumCoinsAfter = 0; //TODO
+            int expectedPremiumCoinsAfter = premiumCoinsBefore;
+            for (int level = startingLevelIndex; level <= desiredLevelIndex; level++)
+            {
+                expectedPremiumCoinsAfter += ExperienceManager.Instance.Levels[level].PremiumCurrencyReward;
+                
+                //TODO: check fuel is given
+
+                //check all unlockables are now unlocked
+                foreach (Unlockable unlockable in ExperienceManager.Level.Unlockables)
+                {
+                    Assert.IsTrue(unlockable.IsUnlocked);
+                }
+            }
+
+            //TODO:
+            //Assert.AreEqual(expectedPremiumCoinsAfter, premiumCoinsAfter);
         }
         
     }

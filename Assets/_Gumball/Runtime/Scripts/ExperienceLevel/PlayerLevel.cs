@@ -20,12 +20,16 @@ namespace Gumball
         [SerializeField] private Unlockable[] unlockables;
         
         public int XPRequired => xpRequired;
+        public bool FuelRefillReward => fuelRefillReward;
+        public int PremiumCurrencyReward => premiumCurrencyReward;
+        public Unlockable[] Unlockables => unlockables;
 
-        //TODO: unit test to ensure all rewards are given and unlockables are unlocked, even in cases of levelling up multiple times at once (eg. level 1 to 3 should giev level 2 rewards too)
         public void GiveRewards()
         {
             //TODO: refill fuel
             //TODO: give premium currency
+            
+            //TODO: update unit tests
             
             UnlockUnlockables();
         }
