@@ -45,7 +45,8 @@ namespace Gumball
         {
             IsUnlocked = true;
 
-            if (announceWhenUnlocked)
+            if (announceWhenUnlocked
+                && PanelManager.PanelExists<UnlockableAnnouncementPanel>())
             {
                 PanelManager.GetPanel<UnlockableAnnouncementPanel>().Show();
                 PanelManager.GetPanel<UnlockableAnnouncementPanel>().Populate(this);

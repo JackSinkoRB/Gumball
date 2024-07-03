@@ -11,6 +11,8 @@ namespace Gumball.Runtime.Tests
     public class ExperienceManagerTests : IPrebuildSetup, IPostBuildCleanup
     {
         
+        private bool isInitialised;
+
         public void Setup()
         {
             BootSceneClear.TrySetup();
@@ -30,6 +32,9 @@ namespace Gumball.Runtime.Tests
         {
             DecalEditor.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
+            
+            AsyncOperation loadBootScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.BootScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            loadBootScene.completed += OnSceneLoadComplete;
         }
 
         [OneTimeTearDown]
@@ -43,11 +48,18 @@ namespace Gumball.Runtime.Tests
         {
             DataManager.RemoveAllData();
         }
-
-        [Test]
-        [Order(1)]
-        public void GetLevelFromTotalXP()
+        
+        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
+            CoroutineHelper.Instance.PerformAfterTrue(() => GameLoaderSceneManager.HasLoaded, () => isInitialised = true);
+        }
+
+        [UnityTest]
+        [Order(1)]
+        public IEnumerator GetLevelFromTotalXP()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
             Assert.AreEqual(0, ExperienceManager.GetLevelIndexFromTotalXP(0));
             
             //just not enough experience
@@ -71,10 +83,12 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(3,  ExperienceManager.GetLevelIndexFromTotalXP(totalXP));
         }
 
-        [Test]
+        [UnityTest]
         [Order(2)]
-        public void AddXPChangesLevel()
+        public IEnumerator AddXPChangesLevel()
         {
+            yield return new WaitUntil(() => isInitialised);
+            
             int previousLevel = ExperienceManager.LevelValue;
             Assert.AreEqual(1, previousLevel);
             
@@ -84,10 +98,12 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(2, newLevel);
         }
 
-        [Test]
+        [UnityTest]
         [Order(3)]
-        public void GetXPRequiredForLevel()
+        public IEnumerator GetXPRequiredForLevel()
         {
+            yield return new WaitUntil(() => isInitialised);
+            
             Assert.AreEqual(ExperienceManager.Instance.Levels[0].XPRequired, ExperienceManager.GetXPRequiredForLevel(0));
             
             Assert.AreEqual(ExperienceManager.Instance.Levels[0].XPRequired +
@@ -98,10 +114,12 @@ namespace Gumball.Runtime.Tests
                             ExperienceManager.Instance.Levels[2].XPRequired, ExperienceManager.GetXPRequiredForLevel(2));
         }
 
-        [Test]
+        [UnityTest]
         [Order(4)]
-        public void GetXPForNextLevel()
+        public IEnumerator GetXPForNextLevel()
         {
+            yield return new WaitUntil(() => isInitialised);
+            
             ExperienceManager.SetLevel(0);
             
             int currentLevel = ExperienceManager.LevelValue;
@@ -125,10 +143,12 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(ExperienceManager.Instance.Levels[3].XPRequired - difference, ExperienceManager.RemainingXPForNextLevel);
         }
 
-        [Test]
+        [UnityTest]
         [Order(5)]
-        public void RewardsGivenOnSingleLevelUp()
+        public IEnumerator RewardsGivenOnSingleLevelUp()
         {
+            yield return new WaitUntil(() => isInitialised);
+            
             ExperienceManager.SetLevel(0);
 
             int premiumCoinsBefore = 0; //TODO
@@ -143,10 +163,12 @@ namespace Gumball.Runtime.Tests
             //TODO: check fuel is given
         }
         
-        [Test]
+        [UnityTest]
         [Order(6)]
-        public void RewardsGivenOnMultipleLevelUp()
+        public IEnumerator RewardsGivenOnMultipleLevelUp()
         {
+            yield return new WaitUntil(() => isInitialised);
+            
             const int startingLevelIndex = 0;
             const int desiredLevelIndex = 3;
             

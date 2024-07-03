@@ -37,6 +37,7 @@ namespace Gumball
             foreach (Unlockable unlockable in unlockables)
             {
                 unlockable.Unlock();
+                
                 yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
             }
         }

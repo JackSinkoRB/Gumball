@@ -132,7 +132,7 @@ namespace Gumball
         
         private static void OnLevelUp(int previousLevel, int newLevel)
         {
-            CoroutineHelper.Instance.StartCoroutine(OnLevelUpIE(previousLevel, newLevel));
+            CoroutineHelper.StartCoroutineOnCurrentScene(OnLevelUpIE(previousLevel, newLevel));
         }
 
         private static IEnumerator OnLevelUpIE(int previousLevel, int newLevel)
