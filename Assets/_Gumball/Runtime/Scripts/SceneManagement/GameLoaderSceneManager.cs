@@ -37,8 +37,8 @@ namespace Gumball
         private AsyncOperationHandle<SceneInstance> mainSceneHandle;
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
-            
-        public static bool HasLoaded { get; private set; }
+
+        public static bool HasLoaded;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void RuntimeInitialise()
