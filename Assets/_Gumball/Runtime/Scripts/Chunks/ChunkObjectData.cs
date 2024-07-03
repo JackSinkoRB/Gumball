@@ -13,7 +13,7 @@ namespace Gumball
         
         [SerializeField] private bool hideWhenFarAway;
         [SerializeField] private Vector3 positionRelativeToParent;
-        [SerializeField] private Quaternion rotation;
+        [SerializeField] private Quaternion locationRotation;
         [SerializeField] private Vector3 scaleRelativeToChunk;
 
         public ChunkObjectData(Chunk chunkReference, ChunkObject chunkObject)
@@ -21,7 +21,7 @@ namespace Gumball
             hideWhenFarAway = chunkObject.HideWhenFarAway;
             Transform desiredParent = hideWhenFarAway ? chunkReference.TerrainHighLOD.transform : chunkReference.transform;
             positionRelativeToParent = desiredParent.InverseTransformPoint(chunkObject.transform.position);
-            rotation = chunkObject.transform.rotation;
+            locationRotation = chunkObject.transform.localRotation;
             scaleRelativeToChunk = GetScaleRelativeToChunk(chunkReference, chunkObject);
         }
 
@@ -29,7 +29,7 @@ namespace Gumball
         {
             GameObject chunkObject = Object.Instantiate(handle.Result, hideWhenFarAway ? chunk.TerrainHighLOD.transform : chunk.transform);
             chunkObject.transform.localPosition = positionRelativeToParent;
-            chunkObject.transform.localRotation = rotation;
+            chunkObject.transform.localRotation = locationRotation;
             chunkObject.transform.localScale = scaleRelativeToChunk;
 
             chunkObject.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);

@@ -19,7 +19,7 @@ namespace Gumball
         [Header("Setup check")]
         [HelpBox("The object is not a valid prefab asset (ending in .prefab). ChunkObject can only be added to prefabs. Therefore this object will not show at runtime.", MessageType.Error, true)]
         [SerializeField, ReadOnly] private bool isPrefab;
-        [HelpBox("This ChunkObject will not function properly because it is a child of another ChunkObject.", MessageType.Error, true, true)]
+        [HelpBox("This ChunkObject will not function properly because it is a child of another ChunkObject.", MessageType.Warning, true, true)]
         [SerializeField, ReadOnly] private bool isChildOfAnotherChunkObject;
         
         [Header("Settings")]
