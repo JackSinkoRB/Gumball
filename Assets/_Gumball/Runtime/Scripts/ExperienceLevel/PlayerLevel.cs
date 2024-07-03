@@ -15,17 +15,30 @@ namespace Gumball
         [Header("Rewards")]
         [SerializeField] private bool fuelRefillReward = true;
         [SerializeField] private int premiumCurrencyReward;
+        [SerializeField] private Unlockable[] unlockables;
         
         public int XPRequired => xpRequired;
         public bool FuelRefillReward => fuelRefillReward;
         public int PremiumCurrencyReward => premiumCurrencyReward;
         
-        public void GiveRewards()
+        public IEnumerator GiveRewards()
         {
             //TODO: refill fuel
             //TODO: give premium currency
             
             //TODO: update unit tests
+            
+            //show the level up panel with the rewards
+            PanelManager.GetPanel<LevelUpPanel>().Show();
+            //TODO: populate level up panel with the rewards
+
+            yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
+            
+            foreach (Unlockable unlockable in unlockables)
+            {
+                unlockable.Unlock();
+                yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+            }
         }
 
     }

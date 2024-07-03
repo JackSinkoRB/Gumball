@@ -13,34 +13,46 @@ namespace Gumball
     public class Unlockable : UniqueScriptableObject
     {
 
-        [SerializeField] private bool unlockWithLevel = true;
-        [SerializeField, ConditionalField(nameof(unlockWithLevel)), MinValue(1)] private int requiredLevel = 1;
-        [SerializeField, ConditionalField(nameof(unlockWithLevel), true)] private bool isUnlockedByDefault;
+        [SerializeField] private bool isUnlockedByDefault;
+        [Tooltip("Does the unlockable announcement panel get shown when the unlockable is unlocked?")]
+        [SerializeField] private bool announceWhenUnlocked = true;
         
         public bool IsUnlocked
         {
-            get
+            get => DataManager.Player.Get($"Unlockable.{name}-{ID}.IsUnlocked", isUnlockedByDefault);
+            private set => DataManager.Player.Set($"Unlockable.{name}-{ID}.IsUnlocked", value);
+        }
+
+        [ButtonMethod]
+        public void Unlock()
+        {
+            if (IsUnlocked)
+                return;
+            
+            OnUnlock();
+        }
+        
+        [ButtonMethod]
+        public void Lock()
+        {
+            if (!IsUnlocked)
+                return;
+            
+            OnLock();
+        }
+        
+        private void OnUnlock()
+        {
+            IsUnlocked = true;
+
+            if (announceWhenUnlocked)
             {
-                if (unlockWithLevel)
-                    return ExperienceManager.LevelValue >= requiredLevel;
-                
-                return DataManager.Player.Get($"Unlockable.{name}-{ID}.IsUnlocked", isUnlockedByDefault);
-            }
-            private set
-            {
-                if (!unlockWithLevel)
-                    DataManager.Player.Set($"Unlockable.{name}-{ID}.IsUnlocked", value);
+                PanelManager.GetPanel<UnlockableAnnouncementPanel>().Show();
+                PanelManager.GetPanel<UnlockableAnnouncementPanel>().Populate(this);
             }
         }
 
-        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(unlockWithLevel), true)]
-        public void Unlock()
-        {
-            IsUnlocked = true;
-        }
-        
-        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(unlockWithLevel), true)]
-        public void Lock()
+        private void OnLock()
         {
             IsUnlocked = false;
         }
