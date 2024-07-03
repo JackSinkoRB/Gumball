@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Gumball;
+using MyBox;
 using UnityEngine;
 
 /// <summary>
@@ -52,11 +53,14 @@ public abstract class AnimatedPanel : MonoBehaviour
     }
     
     //shortcuts for unity events:
-    public void Show() => Show(null);
-    public void Hide() => Hide(false, false, null);
+    [ButtonMethod] public void Show() => Show(null);
+    [ButtonMethod] public void Hide() => Hide(false, false, null);
 
     public Sequence Show(Action onComplete = null)
     {
+        if (!Application.isPlaying)
+            throw new InvalidOperationException("Must be in play made to show panel.");
+        
         if (IsShowing)
         {
             Debug.LogWarning($"Tried showing panel {gameObject.name} but it is already showing.");
@@ -106,6 +110,9 @@ public abstract class AnimatedPanel : MonoBehaviour
 
     public Sequence Hide(bool keepInStack = false, bool instant = false, Action onComplete = null)
     {
+        if (!Application.isPlaying)
+            throw new InvalidOperationException("Must be in play made to hide panel.");
+        
         if (!IsShowing && !instant)
         {
             Debug.LogWarning($"Tried hiding panel {gameObject.name} but it is not already showing.");
