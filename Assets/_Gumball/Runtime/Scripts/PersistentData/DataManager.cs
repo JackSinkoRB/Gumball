@@ -14,7 +14,8 @@ namespace Gumball
         public static JsonDataProvider Avatar { get; private set; } = new("Avatar");
         public static JsonDataProvider GameSessions { get; private set; } = new("GameSessions");
         public static JsonDataProvider Warehouse { get; private set; } = new("Warehouse");
-        
+        public static JsonDataProvider Player { get; private set; } = new("Player");
+
         /// <summary>
         /// Enable or disable whether it reads from the test providers, or the real providers.
         /// </summary>
@@ -25,6 +26,7 @@ namespace Gumball
             Avatar = new JsonDataProvider(enableTestProviders ? "Avatar_Tests" : "Avatar");
             GameSessions = new JsonDataProvider(enableTestProviders ? "GameSessions_Tests" : "GameSessions");
             Warehouse = new JsonDataProvider(enableTestProviders ? "Warehouse_Tests" : "Warehouse");
+            Player = new JsonDataProvider(enableTestProviders ? "Player_Tests" : "Player");
         }
         
         /// <summary>
@@ -40,7 +42,13 @@ namespace Gumball
             Avatar.LoadFromSourceAsync();
             GameSessions.LoadFromSourceAsync();
             Warehouse.LoadFromSourceAsync();
-            yield return new WaitUntil(() => Settings.IsLoaded && Cars.IsLoaded);
+            Player.LoadFromSourceAsync();
+            yield return new WaitUntil(() => Settings.IsLoaded
+                                             && Cars.IsLoaded
+                                             && Avatar.IsLoaded
+                                             && GameSessions.IsLoaded
+                                             && Warehouse.IsLoaded
+                                             && Player.IsLoaded);
             onComplete?.Invoke();
         }
 
@@ -55,6 +63,7 @@ namespace Gumball
             Avatar.LoadFromSourceSync();
             GameSessions.LoadFromSourceSync();
             Warehouse.LoadFromSourceSync();
+            Player.LoadFromSourceSync();
         }
 
         public static void RemoveAllData()
@@ -64,6 +73,7 @@ namespace Gumball
             Avatar.RemoveFromSource();
             GameSessions.RemoveFromSource();
             Warehouse.RemoveFromSource();
+            Player.RemoveFromSource();
         }
         
     }

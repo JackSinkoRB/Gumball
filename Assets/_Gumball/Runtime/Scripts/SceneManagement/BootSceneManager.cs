@@ -16,6 +16,8 @@ namespace Gumball
         
         private IEnumerator Start()
         {
+            GameLoaderSceneManager.HasLoaded = false;
+            
             BootDurationSeconds = Time.realtimeSinceStartup;
 #if ENABLE_LOGS
             Debug.Log($"Boot loading complete in {TimeSpan.FromSeconds(BootDurationSeconds).ToPrettyString(true)}");
