@@ -14,7 +14,11 @@ namespace Gumball
             if (rewardPanel.PendingRewards > 0)
                 rewardPanel.Show();
             
-            this.PerformAfterTrue(() => !rewardPanel.IsShowing, MainSceneManager.LoadMainScene);
+            this.PerformAfterTrue(() => !rewardPanel.IsShowing, () =>
+            {
+                GameSessionManager.Instance.CurrentSession.UnloadSession();
+                MainSceneManager.LoadMainScene();
+            });
         }
         
     }

@@ -16,8 +16,11 @@ namespace Gumball
         public void OnClickQuitButton()
         {
             if (GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null)
+            {
                 GameSessionManager.Instance.CurrentSession.EndSession();
-            
+                GameSessionManager.Instance.CurrentSession.UnloadSession();
+            }
+
             MainSceneManager.LoadMainScene();
         }
 
