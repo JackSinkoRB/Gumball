@@ -75,17 +75,10 @@ namespace Gumball
                 onLevelChange?.Invoke(previousLevel, newLevel);
 
                 if (newLevel > previousLevel)
-                {
-                    //give rewards for all the levels in between
-                    for (int level = previousLevel + 1; level <= newLevel; level++)
-                    {
-                        int levelIndex = level - 1;
-                        Instance.levels[levelIndex].GiveRewards();
-                    }
-                }
+                    OnLevelUp(previousLevel, newLevel);
             }
         }
-        
+
         public static void AddXP(int xp)
         {
             int newTotalXP = TotalXP + xp;
@@ -135,6 +128,20 @@ namespace Gumball
             }
             
             return Instance.levels.Length - 1; //if totalXP exceeds all levels, return the max level
+        }
+        
+        private static void OnLevelUp(int previousLevel, int newLevel)
+        {
+            //give rewards for all the levels in between
+            for (int level = previousLevel + 1; level <= newLevel; level++)
+            {
+                int levelIndex = level - 1;
+                Instance.levels[levelIndex].GiveRewards();
+            }
+            
+            //show the level up panel with the rewards
+            PanelManager.GetPanel<LevelUpPanel>().Show();
+            PanelManager.GetPanel<LevelUpPanel>().Populate(previousLevel, newLevel);
         }
         
     }

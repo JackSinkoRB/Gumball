@@ -16,7 +16,8 @@ public abstract class AnimatedPanel : MonoBehaviour
     public event Action onHide;
     public event Action onShowComplete;
     public event Action onHideComplete;
-
+    
+    [Tooltip("Is the panel tracked in the PanelManager stack, or is it separate from it?")]
     [SerializeField] private bool isAddedToPanelStack = true;
     
     [Header("Animation")]
