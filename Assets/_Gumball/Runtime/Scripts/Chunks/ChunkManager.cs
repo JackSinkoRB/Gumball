@@ -198,12 +198,18 @@ namespace Gumball
                     //load
                     customChunkLoading.Add(new TrackedCoroutine(LoadChunkAsync(chunkIndexWithCustomLoadDistance, ChunkUtils.LoadDirection.CUSTOM)));
                 }
-                if (!isWithinLoadDistance && isChunkCustomLoaded)
+                if (!isWithinLoadDistance && isChunkCustomLoaded && !IsPlayersChunk(customLoadedData.Value.Chunk))
                 {
                     //should not be loaded - unload if so
                     UnloadChunk(customLoadedData.Value);
                 }
             }
+        }
+
+        private bool IsPlayersChunk(Chunk chunk)
+        {
+            Chunk playersChunk = WarehouseManager.Instance.CurrentCar.CurrentChunk;
+            return playersChunk != null && playersChunk == chunk;
         }
 
         private bool IsChunkWithinLoadDistance(Vector3 loadPosition, int mapIndex, ChunkUtils.LoadDirection direction)
@@ -243,6 +249,9 @@ namespace Gumball
                     Debug.LogWarning($"There's null chunk data within the loading range ({loadingOrLoadedChunksIndices.Min} to {loadingOrLoadedChunksIndices.Max}) at index {chunkAheadIndex}");
                     continue;
                 }
+
+                if (IsPlayersChunk(loadedChunkData.Value.Chunk))
+                    break;
                 
                 UnloadChunk(loadedChunkData.Value);
                 
@@ -273,6 +282,9 @@ namespace Gumball
                     Debug.LogWarning($"There's null chunk data within the loading range ({loadingOrLoadedChunksIndices.Min} to {loadingOrLoadedChunksIndices.Max}) at index {chunkBehindIndex}");
                     continue;
                 }
+                
+                if (IsPlayersChunk(loadedChunkData.Value.Chunk))
+                    break;
                 
                 UnloadChunk(loadedChunkData.Value);
 
