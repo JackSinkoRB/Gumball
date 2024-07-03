@@ -160,6 +160,8 @@ jobs:
               COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | tr '\n\t' ' ' | tr -d '/')
               # Remove any occurrence of "JackSinkoRB"
               COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
+              # Remove any occurrence of "Conflicts: #" and anything after it
+              COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/Conflicts: #.*//g')
               COMMIT_MESSAGES+="$((i+1)). $COMMIT_MESSAGE\\n"
             done
           else
@@ -168,6 +170,8 @@ jobs:
             COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | tr '\n\t' ' ' | tr -d '/')
             # Remove any occurrence of "JackSinkoRB"
             COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
+            # Remove any occurrence of "Conflicts: #" and anything after it
+            COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/Conflicts: #.*//g')
             COMMIT_MESSAGES="$COMMIT_MESSAGE\\n"
           fi
           echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"
