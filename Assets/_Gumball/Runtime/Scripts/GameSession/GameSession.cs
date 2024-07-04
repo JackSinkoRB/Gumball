@@ -59,6 +59,7 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
+        [SerializeField] private int xpReward = 100;
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
         [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
 
@@ -491,9 +492,9 @@ namespace Gumball
         {
             trafficPrefabHandles.Clear();
             
-            AssetReferenceGameObject[] allVehicles = trafficBikes
-                .Concat(trafficCars)
-                .Concat(trafficTrucks)
+            AssetReferenceGameObject[] allVehicles = (trafficBikes ?? Array.Empty<AssetReferenceGameObject>())
+                .Concat(trafficCars ?? Array.Empty<AssetReferenceGameObject>())
+                .Concat(trafficTrucks ?? Array.Empty<AssetReferenceGameObject>())
                 .ToArray();
             
             foreach (AssetReferenceGameObject assetReference in allVehicles)
@@ -559,6 +560,10 @@ namespace Gumball
 
         private void GiveRewards()
         {
+            //TODO: how to display XP as a reward?
+            if (xpReward > 0)
+                ExperienceManager.AddXP(xpReward);
+            
             if (corePartRewards != null)
             {
                 foreach (CorePart corePartReward in corePartRewards)

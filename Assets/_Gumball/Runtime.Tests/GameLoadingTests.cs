@@ -30,8 +30,8 @@ namespace Gumball.Runtime.Tests
             DecalEditor.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
 
-            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.BootScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadWorkshopScene.completed += OnSceneLoadComplete;
+            AsyncOperation loadBootScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.BootScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            loadBootScene.completed += OnSceneLoadComplete;
         }
 
         [OneTimeTearDown]

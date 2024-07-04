@@ -26,11 +26,17 @@ namespace Gumball
 
         private static void OnSavePrefab(string sceneName, string path)
         {
+            if (EditorApplication.isUpdating)
+                return;
+            
             RemoveUnusedSplineMeshes(path);
         }
 
         private static void OnSaveScene(string sceneName, string path)
         {
+            if (EditorApplication.isUpdating)
+                return;
+            
             RemoveUnusedChunks();
         }
 
