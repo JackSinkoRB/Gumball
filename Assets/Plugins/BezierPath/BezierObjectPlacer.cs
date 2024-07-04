@@ -136,7 +136,7 @@ namespace BezierPath
                 if (raycast)
                 {
                     float raycastsafecheck = 2;
-                    if (!Physics.Raycast(position + Vector3.up * raycastsafecheck, Vector3.down, out RaycastHit hit, maxRaycastDistance + raycastsafecheck, raycastLayerMask))
+                    if (!gameObject.scene.GetPhysicsScene().Raycast(position + Vector3.up * raycastsafecheck, Vector3.down, out RaycastHit hit, maxRaycastDistance + raycastsafecheck, raycastLayerMask))
                         continue;
                     position = hit.point + hit.normal * groundOffset;
                     if (normalUp)
