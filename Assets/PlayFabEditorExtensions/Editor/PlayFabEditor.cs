@@ -95,6 +95,11 @@ namespace PlayFab.PfEditor
         {
             static Startup()
             {
+                EditorApplication.delayCall += StartupDelay;
+            }
+
+            static void StartupDelay()
+            {
                 if (PlayFabEditorPrefsSO.Instance.PanelIsShown || !PlayFabEditorSDKTools.IsInstalled)
                 {
                     EditorCoroutine.Start(OpenPlayServices());
