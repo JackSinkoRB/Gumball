@@ -9,7 +9,7 @@ namespace Gumball
     public class StandardCurrencyUI : MonoBehaviour
     {
         
-        [SerializeField] private TextMeshProUGUI currencyLabel;
+        [SerializeField] private AutosizeTextMeshPro currencyLabel;
         
         private void OnEnable()
         {
@@ -31,6 +31,7 @@ namespace Gumball
         private void RefreshCurrencyLabel()
         {
             currencyLabel.text = $"{Currency.Standard.Funds}";
+            currencyLabel.Resize();
         }
         
     }
