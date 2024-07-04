@@ -29,16 +29,21 @@ namespace Gumball
             //TODO: update unit tests
             
             //show the level up panel with the rewards
-            PanelManager.GetPanel<LevelUpPanel>().Show();
-            //TODO: populate level up panel with the rewards
+            if (PanelManager.PanelExists<LevelUpPanel>())
+            {
+                PanelManager.GetPanel<LevelUpPanel>().Show();
+                //TODO: populate level up panel with the rewards
+            }
 
-            yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
+            if (PanelManager.PanelExists<LevelUpPanel>())
+                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
             
             foreach (Unlockable unlockable in unlockables)
             {
                 unlockable.Unlock();
                 
-                yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+                if (PanelManager.PanelExists<UnlockableAnnouncementPanel>())
+                    yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
             }
         }
 
