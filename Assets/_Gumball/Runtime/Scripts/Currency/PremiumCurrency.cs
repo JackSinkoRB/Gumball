@@ -8,6 +8,7 @@ namespace Gumball
     {
         
         protected override string CurrencyType => "Premium";
-
+        public override int StartingFunds => 0;
+        
     }
 }
