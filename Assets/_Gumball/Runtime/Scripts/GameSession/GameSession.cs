@@ -59,7 +59,8 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
-        [SerializeField] private int xpReward = 100;
+        [SerializeField, PositiveValueOnly] private int xpReward = 100;
+        [SerializeField, PositiveValueOnly] private int standardCurrencyReward = 10;
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
         [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
 
@@ -560,10 +561,18 @@ namespace Gumball
 
         private void GiveRewards()
         {
-            //TODO: how to display XP as a reward?
             if (xpReward > 0)
+            {
+                //TODO: go through reward manager so the reward is shown in the reward list
                 ExperienceManager.AddXP(xpReward);
+            }
             
+            if (standardCurrencyReward > 0)
+            {
+                //TODO: go through reward manager so the reward is shown in the reward list
+                Currency.Standard.AddFunds(standardCurrencyReward);
+            }
+
             if (corePartRewards != null)
             {
                 foreach (CorePart corePartReward in corePartRewards)

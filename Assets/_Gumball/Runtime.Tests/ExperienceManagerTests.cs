@@ -131,14 +131,13 @@ namespace Gumball.Runtime.Tests
         {
             ExperienceManager.SetLevel(0);
 
-            int premiumCoinsBefore = 0; //TODO
+            int premiumFundsBefore = Currency.Premium.Funds;
             
             ExperienceManager.AddXP(ExperienceManager.RemainingXPForNextLevel);
 
-            int premiumCoinsAfter = 0; //TODO
-            int expectedPremiumCoinsAfter = premiumCoinsBefore + ExperienceManager.Instance.Levels[1].PremiumCurrencyReward;
-            //TODO:
-            //Assert.AreEqual(expectedPremiumCoinsAfter, premiumCoinsAfter);
+            int expectedPremiumCoinsAfter = premiumFundsBefore + ExperienceManager.Instance.Levels[1].PremiumCurrencyReward;
+
+            Assert.AreEqual(expectedPremiumCoinsAfter, Currency.Premium.Funds);
 
             //TODO: check fuel is given
         }
@@ -152,22 +151,20 @@ namespace Gumball.Runtime.Tests
             
             ExperienceManager.SetLevel(startingLevelIndex);
             
-            int premiumCoinsBefore = 0; //TODO
+            int premiumFundsBefore = Currency.Premium.Funds;
             
             int xpRequired = ExperienceManager.GetXPRequiredForLevel(desiredLevelIndex) - ExperienceManager.TotalXP;
             ExperienceManager.AddXP(xpRequired);
 
-            int premiumCoinsAfter = 0; //TODO
-            int expectedPremiumCoinsAfter = premiumCoinsBefore;
+            int expectedPremiumFundsAfter = premiumFundsBefore;
             for (int level = startingLevelIndex; level <= desiredLevelIndex; level++)
             {
-                expectedPremiumCoinsAfter += ExperienceManager.Instance.Levels[level].PremiumCurrencyReward;
+                expectedPremiumFundsAfter += ExperienceManager.Instance.Levels[level].PremiumCurrencyReward;
                 
                 //TODO: check fuel is given
             }
 
-            //TODO:
-            //Assert.AreEqual(expectedPremiumCoinsAfter, premiumCoinsAfter);
+            Assert.AreEqual(expectedPremiumFundsAfter, Currency.Premium.Funds);
         }
         
     }
