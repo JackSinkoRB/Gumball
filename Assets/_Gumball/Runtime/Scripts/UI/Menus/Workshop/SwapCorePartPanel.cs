@@ -65,18 +65,13 @@ namespace Gumball
             }
 
             CorePartManager.InstallPartOnCar(partType, currentSelectedPart, WarehouseManager.Instance.CurrentCar.CarIndex);
-            UpdateInstallButton(partType, currentSelectedPart);
-            
+            installButton.Initialise(partType, currentSelectedPart);
+
             //update the sub parts menu
             if (isStockPart)
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(null);
             else
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(partType);
-        }
-        
-        private void UpdateInstallButton(CorePart.PartType type, CorePart part)
-        {
-            installButton.Initialise(type, part);
         }
 
         private ScrollItem CreateScrollItem(CorePart.PartType type, CorePart part)
@@ -95,7 +90,7 @@ namespace Gumball
                 currentSelectedPart = part;
                 
                 //populate details
-                UpdateInstallButton(type, part);
+                installButton.Initialise(type, part);
             };
 
             return scrollItem;
