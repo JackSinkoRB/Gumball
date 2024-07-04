@@ -46,20 +46,12 @@ namespace Gumball
         private void RefreshLevelLabel()
         {
             levelLabel.text = $"{ExperienceManager.LevelValue}";
+            levelLabel.Resize();
         }
 
         private void RefreshExperienceBar()
         {
-            int currentLevelIndex = ExperienceManager.LevelValue - 1;
-            int nextLevelIndex = currentLevelIndex + 1;
-
-            int totalXPForCurrentLevel = ExperienceManager.GetXPRequiredForLevel(currentLevelIndex);
-            int totalXPForNextLevel = ExperienceManager.GetXPRequiredForLevel(nextLevelIndex);
-
-            int xpRequiredForLevelUp = totalXPForNextLevel - totalXPForCurrentLevel;
-            int xpGainedSinceLastLevel = ExperienceManager.TotalXP - totalXPForCurrentLevel;
-            
-            experienceBar.fillAmount = Mathf.Clamp01((float)xpGainedSinceLastLevel / xpRequiredForLevelUp);
+            experienceBar.fillAmount = ExperienceManager.GetPercentToNextLevel(ExperienceManager.TotalXP);
         }
         
     }

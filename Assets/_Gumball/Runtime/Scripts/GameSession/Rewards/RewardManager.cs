@@ -18,6 +18,12 @@ namespace Gumball
             subPart.SetUnlocked(true);
             PanelManager.GetPanel<RewardPanel>().QueueReward(subPart);
         }
+
+        public static void GiveStandardCurrency(int amount)
+        {
+            Currency.Standard.AddFunds(amount);
+            PanelManager.GetPanel<RewardPanel>().QueueStandardCurrencyReward(amount);
+        }
         
     }
 }

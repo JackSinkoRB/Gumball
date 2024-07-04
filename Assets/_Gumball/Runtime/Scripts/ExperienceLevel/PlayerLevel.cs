@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
@@ -10,11 +11,11 @@ namespace Gumball
     {
     
         [Tooltip("The XP required from the previous level to reach this level.")]
-        [SerializeField] private int xpRequired;
+        [SerializeField, PositiveValueOnly] private int xpRequired;
         
         [Header("Rewards")]
         [SerializeField] private bool fuelRefillReward = true;
-        [SerializeField] private int premiumCurrencyReward;
+        [SerializeField, PositiveValueOnly] private int premiumCurrencyReward;
         [SerializeField] private Unlockable[] unlockables;
         
         public int XPRequired => xpRequired;
@@ -23,22 +24,31 @@ namespace Gumball
         
         public IEnumerator GiveRewards()
         {
-            //TODO: refill fuel
-            //TODO: give premium currency
+            //give premium currency
+            if (premiumCurrencyReward > 0)
+                Currency.Premium.AddFunds(premiumCurrencyReward);
             
+            //TODO: refill fuel
+
             //TODO: update unit tests
             
             //show the level up panel with the rewards
-            PanelManager.GetPanel<LevelUpPanel>().Show();
-            //TODO: populate level up panel with the rewards
+            if (PanelManager.PanelExists<LevelUpPanel>())
+            {
+                PanelManager.GetPanel<LevelUpPanel>().Show();
+                
+                //populate level up panel with the rewards
+                PanelManager.GetPanel<LevelUpPanel>().Populate(this);
 
-            yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
+                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
+            }
             
             foreach (Unlockable unlockable in unlockables)
             {
                 unlockable.Unlock();
                 
-                yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+                if (PanelManager.PanelExists<UnlockableAnnouncementPanel>())
+                    yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
             }
         }
 
