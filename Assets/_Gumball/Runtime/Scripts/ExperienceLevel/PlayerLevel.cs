@@ -37,13 +37,9 @@ namespace Gumball
             {
                 PanelManager.GetPanel<LevelUpPanel>().Show();
                 
-                //TODO: populate level up panel with the rewards
+                //populate level up panel with the rewards
+                PanelManager.GetPanel<LevelUpPanel>().Populate(this);
 
-                if (premiumCurrencyReward > 0)
-                {
-                    //TODO: LevelUpPanel.ShowPremiumCurrencyReward(premiumCurrencyReward)
-                }
-                
                 yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
             }
             
