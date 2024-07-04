@@ -299,8 +299,6 @@ namespace Gumball
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
-            
-            GiveRewards();
         }
         
         public virtual void UpdateWhenCurrent()
@@ -559,15 +557,26 @@ namespace Gumball
             EndSession();
         }
 
-        private void GiveRewards()
+        public IEnumerator GiveRewards()
         {
             //give XP
             if (xpReward > 0)
             {
-                //TODO: go through the RewardManager and show the XPGainedPanel
-                ExperienceManager.AddXP(xpReward);
-            }
+                PanelManager.GetPanel<XPGainedPanel>().Show();
             
+                int currentXP = ExperienceManager.TotalXP;
+                int newXP = ExperienceManager.TotalXP + xpReward;
+                
+                PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
+                
+                yield return new WaitUntil(() => !PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning);
+                
+                ExperienceManager.AddXP(xpReward); //add XP after in case there's a level up
+                
+                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning &&
+                                                 !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+            }
+
             //give standard currency
             if (standardCurrencyReward > 0)
                 RewardManager.GiveStandardCurrency(standardCurrencyReward);
@@ -590,6 +599,13 @@ namespace Gumball
                     if (!subPartReward.IsUnlocked)
                         RewardManager.GiveReward(subPartReward);
                 }
+            }
+            
+            //show the reward panel with queued rewards
+            if (PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
+            {
+                PanelManager.GetPanel<RewardPanel>().Show();
+                yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);
             }
         }
         

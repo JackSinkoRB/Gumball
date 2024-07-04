@@ -95,7 +95,21 @@ namespace Gumball
                     return totalXPOfLevel;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(levelIndex));
+            throw new ArgumentOutOfRangeException(nameof(levelIndex), $"Level {levelIndex} is not an existing level.");
+        }
+
+        public static float GetPercentToNextLevel(int totalXP)
+        {
+            int currentLevelIndex = GetLevelIndexFromTotalXP(totalXP);
+            int nextLevelIndex = currentLevelIndex + 1;
+            
+            int totalXPForCurrentLevel = GetXPRequiredForLevel(currentLevelIndex);
+            int totalXPForNextLevel = GetXPRequiredForLevel(nextLevelIndex);
+            
+            int xpRequiredForLevelUp = totalXPForNextLevel - totalXPForCurrentLevel;
+            int xpGainedSinceLastLevel = totalXP - totalXPForCurrentLevel;
+            
+            return Mathf.Clamp01((float)xpGainedSinceLastLevel / xpRequiredForLevelUp);
         }
         
         public static int GetRemainingXPForNextLevel(int currentTotalXP)
