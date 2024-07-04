@@ -76,10 +76,7 @@ namespace Gumball
         private void OnEnable()
         {
             //start disabled
-            slipStreamLabel.gameObject.SetActive(false);
-            nearMissLabel.gameObject.SetActive(false);
-            airTimeLabel.gameObject.SetActive(false);
-            landingLabel.gameObject.SetActive(false);
+            DisableUI();
 
             currentPoints = 0;
         }
@@ -89,6 +86,7 @@ namespace Gumball
             if (GameSessionManager.Instance.CurrentSession == null
                 || !GameSessionManager.Instance.CurrentSession.HasStarted)
             {
+                DisableUI();
                 return;
             }
 
@@ -97,6 +95,14 @@ namespace Gumball
             CheckForAirTime();
         }
 
+        private void DisableUI()
+        {
+            slipStreamLabel.gameObject.SetActive(false);
+            nearMissLabel.gameObject.SetActive(false);
+            airTimeLabel.gameObject.SetActive(false);
+            landingLabel.gameObject.SetActive(false);
+        }
+        
         private void CheckForNearMiss()
         {
             if (WarehouseManager.Instance.CurrentCar.InCollision)
