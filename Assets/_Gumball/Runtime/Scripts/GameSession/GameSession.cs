@@ -561,18 +561,18 @@ namespace Gumball
 
         private void GiveRewards()
         {
+            //give XP
             if (xpReward > 0)
             {
-                //TODO: go through reward manager so the reward is shown in the reward list
+                //TODO: go through the RewardManager and show the XPGainedPanel
                 ExperienceManager.AddXP(xpReward);
             }
             
+            //give standard currency
             if (standardCurrencyReward > 0)
-            {
-                //TODO: go through reward manager so the reward is shown in the reward list
-                Currency.Standard.AddFunds(standardCurrencyReward);
-            }
+                RewardManager.GiveStandardCurrency(standardCurrencyReward);
 
+            //give core parts
             if (corePartRewards != null)
             {
                 foreach (CorePart corePartReward in corePartRewards)
@@ -582,6 +582,7 @@ namespace Gumball
                 }
             }
 
+            //give sub parts
             if (subPartRewards != null)
             {
                 foreach (SubPart subPartReward in subPartRewards)
