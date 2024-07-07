@@ -162,7 +162,7 @@ jobs:
               COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
               # Remove 'Conflicts:' and anything after it
               COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/Conflicts:.*//g')
-              COMMIT_MESSAGES+="$COMMIT_MESSAGE "
+              COMMIT_MESSAGES+="$((i+1)). $COMMIT_MESSAGE\\n"
             done
           else
             COUNT=1
@@ -172,7 +172,7 @@ jobs:
             COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
             # Remove 'Conflicts:' and anything after it
             COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/Conflicts:.*//g')
-            COMMIT_MESSAGES+="$COMMIT_MESSAGE "
+            COMMIT_MESSAGES="$COMMIT_MESSAGE\\n"
           fi
           echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"
           echo "commit-messages=$COMMIT_MESSAGES" >> "$GITHUB_OUTPUT"
