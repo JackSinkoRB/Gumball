@@ -10,11 +10,7 @@ namespace Gumball
     public class SwapSubPartPanel : AnimatedPanel
     {
 
-        [Header("Install button")]
-        [SerializeField] private Button installButton;
-        [SerializeField] private TextMeshProUGUI installButtonLabel;
-        [SerializeField] private Color installButtonColorInstall = Color.blue;
-        [SerializeField] private Color installButtonColorUninstall = Color.red;
+        [SerializeField] private SwapSubPartInstallButton installButton;
 
         [Header("Events")]
         [SerializeField] private Transform eventHolder;
@@ -23,24 +19,12 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private SubPartSlot slot;
 
-        private SubPart sparePart;
-
         public void Initialise(SubPartSlot slot)
         {
             this.slot = slot;
 
             UpdateEvents();
-            UpdateInstallButton();
-        }
-
-        public void OnClickInstallButton()
-        {
-            if (slot.CurrentSubPart != null)
-                slot.UninstallSubPart();
-            else
-                slot.InstallSubPart(sparePart);
-            
-            UpdateInstallButton();
+            installButton.Initialise(slot);
         }
 
         private void UpdateEvents()
@@ -56,32 +40,6 @@ namespace Gumball
                 }
             }
         }
-        
-        private void UpdateInstallButton()
-        {
-            if (slot.CurrentSubPart != null)
-            {
-                //show uninstall
-                installButton.interactable = true;
-                installButtonLabel.text = "Uninstall";
-                installButton.image.color = installButtonColorUninstall;
-                return;
-            }
-            
-            sparePart = SubPartManager.GetSpareSubPart(slot.Type, slot.Rarity);
-            if (sparePart == null)
-            {
-                //show not available
-                installButton.interactable = false;
-                installButtonLabel.text = "Not available";
-                installButton.image.color = installButtonColorInstall;
-                return;
-            }
-            
-            installButton.interactable = true;
-            installButtonLabel.text = "Install";
-            installButton.image.color = installButtonColorInstall;
-        }
-        
+
     }
 }

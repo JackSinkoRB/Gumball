@@ -143,10 +143,6 @@ namespace Gumball
         {
             isFullyLoaded = true;
             onFullyLoaded?.Invoke();
-            
-            //move the chunk detector relative to the chunk (as it may have rotated)
-            chunkDetector.transform.position = terrainHighLOD.transform.position.OffsetY(-500);
-            chunkDetector.SetActive(true);
         }
 
         public void OnBecomeAccessible()

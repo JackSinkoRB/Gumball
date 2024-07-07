@@ -12,12 +12,28 @@ namespace Gumball
         public static event Action onUnityLateUpdate;
         public static event Action onUnityFixedUpdate;
 
+        private static readonly Dictionary<string, CoroutineHelperInstance> sceneCoroutineInstances = new();
+        
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
         {
             onUnityUpdate = null;
             onUnityLateUpdate = null;
             onUnityFixedUpdate = null;
+
+            sceneCoroutineInstances.Clear();
+        }
+        
+        /// <summary>
+        /// Starts the coroutine on the current scene only. If the scene is unloaded, the coroutine will stop.
+        /// </summary>
+        public static void StartCoroutineOnCurrentScene(IEnumerator routine)
+        {
+            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (!sceneCoroutineInstances.ContainsKey(sceneName))
+                sceneCoroutineInstances[sceneName] = new GameObject($"CoroutineHelper-{sceneName}").AddComponent<CoroutineHelperInstance>();
+            
+            sceneCoroutineInstances[sceneName].StartCoroutine(routine);
         }
         
         private void Update()

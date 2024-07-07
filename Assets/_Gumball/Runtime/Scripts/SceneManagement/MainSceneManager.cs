@@ -29,7 +29,11 @@ namespace Gumball
         private void Start()
         {
             this.PerformAfterTrue(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MainSceneAddress),
-                () => PanelManager.GetPanel<MainMenuPanel>().Show());
+                () =>
+                {
+                    PanelManager.GetPanel<MainMenuPanel>().Show();
+                    PanelManager.GetPanel<PlayerStatsPanel>().Show();
+                });
         }
         
         public static void LoadMainScene()

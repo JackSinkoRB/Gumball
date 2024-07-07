@@ -61,11 +61,16 @@ namespace Gumball
             Legendary
         }
 
+        [Header("Details")]
         [SerializeField] private SubPartType type;
         [SerializeField] private SubPartRarity rarity;
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
 
+        [Header("Cost")]
+        [Tooltip("This is the cost to install the sub part on a core part.")]
+        [SerializeField] private int standardCurrencyInstallCost = 50;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<GameSession> sessionsThatGiveReward = new();
         
@@ -75,6 +80,7 @@ namespace Gumball
         public SubPartRarity Rarity => rarity;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
+        public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public ReadOnlyCollection<GameSession> SessionsThatGiveReward => sessionsThatGiveReward.AsReadOnly();
         
         public bool IsUnlocked

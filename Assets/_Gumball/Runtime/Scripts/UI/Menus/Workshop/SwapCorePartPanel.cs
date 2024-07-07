@@ -12,8 +12,7 @@ namespace Gumball
     {
 
         [SerializeField] private MagneticScroll partsMagneticScroll;
-        [SerializeField] private Button installButton;
-        [SerializeField] private TextMeshProUGUI installButtonLabel;
+        [SerializeField] private SwapCorePartInstallButton installButton;
         [SerializeField] private TextMeshProUGUI countLabel;
         
         [Header("Debugging")]
@@ -52,11 +51,24 @@ namespace Gumball
 
         public void OnClickInstallButton()
         {
+            bool isStockPart = currentSelectedPart == null;
+            if (!isStockPart)
+            {
+                //take funds
+                if (!Currency.Standard.HasEnoughFunds(currentSelectedPart.StandardCurrencyInstallCost))
+                {
+                    PanelManager.GetPanel<InsufficientStandardCurrencyPanel>().Show();
+                    return;
+                }
+
+                Currency.Standard.TakeFunds(currentSelectedPart.StandardCurrencyInstallCost);
+            }
+
             CorePartManager.InstallPartOnCar(partType, currentSelectedPart, WarehouseManager.Instance.CurrentCar.CarIndex);
-            UpdateInstallButton(partType, currentSelectedPart);
-            
+            installButton.Initialise(partType, currentSelectedPart);
+
             //update the sub parts menu
-            if (currentSelectedPart == null)
+            if (isStockPart)
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(null);
             else
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(partType);
@@ -78,18 +90,11 @@ namespace Gumball
                 currentSelectedPart = part;
                 
                 //populate details
-                UpdateInstallButton(type, part);
+                installButton.Initialise(type, part);
             };
 
             return scrollItem;
         }
 
-        private void UpdateInstallButton(CorePart.PartType type, CorePart part)
-        {
-            bool isSelected = PartModification.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, type) == part;
-            installButton.interactable = !isSelected;
-            installButtonLabel.text = isSelected ? "Installed" : "Install";
-        }
-        
     }
 }

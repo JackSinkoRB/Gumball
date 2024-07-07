@@ -986,6 +986,9 @@ namespace Gumball
             
             foreach (AICar racerCollidingWith in racersCollidingWith)
             {
+                if (racerCollidingWith == null)
+                    continue;
+                
                 //since the racer may be in the list multiple times (multiple colliders colliding), only do the check once per racer
                 if (racersAlreadyChecked.Contains(racerCollidingWith))
                     continue;

@@ -7,18 +7,17 @@ namespace Gumball
     public class GameSessionEndPanel : AnimatedPanel
     {
         
-        private RewardPanel rewardPanel => PanelManager.GetPanel<RewardPanel>();
-        
         public void OnClickExitButton()
         {
-            if (rewardPanel.PendingRewards > 0)
-                rewardPanel.Show();
+            StartCoroutine(GiveRewardsThenExitIE());
+        }
+
+        private IEnumerator GiveRewardsThenExitIE()
+        {
+            yield return GameSessionManager.Instance.CurrentSession.GiveRewards();
             
-            this.PerformAfterTrue(() => !rewardPanel.IsShowing, () =>
-            {
-                GameSessionManager.Instance.CurrentSession.UnloadSession();
-                MainSceneManager.LoadMainScene();
-            });
+            GameSessionManager.Instance.CurrentSession.UnloadSession();
+            MainSceneManager.LoadMainScene();
         }
         
     }

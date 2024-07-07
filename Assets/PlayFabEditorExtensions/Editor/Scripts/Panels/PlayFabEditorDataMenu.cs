@@ -70,8 +70,8 @@ namespace PlayFab.PfEditor
             {
                 PlayFabEditor.EdExStateUpdate += StateUpdateHandler;
             }
-
-            RegisterMenu();
+            
+            EditorApplication.delayCall += RegisterMenu;
         }
 
         public void OnDestroy()

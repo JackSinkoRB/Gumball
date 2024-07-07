@@ -49,9 +49,9 @@ namespace Gumball.Runtime.Tests
         [Header("Warehouse manager")]
         [SerializeField] private GameObject carTemplatePrefab;
         
+        public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
         public string DecalEditorScenePath => AssetDatabase.GetAssetPath(decalEditorScene);
         public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
-        public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
         public string ChunkMapScenePath => AssetDatabase.GetAssetPath(chunkMapScene);
         public string WorkshopScenePath => AssetDatabase.GetAssetPath(workshopScene);
 

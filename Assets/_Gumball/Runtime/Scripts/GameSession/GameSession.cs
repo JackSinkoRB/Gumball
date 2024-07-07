@@ -59,6 +59,8 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
+        [SerializeField, PositiveValueOnly] private int xpReward = 100;
+        [SerializeField, PositiveValueOnly] private int standardCurrencyReward = 10;
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
         [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
 
@@ -297,8 +299,6 @@ namespace Gumball
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
-            
-            GiveRewards();
         }
         
         public virtual void UpdateWhenCurrent()
@@ -557,8 +557,31 @@ namespace Gumball
             EndSession();
         }
 
-        private void GiveRewards()
+        public IEnumerator GiveRewards()
         {
+            //give XP
+            if (xpReward > 0)
+            {
+                PanelManager.GetPanel<XPGainedPanel>().Show();
+            
+                int currentXP = ExperienceManager.TotalXP;
+                int newXP = ExperienceManager.TotalXP + xpReward;
+                
+                PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
+                
+                yield return new WaitUntil(() => !PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning);
+                
+                ExperienceManager.AddXP(xpReward); //add XP after in case there's a level up
+                
+                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning &&
+                                                 !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+            }
+
+            //give standard currency
+            if (standardCurrencyReward > 0)
+                RewardManager.GiveStandardCurrency(standardCurrencyReward);
+
+            //give core parts
             if (corePartRewards != null)
             {
                 foreach (CorePart corePartReward in corePartRewards)
@@ -568,6 +591,7 @@ namespace Gumball
                 }
             }
 
+            //give sub parts
             if (subPartRewards != null)
             {
                 foreach (SubPart subPartReward in subPartRewards)
@@ -575,6 +599,13 @@ namespace Gumball
                     if (!subPartReward.IsUnlocked)
                         RewardManager.GiveReward(subPartReward);
                 }
+            }
+            
+            //show the reward panel with queued rewards
+            if (PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
+            {
+                PanelManager.GetPanel<RewardPanel>().Show();
+                yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);
             }
         }
         
