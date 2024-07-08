@@ -7,7 +7,11 @@ namespace Gumball
     public class InsufficientPremiumCurrencyPanel : AnimatedPanel
     {
         
-        
+        public void OnClickStoreButton()
+        {
+            Hide();
+            PanelManager.GetPanel<StorePanel>().Show();
+        }
         
     }
 }
