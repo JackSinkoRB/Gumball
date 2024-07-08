@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class WorkshopSubMenu : SubMenu
+    public class CurrencyStoreMenu : StoreSubMenu
     {
-        
+
         
         
     }
