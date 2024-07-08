@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using PlayFab;
 using PlayFab.ClientModels;
+using Unity.Plastic.Newtonsoft.Json;
 using UnityEngine;
 
 namespace Gumball
@@ -23,6 +25,18 @@ namespace Gumball
         public static void Initialise()
         {
             Login();
+        }
+
+        public static T GetTitleData<T>(string key, T defaultValue = default)
+        {
+            if (titleDataCached == null)
+                throw new NullReferenceException("Trying to retrieve title data, but the title data hasn't been loaded.");
+
+            if (!titleDataCached.ContainsKey(key))
+                return defaultValue;
+            
+            T deserializedObject = JsonConvert.DeserializeObject<T>(titleDataCached[key]);
+            return deserializedObject;
         }
 
         private static void Login()
