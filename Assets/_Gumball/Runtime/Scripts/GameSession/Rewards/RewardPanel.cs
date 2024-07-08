@@ -8,14 +8,16 @@ namespace Gumball
 {
     public class RewardPanel : AnimatedPanel
     {
-
+        
         [SerializeField] private MagneticScroll magneticScroll;
+        [SerializeField] private Sprite standardCurrencyIcon;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<CorePart> rewardQueueCoreParts = new();
         [SerializeField, ReadOnly] private List<SubPart> rewardQueueSubParts = new();
-
-        public int PendingRewards => rewardQueueCoreParts.Count + rewardQueueSubParts.Count;
+        [SerializeField, ReadOnly] private List<int> rewardQueueStandardCurrency = new();
+        
+        public int PendingRewards => rewardQueueCoreParts.Count + rewardQueueSubParts.Count + rewardQueueStandardCurrency.Count;
         
         protected override void OnShow()
         {
@@ -45,17 +47,19 @@ namespace Gumball
             
             rewardQueueSubParts.Add(subPart);
         }
-
+        
+        public void QueueStandardCurrencyReward(int amount)
+        {
+            rewardQueueStandardCurrency.Add(amount);
+        }
+        
         public void Populate()
         {
             List<ScrollItem> scrollItems = new List<ScrollItem>();
             
             //do core parts first
-            if (rewardQueueCoreParts.Count > 0)
+            foreach (CorePart corePart in rewardQueueCoreParts)
             {
-                CorePart corePart = rewardQueueCoreParts[0];
-                rewardQueueCoreParts.RemoveAt(0);
-                
                 ScrollItem scrollItem = new ScrollItem();
 
                 scrollItem.onLoad += () =>
@@ -66,13 +70,11 @@ namespace Gumball
                 
                 scrollItems.Add(scrollItem);
             }
+            rewardQueueCoreParts.Clear();
 
             //show sub parts
-            if (rewardQueueSubParts.Count > 0)
+            foreach (SubPart subPart in rewardQueueSubParts)
             {
-                SubPart subPart = rewardQueueSubParts[0];
-                rewardQueueSubParts.RemoveAt(0);
-                
                 ScrollItem scrollItem = new ScrollItem();
 
                 scrollItem.onLoad += () =>
@@ -83,7 +85,22 @@ namespace Gumball
                 
                 scrollItems.Add(scrollItem);
             }
+            rewardQueueSubParts.Clear();
             
+            //show standard currency
+            foreach (int amount in rewardQueueStandardCurrency)
+            {
+                ScrollItem scrollItem = new ScrollItem();
+
+                scrollItem.onLoad += () =>
+                {
+                    RewardScrollIcon rewardScrollIcon = (RewardScrollIcon) scrollItem.CurrentIcon;
+                    rewardScrollIcon.Initialise($"{amount}", standardCurrencyIcon);
+                };
+
+                scrollItems.Add(scrollItem);
+            }
+
             magneticScroll.SetItems(scrollItems);
         }
         

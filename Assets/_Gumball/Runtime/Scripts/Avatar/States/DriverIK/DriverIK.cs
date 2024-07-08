@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Gumball
 {
+    [ExecuteAlways]
     public class DriverIK : MonoBehaviour
     {
         

@@ -156,18 +156,22 @@ jobs:
             COUNT=$(( $(echo "$COMMITS" | jq length) ))
             COMMIT_MESSAGES=""
             for ((i=0; i<$COUNT; i++)); do
-              # Get commit message, replace '\n' with a space, and remove '/'
-              COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | tr '\n\t' ' ' | tr -d '/')
+              # Get commit message, replace '\n' with a space, and remove '/', apostrophes and hash marks
+              COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | tr '\n\t' ' ' | tr -d '/' | tr -d "'" | tr -d '#')
               # Remove any occurrence of "JackSinkoRB"
               COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
+              # Remove 'Conflicts:' and anything after it
+              COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/Conflicts:.*//g')
               COMMIT_MESSAGES+="$((i+1)). $COMMIT_MESSAGE\\n"
             done
           else
             COUNT=1
-            # Get commit message, replace '\n' with a space, and remove '/'
-            COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | tr '\n\t' ' ' | tr -d '/')
+            # Get commit message, replace '\n' with a space, and remove '/', apostrophes and hash marks
+            COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | tr '\n\t' ' ' | tr -d '/' | tr -d "'" | tr -d '#')
             # Remove any occurrence of "JackSinkoRB"
             COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
+            # Remove 'Conflicts:' and anything after it
+            COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/Conflicts:.*//g')
             COMMIT_MESSAGES="$COMMIT_MESSAGE\\n"
           fi
           echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"

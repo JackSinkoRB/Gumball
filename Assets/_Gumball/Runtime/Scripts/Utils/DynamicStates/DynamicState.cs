@@ -18,11 +18,19 @@ namespace Gumball
         [SerializeField] private int priority;
         [SerializeField] private bool checkToSetEachFrame;
 
-        protected DynamicStateManager manager;
+        private DynamicStateManager manager;
         
         public int Priority => priority;
         public bool CheckToSetEachFrame => checkToSetEachFrame;
-        public DynamicStateManager Manager => manager;
+
+        public DynamicStateManager Manager {
+            get
+            {
+                if (manager == null && !Application.isPlaying)
+                    manager = transform.GetComponentInAllParents<DynamicStateManager>();
+                return manager;
+            } 
+        }
         
         [Tooltip("The time passed (in seconds) since the state was set.")]
         [SerializeField, ReadOnly] protected float timeSinceSet;
@@ -36,10 +44,10 @@ namespace Gumball
 
         public virtual bool CanSetCurrent()
         {
-            if (manager.CurrentState == this) return false;
+            if (Manager.CurrentState == this) return false;
             if (!enabled || !gameObject.activeSelf) return false;
-            if (manager.CurrentState == null) return true;
-            if (priority < manager.CurrentState.Priority) return false;
+            if (Manager.CurrentState == null) return true;
+            if (priority < Manager.CurrentState.Priority) return false;
             return true;
         }
 
@@ -87,7 +95,7 @@ namespace Gumball
         /// </summary>
         protected void EndState()
         {
-            manager.SetState(null);
+            Manager.SetState(null);
         }
         
     }

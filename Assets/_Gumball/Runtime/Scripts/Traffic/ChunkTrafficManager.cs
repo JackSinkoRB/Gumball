@@ -35,9 +35,7 @@ namespace Gumball
         [Tooltip("The chunks racing lines. Can have none, one or multiple. If multiple, the first lines will take priority.")]
         [SerializeField] private CustomDrivingPath[] racingLines;
         [SerializeField] private float speedLimitKmh = 40;
-        [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
-        [SerializeField] private int density = 100;
-        
+
         [Header("Traffic lanes")]
         [SerializeField] private TrafficLane[] lanesForward;
         [SerializeField] private TrafficLane[] lanesBackward;
@@ -60,7 +58,7 @@ namespace Gumball
         public TrafficLane[] LanesBackward => lanesBackward;
         public Chunk Chunk => chunk;
         public float SpeedLimitKmh => speedLimitKmh;
-        public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLengthCached / density);
+        public int NumberOfCarsToSpawn => Mathf.RoundToInt(chunk.SplineLengthCached / GameSessionManager.Instance.CurrentSession.TrafficDensity);
         public CustomDrivingPath[] RacingLines => racingLines;
         public bool HasBackwardLanes => lanesBackward != null && lanesBackward.Length > 0;
         public bool HasForwardLanes => lanesForward != null && lanesForward.Length > 0;
@@ -93,9 +91,17 @@ namespace Gumball
         /// </summary>
         private void InitialiseCars()
         {
-            for (int count = 0; count < NumberOfCarsToSpawn; count++)
+            if (GameSessionManager.Instance.CurrentSession == null)
+                return;
+            
+            if (GameSessionManager.Instance.CurrentSession.TrafficIsProcedural)
             {
-                SpawnCarInRandomPosition();
+                for (int count = 0; count < NumberOfCarsToSpawn; count++)
+                    SpawnCarInRandomPosition();
+            }
+            else
+            {
+                SpawnNonProceduralCars();
             }
         }
 
@@ -118,7 +124,8 @@ namespace Gumball
                     direction = randomDirection.Value;
                 }
                 
-                if (TrySpawnCarInDirection(direction))
+                TrafficLane randomLane = direction == LaneDirection.FORWARD ? lanesForward.GetRandom() : lanesBackward.GetRandom();
+                if (TrySpawnCarInLane(randomLane, direction))
                     return;
                 
 #if UNITY_EDITOR
@@ -163,7 +170,7 @@ namespace Gumball
                 lanesForward = new[] { new TrafficLane(0) };
         }
         
-        private LaneDirection? ChooseRandomLaneDirection()
+        public LaneDirection? ChooseRandomLaneDirection()
         {
             if (HasBackwardLanes && HasForwardLanes)
                 return Random.Range(0, 2) == 0 ? LaneDirection.FORWARD : LaneDirection.BACKWARD;
@@ -174,25 +181,86 @@ namespace Gumball
             return null;
         }
 
-        private bool TrySpawnCarInDirection(LaneDirection direction)
+        private bool TrySpawnCarInLane(TrafficLane lane, LaneDirection direction)
         {
             //get a random lane
-            TrafficLane randomLane = direction == LaneDirection.FORWARD ? lanesForward.GetRandom() : lanesBackward.GetRandom();
             float additionalOffset = Random.Range(-randomLaneOffset, randomLaneOffset);
-            PositionAndRotation lanePosition = randomLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE
-                ? GetLanePosition(randomLane.Path.SplineSamples.GetRandom(), additionalOffset, direction)
-                : GetLanePosition(chunk.SplineSamples.GetRandom(), randomLane.DistanceFromCenter + additionalOffset, direction);
+            PositionAndRotation lanePosition = lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE
+                ? GetLanePosition(lane.Path.SplineSamples.GetRandom(), additionalOffset, direction)
+                : GetLanePosition(chunk.SplineSamples.GetRandom(), lane.DistanceFromCenter + additionalOffset, direction);
 
-            AICar randomVariant = TrafficCarSpawner.Instance.GetRandomCarPrefab();
-            if (!CanSpawnCarAtPosition(randomVariant, lanePosition.Position, lanePosition.Rotation))
+            GameObject randomVariantPrefab = lane.GetVehicleToSpawn();
+            if (randomVariantPrefab == null)
                 return false;
 
-            //spawn an instance of the car and intialise
-            AICar car = TrafficCarSpawner.Instance.SpawnCar(lanePosition.Position, lanePosition.Rotation, randomVariant);
+            AICar carToSpawn = randomVariantPrefab.GetComponent<AICar>();
+            if (!CanSpawnCarAtPosition(carToSpawn, lanePosition.Position, lanePosition.Rotation))
+                return false;
             
-            car.SetCurrentLane(randomLane, direction, additionalOffset);
+            //spawn an instance of the car and intialise
+            AICar car = TrafficCarSpawner.Instance.SpawnCar(lanePosition.Position, lanePosition.Rotation, carToSpawn);
+            
+            car.SetCurrentLane(lane, direction, additionalOffset);
             car.SetSpeed(car.DesiredSpeed);
             return true;
+        }
+        
+        private void SpawnNonProceduralCars()
+        {
+            //get manual spawn data
+            List<TrafficSpawnPosition> spawnPositionsInChunk = GetManualSpawnPositionsInChunk();
+
+            //spawn the cars
+            for (int index = 0; index < spawnPositionsInChunk.Count; index++)
+            {
+                TrafficSpawnPosition spawnPosition = spawnPositionsInChunk[index];
+
+                if (spawnPosition.LaneDirection == LaneDirection.NONE)
+                {
+                    Debug.LogError($"The traffic spawn position in {chunk.name} at index {index} is invalid. The lane direction must not be 'none'.");
+                    continue;
+                }
+
+                if ((spawnPosition.LaneDirection == LaneDirection.FORWARD && (lanesForward == null || lanesForward.Length == 0))
+                    || (spawnPosition.LaneDirection == LaneDirection.BACKWARD && (lanesBackward == null || lanesBackward.Length == 0)))
+                {
+                    Debug.LogError($"The traffic spawn position in {chunk.name} at index {index} is invalid. There is no lanes in direction {spawnPosition.LaneDirection.ToString()}.");
+                    continue;
+                }
+                
+                TrafficLane lane = spawnPosition.LaneDirection == LaneDirection.FORWARD ? lanesForward[spawnPosition.LaneIndex] : lanesBackward[spawnPosition.LaneIndex];
+                
+                if (!TrySpawnCarInLane(lane, spawnPosition.LaneDirection))
+                    GlobalLoggers.AICarLogger.Log($"Could not spawn traffic car at index {index} because there was no room.");
+            }
+        }
+
+        private List<TrafficSpawnPosition> GetManualSpawnPositionsInChunk()
+        {
+            //TODO: if this is called more than once, cache it and only calculate once
+            List<TrafficSpawnPosition> spawnPositionsInChunk = new List<TrafficSpawnPosition>();
+            
+            float[] chunkLengths = GameSessionManager.Instance.CurrentSession.CurrentChunkMap.ChunkLengthsCalculated;
+            if (chunkLengths == null || chunkLengths.Length == 0)
+            {
+                Debug.LogError($"The chunk map {GameSessionManager.Instance.CurrentSession.CurrentChunkMap.name.Replace("(Clone)", "")} hasn't calculated the chunk lengths. You need to rebuild the map data for manual traffic spawn positions to work.");
+                return spawnPositionsInChunk;
+            }
+            
+            int currentChunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(chunk);
+            float chunkStartDistance = currentChunkIndex == 0 ? 0 : chunkLengths[currentChunkIndex - 1];
+            float chunkEndDistance = chunkLengths[currentChunkIndex];
+
+            foreach (TrafficSpawnPosition spawnPosition in GameSessionManager.Instance.CurrentSession.TrafficSpawnPositions)
+            {
+                if (spawnPosition.DistanceFromMapStart >= chunkStartDistance
+                    && spawnPosition.DistanceFromMapStart < chunkEndDistance)
+                {
+                    spawnPositionsInChunk.Add(spawnPosition);
+                }
+            }
+
+            return spawnPositionsInChunk;
         }
 
 #if UNITY_EDITOR

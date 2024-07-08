@@ -46,9 +46,12 @@ namespace Gumball.Runtime.Tests
         [SerializeField] private SubPart subPartA;
         [SerializeField] private SubPart subPartB;
         
+        [Header("Warehouse manager")]
+        [SerializeField] private GameObject carTemplatePrefab;
+        
+        public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
         public string DecalEditorScenePath => AssetDatabase.GetAssetPath(decalEditorScene);
         public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
-        public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
         public string ChunkMapScenePath => AssetDatabase.GetAssetPath(chunkMapScene);
         public string WorkshopScenePath => AssetDatabase.GetAssetPath(workshopScene);
 
@@ -63,6 +66,8 @@ namespace Gumball.Runtime.Tests
 
         public SubPart SubPartA => subPartA;
         public SubPart SubPartB => subPartB;
-        
+
+        public GameObject CarTemplatePrefab => carTemplatePrefab;
+
     }
 }

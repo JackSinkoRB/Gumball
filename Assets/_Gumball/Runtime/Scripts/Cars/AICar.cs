@@ -591,6 +591,11 @@ namespace Gumball
         {
             onCollisionEnter?.Invoke(collision);
             
+            //limit the y velocity to prevent car getting flung into the air and keep it more solid on the ground
+            const float maxVerticalVelocity = 0.1f;
+            if (Rigidbody.velocity.y > maxVerticalVelocity)
+                Rigidbody.velocity = Rigidbody.velocity.SetY(maxVerticalVelocity);
+            
             AICar car = collision.gameObject.GetComponent<AICar>();
             if (car == null)
                 return;
@@ -981,6 +986,9 @@ namespace Gumball
             
             foreach (AICar racerCollidingWith in racersCollidingWith)
             {
+                if (racerCollidingWith == null)
+                    continue;
+                
                 //since the racer may be in the list multiple times (multiple colliders colliding), only do the check once per racer
                 if (racersAlreadyChecked.Contains(racerCollidingWith))
                     continue;
@@ -1430,6 +1438,7 @@ namespace Gumball
                 
                 //set the steer amount
                 Transform steerPivot = frontWheelMesh.transform.parent;
+                steerPivot.transform.position = wheelPosition;
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
             }
 
@@ -1783,10 +1792,13 @@ namespace Gumball
                     if (!useRacingLine)
                     {
                         TrafficLane closestLane = GetClosestLaneToCurrentLane(chunkToUse);
-                        SetCurrentLane(closestLane);
-                        
-                        if (closestLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE)
-                            sampleCollection = closestLane.Path.SampleCollection;
+                        if (closestLane != null) //may be null if there are no lanes in the chunk in the current direction
+                        {
+                            SetCurrentLane(closestLane);
+
+                            if (closestLane.Type == TrafficLane.LaneType.CUSTOM_SPLINE)
+                                sampleCollection = closestLane.Path.SampleCollection;
+                        }
                     }
                     
                     //reset the values

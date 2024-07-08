@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Debug = UnityEngine.Debug;
+using Random = UnityEngine.Random;
 
 namespace Gumball
 {
@@ -39,12 +40,27 @@ namespace Gumball
 
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
+        [SerializeField] protected float raceDistanceMetres;
+
+        [Header("Racers")]
         [SerializeField] private RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
-        [SerializeField] protected float raceDistanceMetres;
         [SerializeField] private float racersStartingSpeed = 70;
 
+        [Header("Traffic")]
+        [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the list below.", MessageType.Info, true)]
+        [Tooltip("If enabled, each frame it will check to spawn traffic to keep the desired traffic density designated in the chunks.")]
+        [SerializeField] private bool trafficIsProcedural = true;
+        [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
+        [SerializeField] private int trafficDensity = 100;
+        [SerializeField] private AssetReferenceGameObject[] trafficBikes;
+        [SerializeField] private AssetReferenceGameObject[] trafficCars;
+        [SerializeField] private AssetReferenceGameObject[] trafficTrucks;
+        [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
+
         [Header("Rewards")]
+        [SerializeField, PositiveValueOnly] private int xpReward = 100;
+        [SerializeField, PositiveValueOnly] private int standardCurrencyReward = 10;
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
         [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
 
@@ -55,6 +71,7 @@ namespace Gumball
         private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         private ChunkMap currentChunkMapCached;
         private Coroutine sessionCoroutine;
+        private Dictionary<AssetReferenceGameObject, AsyncOperationHandle> trafficPrefabHandles = new();
         
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
 
@@ -67,7 +84,14 @@ namespace Gumball
         public CorePart[] CorePartRewards => corePartRewards;
         public SubPart[] SubPartRewards => subPartRewards;
         public bool HasStarted { get; private set; }
-        
+        public bool TrafficIsProcedural => trafficIsProcedural;
+        public int TrafficDensity => trafficDensity;
+        public AssetReferenceGameObject[] TrafficBikes => trafficBikes;
+        public AssetReferenceGameObject[] TrafficCars => trafficCars;
+        public AssetReferenceGameObject[] TrafficTrucks => trafficTrucks;
+        public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
+        public ChunkMap CurrentChunkMap => currentChunkMapCached;
+
         public abstract string GetName();
 
         public void StartSession()
@@ -102,6 +126,49 @@ namespace Gumball
             TrackSubPartRewards();
         }
 
+#if UNITY_EDITOR
+        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
+        public void RandomiseTraffic()
+        {
+            List<TrafficSpawnPosition> spawnPositions = new();
+
+            ChunkMap chunkMap = chunkMapAssetReference.editorAsset;
+            
+            float chunkStartDistance = 0;
+            for (int chunkIndex = 0; chunkIndex < chunkMap.ChunkReferences.Length; chunkIndex++)
+            {
+                AssetReferenceGameObject chunkReference = chunkMap.ChunkReferences[chunkIndex];
+                Chunk chunk = chunkReference.editorAsset.gameObject.GetComponent<Chunk>();
+                
+                float chunkEndDistance = chunkStartDistance + chunk.SplineLengthCached;
+                
+                int desiredCars = chunk.TrafficManager.NumberOfCarsToSpawn;
+
+                for (int count = 0; count < desiredCars; count++)
+                {
+                    float randomDistance = Random.Range(chunkStartDistance, chunkEndDistance);
+                    
+                    ChunkTrafficManager.LaneDirection? randomDirection = chunk.TrafficManager.ChooseRandomLaneDirection();
+                    if (randomDirection == null)
+                    {
+                        Debug.LogError($"Could not spawn traffic car at index {count} because there are no lanes in {chunk.name}.");
+                        continue;
+                    }
+                    
+                    TrafficLane[] lanes = randomDirection == ChunkTrafficManager.LaneDirection.FORWARD ? chunk.TrafficManager.LanesForward : chunk.TrafficManager.LanesBackward;
+                    int randomLaneIndex = Random.Range(0, lanes.Length);
+                    
+                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex));
+                }
+
+                chunkStartDistance += chunk.SplineLengthCached;
+            }
+
+            trafficSpawnPositions = new CollectionWrapperTrafficSpawnPosition();
+            trafficSpawnPositions.Value = spawnPositions.ToArray();
+        }
+#endif
+        
         private void TrackCorePartRewards()
         {
             foreach (CorePart corePart in corePartRewards)
@@ -197,11 +264,22 @@ namespace Gumball
                 CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
             
             OnSessionEnd();
-            
-            GameSessionManager.Instance.SetCurrentSession(null);
+        }
 
+        public void UnloadSession()
+        {
+            GameSessionManager.Instance.SetCurrentSession(null);
+            
             if (chunkMapHandle.IsValid())
                 Addressables.Release(chunkMapHandle);
+            
+            Destroy(currentChunkMapCached);
+            trafficPrefabHandles.Clear(); //remove the traffic car references so they can be unloaded 
+        }
+        
+        public AsyncOperationHandle GetTrafficVehicleHandle(AssetReferenceGameObject assetReference)
+        {
+            return trafficPrefabHandles[assetReference];
         }
 
         protected virtual void OnSessionEnd()
@@ -221,8 +299,6 @@ namespace Gumball
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
-            
-            GiveRewards();
         }
         
         public virtual void UpdateWhenCurrent()
@@ -254,6 +330,7 @@ namespace Gumball
 
             yield return LoadChunkMap();
             yield return LoadScene();
+            yield return LoadTrafficVehicles();
             yield return SetupSession();
             
             GlobalLoggers.LoadingLogger.Log("Loading session...");
@@ -371,10 +448,23 @@ namespace Gumball
             for (int index = 0; index < racerData.Length; index++)
             {
                 RacerSessionData data = racerData[index];
+
+                if (data.AssetReference == null)
+                {
+                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                    continue;
+                }
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
+
                 handle.Completed += h =>
                 {
+                    if (handle.Result == null)
+                    {
+                        Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                        return;
+                    }
+                    
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
 
@@ -395,6 +485,40 @@ namespace Gumball
             {
                 racer.SetSpeed(racersStartingSpeed);
             }
+        }
+
+        private IEnumerator LoadTrafficVehicles()
+        {
+            trafficPrefabHandles.Clear();
+            
+            AssetReferenceGameObject[] allVehicles = (trafficBikes ?? Array.Empty<AssetReferenceGameObject>())
+                .Concat(trafficCars ?? Array.Empty<AssetReferenceGameObject>())
+                .Concat(trafficTrucks ?? Array.Empty<AssetReferenceGameObject>())
+                .ToArray();
+            
+            foreach (AssetReferenceGameObject assetReference in allVehicles)
+            {
+                if (assetReference == null)
+                {
+                    Debug.LogError($"There is a null traffic vehicle in {name}. Skipping it.");
+                    continue;
+                }
+
+                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
+                trafficPrefabHandles[assetReference] = handle;
+                
+                handle.Completed += h =>
+                {
+                    if (handle.Result == null)
+                    {
+                        trafficPrefabHandles.Remove(assetReference);
+                        Debug.LogError($"There is a null traffic vehicle in {name}. Skipping it.");
+                    }
+                };
+            }
+            
+            //wait until all cars have loaded
+            yield return new WaitUntil(() => trafficPrefabHandles.Values.AreAllComplete());
         }
 
         private void InitialiseRaceMode()
@@ -433,8 +557,31 @@ namespace Gumball
             EndSession();
         }
 
-        private void GiveRewards()
+        public IEnumerator GiveRewards()
         {
+            //give XP
+            if (xpReward > 0)
+            {
+                PanelManager.GetPanel<XPGainedPanel>().Show();
+            
+                int currentXP = ExperienceManager.TotalXP;
+                int newXP = ExperienceManager.TotalXP + xpReward;
+                
+                PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
+                
+                yield return new WaitUntil(() => !PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning);
+                
+                ExperienceManager.AddXP(xpReward); //add XP after in case there's a level up
+                
+                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning &&
+                                                 !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+            }
+
+            //give standard currency
+            if (standardCurrencyReward > 0)
+                RewardManager.GiveStandardCurrency(standardCurrencyReward);
+
+            //give core parts
             if (corePartRewards != null)
             {
                 foreach (CorePart corePartReward in corePartRewards)
@@ -444,6 +591,7 @@ namespace Gumball
                 }
             }
 
+            //give sub parts
             if (subPartRewards != null)
             {
                 foreach (SubPart subPartReward in subPartRewards)
@@ -451,6 +599,13 @@ namespace Gumball
                     if (!subPartReward.IsUnlocked)
                         RewardManager.GiveReward(subPartReward);
                 }
+            }
+            
+            //show the reward panel with queued rewards
+            if (PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
+            {
+                PanelManager.GetPanel<RewardPanel>().Show();
+                yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);
             }
         }
         

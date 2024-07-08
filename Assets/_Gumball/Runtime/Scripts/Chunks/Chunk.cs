@@ -143,10 +143,6 @@ namespace Gumball
         {
             isFullyLoaded = true;
             onFullyLoaded?.Invoke();
-            
-            //move the chunk detector relative to the chunk (as it may have rotated)
-            chunkDetector.transform.position = terrainHighLOD.transform.position.OffsetY(-500);
-            chunkDetector.SetActive(true);
         }
 
         public void OnBecomeAccessible()
@@ -302,7 +298,44 @@ namespace Gumball
         public void FindSplineMeshes()
         {
             splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+
+            EnsureSplineMeshHaveUniqueID();
+
             GlobalLoggers.ChunkLogger.Log($"Found {splineMeshes.Length} spline meshes under {gameObject.name}.");
+        }
+
+        private void EnsureSplineMeshHaveUniqueID()
+        {
+            bool prefabNeedsChanging = false;
+            
+            foreach (SplineMesh splineMesh in splineMeshes)
+            {
+                if (!splineMesh.HasComponent<UniqueIDAssigner>())
+                    prefabNeedsChanging = true;
+            }
+
+            if (prefabNeedsChanging)
+            {
+                string path = GameObjectUtils.GetPathToPrefabAsset(gameObject);
+                if (path.IsNullOrEmpty())
+                    return;
+
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+
+                SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+                foreach (SplineMesh splineMeshInPrefab in splineMeshesInPrefab)
+                {
+                    if (!splineMeshInPrefab.HasComponent<UniqueIDAssigner>())
+                    {
+                        UniqueIDAssigner id = splineMeshInPrefab.gameObject.AddComponent<UniqueIDAssigner>();
+                        id.Initialise();
+                    }
+                }
+                
+                PrefabUtility.SaveAsPrefabAsset(prefabInstance, path);
+                DestroyImmediate(prefabInstance);
+            }
         }
 #endif
 

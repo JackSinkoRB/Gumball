@@ -26,11 +26,17 @@ namespace Gumball
 
         private static void OnSavePrefab(string sceneName, string path)
         {
+            if (EditorApplication.isUpdating)
+                return;
+            
             RemoveUnusedSplineMeshes(path);
         }
 
         private static void OnSaveScene(string sceneName, string path)
         {
+            if (EditorApplication.isUpdating)
+                return;
+            
             RemoveUnusedChunks();
         }
 
@@ -53,7 +59,10 @@ namespace Gumball
             List<string> safeFileNames = new List<string>();
             foreach (SplineMesh splineMeshInChunk in chunkAsset.transform.GetComponentsInAllChildren<SplineMesh>())
             {
-                string splineMeshAssetName = $"{splineMeshInChunk.gameObject.name}_{chunkAsset.transform.InverseTransformPoint(splineMeshInChunk.transform.position.Round(1))}";
+                if (splineMeshInChunk.GetComponent<UniqueIDAssigner>() == null)
+                    continue;
+                
+                string splineMeshAssetName = $"{splineMeshInChunk.gameObject.name}_{splineMeshInChunk.GetComponent<UniqueIDAssigner>().UniqueID}";
                 safeFileNames.Add(splineMeshAssetName);
             }
             
@@ -104,7 +113,8 @@ namespace Gumball
                 }
             }
             
-            AssetDatabase.SaveAssets();
+            if (!EditorApplication.isUpdating)
+                AssetDatabase.SaveAssets();
         }
 
     }

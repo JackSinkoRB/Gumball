@@ -11,24 +11,25 @@ namespace Gumball
     public struct ChunkObjectData
     {
         
-        [SerializeField] private Vector3 positionRelativeToChunk;
-        [SerializeField] private Quaternion rotation;
+        [SerializeField] private bool hideWhenFarAway;
+        [SerializeField] private Vector3 positionRelativeToParent;
+        [SerializeField] private Quaternion locationRotation;
         [SerializeField] private Vector3 scaleRelativeToChunk;
-        [SerializeField] private bool alwaysGrounded;
 
         public ChunkObjectData(Chunk chunkReference, ChunkObject chunkObject)
         {
-            positionRelativeToChunk = chunkReference.transform.InverseTransformPoint(chunkObject.transform.position);
-            rotation = chunkObject.transform.rotation;
+            hideWhenFarAway = chunkObject.HideWhenFarAway;
+            Transform desiredParent = hideWhenFarAway ? chunkReference.TerrainHighLOD.transform : chunkReference.transform;
+            positionRelativeToParent = desiredParent.InverseTransformPoint(chunkObject.transform.position);
+            locationRotation = chunkObject.transform.localRotation;
             scaleRelativeToChunk = GetScaleRelativeToChunk(chunkReference, chunkObject);
-            alwaysGrounded = chunkObject.AlwaysGrounded;
         }
 
         public GameObject LoadIntoChunk(AsyncOperationHandle<GameObject> handle, Chunk chunk)
         {
-            GameObject chunkObject = Object.Instantiate(handle.Result, chunk.transform);
-            chunkObject.transform.localPosition = positionRelativeToChunk;
-            chunkObject.transform.localRotation = rotation;
+            GameObject chunkObject = Object.Instantiate(handle.Result, hideWhenFarAway ? chunk.TerrainHighLOD.transform : chunk.transform);
+            chunkObject.transform.localPosition = positionRelativeToParent;
+            chunkObject.transform.localRotation = locationRotation;
             chunkObject.transform.localScale = scaleRelativeToChunk;
 
             chunkObject.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);

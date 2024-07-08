@@ -206,7 +206,12 @@ namespace Gumball
                 string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
                 if (!Directory.Exists(chunkDirectory))
                     Directory.CreateDirectory(chunkDirectory);
-                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{chunk.transform.InverseTransformPoint(splineMesh.transform.position.Round(1))}.asset";
+
+                UniqueIDAssigner uniqueIDAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                if (uniqueIDAssigner == null)
+                    continue;
+                
+                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{uniqueIDAssigner.UniqueID}.asset";
                 Mesh existingAsset = AssetDatabase.LoadAssetAtPath<Mesh>(path);
                 
                 bool alreadyBaked = splineMesh.baked && existingAsset != null && splineMesh.GetComponent<MeshFilter>().sharedMesh != null;
@@ -262,7 +267,7 @@ namespace Gumball
             if (chunkObject.IsChildOfAnotherChunkObject)
             {
                 Debug.LogWarning($"Chunk object {chunkObject.gameObject.name} will not be treated as a chunk object, as it is a child of another chunk object.");
-                return new ChunkObjectHandling(false, false, null);
+                return new ChunkObjectHandling(true, false, null);
             }
             
             if (chunkObject.IgnoreAtRuntime || !chunkObject.gameObject.activeSelf || !chunkObject.enabled)
@@ -313,8 +318,11 @@ namespace Gumball
                 ChunkObject chunkObjectInPrefab = chunkObjectsInPrefab[index];
                 ChunkObject chunkObjectInInstance = chunkObjectsInInstance[index];
 
-                if (GetChunkObjectHandling(chunkObjectInPrefab).CanDestroy)
+                if (GetChunkObjectHandling(chunkObjectInPrefab).CanDestroy
+                    && chunkObjectInInstance != null) //may have already been destroyed
+                {
                     Object.DestroyImmediate(chunkObjectInInstance.gameObject);
+                }
             }
 
             //delete empty gameobjects

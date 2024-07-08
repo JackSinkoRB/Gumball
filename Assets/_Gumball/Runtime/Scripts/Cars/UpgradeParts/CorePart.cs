@@ -20,10 +20,15 @@ namespace Gumball
             DRIVETRAIN
         }
 
+        [Header("Details")]
         [SerializeField] private PartType type;
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
 
+        [Header("Cost")]
+        [Tooltip("This is the cost to install the core part on a car.")]
+        [SerializeField] private int standardCurrencyInstallCost = 500;
+        
         [Header("SubParts")]
         [SerializeField] private SubPartSlot[] subPartSlots;
         [SerializeField] private CorePartLevel[] levels;
@@ -40,6 +45,7 @@ namespace Gumball
         public PartType Type => type;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
+        public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public SubPartSlot[] SubPartSlots => subPartSlots;
         public float PeakTorqueAddition => peakTorqueAddition;
         
