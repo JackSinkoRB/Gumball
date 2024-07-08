@@ -28,6 +28,7 @@ namespace Gumball
             Loading_vehicle,
             Loading_avatars,
             Loading_vehicle_and_drivers,
+            Connecting_to_PlayFab,
         }
 
         [SerializeField] private TextMeshProUGUI debugLabel;
@@ -101,6 +102,9 @@ namespace Gumball
 #if ENABLE_LOGS
             Debug.Log($"Vehicle and driver loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
+
+            currentStage = Stage.Connecting_to_PlayFab;
+            yield return new WaitUntil(() => PlayFabManager.ConnectionStatus != PlayFabManager.ConnectionStatusType.LOADING);
             
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
