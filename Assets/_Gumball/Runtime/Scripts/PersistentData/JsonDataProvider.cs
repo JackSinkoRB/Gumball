@@ -15,7 +15,7 @@ namespace Gumball
             filePath = $"{Application.persistentDataPath}/{identifier}.json";
         }
 
-        public override bool SourceHasValue()
+        public override bool SourceExists()
         {
             return File.Exists(filePath);
         }
@@ -30,7 +30,7 @@ namespace Gumball
 
         protected override void LoadFromSource()
         {
-            if (!File.Exists(filePath))
+            if (!SourceExists())
             {
                 GlobalLoggers.SaveDataLogger.Log($"No previously saved data for '{identifier}'.");
                 return;

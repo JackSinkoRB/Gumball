@@ -230,7 +230,7 @@ namespace Gumball
             }
         }
 
-        public abstract bool SourceHasValue();
+        public abstract bool SourceExists();
         protected abstract void SaveToSource();
         protected abstract void LoadFromSource();
         protected abstract void OnRemoveFromSource();
