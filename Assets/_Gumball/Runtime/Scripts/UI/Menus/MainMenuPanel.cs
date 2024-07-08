@@ -37,5 +37,10 @@ namespace Gumball
             WorkshopSceneManager.LoadWorkshop();
         }
         
+        public void OnClickStoreButton()
+        {
+            PanelManager.GetPanel<StorePanel>().Show();
+        }
+        
     }
 }
