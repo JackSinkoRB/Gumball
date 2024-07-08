@@ -65,7 +65,10 @@ namespace Gumball
 #if ENABLE_LOGS
             Debug.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
-
+            
+            //start loading playfab (async)
+            PlayFabManager.Initialise();
+            
             currentStage = Stage.Checking_for_new_version;
             yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
             

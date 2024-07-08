@@ -16,17 +16,18 @@ namespace Gumball
             ERROR,
         }
 
+        private static Dictionary<string, string> titleDataCached;
+        
         public static ConnectionStatusType ConnectionStatus { get; private set; }
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RuntimeInitialise()
+        
+        public static void Initialise()
         {
             Login();
         }
 
         private static void Login()
         {
-            Debug.Log("Loading PlayFab.");
+            GlobalLoggers.PlayFabLogger.Log("Loading PlayFab.");
 
             ConnectionStatus = ConnectionStatusType.LOADING;
             
@@ -49,11 +50,29 @@ namespace Gumball
 
         private static void OnLoginSuccess(LoginResult result)
         {
-            Debug.Log($"Logged into PlayFab successfully with ID {result.PlayFabId}.");
+            GlobalLoggers.PlayFabLogger.Log($"Logged into PlayFab successfully with ID {result.PlayFabId}.");
 
-            //TODO: load playfab data provider
+            LoadTitleData();
+        }
 
-            ConnectionStatus = ConnectionStatusType.SUCCESS;
+        private static void LoadTitleData()
+        {
+            GlobalLoggers.PlayFabLogger.Log($"Loading PlayFab title data.");
+            
+            PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(),
+                result =>
+                {
+                    titleDataCached = result.Data;
+                    
+                    ConnectionStatus = ConnectionStatusType.SUCCESS;
+                    
+                    GlobalLoggers.PlayFabLogger.Log($"Loaded {titleDataCached.Count} entries from PlayFab title data.");
+                }, error =>
+                {
+                    ConnectionStatus = ConnectionStatusType.ERROR;
+                    
+                    Debug.LogError($"Error getting PlayFab title data:\n{error.GenerateErrorReport()}");
+                });
         }
     }
 }
