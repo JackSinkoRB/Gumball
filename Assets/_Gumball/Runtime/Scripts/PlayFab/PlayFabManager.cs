@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
-using Unity.Plastic.Newtonsoft.Json;
 using UnityEngine;
 
 namespace Gumball
@@ -30,7 +30,7 @@ namespace Gumball
         public static T Get<T>(string key, T defaultValue = default)
         {
             if (titleDataCached == null)
-                throw new NullReferenceException("Trying to retrieve title data, but the title data hasn't been loaded.");
+                throw new NullReferenceException($"Trying to retrieve title data for {key}, but the title data hasn't been loaded. You should handle cases where the player is offline.");
 
             if (!titleDataCached.ContainsKey(key))
                 return defaultValue;
