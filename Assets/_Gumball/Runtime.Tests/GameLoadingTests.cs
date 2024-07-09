@@ -26,8 +26,8 @@ namespace Gumball.Runtime.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            
             DecalEditor.IsRunningTests = true;
+            IAPManager.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
 
             AsyncOperation loadBootScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.BootScenePath, new LoadSceneParameters(LoadSceneMode.Single));

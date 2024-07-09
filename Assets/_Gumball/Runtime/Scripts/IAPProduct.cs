@@ -10,9 +10,11 @@ namespace Gumball
     public class IAPProduct
     {
         
-        [SerializeField] private string productID = "com.RoadburnGames.Gumball.<SOME_ID>";
+        [Tooltip("This should be the product ID reference from the Apple/Google stores.")]
+        [SerializeField] private string productID = "<STORE ID>";
+        [Tooltip("This should be the same type that the product is in the Apple/Google stores.")]
         [SerializeField] private ProductType type = ProductType.NonConsumable;
-
+        
         public string ProductID => productID;
         public ProductType Type => type;
 

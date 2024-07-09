@@ -25,14 +25,19 @@ namespace Gumball
         
         private static readonly Dictionary<string, PurchaseHandler> purchasesInProgress = new(); //string is product ID
 
+#if UNITY_EDITOR
+        public static bool IsRunningTests;
+#endif
+        
         [SerializeField] private bool useStoreKitTesting;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<IAPProduct> allProducts = new();
 
+        private CrossPlatformValidator purchaseValidator;
+        
         public InitialisationStatusType InitialisationStatus { get; private set; }
         public IStoreController StoreController { get; private set; }
-        private CrossPlatformValidator purchaseValidator;
         
         //the CrossPlatform validator only supports the GooglePlayStore and Apple's App Stores.
         private bool IsCurrentStoreSupportedByValidator => StandardPurchasingModule.Instance().appStore is AppStore.GooglePlay or AppStore.AppleAppStore or AppStore.MacAppStore;
@@ -40,6 +45,10 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void RuntimeInitialise()
         {
+#if UNITY_EDITOR
+            IsRunningTests = false;
+#endif
+            
             purchasesInProgress.Clear();
         }
         
@@ -134,7 +143,8 @@ namespace Gumball
             InitialisationStatus = InitialisationStatusType.ERROR;
             
             string additionalErrorMessage = message != null ? $" - {message}" : "";
-            Debug.LogError($"Store initialisation error: {error}{additionalErrorMessage}");
+            if (!IsRunningTests)
+                Debug.LogError($"Store initialisation error: {error}{additionalErrorMessage}");
         }
 
         public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
