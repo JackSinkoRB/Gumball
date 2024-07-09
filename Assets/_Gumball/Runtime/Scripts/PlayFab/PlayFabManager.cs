@@ -27,7 +27,7 @@ namespace Gumball
             Login();
         }
 
-        public static T GetTitleData<T>(string key, T defaultValue = default)
+        public static T Get<T>(string key, T defaultValue = default)
         {
             if (titleDataCached == null)
                 throw new NullReferenceException("Trying to retrieve title data, but the title data hasn't been loaded.");
@@ -37,6 +37,14 @@ namespace Gumball
             
             T deserializedObject = JsonConvert.DeserializeObject<T>(titleDataCached[key]);
             return deserializedObject;
+        }
+
+        public static bool HasKey(string key)
+        {
+            if (titleDataCached == null)
+                throw new NullReferenceException("Trying to retrieve title data, but the title data hasn't been loaded.");
+
+            return titleDataCached.ContainsKey(key);
         }
 
         private static void Login()

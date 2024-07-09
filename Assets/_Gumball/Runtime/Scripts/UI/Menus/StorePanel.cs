@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,6 +30,25 @@ namespace Gumball
             if (subMenu != null)
                 subMenu.Show();
         }
+        
+#if UNITY_EDITOR
+        [ButtonMethod]
+        public void RefreshIAPProducts()
+        {
+            IAPManager.Instance.ClearProducts();
+            int realProducts = 0;
+            foreach (StorePurchaseButton purchaseButton in transform.GetComponentsInAllChildren<StorePurchaseButton>())
+            {
+                if (purchaseButton.CurrencyType == CurrencyType.REAL)
+                {
+                    IAPManager.Instance.AddProduct(purchaseButton.Product);
+                    realProducts++;
+                }
+            }
+            
+            Debug.Log($"Found {realProducts} products in store panel and added them to the IAP product catalogue.");
+        }
+#endif
         
     }
 }

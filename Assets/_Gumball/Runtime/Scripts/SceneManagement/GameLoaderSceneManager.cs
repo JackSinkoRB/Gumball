@@ -29,6 +29,7 @@ namespace Gumball
             Loading_avatars,
             Loading_vehicle_and_drivers,
             Connecting_to_PlayFab,
+            Initialising_Unity_Purchasing,
         }
 
         [SerializeField] private TextMeshProUGUI debugLabel;
@@ -61,17 +62,22 @@ namespace Gumball
             TrackedCoroutine initialiseCoreParts = new TrackedCoroutine(CorePartManager.Initialise());
             TrackedCoroutine initialiseSubParts = new TrackedCoroutine(SubPartManager.Initialise());
 
-            yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete() && !initialiseCoreParts.IsPlaying && !initialiseSubParts.IsPlaying);
+            yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete() 
+                                             && !initialiseCoreParts.IsPlaying 
+                                             && !initialiseSubParts.IsPlaying);
 #if ENABLE_LOGS
             Debug.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
+
+            currentStage = Stage.Checking_for_new_version;
+            yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
             
             //start loading playfab (async)
             PlayFabManager.Initialise();
             
-            currentStage = Stage.Checking_for_new_version;
-            yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
-            
+            //start loading unity purchasing (async)
+            IAPManager.Instance.Initialise();
+
             currentStage = Stage.Loading_save_data;
             TrackedCoroutine loadSaveDataAsync = new TrackedCoroutine(DataManager.LoadAllAsync());
             
@@ -109,6 +115,9 @@ namespace Gumball
             currentStage = Stage.Connecting_to_PlayFab;
             yield return new WaitUntil(() => PlayFabManager.ConnectionStatus != PlayFabManager.ConnectionStatusType.LOADING);
             
+            currentStage = Stage.Initialising_Unity_Purchasing;
+            yield return new WaitUntil(() => IAPManager.Instance.InitialisationStatus != IAPManager.InitialisationStatusType.LOADING);
+            
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
             Debug.Log($"Async loading complete in {TimeSpan.FromSeconds(asyncLoadingDurationSeconds).ToPrettyString(true)}");
@@ -136,7 +145,8 @@ namespace Gumball
                 AvatarManager.LoadInstanceAsync(),
                 WarehouseManager.LoadInstanceAsync(),
                 GlobalPaintPresets.LoadInstanceAsync(),
-                ExperienceManager.LoadInstanceAsync()
+                ExperienceManager.LoadInstanceAsync(),
+                IAPManager.LoadInstanceAsync()
             };
             return handles;
         }

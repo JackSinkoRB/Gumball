@@ -7,7 +7,7 @@ namespace Gumball
     public class PremiumCurrency : Currency
     {
         
-        protected override string CurrencyType => "Premium";
+        protected override CurrencyType CurrencyType => CurrencyType.PREMIUM;
         public override int StartingFunds => 0;
         
     }
