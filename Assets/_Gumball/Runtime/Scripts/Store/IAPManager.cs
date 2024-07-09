@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Purchasing;
 using UnityEngine.Purchasing.Extension;
@@ -18,13 +21,20 @@ namespace Gumball
             SUCCESS,
             ERROR
         }
-        
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<IAPProduct> allProducts = new();
 
-        private IStoreController storeController;
-
         public InitialisationStatusType InitialisationStatus { get; private set; }
+        public IStoreController StoreController { get; private set; }
+
+        private static readonly Dictionary<string, PurchaseHandler> purchasesInProgress = new(); //string is product ID
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RuntimeInitialise()
+        {
+            purchasesInProgress.Clear();
+        } 
         
         public void Initialise()
         {
@@ -34,19 +44,60 @@ namespace Gumball
             InitialiseProducts();
         }
 
+        private void InitialiseProducts()
+        {
+            ConfigurationBuilder builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+
+            foreach (IAPProduct product in allProducts)
+            {
+                builder.AddProduct(product.ProductID, product.Type);
+            }
+            
+            UnityPurchasing.Initialize(this, builder);
+        }
+        
+#if UNITY_EDITOR
         public void ClearProducts()
         {
             allProducts.Clear();
+            EditorUtility.SetDirty(this);
         }
 
         public void AddProduct(IAPProduct product)
         {
             allProducts.Add(product);
+            EditorUtility.SetDirty(this);
+        }
+#endif
+
+        public void InitiatePurchase(string productID, PurchaseHandler handler)
+        {
+            try
+            {
+                GlobalLoggers.StoreLogger.Log($"Initiating purchase for {productID}.");
+
+                if (purchasesInProgress.ContainsKey(productID))
+                {
+                    Debug.LogError("Could not initiate purchase as a purchase initiation for this item is already in progress.");
+                    handler.onFail?.Invoke();
+                    return;
+                }
+
+                purchasesInProgress[productID] = handler;
+
+                StoreController.InitiatePurchase(productID);
+            }
+            catch (Exception e)
+            {
+                purchasesInProgress.Remove(productID);
+                handler.onFail?.Invoke();
+                throw new Exception("There was an error while initiating a purchase.", e);
+            }
         }
         
         public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
         {
-            storeController = controller;
+            StoreController = controller;
             
             InitialisationStatus = InitialisationStatusType.SUCCESS;
             GlobalLoggers.StoreLogger.Log("Store initialisation successful.");
@@ -67,30 +118,39 @@ namespace Gumball
 
         public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
         {
-            throw new NotImplementedException();
+            string productID = purchaseEvent.purchasedProduct.definition.id;
+
+            PurchaseHandler handler = purchasesInProgress[productID];
+            handler.onSuccess?.Invoke();
+            
+            purchasesInProgress.Remove(productID);
+
+            return PurchaseProcessingResult.Complete;
         }
 
         public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
         {
+            string productID = product.definition.id;
+            GlobalLoggers.StoreLogger.Log($"Store purchase failed: {productID} - {failureReason}");
             
+            PurchaseHandler handler = purchasesInProgress[productID];
+            handler.onFail?.Invoke();
+
+            purchasesInProgress.Remove(productID);
         }
 
         public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
         {
-            
-        }
-        
-        private void InitialiseProducts()
-        {
-            ConfigurationBuilder builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+            string productID = product.definition.id;
+            GlobalLoggers.StoreLogger.Log($"Purchase failed - Product: '{productID}'," +
+                                          $" Purchase failure reason: {failureDescription.reason}," +
+                                          $" Purchase failure details: {failureDescription.message}");
 
-            foreach (IAPProduct product in allProducts)
-            {
-                builder.AddProduct(product.ProductID, product.Type);
-            }
+            PurchaseHandler handler = purchasesInProgress[productID];
+            handler.onFail?.Invoke();
             
-            UnityPurchasing.Initialize(this, builder);
+            purchasesInProgress.Remove(productID);
         }
-        
+
     }
 }

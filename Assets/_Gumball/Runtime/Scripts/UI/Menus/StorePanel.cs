@@ -9,8 +9,12 @@ namespace Gumball
     public class StorePanel : AnimatedPanel
     {
         
+        [SerializeField] private SpecialsStoreMenu specialsMenu;
+        [SerializeField] private ContentPacksStoreMenu contentPacksMenu;
+        [SerializeField] private CarsStoreMenu carsMenu;
+        [SerializeField] private PartsStoreMenu partsMenu;
         [SerializeField] private CurrencyStoreMenu currencyMenu;
-        
+
         protected override void OnShow()
         {
             base.OnShow();
@@ -24,6 +28,10 @@ namespace Gumball
                 return; //already open
             
             //hide all menus
+            specialsMenu.Hide();
+            contentPacksMenu.Hide();
+            carsMenu.Hide();
+            partsMenu.Hide();
             currencyMenu.Hide();
             
             //just show this menu
