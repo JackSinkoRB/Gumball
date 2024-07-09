@@ -143,7 +143,9 @@ namespace Gumball
             InitialisationStatus = InitialisationStatusType.ERROR;
             
             string additionalErrorMessage = message != null ? $" - {message}" : "";
+#if UNITY_EDITOR
             if (!IsRunningTests)
+#endif
                 Debug.LogError($"Store initialisation error: {error}{additionalErrorMessage}");
         }
 
