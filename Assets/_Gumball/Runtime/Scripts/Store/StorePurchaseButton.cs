@@ -120,7 +120,7 @@ namespace Gumball
 
         private void OnPurchaseFailed()
         {
-            const string userMessage = "There was an issue with the purchase. Please try again.";
+            const string userMessage = "There was an issue with the purchase.\nPlease try again.";
             PanelManager.GetPanel<GenericMessagePanel>().Show();
             PanelManager.GetPanel<GenericMessagePanel>().Initialise(userMessage);
         }

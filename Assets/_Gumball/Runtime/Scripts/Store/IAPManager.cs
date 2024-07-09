@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Purchasing;
 using UnityEngine.Purchasing.Extension;
+using UnityEngine.Purchasing.Security;
 
 namespace Gumball
 {
@@ -21,26 +22,46 @@ namespace Gumball
             SUCCESS,
             ERROR
         }
+        
+        private static readonly Dictionary<string, PurchaseHandler> purchasesInProgress = new(); //string is product ID
+
+        [SerializeField] private bool useStoreKitTesting;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<IAPProduct> allProducts = new();
 
         public InitialisationStatusType InitialisationStatus { get; private set; }
         public IStoreController StoreController { get; private set; }
-
-        private static readonly Dictionary<string, PurchaseHandler> purchasesInProgress = new(); //string is product ID
+        private CrossPlatformValidator purchaseValidator;
+        
+        //the CrossPlatform validator only supports the GooglePlayStore and Apple's App Stores.
+        private bool IsCurrentStoreSupportedByValidator => StandardPurchasingModule.Instance().appStore is AppStore.GooglePlay or AppStore.AppleAppStore or AppStore.MacAppStore;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void RuntimeInitialise()
         {
             purchasesInProgress.Clear();
-        } 
+        }
         
         public void Initialise()
         {
             InitialisationStatus = InitialisationStatusType.LOADING;
             GlobalLoggers.StoreLogger.Log("Initialising store.");
             
+#if UNITY_EDITOR
+            //allows simulating failed IAP transactions in the Editor
+            StandardPurchasingModule.Instance().useFakeStoreUIMode = FakeStoreUIMode.StandardUser;
+#endif
+            
+#if !UNITY_EDITOR
+            //the CrossPlatform validator only supports Google Play and Apple App Store
+            if (IsCurrentStoreSupportedByValidator)
+            {
+				byte[] appleTangleData = useStoreKitTesting ? AppleStoreKitTestTangle.Data() : AppleTangle.Data();
+				purchaseValidator = new CrossPlatformValidator(GooglePlayTangle.Data(), appleTangleData, Application.identifier);
+            }
+#endif
+
             InitialiseProducts();
         }
 
@@ -118,14 +139,40 @@ namespace Gumball
 
         public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
         {
-            string productID = purchaseEvent.purchasedProduct.definition.id;
-
+            Product product = purchaseEvent.purchasedProduct;
+            string productID = product.definition.id;
             PurchaseHandler handler = purchasesInProgress[productID];
-            handler.onSuccess?.Invoke();
+            
+            if (!IsPurchaseValid(product))
+            {
+                purchasesInProgress.Remove(productID);
+                handler.onFail?.Invoke();
+                return PurchaseProcessingResult.Complete;
+            }
             
             purchasesInProgress.Remove(productID);
+            handler.onSuccess?.Invoke();            
 
             return PurchaseProcessingResult.Complete;
+        }
+        
+        private bool IsPurchaseValid(Product product)
+        {
+            //if the validator doesn't support the current store, we assume the purchase is valid
+            if (IsCurrentStoreSupportedByValidator)
+            {
+                try
+                {
+                    purchaseValidator.Validate(product.receipt);
+                }
+                catch (IAPSecurityException reason) //if the purchase is deemed invalid, the validator throws an IAPSecurityException.
+                {
+                    GlobalLoggers.StoreLogger.Log($"Invalid receipt: {reason}");
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
