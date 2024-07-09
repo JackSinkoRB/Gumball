@@ -1402,6 +1402,7 @@ MonoBehaviour:
   objectParent: {fileID: 3186611742869528155}
   prefabs:
   - {fileID: 6544492484705523080, guid: 59ac05174ee456a4bada1202c8840e6e, type: 3}
+  updateImmediately: 1
 --- !u!1 &1398388826635120653
 GameObject:
   m_ObjectHideFlags: 0
@@ -2810,6 +2811,7 @@ MonoBehaviour:
   objectParent: {fileID: 5819118820327690099}
   prefabs:
   - {fileID: 6544492484705523080, guid: 59ac05174ee456a4bada1202c8840e6e, type: 3}
+  updateImmediately: 1
 --- !u!1 &4295926730706708539
 GameObject:
   m_ObjectHideFlags: 0
@@ -9379,6 +9381,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7ca20eb370e22f4399b5974ec0c1fad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  racerInterpolationDistance: 100
   sampleCollection:
     samples: []
     optimizedIndices: 
@@ -10912,6 +10915,7 @@ MonoBehaviour:
   - {fileID: 0}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
+  distanceFromRoadSplineToResetPlayer: 50
   terrainHighLODDistance: 500
   currentLOD: 1
   terrainHighLOD: {fileID: 1730144375595128612}
@@ -14873,8 +14877,6 @@ MonoBehaviour:
       percent: 1
     optimizedIndices: 
     sampleMode: 1
-  ChunkObjectData:
-    _serializedList: []
 --- !u!114 &461874578867610291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14892,6 +14894,7 @@ MonoBehaviour:
   hasChunkConnected: 0
   updateImmediately: 0
   terrainData:
+    terrainMaterial: {fileID: 0}
     resolution: 100
     resolutionLowLOD: 20
     chunkBlendDistance: 25
@@ -15894,15 +15897,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driveOnLeft: 1
-  racingLine: {fileID: 4503799474479618766}
+  racingLines: []
   speedLimitKmh: 60
-  density: 70
-  laneDistancesForward:
-  - -10.5
-  - -3.5
-  laneDistancesBackward:
-  - 10.5
-  - 3.5
+  lanesForward: []
+  lanesBackward: []
   chunk: {fileID: 6860265999645676851}
 --- !u!1 &8386455041040015300
 GameObject:
@@ -16105,8 +16103,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPrefab: 0
+  isChildOfAnotherChunkObject: 0
   ignoreAtRuntime: 1
   loadSeparately: 1
+  hideWhenFarAway: 0
   alwaysGrounded: 0
   keepAtSpecificDistanceFromRoad: 0
   distanceFromRoad: 10
@@ -16138,9 +16139,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   colourTerrain: 0
-  colliderToColourAround: {fileID: 0}
-  colourTerrainColor: {r: 0, g: 0, b: 0, a: 0}
-  colourTerrainStrength: 0.5
+  colorModifier:
+    colliderToColourAround: {fileID: 0}
+    useColor: 0
+    color: {r: 1, g: 0, b: 0, a: 0.5}
+    useAlpha: 0
+    alpha: 0
   chunkBelongsTo: {fileID: 6860265999645676851}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!1001 &31994048355292708
