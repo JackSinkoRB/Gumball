@@ -51,6 +51,15 @@ namespace Gumball
         {
             GlobalLoggers.PlayFabLogger.Log("Loading PlayFab.");
 
+            //check to break quickly if internet is not connected - otherwise the service check may take longer and increase game load time
+            if (Application.internetReachability == NetworkReachability.NotReachable)
+            {
+                ConnectionStatus = ConnectionStatusType.ERROR;
+                
+                Debug.LogError($"Could not login to PlayFab: no internet connection");
+                return;
+            }
+            
             ConnectionStatus = ConnectionStatusType.LOADING;
             
             LoginWithCustomIDRequest request = new LoginWithCustomIDRequest

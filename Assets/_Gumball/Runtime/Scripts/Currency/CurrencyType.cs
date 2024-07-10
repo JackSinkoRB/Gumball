@@ -6,8 +6,8 @@ namespace Gumball
 {
     public enum CurrencyType
     {
+        REAL,
         STANDARD,
-        PREMIUM,
-        REAL
+        PREMIUM
     }
 }

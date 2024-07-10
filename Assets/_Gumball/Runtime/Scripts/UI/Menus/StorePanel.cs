@@ -14,12 +14,18 @@ namespace Gumball
         [SerializeField] private CarsStoreMenu carsMenu;
         [SerializeField] private PartsStoreMenu partsMenu;
         [SerializeField] private CurrencyStoreMenu currencyMenu;
-
+        [Space(5)]
+        [SerializeField] private Button specialsCategoryButton;
+        
         protected override void OnShow()
         {
             base.OnShow();
             
             OpenSubMenu(null);
+            
+            //disable the specials category if no PlayFab connection
+            if (PlayFabManager.ConnectionStatus != PlayFabManager.ConnectionStatusType.SUCCESS)
+                specialsCategoryButton.interactable = false;
         }
         
         public void OpenSubMenu(StoreSubMenu subMenu)

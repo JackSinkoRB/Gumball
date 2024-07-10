@@ -11,7 +11,7 @@ namespace Gumball
     {
         
         [Tooltip("This should be the product ID reference from the Apple/Google stores.")]
-        [SerializeField] private string productID = "<STORE ID>";
+        [SerializeField] private string productID = "<STORE PRODUCT ID>";
         [Tooltip("This should be the same type that the product is in the Apple/Google stores.")]
         [SerializeField] private ProductType type = ProductType.NonConsumable;
         

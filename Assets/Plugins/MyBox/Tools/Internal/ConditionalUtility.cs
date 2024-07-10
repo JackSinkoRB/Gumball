@@ -59,6 +59,8 @@ namespace MyBox.Internal
 			if (property == null) return true;
 
 			string asString = property.AsStringValue().ToUpper();
+			if (property.propertyType == SerializedPropertyType.Enum)
+				asString = property.enumValueIndex.ToString();
 
 			if (compareAgainst != null && compareAgainst.Length > 0)
 			{
@@ -67,7 +69,8 @@ namespace MyBox.Internal
 				return matchAny;
 			}
 
-			bool someValueAssigned = asString != "FALSE" && asString != "0" && asString != "NULL" && asString != "NONE";
+			bool someValueAssigned = property.propertyType == SerializedPropertyType.Enum ? property.enumValueIndex > 0 //treat first values as default values
+				: asString != "FALSE" && asString != "0" && asString != "NULL" && asString != "NONE";
 			if (someValueAssigned) return !inverse;
 
 			return inverse;
