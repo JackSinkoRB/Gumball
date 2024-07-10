@@ -22,14 +22,14 @@ namespace Gumball
         {
             Checking_for_new_version,
             Loading_scriptable_data_objects,
-            Loading_save_data,
+            Starting_async_loading,
             Loading_mainscene,
             Waiting_for_save_data_to_load,
             Loading_vehicle,
             Loading_avatars,
             Loading_vehicle_and_drivers,
             Connecting_to_PlayFab,
-            Initialising_Unity_Purchasing,
+            Initialising_Unity_services,
         }
 
         [SerializeField] private TextMeshProUGUI debugLabel;
@@ -72,13 +72,13 @@ namespace Gumball
             currentStage = Stage.Checking_for_new_version;
             yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
             
+            currentStage = Stage.Starting_async_loading;
             //start loading playfab (async)
             PlayFabManager.Initialise();
-            
-            //start loading unity purchasing (async)
-            IAPManager.Instance.Initialise();
 
-            currentStage = Stage.Loading_save_data;
+            //start loading unity services (async)
+            TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
+
             TrackedCoroutine loadSaveDataAsync = new TrackedCoroutine(DataManager.LoadAllAsync());
             
             stopwatch.Restart();
@@ -115,8 +115,8 @@ namespace Gumball
             currentStage = Stage.Connecting_to_PlayFab;
             yield return new WaitUntil(() => PlayFabManager.ConnectionStatus != PlayFabManager.ConnectionStatusType.LOADING);
             
-            currentStage = Stage.Initialising_Unity_Purchasing;
-            yield return new WaitUntil(() => IAPManager.Instance.InitialisationStatus != IAPManager.InitialisationStatusType.LOADING);
+            currentStage = Stage.Initialising_Unity_services;
+            yield return new WaitUntil(() => !loadUnityServicesAsync.IsPlaying);
             
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
