@@ -8,8 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Car_Trim
-  m_Shader: {fileID: -6465566751694194690, guid: 3d9d978bd27b9d240ab8dbcfe63b7c79,
-    type: 3}
+  m_Shader: {fileID: 4800000, guid: 6d8fc667142cd28438fcf336422b4904, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -24,31 +23,7 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 057fbac6ad929b143b733e07cc556af1, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _Decal:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailAlbedoMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailMask:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailNormalMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _EmissionMap:
+    - _Gloss_Metal:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -56,19 +31,43 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _MetallicGlossMap:
+    - _Mask_01:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _OcclusionMap:
+    - _Mask_02:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _ParallaxMap:
+    - _Mask_03:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SpecGlossMap:
+    - _Mask_04:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask_05:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask_06:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask_07:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask_08:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask_09:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texcoord:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -86,44 +85,95 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaClip: 0
-    - _AlphaToMask: 0
-    - _Blend: 0
-    - _BlendModePreserveSpecular: 1
-    - _BumpScale: 1
-    - _ClearCoat: 1
-    - _ClearCoatMask: 0
-    - _ClearCoatSmoothness: 0
-    - _Cull: 2
-    - _Cutoff: 0.5
-    - _DetailAlbedoMapScale: 1
-    - _DetailNormalMapScale: 1
-    - _DstBlend: 0
-    - _DstBlendAlpha: 0
+    - _Alloy_01_Gloss: 0.7
+    - _Alloy_01_Metal: 0
+    - _Alloy_02_Gloss: 0
+    - _Alloy_02_Metal: 0
+    - _Alloy_03_Gloss: 0
+    - _Alloy_03_Metal: 0
+    - _Alloy_04_Gloss: 0
+    - _Alloy_04_Metal: 0
+    - _AlphaCutoff: 0.5
+    - _Cosmetic_01_Gloss: 0
+    - _Cosmetic_01_Metal: 0
+    - _Cosmetic_02_Gloss: 0
+    - _Cosmetic_02_Metal: 0
+    - _Cosmetic_03_Gloss: 0.7
+    - _Cosmetic_03_Metal: 0
+    - _Cosmetic_04_Gloss: 0
+    - _Cosmetic_04_Metal: 0
+    - _Cosmetic_05_Gloss: 0
+    - _Cosmetic_05_Metal: 0
+    - _Cosmetic_06_Gloss: 0.7
+    - _Cosmetic_06_Metal: 0
+    - _Cosmetic_07_Gloss: 0
+    - _Cosmetic_07_Metal: 0
+    - _E_Brake_01_Gloss: 0.7
+    - _E_Brake_01_Metal: 0
+    - _E_Brake_02_Gloss: 0
+    - _E_Brake_02_Metal: 0
+    - _EngineBay_Gloss: 0
+    - _EngineBay_Metal: 0
     - _EnvironmentReflections: 1
-    - _GlossMapScale: 0
-    - _Glossiness: 0
-    - _GlossyReflections: 0
-    - _Metallic: 0.156
-    - _OcclusionStrength: 1
-    - _Parallax: 0.005
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Smoothness: 0.26
-    - _SmoothnessTextureChannel: 0
+    - _Rollcage_Gloss: 0.7
+    - _Rollcage_Metal: 0
+    - _Seat_01_Gloss: 0.7
+    - _Seat_01_Metal: 0
+    - _Seat_02_Gloss: 0
+    - _Seat_02_Metal: 0
+    - _Seat_03_Gloss: 0
+    - _Seat_03_Metal: 0
+    - _Shifter_01_Gloss: 0
+    - _Shifter_01_Metal: 0
+    - _Shifter_02_Gloss: 0.7
+    - _Shifter_02_Metal: 0
     - _SpecularHighlights: 1
-    - _SrcBlend: 1
-    - _SrcBlendAlpha: 1
-    - _Surface: 0
-    - _WorkflowMode: 1
-    - _ZWrite: 1
+    - _Tacho_01_Gloss: 0
+    - _Tacho_01_Metal: 0
+    - _Tacho_02_Gloss: 0
+    - _Tacho_02_Metal: 0
+    - _Tacho_03_Gloss: 0.7
+    - _Tacho_03_Metal: 0
+    - _Tub_Gloss: 0
+    - _Tub_Metal: 0
+    - _Wheel_01_Gloss: 0.7
+    - _Wheel_01_Metal: 0
+    - _Wheel_02_Gloss: 0
+    - _Wheel_02_Metal: 0
+    - _Wheel_03_Gloss: 0
+    - _Wheel_03_Metal: 0
     m_Colors:
-    - _BaseColor: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 1}
-    - _Color: {r: 0.17924526, g: 0.17924526, b: 0.17924526, a: 1}
-    - _Emission: {r: 0, g: 0, b: 0, a: 0}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _Alloy_01_Color: {r: 0.46226412, g: 0.46226412, b: 0.46226412, a: 0}
+    - _Alloy_02_Color: {r: 0.22641507, g: 0.22641507, b: 0.22641507, a: 0}
+    - _Alloy_03_Color: {r: 0.27358484, g: 0.27358484, b: 0.27358484, a: 0}
+    - _Alloy_04_Color: {r: 0.27358484, g: 0.27358484, b: 0.27358484, a: 0}
+    - _Cosmetic_01_Color: {r: 0.22641507, g: 0.22641507, b: 0.22641507, a: 0}
+    - _Cosmetic_02_Color: {r: 0.27358484, g: 0.27358484, b: 0.27358484, a: 0}
+    - _Cosmetic_03_Color: {r: 0.46226412, g: 0.46226412, b: 0.46226412, a: 0}
+    - _Cosmetic_04_Color: {r: 0.22641507, g: 0.22641507, b: 0.22641507, a: 0}
+    - _Cosmetic_05_Color: {r: 0.27358484, g: 0.27358484, b: 0.27358484, a: 0}
+    - _Cosmetic_06_Color: {r: 0.46226412, g: 0.46226412, b: 0.46226412, a: 0}
+    - _Cosmetic_07_Color: {r: 0.22641507, g: 0.22641507, b: 0.22641507, a: 0}
+    - _E_Brake_01_Color: {r: 0.46226412, g: 0.46226412, b: 0.46226412, a: 0}
+    - _E_Brake_02_Color: {r: 0.22641507, g: 0.22641507, b: 0.22641507, a: 0}
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+    - _EngineBay_Color: {r: 0.27358484, g: 0.27358484, b: 0.27358484, a: 0}
+    - _Rollcage_Color: {r: 0.46226412, g: 0.46226412, b: 0.46226412, a: 0}
+    - _Seat_01_Color: {r: 0.46226412, g: 0.46226412, b: 0.46226412, a: 0}
+    - _Seat_02_Color: {r: 0.22641507, g: 0.22641507, b: 0.22641507, a: 0}
+    - _Seat_03_Color: {r: 0.27358484, g: 0.27358484, b: 0.27358484, a: 0}
+    - _Shifter_01_Color: {r: 0.27358484, g: 0.27358484, b: 0.27358484, a: 0}
+    - _Shifter_02_Color: {r: 0.46226412, g: 0.46226412, b: 0.46226412, a: 0}
+    - _Tacho_01_Color: {r: 0.22641507, g: 0.22641507, b: 0.22641507, a: 0}
+    - _Tacho_02_Color: {r: 0.27358484, g: 0.27358484, b: 0.27358484, a: 0}
+    - _Tacho_03_Color: {r: 0.46226412, g: 0.46226412, b: 0.46226412, a: 0}
+    - _Tub_Color: {r: 0.22641507, g: 0.22641507, b: 0.22641507, a: 0}
+    - _Wheel_01_Color: {r: 0.46226412, g: 0.46226412, b: 0.46226412, a: 0}
+    - _Wheel_02_Color: {r: 0.22641507, g: 0.22641507, b: 0.22641507, a: 0}
+    - _Wheel_03_Color: {r: 0.27358484, g: 0.27358484, b: 0.27358484, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &3038113578401860643
 MonoBehaviour:
