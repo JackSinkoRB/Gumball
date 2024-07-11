@@ -158,10 +158,6 @@ namespace Gumball
 
         private void UpdateDebugLabel()
         {
-#if !UNITY_EDITOR && !DEVELOPMENT_BUILD
-            debugLabel.gameObject.SetActive(false);
-            return;
-#endif
             debugLabel.text = currentStage switch
             {
                 Stage.Loading_mainscene => $"Loading MainScene... ({(int)(mainSceneHandle.PercentComplete*100f)}%)",
