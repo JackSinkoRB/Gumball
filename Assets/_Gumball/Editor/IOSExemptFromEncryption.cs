@@ -1,3 +1,4 @@
+#if UNITY_IOS
 using UnityEngine;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -34,3 +35,4 @@ namespace Gumball.Editor
 
     }
 }
+#endif
