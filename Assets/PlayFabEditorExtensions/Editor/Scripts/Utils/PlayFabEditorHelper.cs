@@ -70,47 +70,52 @@ namespace PlayFab.PfEditor
 
         static PlayFabEditorHelper()
         {
-            // scan for changes to the editor folder / structure.
-            if (uiStyle == null)
+            EditorApplication.delayCall += InitialiseWithDelay;
+
+            void InitialiseWithDelay()
             {
-                string[] rootFiles = new string[0];
-                bool relocatedEdEx = false;
-                _uiStyle = null;
-
-                try
+                // scan for changes to the editor folder / structure.
+                if (uiStyle == null)
                 {
-                    if (!string.IsNullOrEmpty(PlayFabEditorPrefsSO.Instance.EdExPath))
-                        EDEX_ROOT = PlayFabEditorPrefsSO.Instance.EdExPath;
-                    rootFiles = Directory.GetDirectories(EDEX_ROOT);
-                }
-                catch
-                {
+                    string[] rootFiles = new string[0];
+                    bool relocatedEdEx = false;
+                    _uiStyle = null;
 
-                    if (rootFiles.Length == 0)
+                    try
                     {
-                        // this probably means the editor folder was moved.
-                        // see if we can locate the moved root and reload the assets
+                        if (!string.IsNullOrEmpty(PlayFabEditorPrefsSO.Instance.EdExPath))
+                            EDEX_ROOT = PlayFabEditorPrefsSO.Instance.EdExPath;
+                        rootFiles = Directory.GetDirectories(EDEX_ROOT);
+                    }
+                    catch
+                    {
 
-                        var movedRootFiles = Directory.GetFiles(Application.dataPath, PLAYFAB_EDEX_MAINFILE, SearchOption.AllDirectories);
-                        if (movedRootFiles.Length > 0)
+                        if (rootFiles.Length == 0)
                         {
-                            relocatedEdEx = true;
-                            EDEX_ROOT = movedRootFiles[0].Substring(0, movedRootFiles[0].LastIndexOf(PLAYFAB_EDEX_MAINFILE) - 1);
-                            PlayFabEditorPrefsSO.Instance.EdExPath = EDEX_ROOT;
-                            PlayFabEditorDataService.SaveEnvDetails();
+                            // this probably means the editor folder was moved.
+                            // see if we can locate the moved root and reload the assets
+
+                            var movedRootFiles = Directory.GetFiles(Application.dataPath, PLAYFAB_EDEX_MAINFILE, SearchOption.AllDirectories);
+                            if (movedRootFiles.Length > 0)
+                            {
+                                relocatedEdEx = true;
+                                EDEX_ROOT = movedRootFiles[0].Substring(0, movedRootFiles[0].LastIndexOf(PLAYFAB_EDEX_MAINFILE) - 1);
+                                PlayFabEditorPrefsSO.Instance.EdExPath = EDEX_ROOT;
+                                PlayFabEditorDataService.SaveEnvDetails();
+                            }
                         }
                     }
-                }
-                finally
-                {
-                    if (relocatedEdEx && rootFiles.Length == 0)
+                    finally
                     {
-                        Debug.Log("Found new EdEx root: " + EDEX_ROOT);
-                    }
-                    else if (rootFiles.Length == 0)
-                    {
-                        Debug.Log("Could not relocate the PlayFab Editor Extension");
-                        EDEX_ROOT = string.Empty;
+                        if (relocatedEdEx && rootFiles.Length == 0)
+                        {
+                            Debug.Log("Found new EdEx root: " + EDEX_ROOT);
+                        }
+                        else if (rootFiles.Length == 0)
+                        {
+                            Debug.Log("Could not relocate the PlayFab Editor Extension");
+                            EDEX_ROOT = string.Empty;
+                        }
                     }
                 }
             }

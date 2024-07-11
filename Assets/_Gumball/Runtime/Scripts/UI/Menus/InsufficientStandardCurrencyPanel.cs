@@ -6,8 +6,12 @@ namespace Gumball
 {
     public class InsufficientStandardCurrencyPanel : AnimatedPanel
     {
-        
-        
+
+        public void OnClickStoreButton()
+        {
+            Hide();
+            PanelManager.GetPanel<StorePanel>().Show();
+        }
         
     }
 }

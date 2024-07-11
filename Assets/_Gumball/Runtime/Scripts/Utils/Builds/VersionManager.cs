@@ -67,6 +67,32 @@ namespace Gumball
             AssetDatabase.SaveAssets();
         }
 
+        public void IncrementBundleVersion()
+        {
+            int newPatchVersion = CurrentPatchVersion() + 1;
+            string newVersion = $"{CurrentMajorVersion()}.{CurrentMinorVersion()}.{newPatchVersion}";
+            PlayerSettings.bundleVersion = newVersion;
+            PlayerSettings.Android.bundleVersionCode++;
+        }
+
+        public int CurrentMajorVersion()
+        {
+            string[] versionParts = PlayerSettings.bundleVersion.Split('.');
+            return int.Parse(versionParts[0]);
+        }
+        
+        public int CurrentMinorVersion()
+        {
+            string[] versionParts = PlayerSettings.bundleVersion.Split('.');
+            return int.Parse(versionParts[1]);
+        }
+        
+        public int CurrentPatchVersion()
+        {
+            string[] versionParts = PlayerSettings.bundleVersion.Split('.');
+            return int.Parse(versionParts[2]);
+        }
+
         private string GetFormattedPlatformName(string platformName)
         {
             string lower = platformName.ToLower();

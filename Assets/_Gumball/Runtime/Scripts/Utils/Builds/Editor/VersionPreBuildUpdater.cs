@@ -25,6 +25,7 @@ namespace Gumball
             }
 
             VersionManager.Instance.UpdateVersion();
+            VersionManager.Instance.IncrementBundleVersion();
         }
 
         /// <summary>

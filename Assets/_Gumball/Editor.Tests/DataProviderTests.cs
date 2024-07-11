@@ -59,7 +59,7 @@ namespace Gumball.Editor.Tests
 
             provider.Set(testKey, testValue);
             DataProvider.SaveAllSync();
-            Assert.IsTrue(provider.SourceHasValue());
+            Assert.IsTrue(provider.SourceExists());
 
             provider.ReloadFromSource();
             Assert.IsTrue(provider.Get<string>(testKey).Equals(testValue));
@@ -270,11 +270,11 @@ namespace Gumball.Editor.Tests
 
             provider.Set(key, value);
             DataProvider.SaveAllSync();
-            Assert.IsTrue(provider.SourceHasValue());
+            Assert.IsTrue(provider.SourceExists());
 
             provider.RemoveFromSource();
             DataProvider.SaveAllSync();
-            Assert.IsTrue(!provider.SourceHasValue());
+            Assert.IsTrue(!provider.SourceExists());
         }
 
     }

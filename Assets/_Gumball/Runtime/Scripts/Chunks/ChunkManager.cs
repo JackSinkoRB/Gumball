@@ -57,6 +57,15 @@ namespace Gumball
         public MinMaxInt LoadingOrLoadedChunksIndices => loadingOrLoadedChunksIndices;
         public MinMaxInt AccessibleChunksIndices => accessibleChunksIndices;
 
+        
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void RuntimeInitialise()
+        {
+#if UNITY_EDITOR
+            IsRunningTests = false;
+#endif
+        }
+        
         public LoadedChunkData? GetLoadedChunkDataByMapIndex(int chunkMapIndex)
         {
             foreach (LoadedChunkData data in currentChunks)
