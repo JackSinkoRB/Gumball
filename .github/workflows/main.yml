@@ -115,6 +115,7 @@ jobs:
           dockerMemoryLimit: 7500m
           dockerCpuLimit: 2
           buildName: 'Gumball'
+          versioning: Semantic
 
       # Zip Build Files
       - name: Zip Build Files
@@ -144,9 +145,9 @@ jobs:
       - name: Delete library folder
         run: rm -rf Library
 
-  deploy:
+  deploy-discord:
     needs: build
-    name: Deploy
+    name: Deploy to Discord
     runs-on: self-hosted
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     steps:
