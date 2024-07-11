@@ -72,8 +72,19 @@ namespace Gumball
 #endif
 
             InitialiseProducts();
-        }
 
+            //check for timeout
+            const float timeoutSeconds = 10;
+            CoroutineHelper.Instance.PerformAfterDelay(timeoutSeconds, () =>
+            {
+                if (InitialisationStatus == InitialisationStatusType.LOADING)
+                {
+                    InitialisationStatus = InitialisationStatusType.ERROR;
+                    Debug.LogError("Timeout waiting to initialise UnityPurchasing.");
+                }
+            });
+        }
+        
         private void InitialiseProducts()
         {
             ConfigurationBuilder builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
