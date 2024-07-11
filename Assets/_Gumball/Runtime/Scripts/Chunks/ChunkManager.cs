@@ -19,6 +19,7 @@ namespace Gumball
         public static bool IsRunningTests;
 #endif
         
+        public const float GlobalChunkLoadDistance = Mathf.Infinity;
         private const float timeBetweenLoadingChecks = 0.5f;
 
         [SerializeField] private PhysicMaterial slipperyPhysicsMaterial;
@@ -223,8 +224,8 @@ namespace Gumball
 
         private bool IsChunkWithinLoadDistance(Vector3 loadPosition, int mapIndex, ChunkUtils.LoadDirection direction)
         {
-            float chunkLoadDistanceSqr = currentChunkMap.ChunkLoadDistance * currentChunkMap.ChunkLoadDistance;
-            
+            float chunkLoadDistanceSqr = GlobalChunkLoadDistance > 0 ? GlobalChunkLoadDistance : currentChunkMap.ChunkLoadDistance * currentChunkMap.ChunkLoadDistance;
+
             ChunkMapData chunkData = currentChunkMap.GetChunkData(mapIndex);
             Vector3 chunkPosition = direction == ChunkUtils.LoadDirection.AFTER ? chunkData.SplineStartPosition : chunkData.SplineEndPosition;
             
@@ -403,7 +404,7 @@ namespace Gumball
             if (direction == ChunkUtils.LoadDirection.AFTER)
                 chunksAfterLoading.Clear();
             
-            float chunkLoadDistanceSqr = currentChunkMap.ChunkLoadDistance * currentChunkMap.ChunkLoadDistance;
+            float chunkLoadDistanceSqr = GlobalChunkLoadDistance > 0 ? GlobalChunkLoadDistance : currentChunkMap.ChunkLoadDistance * currentChunkMap.ChunkLoadDistance;
             
             Vector3 endOfChunk = direction == ChunkUtils.LoadDirection.AFTER
                 ? currentChunkMap.GetChunkData(loadingOrLoadedChunksIndices.Max).SplineEndPosition
