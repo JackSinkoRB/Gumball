@@ -87,7 +87,6 @@ jobs:
     needs: build
     name: Deploy to TestFlight
     runs-on: macos-latest
-    needs: build
     steps:
 
       # Checkout
@@ -136,7 +135,6 @@ jobs:
     needs: build
     name: Deploy to Google Play internal track
     runs-on: self-hosted
-    needs: build
     steps:
 
       - name: Cleanup to avoid storage limit
