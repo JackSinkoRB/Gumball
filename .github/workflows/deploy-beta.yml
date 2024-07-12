@@ -58,14 +58,33 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: build-{{ matrix.targetPlatform }}
-          path: build/{{ matrix.targetPlatform }}
+          name: build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
 
       # Delete build folder to save space
       - name: Delete build folder
         run: rm -rf build
 
+  cleanup:
+    needs: build
+    name: Cleanup
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+    env:
+      LIBRARY_PATH: ${{ format('{0}/Library', github.workspace) }}
+
+    steps:
+      - name: Check if library folder exists
+        run: |
+          if [ ! -d "$LIBRARY_PATH" ]; then
+            echo "::warning file=cleanup::Library directory does not exist at $LIBRARY_PATH"
+          else
+            rm -rf $LIBRARY_PATH
+          fi
+
   deployToApple:
+    needs: build
     name: Deploy to TestFlight
     runs-on: macos-latest
     needs: build
@@ -114,6 +133,7 @@ jobs:
           name: build-iOS
 
   deployToGoogle:
+    needs: build
     name: Deploy to Google Play internal track
     runs-on: self-hosted
     needs: build

@@ -142,10 +142,13 @@ jobs:
       LIBRARY_PATH: ${{ format('{0}/Library', github.workspace) }}
 
     steps:
-
-      # Delete library folder to save space - must do this after build job as post-cache needs to cache it
-      - name: Delete library folder
-        run: rm -rf $LIBRARY_PATH
+      - name: Check if library folder exists
+        run: |
+          if [ ! -d "$LIBRARY_PATH" ]; then
+            echo "::warning file=cleanup::Library directory does not exist at $LIBRARY_PATH"
+          else
+            rm -rf $LIBRARY_PATH
+          fi
 
   deploy-discord:
     needs: build
