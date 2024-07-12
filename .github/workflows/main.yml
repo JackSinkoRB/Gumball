@@ -138,17 +138,14 @@ jobs:
     runs-on: self-hosted
     strategy:
       fail-fast: false
-    env:
-      LIBRARY_PATH: ${{ format('{0}/Library', github.workspace) }}
 
     steps:
-      - name: Check if library folder exists
-        run: |
-          if [ ! -d "$LIBRARY_PATH" ]; then
-            echo "::warning file=cleanup::Library directory does not exist at $LIBRARY_PATH"
-          else
-            rm -rf $LIBRARY_PATH
-          fi
+
+      # Delete library folders to save space - must do this after build job as post-cache needs to cache it
+      - name: Delete runner1 Library
+        run: rm rf /root/runner1-actions/_work/Gumball/Gumball/Library
+      - name: Delete runner2 Library
+        run: rm rf /root/runner2-actions/_work/Gumball/Gumball/Library
 
   deployToDiscord:
     needs: build
