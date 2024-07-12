@@ -1,4 +1,4 @@
-name: Deploy builds (beta)
+name: Deploy builds (internal testing)
 
 on:
   # Runs on pushes targeting the default branch
@@ -155,7 +155,7 @@ jobs:
           name: build-Android
 
   sendDiscordNotification:
-    needs: build
+    needs: [deployToApple, deployToGoogle]
     name: Discord Notification
     runs-on: self-hosted
     steps:
@@ -166,7 +166,8 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           DISCORD_EMBEDS: |
             [{
-              "title": "Gumball deployed a release: ${{ github.ref_name }}"
+              "title": "Gumball deployed an internal release: ${{ github.ref_name }}",
+              "description": "It will be available on TestFlight and GooglePlay soon."
             }]
         uses: Ilshidur/action-discord@0.3.2
 
