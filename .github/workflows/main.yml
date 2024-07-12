@@ -138,12 +138,14 @@ jobs:
     runs-on: self-hosted
     strategy:
       fail-fast: false
+    env:
+      LIBRARY_PATH: ${{ format('{0}/Library', github.workspace) }}
 
     steps:
 
       # Delete library folder to save space - must do this after build job as post-cache needs to cache it
       - name: Delete library folder
-        run: rm -rf Library
+        run: rm -rf $LIBRARY_PATH
 
   deploy-discord:
     needs: build
