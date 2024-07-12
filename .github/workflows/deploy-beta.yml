@@ -61,28 +61,6 @@ jobs:
           name: build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
 
-      # Delete build folder to save space
-      - name: Delete build folder
-        run: rm -rf build
-
-  cleanup:
-    needs: build
-    name: Cleanup
-    runs-on: self-hosted
-    strategy:
-      fail-fast: false
-    env:
-      LIBRARY_PATH: ${{ format('{0}/Library', github.workspace) }}
-
-    steps:
-      - name: Check if library folder exists
-        run: |
-          if [ ! -d "$LIBRARY_PATH" ]; then
-            echo "::warning file=cleanup::Library directory does not exist at $LIBRARY_PATH"
-          else
-            rm -rf $LIBRARY_PATH
-          fi
-
   deployToApple:
     needs: build
     name: Deploy to TestFlight
@@ -142,3 +120,44 @@ jobs:
         uses: geekyeggo/delete-artifact@v5
         with:
           name: build-Android
+
+  sendDiscordNotification:
+    needs: build
+    name: Discord Notification
+    runs-on: self-hosted
+    steps:
+
+      # Send Discord notification
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_EMBEDS: |
+            [{
+              "title": "Gumball deployed a release: ${{ github.ref_name }}"
+            }]
+        uses: Ilshidur/action-discord@0.3.2
+
+  cleanup:
+    if: ${{ always() }}
+    needs: [deployToApple, deployToGoogle]
+    name: Cleanup
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+    env:
+      LIBRARY_PATH: ${{ format('{0}/Library', github.workspace) }}
+
+    steps:
+
+      # Delete library folder
+      - name: Check if library folder exists
+        run: |
+          if [ ! -d "$LIBRARY_PATH" ]; then
+            echo "::warning file=cleanup::Library directory does not exist at $LIBRARY_PATH"
+          else
+            rm -rf $LIBRARY_PATH
+          fi
+
+      # Delete build folder to save space
+      - name: Delete build folder
+        run: rm -rf build
