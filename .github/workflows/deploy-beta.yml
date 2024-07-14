@@ -45,7 +45,6 @@ jobs:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          androidExportType: androidAppBundle
           androidKeystoreName: user.keystore
           androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
@@ -53,6 +52,7 @@ jobs:
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
+          androidExportType: androidAppBundle
           dockerMemoryLimit: 7500m
           dockerCpuLimit: 2
           buildName: 'Gumball'
@@ -118,7 +118,7 @@ jobs:
       GOOGLE_PLAY_KEY_FILE: ${{ secrets.GOOGLE_PLAY_KEY_FILE }}
       GOOGLE_PLAY_KEY_FILE_PATH:
         ${{ format('{0}/fastlane/google-fastlane.json', github.workspace) }}
-      ANDROID_BUILD_FILE_PATH: ${{ format('{0}/build/Android/Android.aab', github.workspace) }}
+      ANDROID_BUILD_FILE_PATH: ${{ format('{0}/build/Android/Gumball.aab', github.workspace) }}
       ANDROID_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
 
     steps:
