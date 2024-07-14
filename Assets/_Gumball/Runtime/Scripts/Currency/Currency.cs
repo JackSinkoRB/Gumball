@@ -15,7 +15,7 @@ namespace Gumball
         public static Currency Premium => premiumInstance ??= new PremiumCurrency();
         #endregion
         
-        protected abstract string CurrencyType { get; }
+        protected abstract CurrencyType CurrencyType { get; }
         public abstract int StartingFunds { get; }
         
         public delegate void OnFundsChangeDelegate(int previousFunds, int newFunds);

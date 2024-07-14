@@ -4,20 +4,10 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class WorkshopSubMenu : MonoBehaviour
+    public class WorkshopSubMenu : SubMenu
     {
-
-        public bool IsShowing => gameObject.activeSelf;
-
-        public virtual void Show()
-        {
-            gameObject.SetActive(true);
-        }
-
-        public virtual void Hide()
-        {
-            gameObject.SetActive(false);
-        }
+        
+        
         
     }
 }
