@@ -53,6 +53,7 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
           androidExportType: androidAppBundle
+          androidTargetSdkVersion: 34
           dockerMemoryLimit: 7500m
           dockerCpuLimit: 2
           buildName: 'Gumball'
@@ -94,8 +95,8 @@ jobs:
           APPSTORE_P8: ${{ secrets.APPSTORE_P8 }}
 
           IOS_BUILD_PATH: ${{ format('{0}/build/iOS', github.workspace) }}
-          IOS_BUNDLE_ID: com.company.application # Change it to match your Unity bundle id
-          PROJECT_NAME: Your Project Name # Change it to match your project's name
+          IOS_BUNDLE_ID: com.RoadburnGames.Gumball
+          PROJECT_NAME: Gumball
         run: |
           eval "$(ssh-agent -s)"
           ssh-add - <<< "${MATCH_DEPLOY_KEY}"
@@ -183,12 +184,12 @@ jobs:
 
       # Delete library folders to save space - must do this after build job as post-cache needs to cache it
       - name: Delete runner1 Library folder
-        run: rm rf /root/runner1-actions/_work/Gumball/Gumball/Library
+        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/Library || true
       - name: Delete runner2 Library folder
-        run: rm rf /root/runner2-actions/_work/Gumball/Gumball/Library
+        run: rm -rf /root/runner2-actions/_work/Gumball/Gumball/Library || true
 
       # Delete build folder to save space
       - name: Delete runner1 build folder
-        run: rm rf /root/runner1-actions/_work/Gumball/Gumball/build
+        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/build || true
       - name: Delete runner2 build folder
-        run: rm rf /root/runner2-actions/_work/Gumball/Gumball/build
+        run: rm -rf /root/runner2-actions/_work/Gumball/Gumball/build || true

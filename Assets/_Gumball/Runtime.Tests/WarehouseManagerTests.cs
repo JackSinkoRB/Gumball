@@ -113,6 +113,25 @@ namespace Gumball.Runtime.Tests
         
         [Test]
         [Order(5)]
+        public void AllCarsHaveSteeringWheelsAssigned()
+        {
+            string carsMissingSteeringWheelReferences = "";
+            for (int index = 0; index < WarehouseManager.Instance.AllCars.Count; index++)
+            {
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCars[index];
+                AICar car = carAsset.editorAsset.GetComponent<AICar>();
+                if (car == null)
+                    continue;
+
+                if (car.SteeringWheel == null)
+                    carsMissingSteeringWheelReferences += $"\n - {car.name} (index {index})";
+            }
+            
+            Assert.IsTrue(carsMissingSteeringWheelReferences.IsNullOrEmpty(), $"Cars missing steering wheel references: {carsMissingSteeringWheelReferences}");
+        }
+        
+        [Test]
+        [Order(6)]
         public void NoAvatarsExistInCars()
         {
             string carsWithAvatars = "";

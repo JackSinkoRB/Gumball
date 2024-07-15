@@ -17,9 +17,6 @@ namespace Gumball
         [InitializeOnLoadMethod]
         private static void Initialise()
         {
-            SaveEditorAssetsEvents.onSaveScene -= OnSaveScene;
-            SaveEditorAssetsEvents.onSaveScene += OnSaveScene;
-            
             SaveEditorAssetsEvents.onSavePrefab -= OnSavePrefab;
             SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
         }
@@ -30,14 +27,6 @@ namespace Gumball
                 return;
             
             RemoveUnusedSplineMeshes(path);
-        }
-
-        private static void OnSaveScene(string sceneName, string path)
-        {
-            if (EditorApplication.isUpdating)
-                return;
-            
-            RemoveUnusedChunks();
         }
 
         private static void RemoveUnusedSplineMeshes(string path)
@@ -84,7 +73,8 @@ namespace Gumball
             }
         }
 
-        private static void RemoveUnusedChunks()
+        [MenuItem("Gumball/Remove unused chunk mesh assets")]
+        public static void RemoveUnusedChunkMeshes()
         {
             if (Application.isPlaying)
                 return;
