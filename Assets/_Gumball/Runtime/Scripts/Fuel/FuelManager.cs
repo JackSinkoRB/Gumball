@@ -17,6 +17,11 @@ namespace Gumball
             get => DataManager.Player.Get("Fuel.Current", maxFuel); //initialise with max fuel
             private set => DataManager.Player.Set("Fuel.Current", value);
         }
+
+        public static bool HasFuel(int amount = 1)
+        {
+            return CurrentFuel >= amount;
+        }
         
         public static void SetFuel(int amount)
         {
@@ -36,6 +41,16 @@ namespace Gumball
             CurrentFuel = amount;
             
             onFuelChange?.Invoke(previousFuel, amount);
+        }
+        
+        public static void AddFuel(int amount = 1)
+        {
+            SetFuel(CurrentFuel + amount);
+        }
+        
+        public static void TakeFuel(int amount = 1)
+        {
+            SetFuel(CurrentFuel - amount);
         }
         
     }
