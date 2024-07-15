@@ -53,6 +53,7 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
           androidExportType: androidAppBundle
+          androidTargetSdkVersion: 34
           dockerMemoryLimit: 7500m
           dockerCpuLimit: 2
           buildName: 'Gumball'
@@ -94,8 +95,8 @@ jobs:
           APPSTORE_P8: ${{ secrets.APPSTORE_P8 }}
 
           IOS_BUILD_PATH: ${{ format('{0}/build/iOS', github.workspace) }}
-          IOS_BUNDLE_ID: com.company.application # Change it to match your Unity bundle id
-          PROJECT_NAME: Your Project Name # Change it to match your project's name
+          IOS_BUNDLE_ID: com.RoadburnGames.Gumball
+          PROJECT_NAME: Gumball
         run: |
           eval "$(ssh-agent -s)"
           ssh-add - <<< "${MATCH_DEPLOY_KEY}"
