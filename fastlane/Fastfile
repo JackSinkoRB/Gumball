@@ -1,6 +1,18 @@
 org, repo = (ENV["GITHUB_REPOSITORY"]||"").split("/")
 match_org, match_repo = (ENV["MATCH_REPOSITORY"]||"").split("/")
 
+def ensure_temp_keychain(name)
+  delete_keychain(
+    name: name
+  ) if File.exist? File.expand_path("~/Library/Keychains/#{name}-db")
+  create_keychain(
+    name: name,
+    password: 'temppassword',
+    unlock: true,
+    timeout: false
+  )
+end
+
 platform :ios do
   lane :init_ci do
     setup_ci
@@ -22,11 +34,14 @@ platform :ios do
       key_content: ENV['APPSTORE_P8']
     )
 
+    ensure_temp_keychain 'fastlane_enterprise'
     match(
       type: "appstore",
       storage_mode: "git",
       git_url: "git@github.com:#{match_org}/#{match_repo}.git",
       app_identifier: ENV["IOS_BUNDLE_ID"]
+      keychain_name: 'fastlane_enterprise',
+      keychain_password: 'temppassword'
     )
   end
 
