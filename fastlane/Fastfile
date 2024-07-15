@@ -39,7 +39,7 @@ platform :ios do
       type: "appstore",
       storage_mode: "git",
       git_url: "git@github.com:#{match_org}/#{match_repo}.git",
-      app_identifier: ENV["IOS_BUNDLE_ID"]
+      app_identifier: ENV["IOS_BUNDLE_ID"],
       keychain_name: 'fastlane_enterprise',
       keychain_password: 'temppassword'
     )
