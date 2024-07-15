@@ -29,7 +29,7 @@ namespace Gumball
         private void RefreshFuelLabel()
         {
             fuelLabel.text = $"{FuelManager.CurrentFuel}";
-            fuelLabel.Resize();
+            this.PerformAtEndOfFrame(fuelLabel.Resize);
         }
 
     }

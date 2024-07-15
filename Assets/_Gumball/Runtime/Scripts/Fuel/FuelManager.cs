@@ -7,14 +7,14 @@ namespace Gumball
     public static class FuelManager
     {
         
-        private const int maxFuel = 10;
+        public const int MaxFuel = 10;
 
         public delegate void OnFuelChangeDelegate(int previousFuel, int newFuel);
         public static OnFuelChangeDelegate onFuelChange;
         
         public static int CurrentFuel
         {
-            get => DataManager.Player.Get("Fuel.Current", maxFuel); //initialise with max fuel
+            get => DataManager.Player.Get("Fuel.Current", MaxFuel); //initialise with max fuel
             private set => DataManager.Player.Set("Fuel.Current", value);
         }
 
@@ -25,10 +25,13 @@ namespace Gumball
         
         public static void SetFuel(int amount)
         {
-            if (amount > maxFuel)
+            if (CurrentFuel == amount)
+                return; //already has this amount
+            
+            if (amount > MaxFuel)
             {
                 Debug.LogError("Cannot set fuel above the maximum.");
-                amount = maxFuel;
+                amount = MaxFuel;
             }
 
             if (amount < 0)

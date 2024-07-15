@@ -24,6 +24,14 @@ namespace Gumball
 
         public void OnClickPlayButton()
         {
+            
+            //TODO: unit tests - test adding fuel, make sure session can't be started if not enough fuel
+            if (!FuelManager.HasFuel())
+            {
+                PanelManager.GetPanel<InsufficientFuelPanel>().Show();
+                return;
+            }
+
             currentNode.GameSession.StartSession();
         }
         
