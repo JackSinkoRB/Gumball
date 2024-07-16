@@ -53,7 +53,7 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-Editor
+          key: Library-${{ testMode }}
 
       # Test
       - uses: game-ci/unity-test-runner@v4
@@ -115,7 +115,6 @@ jobs:
           dockerMemoryLimit: 7500m
           dockerCpuLimit: 2
           buildName: 'Gumball'
-          versioning: Semantic
 
       # Zip Build Files
       - name: Zip Build Files
