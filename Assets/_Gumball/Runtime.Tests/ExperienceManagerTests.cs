@@ -75,12 +75,12 @@ namespace Gumball.Runtime.Tests
         [Order(2)]
         public void AddXPChangesLevel()
         {
-            int previousLevel = ExperienceManager.LevelValue;
+            int previousLevel = ExperienceManager.Level;
             Assert.AreEqual(1, previousLevel);
             
             ExperienceManager.AddXP(ExperienceManager.Instance.Levels[1].XPRequired);
             
-            int newLevel = ExperienceManager.LevelValue;
+            int newLevel = ExperienceManager.Level;
             Assert.AreEqual(2, newLevel);
         }
 
@@ -104,13 +104,13 @@ namespace Gumball.Runtime.Tests
         {
             ExperienceManager.SetLevel(0);
             
-            int currentLevel = ExperienceManager.LevelValue;
+            int currentLevel = ExperienceManager.Level;
             Assert.AreEqual(1, currentLevel);
             
             Assert.AreEqual(ExperienceManager.Instance.Levels[1].XPRequired, ExperienceManager.RemainingXPForNextLevel);
             
             ExperienceManager.SetLevel(1);
-            currentLevel = ExperienceManager.LevelValue;
+            currentLevel = ExperienceManager.Level;
             Assert.AreEqual(2, currentLevel);
             
             int xpForLevel3 = ExperienceManager.RemainingXPForNextLevel;
@@ -119,7 +119,7 @@ namespace Gumball.Runtime.Tests
             //try with a difference
             const int difference = 5;
             ExperienceManager.SetTotalXP(ExperienceManager.GetXPRequiredForLevel(2) + difference);
-            currentLevel = ExperienceManager.LevelValue;
+            currentLevel = ExperienceManager.Level;
             Assert.AreEqual(3, currentLevel);
             
             Assert.AreEqual(ExperienceManager.Instance.Levels[3].XPRequired - difference, ExperienceManager.RemainingXPForNextLevel);
