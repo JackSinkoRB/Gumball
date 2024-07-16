@@ -10,6 +10,15 @@ namespace Gumball
 
         public static Coroutine PerformAtEndOfFrame(this MonoBehaviour monoBehaviour, Action action)
         {
+            if (!monoBehaviour.isActiveAndEnabled)
+                return null;
+            
+            if (!Application.isPlaying)
+            {
+                action?.Invoke();
+                return null;
+            }
+
             return CoroutineHelper.PerformNextFrame(action, monoBehaviour);
         }
 

@@ -31,7 +31,7 @@ namespace Gumball
         private void RefreshCurrencyLabel()
         {
             currencyLabel.text = $"{Currency.Standard.Funds}";
-            currencyLabel.Resize();
+            this.PerformAtEndOfFrame(currencyLabel.Resize);
         }
         
     }

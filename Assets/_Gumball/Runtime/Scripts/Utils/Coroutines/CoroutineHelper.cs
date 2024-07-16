@@ -14,7 +14,7 @@ namespace Gumball
 
         private static readonly Dictionary<string, CoroutineHelperInstance> sceneCoroutineInstances = new();
         
-        [RuntimeInitializeOnLoadMethod]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void RuntimeInitialise()
         {
             onUnityUpdate = null;

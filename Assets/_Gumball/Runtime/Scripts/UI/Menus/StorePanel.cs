@@ -49,18 +49,16 @@ namespace Gumball
         [ButtonMethod]
         public void RefreshIAPProducts()
         {
-            IAPManager.Instance.ClearProducts();
-            int realProducts = 0;
+            List<IAPProduct> storeProducts = new();
             foreach (StorePurchaseButton purchaseButton in transform.GetComponentsInAllChildren<StorePurchaseButton>())
             {
                 if (purchaseButton.CurrencyType == CurrencyType.REAL)
-                {
-                    IAPManager.Instance.AddProduct(purchaseButton.Product);
-                    realProducts++;
-                }
+                    storeProducts.Add(purchaseButton.Product);
             }
             
-            Debug.Log($"Found {realProducts} products in store panel and added them to the IAP product catalogue.");
+            IAPManager.Instance.SetStoreProducts(storeProducts);
+
+            Debug.Log($"Found {storeProducts.Count} products in store panel and added them to the IAP product catalogue.");
         }
 #endif
         

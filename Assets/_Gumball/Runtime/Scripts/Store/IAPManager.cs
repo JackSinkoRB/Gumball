@@ -30,9 +30,11 @@ namespace Gumball
 #endif
         
         [SerializeField] private bool useStoreKitTesting;
-
+        [Tooltip("Manually register products here that aren't included in the store.")]
+        [SerializeField] private List<IAPProduct> nonStoreProducts = new();
+        
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private List<IAPProduct> allProducts = new();
+        [SerializeField, ReadOnly] private List<IAPProduct> storeProducts = new();
 
         private CrossPlatformValidator purchaseValidator;
         
@@ -89,24 +91,19 @@ namespace Gumball
         {
             ConfigurationBuilder builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
 
-            foreach (IAPProduct product in allProducts)
-            {
+            foreach (IAPProduct product in storeProducts)
                 builder.AddProduct(product.ProductID, product.Type);
-            }
+
+            foreach (IAPProduct product in nonStoreProducts)
+                builder.AddProduct(product.ProductID, product.Type);
             
             UnityPurchasing.Initialize(this, builder);
         }
         
 #if UNITY_EDITOR
-        public void ClearProducts()
+        public void SetStoreProducts(List<IAPProduct> products)
         {
-            allProducts.Clear();
-            EditorUtility.SetDirty(this);
-        }
-
-        public void AddProduct(IAPProduct product)
-        {
-            allProducts.Add(product);
+            storeProducts = products;
             EditorUtility.SetDirty(this);
         }
 #endif

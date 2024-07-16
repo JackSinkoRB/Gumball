@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using MyBox;
 using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Purchasing;
@@ -37,12 +40,13 @@ namespace Gumball
         [SerializeField] private UnityEvent onSuccessfulPurchase;
 
         [Header("UI")]
-        [SerializeField] private AutosizeTextMeshPro priceLabel;
-        [SerializeField] private Image standardCurrencySymbol;
-        [SerializeField] private Image premiumCurrencySymbol;
+        [SerializeField] private bool updatesUI = true;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private AutosizeTextMeshPro priceLabel;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private Image standardCurrencySymbol;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private Image premiumCurrencySymbol;
         [Space(5)]
-        [SerializeField] private GameObject saleHolder;
-        [SerializeField] private AutosizeTextMeshPro salePercentLabel;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private GameObject saleHolder;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private AutosizeTextMeshPro salePercentLabel;
         
         private bool isInitialised;
 
@@ -64,11 +68,14 @@ namespace Gumball
             UpdateButtonUI();
         }
 
+#if UNITY_EDITOR
         private void OnValidate()
         {
-            UpdateButtonUI();
+            if (!EditorApplication.isUpdating)
+                UpdateButtonUI();
         }
-
+#endif
+        
         public string GetPriceFormatted()
         {
             if (currencyType == CurrencyType.REAL)
@@ -168,10 +175,13 @@ namespace Gumball
         
         private void UpdateButtonUI()
         {
+            if (!updatesUI)
+                return;
+            
             if (priceLabel != null)
             {
                 priceLabel.text = GetPriceFormatted();
-                priceLabel.Resize();
+                this.PerformAtEndOfFrame(priceLabel.Resize);
             }
 
             if (isSale)
@@ -179,7 +189,7 @@ namespace Gumball
                 saleHolder.gameObject.SetActive(true);
                 float salePercent = 1 - (GetFinalPrice() / GetNonSalePrice());
                 salePercentLabel.text = $"-{Mathf.RoundToInt(salePercent * 100)}%";
-                salePercentLabel.Resize();
+                this.PerformAtEndOfFrame(salePercentLabel.Resize);
             }
             else
             {

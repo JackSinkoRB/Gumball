@@ -3,12 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Gumball.Editor.Tests
 {
     public class TimeUtilsTests
     {
 
+        [Test]
+        public void SetTime()
+        {
+            long timeAtStart = TimeUtils.CurrentEpochSeconds;
+            const int attempts = 100;
+            for (int count = 0; count < attempts; count++)
+            {
+                const int randomAmount = 10000;
+                int randomOffset = Random.Range(-randomAmount, randomAmount);
+                long desiredTime = timeAtStart + randomOffset;
+                TimeUtils.SetTime(desiredTime);
+                long actualTime = TimeUtils.CurrentEpochSeconds;
+                Assert.AreEqual(desiredTime, actualTime);
+            }
+        }
+        
         [Test]
         public void TimeUtilsToPrettyStringShort()
         {
