@@ -169,6 +169,9 @@ jobs:
               if [[ "$COMMIT_MESSAGE" == *"merge branch"* ]]; then
                 continue
               fi
+              if [[ "$COMMIT_MESSAGE" == *"Merge branch"* ]]; then
+                continue
+              fi
               # Remove any occurrence of "JackSinkoRB"
               COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
               # Remove 'Conflicts:' and anything after it

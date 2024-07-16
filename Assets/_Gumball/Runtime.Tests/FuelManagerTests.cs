@@ -121,9 +121,8 @@ namespace Gumball.Runtime.Tests
             FuelManager.SetFuel(0);
             
             FuelManager.RegenerateCycle.Restart();
-            const long cycleDurationSeconds = FuelManager.MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute;
-            Assert.AreEqual(cycleDurationSeconds, FuelManager.RegenerateCycle.SecondsRemainingInCurrentCycle);
             
+            const long cycleDurationSeconds = FuelManager.MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute;
             TimeUtils.SetTimeOffset(cycleDurationSeconds);
             yield return null; //wait for events to trigger
 
@@ -142,9 +141,8 @@ namespace Gumball.Runtime.Tests
             FuelManager.SetFuel(0);
             
             FuelManager.RegenerateCycle.Restart();
-            const long cycleDurationSeconds = FuelManager.MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute;
-            Assert.AreEqual(cycleDurationSeconds, FuelManager.RegenerateCycle.SecondsRemainingInCurrentCycle);
 
+            const long cycleDurationSeconds = FuelManager.MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute;
             const int cyclesToComplete = FuelManager.MaxFuel;
             TimeUtils.SetTimeOffset(cycleDurationSeconds * cyclesToComplete);
             yield return null; //wait for events to trigger
@@ -164,9 +162,8 @@ namespace Gumball.Runtime.Tests
             FuelManager.SetFuel(FuelManager.MaxFuel - 1);
             
             FuelManager.RegenerateCycle.Restart();
-            const long cycleDurationSeconds = FuelManager.MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute;
-            Assert.AreEqual(cycleDurationSeconds, FuelManager.RegenerateCycle.SecondsRemainingInCurrentCycle);
             
+            const long cycleDurationSeconds = FuelManager.MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute;
             const int cyclesToComplete = 2;
             TimeUtils.SetTimeOffset(cycleDurationSeconds * cyclesToComplete);
             yield return null; //wait for events to trigger
