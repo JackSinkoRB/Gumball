@@ -23,6 +23,11 @@ namespace Gumball
             return CurrentFuel >= amount;
         }
         
+        public static void ReplenishFuel()
+        {
+            SetFuel(MaxFuel);
+        }
+        
         public static void SetFuel(int amount)
         {
             if (CurrentFuel == amount)

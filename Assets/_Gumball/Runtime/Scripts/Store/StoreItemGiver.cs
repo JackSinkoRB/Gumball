@@ -29,7 +29,7 @@ namespace Gumball
 
         public void ReplenishFuel()
         {
-            FuelManager.SetFuel(FuelManager.MaxFuel);
+            FuelManager.ReplenishFuel();
         }
         
     }

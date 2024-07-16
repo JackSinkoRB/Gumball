@@ -19,5 +19,21 @@ namespace Gumball
             Currency.Standard.AddFunds(10000);
         }
         
+#if UNITY_EDITOR
+        [MenuItem("Gumball/Cheats/Replenish Fuel")]
+#endif
+        private static void ReplenishFuel()
+        {
+            FuelManager.ReplenishFuel();
+        }
+        
+#if UNITY_EDITOR
+        [MenuItem("Gumball/Cheats/Remove All Fuel")]
+#endif
+        private static void RemoveAllFuel()
+        {
+            FuelManager.SetFuel(0);
+        }
+        
     }
 }
