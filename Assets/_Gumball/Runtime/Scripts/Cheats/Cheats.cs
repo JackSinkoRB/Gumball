@@ -11,6 +11,19 @@ namespace Gumball
     public class Cheats : MonoBehaviour
     {
         
+        public void ResetGame()
+        {
+            DataManager.RemoveAllData();
+
+            if (Application.isPlaying)
+            {
+#if UNITY_EDITOR
+                EditorApplication.isPlaying = false;
+#endif
+                Application.Quit();
+            }
+        }
+        
         public void Add10000StandardCurrency()
         {
             Currency.Standard.AddFunds(10000);
