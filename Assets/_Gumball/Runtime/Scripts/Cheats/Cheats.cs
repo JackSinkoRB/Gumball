@@ -8,32 +8,31 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public static class Cheats
+    public class Cheats : MonoBehaviour
     {
         
+        public void ResetGame()
+        {
+            DataManager.RemoveAllData();
+
+            if (Application.isPlaying)
+            {
 #if UNITY_EDITOR
-        [MenuItem("Gumball/Cheats/Add 10000 Standard Currency")]
+                EditorApplication.isPlaying = false;
 #endif
-        private static void Add10000StandardCurrency()
+                Application.Quit();
+            }
+        }
+        
+        public void Add10000StandardCurrency()
         {
             Currency.Standard.AddFunds(10000);
         }
-        
-#if UNITY_EDITOR
-        [MenuItem("Gumball/Cheats/Replenish Fuel")]
-#endif
-        private static void ReplenishFuel()
+
+        public void GiveMaxLevel()
         {
-            FuelManager.ReplenishFuel();
+            ExperienceManager.SetTotalXP(int.MaxValue);
         }
-        
-#if UNITY_EDITOR
-        [MenuItem("Gumball/Cheats/Remove All Fuel")]
-#endif
-        private static void RemoveAllFuel()
-        {
-            FuelManager.SetFuel(0);
-        }
-        
+
     }
 }

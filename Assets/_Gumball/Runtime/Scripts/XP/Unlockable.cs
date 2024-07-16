@@ -14,9 +14,7 @@ namespace Gumball
     {
 
         [SerializeField] private bool isUnlockedByDefault;
-        [Tooltip("Does the unlockable announcement panel get shown when the unlockable is unlocked?")]
-        [SerializeField] private bool announceWhenUnlocked = true;
-        
+
         public bool IsUnlocked
         {
             get => DataManager.Player.Get($"Unlockable.{name}-{ID}.IsUnlocked", isUnlockedByDefault);
@@ -44,13 +42,6 @@ namespace Gumball
         private void OnUnlock()
         {
             IsUnlocked = true;
-
-            if (announceWhenUnlocked
-                && PanelManager.PanelExists<UnlockableAnnouncementPanel>())
-            {
-                PanelManager.GetPanel<UnlockableAnnouncementPanel>().Show();
-                PanelManager.GetPanel<UnlockableAnnouncementPanel>().Populate(this);
-            }
         }
 
         private void OnLock()

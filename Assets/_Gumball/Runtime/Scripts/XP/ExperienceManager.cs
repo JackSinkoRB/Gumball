@@ -30,7 +30,7 @@ namespace Gumball
         
         public delegate void OnXPChangeDelegate(int previousXP, int newXP);
         public static OnXPChangeDelegate onXPChange;
-
+        
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void RuntimeInitialise()
         {
@@ -46,8 +46,9 @@ namespace Gumball
 
         public static int RemainingXPForNextLevel => GetRemainingXPForNextLevel(TotalXP);
         
-        public static int LevelValue => GetLevelIndexFromTotalXP(TotalXP) + 1; //add 1 as using index
-        public static PlayerLevel Level => GetLevelFromTotalXP(TotalXP);
+        public static int Level => GetLevelIndexFromTotalXP(TotalXP) + 1; //add 1 as using index
+        public static PlayerLevel PlayerLevel => GetLevelFromTotalXP(TotalXP);
+        public static bool IsMaxLevel => Level >= Instance.levels.Length;
         
         public static void SetLevel(int level)
         {
@@ -63,9 +64,9 @@ namespace Gumball
                 return; //nothing changed
             
             int previousXP = TotalXP;
-            int previousLevel = LevelValue;
+            int previousLevel = Level;
             TotalXP = xp;
-            int newLevel = LevelValue;
+            int newLevel = Level;
             int newXP = TotalXP;
             
             onXPChange?.Invoke(previousXP, newXP);
@@ -102,6 +103,9 @@ namespace Gumball
         {
             int currentLevelIndex = GetLevelIndexFromTotalXP(totalXP);
             int nextLevelIndex = currentLevelIndex + 1;
+
+            if (nextLevelIndex >= Instance.levels.Length)
+                return 0; //is max level
             
             int totalXPForCurrentLevel = GetXPRequiredForLevel(currentLevelIndex);
             int totalXPForNextLevel = GetXPRequiredForLevel(nextLevelIndex);
@@ -151,11 +155,38 @@ namespace Gumball
 
         private static IEnumerator OnLevelUpIE(int previousLevel, int newLevel)
         {
-            //give rewards for all the levels in between
+            List<Unlockable> unlockables = new();
+            
+            //give rewards for all the levels in between INSTANTLY (so player doesn't quit and lose the rewards)
             for (int level = previousLevel + 1; level <= newLevel; level++)
             {
                 int levelIndex = level - 1;
-                yield return Instance.levels[levelIndex].GiveRewards();
+                Instance.levels[levelIndex].GiveRewards();
+                
+                unlockables.AddRange(Instance.levels[levelIndex].Unlockables);
+            }
+            
+            //show the level up panel with the rewards (just for the last level gained)
+            if (PanelManager.PanelExists<LevelUpPanel>())
+            {
+                PanelManager.GetPanel<LevelUpPanel>().Show();
+                
+                //populate level up panel with the rewards
+                PanelManager.GetPanel<LevelUpPanel>().Populate(Instance.levels[newLevel - 1]);
+
+                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
+            }
+            
+            //show unlocks
+            foreach (Unlockable unlockable in unlockables)
+            {
+                if (PanelManager.PanelExists<UnlockableAnnouncementPanel>())
+                {
+                    PanelManager.GetPanel<UnlockableAnnouncementPanel>().Show();
+                    PanelManager.GetPanel<UnlockableAnnouncementPanel>().Populate(unlockable);
+
+                    yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+                }
             }
         }
         

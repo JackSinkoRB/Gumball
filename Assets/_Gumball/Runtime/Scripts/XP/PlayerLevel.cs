@@ -21,6 +21,7 @@ namespace Gumball
         public int XPRequired => xpRequired;
         public bool FuelRefillReward => fuelRefillReward;
         public int PremiumCurrencyReward => premiumCurrencyReward;
+        public Unlockable[] Unlockables => unlockables;
 
 #if UNITY_EDITOR
         public void SetPremiumCurrencyReward(int amount)
@@ -34,33 +35,19 @@ namespace Gumball
         }
 #endif
 
-        public IEnumerator GiveRewards()
+        public void GiveRewards()
         {
             //give premium currency
             if (premiumCurrencyReward > 0)
                 Currency.Premium.AddFunds(premiumCurrencyReward);
             
+            //replenish fuel
             if (fuelRefillReward)
                 FuelManager.ReplenishFuel();
-
-            //show the level up panel with the rewards
-            if (PanelManager.PanelExists<LevelUpPanel>())
-            {
-                PanelManager.GetPanel<LevelUpPanel>().Show();
-                
-                //populate level up panel with the rewards
-                PanelManager.GetPanel<LevelUpPanel>().Populate(this);
-
-                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
-            }
             
+            //unlock unlockables
             foreach (Unlockable unlockable in unlockables)
-            {
                 unlockable.Unlock();
-                
-                if (PanelManager.PanelExists<UnlockableAnnouncementPanel>())
-                    yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
-            }
         }
 
     }

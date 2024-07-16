@@ -45,7 +45,7 @@ namespace Gumball
 
         private void RefreshLevelLabel()
         {
-            levelLabel.text = $"{ExperienceManager.LevelValue}";
+            levelLabel.text = $"{ExperienceManager.Level}";
             this.PerformAtEndOfFrame(levelLabel.Resize);
         }
 
