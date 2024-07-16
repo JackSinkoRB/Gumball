@@ -26,6 +26,7 @@ namespace Gumball.Runtime.Tests
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
+            PersistentCooldown.IsRunningTests = true;
             DecalEditor.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
         }
@@ -33,6 +34,7 @@ namespace Gumball.Runtime.Tests
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
+            PersistentCooldown.IsRunningTests = false;
             DataManager.EnableTestProviders(false);
         }
         

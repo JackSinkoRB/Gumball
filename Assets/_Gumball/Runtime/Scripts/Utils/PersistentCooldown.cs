@@ -9,6 +9,16 @@ namespace Gumball
     [Serializable]
     public class PersistentCooldown
     {
+        
+#if UNITY_EDITOR
+        public static bool IsRunningTests;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RuntimeInitialise()
+        {
+            IsRunningTests = false;
+        }
+#endif
 
         public event Action onCycleComplete;
         
@@ -60,6 +70,9 @@ namespace Gumball
 
         private void CheckIfCyclesCompleted()
         {
+            if (!GameLoaderSceneManager.HasLoaded && !IsRunningTests)
+                return;
+            
             int completed = CyclesCompleted;
             if (completed == 0)
                 return;
