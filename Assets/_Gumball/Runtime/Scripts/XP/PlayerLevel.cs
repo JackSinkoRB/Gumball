@@ -21,17 +21,28 @@ namespace Gumball
         public int XPRequired => xpRequired;
         public bool FuelRefillReward => fuelRefillReward;
         public int PremiumCurrencyReward => premiumCurrencyReward;
-        
+
+#if UNITY_EDITOR
+        public void SetPremiumCurrencyReward(int amount)
+        {
+            premiumCurrencyReward = amount;
+        }
+
+        public void SetFuelRefillReward(bool refill)
+        {
+            fuelRefillReward = refill;
+        }
+#endif
+
         public IEnumerator GiveRewards()
         {
             //give premium currency
             if (premiumCurrencyReward > 0)
                 Currency.Premium.AddFunds(premiumCurrencyReward);
             
-            //TODO: refill fuel
+            if (fuelRefillReward)
+                FuelManager.ReplenishFuel();
 
-            //TODO: update unit tests
-            
             //show the level up panel with the rewards
             if (PanelManager.PanelExists<LevelUpPanel>())
             {
