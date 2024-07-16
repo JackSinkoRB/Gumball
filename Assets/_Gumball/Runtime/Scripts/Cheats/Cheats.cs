@@ -21,5 +21,21 @@ namespace Gumball
             ExperienceManager.SetTotalXP(int.MaxValue);
         }
         
+#if UNITY_EDITOR
+        [MenuItem("Gumball/Cheats/Replenish Fuel")]
+#endif
+        private static void ReplenishFuel()
+        {
+            FuelManager.ReplenishFuel();
+        }
+        
+#if UNITY_EDITOR
+        [MenuItem("Gumball/Cheats/Remove All Fuel")]
+#endif
+        private static void RemoveAllFuel()
+        {
+            FuelManager.SetFuel(0);
+        }
+        
     }
 }

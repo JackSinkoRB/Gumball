@@ -26,6 +26,11 @@ namespace Gumball
         {
             corePart.SetUnlocked(true);
         }
+
+        public void ReplenishFuel()
+        {
+            FuelManager.ReplenishFuel();
+        }
         
     }
 }
