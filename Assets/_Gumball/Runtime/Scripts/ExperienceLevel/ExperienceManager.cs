@@ -30,7 +30,7 @@ namespace Gumball
         
         public delegate void OnXPChangeDelegate(int previousXP, int newXP);
         public static OnXPChangeDelegate onXPChange;
-
+        
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void RuntimeInitialise()
         {
@@ -48,6 +48,7 @@ namespace Gumball
         
         public static int LevelValue => GetLevelIndexFromTotalXP(TotalXP) + 1; //add 1 as using index
         public static PlayerLevel Level => GetLevelFromTotalXP(TotalXP);
+        public static bool IsMaxLevel => LevelValue >= Instance.levels.Length;
         
         public static void SetLevel(int level)
         {
@@ -102,6 +103,9 @@ namespace Gumball
         {
             int currentLevelIndex = GetLevelIndexFromTotalXP(totalXP);
             int nextLevelIndex = currentLevelIndex + 1;
+
+            if (nextLevelIndex >= Instance.levels.Length)
+                return 0; //is max level
             
             int totalXPForCurrentLevel = GetXPRequiredForLevel(currentLevelIndex);
             int totalXPForNextLevel = GetXPRequiredForLevel(nextLevelIndex);

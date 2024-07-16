@@ -8,15 +8,17 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public static class Cheats
+    public class Cheats : MonoBehaviour
     {
         
-#if UNITY_EDITOR
-        [MenuItem("Gumball/Cheats/Add 10000 Standard Currency")]
-#endif
-        private static void Add10000StandardCurrency()
+        public void Add10000StandardCurrency()
         {
             Currency.Standard.AddFunds(10000);
+        }
+
+        public void GiveMaxLevel()
+        {
+            ExperienceManager.SetTotalXP(int.MaxValue);
         }
         
     }
