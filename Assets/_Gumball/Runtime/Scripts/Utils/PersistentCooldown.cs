@@ -70,9 +70,14 @@ namespace Gumball
 
         private void CheckIfCyclesCompleted()
         {
-            if (!GameLoaderSceneManager.HasLoaded && !IsRunningTests)
+            if (!GameLoaderSceneManager.HasLoaded)
+            {
+#if UNITY_EDITOR
+                if (!IsRunningTests)
+#endif
                 return;
-            
+            }
+
             int completed = CyclesCompleted;
             if (completed == 0)
                 return;
