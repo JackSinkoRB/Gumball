@@ -60,9 +60,6 @@ namespace Gumball
 
         private void CheckIfCyclesCompleted()
         {
-            if (!GameLoaderSceneManager.HasLoaded)
-                return;
-            
             int completed = CyclesCompleted;
             if (completed == 0)
                 return;
