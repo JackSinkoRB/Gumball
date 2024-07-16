@@ -42,8 +42,8 @@ public class AutosizeTextMeshPro : TextMeshProUGUI
 
     public void Resize()
     {
-        // Get the size of the text for the given string.
-        Vector2 textSize = new Vector2(GetPreferredWidth(), GetPreferredHeight()) + settings.extraPadding;
+        Vector2 preferredValues = GetPreferredValues();
+        Vector2 textSize = new Vector2(preferredValues.x, preferredValues.y) + settings.extraPadding;
         enableWordWrapping = false;
         
         if (settings.otherRectsToModify != null && settings.otherRectsToModify.Length > 0)
