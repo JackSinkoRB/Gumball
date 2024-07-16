@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using MyBox;
 using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Purchasing;
@@ -65,11 +68,14 @@ namespace Gumball
             UpdateButtonUI();
         }
 
+#if UNITY_EDITOR
         private void OnValidate()
         {
-            UpdateButtonUI();
+            if (!EditorApplication.isUpdating)
+                UpdateButtonUI();
         }
-
+#endif
+        
         public string GetPriceFormatted()
         {
             if (currencyType == CurrencyType.REAL)
