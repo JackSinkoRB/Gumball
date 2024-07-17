@@ -29,7 +29,7 @@ namespace Gumball
             else
             {
                 label.text = "Install";
-                button.interactable = true;
+                button.interactable = WarehouseManager.Instance.CurrentCar.CarType == part.CarType;
 
                 bool isStockPart = part == null;
                 if (isStockPart)

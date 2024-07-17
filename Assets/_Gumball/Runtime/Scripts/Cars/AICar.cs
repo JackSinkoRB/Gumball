@@ -57,14 +57,16 @@ namespace Gumball
         
         public Transform CockpitCameraTarget => cockpitCameraTarget;
         public Transform RearViewCameraTarget => rearViewCameraTarget;
-        
+
         [Header("Customisation")]
+        [SerializeField] private CarType carType;
         [SerializeField] private CarPartManager carPartManager;
         [SerializeField] private BodyPaintModification bodyPaintModification;
         [SerializeField] private PartModification partModification;
         [Tooltip("This gets added on initialise for every player car.")]
         [SerializeField, ReadOnly] private NosManager nosManager;
 
+        public CarType CarType => carType;
         public CarPartManager CarPartManager => carPartManager;
         public BodyPaintModification BodyPaintModification => bodyPaintModification;
         public PartModification PartModification => partModification;

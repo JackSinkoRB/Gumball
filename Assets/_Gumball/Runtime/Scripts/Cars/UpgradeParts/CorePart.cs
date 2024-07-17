@@ -22,6 +22,7 @@ namespace Gumball
 
         [Header("Details")]
         [SerializeField] private PartType type;
+        [SerializeField] private CarType carType;
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
 
@@ -43,6 +44,7 @@ namespace Gumball
         public string SaveKey => $"{type.ToString()}-{name}-{ID}";
 
         public PartType Type => type;
+        public CarType CarType => carType;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
