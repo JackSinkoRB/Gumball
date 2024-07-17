@@ -32,7 +32,7 @@ namespace Gumball
             scrollItems.Add(stockScrollItem);
 
             //add the current part option as it doesn't show in spare parts
-            CorePart currentPart = PartModification.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, type);
+            CorePart currentPart = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, type);
             if (currentPart != null)
             {
                 ScrollItem currentScrollItem = CreateScrollItem(type, currentPart);

@@ -49,10 +49,10 @@ namespace Gumball
             //apply to sub part
             part.ApplyToCorePart(corePartBelongsTo);
             
-            //update the cars modifiers
+            //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == corePartBelongsTo.CarBelongsToIndex;
             if (isAttachedToCurrentCar)
-                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(corePartBelongsTo.CarBelongsToIndex));
         }
 
         public void UninstallSubPart()
@@ -69,10 +69,10 @@ namespace Gumball
             //apply to slot
             CurrentSubPart = null;
             
-            //update the cars modifiers
+            //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == corePartBelongsTo.CarBelongsToIndex;
             if (isAttachedToCurrentCar)
-                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(corePartBelongsTo.CarBelongsToIndex));
         }
         
     }

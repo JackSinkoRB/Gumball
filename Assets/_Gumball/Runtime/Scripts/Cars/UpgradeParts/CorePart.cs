@@ -33,10 +33,9 @@ namespace Gumball
         [Header("SubParts")]
         [SerializeField] private SubPartSlot[] subPartSlots;
         [SerializeField] private CorePartLevel[] levels;
-        
+
         [Header("Modifiers")]
-        [Tooltip("The amount of peak torque to add to the car.")]
-        [SerializeField] private float peakTorqueAddition;
+        [SerializeField] private CarPerformanceProfileModifiers performanceModifiers;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<GameSession> sessionsThatGiveReward = new();
@@ -49,7 +48,7 @@ namespace Gumball
         public Sprite Icon => icon;
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public SubPartSlot[] SubPartSlots => subPartSlots;
-        public float PeakTorqueAddition => peakTorqueAddition;
+        public CarPerformanceProfileModifiers PerformanceModifiers => performanceModifiers;
         
         public bool IsUnlocked
         {
@@ -129,12 +128,10 @@ namespace Gumball
                 return;
             }
 
+            //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CarBelongsToIndex;
             if (isAttachedToCurrentCar)
-            {
-                //update the modifiers
-                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
-            }
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CarBelongsToIndex));
             
             CarBelongsToIndex = -1;
         }

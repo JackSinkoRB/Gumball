@@ -163,12 +163,10 @@ namespace Gumball
                 return;
             }
 
+            //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CorePartBelongsTo.CarBelongsToIndex;
             if (isAttachedToCurrentCar)
-            {
-                //update the modifiers
-                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
-            }
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CorePartBelongsTo.CarBelongsToIndex));
             
             CorePartBelongsTo = null;
         }
