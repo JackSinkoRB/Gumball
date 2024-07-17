@@ -34,5 +34,14 @@ namespace Gumball
             ExperienceManager.SetTotalXP(int.MaxValue);
         }
 
+        public void UnlockAllParts()
+        {
+            foreach (CorePart corePart in CorePartManager.AllParts)
+                corePart.SetUnlocked(true);
+            
+            foreach (SubPart subPart in SubPartManager.AllParts)
+                subPart.SetUnlocked(true);
+        }
+
     }
 }
