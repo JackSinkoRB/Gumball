@@ -1,0 +1,195 @@
+name: Deploy builds (internal testing)
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    tags:
+      - "v*.*.*"
+
+concurrency:
+  group: ${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+
+  build:
+    name: Build for ${{ matrix.targetPlatform }}
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - Android
+          - iOS
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
+
+      # Cache
+      - uses: JackSinkoRB/local-cache@main
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+
+      # Build
+      - uses: game-ci/unity-builder@v4
+        id: buildStep
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          androidKeystoreName: user.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          androidExportType: androidAppBundle
+          androidTargetSdkVersion: 34
+          dockerMemoryLimit: 7500m
+          dockerCpuLimit: 2
+          buildName: 'Gumball'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
+
+  deployToApple:
+    needs: build
+    name: Deploy to TestFlight
+    runs-on: macos-latest
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Download IOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-iOS
+          path: build/iOS
+
+      - name: Fix File Permissions and Run fastlane
+        env:
+          APPLE_CONNECT_EMAIL: ${{ secrets.APPLE_CONNECT_EMAIL }}
+          APPLE_DEVELOPER_EMAIL: ${{ secrets.APPLE_DEVELOPER_EMAIL }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+          MATCH_REPOSITORY: ${{ secrets.MATCH_REPOSITORY }}
+          MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_P8: ${{ secrets.APPSTORE_P8 }}
+
+          IOS_BUILD_PATH: ${{ format('{0}/build/iOS', github.workspace) }}
+          IOS_BUNDLE_ID: com.RoadburnGames.Gumball
+          PROJECT_NAME: Gumball
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add - <<< "${MATCH_DEPLOY_KEY}"
+          find $IOS_BUILD_PATH -type f -name "**.sh" -exec chmod +x {} \;
+          find $IOS_BUILD_PATH -type f -iname "usymtool" -exec chmod +x {} \;
+          bundle install
+          bundle exec fastlane ios beta
+
+      - name: Cleanup to avoid storage limit
+        if: always()
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build-iOS
+
+  deployToGoogle:
+    needs: build
+    name: Deploy to Google Play internal track
+    runs-on: self-hosted
+    env:
+      GOOGLE_PLAY_KEY_FILE: ${{ secrets.GOOGLE_PLAY_KEY_FILE }}
+      GOOGLE_PLAY_KEY_FILE_PATH:
+        ${{ format('{0}/fastlane/google-fastlane.json', github.workspace) }}
+      ANDROID_BUILD_FILE_PATH: ${{ format('{0}/build/Android/Gumball.aab', github.workspace) }}
+      ANDROID_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
+
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Download Android artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-Android
+          path: build/Android
+
+      - name: Add Authentication
+        run: echo "$GOOGLE_PLAY_KEY_FILE" > $GOOGLE_PLAY_KEY_FILE_PATH
+
+      - name: Set up Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+
+      - name: Upload to Google Play Internal
+        uses: maierj/fastlane-action@v3.1.0
+        with:
+          lane: 'android internal'
+
+      - name: Cleanup to avoid storage limit
+        if: always()
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build-Android
+
+  sendDiscordNotification:
+    needs: [deployToApple, deployToGoogle]
+    name: Discord Notification
+    runs-on: self-hosted
+    steps:
+
+      # Send Discord notification
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_EMBEDS: |
+            [{
+              "title": "Gumball deployed an internal release: ${{ github.ref_name }}",
+              "description": "It will be available on TestFlight and GooglePlay soon."
+            }]
+        uses: Ilshidur/action-discord@0.3.2
+
+  cleanup:
+    if: ${{ always() }}
+    needs: [deployToApple, deployToGoogle]
+    name: Cleanup
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      # Delete library folders to save space - must do this after build job as post-cache needs to cache it
+      - name: Delete runner1 Library folder
+        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/Library || true
+      - name: Delete runner2 Library folder
+        run: rm -rf /root/runner2-actions/_work/Gumball/Gumball/Library || true
+
+      # Delete build folder to save space
+      - name: Delete runner1 build folder
+        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/build || true
+      - name: Delete runner2 build folder
+        run: rm -rf /root/runner2-actions/_work/Gumball/Gumball/build || true

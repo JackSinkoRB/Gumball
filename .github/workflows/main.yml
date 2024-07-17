@@ -53,13 +53,13 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-Editor
+          key: Library-${{ matrix.testMode }}
 
       # Test
       - uses: game-ci/unity-test-runner@v4
         id: tests
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
@@ -102,9 +102,14 @@ jobs:
       - uses: game-ci/unity-builder@v4
         id: buildStep
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          androidKeystoreName: user.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
           dockerMemoryLimit: 7500m
@@ -135,13 +140,15 @@ jobs:
 
     steps:
 
-      # Delete library folder to save space - must do this after build job as post-cache needs to cache it
-      - name: Delete library folder
-        run: rm -rf Library
+      # Delete library folders to save space - must do this after build job as post-cache needs to cache it
+      - name: Delete runner1 Library
+        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/Library || true
+      - name: Delete runner2 Library
+        run: rm -rf /root/runner2-actions/_work/Gumball/Gumball/Library || true
 
-  deploy:
+  deployToDiscord:
     needs: build
-    name: Deploy
+    name: Deploy to Discord
     runs-on: self-hosted
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     steps:
@@ -158,6 +165,13 @@ jobs:
             for ((i=0; i<$COUNT; i++)); do
               # Get commit message, replace '\n' with a space, and remove '/', apostrophes and hash marks
               COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | tr '\n\t' ' ' | tr -d '/' | tr -d "'" | tr -d '#')
+              # Skip commits with 'merge branch' in the message
+              if [[ "$COMMIT_MESSAGE" == *"merge branch"* ]]; then
+                continue
+              fi
+              if [[ "$COMMIT_MESSAGE" == *"Merge branch"* ]]; then
+                continue
+              fi
               # Remove any occurrence of "JackSinkoRB"
               COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
               # Remove 'Conflicts:' and anything after it

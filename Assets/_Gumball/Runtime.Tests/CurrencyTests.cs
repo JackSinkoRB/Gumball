@@ -11,8 +11,6 @@ namespace Gumball.Runtime.Tests
     public class CurrencyTests : IPrebuildSetup, IPostBuildCleanup
     {
         
-        private bool isInitialised;
-
         public void Setup()
         {
             BootSceneClear.TrySetup();

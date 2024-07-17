@@ -19,6 +19,7 @@ namespace Gumball
     public class ChunkMap : ScriptableObject
     {
         
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         [SerializeField] private float chunkLoadDistance = 700;
         [Tooltip("The chunk index from the chunk references that gets loaded at the world origin.")]
         [SerializeField] private int startingChunkIndex;
@@ -28,6 +29,7 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private string[] runtimeChunkAssetKeys;
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         [SerializeField, ReadOnly] private List<int> chunksWithCustomLoadDistance = new();
         [SerializeField, ReadOnly] private ChunkMapData[] chunkData;
         [SerializeField, ReadOnly] private float[] chunkLengthsCalculated;
@@ -40,7 +42,9 @@ namespace Gumball
         
         public string[] RuntimeChunkAssetKeys => runtimeChunkAssetKeys;
         public int StartingChunkIndex => startingChunkIndex;
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         public List<int> ChunksWithCustomLoadDistance => chunksWithCustomLoadDistance;
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         public float ChunkLoadDistance => chunkLoadDistance;
         public float TotalLengthMetres => totalLengthMetres;
         public float[] ChunkLengthsCalculated => chunkLengthsCalculated;

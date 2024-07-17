@@ -24,6 +24,13 @@ namespace Gumball
 
         public void OnClickPlayButton()
         {
+            if (!FuelManager.HasFuel())
+            {
+                Hide();
+                PanelManager.GetPanel<InsufficientFuelPanel>().Show();
+                return;
+            }
+            
             currentNode.GameSession.StartSession();
         }
         

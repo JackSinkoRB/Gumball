@@ -13,7 +13,9 @@ namespace Gumball
         [SerializeField] private Quaternion rotation;
         [SerializeField] private ChunkMeshData finalMeshData;
             
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         [SerializeField] private bool hasCustomLoadDistance;
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         [SerializeField] private float customLoadDistance;
         [SerializeField] private Vector3 splineStartPosition;
         [SerializeField] private Vector3 splineEndPosition;
@@ -29,7 +31,9 @@ namespace Gumball
         public ChunkMeshData FinalMeshData => finalMeshData;
 
         public GenericDictionary<string, List<ChunkObjectData>> ChunkObjectData => chunkObjectData;
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         public bool HasCustomLoadDistance => hasCustomLoadDistance;
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         public float CustomLoadDistance => customLoadDistance;
         public Vector3 SplineStartPosition => splineStartPosition;
         public Vector3 SplineEndPosition => splineEndPosition;

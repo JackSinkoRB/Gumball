@@ -352,6 +352,9 @@ namespace Gumball
         protected virtual void OnSessionStart()
         {
             HasStarted = true;
+            
+            //only take fuel once session has properly started (in case loading failed)
+            FuelManager.TakeFuel();
         }
 
         private IEnumerator LoadScene()
