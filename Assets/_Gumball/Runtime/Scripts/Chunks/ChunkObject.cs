@@ -17,9 +17,9 @@ namespace Gumball
     {
         
         [Header("Setup check")]
-        [HelpBox("The object is not a valid prefab asset (ending in .prefab). ChunkObject can only be added to prefabs. Therefore this object will not show at runtime.", MessageType.Error, true)]
+        [HelpBox("The object is not a valid prefab asset (ending in .prefab). ChunkObject can only be added to prefabs. Therefore this object will not show at runtime.", MessageType.Error, inverse: true)]
         [SerializeField, ReadOnly] private bool isPrefab;
-        [HelpBox("This ChunkObject will not function properly because it is a child of another ChunkObject.", MessageType.Warning, true, true)]
+        [HelpBox("This ChunkObject will not function properly because it is a child of another ChunkObject.", MessageType.Warning, inverse: true, onlyShowWhenDefaultValue: true)]
         [SerializeField, ReadOnly] private bool isChildOfAnotherChunkObject;
         
         [Header("Settings")]
@@ -27,7 +27,7 @@ namespace Gumball
         [SerializeField] private bool ignoreAtRuntime;
         
         [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
-        [HelpBox("The object is not loading separately, which can contribute to lag when the chunk is loaded.", MessageType.Warning, true)]
+        [HelpBox("The object is not loading separately, which can contribute to lag when the chunk is loaded.", MessageType.Warning, inverse: true)]
         [SerializeField, ConditionalField(nameof(ignoreAtRuntime), true)] private bool loadSeparately = true;
 
         [Tooltip("Is the object hidden when the high terrain LOD is hidden?")]
@@ -45,7 +45,7 @@ namespace Gumball
         
         [Space(10)]
         [Tooltip("When enabled, the terrain is flattened to the collider specified below.")]
-        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, true, true)]
+        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, inverse: true, onlyShowWhenDefaultValue: true)]
         [SerializeField] private bool flattenTerrain;
         [Tooltip("Assign a collider for the terrain to flatten to.")]
         [SerializeField, ConditionalField(nameof(flattenTerrain))]
@@ -58,7 +58,7 @@ namespace Gumball
         
         [Space(10)]
         [Tooltip("When enabled, the specified vertex colour is blended into the current vertex colours around the supplied mesh.")]
-        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, true, true)]
+        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, inverse: true, onlyShowWhenDefaultValue: true)]
         [SerializeField] private bool colourTerrain;
         [SerializeField, ConditionalField(nameof(colourTerrain))] private ChunkObjectColorModifier colorModifier;
 
