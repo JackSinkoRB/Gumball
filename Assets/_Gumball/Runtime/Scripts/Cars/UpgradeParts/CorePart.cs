@@ -80,24 +80,6 @@ namespace Gumball
             }
         }
 
-        public CarPerformanceProfileModifiers GetTotalModifiers()
-        {
-            CarPerformanceProfileModifiers subPartModifiers = new CarPerformanceProfileModifiers();
-            if (subPartSlots == null)
-                return subPartModifiers;
-            
-            foreach (SubPartSlot slot in subPartSlots)
-            {
-                SubPart subPart = slot.CurrentSubPart;
-                if (subPart == null)
-                    continue; //nothing applied
-                
-                subPartModifiers += subPart.CorePartModifiers;
-            }
-            
-            return subPartModifiers * performanceModifiers;
-        }
-        
         public void TrackAsReward(GameSession session)
         {
             if (sessionsThatGiveReward.Contains(session))
@@ -151,6 +133,24 @@ namespace Gumball
                 WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CarBelongsToIndex));
             
             CarBelongsToIndex = -1;
+        }
+        
+        public CarPerformanceProfileModifiers GetTotalModifiers()
+        {
+            CarPerformanceProfileModifiers subPartModifiers = new CarPerformanceProfileModifiers();
+            if (subPartSlots == null)
+                return subPartModifiers;
+            
+            foreach (SubPartSlot slot in subPartSlots)
+            {
+                SubPart subPart = slot.CurrentSubPart;
+                if (subPart == null)
+                    continue; //nothing applied
+                
+                subPartModifiers += subPart.CorePartModifiers;
+            }
+            
+            return subPartModifiers * performanceModifiers;
         }
 
         private void ApplySubPartsToCar()
