@@ -63,7 +63,7 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
-        public CarPerformanceSettings PerformanceSettings => performanceSettings;
+
         public float[] GearRatios => performanceSettings.GearRatios.GetValue(performanceProfile);
         public float FinalGearRatio => performanceSettings.FinalGearRatio.GetValue(performanceProfile);
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
@@ -74,6 +74,7 @@ namespace Gumball
         public float HandbrakeEaseOffDuration => performanceSettings.HandbrakeEaseOffDuration.GetValue(performanceProfile);
         public float SteerSpeed => performanceSettings.SteerSpeed.GetValue(performanceProfile);
         public float SteerReleaseSpeed => performanceSettings.SteerReleaseSpeed.GetValue(performanceProfile);
+        public AnimationCurve MaxSteerAngleCurve => performanceSettings.MaxSteerAngle.GetValue(performanceProfile);
         public float NosDepletionRate => performanceSettings.NosDepletionRate.GetValue(performanceProfile);
         public float NosFillRate => performanceSettings.NosFillRate.GetValue(performanceProfile);
         public float NosTorqueAddition => performanceSettings.NosTorqueAddition.GetValue(performanceProfile);
@@ -197,7 +198,6 @@ namespace Gumball
         
         [Header("Steering")]
         [ConditionalField(nameof(autoDrive)), SerializeField] private float autoDriveMaxSteerAngle = 65;
-        [ConditionalField(nameof(autoDrive), true), SerializeField] private AnimationCurve maxSteerAngleCurve;
         [Space(5)]
         [SerializeField, ReadOnly] private float desiredSteerAngle;
         [SerializeField, ReadOnly] private float visualSteerAngle;
@@ -1076,7 +1076,7 @@ namespace Gumball
 
             const float speedForMaxAngle = 300;
             float speedPercent = Mathf.Clamp01(speed / speedForMaxAngle);
-            float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : maxSteerAngleCurve.Evaluate(speedPercent);
+            float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : MaxSteerAngleCurve.Evaluate(speedPercent);
 
             if (autoDrive)
             {

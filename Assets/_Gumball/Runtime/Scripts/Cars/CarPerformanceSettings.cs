@@ -39,6 +39,8 @@ namespace Gumball
         [SerializeField] private CarPerformanceSettingFloat steerSpeed = new(2.5f, 2.5f);
         [Tooltip("This allows for a different steer speed when the steering input has been released.")]
         [SerializeField] private CarPerformanceSettingFloat steerReleaseSpeed = new(15, 15);
+        [Tooltip("The max angle the steering can turn (y) at the specified speed (x).")]
+        [SerializeField] private CarPerformanceSettingAnimationCurve maxSteerAngle;
         
         [Header("Nos")]
         [Tooltip("How long (in seconds) does a full tank of NOS last?")]
@@ -58,6 +60,7 @@ namespace Gumball
         public CarPerformanceSettingFloat HandbrakeTorque => handbrakeTorque;
         public CarPerformanceSettingFloat SteerSpeed => steerSpeed;
         public CarPerformanceSettingFloat SteerReleaseSpeed => steerReleaseSpeed;
+        public CarPerformanceSettingAnimationCurve MaxSteerAngle => maxSteerAngle;
         public CarPerformanceSettingFloat NosDepletionRate => nosDepletionRate;
         public CarPerformanceSettingFloat NosFillRate => nosFillRate;
         public CarPerformanceSettingFloat NosTorqueAddition => nosTorqueAddition;
