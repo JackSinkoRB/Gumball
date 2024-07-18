@@ -296,6 +296,9 @@ namespace Gumball
             //come to a stop
             WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
             
+            //convert skill points to followers
+            FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
+            
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
