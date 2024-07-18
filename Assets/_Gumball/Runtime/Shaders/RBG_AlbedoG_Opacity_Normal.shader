@@ -12,6 +12,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 		_Bumpmap("Normal", 2D) = "bump" {}
 		_Metal("Metal", Range( 0 , 1)) = 0
 		_Gloss("Gloss", Range( 0 , 1)) = 0
+		_Clip("Clip", Range( 0 , 2)) = 0.7
 		_Nrm_Str("Nrm_Str", Range( 0 , 5)) = 1
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
@@ -193,6 +194,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -295,6 +297,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
+			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -560,7 +563,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 				float Smoothness = ( tex2DNode5.a * _Gloss );
 				float Occlusion = 1;
 				float Alpha = tex2D( _Opacity_Mask, uv_Opacity_Mask ).r;
-				float AlphaClipThreshold = 0.5;
+				float AlphaClipThreshold = _Clip;
 				float AlphaClipThresholdShadow = 0.5;
 				float3 BakedGI = 0;
 				float3 RefractionColor = 1;
@@ -810,6 +813,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -875,6 +879,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
+			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1082,7 +1087,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 				
 
 				float Alpha = tex2D( _Opacity_Mask, uv_Opacity_Mask ).r;
-				float AlphaClipThreshold = 0.5;
+				float AlphaClipThreshold = _Clip;
 				float AlphaClipThresholdShadow = 0.5;
 
 				#ifdef ASE_DEPTH_WRITE_ON
@@ -1128,6 +1133,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1191,6 +1197,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
+			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1380,7 +1387,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 				
 
 				float Alpha = tex2D( _Opacity_Mask, uv_Opacity_Mask ).r;
-				float AlphaClipThreshold = 0.5;
+				float AlphaClipThreshold = _Clip;
 				#ifdef ASE_DEPTH_WRITE_ON
 					float DepthValue = IN.clipPos.z;
 				#endif
@@ -1416,6 +1423,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1476,6 +1484,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
+			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1681,7 +1690,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 				float3 BaseColor = ( _Color * tex2DNode5 ).rgb;
 				float3 Emission = 0;
 				float Alpha = tex2D( _Opacity_Mask, uv_Opacity_Mask ).r;
-				float AlphaClipThreshold = 0.5;
+				float AlphaClipThreshold = _Clip;
 
 				#ifdef _ALPHATEST_ON
 					clip(Alpha - AlphaClipThreshold);
@@ -1718,6 +1727,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1768,6 +1778,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
+			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -1957,7 +1968,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 
 				float3 BaseColor = ( _Color * tex2DNode5 ).rgb;
 				float Alpha = tex2D( _Opacity_Mask, uv_Opacity_Mask ).r;
-				float AlphaClipThreshold = 0.5;
+				float AlphaClipThreshold = _Clip;
 
 				half4 color = half4(BaseColor, Alpha );
 
@@ -1989,6 +2000,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -2057,6 +2069,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
+			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2266,7 +2279,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 
 				float3 Normal = unpack19;
 				float Alpha = tex2D( _Opacity_Mask, uv_Opacity_Mask ).r;
-				float AlphaClipThreshold = 0.5;
+				float AlphaClipThreshold = _Clip;
 				#ifdef ASE_DEPTH_WRITE_ON
 					float DepthValue = IN.clipPos.z;
 				#endif
@@ -2336,6 +2349,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -2433,6 +2447,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
+			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -2693,7 +2708,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 				float Smoothness = ( tex2DNode5.a * _Gloss );
 				float Occlusion = 1;
 				float Alpha = tex2D( _Opacity_Mask, uv_Opacity_Mask ).r;
-				float AlphaClipThreshold = 0.5;
+				float AlphaClipThreshold = _Clip;
 				float AlphaClipThresholdShadow = 0.5;
 				float3 BakedGI = 0;
 				float3 RefractionColor = 1;
@@ -2810,6 +2825,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -2858,6 +2874,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
+			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -3023,7 +3040,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 				
 
 				surfaceDescription.Alpha = tex2D( _Opacity_Mask, uv_Opacity_Mask ).r;
-				surfaceDescription.AlphaClipThreshold = 0.5;
+				surfaceDescription.AlphaClipThreshold = _Clip;
 
 				#if _ALPHATEST_ON
 					float alphaClipThreshold = 0.01f;
@@ -3061,6 +3078,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
+			#define _ALPHATEST_ON 1
 			#define _NORMALMAP 1
 			#define ASE_SRP_VERSION 140008
 
@@ -3109,6 +3127,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 			float _Nrm_Str;
 			float _Metal;
 			float _Gloss;
+			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
 			#endif
@@ -3273,7 +3292,7 @@ Shader "RBG/AlbedoG_Opacity_Normal"
 				
 
 				surfaceDescription.Alpha = tex2D( _Opacity_Mask, uv_Opacity_Mask ).r;
-				surfaceDescription.AlphaClipThreshold = 0.5;
+				surfaceDescription.AlphaClipThreshold = _Clip;
 
 				#if _ALPHATEST_ON
 					float alphaClipThreshold = 0.01f;
@@ -3324,8 +3343,8 @@ Node;AmplifyShaderEditor.RangedFloatNode;20;-722.785,-357.3563;Inherit;False;Pro
 Node;AmplifyShaderEditor.RangedFloatNode;3;16.00444,63.95528;Float;False;Property;_Metal;Metal;4;0;Create;True;0;0;0;False;0;False;0;0.479;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;21;-180.2934,219.2879;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SamplerNode;5;-607.5,3.045685;Inherit;True;Property;_Albedo;Albedo;1;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;18;82.07771,419.9637;Inherit;False;Property;_Clip;Clip;6;0;Create;True;0;0;0;False;0;False;0.7;0.7;0;2;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SamplerNode;22;-219.3301,333.7957;Inherit;True;Property;_Opacity_Mask;Opacity_Mask;2;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.RangedFloatNode;18;63.07771,415.9637;Inherit;False;Property;_Clip;Clip;6;0;Create;True;0;0;0;False;0;False;0.7;0.7;0;2;0;1;FLOAT;0
 WireConnection;6;0;2;0
 WireConnection;6;1;5;0
 WireConnection;9;0;6;0
@@ -3333,8 +3352,9 @@ WireConnection;9;1;19;0
 WireConnection;9;3;3;0
 WireConnection;9;4;21;0
 WireConnection;9;6;22;1
+WireConnection;9;7;18;0
 WireConnection;19;5;20;0
 WireConnection;21;0;5;4
 WireConnection;21;1;4;0
 ASEEND*/
-//CHKSM=A6BF1CC8F5E250FBF0F0B21AB8B2001D6DA3F3B2
+//CHKSM=9EDDD411B6EA9C7DDC5494FFEBC1CB904BA134DC
