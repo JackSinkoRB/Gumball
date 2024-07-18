@@ -36,7 +36,7 @@ namespace Gumball
         [SerializeField] private Collider[] barriers;
         
         [Header("Modify")]
-        [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, inverse: true, onlyShowWhenDefaultValue: true)]
+        [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, onlyShowWhenDefaultValue: true, inverse: true)]
         [SerializeField] private bool hasCustomLoadDistance;
         [Tooltip("The distance that the player must be within for the chunk to be loaded.")]
         [ConditionalField(nameof(hasCustomLoadDistance)), SerializeField] private float customLoadDistance = 3000;
