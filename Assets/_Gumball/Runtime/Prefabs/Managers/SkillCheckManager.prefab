@@ -481,33 +481,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7856ce7473e2ee4aab03b9e24a74b03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nearMissLabel: {fileID: 7988378977748654137}
-  nearMissLabelDuration: 1
-  minSpeedForNearMissKmh: 25
-  minTimeWithNoCollisionForNearMiss: 0.5
-  nearMissMaxDistance: 1.7
-  nearMissNosBonus: 0.1
-  nearMissPointBonus: 5
-  timeSinceLastCollision: 0
-  slipStreamLabel: {fileID: 8841572194980037690}
-  minSpeedForSlipStreamKmh: 25
-  slipStreamWidth: 2
-  slipStreamMaxDistance: 17
-  slipStreamNosBonus: 0.1
-  slipStreamPointBonus: 1
-  isSlipStreaming: 0
-  pointsGainedSinceSlipStreamStarted: 0
-  airTimeLabel: {fileID: 3621564443780693016}
-  minimumSpeedForAirTimeKmh: 25
-  airTimeNosBonus: 0.1
-  airTimePointBonus: 1
-  isInAir: 0
-  timeInAir: 0
-  landingLabel: {fileID: 3347519011559047836}
-  landingLabelDuration: 1
-  minTimeInAirForLandingPoints: 0.3
-  landingNosBonus: 0.1
-  landingPointBonus: 5
+  dontDestroy: 0
+  nearMiss:
+    label: {fileID: 7988378977748654137}
+    pointBonus: 5
+    nosBonus: 0.1
+    labelDuration: 1
+    minSpeedKmh: 50
+    maxDistance: 1.7
+    minTimeWithNoCollision: 0.5
+    timeSinceLastCollision: 0
+  slipStream:
+    label: {fileID: 8841572194980037690}
+    pointBonus: 1
+    nosBonus: 0.1
+    minSpeedKmh: 50
+    carWidth: 2
+    maxDistance: 18
+    isSlipStreaming: 0
+    pointsGainedSinceStarted: 0
+  airTime:
+    label: {fileID: 3621564443780693016}
+    pointBonus: 1
+    nosBonus: 0.1
+    minSpeedKmh: 50
+    landingLabel: {fileID: 3347519011559047836}
+    landingLabelDuration: 1
+    minTimeInAirForLandingPoints: 0.3
+    landingNosBonus: 0.1
+    landingPointBonus: 5
+    isInAir: 0
+    timeInAir: 0
   currentPoints: 0
 --- !u!1 &7625991369276321175
 GameObject:
