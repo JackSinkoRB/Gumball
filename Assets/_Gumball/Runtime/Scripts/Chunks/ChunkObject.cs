@@ -15,13 +15,7 @@ namespace Gumball
     [ExecuteAlways]
     public class ChunkObject : MonoBehaviour
     {
-        
-        [Header("Setup check")]
-        [HelpBox("The object is not a valid prefab asset (ending in .prefab). ChunkObject can only be added to prefabs. Therefore this object will not show at runtime.", MessageType.Error, onlyShowWhenDefaultValue: true)]
-        [SerializeField, ReadOnly] private bool isPrefab;
-        [HelpBox("This ChunkObject will not function properly because it is a child of another ChunkObject.", MessageType.Warning, onlyShowWhenDefaultValue: true, inverse: true)]
-        [SerializeField, ReadOnly] private bool isChildOfAnotherChunkObject;
-        
+
         [Header("Settings")]
         [Tooltip("Should the object be ignored from the chunk at runtime? eg. if it is just to modify the terrain etc.")]
         [SerializeField] private bool ignoreAtRuntime;
@@ -82,12 +76,6 @@ namespace Gumball
         [SerializeField, HideInInspector] private Vector3 lastKnownPositionWhenGrounded;
         
 #if UNITY_EDITOR
-        [ButtonMethod]
-        public void RecreateTerrain()
-        {
-            chunkBelongsTo.GetComponent<ChunkEditorTools>().RecreateTerrain();
-        }
-        
         public bool IsChildOfAnotherChunkObject {
             get
             {
@@ -101,6 +89,12 @@ namespace Gumball
 
                 return false;
             }
+        }
+        
+        [ButtonMethod]
+        public void RecreateTerrain()
+        {
+            chunkBelongsTo.GetComponent<ChunkEditorTools>().RecreateTerrain();
         }
 
         public void SetChunkBelongsTo(Chunk chunk)
@@ -151,9 +145,6 @@ namespace Gumball
             {
                 UpdatePosition();
                 CheckToSetColliderToFlattenTo();
-
-                isPrefab = GameObjectUtils.GetPathToPrefabAsset(gameObject) != null;
-                isChildOfAnotherChunkObject = IsChildOfAnotherChunkObject;
             }
         }
 

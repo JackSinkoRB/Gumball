@@ -47,7 +47,7 @@ namespace Gumball
     [CustomPropertyDrawer(typeof(HelpBoxAttribute))]
     public class HelpBoxDrawer : PropertyDrawer
     {
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             HelpBoxAttribute helpBoxAttribute = attribute as HelpBoxAttribute;
             MessageType messageType = helpBoxAttribute.type;
@@ -64,21 +64,25 @@ namespace Gumball
                 if (!helpBoxAttribute.onlyShowWhenDefaultValue ||
                     ((IsPropertyValueDefault(property) && !helpBoxAttribute.inverse) ||
                      (!IsPropertyValueDefault(property) && helpBoxAttribute.inverse)))
+                {
                     EditorGUI.HelpBox(helpBoxPosition, content.text, messageType);
-                    
-                propertyPosition.y += helpBoxHeight + 4f;
+                    propertyPosition.y += helpBoxHeight + 4f;
+                }
+
                 EditorGUI.PropertyField(propertyPosition, property, label, true);
             }
             else
             {
                 // Adjust the positions when the HelpBox is below
                 EditorGUI.PropertyField(propertyPosition, property, label, true);
-                helpBoxPosition.y += propertyHeight + 4f;
-                
+
                 if (!helpBoxAttribute.onlyShowWhenDefaultValue ||
                     ((IsPropertyValueDefault(property) && !helpBoxAttribute.inverse) ||
                      (!IsPropertyValueDefault(property) && helpBoxAttribute.inverse)))
+                {
+                    helpBoxPosition.y += propertyHeight + 4f;
                     EditorGUI.HelpBox(helpBoxPosition, content.text, messageType);
+                }
             }
         }
 
@@ -87,14 +91,14 @@ namespace Gumball
             HelpBoxAttribute helpBoxAttribute = attribute as HelpBoxAttribute;
             float propertyHeight = EditorGUI.GetPropertyHeight(property, true);
             float helpBoxHeight = EditorGUIUtility.singleLineHeight * 2f;
-
+        
             if (helpBoxAttribute.onlyShowWhenDefaultValue &&
                 ((!helpBoxAttribute.inverse && !IsPropertyValueDefault(property)) ||
                  (helpBoxAttribute.inverse && IsPropertyValueDefault(property))))
             {
                 return propertyHeight;
             }
-
+        
             // Add extra height for the help box and some padding
             return propertyHeight + helpBoxHeight + 4f;
         }
