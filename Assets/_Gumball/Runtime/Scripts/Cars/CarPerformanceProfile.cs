@@ -19,6 +19,14 @@ namespace Gumball
         public float Handling => handling;
         public float Nos => nos;
 
+        public CarPerformanceProfile(float maxSpeed, float acceleration, float handling, float nos)
+        {
+            this.maxSpeed = maxSpeed;
+            this.acceleration = acceleration;
+            this.handling = handling;
+            this.nos = nos;
+        }
+
         /// <summary>
         /// Construct a performance profile from a players car depending on installed parts.
         /// </summary>

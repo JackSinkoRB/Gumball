@@ -15,6 +15,14 @@ namespace Gumball
         [SerializeField, Range(0, 1)] protected float handlingWeight;
         [SerializeField, Range(0, 1)] protected float nosWeight;
 
+        public void SetWeights(float maxSpeed, float acceleration, float handling, float nos)
+        {
+            maxSpeedWeight = maxSpeed;
+            accelerationWeight = acceleration;
+            handlingWeight = handling;
+            nosWeight = nos;
+        }
+        
         public float GetFinalWeight(CarPerformanceProfile profile)
         {
             //calculate the sum of weights to normalize them
