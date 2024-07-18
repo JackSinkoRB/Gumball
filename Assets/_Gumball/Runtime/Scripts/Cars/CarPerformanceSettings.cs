@@ -11,8 +11,12 @@ namespace Gumball
     {
         
         [Header("Torque")]
-        [SerializeField] private CarPerformanceSettingTorqueCurve torqueCurve;
-        
+        [SerializeField] private AnimationCurve minTorqueCurve;
+        [Tooltip("The maximum amount of torque that is added to the peak torque values.")]
+        [SerializeField] private CarPerformanceSettingFloatScalar additionalPeakTorque = new(2000);
+        [Tooltip("The maximum percentage that the initial torque can be in comparison to the peak torque. A value of 1 means it can get to peak torque instantly. A value of 0 means the initial torque doesn't change.")]
+        [SerializeField] private CarPerformanceSettingPercent minTorquePercentToPeak = new(0.8f);
+
         [Header("RPM range")]
         [SerializeField] private CarPerformanceSettingMinMaxFloat engineRpmRange = new(new MinMaxFloat(1000, 7000), new MinMaxFloat(1000, 9000));
         [Tooltip("If RPM goes outside this range, it will try upshift/downshift to the desired RPM. For optimal power, the ideal range is where the torque is the highest.")]
@@ -43,8 +47,7 @@ namespace Gumball
         [SerializeField] private CarPerformanceSettingFloat nosFillRate = new(60, 30);
         [Tooltip("How much additional torque added to the car when NOS is activated.")]
         [SerializeField] private CarPerformanceSettingFloat nosTorqueAddition = new(1000f, 2000f);
-
-        public CarPerformanceSettingTorqueCurve TorqueCurve => torqueCurve;
+        
         public CarPerformanceSettingMinMaxFloat EngineRpmRange => engineRpmRange;
         public CarPerformanceSettingMinMaxFloat IdealRPMRangeForGearChanges => idealRPMRangeForGearChanges;
         public CarPerformanceSettingFloatArray GearRatios => gearRatios;
@@ -58,6 +61,48 @@ namespace Gumball
         public CarPerformanceSettingFloat NosDepletionRate => nosDepletionRate;
         public CarPerformanceSettingFloat NosFillRate => nosFillRate;
         public CarPerformanceSettingFloat NosTorqueAddition => nosTorqueAddition;
+
+        private AnimationCurve torqueCurveCached;
+        
+        public AnimationCurve CalculateTorqueCurve(CarPerformanceProfile profile, float additionalTorque = 0)
+        {
+            torqueCurveCached ??= new AnimationCurve(minTorqueCurve.keys);
+            float additionalPeakTorqueValue = additionalPeakTorque.GetValue(profile);
+            
+            //reset the curve to default
+            for (int index = 0; index < torqueCurveCached.keys.Length; index++) //just the middle keys
+            {
+                Keyframe keyframe = torqueCurveCached.keys[index];
+                float originalValue = minTorqueCurve.keys[index].value;
+                float desiredTorque;
+                
+                //ensure last key is 0
+                bool isFirstKey = index == 0;
+                bool isLastKey = index == torqueCurveCached.keys.Length - 1;
+                if (isFirstKey)
+                {
+                    float nextKeyTorqueValue = minTorqueCurve.keys[index + 1].value + additionalPeakTorqueValue;
+                    float difference = nextKeyTorqueValue - originalValue;
+                    float maxAddition = difference * minTorquePercentToPeak.GetValue(profile);
+                    desiredTorque = originalValue + (maxAddition * minTorquePercentToPeak.GetFinalWeight(profile)) + additionalTorque;
+                }
+                else if (isLastKey)
+                {
+                    desiredTorque = 0;
+                }
+                else
+                {
+                    //is peak key
+                    desiredTorque = originalValue + additionalPeakTorqueValue + additionalTorque;
+                }
+                
+                //move the key
+                Keyframe newKeyframe = new Keyframe(keyframe.time, desiredTorque, keyframe.inTangent, keyframe.outTangent, keyframe.inWeight, keyframe.outWeight);
+                torqueCurveCached.MoveKey(index, newKeyframe);
+            }
+
+            return torqueCurveCached;
+        }
         
     }
 }

@@ -72,7 +72,7 @@ namespace Gumball
             
             IsActivated = true;
 
-            carBelongsTo.PerformanceSettings.TorqueCurve.SetTemporaryAdditionalTorque(carBelongsTo.NosTorqueAddition);
+            carBelongsTo.UpdateTorqueCurve(carBelongsTo.NosTorqueAddition);
             
             ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(true);
         }
@@ -87,8 +87,8 @@ namespace Gumball
             
             IsActivated = false;
             
-            carBelongsTo.PerformanceSettings.TorqueCurve.SetTemporaryAdditionalTorque(0);
-            
+            carBelongsTo.UpdateTorqueCurve();
+
             ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(false);
         }
         

@@ -61,10 +61,9 @@ namespace Gumball
         [Header("Performance settings")]
         [SerializeField] private CarPerformanceSettings performanceSettings;
         [Space(5)]
+        [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
-        [SerializeField] private AnimationCurve torqueCurve;
         public CarPerformanceSettings PerformanceSettings => performanceSettings;
-        public AnimationCurve TorqueCurve => performanceSettings.TorqueCurve.GetValue(performanceProfile);
         public float[] GearRatios => performanceSettings.GearRatios.GetValue(performanceProfile);
         public float FinalGearRatio => performanceSettings.FinalGearRatio.GetValue(performanceProfile);
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
@@ -441,6 +440,14 @@ namespace Gumball
             
             //initialise mass
             Rigidbody.mass = RigidbodyMass;
+            
+            //initialise torque curve
+            UpdateTorqueCurve();
+        }
+
+        public void UpdateTorqueCurve(float additionalTorque = 0)
+        {
+            torqueCurve = performanceSettings.CalculateTorqueCurve(performanceProfile, additionalTorque);
         }
         
         public void InitialiseAsRacer()
@@ -1372,7 +1379,7 @@ namespace Gumball
         {
             //calculate the current engine torque from the engine RPM
             float engineRpmPercent = (engineRpm - EngineRpmRange.Min) / EngineRpmRange.Difference;
-            float engineTorque = TorqueCurve.Evaluate(engineRpmPercent);
+            float engineTorque = torqueCurve.Evaluate(engineRpmPercent);
             
             foreach (WheelCollider poweredWheel in poweredWheels)
             {
