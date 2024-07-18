@@ -19,6 +19,9 @@ namespace Gumball
         {
             //calculate the sum of weights to normalize them
             float totalWeight = maxSpeedWeight + accelerationWeight + handlingWeight + nosWeight;
+
+            if (totalWeight == 0)
+                return 0;
             
             //normalize the weights
             float normalizedMaxSpeedWeight = maxSpeedWeight / totalWeight;
