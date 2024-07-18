@@ -53,6 +53,17 @@ namespace Gumball
             return parts;
         }
 
+        public static void InstallParts(int carIndex)
+        {
+            foreach (CorePart part in GetCoreParts(carIndex))
+            {
+                if (part == null)
+                    continue; //no part applied
+                
+                InstallPartOnCar(part.Type, part, carIndex);
+            }
+        }
+        
         public static CorePart GetPartByID(string ID)
         {
             if (ID == null)
