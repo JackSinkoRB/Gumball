@@ -34,10 +34,13 @@ namespace Gumball
 
             
             //TODO: subpart modifiers
-
+            
             
             foreach (CorePart corePart in allParts)
             {
+                if (corePart == null)
+                    continue; //no part applied
+                
                 maxSpeed += corePart.PerformanceModifiers.MaxSpeed;
                 acceleration += corePart.PerformanceModifiers.Acceleration;
                 handling += corePart.PerformanceModifiers.Handling;
