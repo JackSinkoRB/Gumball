@@ -418,6 +418,9 @@ namespace Gumball
             if (bodyPaintModification != null)
                 bodyPaintModification.Initialise(this);
 
+            //load the parts
+            CorePartManager.InstallParts(carIndex);
+
             //construct a new performance profile
             SetPerformanceProfile(new CarPerformanceProfile(carIndex));
 
