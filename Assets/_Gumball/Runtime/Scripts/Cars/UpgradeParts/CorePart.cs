@@ -48,7 +48,6 @@ namespace Gumball
         public Sprite Icon => icon;
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public SubPartSlot[] SubPartSlots => subPartSlots;
-        public CarPerformanceProfileModifiers PerformanceModifiers => performanceModifiers;
         
         public bool IsUnlocked
         {
@@ -81,6 +80,21 @@ namespace Gumball
             }
         }
 
+        public CarPerformanceProfileModifiers GetTotalModifiers()
+        {
+            CarPerformanceProfileModifiers subPartModifiers = new CarPerformanceProfileModifiers();
+            if (subPartSlots == null)
+                return subPartModifiers;
+            
+            foreach (SubPartSlot slot in subPartSlots)
+            {
+                SubPart subPart = slot.CurrentSubPart;
+                subPartModifiers += subPart.CorePartModifiers;
+            }
+            
+            return subPartModifiers * performanceModifiers;
+        }
+        
         public void TrackAsReward(GameSession session)
         {
             if (sessionsThatGiveReward.Contains(session))

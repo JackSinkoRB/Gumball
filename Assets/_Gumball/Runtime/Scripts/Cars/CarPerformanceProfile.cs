@@ -35,25 +35,21 @@ namespace Gumball
             //load parts
             CorePart[] allParts = CorePartManager.GetCoreParts(playerCarIndex);
 
-            maxSpeed = 0;
-            acceleration = 0;
-            handling = 0;
-            nos = 0;
-
-            
-            //TODO: subpart modifiers
-            
+            CarPerformanceProfileModifiers finalModifiers = new CarPerformanceProfileModifiers();
             
             foreach (CorePart corePart in allParts)
             {
                 if (corePart == null)
                     continue; //no part applied
-                
-                maxSpeed += corePart.PerformanceModifiers.MaxSpeed;
-                acceleration += corePart.PerformanceModifiers.Acceleration;
-                handling += corePart.PerformanceModifiers.Handling;
-                nos += corePart.PerformanceModifiers.Nos;
+
+                CarPerformanceProfileModifiers totalModifiers = corePart.GetTotalModifiers();
+                finalModifiers += totalModifiers;
             }
+
+            maxSpeed = finalModifiers.MaxSpeed;
+            acceleration = finalModifiers.Acceleration; 
+            handling = finalModifiers.Handling;
+            nos = finalModifiers.Nos;
         }
 
     }

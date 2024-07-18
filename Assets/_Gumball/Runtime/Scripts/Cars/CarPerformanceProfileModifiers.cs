@@ -19,5 +19,27 @@ namespace Gumball
         public float Handling => handling;
         public float Nos => nos;
 
+        public static CarPerformanceProfileModifiers operator +(CarPerformanceProfileModifiers a, CarPerformanceProfileModifiers b)
+        {
+            return new CarPerformanceProfileModifiers
+            {
+                maxSpeed = a.maxSpeed + b.maxSpeed,
+                acceleration = a.acceleration + b.acceleration,
+                handling = a.handling + b.handling,
+                nos = a.nos + b.nos
+            };
+        }
+        
+        public static CarPerformanceProfileModifiers operator *(CarPerformanceProfileModifiers a, CarPerformanceProfileModifiers b)
+        {
+            return new CarPerformanceProfileModifiers
+            {
+                maxSpeed = a.maxSpeed * b.maxSpeed,
+                acceleration = a.acceleration * b.acceleration,
+                handling = a.handling * b.handling,
+                nos = a.nos * b.nos
+            };
+        }
+        
     }
 }
