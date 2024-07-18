@@ -89,6 +89,9 @@ namespace Gumball
             foreach (SubPartSlot slot in subPartSlots)
             {
                 SubPart subPart = slot.CurrentSubPart;
+                if (subPart == null)
+                    continue; //nothing applied
+                
                 subPartModifiers += subPart.CorePartModifiers;
             }
             
