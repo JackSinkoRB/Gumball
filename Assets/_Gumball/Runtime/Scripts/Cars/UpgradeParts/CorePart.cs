@@ -22,6 +22,7 @@ namespace Gumball
 
         [Header("Details")]
         [SerializeField] private PartType type;
+        [SerializeField] private CarType carType;
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
 
@@ -32,10 +33,9 @@ namespace Gumball
         [Header("SubParts")]
         [SerializeField] private SubPartSlot[] subPartSlots;
         [SerializeField] private CorePartLevel[] levels;
-        
+
         [Header("Modifiers")]
-        [Tooltip("The amount of peak torque to add to the car.")]
-        [SerializeField] private float peakTorqueAddition;
+        [SerializeField] private CarPerformanceProfileModifiers performanceModifiers;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<GameSession> sessionsThatGiveReward = new();
@@ -43,11 +43,11 @@ namespace Gumball
         public string SaveKey => $"{type.ToString()}-{name}-{ID}";
 
         public PartType Type => type;
+        public CarType CarType => carType;
         public string DisplayName => displayName;
         public Sprite Icon => icon;
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public SubPartSlot[] SubPartSlots => subPartSlots;
-        public float PeakTorqueAddition => peakTorqueAddition;
         
         public bool IsUnlocked
         {
@@ -127,14 +127,30 @@ namespace Gumball
                 return;
             }
 
+            //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CarBelongsToIndex;
             if (isAttachedToCurrentCar)
-            {
-                //update the modifiers
-                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
-            }
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CarBelongsToIndex));
             
             CarBelongsToIndex = -1;
+        }
+        
+        public CarPerformanceProfileModifiers GetTotalModifiers()
+        {
+            CarPerformanceProfileModifiers subPartModifiers = new CarPerformanceProfileModifiers();
+            if (subPartSlots == null)
+                return subPartModifiers;
+            
+            foreach (SubPartSlot slot in subPartSlots)
+            {
+                SubPart subPart = slot.CurrentSubPart;
+                if (subPart == null)
+                    continue; //nothing applied
+                
+                subPartModifiers += subPart.CorePartModifiers;
+            }
+            
+            return subPartModifiers * performanceModifiers;
         }
 
         private void ApplySubPartsToCar()

@@ -17,7 +17,7 @@ namespace Gumball
 
         public void Initialise(CorePart.PartType type, CorePart part)
         {
-            bool isSelected = PartModification.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, type) == part;
+            bool isSelected = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, type) == part;
             if (isSelected)
             {
                 label.alignment = TextAlignmentOptions.Center;
@@ -29,7 +29,7 @@ namespace Gumball
             else
             {
                 label.text = "Install";
-                button.interactable = true;
+                button.interactable = WarehouseManager.Instance.CurrentCar.CarType == part.CarType;
 
                 bool isStockPart = part == null;
                 if (isStockPart)

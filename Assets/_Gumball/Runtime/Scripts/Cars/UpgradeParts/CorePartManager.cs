@@ -25,6 +25,33 @@ namespace Gumball
         {
             yield return FindParts();
         }
+        
+        public static void SetCorePart(int carIndex, CorePart.PartType type, CorePart corePart)
+        {
+            DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}", corePart == null ? null : corePart.ID);
+        }
+        
+        public static CorePart GetCorePart(int carIndex, CorePart.PartType type)
+        {
+            string partID = DataManager.Cars.Get<string>($"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}");
+            return GetPartByID(partID);
+        }
+        
+        public static CorePart[] GetCoreParts(int carIndex)
+        {
+            CorePart.PartType[] coreParts = (CorePart.PartType[]) Enum.GetValues(typeof(CorePart.PartType));
+            CorePart[] parts = new CorePart[coreParts.Length];
+            
+            for (int index = 0; index < coreParts.Length; index++) {
+                CorePart.PartType type = coreParts[index];
+                
+                string partID = DataManager.Cars.Get<string>($"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}");
+                CorePart part = GetPartByID(partID);
+                parts[index] = part;
+            }
+
+            return parts;
+        }
 
         public static CorePart GetPartByID(string ID)
         {
@@ -57,22 +84,36 @@ namespace Gumball
         public static void InstallPartOnCar(CorePart.PartType type, CorePart part, int carIndex)
         {
             //if car has a part already installed, remove the reference to set it as a spare
-            CorePart existingPart = PartModification.GetCorePart(carIndex, type);
+            CorePart existingPart = GetCorePart(carIndex, type);
             if (existingPart != null)
                 existingPart.RemoveFromCar();
 
             //apply to car
-            PartModification.SetCorePart(carIndex, type, part);
+            SetCorePart(carIndex, type, part);
             
             //apply to part
             if (part != null)
                 part.ApplyToCar(carIndex);
             
-            //update the cars modifiers
+            //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == carIndex;
             if (isAttachedToCurrentCar)
-                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(carIndex));
         }
+        
+        
+        //TODO: sub parts
+        
+        // public static void SetSubPart(int carIndex, SubPart.SubPartType type, CorePart corePart)
+        // {
+        //     DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}", corePart == null ? null : corePart.ID);
+        // }
+        //
+        // public static SubPart GetSubPart(int carIndex, SubPart.SubPartType type)
+        // {
+        //     string partID = DataManager.Cars.Get<string>($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}");
+        //     return SubPartManager.GetPartByID(partID);
+        // }
 
         private static IEnumerator FindParts()
         {
@@ -117,6 +158,11 @@ namespace Gumball
 
                 partsMappedByID[corePart.ID] = corePart;
             } 
+        }
+        
+        private static string GetSaveKeyFromIndex(int carIndex)
+        {
+            return $"{AICar.GetSaveKeyFromIndex(carIndex)}.Parts";
         }
         
     }

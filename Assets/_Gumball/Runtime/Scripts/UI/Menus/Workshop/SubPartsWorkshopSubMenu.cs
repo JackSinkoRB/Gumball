@@ -22,7 +22,7 @@ namespace Gumball
 
         public void OnClickCorePartButton()
         {
-            CorePart currentCarCorePart = PartModification.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, corePartType);
+            CorePart currentCarCorePart = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, corePartType);
             if (currentCarCorePart == null)
             {
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(null);
@@ -41,7 +41,7 @@ namespace Gumball
 
         private void SetupSubPartSlots()
         {
-            CorePart currentCarCorePart = PartModification.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, corePartType);
+            CorePart currentCarCorePart = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, corePartType);
             if (currentCarCorePart == null)
                 return;
             

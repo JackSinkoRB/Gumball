@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class PartModificationTests : IPrebuildSetup, IPostBuildCleanup
+    public class CoreAndSubPartTests : IPrebuildSetup, IPostBuildCleanup
     {
         
         private const int carIndexToUse = 0; //test with the XJ
@@ -75,7 +75,6 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             Assert.IsNotNull(WarehouseManager.Instance.CurrentCar);
-            Assert.IsNotNull(WarehouseManager.Instance.CurrentCar.PartModification);
             Assert.AreEqual(WarehouseManager.Instance.CurrentCar.CarIndex, carIndexToUse);
         }
 
@@ -114,7 +113,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(carIndexToUse, TestManager.Instance.CorePartA.CarBelongsToIndex);
 
             //check it applied to the car
-            Assert.AreEqual(TestManager.Instance.CorePartA, PartModification.GetCorePart(carIndexToUse, CorePart.PartType.ENGINE));
+            Assert.AreEqual(TestManager.Instance.CorePartA, CorePartManager.GetCorePart(carIndexToUse, CorePart.PartType.ENGINE));
             
             //ensure it is removed from spare parts
             Assert.AreEqual(1, CorePartManager.GetSpareParts(CorePart.PartType.ENGINE).Count);
@@ -144,7 +143,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(carIndexToUse, TestManager.Instance.CorePartB.CarBelongsToIndex);
 
             //check it applied to the car
-            Assert.AreEqual(TestManager.Instance.CorePartB, PartModification.GetCorePart(carIndexToUse, CorePart.PartType.ENGINE));
+            Assert.AreEqual(TestManager.Instance.CorePartB, CorePartManager.GetCorePart(carIndexToUse, CorePart.PartType.ENGINE));
             
             //ensure it is removed from spare parts
             Assert.AreEqual(1, CorePartManager.GetSpareParts(CorePart.PartType.ENGINE).Count);
@@ -153,49 +152,9 @@ namespace Gumball.Runtime.Tests
             Assert.IsTrue(CorePartManager.GetSpareParts(CorePart.PartType.ENGINE).Contains(TestManager.Instance.CorePartA));
             Assert.IsFalse(CorePartManager.GetSpareParts(CorePart.PartType.ENGINE).Contains(TestManager.Instance.CorePartB));
         }
-
+        
         [UnityTest]
         [Order(5)]
-        public IEnumerator PeakTorqueModifier()
-        {
-            yield return new WaitUntil(() => isInitialised);
-            
-            //part B should be applied to the car
-            Assert.AreEqual(TestManager.Instance.CorePartB, PartModification.GetCorePart(carIndexToUse, CorePart.PartType.ENGINE));
-            
-            //ensure default peak torque has been cached/initialised
-            float defaultPeakTorque = WarehouseManager.Instance.CurrentCar.DefaultPeakTorque;
-            Assert.Greater(defaultPeakTorque, 0);
-
-            //core part B is applied - gives 10 peak torque
-            float additionalPeakTorque = WarehouseManager.Instance.CurrentCar.PartModification.GetTotalPeakTorqueModifiers();
-            Assert.AreEqual(10, additionalPeakTorque);
-
-            //ensure it is actually applied to the torque curve
-            Assert.AreEqual(defaultPeakTorque + additionalPeakTorque, WarehouseManager.Instance.CurrentCar.PeakTorque);
-        }
-
-        [UnityTest]
-        [Order(6)]
-        public IEnumerator PeakTorqueModifierAfterPartSwitch()
-        {
-            yield return new WaitUntil(() => isInitialised);
-            
-            float defaultPeakTorque = WarehouseManager.Instance.CurrentCar.DefaultPeakTorque;
-            
-            //switch to part A
-            CorePartManager.InstallPartOnCar(CorePart.PartType.ENGINE, TestManager.Instance.CorePartA, carIndexToUse);
-            
-            //ensure new torque has been applied (part A has 15)
-            float additionalPeakTorque = WarehouseManager.Instance.CurrentCar.PartModification.GetTotalPeakTorqueModifiers();
-            Assert.AreEqual(15, additionalPeakTorque);
-            
-            //ensure it is actually applied to the torque curve
-            Assert.AreEqual(defaultPeakTorque + additionalPeakTorque, WarehouseManager.Instance.CurrentCar.PeakTorque);
-        }
-
-        [UnityTest]
-        [Order(7)]
         public IEnumerator SubPartBecomesAvailableAfterUnlocking()
         {
             yield return new WaitUntil(() => isInitialised);
@@ -213,7 +172,7 @@ namespace Gumball.Runtime.Tests
         }
         
         [UnityTest]
-        [Order(8)]
+        [Order(6)]
         public IEnumerator SubPartInstalling()
         {
             yield return new WaitUntil(() => isInitialised);
@@ -241,7 +200,7 @@ namespace Gumball.Runtime.Tests
         }
         
         [UnityTest]
-        [Order(9)]
+        [Order(7)]
         public IEnumerator SubPartRemoval()
         {
             yield return new WaitUntil(() => isInitialised);

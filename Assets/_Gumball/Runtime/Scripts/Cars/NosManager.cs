@@ -11,15 +11,6 @@ namespace Gumball
     {
 
         public const float MinPercentToActivate = 0.1f;
-
-        [Tooltip("How long (in seconds) does a full tank of NOS last?")]
-        [SerializeField] private float depletionRate = 5; //TODO: might want to make this upgradable (use save data)
-        
-        [Tooltip("How long (in seconds) does it take to regenerate a full tank of NOS?")]
-        [SerializeField] private float fillRate = 60; //TODO: might want to make this upgradable (use save data)
-
-        [Tooltip("The multiplier to apply to the cars torque when NOS is activated.")]
-        [SerializeField] private float torqueAddition = 1500; //TODO: might want to make this upgradable (use save data)
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
@@ -81,7 +72,8 @@ namespace Gumball
             
             IsActivated = true;
 
-            carBelongsTo.SetPeakTorque(carBelongsTo.PeakTorque + torqueAddition);
+            carBelongsTo.UpdateTorqueCurve(carBelongsTo.NosTorqueAddition);
+            
             ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(true);
         }
         
@@ -95,19 +87,20 @@ namespace Gumball
             
             IsActivated = false;
             
-            carBelongsTo.SetPeakTorque(carBelongsTo.PeakTorque - torqueAddition);
+            carBelongsTo.UpdateTorqueCurve();
+
             ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(false);
         }
         
         private void Deplete()
         {
-            float percent = Time.deltaTime / depletionRate;
+            float percent = Time.deltaTime / carBelongsTo.NosDepletionRate;
             RemoveNos(percent);
         }
         
         private void Fill()
         {
-            float percent = Time.deltaTime / fillRate;
+            float percent = Time.deltaTime / carBelongsTo.NosFillRate;
             AddNos(percent);
         }
         

@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 namespace MyBox
 {
 	[Serializable]
-	public struct MinMaxFloat
+	public struct MinMaxFloat : IEquatable<MinMaxFloat>
 	{
 		public float Min;
 		public float Max;
@@ -22,6 +22,21 @@ namespace MyBox
 		{
 			Min = min;
 			Max = max;
+		}
+
+		public bool Equals(MinMaxFloat other)
+		{
+			return Min.Equals(other.Min) && Max.Equals(other.Max);
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is MinMaxFloat other && Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			return HashCode.Combine(Min, Max);
 		}
 	}
 
