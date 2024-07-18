@@ -57,17 +57,39 @@ namespace Gumball
         
         public Transform CockpitCameraTarget => cockpitCameraTarget;
         public Transform RearViewCameraTarget => rearViewCameraTarget;
+
+        [Header("Performance settings")]
+        [SerializeField] private CarPerformanceSettings performanceSettings;
+        [Space(5)]
+        [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
+        [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
+
+        public float[] GearRatios => performanceSettings.GearRatios.GetValue(performanceProfile);
+        public float FinalGearRatio => performanceSettings.FinalGearRatio.GetValue(performanceProfile);
+        public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
+        public MinMaxFloat EngineRpmRange => performanceSettings.EngineRpmRange.GetValue(performanceProfile);
+        public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
+        public float BrakeTorque => performanceSettings.BrakeTorque.GetValue(performanceProfile);
+        public float HandbrakeTorque => performanceSettings.HandbrakeTorque.GetValue(performanceProfile);
+        public float HandbrakeEaseOffDuration => performanceSettings.HandbrakeEaseOffDuration.GetValue(performanceProfile);
+        public float SteerSpeed => performanceSettings.SteerSpeed.GetValue(performanceProfile);
+        public float SteerReleaseSpeed => performanceSettings.SteerReleaseSpeed.GetValue(performanceProfile);
+        public AnimationCurve MaxSteerAngleCurve => performanceSettings.MaxSteerAngle.GetValue(performanceProfile);
+        public float NosDepletionRate => performanceSettings.NosDepletionRate.GetValue(performanceProfile);
+        public float NosFillRate => performanceSettings.NosFillRate.GetValue(performanceProfile);
+        public float NosTorqueAddition => performanceSettings.NosTorqueAddition.GetValue(performanceProfile);
         
         [Header("Customisation")]
+        [SerializeField] private CarType carType;
         [SerializeField] private CarPartManager carPartManager;
         [SerializeField] private BodyPaintModification bodyPaintModification;
-        [SerializeField] private PartModification partModification;
+        [Space(5)]
         [Tooltip("This gets added on initialise for every player car.")]
         [SerializeField, ReadOnly] private NosManager nosManager;
-
+        
+        public CarType CarType => carType;
         public CarPartManager CarPartManager => carPartManager;
         public BodyPaintModification BodyPaintModification => bodyPaintModification;
-        public PartModification PartModification => partModification;
         public NosManager NosManager => nosManager;
         
         [Header("Sizing")]
@@ -154,14 +176,6 @@ namespace Gumball
         public bool IsStationary => speed < stationarySpeed && !isAccelerating;
 
         [Header("Engine & Drivetrain")]
-        [Tooltip("The engine torque output (y) (in Newton metres) compared to the engine RPM (x), between the min and max RPM ranges (where x = 0 is minEngineRpm)")]
-        [SerializeField] private AnimationCurve torqueCurve;
-        [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
-        [SerializeField] private float finalGearRatio = 3.42f;
-        [SerializeField] private MinMaxFloat engineRpmRange = new(1000, 8000);
-        [Space(5)]
-        [SerializeField] private MinMaxFloat idealRPMRangeForGearChanges = new(3000, 6000);
-        [Space(5)]
         [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
         [SerializeField, ReadOnly] private float engineRpm;
@@ -172,10 +186,8 @@ namespace Gumball
         private bool wasAcceleratingLastFrame;
         public bool IsAutomaticTransmission => autoDrive || GearboxSetting.Setting == GearboxSetting.GearboxOption.AUTOMATIC;
         public int CurrentGear => currentGear;
-        public int NumberOfGears => gearRatios.Length;
+        public int NumberOfGears => GearRatios.Length;
         public float EngineRpm => engineRpm;
-        public MinMaxFloat EngineRpmRange => engineRpmRange;
-        public AnimationCurve TorqueCurve => torqueCurve;
         public bool IsAccelerating => isAccelerating;
         
         [Header("Reversing")]
@@ -185,21 +197,17 @@ namespace Gumball
         public bool IsReversing => isReversing;
         
         [Header("Steering")]
-        [Tooltip("The speed that the wheel collider turns if not auto driving.")]
-        [ConditionalField(nameof(autoDrive), true), SerializeField] private float steerSpeed = 2.5f;
-        [Tooltip("This allows for a different steer speed when the steering input has been released.")]
-        [ConditionalField(nameof(autoDrive), true), SerializeField] private float releaseSpeed = 15;
-        [Tooltip("The speed that the wheel mesh is interpolated to the desired steer angle. This is different to the steer speed of the wheel collider.")]
-        [SerializeField] private float visualSteerSpeed = 5;
         [ConditionalField(nameof(autoDrive)), SerializeField] private float autoDriveMaxSteerAngle = 65;
-        [ConditionalField(nameof(autoDrive), true), SerializeField] private AnimationCurve maxSteerAngleCurve;
         [Space(5)]
         [SerializeField, ReadOnly] private float desiredSteerAngle;
         [SerializeField, ReadOnly] private float visualSteerAngle;
         
+        /// <summary>
+        /// The speed that the wheel mesh is interpolated to the desired steer angle. This is different to the steer speed of the wheel collider.
+        /// </summary>
+        private const float visualSteerSpeed = 5;
+        
         [Header("Braking")]
-        [SerializeField] private float brakeTorque = 1000;
-        [Space(5)]
         [Tooltip("The time that the autodriving car looks ahead for curves to brake. Lowering the time can make it more aggressive around corners, while increasing can make them safer.")]
         [SerializeField] private float cornerReactionTime = 1.1f;
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
@@ -216,8 +224,6 @@ namespace Gumball
         public bool IsBraking => isBraking;
         
         [Header("Handbrake")]
-        [SerializeField] private float handbrakeEaseOffDuration = 1f;
-        [SerializeField] private float handbrakeTorque = 5000;
         [Space(5)]
         [SerializeField, ReadOnly] private bool isHandbrakeEngaged;
         
@@ -276,16 +282,6 @@ namespace Gumball
         private Chunk lastKnownChunkForRacingLineOffset;
         private CustomDrivingPath lastKnownRacingLineForRacingLineOffset;
         private readonly RaycastHit[] blockagesTemp = new RaycastHit[10];
-
-        [Header("Value modification")]
-        [SerializeField, ReadOnly] private float defaultPeakTorque;
-        
-        private int[] peakTorqueKeys;
-
-        public float DefaultPeakTorque => defaultPeakTorque;
-        private Keyframe peakTorqueKey => torqueCurve.keys[peakTorqueKeys[^1]];
-        public float PeakTorque => peakTorqueKey.value;
-        public float Horsepower => DynoUtils.CalculateHorsepower(DynoUtils.ConvertNewtonMetresToFootPounds(peakTorqueKey.value), peakTorqueKey.time);
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool isInitialised;
@@ -402,8 +398,6 @@ namespace Gumball
             OnChangeChunk(null, CurrentChunk);
             
             CachePoweredWheels();
-            CachePeakTorque();
-            
             InitialiseSize();
         }
 
@@ -424,8 +418,11 @@ namespace Gumball
             if (bodyPaintModification != null)
                 bodyPaintModification.Initialise(this);
 
-            if (partModification != null)
-                partModification.Initialise(this);
+            //load the parts
+            CorePartManager.InstallParts(carIndex);
+
+            //construct a new performance profile
+            SetPerformanceProfile(new CarPerformanceProfile(carIndex));
 
             nosManager = transform.GetOrAddComponent<NosManager>();
             nosManager.Initialise(this);
@@ -440,6 +437,22 @@ namespace Gumball
             InitialiseWheelStance();
         }
 
+        public void SetPerformanceProfile(CarPerformanceProfile profile)
+        {
+            performanceProfile = profile;
+            
+            //initialise mass
+            Rigidbody.mass = RigidbodyMass;
+            
+            //initialise torque curve
+            UpdateTorqueCurve();
+        }
+
+        public void UpdateTorqueCurve(float additionalTorque = 0)
+        {
+            torqueCurve = performanceSettings.CalculateTorqueCurve(performanceProfile, additionalTorque);
+        }
+        
         public void InitialiseAsRacer()
         {
             gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
@@ -552,16 +565,6 @@ namespace Gumball
             
             if (!float.IsNaN(additionalLaneOffset))
                 this.additionalLaneOffset = additionalLaneOffset;
-        }
-        
-        public void SetPeakTorque(float peakTorque)
-        {
-            foreach (int peakTorqueKeyIndex in peakTorqueKeys)
-            {
-                Keyframe currentKeyframe = torqueCurve.keys[peakTorqueKeyIndex];
-                Keyframe newKeyframe = new Keyframe(currentKeyframe.time, peakTorque, currentKeyframe.inTangent, currentKeyframe.outTangent, currentKeyframe.inWeight, currentKeyframe.outWeight);
-                torqueCurve.MoveKey(peakTorqueKeyIndex, newKeyframe);
-            }
         }
 
         private void Update()
@@ -943,10 +946,10 @@ namespace Gumball
                 return;
 
             //check whether to shift up or down
-            if (engineRpm < idealRPMRangeForGearChanges.Min && currentGear > 1)
+            if (engineRpm < IdealRPMRangeForGearChanges.Min && currentGear > 1)
             {
                 ShiftDown();
-            } else if (engineRpm > idealRPMRangeForGearChanges.Max && currentGear < NumberOfGears - 1)
+            } else if (engineRpm > IdealRPMRangeForGearChanges.Max && currentGear < NumberOfGears - 1)
             {
                 ShiftUp();
             }
@@ -965,8 +968,8 @@ namespace Gumball
             
             float averagePoweredWheelRPM = sumOfPoweredWheelRPM / poweredWheels.Length;
 
-            float engineRpmUnclamped = engineRpmRange.Min + averagePoweredWheelRPM * gearRatios[currentGear] * finalGearRatio;
-            engineRpm = engineRpmRange.Clamp(engineRpmUnclamped);
+            float engineRpmUnclamped = EngineRpmRange.Min + averagePoweredWheelRPM * GearRatios[currentGear] * FinalGearRatio;
+            engineRpm = EngineRpmRange.Clamp(engineRpmUnclamped);
         }
 
         /// <summary>
@@ -1076,7 +1079,7 @@ namespace Gumball
 
             const float speedForMaxAngle = 300;
             float speedPercent = Mathf.Clamp01(speed / speedForMaxAngle);
-            float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : maxSteerAngleCurve.Evaluate(speedPercent);
+            float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : MaxSteerAngleCurve.Evaluate(speedPercent);
 
             if (autoDrive)
             {
@@ -1086,7 +1089,7 @@ namespace Gumball
             }
             else
             {
-                float actualSteerSpeed = InputManager.Instance.CarInput.SteeringInput.Approximately(0) ? releaseSpeed : steerSpeed;
+                float actualSteerSpeed = InputManager.Instance.CarInput.SteeringInput.Approximately(0) ? SteerReleaseSpeed : SteerSpeed;
 
                 float angle = InputManager.Instance.CarInput.SteeringInput * maxSteerAngle;
                 desiredSteerAngle = Mathf.LerpAngle(desiredSteerAngle, angle, actualSteerSpeed * Time.deltaTime);
@@ -1236,7 +1239,7 @@ namespace Gumball
 
                 wheelCollider.sidewaysFriction = sidewaysFriction;
 
-                wheelCollider.brakeTorque = handbrakeTorque;
+                wheelCollider.brakeTorque = HandbrakeTorque;
             }
         }
 
@@ -1254,9 +1257,9 @@ namespace Gumball
                 
                 handbrakeEaseOffTweens[index]?.Kill();
                 handbrakeEaseOffTweens[index] = DOTween.Sequence()
-                    .Join(DOTween.To(() => Rigidbody.angularDrag, x => Rigidbody.angularDrag = x, defaultAngularDrag, handbrakeEaseOffDuration))
+                    .Join(DOTween.To(() => Rigidbody.angularDrag, x => Rigidbody.angularDrag = x, defaultAngularDrag, HandbrakeEaseOffDuration))
                     .Join(DOTween.To(() => sidewaysFriction.stiffness, 
-                        x => sidewaysFriction.stiffness = x, defaultRearWheelStiffness, handbrakeEaseOffDuration)
+                        x => sidewaysFriction.stiffness = x, defaultRearWheelStiffness, HandbrakeEaseOffDuration)
                     .OnUpdate(() => wheelCollider.sidewaysFriction = sidewaysFriction));
             }
         }
@@ -1278,7 +1281,7 @@ namespace Gumball
             
             foreach (WheelCollider wheelCollider in AllWheelColliders)
             {
-                wheelCollider.brakeTorque = brakeTorque;
+                wheelCollider.brakeTorque = BrakeTorque;
             }
         }
         
@@ -1378,14 +1381,14 @@ namespace Gumball
         private void ApplyTorqueToPoweredWheels()
         {
             //calculate the current engine torque from the engine RPM
-            float engineRpmPercent = (engineRpm - engineRpmRange.Min) / engineRpmRange.Difference;
+            float engineRpmPercent = (engineRpm - EngineRpmRange.Min) / EngineRpmRange.Difference;
             float engineTorque = torqueCurve.Evaluate(engineRpmPercent);
             
             foreach (WheelCollider poweredWheel in poweredWheels)
             {
                 //distribute the engine torque to the wheels based on gear ratios
                 float engineTorqueDistributed = engineTorque / poweredWheels.Length; //TODO: might want to distribute this unevenly - eg. give more torque to the wheel with more traction
-                float wheelTorque = engineTorqueDistributed * gearRatios[currentGear] * finalGearRatio;
+                float wheelTorque = engineTorqueDistributed * GearRatios[currentGear] * FinalGearRatio;
             
                 //apply to the wheels
                 poweredWheel.motorTorque = wheelTorque;
@@ -1994,33 +1997,7 @@ namespace Gumball
                     stanceModification.Initialise(this);
             }
         }
-        
-        private void CachePeakTorque()
-        {
-            HashSet<int> keys = new();
-            
-            //set the default peak torque
-            float highestTorque = 0;
-            foreach (Keyframe key in torqueCurve.keys)
-            {
-                float torque = key.value;
-                if (torque > highestTorque)
-                    highestTorque = torque;
-            }
-            defaultPeakTorque = highestTorque;
 
-            //cache the peak torque keys
-            for (int index = 0; index < torqueCurve.keys.Length; index++)
-            {
-                Keyframe key = torqueCurve.keys[index];
-                float torque = key.value;
-                if (torque.Approximately(highestTorque, 1))
-                    keys.Add(index);
-            }
-
-            peakTorqueKeys = keys.ToArray();
-        }
-        
         private bool ShouldBeStuck()
         {
             const float minSpeedForStuckKmh = 0.5f;

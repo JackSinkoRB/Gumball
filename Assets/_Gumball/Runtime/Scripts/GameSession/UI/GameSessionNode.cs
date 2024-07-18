@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -19,6 +22,27 @@ namespace Gumball
         public AssetReferenceT<GameSession> SessionAssetReference => sessionAssetReference;
         public GameSession GameSession { get; private set; }
 
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            UpdateInspectorName();
+        }
+
+        private void UpdateInspectorName()
+        {
+            string nodeName = "GameSessionNode";
+            if (sessionAssetReference != null && sessionAssetReference.editorAsset != null)
+            {
+                nodeName = $"{sessionAssetReference.editorAsset.GetName()} - {sessionAssetReference.editorAsset.name}";
+                AssetReferenceT<ChunkMap> chunkMap = sessionAssetReference.editorAsset.ChunkMapAssetReference;
+                if (chunkMap != null && chunkMap.editorAsset != null)
+                    nodeName += $" - {chunkMap.editorAsset.name}";
+            }
+            gameObject.name = nodeName;
+            EditorUtility.SetDirty(gameObject);
+        }
+#endif
+        
         private void OnEnable()
         {
             TryLoadGameSessionAsset();

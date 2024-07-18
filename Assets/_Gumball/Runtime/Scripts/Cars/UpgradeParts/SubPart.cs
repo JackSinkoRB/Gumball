@@ -71,6 +71,10 @@ namespace Gumball
         [Tooltip("This is the cost to install the sub part on a core part.")]
         [SerializeField] private int standardCurrencyInstallCost = 50;
         
+        [Header("Modifiers")]
+        [Tooltip("How much does this sub part contribute to the core parts total modifier?")]
+        [SerializeField] private CarPerformanceProfileModifiers corePartModifiers;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<GameSession> sessionsThatGiveReward = new();
         
@@ -81,6 +85,7 @@ namespace Gumball
         public string DisplayName => displayName;
         public Sprite Icon => icon;
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
+        public CarPerformanceProfileModifiers CorePartModifiers => corePartModifiers;
         public ReadOnlyCollection<GameSession> SessionsThatGiveReward => sessionsThatGiveReward.AsReadOnly();
         
         public bool IsUnlocked
@@ -163,12 +168,10 @@ namespace Gumball
                 return;
             }
 
+            //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CorePartBelongsTo.CarBelongsToIndex;
             if (isAttachedToCurrentCar)
-            {
-                //update the modifiers
-                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
-            }
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CorePartBelongsTo.CarBelongsToIndex));
             
             CorePartBelongsTo = null;
         }
