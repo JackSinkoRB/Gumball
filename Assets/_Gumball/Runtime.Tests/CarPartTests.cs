@@ -104,7 +104,6 @@ namespace Gumball.Runtime.Tests
             //ensure it saved
             Assert.AreEqual(partGroupToTest.SavedPartIndex, indexToUse);
             
-            
             //set back to 0:
             partGroupToTest.SetPartActive(0);
             
@@ -121,8 +120,6 @@ namespace Gumball.Runtime.Tests
             //ensure it saved
             Assert.AreEqual(partGroupToTest.SavedPartIndex, 0);
         }
-        
-        
-        
+
     }
 }
