@@ -42,6 +42,8 @@ namespace Gumball
         [ConditionalField(nameof(hasCustomLoadDistance)), SerializeField] private float customLoadDistance = 3000;
         [Tooltip("If the players distance from the road is equal or greater to this distance, the player is reset.")]
         [SerializeField] private float distanceFromRoadSplineToResetPlayer = 50;
+        [Tooltip("The distance racers look ahead for the next racing line to start interpolating to its position.")]
+        [SerializeField] private float nextRacingLineInterpolateDistance = 65;
         
         [Header("Terrains")]
         [Tooltip("The distance for the player to be within to use the high LOD.")]
@@ -80,6 +82,7 @@ namespace Gumball
         public bool HasCustomLoadDistance => hasCustomLoadDistance;
         public float CustomLoadDistance => customLoadDistance;
         public float DistanceFromRoadSplineToResetPlayer => distanceFromRoadSplineToResetPlayer;
+        public float NextRacingLineInterpolateDistance => nextRacingLineInterpolateDistance;
         
         public ChunkTrafficManager TrafficManager => trafficManager;
         public ChunkPowerpoleManager PowerpoleManager => powerpoleManager;
@@ -424,6 +427,21 @@ namespace Gumball
         {
             splineLengthCached = splineComputer.CalculateLength();
         }
+        
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            //draw the interpolation distance
+            if (nextRacingLineInterpolateDistance > 0)
+            {
+                if (SplineSamples == null || SplineSamples.Length == 0)
+                    UpdateSplineSampleData();
+
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawSphere(LastSample.position - LastSample.forward * nextRacingLineInterpolateDistance, 1f);
+            }
+        }
+#endif
         
     }
 }

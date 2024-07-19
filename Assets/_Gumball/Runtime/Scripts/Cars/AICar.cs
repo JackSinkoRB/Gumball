@@ -270,10 +270,14 @@ namespace Gumball
                                                            | 1 << (int)LayersAndTags.Layer.PlayerCar
                                                            | 1 << (int)LayersAndTags.Layer.RacerCar
                                                            | 1 << (int)LayersAndTags.Layer.Barrier
-                                                           | 1 << (int)LayersAndTags.Layer.MovementPath;
-        private static readonly LayerMask obstacleLayersNoCars = 1 << (int)LayersAndTags.Layer.Barrier
-                                                           | 1 << (int)LayersAndTags.Layer.MovementPath;
-        
+                                                           | 1 << (int)LayersAndTags.Layer.MovementPath
+                                                           | 1 << (int)LayersAndTags.Layer.RacerObstacle;
+        private static readonly LayerMask obstacleLayersNoCars = 1 << (int)LayersAndTags.Layer.Barrier 
+                                                                 | 1 << (int)LayersAndTags.Layer.MovementPath
+                                                                 | 1 << (int)LayersAndTags.Layer.RacerObstacle;
+        private static readonly LayerMask racingLineObstacleLayers = 1 << (int)LayersAndTags.Layer.Barrier
+                                                                     | 1 << (int)LayersAndTags.Layer.RacerObstacle;
+
         /// <summary>
         /// The time that the autodriving car looks ahead for curves.
         /// </summary>
@@ -755,7 +759,7 @@ namespace Gumball
                 //check if blocked
                 Vector3 frontOfCar = transform.TransformPoint(frontOfCarPosition);
                 Vector3 direction = Vector3.Normalize(startOfRacingLine - frontOfCar);
-                int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Barrier));
+                int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), racingLineObstacleLayers);
                 Debug.DrawRay(frontOfCar, direction * Vector3.Distance(frontOfCar, startOfRacingLine), hits > 0 ? Color.red : Color.blue);
                 bool isBlocked = hits > 0;
                 if (isBlocked)
@@ -787,7 +791,7 @@ namespace Gumball
                     //check if blocked
                     Vector3 frontOfCar = transform.TransformPoint(frontOfCarPosition);
                     Vector3 direction = Vector3.Normalize(startOfRacingLine - frontOfCar);
-                    int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Barrier));
+                    int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), racingLineObstacleLayers);
                     Debug.DrawRay(frontOfCar, direction * Vector3.Distance(frontOfCar, startOfRacingLine), hits > 0 ? Color.red : Color.blue);
                     bool isBlocked = hits > 0;
                     if (isBlocked)
@@ -805,7 +809,7 @@ namespace Gumball
 
             if (nearestRacingLine != null)
             {
-                float interpolationDistanceSqr = nearestRacingLine.RacerInterpolationDistance * nearestRacingLine.RacerInterpolationDistance;
+                float interpolationDistanceSqr = CurrentChunk.NextRacingLineInterpolateDistance * CurrentChunk.NextRacingLineInterpolateDistance;
                 if (nearestDistanceSqr < interpolationDistanceSqr)
                 {
                     //is within interpolation distance
