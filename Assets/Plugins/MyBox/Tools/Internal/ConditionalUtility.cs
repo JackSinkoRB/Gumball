@@ -59,8 +59,6 @@ namespace MyBox.Internal
 			if (property == null) return true;
 
 			string asString = property.AsStringValue().ToUpper();
-			if (property.propertyType == SerializedPropertyType.Enum)
-				asString = property.enumValueIndex.ToString();
 
 			if (compareAgainst != null && compareAgainst.Length > 0)
 			{
