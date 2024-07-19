@@ -10,7 +10,7 @@ namespace MyBox.Internal
         private FoldoutAttributeHandler _foldout;
         private ButtonMethodHandler _buttonMethod; 
         
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             if (target == null) return;
             
