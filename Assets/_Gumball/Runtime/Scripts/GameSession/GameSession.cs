@@ -16,8 +16,15 @@ using Random = UnityEngine.Random;
 namespace Gumball
 {
     [Serializable]
-    public abstract class GameSession : ScriptableObject, ISerializationCallbackReceiver
+    public abstract class GameSession : UniqueScriptableObject, ISerializationCallbackReceiver
     {
+
+        public enum ProgressStatus
+        {
+            NOT_ATTEMPTED,
+            ATTEMPTED,
+            COMPLETE
+        }
 
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
@@ -75,6 +82,12 @@ namespace Gumball
         
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
 
+        public ProgressStatus Progress
+        {
+            get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
+            private set => DataManager.Player.Set($"SessionStatus.{ID}", value);
+        }
+        
         public string Description => description;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
@@ -120,8 +133,10 @@ namespace Gumball
         [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
         [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
 
-        private void OnValidate()
+        protected override void OnValidate()
         {
+            base.OnValidate();
+            
             TrackCorePartRewards();
             TrackSubPartRewards();
         }

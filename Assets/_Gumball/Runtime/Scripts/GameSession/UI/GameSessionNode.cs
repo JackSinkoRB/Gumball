@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using TMPro;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -14,27 +15,34 @@ namespace Gumball
     public class GameSessionNode : MonoBehaviour
     {
 
-        [SerializeField] private AssetReferenceT<GameSession> sessionAssetReference;
+        [Obsolete("Old reference, use gameSession. This will be removed.")]
+        [SerializeField, HideInInspector] private AssetReferenceT<GameSession> sessionAssetReference;
+        [SerializeField, DisplayInspector] private GameSession gameSession;
+        
+        [Header("UI")]
         [SerializeField] private TextMeshProUGUI typeLabel;
 
         private AsyncOperationHandle<GameSession> handle;
 
-        public AssetReferenceT<GameSession> SessionAssetReference => sessionAssetReference;
-        public GameSession GameSession { get; private set; }
+        public GameSession GameSession => gameSession;
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            //TODO: temp - remove when sessionAssetReferenceIsRemoved
+            if (gameSession == null)
+                gameSession = sessionAssetReference.editorAsset;
+            
             UpdateInspectorName();
         }
 
         private void UpdateInspectorName()
         {
             string nodeName = "GameSessionNode";
-            if (sessionAssetReference != null && sessionAssetReference.editorAsset != null)
+            if (gameSession != null)
             {
-                nodeName = $"{sessionAssetReference.editorAsset.GetName()} - {sessionAssetReference.editorAsset.name}";
-                AssetReferenceT<ChunkMap> chunkMap = sessionAssetReference.editorAsset.ChunkMapAssetReference;
+                nodeName = $"{gameSession.GetName()} - {gameSession.name}";
+                AssetReferenceT<ChunkMap> chunkMap = gameSession.ChunkMapAssetReference;
                 if (chunkMap != null && chunkMap.editorAsset != null)
                     nodeName += $" - {chunkMap.editorAsset.name}";
             }
@@ -45,8 +53,6 @@ namespace Gumball
         
         private void OnEnable()
         {
-            TryLoadGameSessionAsset();
-            
             typeLabel.text = GameSession.GetName();
         }
 
@@ -55,18 +61,6 @@ namespace Gumball
             PanelManager.GetPanel<GameSessionNodePanel>().Show();
             PanelManager.GetPanel<GameSessionNodePanel>().Initialise(this);
         }
-
-        private void TryLoadGameSessionAsset()
-        {
-            //just load the game sessions once and keep it loaded as these will have a neglible impact on memory
-            if (GameSession != null)
-                return; //already loaded
-
-            handle = Addressables.LoadAssetAsync<GameSession>(sessionAssetReference);
-            handle.WaitForCompletion();
-
-            GameSession = handle.Result;
-        }
-
+        
     }
 }
