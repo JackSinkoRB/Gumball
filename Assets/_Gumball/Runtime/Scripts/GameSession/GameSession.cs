@@ -271,7 +271,7 @@ namespace Gumball
             }
         }
 
-        public void EndSession()
+        public void EndSession(ProgressStatus progress)
         {
             inProgress = false;
 
@@ -279,6 +279,15 @@ namespace Gumball
                 CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
             
             OnSessionEnd();
+            
+            if (Progress != ProgressStatus.COMPLETE && progress == ProgressStatus.COMPLETE)
+            {
+                OnCompleteSessionForFirstTime();
+            }
+            else
+            {
+                OnFailMission();
+            }
         }
 
         public void UnloadSession()
@@ -300,7 +309,7 @@ namespace Gumball
         protected virtual void OnSessionEnd()
         {
             HasStarted = false;
-            
+
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
@@ -310,15 +319,15 @@ namespace Gumball
             
             //come to a stop
             WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
-            
-            //convert skill points to followers
-            FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
-            
+
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
+            
+            //convert skill points to followers
+            FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
         }
-        
+
         public virtual void UpdateWhenCurrent()
         {
             SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
@@ -575,7 +584,7 @@ namespace Gumball
         
         private void OnCrossFinishLine()
         {
-            EndSession();
+            EndSession(ProgressStatus.COMPLETE);
         }
 
         public IEnumerator GiveRewards()
@@ -628,6 +637,16 @@ namespace Gumball
                 PanelManager.GetPanel<RewardPanel>().Show();
                 yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);
             }
+        }
+        
+        private void OnCompleteSessionForFirstTime()
+        {
+            Progress = ProgressStatus.COMPLETE;
+        }
+        
+        private void OnFailMission()
+        {
+            Progress = ProgressStatus.ATTEMPTED;
         }
         
     }

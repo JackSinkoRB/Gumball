@@ -17,7 +17,7 @@ namespace Gumball
         {
             if (GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null)
             {
-                GameSessionManager.Instance.CurrentSession.EndSession();
+                GameSessionManager.Instance.CurrentSession.EndSession(GameSession.ProgressStatus.ATTEMPTED);
                 GameSessionManager.Instance.CurrentSession.UnloadSession();
             }
 

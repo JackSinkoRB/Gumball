@@ -72,7 +72,7 @@ namespace Gumball
 
         private void OnTimerExpire()
         {
-            EndSession();
+            EndSession(ProgressStatus.ATTEMPTED);
         }
 
         protected override void OnSessionEnd()
