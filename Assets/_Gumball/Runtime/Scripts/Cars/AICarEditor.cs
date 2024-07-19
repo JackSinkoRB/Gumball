@@ -1,11 +1,12 @@
 #if UNITY_EDITOR
+using MyBox.Internal;
 using UnityEngine;
 using UnityEditor;
 
 namespace Gumball.Editor
 {
     [CustomEditor(typeof(AICar))]
-    public class AICarEditor : UnityEditor.Editor
+    public class AICarEditor : UnityObjectEditor
     {
 
         private AICar car => target as AICar;
@@ -22,7 +23,7 @@ namespace Gumball.Editor
             if (rigidbody != null)
                 EditorGUILayout.HelpBox("Rigidbody component driven by car.", MessageType.Info);
             
-            DrawDefaultInspector();
+            base.OnInspectorGUI();
         }
         
     }

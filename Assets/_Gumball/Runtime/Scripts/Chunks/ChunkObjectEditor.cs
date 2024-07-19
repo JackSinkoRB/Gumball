@@ -1,11 +1,12 @@
 #if UNITY_EDITOR
+using MyBox.Internal;
 using UnityEngine;
 using UnityEditor;
 
 namespace Gumball.Editor
 {
     [CustomEditor(typeof(ChunkObject))]
-    public class ChunkObjectEditor : UnityEditor.Editor
+    public class ChunkObjectEditor : UnityObjectEditor
     {
 
         private ChunkObject chunkObject => target as ChunkObject;
@@ -21,8 +22,8 @@ namespace Gumball.Editor
                 if (chunkObject.IsChildOfAnotherChunkObject)
                     EditorGUILayout.HelpBox("This ChunkObject will not function properly because it is a child of another ChunkObject.", MessageType.Error);
             }
-            
-            DrawDefaultInspector();
+
+            base.OnInspectorGUI();
         }
         
     }
