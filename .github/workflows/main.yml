@@ -68,7 +68,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: ${{ matrix.testMode }} Test Results
           customParameters: -nographics
-          dockerMemoryLimit: 7500m
+          dockerMemoryLimit: 8000m
           dockerCpuLimit: 2
 
   build:
@@ -112,7 +112,7 @@ jobs:
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
-          dockerMemoryLimit: 7500m
+          dockerMemoryLimit: 8000m
           dockerCpuLimit: 2
           buildName: 'Gumball'
 
@@ -132,6 +132,7 @@ jobs:
         run: rm -rf build
 
   cleanup:
+    if: ${{ always() }}
     needs: build
     name: Cleanup
     runs-on: self-hosted
