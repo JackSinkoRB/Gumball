@@ -5661,12 +5661,12 @@ MonoBehaviour:
   _space: 1
   _sampleMode: 1
   _subscribers:
-  - {fileID: 2392943712404081475}
+  - {fileID: 3331371752374377760}
+  - {fileID: 9222812733813283705}
   - {fileID: 5505434393137283753}
   - {fileID: 6604183890598404620}
-  - {fileID: 3331371752374377760}
+  - {fileID: 2392943712404081475}
   - {fileID: 1907148623669486612}
-  - {fileID: 9222812733813283705}
   _rawSamples:
   - position: {x: 0, y: 0, z: 0}
     up: {x: 0, y: 1, z: 0}
@@ -10085,9 +10085,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   driveOnLeft: 1
   racingLines: []
-  speedLimitKmh: 60
-  lanesForward: []
-  lanesBackward: []
+  speedLimitKmh: 100
+  lanesForward:
+  - type: 0
+    distanceFromCenter: 5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: 10.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: 16
+    path: {fileID: 0}
+    vehicleTypes: -1
+  lanesBackward:
+  - type: 0
+    distanceFromCenter: -5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: -10.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: -16
+    path: {fileID: 0}
+    vehicleTypes: -1
   chunk: {fileID: 8414334395507603403}
 --- !u!1 &6280749705286109322
 GameObject:

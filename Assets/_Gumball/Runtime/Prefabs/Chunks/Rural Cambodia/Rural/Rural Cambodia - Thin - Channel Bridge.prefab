@@ -12788,6 +12788,7 @@ MonoBehaviour:
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 50
+  nextRacingLineInterpolationDistance: 100
   terrainHighLODDistance: 500
   currentLOD: 1
   terrainHighLOD: {fileID: 3713781627137319799}
@@ -18749,6 +18750,9 @@ MonoBehaviour:
   _sampleMode: 1
   _subscribers:
   - {fileID: 5224868912029315885}
+  - {fileID: 637102274076756483}
+  - {fileID: 1105440949254208930}
+  - {fileID: 7398188007954511269}
   _rawSamples:
   - position: {x: 0, y: 0, z: 0}
     up: {x: 0, y: 1, z: 0}
@@ -19523,36 +19527,36 @@ MonoBehaviour:
   - type: 0
     distanceFromCenter: 3
     path: {fileID: 0}
-    vehicleTypes: 0
+    vehicleTypes: -1
   - type: 0
     distanceFromCenter: 3
     path: {fileID: 0}
-    vehicleTypes: 0
+    vehicleTypes: -1
   - type: 0
     distanceFromCenter: 3
     path: {fileID: 0}
-    vehicleTypes: 0
+    vehicleTypes: -1
   - type: 0
     distanceFromCenter: 3
     path: {fileID: 0}
-    vehicleTypes: 0
+    vehicleTypes: -1
   lanesBackward:
   - type: 0
     distanceFromCenter: -3
     path: {fileID: 0}
-    vehicleTypes: 0
+    vehicleTypes: -1
   - type: 0
     distanceFromCenter: -3
     path: {fileID: 0}
-    vehicleTypes: 0
+    vehicleTypes: -1
   - type: 0
     distanceFromCenter: -3
     path: {fileID: 0}
-    vehicleTypes: 0
+    vehicleTypes: -1
   - type: 0
     distanceFromCenter: -3
     path: {fileID: 0}
-    vehicleTypes: 0
+    vehicleTypes: -1
   chunk: {fileID: 6860265999645676851}
 --- !u!1 &7994976021753957193
 GameObject:
@@ -26606,6 +26610,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1662303290384971408}
     m_Modifications:
+    - target: {fileID: 715333749413381852, guid: bab1b02097d5b514dad15eb10ade941b,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 1086827050516561384, guid: bab1b02097d5b514dad15eb10ade941b,
         type: 3}
       propertyPath: chunkBelongsTo
@@ -29622,6 +29631,11 @@ PrefabInstance:
       value: Shack_01_Asp
       objectReference: {fileID: 0}
     - target: {fileID: 5203688578422356544, guid: bea90b9b9c682c9448f0713cbe200c24,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
+    - target: {fileID: 7321451168830945939, guid: bea90b9b9c682c9448f0713cbe200c24,
         type: 3}
       propertyPath: chunkBelongsTo
       value: 
@@ -46412,6 +46426,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 5094336772112625562, guid: 643535a94fc112b4cadacccfc5bcb773,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
+    - target: {fileID: 7371804648670595101, guid: 643535a94fc112b4cadacccfc5bcb773,
         type: 3}
       propertyPath: chunkBelongsTo
       value: 
