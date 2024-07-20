@@ -1,0 +1,140 @@
+name: Deploy builds (internal testing) - Google
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    tags:
+      - "v*.*.*"
+
+concurrency:
+  group: ${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+
+  build:
+    name: Build for ${{ matrix.targetPlatform }}
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - Android
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
+
+      # Cache
+      - uses: JackSinkoRB/local-cache@main
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+
+      # Build
+      - uses: game-ci/unity-builder@v4
+        id: buildStep
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          androidKeystoreName: user.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          androidExportType: androidAppBundle
+          androidTargetSdkVersion: 34
+          buildName: 'Gumball'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
+
+  deployToGoogle:
+    needs: build
+    name: Deploy to Google Play internal track
+    runs-on: self-hosted
+    env:
+      GOOGLE_PLAY_KEY_FILE: ${{ secrets.GOOGLE_PLAY_KEY_FILE }}
+      GOOGLE_PLAY_KEY_FILE_PATH:
+        ${{ format('{0}/fastlane/google-fastlane.json', github.workspace) }}
+      ANDROID_BUILD_FILE_PATH: ${{ format('{0}/build/Android/Gumball.aab', github.workspace) }}
+      ANDROID_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
+
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Download Android artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-Android
+          path: build/Android
+
+      - name: Add Authentication
+        run: echo "$GOOGLE_PLAY_KEY_FILE" > $GOOGLE_PLAY_KEY_FILE_PATH
+
+      - name: Set up Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+
+      - name: Upload to Google Play Internal
+        uses: maierj/fastlane-action@v3.1.0
+        with:
+          lane: 'android internal'
+
+      - name: Cleanup to avoid storage limit
+        if: always()
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build-Android
+
+  sendDiscordNotification:
+    needs: deployToGoogle
+    name: Discord Notification
+    runs-on: self-hosted
+    steps:
+
+      # Send Discord notification
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_EMBEDS: |
+            [{
+              "title": "Gumball deployed an internal release: ${{ github.ref_name }}",
+              "description": "It will be available on TestFlight and GooglePlay soon."
+            }]
+        uses: Ilshidur/action-discord@0.3.2
+
+  cleanup:
+    if: ${{ always() }}
+    needs: deployToGoogle
+    name: Cleanup
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      # Delete library folders to save space - must do this after build job as post-cache needs to cache it
+      - name: Delete runner1 Library folder
+        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/Library || true
+
+      # Delete build folder to save space
+      - name: Delete runner1 build folder
+        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/build || true
