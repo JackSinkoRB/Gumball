@@ -68,8 +68,6 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: ${{ matrix.testMode }} Test Results
           customParameters: -nographics
-          dockerMemoryLimit: 7500m
-          dockerCpuLimit: 2
 
   build:
     needs: testAllModes
@@ -112,8 +110,6 @@ jobs:
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
-          dockerMemoryLimit: 7500m
-          dockerCpuLimit: 2
           buildName: 'Gumball'
 
       # Zip Build Files
@@ -132,6 +128,7 @@ jobs:
         run: rm -rf build
 
   cleanup:
+    if: ${{ always() }}
     needs: build
     name: Cleanup
     runs-on: self-hosted
@@ -143,8 +140,6 @@ jobs:
       # Delete library folders to save space - must do this after build job as post-cache needs to cache it
       - name: Delete runner1 Library
         run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/Library || true
-      - name: Delete runner2 Library
-        run: rm -rf /root/runner2-actions/_work/Gumball/Gumball/Library || true
 
   deployToDiscord:
     needs: build
