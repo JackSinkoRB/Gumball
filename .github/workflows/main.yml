@@ -81,6 +81,15 @@ jobs:
           - StandaloneWindows
     steps:
 
+      # Set runner-specific IP addresses
+      - name: Set runner-specific IP addresses
+        run: |
+          if [[ "${{ runner.name }}" == "Hostinger-Runner-3-Singapore" ]]; then
+            echo "${{ matrix.targetPlatform }}_runner_ip=141.136.47.108" >> $GITHUB_ENV
+          else
+            echo "${{ matrix.targetPlatform }}_runner_ip=178.16.143.69" >> $GITHUB_ENV
+          fi
+
       # Checkout
       - uses: actions/checkout@v4
         with:
@@ -192,6 +201,16 @@ jobs:
         with:
           length: 7
 
+      # Get the IP of the runner the build is on
+      - name: Set IP address based on runner name
+        id: set-ip
+        run: |
+          if [ "${RUNNER_NAME}" == "Hostinger-Runner-3-Singapore" ]; then
+            echo "IP_ADDRESS=141.136.47.108" >> $GITHUB_ENV
+          else
+            echo "IP_ADDRESS=178.16.143.69" >> $GITHUB_ENV
+          fi
+
       # Send Discord notification
       - name: Discord notification
         env:
@@ -200,8 +219,8 @@ jobs:
             [{
               "title": "Gumball has a new build available.",
               "fields": [
-                { "name": "Android", "value": "[Download](http://178.16.143.69/Gumball-Android.zip)", "inline": true },
-                { "name": "Windows", "value": "[Download](http://178.16.143.69/Gumball-StandaloneWindows.zip)", "inline": true },
+                { "name": "Android", "value": "[Download](http://${{ env.Android_runner_ip }}/Gumball-Android.zip)", "inline": true },
+                { "name": "Windows", "value": "[Download](http://${{ env.StandaloneWindows_runner_ip }}/Gumball-StandaloneWindows.zip)", "inline": true },
                 { "name": "Latest commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}})" },
                 { "name": "Commits (${{ steps.pre-checkout.outputs.number-of-commits }})", "value": "${{ steps.pre-checkout.outputs.commit-messages }}" }
               ],
