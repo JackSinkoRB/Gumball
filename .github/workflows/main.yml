@@ -73,6 +73,9 @@ jobs:
     needs: testAllModes
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: self-hosted
+    outputs:
+      Android-runner-ip: ${{ steps.set-runner-ips.outputs.Android-runner-ip }}
+      StandaloneWindows-runner-ip: ${{ steps.set-runner-ips.outputs.StandaloneWindows-runner-ip }}
     strategy:
       fail-fast: false
       matrix:
