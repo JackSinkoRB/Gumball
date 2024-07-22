@@ -9,6 +9,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -32,7 +33,7 @@ namespace Gumball
 
             yield return Instance.LoadMaps();
             
-            Instance.SelectMap(Instance.GetCurrentMapIndex());
+            Instance.SelectMap(Instance.GetCurrentMap());
             
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
@@ -43,12 +44,18 @@ namespace Gumball
         [Header("Nodes")]
         [SerializeField] private float nodeFadeAmountWhenNotFocused = 0.2f;
         [SerializeField] private float nodeFadeDuration = 0.2f;
+
+        [Header("Arrows")]
+        [SerializeField] private Button leftArrow;
+        [SerializeField] private Button rightArrow;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private GameSessionMap[] mapInstances;
         [SerializeField, ReadOnly] private GameSessionMap selectedMap;
 
         private Sequence currentNodesTween;
+
+        public GameSessionMap SelectedMap => selectedMap;
         
         protected override void Initialise()
         {
@@ -86,37 +93,68 @@ namespace Gumball
                     GameSessionMap map = Instantiate(h.Result).GetComponent<GameSessionMap>();
                     map.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
                     mapInstances[finalIndex] = map;
+                    map.gameObject.SetActive(false); //start inactive until selected
                 };
             }
 
-            yield return new WaitUntil(handles.AreAllComplete());
+            yield return new WaitUntil(() => handles.AreAllComplete());
+        }
+
+        public void SelectPreviousMap()
+        {
+            int currentIndex = mapInstances.IndexOfItem(selectedMap);
+            int newIndex = currentIndex - 1;
+            if (newIndex < 0)
+            {
+                Debug.LogWarning("No previous maps.");
+                return;
+            }
+
+            GameSessionMap newMap = mapInstances[newIndex];
+            SelectMap(newMap);
+        }
+
+        public void SelectNextMap()
+        {
+            int currentIndex = mapInstances.IndexOfItem(selectedMap);
+            int newIndex = currentIndex + 1;
+            if (newIndex >= mapInstances.Length)
+            {
+                Debug.LogWarning("No more maps.");
+                return;
+            }
+
+            GameSessionMap newMap = mapInstances[newIndex];
+            SelectMap(newMap);
         }
         
-        public void SelectMap(int mapIndex)
+        public void SelectMap(GameSessionMap newMap)
         {
-            if (mapIndex >= currentEvent.Maps.Length || mapIndex < 0)
-                throw new IndexOutOfRangeException($"Event '{name}' doesn't have a map at index {mapIndex}.");
-
             //disable old map
             if (selectedMap != null)
                 selectedMap.gameObject.SetActive(false);
             
             //enable new map
-            selectedMap = mapInstances[mapIndex];
+            selectedMap = newMap;
             selectedMap.gameObject.SetActive(true);
+            
+            int currentIndex = mapInstances.IndexOfItem(selectedMap);
+            rightArrow.interactable = mapInstances.Length > 1 && currentIndex < mapInstances.Length - 1;
+            leftArrow.interactable = mapInstances.Length > 1 && currentIndex > 0;
         }
 
         /// <summary>
         /// The current map is the furthest map in the map list with at least 1 node unlocked.
         /// </summary>
-        private int GetCurrentMapIndex()
+        private GameSessionMap GetCurrentMap()
         {
-            foreach (var map in currentEvent.Maps)
+            foreach (GameSessionMap map in mapInstances)
             {
-                
+                if (!map.AllSessionsComplete())
+                    return map;
             }
 
-            return 0; //TODO
+            return mapInstances[^1];
         }
         
         public void RemoveFocusOnNode()
