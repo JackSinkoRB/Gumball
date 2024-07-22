@@ -59,6 +59,9 @@ namespace Gumball
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
         [Header("Performance settings")]
+        [SerializeField] private CorePart defaultEngine;
+        [SerializeField] private CorePart defaultWheels;
+        [SerializeField] private CorePart defaultDrivetrain;
         [SerializeField] private CarPerformanceSettings performanceSettings;
         [Space(5)]
         [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
@@ -441,6 +444,17 @@ namespace Gumball
             InitialiseWheelStance();
         }
 
+        public CorePart GetDefaultPart(CorePart.PartType type)
+        {
+            return type switch
+            {
+                CorePart.PartType.ENGINE => defaultEngine,
+                CorePart.PartType.WHEELS => defaultWheels,
+                CorePart.PartType.DRIVETRAIN => defaultDrivetrain,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
+        }
+        
         public void SetPerformanceProfile(CarPerformanceProfile profile)
         {
             performanceProfile = profile;

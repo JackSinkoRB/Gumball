@@ -23,30 +23,20 @@ namespace Gumball
         {
             partType = type;
             
-            bool hasNonStockPart = false;
-            
             List<ScrollItem> scrollItems = new List<ScrollItem>();
-
-            //add the stock option
-            ScrollItem stockScrollItem = CreateScrollItem(type, null);
-            scrollItems.Add(stockScrollItem);
-
+            
             //add the current part option as it doesn't show in spare parts
             CorePart currentPart = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, type);
-            if (currentPart != null)
-            {
-                ScrollItem currentScrollItem = CreateScrollItem(type, currentPart);
-                scrollItems.Add(currentScrollItem);
-                hasNonStockPart = true;
-            }
-
+            ScrollItem currentScrollItem = CreateScrollItem(type, currentPart);
+            scrollItems.Add(currentScrollItem);
+            
             foreach (CorePart part in CorePartManager.GetSpareParts(type))
             {
                 ScrollItem scrollItem = CreateScrollItem(type, part);
                 scrollItems.Add(scrollItem);
             }
 
-            partsMagneticScroll.SetItems(scrollItems, hasNonStockPart ? 1 : 0);
+            partsMagneticScroll.SetItems(scrollItems);
         }
 
         public void OnClickInstallButton()
