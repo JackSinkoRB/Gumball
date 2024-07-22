@@ -15,6 +15,8 @@ namespace Gumball
         
         [SerializeField] private List<AssetReferenceGameObject> allCars;
 
+        [SerializeField] private GenericDictionary<int, AICar> playerCarInstances = new();
+
         public delegate void CarChangedDelegate(AICar newCar);
         public event CarChangedDelegate onCurrentCarChanged;
 
@@ -25,6 +27,17 @@ namespace Gumball
         {
             get => DataManager.Warehouse.Get("CurrentCar.Index", 0);
             private set => DataManager.Warehouse.Set("CurrentCar.Index", value);
+        }
+
+        public AICar GetCarInstance(int carIndex)
+        {
+            if (!playerCarInstances.ContainsKey(carIndex) || playerCarInstances[carIndex] == null)
+            {
+                Debug.LogError($"There is no active car instance for car index {carIndex}.");
+                return null;
+            }
+            
+            return playerCarInstances[carIndex];
         }
         
         public void SetCurrentCar(AICar car)
@@ -60,6 +73,8 @@ namespace Gumball
             
             AICar car = Instantiate(handle.Result, position, rotation).GetComponent<AICar>();
             car.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
+            
+            playerCarInstances[index] = car;
             
             car.InitialiseAsPlayer(index);
             car.SetGrounded();
