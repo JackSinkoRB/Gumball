@@ -33,6 +33,17 @@ namespace Gumball
             
             return true;
         }
+        
+        public static bool AreAllComplete<T>(this IEnumerable<AsyncOperationHandle<T>> handles)
+        {
+            foreach (AsyncOperationHandle handle in handles)
+            {
+                if (!handle.IsDone)
+                    return false;
+            }
+            
+            return true;
+        }
 
         public static bool AreAllComplete(this IEnumerable<TrackedCoroutine> collection)
         {
