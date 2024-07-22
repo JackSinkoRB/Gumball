@@ -213,8 +213,8 @@ jobs:
             [{
               "title": "Gumball has a new build available.",
               "fields": [
-                { "name": "Android", "value": "[Download](http://${{ steps.set-runner-ips.outputs.Android-runner-ip }}/Gumball-Android.zip)", "inline": true },
-                { "name": "Windows", "value": "[Download](http://${{ steps.set-runner-ips.outputs.StandaloneWindows-runner-ip }}/Gumball-StandaloneWindows.zip)", "inline": true },
+                { "name": "Android", "value": "[Download](http://${{ needs.build.outputs.Android-runner-ip }}/Gumball-Android.zip)", "inline": true },
+                { "name": "Windows", "value": "[Download](http://${{ needs.build.outputs.StandaloneWindows-runner-ip }}/Gumball-StandaloneWindows.zip)", "inline": true },
                 { "name": "Latest commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}})" },
                 { "name": "Commits (${{ steps.pre-checkout.outputs.number-of-commits }})", "value": "${{ steps.pre-checkout.outputs.commit-messages }}" }
               ],
