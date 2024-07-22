@@ -22,6 +22,7 @@ namespace Gumball
         {
             Checking_for_new_version,
             Loading_scriptable_data_objects,
+            Initialising_parts,
             Starting_async_loading,
             Loading_mainscene,
             Waiting_for_save_data_to_load,
@@ -59,16 +60,22 @@ namespace Gumball
             Stopwatch stopwatch = Stopwatch.StartNew();
             
             singletonScriptableHandles = LoadSingletonScriptables();
-            TrackedCoroutine initialiseCoreParts = new TrackedCoroutine(CorePartManager.Initialise());
-            TrackedCoroutine initialiseSubParts = new TrackedCoroutine(SubPartManager.Initialise());
-
-            yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete() 
-                                             && !initialiseCoreParts.IsPlaying 
-                                             && !initialiseSubParts.IsPlaying);
+            yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete());
 #if ENABLE_LOGS
             Debug.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
+            stopwatch.Restart();
+            
+            currentStage = Stage.Initialising_parts;
+            TrackedCoroutine initialiseCoreParts = new TrackedCoroutine(CorePartManager.Initialise());
+            TrackedCoroutine initialiseSubParts = new TrackedCoroutine(SubPartManager.Initialise());
 
+            yield return new WaitUntil(() => !initialiseCoreParts.IsPlaying 
+                                             && !initialiseSubParts.IsPlaying);
+#if ENABLE_LOGS
+            Debug.Log($"Parts initialisation complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+#endif
+            
             currentStage = Stage.Checking_for_new_version;
             yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
             

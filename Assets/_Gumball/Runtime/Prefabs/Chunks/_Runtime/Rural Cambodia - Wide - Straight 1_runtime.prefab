@@ -257,6 +257,7 @@ MonoBehaviour:
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 50
+  nextRacingLineInterpolateDistance: 65
   terrainHighLODDistance: 500
   currentLOD: 1
   terrainHighLOD: {fileID: 5975583160931873043}
@@ -4494,11 +4495,11 @@ MonoBehaviour:
   _space: 1
   _sampleMode: 1
   _subscribers:
-  - {fileID: 1643715227156121924}
-  - {fileID: 7167916391143889942}
-  - {fileID: 2949423982163055042}
   - {fileID: 8881966267485743918}
   - {fileID: 9068580993723600814}
+  - {fileID: 7167916391143889942}
+  - {fileID: 1643715227156121924}
+  - {fileID: 2949423982163055042}
   - {fileID: 6103033656294484425}
   _rawSamples:
   - position: {x: 0, y: 0, z: 0}
@@ -5306,9 +5307,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   driveOnLeft: 1
   racingLines: []
-  speedLimitKmh: 60
-  lanesForward: []
-  lanesBackward: []
+  speedLimitKmh: 100
+  lanesForward:
+  - type: 0
+    distanceFromCenter: 5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: 10.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: 16
+    path: {fileID: 0}
+    vehicleTypes: -1
+  lanesBackward:
+  - type: 0
+    distanceFromCenter: -5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: -10.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: -16
+    path: {fileID: 0}
+    vehicleTypes: -1
   chunk: {fileID: 3069090026382908015}
 --- !u!1 &3204273932936847885
 GameObject:

@@ -54,8 +54,6 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           androidExportType: androidAppBundle
           androidTargetSdkVersion: 34
-          dockerMemoryLimit: 7500m
-          dockerCpuLimit: 2
           buildName: 'Gumball'
 
       - uses: actions/upload-artifact@v4
@@ -185,11 +183,7 @@ jobs:
       # Delete library folders to save space - must do this after build job as post-cache needs to cache it
       - name: Delete runner1 Library folder
         run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/Library || true
-      - name: Delete runner2 Library folder
-        run: rm -rf /root/runner2-actions/_work/Gumball/Gumball/Library || true
 
       # Delete build folder to save space
       - name: Delete runner1 build folder
         run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/build || true
-      - name: Delete runner2 build folder
-        run: rm -rf /root/runner2-actions/_work/Gumball/Gumball/build || true
