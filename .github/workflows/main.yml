@@ -68,13 +68,14 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: ${{ matrix.testMode }} Test Results
           customParameters: -nographics
-          dockerMemoryLimit: 7500m
-          dockerCpuLimit: 2
 
   build:
     needs: testAllModes
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: self-hosted
+    outputs:
+      Android-runner-ip: ${{ steps.set-runner-ips.outputs.Android-runner-ip }}
+      StandaloneWindows-runner-ip: ${{ steps.set-runner-ips.outputs.StandaloneWindows-runner-ip }}
     strategy:
       fail-fast: false
       matrix:
@@ -82,6 +83,16 @@ jobs:
           - Android
           - StandaloneWindows
     steps:
+
+      # Set runner-specific IP addresses
+      - name: Set runner-specific IP addresses
+        id: set-runner-ips
+        run: |
+          if [[ "${{ runner.name }}" == "Hostinger-Runner-3-Singapore" ]]; then
+            echo "${{ matrix.targetPlatform }}-runner-ip=141.136.47.108" >> "$GITHUB_OUTPUT"
+          else
+            echo "${{ matrix.targetPlatform }}-runner-ip=178.16.143.69" >> "$GITHUB_OUTPUT"
+          fi
 
       # Checkout
       - uses: actions/checkout@v4
@@ -112,8 +123,6 @@ jobs:
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
-          dockerMemoryLimit: 7500m
-          dockerCpuLimit: 2
           buildName: 'Gumball'
 
       # Zip Build Files
@@ -132,6 +141,7 @@ jobs:
         run: rm -rf build
 
   cleanup:
+    if: ${{ always() }}
     needs: build
     name: Cleanup
     runs-on: self-hosted
@@ -143,8 +153,6 @@ jobs:
       # Delete library folders to save space - must do this after build job as post-cache needs to cache it
       - name: Delete runner1 Library
         run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/Library || true
-      - name: Delete runner2 Library
-        run: rm -rf /root/runner2-actions/_work/Gumball/Gumball/Library || true
 
   deployToDiscord:
     needs: build
@@ -205,8 +213,8 @@ jobs:
             [{
               "title": "Gumball has a new build available.",
               "fields": [
-                { "name": "Android", "value": "[Download](http://178.16.143.69/Gumball-Android.zip)", "inline": true },
-                { "name": "Windows", "value": "[Download](http://178.16.143.69/Gumball-StandaloneWindows.zip)", "inline": true },
+                { "name": "Android", "value": "[Download](http://${{ needs.build.outputs.Android-runner-ip }}/Gumball-Android.zip)", "inline": true },
+                { "name": "Windows", "value": "[Download](http://${{ needs.build.outputs.StandaloneWindows-runner-ip }}/Gumball-StandaloneWindows.zip)", "inline": true },
                 { "name": "Latest commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}})" },
                 { "name": "Commits (${{ steps.pre-checkout.outputs.number-of-commits }})", "value": "${{ steps.pre-checkout.outputs.commit-messages }}" }
               ],

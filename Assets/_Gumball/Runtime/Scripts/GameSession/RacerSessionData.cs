@@ -17,14 +17,17 @@ namespace Gumball
         [Tooltip("This is the maximum distance +/- from the racing line that the racer could drive (randomly chosen).")]
         [SerializeField] private float racingLineImprecisionMaxDistance = 3f;
         [SerializeField] private PositionAndRotation startingPosition;
+        [SerializeField] private CarPerformanceProfile performanceProfile;
 
         public AssetReferenceGameObject AssetReference => assetReference;
         public PositionAndRotation StartingPosition => startingPosition;
         public bool CanCrossMiddle => canCrossMiddle;
+        public CarPerformanceProfile PerformanceProfile => performanceProfile;
         
         public float GetRandomRacingLineImprecision()
         {
             return Random.Range(-racingLineImprecisionMaxDistance, racingLineImprecisionMaxDistance);
         }
+        
     }
 }

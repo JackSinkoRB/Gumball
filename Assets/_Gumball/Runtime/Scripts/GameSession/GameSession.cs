@@ -142,7 +142,7 @@ namespace Gumball
                 
                 float chunkEndDistance = chunkStartDistance + chunk.SplineLengthCached;
                 
-                int desiredCars = chunk.TrafficManager.NumberOfCarsToSpawn;
+                int desiredCars = Mathf.RoundToInt(chunk.SplineLengthCached / trafficDensity);
 
                 for (int count = 0; count < desiredCars; count++)
                 {
@@ -474,6 +474,7 @@ namespace Gumball
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
 
+                    racer.SetPerformanceProfile(data.PerformanceProfile);
                     racer.InitialiseAsRacer();
 
                     currentRacers[racer] = data;

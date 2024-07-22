@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -33,10 +33,15 @@ namespace Gumball
         
         public static CorePart GetCorePart(int carIndex, CorePart.PartType type)
         {
-            string partID = DataManager.Cars.Get<string>($"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}");
+            string saveKey = $"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}";
+            
+            AICar car = WarehouseManager.Instance.GetCarInstance(carIndex);
+            CorePart defaultPart = car.GetDefaultPart(type);
+            
+            string partID = DataManager.Cars.Get(saveKey, defaultPart != null ? defaultPart.ID : null);
             return GetPartByID(partID);
         }
-        
+
         public static CorePart[] GetCoreParts(int carIndex)
         {
             CorePart.PartType[] coreParts = (CorePart.PartType[]) Enum.GetValues(typeof(CorePart.PartType));
@@ -44,10 +49,7 @@ namespace Gumball
             
             for (int index = 0; index < coreParts.Length; index++) {
                 CorePart.PartType type = coreParts[index];
-                
-                string partID = DataManager.Cars.Get<string>($"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}");
-                CorePart part = GetPartByID(partID);
-                parts[index] = part;
+                parts[index] = GetCorePart(carIndex, type);
             }
 
             return parts;
