@@ -142,7 +142,7 @@ namespace Gumball
                 
                 float chunkEndDistance = chunkStartDistance + chunk.SplineLengthCached;
                 
-                int desiredCars = chunk.TrafficManager.NumberOfCarsToSpawn;
+                int desiredCars = Mathf.RoundToInt(chunk.SplineLengthCached / trafficDensity);
 
                 for (int count = 0; count < desiredCars; count++)
                 {
