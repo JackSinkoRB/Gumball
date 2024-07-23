@@ -101,6 +101,8 @@ namespace Gumball
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
         public GenericDictionary<AICar, RacerSessionData> CurrentRacers => currentRacers;
+        public int XPReward => xpReward;
+        public int StandardCurrencyReward => standardCurrencyReward;
         public CorePart[] CorePartRewards => corePartRewards;
         public SubPart[] SubPartRewards => subPartRewards;
         public bool HasStarted { get; private set; }
