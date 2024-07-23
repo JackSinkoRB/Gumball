@@ -71,6 +71,10 @@ namespace Gumball
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
         [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
 
+        [Header("Challenges")]
+        [SerializeField] private string mainChallengeDescription = "This is the challenge description";
+        [SerializeField] private Challenge[] subObjectives;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
         [SerializeField, ReadOnly] private GenericDictionary<AICar, RacerSessionData> currentRacers = new();
@@ -87,8 +91,11 @@ namespace Gumball
             get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
             private set => DataManager.Player.Set($"SessionStatus.{ID}", value);
         }
+
+        public Challenge[] SubObjectives => subObjectives;
         
         public string Description => description;
+        public string MainChallengeDescription => mainChallengeDescription;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;
