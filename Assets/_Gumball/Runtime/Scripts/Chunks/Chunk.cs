@@ -274,7 +274,10 @@ namespace Gumball
         public void TryCreateChunkDetector()
         {
             if (chunkDetector != null)
-                return; //already exists
+            {
+                //destroy old one
+                DestroyImmediate(chunkDetector);
+            }
 
             if (terrainLowLOD == null || terrainHighLOD == null)
             {
@@ -286,8 +289,7 @@ namespace Gumball
             chunkDetector.gameObject.layer = (int) LayersAndTags.Layer.ChunkDetector;
             chunkDetector.transform.SetParent(transform);
             
-            const float yOffset = -500;
-            chunkDetector.transform.position = terrainLowLOD.transform.position.OffsetY(yOffset);
+            chunkDetector.transform.position = terrainLowLOD.transform.position;
 
             MeshCollider meshCollider = chunkDetector.AddComponent<MeshCollider>();
             meshCollider.convex = true;
