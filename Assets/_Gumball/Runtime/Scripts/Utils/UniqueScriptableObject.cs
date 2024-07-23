@@ -18,13 +18,14 @@ namespace Gumball
         {
             get
             {
+#if UNITY_EDITOR
                 if (string.IsNullOrEmpty(lastKnownName)
                     || !lastKnownName.Equals(name)
                     || string.IsNullOrEmpty(uniqueID))
                 {
                     GenerateNewID();
                 }
-
+#endif
                 return uniqueID;
             }
         }
