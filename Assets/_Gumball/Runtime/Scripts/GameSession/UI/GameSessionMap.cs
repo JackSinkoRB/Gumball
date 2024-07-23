@@ -24,5 +24,16 @@ namespace Gumball
             }
         }
 
+        public bool AllSessionsComplete()
+        {
+            foreach (GameSessionNode node in Nodes)
+            {
+                if (node.GameSession.Progress != GameSession.ProgressStatus.COMPLETE)
+                    return false;
+            }
+
+            return true;
+        }
+
     }
 }

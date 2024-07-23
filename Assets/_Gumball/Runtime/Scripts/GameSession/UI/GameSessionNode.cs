@@ -1,40 +1,72 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using TMPro;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Gumball
 {
     public class GameSessionNode : MonoBehaviour
     {
 
-        [SerializeField] private AssetReferenceT<GameSession> sessionAssetReference;
+        [Header("Unlock requirements")]
+        [HelpBox("Assign either a session node (from this map), or game session (from another map).", MessageType.Info, HelpBoxAttribute.Position.ABOVE)]
+        [SerializeField] private GameSessionNode requiredSessionNode;
+        [SerializeField] private GameSession requiredSession;
+        [Space(5)]
+        [HelpBox("Sessions that require fans won't show on the map until the player has enough fans.", MessageType.Info, HelpBoxAttribute.Position.ABOVE, true, true)]
+        [SerializeField] private bool requireFans;
+        [SerializeField, ConditionalField(nameof(requireFans))] private int fansRequired;
+        
+        [Obsolete("Old reference, use gameSession. This will be removed.")]
+        [SerializeField, HideInInspector] private AssetReferenceT<GameSession> sessionAssetReference;
+        [Header("Game session")]
+        [SerializeField, DisplayInspector] private GameSession gameSession;
+        
+        [Header("UI")]
         [SerializeField] private TextMeshProUGUI typeLabel;
+        [SerializeField] private GameObject lockObject;
 
-        private AsyncOperationHandle<GameSession> handle;
+        public bool IsUnlocked {
+            get
+            {
+                if (requiredSessionNode != null && requiredSessionNode.gameSession.Progress != GameSession.ProgressStatus.COMPLETE)
+                    return false;
+                
+                if (requiredSession != null && requiredSession.Progress != GameSession.ProgressStatus.COMPLETE)
+                    return false;
 
-        public AssetReferenceT<GameSession> SessionAssetReference => sessionAssetReference;
-        public GameSession GameSession { get; private set; }
+                if (requireFans && FollowersManager.CurrentFollowers < fansRequired)
+                    return false;
+
+                return true;
+            }
+        }
+        
+        public GameSession GameSession => gameSession;
 
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            //TODO: temp - remove when sessionAssetReferenceIsRemoved
+            if (gameSession == null)
+                gameSession = sessionAssetReference.editorAsset;
+            
             UpdateInspectorName();
         }
 
         private void UpdateInspectorName()
         {
             string nodeName = "GameSessionNode";
-            if (sessionAssetReference != null && sessionAssetReference.editorAsset != null)
+            if (gameSession != null)
             {
-                nodeName = $"{sessionAssetReference.editorAsset.GetName()} - {sessionAssetReference.editorAsset.name}";
-                AssetReferenceT<ChunkMap> chunkMap = sessionAssetReference.editorAsset.ChunkMapAssetReference;
+                nodeName = $"{gameSession.GetName()} - {gameSession.name}";
+                AssetReferenceT<ChunkMap> chunkMap = gameSession.ChunkMapAssetReference;
                 if (chunkMap != null && chunkMap.editorAsset != null)
                     nodeName += $" - {chunkMap.editorAsset.name}";
             }
@@ -45,9 +77,13 @@ namespace Gumball
         
         private void OnEnable()
         {
-            TryLoadGameSessionAsset();
-            
             typeLabel.text = GameSession.GetName();
+            
+            lockObject.SetActive(!IsUnlocked);
+            
+            //nodes that require followers don't show on the map until there's enough followers
+            if (requireFans && FollowersManager.CurrentFollowers < fansRequired)
+                gameObject.SetActive(false);
         }
 
         public void OnClicked()
@@ -55,18 +91,6 @@ namespace Gumball
             PanelManager.GetPanel<GameSessionNodePanel>().Show();
             PanelManager.GetPanel<GameSessionNodePanel>().Initialise(this);
         }
-
-        private void TryLoadGameSessionAsset()
-        {
-            //just load the game sessions once and keep it loaded as these will have a neglible impact on memory
-            if (GameSession != null)
-                return; //already loaded
-
-            handle = Addressables.LoadAssetAsync<GameSession>(sessionAssetReference);
-            handle.WaitForCompletion();
-
-            GameSession = handle.Result;
-        }
-
+        
     }
 }

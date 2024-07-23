@@ -16,8 +16,15 @@ using Random = UnityEngine.Random;
 namespace Gumball
 {
     [Serializable]
-    public abstract class GameSession : ScriptableObject, ISerializationCallbackReceiver
+    public abstract class GameSession : UniqueScriptableObject, ISerializationCallbackReceiver
     {
+
+        public enum ProgressStatus
+        {
+            NOT_ATTEMPTED,
+            ATTEMPTED,
+            COMPLETE
+        }
 
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
@@ -75,6 +82,12 @@ namespace Gumball
         
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
 
+        public ProgressStatus Progress
+        {
+            get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
+            private set => DataManager.Player.Set($"SessionStatus.{ID}", value);
+        }
+        
         public string Description => description;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
@@ -120,8 +133,10 @@ namespace Gumball
         [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
         [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
 
-        private void OnValidate()
+        protected override void OnValidate()
         {
+            base.OnValidate();
+            
             TrackCorePartRewards();
             TrackSubPartRewards();
         }
@@ -256,7 +271,7 @@ namespace Gumball
             }
         }
 
-        public void EndSession()
+        public void EndSession(ProgressStatus progress)
         {
             inProgress = false;
 
@@ -264,6 +279,15 @@ namespace Gumball
                 CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
             
             OnSessionEnd();
+            
+            if (Progress != ProgressStatus.COMPLETE && progress == ProgressStatus.COMPLETE)
+            {
+                OnCompleteSessionForFirstTime();
+            }
+            else
+            {
+                OnFailMission();
+            }
         }
 
         public void UnloadSession()
@@ -285,7 +309,7 @@ namespace Gumball
         protected virtual void OnSessionEnd()
         {
             HasStarted = false;
-            
+
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
@@ -295,15 +319,15 @@ namespace Gumball
             
             //come to a stop
             WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
-            
-            //convert skill points to followers
-            FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
-            
+
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
+            
+            //convert skill points to followers
+            FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
         }
-        
+
         public virtual void UpdateWhenCurrent()
         {
             SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
@@ -561,7 +585,7 @@ namespace Gumball
         
         private void OnCrossFinishLine()
         {
-            EndSession();
+            EndSession(ProgressStatus.COMPLETE);
         }
 
         public IEnumerator GiveRewards()
@@ -614,6 +638,16 @@ namespace Gumball
                 PanelManager.GetPanel<RewardPanel>().Show();
                 yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);
             }
+        }
+        
+        private void OnCompleteSessionForFirstTime()
+        {
+            Progress = ProgressStatus.COMPLETE;
+        }
+        
+        private void OnFailMission()
+        {
+            Progress = ProgressStatus.ATTEMPTED;
         }
         
     }
