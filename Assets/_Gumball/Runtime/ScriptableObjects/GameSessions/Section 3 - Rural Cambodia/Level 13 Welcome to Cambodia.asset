@@ -26,7 +26,7 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  vehicleStartingPosition: {x: 10, y: 0.2, z: 0}
+  vehicleStartingPosition: {x: 10, y: 0.5, z: 0}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
   globalLightIntensity: 1
   reflectionIntensity: 1
@@ -44,6 +44,11 @@ MonoBehaviour:
     startingPosition:
       position: {x: 10, y: 0.2, z: 30}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    performanceProfile:
+      maxSpeed: 0
+      acceleration: 0
+      handling: 0
+      nos: 0
   - assetReference:
       m_AssetGUID: 007b6760012e172418eb7e49956334ab
       m_SubObjectName: 
@@ -54,6 +59,11 @@ MonoBehaviour:
     startingPosition:
       position: {x: 5, y: 0.2, z: 60}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    performanceProfile:
+      maxSpeed: 0
+      acceleration: 0
+      handling: 0
+      nos: 0
   - assetReference:
       m_AssetGUID: 6f46e795bac33904aa0828a7953feaf1
       m_SubObjectName: 
@@ -64,8 +74,13 @@ MonoBehaviour:
     startingPosition:
       position: {x: 15, y: 0.2, z: 90}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    performanceProfile:
+      maxSpeed: 0
+      acceleration: 0
+      handling: 0
+      nos: 0
   racersStartingSpeed: 100
-  trafficIsProcedural: 1
+  trafficIsProcedural: 0
   trafficDensity: 50
   trafficBikes: []
   trafficCars:
@@ -79,7 +94,160 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   trafficTrucks: []
   trafficSpawnPositions:
-    Value: []
+    Value:
+    - distanceFromMapStart: 53.813534
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 171.25528
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 377.04428
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 342.75745
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 422.36652
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 483.21994
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 500
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 580
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 582.18835
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 528.62787
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 634.1164
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 613.72003
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 613.72003
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 744.14404
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 755
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 777.80225
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 814.7396
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 849.672
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 945.0067
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 964.78723
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1085.4137
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1010
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1000
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1020
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1100
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1130.6106
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1160.2349
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1239.746
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1265.9753
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1359.735
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1357.5671
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1422.633
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1491.9629
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1525.3901
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1598.541
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1636.2638
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1655.8137
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1781.885
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1723.8167
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1826.7599
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1835.6705
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1908.593
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1923.3926
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 2095.8525
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 2080.0327
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 2197.7117
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 2190.8372
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 2243.6045
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 2201.892
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 2345.6948
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 2320.0508
+      laneDirection: 2
+      laneIndex: 2
   xpReward: 100
   standardCurrencyReward: 1000
   corePartRewards: []
@@ -99,6 +267,11 @@ MonoBehaviour:
         startingPosition:
           position: {x: 0, y: 0, z: 0}
           rotation: {x: 0, y: 0, z: 0, w: 0}
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0
+          handling: 0
+          nos: 0
     - Key: {fileID: 0}
       Value:
         assetReference:
@@ -111,6 +284,11 @@ MonoBehaviour:
         startingPosition:
           position: {x: 10, y: 0.2, z: 30}
           rotation: {x: 0, y: 0, z: 0, w: 0}
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0
+          handling: 0
+          nos: 0
     - Key: {fileID: 0}
       Value:
         assetReference:
@@ -123,6 +301,11 @@ MonoBehaviour:
         startingPosition:
           position: {x: 15, y: 0.2, z: 90}
           rotation: {x: 0, y: 0, z: 0, w: 0}
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0
+          handling: 0
+          nos: 0
     - Key: {fileID: 0}
       Value:
         assetReference:
@@ -135,6 +318,11 @@ MonoBehaviour:
         startingPosition:
           position: {x: 5, y: 0.2, z: 60}
           rotation: {x: 0, y: 0, z: 0, w: 0}
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0
+          handling: 0
+          nos: 0
     keyCollision: 0
   previousCorePartRewards: []
   previousSubPartRewards: []
