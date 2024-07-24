@@ -14,7 +14,21 @@ namespace Gumball
         [SerializeField, ReadOnly] private string uniqueID;
         [SerializeField, HideInInspector] private string lastKnownName;
 
-        public string ID => uniqueID;
+        public string ID
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (string.IsNullOrEmpty(lastKnownName)
+                    || !lastKnownName.Equals(name)
+                    || string.IsNullOrEmpty(uniqueID))
+                {
+                    GenerateNewID();
+                }
+#endif
+                return uniqueID;
+            }
+        }
         
         protected virtual void OnValidate()
         {

@@ -525,8 +525,6 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to update components.");
             stopwatch.Restart();
 
-            //move the chunk detector relative to the chunk (as it may have rotated)
-            chunkInstance.ChunkDetector.transform.position = chunkInstance.TerrainHighLOD.transform.position.OffsetY(-500);
             chunkInstance.ChunkDetector.SetActive(true);
             
             if (HasLoaded)

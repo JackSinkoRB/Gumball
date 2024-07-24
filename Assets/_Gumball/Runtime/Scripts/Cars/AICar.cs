@@ -28,6 +28,9 @@ namespace Gumball
         
         public event Action onDisable;
 
+        public delegate void TeleportDelegate(Vector3 previousPosition, Vector3 newPosition); 
+        public static event TeleportDelegate onPlayerTeleport;
+
         private enum WheelConfiguration
         {
             REAR_WHEEL_DRIVE,
@@ -294,6 +297,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isInitialised;
         [Space(5)]
         [SerializeField, ReadOnly] private Chunk currentChunkCached;
+        [SerializeField, ReadOnly] private float timeWithNoChunk;
         [SerializeField, ReadOnly] private bool isFrozen;
 
         private Vector3 targetPosition;
@@ -522,6 +526,8 @@ namespace Gumball
                 Rigidbody.velocity = Vector3.zero;
                 Rigidbody.angularVelocity = Vector3.zero;
             }
+
+            Vector3 previousPosition = transform.position;
             
             //move the transform AND the rigidbody, so physics calculations are updated instantly too
             transform.position = position;
@@ -543,6 +549,9 @@ namespace Gumball
             }
             
             UpdateWheelMeshes(); //force update
+
+            if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar == this)
+                onPlayerTeleport?.Invoke(previousPosition, position);
 
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
         }
@@ -594,14 +603,22 @@ namespace Gumball
         {
             if (!isInitialised)
                 return;
-            
-            if (CurrentChunk == null && autoDrive)
+
+            if (autoDrive)
             {
-                //current chunk may have despawned
-                Despawn();
-                return;
+                if (CurrentChunk == null)
+                {
+                    //current chunk may have despawned
+                    const float timeWithNoChunkToDespawn = 1;
+                    timeWithNoChunk += Time.deltaTime;
+                    if (timeWithNoChunk >= timeWithNoChunkToDespawn)
+                        Despawn();
+                    return;
+                }
+                
+                timeWithNoChunk = 0;
             }
-            
+
             if (!isFrozen)
             {
                 Move();
@@ -1854,7 +1871,8 @@ namespace Gumball
             Chunk previousChunk = currentChunkCached;
                     
             //raycast down to terrain
-            currentChunkCached = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
+            const float offset = 10;
+            currentChunkCached = Physics.Raycast(transform.position.OffsetY(offset), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
                 ? hitDown.transform.parent.GetComponent<Chunk>()
                 : null;
                     

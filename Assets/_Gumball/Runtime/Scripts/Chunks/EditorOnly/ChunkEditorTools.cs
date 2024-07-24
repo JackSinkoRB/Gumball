@@ -99,6 +99,9 @@ namespace Gumball
 
         private void OnDisable()
         {
+            if (!Application.isPlaying)
+                CheckToBakeMeshes();
+            
             chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
 
             SaveEditorAssetsEvents.onSavePrefab -= OnSavePrefab;
@@ -131,16 +134,16 @@ namespace Gumball
             CheckToUpdateMeshesImmediately();
             CheckIfTerrainIsRaycastable();
             
-            EditorApplication.delayCall -= CheckToBakeMeshesIfPrefabMode;
-            EditorApplication.delayCall += CheckToBakeMeshesIfPrefabMode;
+            EditorApplication.delayCall -= CheckToUnbakeMeshesIfPrefabMode;
+            EditorApplication.delayCall += CheckToUnbakeMeshesIfPrefabMode;
         }
 
-        private void CheckToBakeMeshesIfPrefabMode()
+        private void CheckToUnbakeMeshesIfPrefabMode()
         {
             try
             {
                 if (PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject)
-                    CheckToBakeMeshes();
+                    UnbakeSplineMeshes();
             }
             catch (MissingReferenceException)
             {
