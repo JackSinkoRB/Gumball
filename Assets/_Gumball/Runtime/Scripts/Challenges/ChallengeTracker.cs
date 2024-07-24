@@ -9,21 +9,21 @@ namespace Gumball
     {
 
         [Serializable]
-        public struct Tracker
+        public class Tracker
         {
             
-            [SerializeField] private int goal;
-            [SerializeField] private int current;
+            [SerializeField] private float goal;
+            [SerializeField] private float current;
 
-            public float Progress => Mathf.Clamp01((float)current / goal);
+            public float Progress => Mathf.Clamp01(current / goal);
             
-            public Tracker(int goal)
+            public Tracker(float goal)
             {
                 this.goal = goal;
                 current = 0;
             }
 
-            public void Track(int amount)
+            public void Track(float amount)
             {
                 current += amount;
             }
@@ -48,6 +48,9 @@ namespace Gumball
         
         public Tracker GetTracker(string trackerId)
         {
+            if (!trackers.ContainsKey(trackerId))
+                return null;
+            
             return trackers[trackerId];
         }
         
@@ -77,7 +80,7 @@ namespace Gumball
             trackers = trackersTemp;
         }
 
-        protected void Track(int amount)
+        public void Track(float amount)
         {
             Dictionary<string, Tracker> trackersTemp = trackers;
             foreach (string trackerId in trackers.Keys)

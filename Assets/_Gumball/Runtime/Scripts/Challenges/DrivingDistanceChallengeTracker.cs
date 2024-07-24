@@ -36,7 +36,7 @@ namespace Gumball
                 return; //no trackers - no point tracking
 
             float distanceTravelled = Vector3.Distance(previousPosition, WarehouseManager.Instance.CurrentCar.transform.position);
-            Track(Mathf.RoundToInt(distanceTravelled));
+            Track(distanceTravelled);
             Debug.Log($"Travelled {distanceTravelled}");
 
             previousPosition = WarehouseManager.Instance.CurrentCar.transform.position;

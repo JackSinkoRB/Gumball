@@ -118,6 +118,7 @@ namespace Gumball
 
         public void StartSession()
         {
+            HasStarted = false;
             GameSessionManager.Instance.SetCurrentSession(this);
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
@@ -389,15 +390,15 @@ namespace Gumball
 
         protected virtual void OnSessionStart()
         {
-            HasStarted = true;
+            StartTrackingObjectives();
             
             //only take fuel once session has properly started (in case loading failed)
             FuelManager.TakeFuel();
             
-            StartTrackingObjectives();
+            HasStarted = true;
         }
 
-        private void StartTrackingObjectives()
+        public void StartTrackingObjectives()
         {
             foreach (Challenge subObjective in subObjectives)
             {
@@ -413,7 +414,7 @@ namespace Gumball
             }
         }
 
-        private string GetChallengeTrackerID(Challenge challenge)
+        public string GetChallengeTrackerID(Challenge challenge)
         {
             return $"{name}-{challenge.Description}-{challenge.Tracker.GetType()}";
         }

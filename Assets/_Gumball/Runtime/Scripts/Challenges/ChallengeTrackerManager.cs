@@ -11,6 +11,8 @@ namespace Gumball
 
         [SerializeField] private ChallengeTracker[] trackers;
 
+        public ChallengeTracker[] Trackers => trackers;
+
         protected override void OnInstanceLoaded()
         {
             base.OnInstanceLoaded();
@@ -25,6 +27,17 @@ namespace Gumball
         {
             foreach (ChallengeTracker tracker in trackers)
                 tracker.LateUpdate();
+        }
+        
+        public T GetTracker<T>() where T : ChallengeTracker
+        {
+            foreach (ChallengeTracker tracker in trackers)
+            {
+                if (tracker is T trackerAsType)
+                    return trackerAsType;
+            }
+
+            return null;
         }
         
     }
