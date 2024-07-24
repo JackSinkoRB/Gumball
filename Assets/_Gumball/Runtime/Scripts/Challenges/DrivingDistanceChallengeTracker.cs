@@ -32,8 +32,8 @@ namespace Gumball
             if (!GameSessionManager.ExistsRuntime || GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.HasStarted)
                 return; //must be in a session
 
-            if (trackers.Count == 0)
-                return; //no trackers - no point tracking
+            if (listeners.Count == 0)
+                return; //no listeners - no point tracking
 
             float distanceTravelled = Vector3.Distance(previousPosition, WarehouseManager.Instance.CurrentCar.transform.position);
             Track(distanceTravelled);

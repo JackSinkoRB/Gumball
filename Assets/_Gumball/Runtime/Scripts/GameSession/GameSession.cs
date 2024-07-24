@@ -414,7 +414,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StartTracking(GetChallengeTrackerID(subObjective), subObjective.Goal);
+                subObjective.Tracker.StartListening(GetChallengeTrackerID(subObjective), subObjective.Goal);
             }
         }
         
@@ -422,7 +422,7 @@ namespace Gumball
         {
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StopTracking(GetChallengeTrackerID(subObjective));
+                subObjective.Tracker.StopListening(GetChallengeTrackerID(subObjective));
             }
         }
 
@@ -646,7 +646,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                if (subObjective.Tracker.GetTracker(GetChallengeTrackerID(subObjective)).Progress < 1)
+                if (subObjective.Tracker.GetListener(GetChallengeTrackerID(subObjective)).Progress < 1)
                     return false;
             }
 

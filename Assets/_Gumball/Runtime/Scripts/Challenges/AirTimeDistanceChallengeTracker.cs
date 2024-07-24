@@ -31,8 +31,8 @@ namespace Gumball
             if (!WarehouseManager.HasLoaded || WarehouseManager.Instance.CurrentCar == null)
                 return;
             
-            if (trackers.Count == 0)
-                return; //no trackers - no point tracking
+            if (listeners.Count == 0)
+                return; //no listeners - no point tracking
             
             float distanceTravelled = Vector3.Distance(previousPosition, WarehouseManager.Instance.CurrentCar.transform.position);
             Track(distanceTravelled);

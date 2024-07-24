@@ -9,7 +9,7 @@ namespace Gumball
     {
 
         [Serializable]
-        public class Tracker
+        public class Listener
         {
             
             [SerializeField] private float goal;
@@ -17,7 +17,7 @@ namespace Gumball
 
             public float Progress => Mathf.Clamp01(current / goal);
             
-            public Tracker(float goal)
+            public Listener(float goal)
             {
                 this.goal = goal;
                 current = 0;
@@ -28,17 +28,17 @@ namespace Gumball
                 current += amount;
             }
             
-            public void SetTracker(float amount)
+            public void SetValue(float amount)
             {
                 current = amount;
             }
 
         }
 
-        protected Dictionary<string, Tracker> trackers
+        protected Dictionary<string, Listener> listeners
         {
-            get => DataManager.GameSessions.Get($"Challenges.Trackers.{GetType()}", new Dictionary<string, Tracker>());
-            set => DataManager.GameSessions.Set($"Challenges.Trackers.{GetType()}", value);
+            get => DataManager.GameSessions.Get($"Challenges.Listeners.{GetType()}", new Dictionary<string, Listener>());
+            set => DataManager.GameSessions.Set($"Challenges.Listeners.{GetType()}", value);
         }
 
         public virtual void LateUpdate()
@@ -51,60 +51,60 @@ namespace Gumball
             
         }
         
-        public Tracker GetTracker(string trackerId)
+        public Listener GetListener(string listenerId)
         {
-            if (!trackers.ContainsKey(trackerId))
+            if (!listeners.ContainsKey(listenerId))
                 return null;
             
-            return trackers[trackerId];
+            return listeners[listenerId];
         }
         
-        public void StartTracking(string trackerId, int goal)
+        public void StartListening(string listenerId, int goal)
         {
-            if (trackers.ContainsKey(trackerId))
+            if (listeners.ContainsKey(listenerId))
             {
-                Debug.LogWarning($"Cannot start tracking for {trackerId} because it is already tracking.");
+                Debug.LogWarning($"Cannot start listening for {listenerId} because it is already listening.");
                 return;
             }
 
-            Dictionary<string, Tracker> trackersTemp = trackers;
-            trackersTemp[trackerId] = new Tracker(goal);
-            trackers = trackersTemp;
+            Dictionary<string, Listener> listenersTemp = listeners;
+            listenersTemp[listenerId] = new Listener(goal);
+            listeners = listenersTemp;
         }
 
-        public void StopTracking(string trackerId)
+        public void StopListening(string listenerId)
         {
-            if (!trackers.ContainsKey(trackerId))
+            if (!listeners.ContainsKey(listenerId))
             {
-                Debug.LogWarning($"Cannot stop tracking for {trackerId} because it is not tracking.");
+                Debug.LogWarning($"Cannot stop listening for {listenerId} because it is not listening.");
                 return;
             }
             
-            Dictionary<string, Tracker> trackersTemp = trackers;
-            trackersTemp.Remove(trackerId);
-            trackers = trackersTemp;
+            Dictionary<string, Listener> listenersTemp = listeners;
+            listenersTemp.Remove(listenerId);
+            listeners = listenersTemp;
         }
 
         public void Track(float amount)
         {
-            Dictionary<string, Tracker> trackersTemp = trackers;
-            foreach (string trackerId in trackers.Keys)
+            Dictionary<string, Listener> listenersTemp = listeners;
+            foreach (string listenerId in listeners.Keys)
             {
-                trackersTemp[trackerId].Track(amount);
-                trackers = trackersTemp;
+                listenersTemp[listenerId].Track(amount);
+                listeners = listenersTemp;
             }
         }
         
-        public void SetTracker(float amount)
+        public void SetListenerValues(float amount)
         {
-            Dictionary<string, Tracker> trackersTemp = trackers;
-            foreach (string trackerId in trackers.Keys)
+            Dictionary<string, Listener> listenersTemp = listeners;
+            foreach (string listenerId in listeners.Keys)
             {
-                if (trackersTemp[trackerId].Progress >= 1)
+                if (listenersTemp[listenerId].Progress >= 1)
                     continue; //already completed - leave as is
                 
-                trackersTemp[trackerId].SetTracker(amount);
-                trackers = trackersTemp;
+                listenersTemp[listenerId].SetValue(amount);
+                listeners = listenersTemp;
             }
         }
         

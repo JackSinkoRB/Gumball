@@ -21,7 +21,7 @@ namespace Gumball
 
         private void OnSessionStart(GameSession session)
         {
-            SetTracker(0); //reset each map
+            SetListenerValues(0); //reset each map
         }
 
         private void OnNearMiss()
@@ -29,8 +29,8 @@ namespace Gumball
             if (!WarehouseManager.HasLoaded || WarehouseManager.Instance.CurrentCar == null)
                 return;
             
-            if (trackers.Count == 0)
-                return; //no trackers - no point tracking
+            if (listeners.Count == 0)
+                return; //no listeners - no point tracking
             
             Track(1);
         }

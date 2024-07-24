@@ -78,11 +78,11 @@ namespace Gumball.Runtime.Tests
             ChallengeTracker tracker = ChallengeTrackerManager.Instance.Trackers[0];
             const string id = "Test";
             
-            tracker.StartTracking(id, 100);
-            Assert.IsNotNull(tracker.GetTracker(id));
+            tracker.StartListening(id, 100);
+            Assert.IsNotNull(tracker.GetListener(id));
             
-            tracker.StopTracking(id);
-            Assert.IsNull(tracker.GetTracker(id));
+            tracker.StopListening(id);
+            Assert.IsNull(tracker.GetListener(id));
         }
         
         [Test]
@@ -92,13 +92,13 @@ namespace Gumball.Runtime.Tests
             ChallengeTracker tracker = ChallengeTrackerManager.Instance.Trackers[0];
             const string id = "Test";
             
-            tracker.StartTracking(id, 100);
+            tracker.StartListening(id, 100);
 
             tracker.Track(50);
-            Assert.AreEqual(0.5f, tracker.GetTracker(id).Progress);
+            Assert.AreEqual(0.5f, tracker.GetListener(id).Progress);
             
             tracker.Track(20);
-            Assert.AreEqual(0.7f, tracker.GetTracker(id).Progress);
+            Assert.AreEqual(0.7f, tracker.GetListener(id).Progress);
         }
         
         [Test]
@@ -108,13 +108,13 @@ namespace Gumball.Runtime.Tests
             ChallengeTracker tracker = ChallengeTrackerManager.Instance.Trackers[0];
             const string id = "Test";
             
-            tracker.StartTracking(id, 100);
+            tracker.StartListening(id, 100);
 
             tracker.Track(50);
-            Assert.AreEqual(0.5f, tracker.GetTracker(id).Progress);
+            Assert.AreEqual(0.5f, tracker.GetListener(id).Progress);
             
-            tracker.SetTracker(20);
-            Assert.AreEqual(0.2f, tracker.GetTracker(id).Progress);
+            tracker.SetListenerValues(20);
+            Assert.AreEqual(0.2f, tracker.GetListener(id).Progress);
         }
         
         [UnityTest]
@@ -127,13 +127,13 @@ namespace Gumball.Runtime.Tests
             ChallengeTracker tracker = subObjective.Tracker;
             string trackerId = GameSession.GetChallengeTrackerID(subObjective);
             
-            Assert.IsNotNull(tracker.GetTracker(trackerId));
+            Assert.IsNotNull(tracker.GetListener(trackerId));
 
             //ensure teleport doesn't add to it
-            float trackerBeforeTeleport = tracker.GetTracker(trackerId).Progress;
+            float trackerBeforeTeleport = tracker.GetListener(trackerId).Progress;
             WarehouseManager.Instance.CurrentCar.Teleport(new Vector3(1,0,2), Quaternion.Euler(Vector3.zero));
             yield return null;
-            Assert.AreEqual(trackerBeforeTeleport, tracker.GetTracker(trackerId).Progress);
+            Assert.AreEqual(trackerBeforeTeleport, tracker.GetListener(trackerId).Progress);
 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
             WarehouseManager.Instance.CurrentCar.SetSpeed(100);
@@ -141,7 +141,7 @@ namespace Gumball.Runtime.Tests
             yield return new WaitForFixedUpdate();
             yield return new WaitForFixedUpdate();
 
-            Assert.Greater(tracker.GetTracker(trackerId).Progress, 0);
+            Assert.Greater(tracker.GetListener(trackerId).Progress, 0);
         }
 
     }
