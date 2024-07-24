@@ -284,6 +284,9 @@ namespace Gumball
                 AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarDrivingState>();
                 AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarDrivingState>();
             }
+            
+            //reset skill check manager
+            SkillCheckManager.Instance.ResetForSession();
         }
 
         public void EndSession(ProgressStatus progress)
