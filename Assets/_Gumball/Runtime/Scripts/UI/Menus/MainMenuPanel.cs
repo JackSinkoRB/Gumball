@@ -17,6 +17,11 @@ namespace Gumball
             MapSceneManager.LoadMapScene();
         }
 
+        public void OnClickChallengesButton()
+        {
+            PanelManager.GetPanel<ChallengesPanel>().Show();
+        }
+        
         public void LoadDecalEditor()
         {
             DecalEditor.LoadEditor();
