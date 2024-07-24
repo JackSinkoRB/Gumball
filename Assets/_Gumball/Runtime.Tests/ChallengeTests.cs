@@ -43,6 +43,8 @@ namespace Gumball.Runtime.Tests
         public void OneTimeTearDown()
         {
             DataManager.EnableTestProviders(false);
+            
+            GameSession.EndSession(GameSession.ProgressStatus.NOT_ATTEMPTED);
         }
 
         [SetUp]
