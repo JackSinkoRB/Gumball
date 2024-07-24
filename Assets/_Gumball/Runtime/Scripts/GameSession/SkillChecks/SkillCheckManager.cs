@@ -18,6 +18,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private float currentPoints;
         
         public float CurrentPoints => currentPoints;
+        public SlipStreamSkillCheck SlipStream => slipStream;
 
         private void OnEnable()
         {

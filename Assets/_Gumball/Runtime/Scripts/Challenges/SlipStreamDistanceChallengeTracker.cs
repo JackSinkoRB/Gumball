@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Gumball
 {
-    [CreateAssetMenu(menuName = "Gumball/Challenge Tracker/Driving distance")]
-    public class DrivingDistanceChallengeTracker : ChallengeTracker
+    [CreateAssetMenu(menuName = "Gumball/Challenge Tracker/Slip stream distance")]
+    public class SlipStreamDistanceChallengeTracker : ChallengeTracker
     {
 
         private Vector3 previousPosition;
@@ -15,30 +15,38 @@ namespace Gumball
             base.OnInstanceLoaded();
 
             AICar.onPlayerTeleport += OnPlayerTeleport;
+            
+            CoroutineHelper.PerformAfterTrue(
+                () => SkillCheckManager.ExistsRuntime, 
+                () => SkillCheckManager.Instance.SlipStream.onPerformed += OnSlipStream);
         }
 
         private void OnPlayerTeleport(Vector3 previousPos, Vector3 newPos)
         {
             previousPosition = WarehouseManager.Instance.CurrentCar.transform.position;
         }
+        
+        private void OnSlipStream()
+        {
+            if (!WarehouseManager.HasLoaded || WarehouseManager.Instance.CurrentCar == null)
+                return;
+            
+            if (trackers.Count == 0)
+                return; //no trackers - no point tracking
+            
+            float distanceTravelled = Vector3.Distance(previousPosition, WarehouseManager.Instance.CurrentCar.transform.position);
+            Track(distanceTravelled);
+        }
 
         public override void LateUpdate()
         {
             base.LateUpdate();
-            
+
             if (!WarehouseManager.HasLoaded || WarehouseManager.Instance.CurrentCar == null)
                 return;
-
-            if (!GameSessionManager.ExistsRuntime || GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.HasStarted)
-                return; //must be in a session
-
-            if (trackers.Count == 0)
-                return; //no trackers - no point tracking
-
-            float distanceTravelled = Vector3.Distance(previousPosition, WarehouseManager.Instance.CurrentCar.transform.position);
-            Track(distanceTravelled);
-
+            
             previousPosition = WarehouseManager.Instance.CurrentCar.transform.position;
         }
+        
     }
 }
