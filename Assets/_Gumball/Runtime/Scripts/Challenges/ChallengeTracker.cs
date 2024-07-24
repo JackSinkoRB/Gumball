@@ -100,6 +100,9 @@ namespace Gumball
             Dictionary<string, Tracker> trackersTemp = trackers;
             foreach (string trackerId in trackers.Keys)
             {
+                if (trackersTemp[trackerId].Progress >= 1)
+                    continue; //already completed - leave as is
+                
                 trackersTemp[trackerId].SetTracker(amount);
                 trackers = trackersTemp;
             }
