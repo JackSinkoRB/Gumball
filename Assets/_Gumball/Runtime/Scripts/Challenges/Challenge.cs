@@ -1,0 +1,21 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Gumball
+{
+    [Serializable]
+    public class Challenge
+    {
+        
+        [SerializeField] private string description = "Description of challenge";
+        [SerializeField] private ChallengeTracker tracker;
+        [SerializeField] private int goal;
+        
+        public string Description => description;
+        public ChallengeTracker Tracker => tracker;
+        public int Goal => goal;
+
+    }
+}
