@@ -19,6 +19,9 @@ namespace Gumball
     public abstract class GameSession : UniqueScriptableObject, ISerializationCallbackReceiver
     {
 
+        public delegate void OnSessionEndDelegate(GameSession session, ProgressStatus progress);
+        public static OnSessionEndDelegate onSessionEnd;
+        
         public enum ProgressStatus
         {
             NOT_ATTEMPTED,
@@ -298,6 +301,8 @@ namespace Gumball
             {
                 OnFailMission();
             }
+
+            onSessionEnd?.Invoke(this, progress);
             
             StopTrackingObjectives();
         }
