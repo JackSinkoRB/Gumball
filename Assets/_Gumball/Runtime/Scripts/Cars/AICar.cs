@@ -28,6 +28,9 @@ namespace Gumball
         
         public event Action onDisable;
 
+        public delegate void TeleportDelegate(Vector3 previousPosition, Vector3 newPosition); 
+        public static event TeleportDelegate onPlayerTeleport;
+
         private enum WheelConfiguration
         {
             REAR_WHEEL_DRIVE,
@@ -522,6 +525,8 @@ namespace Gumball
                 Rigidbody.velocity = Vector3.zero;
                 Rigidbody.angularVelocity = Vector3.zero;
             }
+
+            Vector3 previousPosition = transform.position;
             
             //move the transform AND the rigidbody, so physics calculations are updated instantly too
             transform.position = position;
@@ -543,6 +548,9 @@ namespace Gumball
             }
             
             UpdateWheelMeshes(); //force update
+
+            if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar == this)
+                onPlayerTeleport?.Invoke(previousPosition, position);
 
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
         }

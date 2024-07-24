@@ -59,8 +59,18 @@ namespace Gumball
                 return handle;
             
             handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
-            handle.Completed += h => instance = h.Result;
+            handle.Completed += h =>
+            {
+                instance = h.Result;
+                instance.OnInstanceLoaded();
+            };
             return handle;
         }
+
+        protected virtual void OnInstanceLoaded()
+        {
+            
+        }
+        
     }
 }

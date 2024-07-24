@@ -297,6 +297,8 @@ namespace Gumball
             {
                 OnFailMission();
             }
+            
+            StopTrackingObjectives();
         }
 
         public void UnloadSession()
@@ -391,8 +393,31 @@ namespace Gumball
             
             //only take fuel once session has properly started (in case loading failed)
             FuelManager.TakeFuel();
+            
+            StartTrackingObjectives();
         }
 
+        private void StartTrackingObjectives()
+        {
+            foreach (Challenge subObjective in subObjectives)
+            {
+                subObjective.Tracker.StartTracking(GetChallengeTrackerID(subObjective), subObjective.Goal);
+            }
+        }
+        
+        private void StopTrackingObjectives()
+        {
+            foreach (Challenge subObjective in subObjectives)
+            {
+                subObjective.Tracker.StopTracking(GetChallengeTrackerID(subObjective));
+            }
+        }
+
+        private string GetChallengeTrackerID(Challenge challenge)
+        {
+            return $"{name}-{challenge.Description}-{challenge.Tracker.GetType()}";
+        }
+        
         private IEnumerator LoadScene()
         {
             GlobalLoggers.LoadingLogger.Log("Scene loading started...");
@@ -594,7 +619,22 @@ namespace Gumball
         
         private void OnCrossFinishLine()
         {
-            EndSession(ProgressStatus.COMPLETE);
+            ProgressStatus status = ProgressStatus.ATTEMPTED;
+            if (AreAllSubObjectivesComplete())
+                status = ProgressStatus.COMPLETE;
+            
+            EndSession(status);
+        }
+
+        private bool AreAllSubObjectivesComplete()
+        {
+            foreach (Challenge subObjective in subObjectives)
+            {
+                if (subObjective.Tracker.GetTracker(GetChallengeTrackerID(subObjective)).Progress < 1)
+                    return false;
+            }
+
+            return true;
         }
 
         public IEnumerator GiveRewards()
