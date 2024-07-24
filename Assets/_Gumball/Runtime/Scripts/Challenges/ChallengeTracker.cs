@@ -27,6 +27,11 @@ namespace Gumball
             {
                 current += amount;
             }
+            
+            public void SetTracker(float amount)
+            {
+                current = amount;
+            }
 
         }
 
@@ -86,6 +91,16 @@ namespace Gumball
             foreach (string trackerId in trackers.Keys)
             {
                 trackersTemp[trackerId].Track(amount);
+                trackers = trackersTemp;
+            }
+        }
+        
+        public void SetTracker(float amount)
+        {
+            Dictionary<string, Tracker> trackersTemp = trackers;
+            foreach (string trackerId in trackers.Keys)
+            {
+                trackersTemp[trackerId].SetTracker(amount);
                 trackers = trackersTemp;
             }
         }

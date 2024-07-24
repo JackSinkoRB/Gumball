@@ -61,11 +61,6 @@ namespace Gumball.Runtime.Tests
         private IEnumerator Initialise()
         {
             yield return WarehouseManager.Instance.SpawnCar(0, new Vector3(0,0,2), Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
-            // yield return GameSession.LoadChunkMap();
-            // yield return GameSession.SetupSession();
-            // GameSessionManager.Instance.SetCurrentSession(GameSession);
-            //
-            // GameSession.StartTrackingObjectives();
             
             ChallengeTrackerManager.LoadInstanceAsync();
             yield return new WaitUntil(() => ChallengeTrackerManager.HasLoaded);
@@ -101,10 +96,29 @@ namespace Gumball.Runtime.Tests
 
             tracker.Track(50);
             Assert.AreEqual(0.5f, tracker.GetTracker(id).Progress);
+            
+            tracker.Track(20);
+            Assert.AreEqual(0.7f, tracker.GetTracker(id).Progress);
+        }
+        
+        [Test]
+        [Order(3)]
+        public void SetTracker()
+        {
+            ChallengeTracker tracker = ChallengeTrackerManager.Instance.Trackers[0];
+            const string id = "Test";
+            
+            tracker.StartTracking(id, 100);
+
+            tracker.Track(50);
+            Assert.AreEqual(0.5f, tracker.GetTracker(id).Progress);
+            
+            tracker.SetTracker(20);
+            Assert.AreEqual(0.2f, tracker.GetTracker(id).Progress);
         }
         
         [UnityTest]
-        [Order(3)]
+        [Order(4)]
         public IEnumerator DrivingDistance()
         {
             yield return new WaitUntil(() => isInitialised);

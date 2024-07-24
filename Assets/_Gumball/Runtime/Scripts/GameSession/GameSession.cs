@@ -22,6 +22,8 @@ namespace Gumball
         public delegate void OnSessionEndDelegate(GameSession session, ProgressStatus progress);
         public static OnSessionEndDelegate onSessionEnd;
         
+        public static Action<GameSession> onSessionStart;
+        
         public enum ProgressStatus
         {
             NOT_ATTEMPTED,
@@ -399,6 +401,8 @@ namespace Gumball
             
             //only take fuel once session has properly started (in case loading failed)
             FuelManager.TakeFuel();
+            
+            onSessionStart?.Invoke(this);
             
             HasStarted = true;
         }
