@@ -139,6 +139,7 @@ namespace Gumball.Runtime.Tests
             WarehouseManager.Instance.CurrentCar.SetSpeed(100);
             
             yield return new WaitForFixedUpdate();
+            yield return new WaitForFixedUpdate();
 
             Assert.Greater(tracker.GetTracker(trackerId).Progress, 0);
         }
