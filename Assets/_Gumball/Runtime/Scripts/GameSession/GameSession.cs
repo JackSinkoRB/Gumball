@@ -400,6 +400,9 @@ namespace Gumball
 
         public void StartTrackingObjectives()
         {
+            if (subObjectives == null)
+                return;
+            
             foreach (Challenge subObjective in subObjectives)
             {
                 subObjective.Tracker.StartTracking(GetChallengeTrackerID(subObjective), subObjective.Goal);
@@ -629,6 +632,9 @@ namespace Gumball
 
         private bool AreAllSubObjectivesComplete()
         {
+            if (subObjectives == null)
+                return true;
+            
             foreach (Challenge subObjective in subObjectives)
             {
                 if (subObjective.Tracker.GetTracker(GetChallengeTrackerID(subObjective)).Progress < 1)

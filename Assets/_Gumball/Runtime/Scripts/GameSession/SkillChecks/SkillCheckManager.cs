@@ -19,6 +19,7 @@ namespace Gumball
         
         public float CurrentPoints => currentPoints;
         public SlipStreamSkillCheck SlipStream => slipStream;
+        public NearMissSkillCheck NearMiss => nearMiss;
 
         private void OnEnable()
         {
