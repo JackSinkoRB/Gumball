@@ -417,7 +417,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StartListening(GetChallengeTrackerID(subObjective), subObjective.Goal);
+                subObjective.Tracker.StartListening(subObjective.ChallengeID, subObjective.Goal);
             }
         }
         
@@ -425,15 +425,10 @@ namespace Gumball
         {
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StopListening(GetChallengeTrackerID(subObjective));
+                subObjective.Tracker.StopListening(subObjective.ChallengeID);
             }
         }
 
-        public string GetChallengeTrackerID(Challenge challenge)
-        {
-            return $"{name}-{challenge.Description}-{challenge.Tracker.GetType()}";
-        }
-        
         private IEnumerator LoadScene()
         {
             GlobalLoggers.LoadingLogger.Log("Scene loading started...");
@@ -650,7 +645,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                if (subObjective.Tracker.GetListener(GetChallengeTrackerID(subObjective)).Progress < 1)
+                if (subObjective.Tracker.GetListener(subObjective.ChallengeID).Progress < 1)
                     return false;
             }
 

@@ -21,6 +21,7 @@ namespace Gumball
             base.OnInstanceLoaded();
 
             daily.Initialise();
+            weekly.Initialise();
         }
         
     }

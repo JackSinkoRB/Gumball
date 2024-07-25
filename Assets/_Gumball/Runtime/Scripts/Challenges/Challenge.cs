@@ -16,6 +16,8 @@ namespace Gumball
         public string Description => description;
         public ChallengeTracker Tracker => tracker;
         public int Goal => goal;
-
+        
+        public string ChallengeID => $"{description}-{tracker.GetType()}-{goal}";
+        
     }
 }

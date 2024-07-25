@@ -125,7 +125,7 @@ namespace Gumball.Runtime.Tests
             
             Challenge subObjective = GameSession.SubObjectives[0];
             ChallengeTracker tracker = subObjective.Tracker;
-            string trackerId = GameSession.GetChallengeTrackerID(subObjective);
+            string trackerId = subObjective.ChallengeID;
             
             Assert.IsNotNull(tracker.GetListener(trackerId));
 
