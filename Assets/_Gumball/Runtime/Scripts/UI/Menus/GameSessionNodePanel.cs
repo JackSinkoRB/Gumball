@@ -41,7 +41,7 @@ namespace Gumball
 
         public void OnClickPlayButton()
         {
-            if (!FuelManager.HasFuel())
+            if (!FuelManager.Instance.HasFuel())
             {
                 Hide();
                 PanelManager.GetPanel<InsufficientFuelPanel>().Show();

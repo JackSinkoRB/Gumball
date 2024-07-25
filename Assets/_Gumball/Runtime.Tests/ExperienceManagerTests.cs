@@ -170,21 +170,23 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(expectedPremiumFundsAfter, Currency.Premium.Funds);
         }
         
-        [Test]
+        [UnityTest]
         [Order(7)]
-        public void GiveFuelOnLevelUp()
+        public IEnumerator GiveFuelOnLevelUp()
         {
+            yield return FuelManager.LoadInstanceAsync();
+            
             //initialise reward
             const int levelToTest = 1;
             bool previousFuelReward = ExperienceManager.Instance.Levels[levelToTest].FuelRefillReward;
             ExperienceManager.Instance.Levels[levelToTest].SetFuelRefillReward(true);
             
-            FuelManager.SetFuel(0);
+            FuelManager.Instance.SetFuel(0);
             ExperienceManager.SetLevel(0);
 
             ExperienceManager.AddXP(ExperienceManager.RemainingXPForNextLevel);
 
-            Assert.AreEqual(FuelManager.MaxFuel, FuelManager.CurrentFuel);
+            Assert.AreEqual(FuelManager.Instance.MaxFuel, FuelManager.Instance.CurrentFuel);
 
             //reset
             ExperienceManager.Instance.Levels[levelToTest].SetFuelRefillReward(previousFuelReward);

@@ -43,7 +43,7 @@ namespace Gumball
             
             //replenish fuel
             if (fuelRefillReward)
-                FuelManager.ReplenishFuel();
+                FuelManager.Instance.ReplenishFuel();
             
             //unlock unlockables
             foreach (Unlockable unlockable in unlockables)

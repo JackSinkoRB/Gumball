@@ -55,10 +55,7 @@ namespace Gumball
             
             CoroutineHelper.onUnityLateUpdate -= CheckIfCyclesCompleted;
             CoroutineHelper.onUnityLateUpdate += CheckIfCyclesCompleted;
-            
-            //ensure coroutinehelper exists
-            CoroutineHelper.AssignInstance();
-            
+
             IsPlaying = true;
         }
         

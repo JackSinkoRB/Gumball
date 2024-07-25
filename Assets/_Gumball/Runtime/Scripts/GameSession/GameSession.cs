@@ -403,7 +403,7 @@ namespace Gumball
             StartTrackingObjectives();
             
             //only take fuel once session has properly started (in case loading failed)
-            FuelManager.TakeFuel();
+            FuelManager.Instance.TakeFuel();
             
             onSessionStart?.Invoke(this);
             
@@ -537,11 +537,12 @@ namespace Gumball
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
 
+                int finalIndex = index;
                 handle.Completed += h =>
                 {
                     if (handle.Result == null)
                     {
-                        Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                        Debug.LogError($"There is a null racer at index {finalIndex} in {name}. Skipping it.");
                         return;
                     }
                     

@@ -21,11 +21,12 @@ namespace Gumball
         private enum Stage
         {
             Checking_for_new_version,
+            Loading_loggers,
+            Loading_save_data,
             Loading_scriptable_data_objects,
             Initialising_parts,
             Starting_async_loading,
             Loading_mainscene,
-            Waiting_for_save_data_to_load,
             Loading_vehicle,
             Loading_avatars,
             Loading_vehicle_and_drivers,
@@ -56,53 +57,48 @@ namespace Gumball
             Debug.Log($"{SceneManager.GameLoaderSceneAddress} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
 #endif
 
-            currentStage = Stage.Loading_scriptable_data_objects;
             Stopwatch stopwatch = Stopwatch.StartNew();
+            currentStage = Stage.Loading_loggers;
+            yield return GlobalLoggers.LoadInstanceAsync();
+            GlobalLoggers.LoadingLogger.Log($"Global logger loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+
+            stopwatch.Restart();
+            currentStage = Stage.Loading_save_data;
+            yield return DataManager.LoadAllAsync();
+            GlobalLoggers.LoadingLogger.Log($"Save data loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+
+            stopwatch.Restart();
+            currentStage = Stage.Checking_for_new_version;
+            yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
+            GlobalLoggers.LoadingLogger.Log($"Check for new version completed in {stopwatch.Elapsed.ToPrettyString(true)}");
             
+            stopwatch.Restart();
+            currentStage = Stage.Loading_scriptable_data_objects;
             singletonScriptableHandles = LoadSingletonScriptables();
             yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete());
-#if ENABLE_LOGS
-            Debug.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
-            stopwatch.Restart();
+            GlobalLoggers.LoadingLogger.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             
+            stopwatch.Restart();
             currentStage = Stage.Initialising_parts;
             TrackedCoroutine initialiseCoreParts = new TrackedCoroutine(CorePartManager.Initialise());
             TrackedCoroutine initialiseSubParts = new TrackedCoroutine(SubPartManager.Initialise());
-
             yield return new WaitUntil(() => !initialiseCoreParts.IsPlaying 
                                              && !initialiseSubParts.IsPlaying);
-#if ENABLE_LOGS
-            Debug.Log($"Parts initialisation complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
-            
-            currentStage = Stage.Checking_for_new_version;
-            yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
-            
+            GlobalLoggers.LoadingLogger.Log($"Parts initialisation complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+
             currentStage = Stage.Starting_async_loading;
             //start loading playfab (async)
             PlayFabManager.Initialise();
 
             //start loading unity services (async)
             TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
-
-            TrackedCoroutine loadSaveDataAsync = new TrackedCoroutine(DataManager.LoadAllAsync());
             
             stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Additive, true);
             yield return mainSceneHandle;
-#if ENABLE_LOGS
-            Debug.Log($"{SceneManager.MainSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
-            stopwatch.Restart();
-            currentStage = Stage.Waiting_for_save_data_to_load;
-            yield return new WaitUntil(() => !loadSaveDataAsync.IsPlaying);
-#if ENABLE_LOGS
-            Debug.Log($"Took additional {stopwatch.Elapsed.ToPrettyString(true)} to load the save data");
-#endif
-            
             stopwatch.Restart();
             currentStage = Stage.Loading_vehicle;
             Vector3 carStartingPosition = Vector3.zero;
@@ -115,9 +111,7 @@ namespace Gumball
             
             currentStage = Stage.Loading_vehicle_and_drivers;
             yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying && !coDriverAvatarLoadCoroutine.IsPlaying);
-#if ENABLE_LOGS
-            Debug.Log($"Vehicle and driver loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-#endif
+            GlobalLoggers.LoadingLogger.Log($"Vehicle and driver loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
             currentStage = Stage.Connecting_to_PlayFab;
             yield return new WaitUntil(() => PlayFabManager.ConnectionStatus != PlayFabManager.ConnectionStatusType.LOADING);
@@ -126,9 +120,7 @@ namespace Gumball
             yield return new WaitUntil(() => !loadUnityServicesAsync.IsPlaying);
             
             asyncLoadingDurationSeconds = Time.realtimeSinceStartup - loadingDurationSeconds - BootSceneManager.BootDurationSeconds;
-#if ENABLE_LOGS
-            Debug.Log($"Async loading complete in {TimeSpan.FromSeconds(asyncLoadingDurationSeconds).ToPrettyString(true)}");
-#endif
+            GlobalLoggers.LoadingLogger.Log($"Async loading complete in {TimeSpan.FromSeconds(asyncLoadingDurationSeconds).ToPrettyString(true)}");
             OnLoadingComplete();
         }
         
@@ -147,7 +139,6 @@ namespace Gumball
         {
             var handles = new[] {
                 //LOAD ALL SINGLETON SCRIPTABLES HERE
-                GlobalLoggers.LoadInstanceAsync(),
                 DecalManager.LoadInstanceAsync(),
                 AvatarManager.LoadInstanceAsync(),
                 WarehouseManager.LoadInstanceAsync(),
@@ -155,7 +146,8 @@ namespace Gumball
                 ExperienceManager.LoadInstanceAsync(),
                 IAPManager.LoadInstanceAsync(),
                 ChallengeTrackerManager.LoadInstanceAsync(),
-                ChallengeManager.LoadInstanceAsync()
+                ChallengeManager.LoadInstanceAsync(),
+                FuelManager.LoadInstanceAsync()
             };
             return handles;
         }
