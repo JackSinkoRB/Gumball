@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MyBox;
 using NUnit.Framework;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
@@ -14,7 +12,10 @@ namespace Gumball.Runtime.Tests
     {
 
         private bool isInitialised;
-        
+
+        private Challenges dailyChallenges => ChallengeManager.Instance.Daily;
+        private Challenges weeklyChallenges => ChallengeManager.Instance.Weekly;
+
         public void Setup()
         {
             BootSceneClear.TrySetup();
@@ -60,7 +61,7 @@ namespace Gumball.Runtime.Tests
 
         private IEnumerator Initialise()
         {
-            yield return DailyChallengeManager.LoadInstanceAsync();
+            yield return ChallengeManager.LoadInstanceAsync();
             isInitialised = true;
         }
 
@@ -70,8 +71,8 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
             
-            Assert.IsNotNull(DailyChallengeManager.Instance.ChallengePool);
-            Assert.Greater(DailyChallengeManager.Instance.ChallengePool.Length, 0);
+            Assert.IsNotNull(dailyChallenges.ChallengePool);
+            Assert.Greater(dailyChallenges.ChallengePool.Length, 0);
         }
         
         [UnityTest]
@@ -80,8 +81,8 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
             
-            for (int slotIndex = 0; slotIndex < DailyChallengeManager.Instance.NumberOfChallenges; slotIndex++)
-                Assert.IsNotNull(DailyChallengeManager.Instance.GetCurrentChallenge(slotIndex));
+            for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
+                Assert.IsNotNull(dailyChallenges.GetCurrentChallenge(slotIndex));
         }
 
         [UnityTest]
@@ -91,65 +92,83 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             //ensure the cycle has been created
-            Assert.IsNotNull(DailyChallengeManager.Instance.ResetCycle);
+            Assert.IsNotNull(dailyChallenges.ResetCycle);
         }
 
         [UnityTest]
         [Order(4)]
+        public IEnumerator EnsureTheresEnoughDailyChallenges()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            Assert.Greater(dailyChallenges.ChallengePool.Length, dailyChallenges.NumberOfChallenges + dailyChallenges.ChallengesBetweenRepeats - 2);
+        }
+        
+        [UnityTest]
+        [Order(5)]
+        public IEnumerator EnsureTheresEnoughWeeklyChallenges()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            Assert.Greater(weeklyChallenges.ChallengePool.Length, weeklyChallenges.NumberOfChallenges + weeklyChallenges.ChallengesBetweenRepeats - 2);
+        }
+
+        [UnityTest]
+        [Order(6)]
         public IEnumerator DailyChallengesResetAutomatically()
         {
             yield return new WaitUntil(() => isInitialised);
 
             Assert.AreEqual(0, TimeUtils.TimeOffsetSeconds);
             
-            Challenge[] previousChallengesInSlots = new Challenge[DailyChallengeManager.Instance.NumberOfChallenges];
-            for (int slotIndex = 0; slotIndex < DailyChallengeManager.Instance.NumberOfChallenges; slotIndex++)
-                previousChallengesInSlots[slotIndex] = DailyChallengeManager.Instance.GetCurrentChallenge(slotIndex);
+            Challenge[] previousChallengesInSlots = new Challenge[dailyChallenges.NumberOfChallenges];
+            for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
+                previousChallengesInSlots[slotIndex] = dailyChallenges.GetCurrentChallenge(slotIndex);
 
-            TimeUtils.SetTimeOffset(DailyChallengeManager.Instance.TimeBetweenReset.ToSeconds());
+            TimeUtils.SetTimeOffset(dailyChallenges.TimeBetweenReset.ToSeconds());
             yield return null; //wait for events to trigger
             
-            for (int slotIndex = 0; slotIndex < DailyChallengeManager.Instance.NumberOfChallenges; slotIndex++)
-                Assert.AreNotEqual(previousChallengesInSlots[slotIndex], DailyChallengeManager.Instance.GetCurrentChallenge(slotIndex), $"Equal at slot {slotIndex}");
+            for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
+                Assert.AreNotEqual(previousChallengesInSlots[slotIndex], dailyChallenges.GetCurrentChallenge(slotIndex), $"Equal at slot {slotIndex}");
         }
         
         [UnityTest]
-        [Order(5)]
+        [Order(7)]
         public IEnumerator DailyChallengesDontRepeat()
         {
             yield return new WaitUntil(() => isInitialised);
             
             Assert.AreEqual(0, TimeUtils.TimeOffsetSeconds);
 
-            Challenge[] previousChallengesInSlots = new Challenge[DailyChallengeManager.Instance.NumberOfChallenges];
-            for (int slotIndex = 0; slotIndex < DailyChallengeManager.Instance.NumberOfChallenges; slotIndex++)
-                previousChallengesInSlots[slotIndex] = DailyChallengeManager.Instance.GetCurrentChallenge(slotIndex);
+            Challenge[] previousChallengesInSlots = new Challenge[dailyChallenges.NumberOfChallenges];
+            for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
+                previousChallengesInSlots[slotIndex] = dailyChallenges.GetCurrentChallenge(slotIndex);
             
-            int[] challengesWithoutRepeats = DailyChallengeManager.Instance.GetChallengesWithoutRepeats();
+            int[] challengesWithoutRepeats = dailyChallenges.GetChallengesWithoutRepeats();
             
-            TimeUtils.SetTimeOffset(DailyChallengeManager.Instance.TimeBetweenReset.ToSeconds());
+            TimeUtils.SetTimeOffset(dailyChallenges.TimeBetweenReset.ToSeconds());
             yield return null; //wait for events to trigger
 
             foreach (Challenge previousChallenge in previousChallengesInSlots)
             {
-                int previousChallengeIndex = DailyChallengeManager.Instance.ChallengePool.IndexOfItem(previousChallenge);
+                int previousChallengeIndex = dailyChallenges.ChallengePool.IndexOfItem(previousChallenge);
                 Assert.IsFalse(challengesWithoutRepeats.Contains(previousChallengeIndex));
             }
 
             //do enough cycles so that the challenge becomes available again
             int items = 0;
-            while (items <= DailyChallengeManager.Instance.ChallengesBetweenRepeats)
+            while (items <= dailyChallenges.ChallengesBetweenRepeats)
             {
-                TimeUtils.SetTimeOffset(DailyChallengeManager.Instance.TimeBetweenReset.ToSeconds());
+                TimeUtils.SetTimeOffset(dailyChallenges.TimeBetweenReset.ToSeconds());
                 yield return null; //wait for events to trigger
-                items += DailyChallengeManager.Instance.NumberOfChallenges;
+                items += dailyChallenges.NumberOfChallenges;
             }
 
             //ensure it is available again (or has already been selected)
             foreach (Challenge previousChallenge in previousChallengesInSlots)
             {
-                int[] challengesWithoutRepeatsUpdated = DailyChallengeManager.Instance.GetChallengesWithoutRepeats();
-                int previousChallengeIndex = DailyChallengeManager.Instance.ChallengePool.IndexOfItem(previousChallenge);
+                int[] challengesWithoutRepeatsUpdated = dailyChallenges.GetChallengesWithoutRepeats();
+                int previousChallengeIndex = dailyChallenges.ChallengePool.IndexOfItem(previousChallenge);
                 bool isSpare = challengesWithoutRepeatsUpdated.Contains(previousChallengeIndex);
                 bool isCurrent = GetCurrentChallenges().Contains(previousChallenge);
                 Assert.IsTrue(isSpare || isCurrent);
@@ -158,10 +177,10 @@ namespace Gumball.Runtime.Tests
 
         private Challenge[] GetCurrentChallenges()
         {
-            Challenge[] currentChallengesInSlots = new Challenge[DailyChallengeManager.Instance.NumberOfChallenges];
-            for (int slotIndex = 0; slotIndex < DailyChallengeManager.Instance.NumberOfChallenges; slotIndex++)
+            Challenge[] currentChallengesInSlots = new Challenge[dailyChallenges.NumberOfChallenges];
+            for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
             {
-                currentChallengesInSlots[slotIndex] = DailyChallengeManager.Instance.GetCurrentChallenge(slotIndex);
+                currentChallengesInSlots[slotIndex] = dailyChallenges.GetCurrentChallenge(slotIndex);
             }
 
             return currentChallengesInSlots;

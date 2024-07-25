@@ -155,7 +155,7 @@ namespace Gumball
                 ExperienceManager.LoadInstanceAsync(),
                 IAPManager.LoadInstanceAsync(),
                 ChallengeTrackerManager.LoadInstanceAsync(),
-                DailyChallengeManager.LoadInstanceAsync()
+                ChallengeManager.LoadInstanceAsync()
             };
             return handles;
         }

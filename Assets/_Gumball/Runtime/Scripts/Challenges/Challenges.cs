@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
@@ -5,10 +6,11 @@ using UnityEngine;
 
 namespace Gumball
 {
-    [CreateAssetMenu(menuName = "Gumball/Singletons/Daily Challenge Manager")]
-    public class DailyChallengeManager : SingletonScriptable<DailyChallengeManager>
+    [Serializable]
+    public class Challenges
     {
 
+        [SerializeField] private string id = "Daily";
         [SerializeField] private Challenge[] challengePool;
         [Space(5)]
         [SerializeField] private int numberOfChallenges = 3;
@@ -18,8 +20,8 @@ namespace Gumball
         
         private List<int> previousChallenges
         {
-            get => DataManager.Player.Get($"Challenges.PreviouslyAssigned", new List<int>());
-            set => DataManager.Player.Set($"Challenges.PreviouslyAssigned", value);
+            get => DataManager.Player.Get($"Challenges.{id}.PreviouslyAssigned", new List<int>());
+            set => DataManager.Player.Set($"Challenges.{id}.PreviouslyAssigned", value);
         }
 
         public int NumberOfChallenges => numberOfChallenges;
@@ -28,11 +30,9 @@ namespace Gumball
         public int ChallengesBetweenRepeats => challengesBetweenRepeats;
         public PersistentCooldown ResetCycle { get; private set; }
 
-        protected override void OnInstanceLoaded()
+        public void Initialise()
         {
-            base.OnInstanceLoaded();
-            
-            ResetCycle = new PersistentCooldown($"ChallengeReset.Daily", timeBetweenReset.ToSeconds());
+            ResetCycle = new PersistentCooldown($"Challenges.{id}.ResetCycle", timeBetweenReset.ToSeconds());
             ResetCycle.onCycleComplete += ResetChallenges;
             ResetCycle.Play();
 
@@ -41,16 +41,22 @@ namespace Gumball
         
         public Challenge GetCurrentChallenge(int slotIndex)
         {
-            string key = $"Challenges.Current.{slotIndex}";
+            string key = $"Challenges.{id}.Current.{slotIndex}";
             if (!DataManager.Player.HasKey(key))
                 return null;
             
             int challengeIndex = DataManager.Player.Get<int>(key);
+            if (challengeIndex == -1)
+                return null; //not enough challenges
+            
             return challengePool[challengeIndex];
         }
         
         public int[] GetChallengesWithoutRepeats()
         {
+            if (previousChallenges.Count >= challengePool.Length)
+                return Array.Empty<int>(); //not enough challenges
+
             int[] challengesWithoutRepeats = new int[challengePool.Length - previousChallenges.Count];
 
             int indexCount = 0;
@@ -85,12 +91,16 @@ namespace Gumball
 
         private int GetRandomChallengeIndex()
         {
-            return GetChallengesWithoutRepeats().GetRandom();
+            int[] spareChallenges = GetChallengesWithoutRepeats();
+            if (spareChallenges.Length == 0)
+                return -1;
+            
+            return spareChallenges.GetRandom();
         }
 
         private void SetCurrentChallenge(int slotIndex, int challengeIndex)
         {
-            DataManager.Player.Set($"Challenges.Current.{slotIndex}", challengeIndex);
+            DataManager.Player.Set($"Challenges.{id}.Current.{slotIndex}", challengeIndex);
             
             //add to previous challenges list
             List<int> previousChallengesTemp = previousChallenges;
