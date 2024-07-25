@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class ChallengeTests : IPrebuildSetup, IPostBuildCleanup
+    public class ChallengeTrackerTests : IPrebuildSetup, IPostBuildCleanup
     {
 
         private bool isInitialised;

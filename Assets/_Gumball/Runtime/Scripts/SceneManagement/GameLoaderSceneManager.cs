@@ -154,7 +154,8 @@ namespace Gumball
                 GlobalPaintPresets.LoadInstanceAsync(),
                 ExperienceManager.LoadInstanceAsync(),
                 IAPManager.LoadInstanceAsync(),
-                ChallengeTrackerManager.LoadInstanceAsync()
+                ChallengeTrackerManager.LoadInstanceAsync(),
+                DailyChallengeManager.LoadInstanceAsync()
             };
             return handles;
         }
