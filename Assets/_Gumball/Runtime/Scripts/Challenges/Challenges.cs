@@ -37,6 +37,8 @@ namespace Gumball
             ResetCycle.Play();
 
             EnsureChallengesAreAssigned();
+            
+            StartTrackers();
         }
         
         public Challenge GetCurrentChallenge(int slotIndex)
@@ -100,6 +102,11 @@ namespace Gumball
 
         private void SetCurrentChallenge(int slotIndex, int challengeIndex)
         {
+            //end the previous tracker
+            Challenge previousChallenge = GetCurrentChallenge(slotIndex);
+            if (previousChallenge != null)
+                previousChallenge.Tracker.StopListening(previousChallenge.ChallengeID);
+            
             DataManager.Player.Set($"Challenges.{id}.Current.{slotIndex}", challengeIndex);
             
             //add to previous challenges list
@@ -108,6 +115,19 @@ namespace Gumball
                 previousChallengesTemp.RemoveAt(0);
             previousChallengesTemp.Add(challengeIndex);
             previousChallenges = previousChallengesTemp;
+
+            //start tracker
+            Challenge currentChallenge = challengePool[challengeIndex];
+            currentChallenge.Tracker.StartListening(currentChallenge.ChallengeID, currentChallenge.Goal);
+        }
+
+        private void StartTrackers()
+        {
+            for (int slotIndex = 0; slotIndex < numberOfChallenges; slotIndex++)
+            {
+                Challenge currentChallenge = GetCurrentChallenge(slotIndex);
+                currentChallenge.Tracker.StartListening(currentChallenge.ChallengeID, currentChallenge.Goal);
+            }
         }
         
     }

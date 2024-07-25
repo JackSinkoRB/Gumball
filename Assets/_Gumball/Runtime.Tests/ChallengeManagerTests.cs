@@ -174,6 +174,37 @@ namespace Gumball.Runtime.Tests
                 Assert.IsTrue(isSpare || isCurrent);
             }
         }
+        
+        [UnityTest]
+        [Order(8)]
+        public IEnumerator DailyChallengeListenersAreActiveOnLoad()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            //ensure the cycle has been created
+            for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
+            {
+                Challenge challenge = dailyChallenges.GetCurrentChallenge(slotIndex);
+                Assert.IsNotNull(challenge.Tracker.GetListener(challenge.ChallengeID));
+            }
+        }
+        
+        [UnityTest]
+        [Order(9)]
+        public IEnumerator DailyChallengeListenersAreActiveAfterChanging()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            TimeUtils.SetTimeOffset(dailyChallenges.TimeBetweenReset.ToSeconds());
+            yield return null; //wait for events to trigger
+            
+            //ensure the cycle has been created
+            for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
+            {
+                Challenge challenge = dailyChallenges.GetCurrentChallenge(slotIndex);
+                Assert.IsNotNull(challenge.Tracker.GetListener(challenge.ChallengeID));
+            }
+        }
 
         private Challenge[] GetCurrentChallenges()
         {
