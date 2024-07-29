@@ -229,6 +229,16 @@ namespace Gumball
                 LoadFromSource();
             }
         }
+        
+        public void SetDirty()
+        {
+            if (dirtyProviders.Contains(this))
+                return; //is already dirty
+
+            dirtyProviders.Add(this);
+            if (!IsAutoSaveActive)
+                StartAutoSave();
+        }
 
         public abstract bool SourceExists();
         protected abstract void SaveToSource();
@@ -267,16 +277,6 @@ namespace Gumball
 
                 SaveToSource();
             }
-        }
-
-        private void SetDirty()
-        {
-            if (dirtyProviders.Contains(this))
-                return; //is already dirty
-
-            dirtyProviders.Add(this);
-            if (!IsAutoSaveActive)
-                StartAutoSave();
         }
 
         private void RemoveDirty()

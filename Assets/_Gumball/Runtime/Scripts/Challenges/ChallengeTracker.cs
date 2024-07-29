@@ -35,11 +35,7 @@ namespace Gumball
 
         }
 
-        protected Dictionary<string, Listener> listeners
-        {
-            get => DataManager.GameSessions.Get($"Challenges.Listeners.{GetType()}", new Dictionary<string, Listener>());
-            set => DataManager.GameSessions.Set($"Challenges.Listeners.{GetType()}", value);
-        }
+        protected Dictionary<string, Listener> listeners => DataManager.GameSessions.Get($"Challenges.Listeners.{GetType()}", new Dictionary<string, Listener>());
 
         public virtual void LateUpdate()
         {
@@ -67,9 +63,8 @@ namespace Gumball
                 return;
             }
 
-            Dictionary<string, Listener> listenersTemp = listeners;
-            listenersTemp[listenerId] = new Listener(goal);
-            listeners = listenersTemp;
+            listeners[listenerId] = new Listener(goal);
+            DataManager.GameSessions.SetDirty();
         }
 
         public void StopListening(string listenerId)
@@ -80,32 +75,32 @@ namespace Gumball
                 return;
             }
             
-            Dictionary<string, Listener> listenersTemp = listeners;
-            listenersTemp.Remove(listenerId);
-            listeners = listenersTemp;
+            listeners.Remove(listenerId);
+            DataManager.GameSessions.SetDirty();
         }
 
         public void Track(float amount)
         {
-            Dictionary<string, Listener> listenersTemp = listeners;
+            if (amount == 0)
+                return;
+            
             foreach (string listenerId in listeners.Keys)
             {
-                listenersTemp[listenerId].Track(amount);
-                listeners = listenersTemp;
+                listeners[listenerId].Track(amount);
             }
+            DataManager.GameSessions.SetDirty();
         }
         
         public void SetListenerValues(float amount)
         {
-            Dictionary<string, Listener> listenersTemp = listeners;
             foreach (string listenerId in listeners.Keys)
             {
-                if (listenersTemp[listenerId].Progress >= 1)
+                if (listeners[listenerId].Progress >= 1)
                     continue; //already completed - leave as is
                 
-                listenersTemp[listenerId].SetValue(amount);
-                listeners = listenersTemp;
+                listeners[listenerId].SetValue(amount);
             }
+            DataManager.GameSessions.SetDirty();
         }
         
     }
