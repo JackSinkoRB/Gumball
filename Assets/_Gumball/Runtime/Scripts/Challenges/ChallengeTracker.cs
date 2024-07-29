@@ -16,6 +16,7 @@ namespace Gumball
             [SerializeField] private float current;
 
             public float Progress => Mathf.Clamp01(current / goal);
+            public bool IsComplete => Progress >= 1;
             
             public Listener(float goal)
             {
@@ -35,8 +36,12 @@ namespace Gumball
 
         }
 
-        protected Dictionary<string, Listener> listeners => DataManager.GameSessions.Get($"Challenges.Listeners.{GetType()}", new Dictionary<string, Listener>());
-
+        protected Dictionary<string, Listener> listeners
+        {
+            get => DataManager.GameSessions.Get($"Challenges.Listeners.{GetType()}", new Dictionary<string, Listener>());
+            set => DataManager.GameSessions.Set($"Challenges.Listeners.{GetType()}", value);
+        }
+        
         public virtual void LateUpdate()
         {
             
@@ -63,8 +68,9 @@ namespace Gumball
                 return;
             }
 
-            listeners[listenerId] = new Listener(goal);
-            DataManager.GameSessions.SetDirty();
+            Dictionary<string, Listener> listenersTemp = new Dictionary<string, Listener>(listeners);
+            listenersTemp[listenerId] = new Listener(goal);
+            listeners = listenersTemp;
         }
 
         public void StopListening(string listenerId)
@@ -75,8 +81,9 @@ namespace Gumball
                 return;
             }
             
-            listeners.Remove(listenerId);
-            DataManager.GameSessions.SetDirty();
+            Dictionary<string, Listener> listenersTemp = new Dictionary<string, Listener>(listeners);
+            listenersTemp.Remove(listenerId);
+            listeners = listenersTemp;
         }
 
         public void Track(float amount)
@@ -84,23 +91,25 @@ namespace Gumball
             if (amount == 0)
                 return;
             
-            foreach (string listenerId in listeners.Keys)
+            Dictionary<string, Listener> listenersTemp = new Dictionary<string, Listener>(listeners);
+            foreach (string listenerId in listenersTemp.Keys)
             {
-                listeners[listenerId].Track(amount);
+                listenersTemp[listenerId].Track(amount);
             }
-            DataManager.GameSessions.SetDirty();
+            listeners = listenersTemp;
         }
         
         public void SetListenerValues(float amount)
         {
-            foreach (string listenerId in listeners.Keys)
+            Dictionary<string, Listener> listenersTemp = new Dictionary<string, Listener>(listeners);
+            foreach (string listenerId in listenersTemp.Keys)
             {
-                if (listeners[listenerId].Progress >= 1)
+                if (listenersTemp[listenerId].IsComplete)
                     continue; //already completed - leave as is
                 
-                listeners[listenerId].SetValue(amount);
+                listenersTemp[listenerId].SetValue(amount);
             }
-            DataManager.GameSessions.SetDirty();
+            listeners = listenersTemp;
         }
         
     }

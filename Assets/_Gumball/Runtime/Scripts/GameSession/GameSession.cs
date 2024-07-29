@@ -415,6 +415,9 @@ namespace Gumball
         
         private void StopTrackingObjectives()
         {
+            if (subObjectives == null)
+                return;
+            
             foreach (Challenge subObjective in subObjectives)
             {
                 subObjective.Tracker.StopListening(subObjective.ChallengeID);
