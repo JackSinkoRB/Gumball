@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,10 +15,14 @@ namespace Gumball
         [SerializeField] private AutosizeTextMeshPro descriptionLabel;
 
         private Challenge challenge;
+        private Challenges challengeManager;
+        private bool isUnclaimedChallenge;
         
-        public void Initialise(Challenge challenge)
+        public void Initialise(Challenge challenge, Challenges challengeManager, bool isUnclaimedChallenge)
         {
             this.challenge = challenge;
+            this.challengeManager = challengeManager;
+            this.isUnclaimedChallenge = isUnclaimedChallenge;
             
             descriptionLabel.text = challenge.Description;
             descriptionLabel.Resize();
@@ -28,9 +33,20 @@ namespace Gumball
         public void OnClickClaimButton()
         {
             CoroutineHelper.Instance.StartCoroutine(challenge.Rewards.GiveRewards());
-            challenge.SetClaimed(true);
+            if (!isUnclaimedChallenge)
+                challenge.SetClaimed(true);
+            else
+                OnClaimUnclaimedChallenge();
 
             UpdateClaimButton();
+        }
+        
+        private void OnClaimUnclaimedChallenge()
+        {
+            gameObject.SetActive(false);
+            
+            //remove from unclaimed challenges
+            challengeManager.RemoveUnclaimedChallenge(challengeManager.ChallengePool.IndexOfItem(challenge));
         }
 
         private void UpdateClaimButton()
@@ -46,9 +62,16 @@ namespace Gumball
 
             descriptionLabel.fontStyle = FontStyles.Normal;
             claimButtonLabel.text = "Claim";
-            
-            ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.ChallengeID);
-            claimButton.interactable = challengeListener.IsComplete;
+
+            if (isUnclaimedChallenge)
+            {
+                claimButton.interactable = true;
+            }
+            else
+            {
+                ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.ChallengeID);
+                claimButton.interactable = challengeListener.IsComplete;
+            }
         }
 
     }

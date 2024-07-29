@@ -29,6 +29,12 @@ namespace Gumball
         public SerializedTimeSpan TimeBetweenReset => timeBetweenReset;
         public int ChallengesBetweenRepeats => challengesBetweenRepeats;
         public PersistentCooldown ResetCycle { get; private set; }
+        
+        public List<int> UnclaimedChallengeIndices
+        {
+            get => DataManager.GameSessions.Get($"Challenges.{id}.Unclaimed", new List<int>());
+            private set => DataManager.GameSessions.Set($"Challenges.{id}.Unclaimed", value);
+        }
 
         public void Initialise()
         {
@@ -106,6 +112,12 @@ namespace Gumball
             Challenge previousChallenge = GetCurrentChallenge(slotIndex);
             if (previousChallenge != null)
             {
+                if (!previousChallenge.IsClaimed && previousChallenge.Tracker.GetListener(previousChallenge.ChallengeID).IsComplete)
+                {
+                    //add to unclaimed challenges
+                    AddUnclaimedChallenge(previousChallenge);
+                }
+                
                 previousChallenge.SetClaimed(false); //reset
                 previousChallenge.Tracker.StopListening(previousChallenge.ChallengeID);
             }
@@ -122,6 +134,20 @@ namespace Gumball
             //start tracker
             Challenge currentChallenge = challengePool[challengeIndex];
             currentChallenge.Tracker.StartListening(currentChallenge.ChallengeID, currentChallenge.Goal);
+        }
+
+        private void AddUnclaimedChallenge(Challenge challenge)
+        {
+            List<int> unclaimedChallengesTemp = new List<int>(UnclaimedChallengeIndices);
+            unclaimedChallengesTemp.Add(challengePool.IndexOfItem(challenge));
+            UnclaimedChallengeIndices = unclaimedChallengesTemp;
+        }
+        
+        public void RemoveUnclaimedChallenge(int index)
+        {
+            List<int> unclaimedChallengesTemp = new List<int>(UnclaimedChallengeIndices);
+            unclaimedChallengesTemp.Remove(index);
+            UnclaimedChallengeIndices = unclaimedChallengesTemp;
         }
 
         private void StartTrackers()

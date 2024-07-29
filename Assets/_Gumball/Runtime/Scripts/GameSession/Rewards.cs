@@ -95,7 +95,7 @@ namespace Gumball
                 unlockable.Unlock();
 
             //show the reward panel with queued rewards
-            if (PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
+            if (PanelManager.PanelExists<RewardPanel>() && PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
             {
                 PanelManager.GetPanel<RewardPanel>().Show();
                 yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);

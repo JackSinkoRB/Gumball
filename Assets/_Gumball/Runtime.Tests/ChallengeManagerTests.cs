@@ -67,17 +67,20 @@ namespace Gumball.Runtime.Tests
 
         [UnityTest]
         [Order(1)]
-        public IEnumerator DailyChallengePoolIsSetup()
+        public IEnumerator ChallengePoolsAreSetup()
         {
             yield return new WaitUntil(() => isInitialised);
             
             Assert.IsNotNull(dailyChallenges.ChallengePool);
             Assert.Greater(dailyChallenges.ChallengePool.Length, 0);
+            
+            Assert.IsNotNull(weeklyChallenges.ChallengePool);
+            Assert.Greater(weeklyChallenges.ChallengePool.Length, 0);
         }
         
         [UnityTest]
         [Order(2)]
-        public IEnumerator DailyChallengesAreAssignedOnStartup()
+        public IEnumerator ChallengesAreAssignedOnStartup()
         {
             yield return new WaitUntil(() => isInitialised);
             
@@ -87,7 +90,7 @@ namespace Gumball.Runtime.Tests
 
         [UnityTest]
         [Order(3)]
-        public IEnumerator DailyChallengesCycleStarts()
+        public IEnumerator ChallengesCycleStarts()
         {
             yield return new WaitUntil(() => isInitialised);
             
@@ -115,7 +118,7 @@ namespace Gumball.Runtime.Tests
 
         [UnityTest]
         [Order(6)]
-        public IEnumerator DailyChallengesResetAutomatically()
+        public IEnumerator ChallengesResetAutomatically()
         {
             yield return new WaitUntil(() => isInitialised);
 
@@ -134,7 +137,7 @@ namespace Gumball.Runtime.Tests
         
         [UnityTest]
         [Order(7)]
-        public IEnumerator DailyChallengesDontRepeat()
+        public IEnumerator ChallengesDontRepeat()
         {
             yield return new WaitUntil(() => isInitialised);
             
@@ -177,7 +180,7 @@ namespace Gumball.Runtime.Tests
         
         [UnityTest]
         [Order(8)]
-        public IEnumerator DailyChallengeListenersAreActiveOnLoad()
+        public IEnumerator ChallengeListenersAreActiveOnLoad()
         {
             yield return new WaitUntil(() => isInitialised);
             
@@ -191,7 +194,7 @@ namespace Gumball.Runtime.Tests
         
         [UnityTest]
         [Order(9)]
-        public IEnumerator DailyChallengeListenersAreActiveAfterChanging()
+        public IEnumerator ChallengeListenersAreActiveAfterChanging()
         {
             yield return new WaitUntil(() => isInitialised);
             
@@ -204,6 +207,29 @@ namespace Gumball.Runtime.Tests
                 Challenge challenge = dailyChallenges.GetCurrentChallenge(slotIndex);
                 Assert.IsNotNull(challenge.Tracker.GetListener(challenge.ChallengeID));
             }
+        }
+        
+        [UnityTest]
+        [Order(10)]
+        public IEnumerator ChallengesRemainIfUnclaimed()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            Challenge challengeToTrack = dailyChallenges.GetCurrentChallenge(0);
+            Assert.IsFalse(challengeToTrack.IsClaimed);
+
+            challengeToTrack.Tracker.Track(challengeToTrack.Goal);
+            Assert.IsTrue(challengeToTrack.Tracker.GetListener(challengeToTrack.ChallengeID).IsComplete);
+            
+            TimeUtils.SetTimeOffset(dailyChallenges.TimeBetweenReset.ToSeconds());
+            yield return null; //wait for events to trigger
+
+            int challengeIndex = dailyChallenges.ChallengePool.IndexOfItem(challengeToTrack);
+            Assert.IsTrue(dailyChallenges.UnclaimedChallengeIndices.Contains(challengeIndex));
+            
+            //ensure it is removed
+            dailyChallenges.RemoveUnclaimedChallenge(challengeIndex);
+            Assert.IsFalse(dailyChallenges.UnclaimedChallengeIndices.Contains(challengeIndex));
         }
 
         private Challenge[] GetCurrentChallenges()
