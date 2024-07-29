@@ -11,16 +11,14 @@ namespace CC
         public List<Transform> SourceBones = new List<Transform>();
         public List<Transform> TargetBones = new List<Transform>();
 
-        private void Start()
+        public void Initialise(Transform body)
         {
-            //Get meshes
-            var sourceMesh = GetComponentInParent<CharacterCustomization>().MainMesh;
+            var sourceMesh = body.GetComponent<CharacterCustomization>().MainMesh;
             var targetMesh = gameObject.GetComponentInChildren<SkinnedMeshRenderer>();
 
-            //Get bone hierarchies
             SourceHierarchy = sourceMesh.rootBone.GetComponentsInChildren<Transform>();
             TargetHierarchy = GetRootBone(targetMesh.rootBone).GetComponentsInChildren<Transform>();
-
+            
             //Only copy bones that are found in both hierarchies, also ensures order is the same
             foreach (Transform child in SourceHierarchy)
             {
@@ -33,6 +31,21 @@ namespace CC
             }
         }
 
+        private void LateUpdate()
+        {
+            CopyBones();
+        }
+
+        private void CopyBones()
+        {
+            for (int i = 0; i < SourceBones.Count; i++)
+            {
+                TargetBones[i].localPosition = SourceBones[i].localPosition;
+                TargetBones[i].localRotation = SourceBones[i].localRotation;
+                TargetBones[i].localScale = SourceBones[i].localScale;
+            }
+        }
+        
         private Transform GetRootBone(Transform bone)
         {
             var parentTransform = bone;
@@ -43,15 +56,5 @@ namespace CC
             }
         }
 
-        private void LateUpdate()
-        {
-            //Copy bone transform
-            for (int i = 0; i < SourceBones.Count; i++)
-            {
-                TargetBones[i].localPosition = SourceBones[i].localPosition;
-                TargetBones[i].localRotation = SourceBones[i].localRotation;
-                TargetBones[i].localScale = SourceBones[i].localScale;
-            }
-        }
     }
 }
