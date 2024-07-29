@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
+using UnityEditor;
 using UnityEngine;
 
 namespace Gumball
 {
     [Serializable]
-    public class Challenge
+    public class Challenge : ISerializationCallbackReceiver
     {
         
         [SerializeField] private string description = "Description of challenge";
@@ -18,15 +20,28 @@ namespace Gumball
         public ChallengeTracker Tracker => tracker;
         public int Goal => goal;
         public Rewards Rewards => rewards;
+
+        [SerializeField, ReadOnly] private string uniqueID;
         
-        public string ChallengeID => $"{description}-{tracker.GetType()}-{goal}";
+        public string ChallengeID => $"{description}-{tracker.GetType()}-{uniqueID}-{goal}";
 
         public bool IsClaimed
         {
             get => DataManager.GameSessions.Get($"Challenges.Listeners.{ChallengeID}.Claimed", false);
             private set => DataManager.GameSessions.Set($"Challenges.Listeners.{ChallengeID}.Claimed", value);
         }
-        
+
+        public void OnBeforeSerialize()
+        {
+            if (uniqueID.IsNullOrEmpty())
+                uniqueID = Guid.NewGuid().ToString();
+        }
+
+        public void OnAfterDeserialize()
+        {
+            
+        }
+
         public void SetClaimed(bool isClaimed)
         {
             IsClaimed = isClaimed;

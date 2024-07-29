@@ -48,7 +48,7 @@ namespace Gumball
             claimButtonLabel.text = "Claim";
             
             ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.ChallengeID);
-            claimButton.interactable = challengeListener.Progress >= 1;
+            claimButton.interactable = challengeListener.IsComplete;
         }
 
     }
