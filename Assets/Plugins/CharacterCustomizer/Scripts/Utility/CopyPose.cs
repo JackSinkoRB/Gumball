@@ -6,30 +6,19 @@ namespace CC
 {
     public class CopyPose : MonoBehaviour
     {
-        
         private Transform[] SourceHierarchy;
         private Transform[] TargetHierarchy;
         public List<Transform> SourceBones = new List<Transform>();
         public List<Transform> TargetBones = new List<Transform>();
-        
+
         public void Initialise(Transform body)
         {
-            //Get bone hierarchies
-            foreach (Transform child in body)
-            {
-                if (child.gameObject.name == "root")
-                {
-                    SourceHierarchy = child.GetComponentsInChildren<Transform>();
-                }
-            }
-            foreach (Transform child in transform)
-            {
-                if (child.gameObject.name == "root")
-                {
-                    TargetHierarchy = child.GetComponentsInChildren<Transform>();
-                }
-            }
+            var sourceMesh = body.GetComponent<CharacterCustomization>().MainMesh;
+            var targetMesh = gameObject.GetComponentInChildren<SkinnedMeshRenderer>();
 
+            SourceHierarchy = sourceMesh.rootBone.GetComponentsInChildren<Transform>();
+            TargetHierarchy = GetRootBone(targetMesh.rootBone).GetComponentsInChildren<Transform>();
+            
             //Only copy bones that are found in both hierarchies, also ensures order is the same
             foreach (Transform child in SourceHierarchy)
             {
@@ -40,10 +29,8 @@ namespace CC
                     TargetBones.Add(targetBone);
                 }
             }
-            
-            CopyBones();
         }
-        
+
         private void LateUpdate()
         {
             CopyBones();
@@ -59,5 +46,15 @@ namespace CC
             }
         }
         
+        private Transform GetRootBone(Transform bone)
+        {
+            var parentTransform = bone;
+            while (true)
+            {
+                if (parentTransform.parent == transform) return parentTransform;
+                parentTransform = parentTransform.parent;
+            }
+        }
+
     }
 }
