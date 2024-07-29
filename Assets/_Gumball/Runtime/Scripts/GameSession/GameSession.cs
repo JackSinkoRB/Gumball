@@ -75,6 +75,7 @@ namespace Gumball
         [SerializeField, PositiveValueOnly] private int standardCurrencyReward = 10;
         [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
         [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
+        [SerializeField] private Rewards rewards;
 
         [Header("Challenges")]
         [SerializeField] private string mainChallengeDescription = "This is the challenge description";
@@ -106,10 +107,7 @@ namespace Gumball
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
         public GenericDictionary<AICar, RacerSessionData> CurrentRacers => currentRacers;
-        public int XPReward => xpReward;
-        public int StandardCurrencyReward => standardCurrencyReward;
-        public CorePart[] CorePartRewards => corePartRewards;
-        public SubPart[] SubPartRewards => subPartRewards;
+        public Rewards Rewards => rewards;
         public bool HasStarted { get; private set; }
         public bool TrafficIsProcedural => trafficIsProcedural;
         public int TrafficDensity => trafficDensity;
@@ -136,6 +134,13 @@ namespace Gumball
                 EditorUtility.SetDirty(this);
                 scene.SetDirty(false);
             }
+            
+            rewards.xp = xpReward;
+            rewards.coreParts = corePartRewards;
+            rewards.standardCurrency = standardCurrencyReward;
+            rewards.subParts = subPartRewards;
+            
+            EditorUtility.SetDirty(this);
 #endif
         }
 
@@ -201,7 +206,7 @@ namespace Gumball
         
         private void TrackCorePartRewards()
         {
-            foreach (CorePart corePart in corePartRewards)
+            foreach (CorePart corePart in rewards.CoreParts)
             {
                 if (corePart == null)
                     continue;
@@ -214,16 +219,16 @@ namespace Gumball
                 if (corePart == null)
                     continue;
                 
-                if (!corePartRewards.Contains(corePart))
+                if (!rewards.CoreParts.Contains(corePart))
                     corePart.UntrackAsReward(this);
             }
             
-            previousCorePartRewards = (CorePart[])corePartRewards.Clone();
+            previousCorePartRewards = (CorePart[])rewards.CoreParts.Clone();
         }
         
         private void TrackSubPartRewards()
         {
-            foreach (SubPart subPart in subPartRewards)
+            foreach (SubPart subPart in rewards.SubParts)
             {
                 if (subPart == null)
                     continue;
@@ -236,11 +241,11 @@ namespace Gumball
                 if (subPart == null)
                     continue;
                 
-                if (!subPartRewards.Contains(subPart))
+                if (!rewards.SubParts.Contains(subPart))
                     subPart.UntrackAsReward(this);
             }
             
-            previousSubPartRewards = (SubPart[])subPartRewards.Clone();
+            previousSubPartRewards = (SubPart[])rewards.SubParts.Clone();
         }
 #endif
 
@@ -652,58 +657,6 @@ namespace Gumball
             return true;
         }
 
-        public IEnumerator GiveRewards()
-        {
-            //give XP
-            if (xpReward > 0)
-            {
-                PanelManager.GetPanel<XPGainedPanel>().Show();
-            
-                int currentXP = ExperienceManager.TotalXP;
-                int newXP = ExperienceManager.TotalXP + xpReward;
-                
-                PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
-                
-                yield return new WaitUntil(() => !PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning);
-                
-                ExperienceManager.AddXP(xpReward); //add XP after in case there's a level up
-                
-                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning &&
-                                                 !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
-            }
-
-            //give standard currency
-            if (standardCurrencyReward > 0)
-                RewardManager.GiveStandardCurrency(standardCurrencyReward);
-
-            //give core parts
-            if (corePartRewards != null)
-            {
-                foreach (CorePart corePartReward in corePartRewards)
-                {
-                    if (!corePartReward.IsUnlocked)
-                        RewardManager.GiveReward(corePartReward);
-                }
-            }
-
-            //give sub parts
-            if (subPartRewards != null)
-            {
-                foreach (SubPart subPartReward in subPartRewards)
-                {
-                    if (!subPartReward.IsUnlocked)
-                        RewardManager.GiveReward(subPartReward);
-                }
-            }
-            
-            //show the reward panel with queued rewards
-            if (PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
-            {
-                PanelManager.GetPanel<RewardPanel>().Show();
-                yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);
-            }
-        }
-        
         private void OnCompleteSessionForFirstTime()
         {
             Progress = ProgressStatus.COMPLETE;
