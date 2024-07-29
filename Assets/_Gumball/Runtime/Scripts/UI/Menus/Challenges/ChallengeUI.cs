@@ -12,13 +12,22 @@ namespace Gumball
         [SerializeField] private Button claimButton;
         [SerializeField] private AutosizeTextMeshPro descriptionLabel;
 
+        private Challenge challenge;
+        
         public void Initialise(Challenge challenge)
         {
+            this.challenge = challenge;
+            
             descriptionLabel.text = challenge.Description;
             descriptionLabel.Resize();
 
             ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.ChallengeID);
             claimButton.interactable = challengeListener.Progress >= 1;
+        }
+
+        public void OnClickClaimButton()
+        {
+            CoroutineHelper.Instance.StartCoroutine(challenge.Rewards.GiveRewards());
         }
 
     }
