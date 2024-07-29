@@ -10,15 +10,33 @@ namespace Gumball
     public class Rewards
     {
 
-        [SerializeField, PositiveValueOnly] public int xp;
-        [SerializeField, PositiveValueOnly] public int standardCurrency;
-        [SerializeField, DisplayInspector] public CorePart[] coreParts = Array.Empty<CorePart>();
-        [SerializeField, DisplayInspector] public SubPart[] subParts = Array.Empty<SubPart>();
-
+        [SerializeField, PositiveValueOnly] private int xp;
+        [SerializeField, PositiveValueOnly] private int standardCurrency;
+        [SerializeField, PositiveValueOnly] private int premiumCurrency;
+        [SerializeField] private bool fuelRefill;
+        [SerializeField, DisplayInspector] private CorePart[] coreParts = Array.Empty<CorePart>();
+        [SerializeField, DisplayInspector] private SubPart[] subParts = Array.Empty<SubPart>();
+        [SerializeField] private Unlockable[] unlockables = Array.Empty<Unlockable>();
+        
         public int XP => xp;
         public int StandardCurrency => standardCurrency;
         public CorePart[] CoreParts => coreParts;
         public SubPart[] SubParts => subParts;
+        public bool FuelRefill => fuelRefill;
+        public int PremiumCurrency => premiumCurrency;
+        public Unlockable[] Unlockables => unlockables;
+        
+#if UNITY_EDITOR
+        public void SetPremiumCurrencyReward(int amount)
+        {
+            premiumCurrency = amount;
+        }
+
+        public void SetFuelRefillReward(bool refill)
+        {
+            fuelRefill = refill;
+        }
+#endif
         
         public IEnumerator GiveRewards()
         {
@@ -44,6 +62,14 @@ namespace Gumball
             if (standardCurrency > 0)
                 RewardManager.GiveStandardCurrency(standardCurrency);
 
+            //give premium currency
+            if (premiumCurrency > 0)
+                Currency.Premium.AddFunds(premiumCurrency);
+            
+            //replenish fuel
+            if (fuelRefill)
+                FuelManager.Instance.ReplenishFuel();
+            
             //give core parts
             if (coreParts != null)
             {
@@ -64,6 +90,10 @@ namespace Gumball
                 }
             }
             
+            //unlock unlockables
+            foreach (Unlockable unlockable in unlockables)
+                unlockable.Unlock();
+
             //show the reward panel with queued rewards
             if (PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
             {

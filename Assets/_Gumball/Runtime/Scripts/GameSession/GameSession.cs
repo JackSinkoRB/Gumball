@@ -71,10 +71,6 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
-        [SerializeField, PositiveValueOnly] private int xpReward = 100;
-        [SerializeField, PositiveValueOnly] private int standardCurrencyReward = 10;
-        [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
-        [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
         [SerializeField] private Rewards rewards;
 
         [Header("Challenges")]
@@ -134,13 +130,6 @@ namespace Gumball
                 EditorUtility.SetDirty(this);
                 scene.SetDirty(false);
             }
-            
-            rewards.xp = xpReward;
-            rewards.coreParts = corePartRewards;
-            rewards.standardCurrency = standardCurrencyReward;
-            rewards.subParts = subPartRewards;
-            
-            EditorUtility.SetDirty(this);
 #endif
         }
 
@@ -161,7 +150,6 @@ namespace Gumball
             TrackSubPartRewards();
         }
 
-#if UNITY_EDITOR
         [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
         public void RandomiseTraffic()
         {
@@ -202,8 +190,7 @@ namespace Gumball
             trafficSpawnPositions = new CollectionWrapperTrafficSpawnPosition();
             trafficSpawnPositions.Value = spawnPositions.ToArray();
         }
-#endif
-        
+
         private void TrackCorePartRewards()
         {
             foreach (CorePart corePart in rewards.CoreParts)
