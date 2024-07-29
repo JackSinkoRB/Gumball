@@ -105,8 +105,11 @@ namespace Gumball
             //end the previous tracker
             Challenge previousChallenge = GetCurrentChallenge(slotIndex);
             if (previousChallenge != null)
+            {
+                previousChallenge.SetClaimed(false); //reset
                 previousChallenge.Tracker.StopListening(previousChallenge.ChallengeID);
-            
+            }
+
             DataManager.Player.Set($"Challenges.{id}.Current.{slotIndex}", challengeIndex);
             
             //add to previous challenges list

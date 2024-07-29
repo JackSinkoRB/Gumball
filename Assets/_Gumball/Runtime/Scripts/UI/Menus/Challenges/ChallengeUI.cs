@@ -10,6 +10,7 @@ namespace Gumball
     {
 
         [SerializeField] private Button claimButton;
+        [SerializeField] private TextMeshProUGUI claimButtonLabel;
         [SerializeField] private AutosizeTextMeshPro descriptionLabel;
 
         private Challenge challenge;
@@ -20,14 +21,34 @@ namespace Gumball
             
             descriptionLabel.text = challenge.Description;
             descriptionLabel.Resize();
-
-            ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.ChallengeID);
-            claimButton.interactable = challengeListener.Progress >= 1;
+            
+            UpdateClaimButton();
         }
 
         public void OnClickClaimButton()
         {
             CoroutineHelper.Instance.StartCoroutine(challenge.Rewards.GiveRewards());
+            challenge.SetClaimed(true);
+
+            UpdateClaimButton();
+        }
+
+        private void UpdateClaimButton()
+        {
+            if (challenge.IsClaimed)
+            {
+                descriptionLabel.fontStyle = FontStyles.Strikethrough;
+                claimButtonLabel.text = "Claimed";
+                
+                claimButton.interactable = false;
+                return;
+            }
+
+            descriptionLabel.fontStyle = FontStyles.Normal;
+            claimButtonLabel.text = "Claim";
+            
+            ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.ChallengeID);
+            claimButton.interactable = challengeListener.Progress >= 1;
         }
 
     }
