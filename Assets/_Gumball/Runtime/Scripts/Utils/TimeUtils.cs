@@ -67,16 +67,21 @@ namespace Gumball
 
         public static string ToPrettyStringMaxUnitOnly(this TimeSpan timeSpan)
         {
-            stringBuilder.Clear();
-            if (timeSpan.Days > 0)
-                return timeSpan.Days == 1 ? "1 day" : $"{timeSpan.Days} days";
-            if (timeSpan.Hours > 0)
-                return timeSpan.Hours == 1 ? "1 hour" : $"{timeSpan.Hours} hours";
-            if (timeSpan.Minutes > 0)
-                return timeSpan.Minutes == 1 ? "1 minute" : $"{timeSpan.Minutes} minutes";
-            if (timeSpan.Seconds > 0)
-                return timeSpan.Seconds == 1 ? "1 second" : $"{timeSpan.Seconds} seconds";
-            return "0 seconds";
+            int daysRounded = Mathf.FloorToInt((float)timeSpan.TotalDays);
+            int hoursRounded = Mathf.FloorToInt((float)timeSpan.TotalHours);
+            int minutesRounded = Mathf.FloorToInt((float)timeSpan.TotalMinutes);
+            int secondsRounded = Mathf.FloorToInt((float)timeSpan.TotalSeconds);
+
+            if (daysRounded > 0)
+                return $"{daysRounded + 1} days";
+            if (hoursRounded > 0)
+                return $"{hoursRounded + 1} hours";
+            if (minutesRounded > 0)
+                return $"{minutesRounded + 1} minutes";
+            if (secondsRounded > 0)
+                return $"{secondsRounded + 1} seconds";
+            
+            return "1 seconds";
         }
 
         public static string ToPrettyString(this TimeSpan timeSpan, bool includeMs = false, bool precise = true, bool longVersion = false)
