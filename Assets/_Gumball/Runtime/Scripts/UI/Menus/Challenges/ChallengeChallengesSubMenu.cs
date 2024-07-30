@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace Gumball
@@ -11,13 +13,17 @@ namespace Gumball
         [SerializeField] private ChallengeUI challengeUIPrefab;
         [SerializeField] private Transform challengeUIHolder;
 
-        protected abstract Challenges GetChallengeManager();
+        [Space(5)]
+        [SerializeField] private TextMeshProUGUI timerLabel;
         
+        protected abstract Challenges GetChallengeManager();
+
         public override void Show()
         {
             base.Show();
             
             SetupChallengeItems();
+            UpdateTimerLabel();
         }
 
         private void SetupChallengeItems()
@@ -54,6 +60,13 @@ namespace Gumball
                 challengeUI.transform.SetAsFirstSibling();
                 challengeUI.Initialise(unclaimedChallenge, GetChallengeManager(), true);
             }
+        }
+
+        private void UpdateTimerLabel()
+        {
+            TimeSpan timeSpan = TimeSpan.FromSeconds(GetChallengeManager().ResetCycle.SecondsRemainingInCurrentCycle);
+            string timeFormatted = timeSpan.TotalMinutes > 60 ? $"{timeSpan.Hours}h" : $"{timeSpan.TotalMinutes}m";
+            timerLabel.text = $"Resets in {timeFormatted}";
         }
         
     }
