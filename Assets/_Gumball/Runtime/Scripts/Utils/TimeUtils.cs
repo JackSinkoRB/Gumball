@@ -45,6 +45,11 @@ namespace Gumball
         {
             TimeOffsetSeconds = epochSeconds;
         }
+        
+        public static void AddTimeOffset(TimeSpan timeSpan)
+        {
+            SetTimeOffset(TimeOffsetSeconds + (long)timeSpan.TotalSeconds);
+        }
 
         /// <summary>
         /// Reset the fake time to bring the game back into real time.

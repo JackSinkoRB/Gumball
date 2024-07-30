@@ -139,6 +139,9 @@ namespace Gumball
 
         private void ResetChallenges()
         {
+            //give unclaimed intermittent rewards before resetting
+            CoroutineHelper.Instance.StartCoroutine(GiveUnclaimedIntermittentRewards());
+
             for (int slotIndex = 0; slotIndex < numberOfChallenges; slotIndex++)
             {
                 SetCurrentChallenge(slotIndex, GetRandomChallengeIndex());
@@ -147,6 +150,35 @@ namespace Gumball
             //reset intermittent rewards claiming
             HasClaimedMinorReward = false;
             HasClaimedMajorReward = false;
+        }
+
+        private IEnumerator GiveUnclaimedIntermittentRewards()
+        {
+            bool isMinorRewardUnclaimed = !HasClaimedMinorReward && GetTotalProgressPercent() >= MinorRewardPercent;
+            bool isMajorRewardUnclaimed = !HasClaimedMajorReward && GetTotalProgressPercent() >= MajorRewardPercent;
+
+            if (!isMinorRewardUnclaimed && !isMajorRewardUnclaimed)
+                yield break;
+            
+            yield return new WaitUntil(() => PanelManager.GetPanel<MainMenuPanel>().IsShowing
+                                             && !PanelManager.GetPanel<MainMenuPanel>().IsTransitioning);
+            
+            PanelManager.GetPanel<GenericMessagePanel>().Show();
+            PanelManager.GetPanel<GenericMessagePanel>().Initialise("You have unclaimed challenge rewards!");
+
+            yield return new WaitUntil(() => !PanelManager.GetPanel<GenericMessagePanel>().IsShowing);
+
+            if (isMinorRewardUnclaimed)
+            {
+                //give the reward
+                yield return minorRewardsPool.GetRandom().GiveRewards();
+            }
+            
+            if (isMajorRewardUnclaimed)
+            {
+                //give the reward
+                yield return majorRewardsPool.GetRandom().GiveRewards();
+            }
         }
 
         private int GetRandomChallengeIndex()

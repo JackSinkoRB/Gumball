@@ -50,6 +50,11 @@ namespace Gumball
                 tracker.Track(int.MaxValue);
             }
         }
+        
+        public void Skip1Day()
+        {
+            TimeUtils.AddTimeOffset(TimeSpan.FromDays(1));
+        }
 
     }
 }

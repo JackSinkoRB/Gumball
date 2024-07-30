@@ -57,6 +57,12 @@ namespace Gumball
 
         private void UpdateProgressLabel()
         {
+            if (isUnclaimedChallenge)
+            {
+                progressLabel.text = "100%";
+                return;
+            }
+            
             ChallengeTracker.Listener listener = challenge.Tracker.GetListener(challenge.ChallengeID);
             int progressAsPercent = Mathf.RoundToInt(listener.Progress * 100);
             progressLabel.text = $"{progressAsPercent}%";
