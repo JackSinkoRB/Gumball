@@ -27,6 +27,33 @@ namespace Gumball.Editor.Tests
         }
         
         [Test]
+        public void TimeUtilsToPrettyStringMaxUnitOnly()
+        {
+            TimeSpan timeSpan = new TimeSpan(2, 2, 50, 35, 150);
+            Assert.AreEqual("3 days", timeSpan.ToPrettyStringMaxUnitOnly());
+            timeSpan = new TimeSpan(1, 2, 50, 35, 150);
+            Assert.AreEqual("2 days", timeSpan.ToPrettyStringMaxUnitOnly());
+
+            timeSpan = new TimeSpan(0, 23, 50, 35, 150);
+            Assert.AreEqual("24 hours", timeSpan.ToPrettyStringMaxUnitOnly());
+            timeSpan = new TimeSpan(0, 1, 50, 35, 150);
+            Assert.AreEqual("2 hours", timeSpan.ToPrettyStringMaxUnitOnly());
+            
+            timeSpan = new TimeSpan(0, 0, 50, 35, 150);
+            Assert.AreEqual("51 minutes", timeSpan.ToPrettyStringMaxUnitOnly());
+            timeSpan = new TimeSpan(0, 0, 1, 35, 150);
+            Assert.AreEqual("2 minutes", timeSpan.ToPrettyStringMaxUnitOnly());
+            
+            timeSpan = new TimeSpan(0, 0, 0, 35, 150);
+            Assert.AreEqual("36 seconds", timeSpan.ToPrettyStringMaxUnitOnly());
+            timeSpan = new TimeSpan(0, 0, 0, 1, 150);
+            Assert.AreEqual("2 seconds", timeSpan.ToPrettyStringMaxUnitOnly());
+            
+            timeSpan = new TimeSpan(0, 0, 0, 0, 150);
+            Assert.AreEqual("1 seconds", timeSpan.ToPrettyStringMaxUnitOnly());
+        }
+        
+        [Test]
         public void TimeUtilsToPrettyStringShort()
         {
             TimeSpan timeSpan = new TimeSpan(0, 2, 50, 35, 150);

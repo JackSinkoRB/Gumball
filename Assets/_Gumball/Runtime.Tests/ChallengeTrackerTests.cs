@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class ChallengeTests : IPrebuildSetup, IPostBuildCleanup
+    public class ChallengeTrackerTests : IPrebuildSetup, IPostBuildCleanup
     {
 
         private bool isInitialised;
@@ -125,7 +125,7 @@ namespace Gumball.Runtime.Tests
             
             Challenge subObjective = GameSession.SubObjectives[0];
             ChallengeTracker tracker = subObjective.Tracker;
-            string trackerId = GameSession.GetChallengeTrackerID(subObjective);
+            string trackerId = subObjective.ChallengeID;
             
             Assert.IsNotNull(tracker.GetListener(trackerId));
 

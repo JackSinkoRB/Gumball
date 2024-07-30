@@ -9,6 +9,8 @@ namespace Gumball.Runtime.Tests
     public class FuelManagerTests : IPrebuildSetup, IPostBuildCleanup
     {
 
+        private bool isInitialised;
+        
         public void Setup()
         {
             BootSceneClear.TrySetup();
@@ -29,6 +31,8 @@ namespace Gumball.Runtime.Tests
             PersistentCooldown.IsRunningTests = true;
             DecalEditor.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
+
+            CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
 
         [OneTimeTearDown]
@@ -50,127 +54,147 @@ namespace Gumball.Runtime.Tests
             TimeUtils.SetTimeOffset(0);
         }
 
-        [Test]
+        private IEnumerator Initialise()
+        {
+            yield return FuelManager.LoadInstanceAsync();
+            
+            isInitialised = true;
+        }
+
+        [UnityTest]
         [Order(1)]
-        public void StartsWithMaxFuel()
+        public IEnumerator StartsWithMaxFuel()
         {
-            Assert.AreEqual(FuelManager.MaxFuel, FuelManager.CurrentFuel);
+            yield return new WaitUntil(() => isInitialised);
+
+            Assert.AreEqual(FuelManager.Instance.MaxFuel, FuelManager.Instance.CurrentFuel);
         }
         
-        [Test]
+        [UnityTest]
         [Order(2)]
-        public void SetFuel()
+        public IEnumerator SetFuel()
         {
-            FuelManager.SetFuel(1);
-            Assert.AreEqual(1, FuelManager.CurrentFuel);
+            yield return new WaitUntil(() => isInitialised);
+
+            FuelManager.Instance.SetFuel(1);
+            Assert.AreEqual(1, FuelManager.Instance.CurrentFuel);
             
-            FuelManager.SetFuel(5);
-            Assert.AreEqual(5, FuelManager.CurrentFuel);
+            FuelManager.Instance.SetFuel(5);
+            Assert.AreEqual(5, FuelManager.Instance.CurrentFuel);
             
-            FuelManager.SetFuel(0);
-            Assert.AreEqual(0, FuelManager.CurrentFuel);
+            FuelManager.Instance.SetFuel(0);
+            Assert.AreEqual(0, FuelManager.Instance.CurrentFuel);
         }
         
-        [Test]
+        [UnityTest]
         [Order(3)]
-        public void AddFuel()
+        public IEnumerator AddFuel()
         {
-            FuelManager.SetFuel(1);
-            FuelManager.AddFuel();
-            Assert.AreEqual(2, FuelManager.CurrentFuel);
+            yield return new WaitUntil(() => isInitialised);
+
+            FuelManager.Instance.SetFuel(1);
+            FuelManager.Instance.AddFuel();
+            Assert.AreEqual(2, FuelManager.Instance.CurrentFuel);
             
-            FuelManager.SetFuel(5);
-            FuelManager.AddFuel(2);
-            Assert.AreEqual(7, FuelManager.CurrentFuel);
+            FuelManager.Instance.SetFuel(5);
+            FuelManager.Instance.AddFuel(2);
+            Assert.AreEqual(7, FuelManager.Instance.CurrentFuel);
         }
         
-        [Test]
+        [UnityTest]
         [Order(4)]
-        public void TakeFuel()
+        public IEnumerator TakeFuel()
         {
-            FuelManager.SetFuel(1);
-            FuelManager.TakeFuel();
-            Assert.AreEqual(0, FuelManager.CurrentFuel);
+            yield return new WaitUntil(() => isInitialised);
             
-            FuelManager.SetFuel(5);
-            FuelManager.TakeFuel(2);
-            Assert.AreEqual(3, FuelManager.CurrentFuel);
+            FuelManager.Instance.SetFuel(1);
+            FuelManager.Instance.TakeFuel();
+            Assert.AreEqual(0, FuelManager.Instance.CurrentFuel);
+            
+            FuelManager.Instance.SetFuel(5);
+            FuelManager.Instance.TakeFuel(2);
+            Assert.AreEqual(3, FuelManager.Instance.CurrentFuel);
         }
         
-        [Test]
+        [UnityTest]
         [Order(5)]
-        public void HasFuel()
+        public IEnumerator HasFuel()
         {
-            FuelManager.SetFuel(1);
-            Assert.IsTrue(FuelManager.HasFuel());
+            yield return new WaitUntil(() => isInitialised);
+
+            FuelManager.Instance.SetFuel(1);
+            Assert.IsTrue(FuelManager.Instance.HasFuel());
             
-            FuelManager.SetFuel(0);
-            Assert.IsFalse(FuelManager.HasFuel());
+            FuelManager.Instance.SetFuel(0);
+            Assert.IsFalse(FuelManager.Instance.HasFuel());
             
-            FuelManager.SetFuel(5);
-            Assert.IsTrue(FuelManager.HasFuel());
+            FuelManager.Instance.SetFuel(5);
+            Assert.IsTrue(FuelManager.Instance.HasFuel());
         }
         
         [UnityTest]
         [Order(6)]
         public IEnumerator FuelRegeneratesAutomaticallySingle()
         {
+            yield return new WaitUntil(() => isInitialised);
+
             Assert.AreEqual(0, TimeUtils.TimeOffsetSeconds);
             
             //ensure the cycle has been created
-            Assert.IsNotNull(FuelManager.RegenerateCycle);
+            Assert.IsNotNull(FuelManager.Instance.RegenerateCycle);
 
-            FuelManager.SetFuel(0);
+            FuelManager.Instance.SetFuel(0);
             
-            FuelManager.RegenerateCycle.Restart();
+            FuelManager.Instance.RegenerateCycle.Restart();
             
-            const long cycleDurationSeconds = FuelManager.MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute;
-            TimeUtils.SetTimeOffset(cycleDurationSeconds);
+            TimeUtils.SetTimeOffset(FuelManager.Instance.TimeBetweenFuelRegenerate.ToSeconds());
             yield return null; //wait for events to trigger
 
-            Assert.AreEqual(1, FuelManager.CurrentFuel);
+            Assert.AreEqual(1, FuelManager.Instance.CurrentFuel);
         }
         
         [UnityTest]
         [Order(7)]
         public IEnumerator FuelRegeneratesAutomaticallyMultiple()
         {
+            yield return new WaitUntil(() => isInitialised);
+            
             Assert.AreEqual(0, TimeUtils.TimeOffsetSeconds);
             
             //ensure the cycle has been created
-            Assert.IsNotNull(FuelManager.RegenerateCycle);
+            Assert.IsNotNull(FuelManager.Instance.RegenerateCycle);
 
-            FuelManager.SetFuel(0);
+            FuelManager.Instance.SetFuel(0);
             
-            FuelManager.RegenerateCycle.Restart();
+            FuelManager.Instance.RegenerateCycle.Restart();
 
-            const long cycleDurationSeconds = FuelManager.MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute;
-            const int cyclesToComplete = FuelManager.MaxFuel;
-            TimeUtils.SetTimeOffset(cycleDurationSeconds * cyclesToComplete);
+            int cyclesToComplete = FuelManager.Instance.MaxFuel;
+            TimeUtils.SetTimeOffset(FuelManager.Instance.TimeBetweenFuelRegenerate.ToSeconds() * cyclesToComplete);
             yield return null; //wait for events to trigger
 
-            Assert.AreEqual(cyclesToComplete, FuelManager.CurrentFuel);
+            Assert.AreEqual(cyclesToComplete, FuelManager.Instance.CurrentFuel);
         }
         
         [UnityTest]
         [Order(8)]
         public IEnumerator FuelDoesntRegenerateOverMax()
         {
+            yield return new WaitUntil(() => isInitialised);
+            
             Assert.AreEqual(0, TimeUtils.TimeOffsetSeconds);
 
             //ensure the cycle has been created
-            Assert.IsNotNull(FuelManager.RegenerateCycle);
+            Assert.IsNotNull(FuelManager.Instance.RegenerateCycle);
 
-            FuelManager.SetFuel(FuelManager.MaxFuel - 1);
+            FuelManager.Instance.SetFuel(FuelManager.Instance.MaxFuel - 1);
             
-            FuelManager.RegenerateCycle.Restart();
+            FuelManager.Instance.RegenerateCycle.Restart();
             
-            const long cycleDurationSeconds = FuelManager.MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute;
             const int cyclesToComplete = 2;
-            TimeUtils.SetTimeOffset(cycleDurationSeconds * cyclesToComplete);
+            TimeUtils.SetTimeOffset(FuelManager.Instance.TimeBetweenFuelRegenerate.ToSeconds() * cyclesToComplete);
             yield return null; //wait for events to trigger
 
-            Assert.AreEqual(FuelManager.MaxFuel, FuelManager.CurrentFuel);
+            Assert.AreEqual(FuelManager.Instance.MaxFuel, FuelManager.Instance.CurrentFuel);
         }
         
     }

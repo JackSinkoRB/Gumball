@@ -50,12 +50,12 @@ namespace Gumball
 
         public void Play()
         {
+            if (!DataManager.Player.HasKey($"PersistentCooldown.{id}"))
+                timeLastStarted = TimeUtils.CurrentEpochSeconds;
+            
             CoroutineHelper.onUnityLateUpdate -= CheckIfCyclesCompleted;
             CoroutineHelper.onUnityLateUpdate += CheckIfCyclesCompleted;
-            
-            //ensure coroutinehelper exists
-            CoroutineHelper.AssignInstance();
-            
+
             IsPlaying = true;
         }
         
