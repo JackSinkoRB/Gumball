@@ -83,6 +83,13 @@ namespace Gumball
             if (isRuntimeChunk)
                 return;
 
+            if (Application.isPlaying)
+                return;
+
+            bool isSceneInstance = !chunk.UniqueID.Contains("Prefab");
+            if (isSceneInstance)
+                return;
+            
             IsBakingMeshes = true;
             chunk.FindSplineMeshes();
             ChunkUtils.BakeMeshes(chunk, false, true);
@@ -134,15 +141,17 @@ namespace Gumball
             CheckToUpdateMeshesImmediately();
             CheckIfTerrainIsRaycastable();
             
-            EditorApplication.delayCall -= CheckToUnbakeMeshesIfPrefabMode;
-            EditorApplication.delayCall += CheckToUnbakeMeshesIfPrefabMode;
+            EditorApplication.delayCall -= CheckToUnbakeMeshes;
+            EditorApplication.delayCall += CheckToUnbakeMeshes;
         }
 
-        private void CheckToUnbakeMeshesIfPrefabMode()
+        private void CheckToUnbakeMeshes()
         {
             try
             {
-                if (PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject)
+                bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject;
+                bool isEditorInstance = !EditorApplication.isPlaying;
+                if (isPrefabMode || isEditorInstance)
                     UnbakeSplineMeshes();
             }
             catch (MissingReferenceException)
