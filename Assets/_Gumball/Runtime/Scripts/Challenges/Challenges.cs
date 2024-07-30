@@ -160,7 +160,8 @@ namespace Gumball
             if (!isMinorRewardUnclaimed && !isMajorRewardUnclaimed)
                 yield break;
             
-            yield return new WaitUntil(() => PanelManager.GetPanel<MainMenuPanel>().IsShowing
+            yield return new WaitUntil(() => PanelManager.PanelExists<MainMenuPanel>()
+                                             && PanelManager.GetPanel<MainMenuPanel>().IsShowing
                                              && !PanelManager.GetPanel<MainMenuPanel>().IsTransitioning);
             
             PanelManager.GetPanel<GenericMessagePanel>().Show();
