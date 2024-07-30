@@ -10,6 +10,8 @@ namespace Gumball
     [Serializable]
     public class AirTimeSkillCheck : SkillCheck
     {
+    
+        public event Action onPerformLanding;
         
         [Header("Air time")]
         [SerializeField] private float minSpeedKmh = 50;
@@ -101,6 +103,8 @@ namespace Gumball
             WarehouseManager.Instance.CurrentCar.NosManager.AddNos(landingNosBonus);
 
             SkillCheckManager.Instance.AddPoints(landingPointBonus);
+            
+            onPerformLanding?.Invoke();
         }
 
         private IEnumerator ShowLandingLabelIE()

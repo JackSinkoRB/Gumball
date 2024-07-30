@@ -16,7 +16,7 @@ namespace Gumball
 
         private IEnumerator GiveRewardsThenExitIE()
         {
-            yield return GameSessionManager.Instance.CurrentSession.GiveRewards();
+            yield return GameSessionManager.Instance.CurrentSession.Rewards.GiveRewards();
             
             GameSessionManager.Instance.CurrentSession.UnloadSession();
             MainSceneManager.LoadMainScene();

@@ -118,7 +118,7 @@ namespace Gumball
             for (int index = sessionsThatGiveReward.Count - 1; index >= 0; index--)
             {
                 GameSession session = sessionsThatGiveReward[index];
-                if (!session.SubPartRewards.Contains(this))
+                if (!session.Rewards.SubParts.Contains(this))
                     UntrackAsReward(session);
             }
         }

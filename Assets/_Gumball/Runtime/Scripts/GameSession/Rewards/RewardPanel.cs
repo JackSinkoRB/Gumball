@@ -100,6 +100,7 @@ namespace Gumball
 
                 scrollItems.Add(scrollItem);
             }
+            rewardQueueStandardCurrency.Clear();
 
             magneticScroll.SetItems(scrollItems);
         }
