@@ -3,18 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Gumball
 {
     public abstract class ChallengeChallengesSubMenu : ChallengesSubMenu
     {
 
-        [Space(5)]
+        [Header("Challenges")]
         [SerializeField] private ChallengeUI challengeUIPrefab;
         [SerializeField] private Transform challengeUIHolder;
 
-        [Space(5)]
+        [Header("Timer")]
         [SerializeField] private TextMeshProUGUI timerLabel;
+
+        [Header("Intermittent rewards")]
+        [SerializeField] private Image totalProgressFill;
+        [SerializeField] private Button minorRewardButton;
+        [SerializeField] private Button majorRewardButton;
         
         protected abstract Challenges GetChallengeManager();
 
@@ -24,6 +30,19 @@ namespace Gumball
             
             SetupChallengeItems();
             UpdateTimerLabel();
+            UpdateIntermittentRewards();
+        }
+        
+        public void OnClickMinorReward()
+        {
+            GetChallengeManager().ClaimMinorReward();
+            UpdateIntermittentRewards();
+        }
+
+        public void OnClickMajorReward()
+        {
+            GetChallengeManager().ClaimMajorReward();
+            UpdateIntermittentRewards();
         }
 
         private void SetupChallengeItems()
@@ -69,5 +88,14 @@ namespace Gumball
             timerLabel.text = $"Resets in {timeFormatted}";
         }
         
+        private void UpdateIntermittentRewards()
+        {
+            float totalProgressPercent = GetChallengeManager().GetTotalProgressPercent();
+            totalProgressFill.fillAmount = totalProgressPercent;
+
+            minorRewardButton.interactable = !GetChallengeManager().HasClaimedMinorReward && totalProgressPercent >= GetChallengeManager().MinorRewardPercent;
+            majorRewardButton.interactable = !GetChallengeManager().HasClaimedMajorReward && totalProgressPercent >= GetChallengeManager().MajorRewardPercent;
+        }
+
     }
 }

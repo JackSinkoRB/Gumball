@@ -17,19 +17,40 @@ namespace Gumball
         [SerializeField] private SerializedTimeSpan timeBetweenReset = new(1, 0, 0, 0);
         [Tooltip("How many challenges need to be assigned before a challenge can be reassigned? This prevents players getting the same challenges repeatedly.")]
         [SerializeField] private int challengesBetweenRepeats = 10;
-        
+
+        [Header("Intermittent rewards")]
+        [SerializeField, Range(0,1)] private float minorRewardPercent = 0.5f;
+        [SerializeField] private Rewards[] minorRewardsPool;
+        [Space(5)]
+        [SerializeField, Range(0,1)] private float majorRewardPercent = 0.8f;
+        [SerializeField] private Rewards[] majorRewardsPool;
+
         private List<int> previousChallenges
         {
             get => DataManager.Player.Get($"Challenges.{id}.PreviouslyAssigned", new List<int>());
             set => DataManager.Player.Set($"Challenges.{id}.PreviouslyAssigned", value);
         }
+        
+        public bool HasClaimedMinorReward
+        {
+            get => DataManager.Player.Get($"Challenges.{id}.HasClaimedMinorReward", false);
+            private set => DataManager.Player.Set($"Challenges.{id}.HasClaimedMinorReward", value);
+        }
 
+        public bool HasClaimedMajorReward
+        {
+            get => DataManager.Player.Get($"Challenges.{id}.HasClaimedMajorReward", false);
+            private set => DataManager.Player.Set($"Challenges.{id}.HasClaimedMajorReward", value);
+        }
+        
         public int NumberOfChallenges => numberOfChallenges;
         public Challenge[] ChallengePool => challengePool;
         public SerializedTimeSpan TimeBetweenReset => timeBetweenReset;
         public int ChallengesBetweenRepeats => challengesBetweenRepeats;
         public PersistentCooldown ResetCycle { get; private set; }
-        
+        public float MinorRewardPercent => minorRewardPercent;
+        public float MajorRewardPercent => majorRewardPercent;
+
         public List<int> UnclaimedChallengeIndices
         {
             get => DataManager.GameSessions.Get($"Challenges.{id}.Unclaimed", new List<int>());
@@ -60,6 +81,21 @@ namespace Gumball
             return challengePool[challengeIndex];
         }
         
+        public float GetTotalProgressPercent()
+        {
+            float currentPercent = 0;
+            float maxPercent = NumberOfChallenges;
+            
+            for (int slotIndex = 0; slotIndex < NumberOfChallenges; slotIndex++)
+            {
+                Challenge challenge = GetCurrentChallenge(slotIndex);
+                float progressPercent = challenge.Tracker.GetListener(challenge.ChallengeID).Progress;
+                currentPercent += progressPercent;
+            }
+
+            return Mathf.Clamp01(currentPercent / maxPercent);
+        }
+        
         public int[] GetChallengesWithoutRepeats()
         {
             if (previousChallenges.Count >= challengePool.Length)
@@ -79,6 +115,18 @@ namespace Gumball
             
             return challengesWithoutRepeats;
         }
+        
+        public void ClaimMinorReward()
+        {
+            HasClaimedMinorReward = true;
+            CoroutineHelper.Instance.StartCoroutine(minorRewardsPool.GetRandom().GiveRewards());
+        }
+
+        public void ClaimMajorReward()
+        {
+            HasClaimedMajorReward = true;
+            CoroutineHelper.Instance.StartCoroutine(majorRewardsPool.GetRandom().GiveRewards());
+        }
 
         private void EnsureChallengesAreAssigned()
         {
@@ -95,6 +143,10 @@ namespace Gumball
             {
                 SetCurrentChallenge(slotIndex, GetRandomChallengeIndex());
             }
+            
+            //reset intermittent rewards claiming
+            HasClaimedMinorReward = false;
+            HasClaimedMajorReward = false;
         }
 
         private int GetRandomChallengeIndex()
@@ -158,6 +210,6 @@ namespace Gumball
                 currentChallenge.Tracker.StartListening(currentChallenge.ChallengeID, currentChallenge.Goal);
             }
         }
-        
+
     }
 }
