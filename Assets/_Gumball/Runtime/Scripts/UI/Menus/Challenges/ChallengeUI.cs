@@ -12,6 +12,7 @@ namespace Gumball
 
         [SerializeField] private Button claimButton;
         [SerializeField] private TextMeshProUGUI claimButtonLabel;
+        [SerializeField] private AutosizeTextMeshPro progressLabel;
         [SerializeField] private AutosizeTextMeshPro descriptionLabel;
 
         private Challenge challenge;
@@ -23,10 +24,9 @@ namespace Gumball
             this.challenge = challenge;
             this.challengeManager = challengeManager;
             this.isUnclaimedChallenge = isUnclaimedChallenge;
-            
-            descriptionLabel.text = challenge.Description;
-            descriptionLabel.Resize();
-            
+
+            UpdateDescriptionLabel();
+            UpdateProgressLabel();
             UpdateClaimButton();
         }
 
@@ -49,6 +49,20 @@ namespace Gumball
             challengeManager.RemoveUnclaimedChallenge(challengeManager.ChallengePool.IndexOfItem(challenge));
         }
 
+        private void UpdateDescriptionLabel()
+        {
+            descriptionLabel.text = challenge.Description;
+            descriptionLabel.Resize();
+        }
+
+        private void UpdateProgressLabel()
+        {
+            ChallengeTracker.Listener listener = challenge.Tracker.GetListener(challenge.ChallengeID);
+            int progressAsPercent = Mathf.RoundToInt(listener.Progress * 100);
+            progressLabel.text = $"{progressAsPercent}%";
+            progressLabel.Resize();
+        }
+        
         private void UpdateClaimButton()
         {
             if (challenge.IsClaimed)

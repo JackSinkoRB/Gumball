@@ -84,7 +84,7 @@ namespace Gumball
         private void UpdateTimerLabel()
         {
             TimeSpan timeSpan = TimeSpan.FromSeconds(GetChallengeManager().ResetCycle.SecondsRemainingInCurrentCycle);
-            string timeFormatted = timeSpan.TotalMinutes > 60 ? $"{timeSpan.Hours}h" : $"{timeSpan.TotalMinutes}m";
+            string timeFormatted = timeSpan.ToPrettyStringMaxUnitOnly();
             timerLabel.text = $"Resets in {timeFormatted}";
         }
         

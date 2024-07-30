@@ -65,6 +65,20 @@ namespace Gumball
             SetTimeOffset(difference);
         }
 
+        public static string ToPrettyStringMaxUnitOnly(this TimeSpan timeSpan)
+        {
+            stringBuilder.Clear();
+            if (timeSpan.Days > 0)
+                return timeSpan.Days == 1 ? "1 day" : $"{timeSpan.Days} days";
+            if (timeSpan.Hours > 0)
+                return timeSpan.Hours == 1 ? "1 hour" : $"{timeSpan.Hours} hours";
+            if (timeSpan.Minutes > 0)
+                return timeSpan.Minutes == 1 ? "1 minute" : $"{timeSpan.Minutes} minutes";
+            if (timeSpan.Seconds > 0)
+                return timeSpan.Seconds == 1 ? "1 second" : $"{timeSpan.Seconds} seconds";
+            return "0 seconds";
+        }
+
         public static string ToPrettyString(this TimeSpan timeSpan, bool includeMs = false, bool precise = true, bool longVersion = false)
         {
             stringBuilder.Clear();
