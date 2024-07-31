@@ -43,19 +43,21 @@ namespace Gumball
             //give XP
             if (xp > 0)
             {
-                PanelManager.GetPanel<XPGainedPanel>().Show();
-            
                 int currentXP = ExperienceManager.TotalXP;
                 int newXP = ExperienceManager.TotalXP + xp;
                 
-                PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
-                
-                yield return new WaitUntil(() => !PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning);
-                
+                if (PanelManager.PanelExists<XPGainedPanel>())
+                {
+                    PanelManager.GetPanel<XPGainedPanel>().Show();
+                    PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
+                    
+                    yield return new WaitUntil(() => !PanelManager.PanelExists<XPGainedPanel>() || (!PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning));
+                }
+
                 ExperienceManager.AddXP(xp); //add XP after in case there's a level up
                 
-                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning &&
-                                                 !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+                yield return new WaitUntil(() => (!PanelManager.PanelExists<LevelUpPanel>() || (!PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning))
+                                                 && (!PanelManager.PanelExists<UnlockableAnnouncementPanel>() || (!PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning)));
             }
 
             //give standard currency
@@ -98,7 +100,7 @@ namespace Gumball
             if (PanelManager.PanelExists<RewardPanel>() && PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
             {
                 PanelManager.GetPanel<RewardPanel>().Show();
-                yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);
+                yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || (!PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning));
             }
         }
         
