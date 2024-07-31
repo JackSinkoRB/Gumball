@@ -45,6 +45,11 @@ namespace Gumball
         {
             TimeOffsetSeconds = epochSeconds;
         }
+        
+        public static void AddTimeOffset(TimeSpan timeSpan)
+        {
+            SetTimeOffset(TimeOffsetSeconds + (long)timeSpan.TotalSeconds);
+        }
 
         /// <summary>
         /// Reset the fake time to bring the game back into real time.
@@ -63,6 +68,25 @@ namespace Gumball
             long currentTime = CurrentEpochSeconds;
             long difference = epochSeconds - currentTime;
             SetTimeOffset(difference);
+        }
+
+        public static string ToPrettyStringMaxUnitOnly(this TimeSpan timeSpan)
+        {
+            int daysRounded = Mathf.FloorToInt((float)timeSpan.TotalDays);
+            int hoursRounded = Mathf.FloorToInt((float)timeSpan.TotalHours);
+            int minutesRounded = Mathf.FloorToInt((float)timeSpan.TotalMinutes);
+            int secondsRounded = Mathf.FloorToInt((float)timeSpan.TotalSeconds);
+
+            if (daysRounded > 0)
+                return $"{daysRounded + 1} days";
+            if (hoursRounded > 0)
+                return $"{hoursRounded + 1} hours";
+            if (minutesRounded > 0)
+                return $"{minutesRounded + 1} minutes";
+            if (secondsRounded > 0)
+                return $"{secondsRounded + 1} seconds";
+            
+            return "1 seconds";
         }
 
         public static string ToPrettyString(this TimeSpan timeSpan, bool includeMs = false, bool precise = true, bool longVersion = false)

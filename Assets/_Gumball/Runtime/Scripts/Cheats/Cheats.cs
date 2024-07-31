@@ -42,6 +42,19 @@ namespace Gumball
             foreach (SubPart subPart in SubPartManager.AllParts)
                 subPart.SetUnlocked(true);
         }
+        
+        public void CompleteCurrentChallenges()
+        {
+            foreach (ChallengeTracker tracker in ChallengeTrackerManager.Instance.Trackers)
+            {
+                tracker.Track(int.MaxValue);
+            }
+        }
+        
+        public void Skip1Day()
+        {
+            TimeUtils.AddTimeOffset(TimeSpan.FromDays(1));
+        }
 
     }
 }

@@ -4,51 +4,53 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public static class FuelManager
+    [CreateAssetMenu(menuName = "Gumball/Singletons/Fuel Manager")]
+    public class FuelManager : SingletonScriptable<FuelManager>
     {
         
-        public const int MaxFuel = 10;
-        
-        /// <summary>
-        /// How often does the player get given a fuel automatically?
-        /// </summary>
-        public const int MinutesBetweenFuelRegenerate = 15;
-        
         public delegate void OnFuelChangeDelegate(int previousFuel, int newFuel);
-        public static OnFuelChangeDelegate onFuelChange;
-
-        public static PersistentCooldown RegenerateCycle { get; private set; }
+        public OnFuelChangeDelegate onFuelChange;
         
-        public static int CurrentFuel
+        [SerializeField] private int maxFuel = 10;
+        [Tooltip("How often does the player get given a fuel automatically?")]
+        [SerializeField] private SerializedTimeSpan timeBetweenFuelRegenerate = new(0, 15, 0);
+
+        public PersistentCooldown RegenerateCycle { get; private set; }
+        
+        public int MaxFuel => maxFuel;
+        public SerializedTimeSpan TimeBetweenFuelRegenerate => timeBetweenFuelRegenerate;
+        
+        public int CurrentFuel
         {
-            get => DataManager.Player.Get("Fuel.Current", MaxFuel); //initialise with max fuel
+            get => DataManager.Player.Get("Fuel.Current", maxFuel); //initialise with max fuel
             private set => DataManager.Player.Set("Fuel.Current", value);
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void RuntimeInitialise()
+        protected override void OnInstanceLoaded()
         {
-            RegenerateCycle = new PersistentCooldown("FuelRegenerateCycle", MinutesBetweenFuelRegenerate * TimeUtils.SecondsInAMinute);
+            base.OnInstanceLoaded();
+            
+            RegenerateCycle = new PersistentCooldown("FuelRegenerateCycle", timeBetweenFuelRegenerate.ToSeconds());
             RegenerateCycle.onCycleComplete += RegenerateFuel;
             RegenerateCycle.Play();
         }
-        
-        public static bool HasFuel(int amount = 1)
+
+        public bool HasFuel(int amount = 1)
         {
             return CurrentFuel >= amount;
         }
         
-        public static void ReplenishFuel()
+        public void ReplenishFuel()
         {
-            SetFuel(MaxFuel);
+            SetFuel(maxFuel);
         }
         
-        public static void SetFuel(int amount)
+        public void SetFuel(int amount)
         {
-            if (amount > MaxFuel)
+            if (amount > maxFuel)
             {
                 Debug.LogError("Cannot set fuel above the maximum.");
-                amount = MaxFuel;
+                amount = maxFuel;
             }
 
             if (amount < 0)
@@ -65,7 +67,7 @@ namespace Gumball
             
             onFuelChange?.Invoke(previousFuel, amount);
 
-            bool wasMaxFuel = previousFuel == MaxFuel && CurrentFuel < MaxFuel;
+            bool wasMaxFuel = previousFuel == maxFuel && CurrentFuel < maxFuel;
             if (wasMaxFuel)
             {
                 //restart the regenerate timer
@@ -73,19 +75,19 @@ namespace Gumball
             }
         }
         
-        public static void AddFuel(int amount = 1)
+        public void AddFuel(int amount = 1)
         {
             SetFuel(CurrentFuel + amount);
         }
         
-        public static void TakeFuel(int amount = 1)
+        public void TakeFuel(int amount = 1)
         {
             SetFuel(CurrentFuel - amount);
         }
         
-        private static void RegenerateFuel()
+        private void RegenerateFuel()
         {
-            if (CurrentFuel == MaxFuel)
+            if (CurrentFuel == maxFuel)
                 return;
             
             AddFuel();
