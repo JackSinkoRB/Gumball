@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class TimedSessionPanel : AnimatedPanel
+    public class TimedSessionPanel : GameSessionPanel
     {
 
         /// <summary>

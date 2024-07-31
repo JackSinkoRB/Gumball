@@ -13,28 +13,19 @@ namespace Gumball
 
         [SerializeField, ReadOnly] private AICar[] racersInPositionOrder;
         
-        private RaceSessionPanel sessionPanel => PanelManager.GetPanel<RaceSessionPanel>();
-
         public override string GetName()
         {
             return "Race";
         }
         
-        protected override IEnumerator LoadSession()
+        protected override GameSessionPanel GetSessionPanel()
         {
-            yield return base.LoadSession();
-
-            sessionPanel.Show();
+            return PanelManager.GetPanel<RaceSessionPanel>();
         }
         
-        protected override void OnSessionEnd()
+        protected override GameSessionEndPanel GetSessionEndPanel()
         {
-            base.OnSessionEnd();
-            
-            PanelManager.GetPanel<RaceSessionPanel>().Hide();
-            PanelManager.GetPanel<RaceSessionEndPanel>().Show();
-            
-            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
+            return PanelManager.GetPanel<RaceSessionEndPanel>();
         }
 
         public int GetRacePosition(AICar car)

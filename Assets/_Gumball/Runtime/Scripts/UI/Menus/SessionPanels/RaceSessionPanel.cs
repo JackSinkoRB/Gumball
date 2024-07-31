@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class RaceSessionPanel : AnimatedPanel
+    public class RaceSessionPanel : GameSessionPanel
     {
         
         [SerializeField] private TextMeshProUGUI positionLabel;

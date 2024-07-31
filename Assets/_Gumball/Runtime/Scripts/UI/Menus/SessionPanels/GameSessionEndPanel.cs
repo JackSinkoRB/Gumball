@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class GameSessionEndPanel : AnimatedPanel
+    public abstract class GameSessionEndPanel : AnimatedPanel
     {
 
         public void OnClickExitButton()
