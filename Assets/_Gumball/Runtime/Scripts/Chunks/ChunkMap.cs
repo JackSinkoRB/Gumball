@@ -77,22 +77,7 @@ namespace Gumball
                 
                 GlobalLoggers.ChunkLogger.Log($"Setup = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
-                
-                //ensure meshes are baked (only check each chunk once)
-                HashSet<string> chunksBaked = new HashSet<string>();
-                for (int index = 0; index < chunkInstances.Length; index++)
-                {
-                    AssetReferenceGameObject chunkReference = chunkReferences[index];
-                    
-                    if (chunksBaked.Contains(chunkReference.editorAsset.name))
-                        continue;
 
-                    chunksBaked.Add(chunkReference.editorAsset.name);
-                    
-                    chunkReference.editorAsset.GetComponent<Chunk>().FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(chunkReference.editorAsset.GetComponent<Chunk>(), false, saveAssets: false);
-                }
-                
                 GlobalLoggers.ChunkLogger.Log($"Baking meshes = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
                 

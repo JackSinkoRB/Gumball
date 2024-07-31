@@ -22,13 +22,6 @@ namespace Gumball
 #if UNITY_EDITOR
         public static void OnDuplicateChunkAsset(string oldID, string newChunkPath, ChunkEditorTools newChunk)
         {
-            if (newChunk != null)
-            {
-                //rebake
-                newChunk.chunk.FindSplineMeshes();
-                ChunkUtils.BakeMeshes(newChunk.chunk, saveAssets: false);
-            }
-
             //find the old chunk
             string directory = Path.GetDirectoryName(newChunkPath);
             UniqueIDAssigner idAssigner = UniqueIDAssigner.FindAssignerWithIDInDirectory(oldID, directory);
@@ -38,10 +31,6 @@ namespace Gumball
                 ChunkEditorTools oldChunk = idAssigner.GetComponent<ChunkEditorTools>();
                 if (oldChunk != null)
                 {
-                    //rebake
-                    oldChunk.chunk.FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(oldChunk.chunk, saveAssets: false);
-                    
                     //rebuild the runtime chunk
                     ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, saveAssetsOnComplete: false);
                 }
@@ -65,45 +54,18 @@ namespace Gumball
 
         private bool isRuntimeChunk => name.Contains(ChunkUtils.RuntimeChunkSuffix);
 
-        public static bool IsBakingMeshes;
-
-        private void CheckToBakeMeshes()
-        {
-            if (IsBakingMeshes)
-                return;
-
-            if (isRuntimeChunk)
-                return;
-
-            //only ever bake meshes when exiting prefab mode
-            bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject;
-            bool isExitingPrefabMode = lastOpenedChunk == this && !isPrefabMode;
-            if (!isExitingPrefabMode)
-                return;
-            
-            IsBakingMeshes = true;
-            chunk.FindSplineMeshes();
-            ChunkUtils.BakeMeshes(chunk, false, true);
-            IsBakingMeshes = false;
-        }
-        
         private void OnEnable()
         {
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
+            
             chunk.UpdateSplineSampleData();
         }
 
         private void OnDisable()
         {
-            if (!Application.isPlaying)
-                CheckToBakeMeshes();
-            
             chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
             
             Tools.hidden = false;
-            
-            if (lastOpenedChunk == this)
-                lastOpenedChunk = null;
         }
 
         private void OnDrawGizmos()
@@ -112,8 +74,6 @@ namespace Gumball
             CheckToShowVertices();
         }
 
-        private static ChunkEditorTools lastOpenedChunk;
-        
         private void Update()
         {
             CheckIfJustDeselected();
@@ -121,10 +81,6 @@ namespace Gumball
             previousSelection = Selection.activeGameObject;
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
                 timeWhenUnityLastUpdated = Time.realtimeSinceStartup;
-
-            bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject;
-            if (isPrefabMode)
-                lastOpenedChunk = this;
         }
         
         private void LateUpdate()
@@ -427,7 +383,6 @@ namespace Gumball
 
             //need to ensure all the splinemesh are set up
             chunk.FindSplineMeshes();
-            ChunkUtils.BakeMeshes(chunk, false, saveAssets: false);
             
             chunk.SplineComputer.RebuildImmediate();
 
@@ -462,12 +417,20 @@ namespace Gumball
 
         private void UnbakeSplineMeshes()
         {
+            if (isRuntimeChunk)
+                return;
+            
             chunk.FindSplineMeshes();
             foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
             {
                 if (!splineMesh.gameObject.activeSelf)
                     continue;
-                splineMesh.Unbake();
+
+                if (splineMesh.baked)
+                {
+                    splineMesh.Unbake();
+                    EditorUtility.SetDirty(gameObject);
+                }
             }
         }
         
