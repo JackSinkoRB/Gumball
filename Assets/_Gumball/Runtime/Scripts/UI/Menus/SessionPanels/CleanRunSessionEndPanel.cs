@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class TimedSessionEndPanel : GameSessionEndPanel
+    public class CleanRunSessionEndPanel : TimedSessionEndPanel
     {
-        
+
         
         
     }
