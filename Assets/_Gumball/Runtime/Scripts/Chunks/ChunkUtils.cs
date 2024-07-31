@@ -4,13 +4,10 @@ using System.Collections.Generic;
 using Dreamteck.Splines;
 using MyBox;
 #if UNITY_EDITOR
-using System.Diagnostics;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using System.IO;
-using BezierPath;
 using UnityEditor;
-using Gumball.Editor;
 #endif
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -196,9 +193,10 @@ namespace Gumball
         }
 
 #if UNITY_EDITOR
-        public static void BakeMeshes(Chunk chunk, bool replace = true, bool saveAssets = true)
+        public static void BakeMeshes(Chunk chunk)
         {
-            foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
+            SplineMesh[] splineMeshes = chunk.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            foreach (SplineMesh splineMesh in splineMeshes)
             {
                 if (splineMesh == null || !splineMesh.gameObject.activeSelf)
                     continue;
@@ -210,45 +208,38 @@ namespace Gumball
                 UniqueIDAssigner uniqueIDAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
                 if (uniqueIDAssigner == null)
                     continue;
-                
-                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{uniqueIDAssigner.UniqueID}.asset";
-                Mesh existingAsset = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-                
-                bool alreadyBaked = splineMesh.baked && existingAsset != null && splineMesh.GetComponent<MeshFilter>().sharedMesh != null;
-                if (alreadyBaked && !replace)
-                    continue;
 
                 splineMesh.Unbake();
                 splineMesh.Bake(true, true);
-
-                MeshFilter meshFilter = splineMesh.GetComponent<MeshFilter>();
                 
+                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{uniqueIDAssigner.UniqueID}.asset";
+                Mesh existingAsset = AssetDatabase.LoadAssetAtPath<Mesh>(path);
                 if (existingAsset != null)
                     AssetDatabase.DeleteAsset(path);
+                
+                MeshFilter meshFilter = splineMesh.GetComponent<MeshFilter>();
                 AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
+                AssetDatabase.SaveAssets();
 
                 MeshCollider meshCollider = splineMesh.GetComponent<MeshCollider>();
                 Mesh savedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
                 if (meshFilter != null)
                 {
                     meshFilter.sharedMesh = savedMesh;
-                    PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
+                    EditorUtility.SetDirty(meshFilter);
                 }
 
                 if (meshCollider != null)
                 {
                     meshCollider.sharedMesh = savedMesh;
-                    PrefabUtility.RecordPrefabInstancePropertyModifications(meshCollider);
+                    EditorUtility.SetDirty(meshCollider);
                 }
                 
-                PrefabUtility.RecordPrefabInstancePropertyModifications(splineMesh);
+                EditorUtility.SetDirty(splineMesh);
                 EditorUtility.SetDirty(chunk.gameObject);
                 
                 GlobalLoggers.ChunkLogger.Log("Baked " + path);
             }
-
-            if (saveAssets)
-                AssetDatabase.SaveAssets();
         }
 
         /// <summary>
@@ -303,8 +294,11 @@ namespace Gumball
                 return null;
             }
 
+            GameObject chunk = instanceToCopy == null ? prefab : instanceToCopy;
+            chunk.GetComponent<ChunkEditorTools>().CheckToAssignSplineMeshIDs();
+            
             //create runtime chunk
-            GameObject runtimeInstance = Object.Instantiate(instanceToCopy == null ? prefab : instanceToCopy);
+            GameObject runtimeInstance = Object.Instantiate(chunk);
             
             Chunk runtimeInstanceChunk = runtimeInstance.GetComponent<Chunk>();
             runtimeInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
@@ -326,8 +320,7 @@ namespace Gumball
             }
             
             //bake spline meshes
-            runtimeInstanceChunk.FindSplineMeshes();
-            BakeMeshes(runtimeInstanceChunk, true, false);
+            BakeMeshes(runtimeInstanceChunk);
 
             //delete empty gameobjects
             HashSet<GameObject> emptyObjects = new();

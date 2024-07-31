@@ -55,8 +55,6 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool isFullyLoaded;
         [SerializeField, ReadOnly] private bool isAccessible;
-        [Tooltip("A list of child spline meshes. These are automatically assigned when the chunk asset is saved.")]
-        [SerializeField, ReadOnly] private SplineMesh[] splineMeshes;
         [SerializeField, ReadOnly] private ChunkMeshData chunkMeshData;
         [SerializeField, ReadOnly] private GameObject chunkDetector;
         [SerializeField, ReadOnly] private float splineLengthCached = -1;
@@ -70,7 +68,6 @@ namespace Gumball
         public ChunkMeshData ChunkMeshData => chunkMeshData;
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
-        public SplineMesh[] SplinesMeshes => splineMeshes;
         public SplineSample[] SplineSamples => splineSampleCollection.samples;
         
         public bool IsAutomaticTerrainRecreationDisabled { get; private set; }
@@ -296,54 +293,6 @@ namespace Gumball
             meshCollider.sharedMesh = terrainLowLOD.GetComponent<MeshFilter>().sharedMesh;
         }
         
-#if UNITY_EDITOR
-        /// <summary>
-        /// Iterates through children to find SplineMeshes, and caches the references.
-        /// </summary>
-        public void FindSplineMeshes()
-        {
-            splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
-
-            EnsureSplineMeshHaveUniqueID();
-
-            GlobalLoggers.ChunkLogger.Log($"Found {splineMeshes.Length} spline meshes under {gameObject.name}.");
-        }
-
-        private void EnsureSplineMeshHaveUniqueID()
-        {
-            bool prefabNeedsChanging = false;
-            
-            foreach (SplineMesh splineMesh in splineMeshes)
-            {
-                if (!splineMesh.HasComponent<UniqueIDAssigner>())
-                    prefabNeedsChanging = true;
-            }
-
-            if (prefabNeedsChanging)
-            {
-                string path = GameObjectUtils.GetPathToPrefabAsset(gameObject);
-                if (path.IsNullOrEmpty())
-                    return;
-
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-
-                SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
-                foreach (SplineMesh splineMeshInPrefab in splineMeshesInPrefab)
-                {
-                    if (!splineMeshInPrefab.HasComponent<UniqueIDAssigner>())
-                    {
-                        UniqueIDAssigner id = splineMeshInPrefab.gameObject.AddComponent<UniqueIDAssigner>();
-                        id.Initialise();
-                    }
-                }
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabInstance, path);
-                DestroyImmediate(prefabInstance);
-            }
-        }
-#endif
-
         private void TryFindExistingTerrain(TerrainLOD lod)
         {
             if ((lod == TerrainLOD.HIGH && terrainHighLOD != null)
