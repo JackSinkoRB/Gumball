@@ -163,12 +163,15 @@ namespace Gumball
             yield return new WaitUntil(() => PanelManager.PanelExists<MainMenuPanel>()
                                              && PanelManager.GetPanel<MainMenuPanel>().IsShowing
                                              && !PanelManager.GetPanel<MainMenuPanel>().IsTransitioning);
+
+            if (PanelManager.PanelExists<GenericMessagePanel>())
+            {
+                PanelManager.GetPanel<GenericMessagePanel>().Show();
+                PanelManager.GetPanel<GenericMessagePanel>().Initialise("You have unclaimed challenge rewards!");
             
-            PanelManager.GetPanel<GenericMessagePanel>().Show();
-            PanelManager.GetPanel<GenericMessagePanel>().Initialise("You have unclaimed challenge rewards!");
-
-            yield return new WaitUntil(() => !PanelManager.GetPanel<GenericMessagePanel>().IsShowing);
-
+                yield return new WaitUntil(() => !PanelManager.GetPanel<GenericMessagePanel>().IsShowing);
+            }
+            
             if (isMinorRewardUnclaimed)
             {
                 //give the reward
