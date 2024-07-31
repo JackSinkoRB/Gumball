@@ -10,19 +10,22 @@ namespace Gumball
         public static void GiveReward(CorePart corePart)
         {
             corePart.SetUnlocked(true);
-            PanelManager.GetPanel<RewardPanel>().QueueReward(corePart);
+            if (PanelManager.PanelExists<RewardPanel>())
+                PanelManager.GetPanel<RewardPanel>().QueueReward(corePart);
         }
         
         public static void GiveReward(SubPart subPart)
         {
             subPart.SetUnlocked(true);
-            PanelManager.GetPanel<RewardPanel>().QueueReward(subPart);
+            if (PanelManager.PanelExists<RewardPanel>())
+                PanelManager.GetPanel<RewardPanel>().QueueReward(subPart);
         }
 
         public static void GiveStandardCurrency(int amount)
         {
             Currency.Standard.AddFunds(amount);
-            PanelManager.GetPanel<RewardPanel>().QueueStandardCurrencyReward(amount);
+            if (PanelManager.PanelExists<RewardPanel>())
+                PanelManager.GetPanel<RewardPanel>().QueueStandardCurrencyReward(amount);
         }
         
     }

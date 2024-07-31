@@ -81,7 +81,7 @@ namespace Gumball
 
             if (flaggedTypes.Count == 0)
             {
-                Debug.LogError($"Could not find car to spawn because the game session ({session.name}) has no vehicles of the desired type.");
+                Debug.LogWarning($"Could not find car to spawn because the game session ({session.name}) has no vehicles of the desired type.");
                 return null;
             }
 

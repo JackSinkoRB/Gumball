@@ -9,8 +9,15 @@ namespace Gumball
     [Serializable]
     public class CarPerformanceSettings
     {
+
+        [Header("Drivetrain")]
+        [Tooltip("The amount to contibute to the acceleration performance points for the gearbox.")]
+        [SerializeField, PositiveValueOnly] private int gearboxAccelerationPerformancePoints;
+        [Tooltip("The amount to contibute to the max speed performance points for the gearbox.")]
+        [SerializeField, PositiveValueOnly] private int gearboxMaxSpeedPerformancePoints;
         
         [Header("Torque")]
+        [Tooltip("The engine torque output (y axis - value) (in Newton metres) compared to the engine RPM (x axis - time), between the min and max RPM ranges (where x = 0 is minEngineRpm and x = 1 is maxEngineRpm)")]
         [SerializeField] private AnimationCurve minTorqueCurve;
         [Tooltip("The maximum amount of torque that is added to the peak torque values.")]
         [SerializeField] private CarPerformanceSettingFloatScalar additionalPeakTorque = new(2000);
@@ -21,10 +28,6 @@ namespace Gumball
         [SerializeField] private CarPerformanceSettingMinMaxFloat engineRpmRange = new(new MinMaxFloat(1000, 7000), new MinMaxFloat(1000, 9000));
         [Tooltip("If RPM goes outside this range, it will try upshift/downshift to the desired RPM. For optimal power, the ideal range is where the torque is the highest.")]
         [SerializeField] private CarPerformanceSettingMinMaxFloat idealRPMRangeForGearChanges = new(new MinMaxFloat(3000, 6000), new MinMaxFloat(3000, 8000));
-
-        [Header("Gear ratios")]
-        [SerializeField] private CarPerformanceSettingFloatArray gearRatios = new(new[] { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f }, new[] { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f });
-        [SerializeField] private CarPerformanceSettingFloat finalGearRatio = new(3.42f, 3.42f);
 
         [Header("Mass")]
         [SerializeField] private CarPerformanceSettingFloat rigidbodyMass = new(1300, 1000);
@@ -52,8 +55,6 @@ namespace Gumball
         
         public CarPerformanceSettingMinMaxFloat EngineRpmRange => engineRpmRange;
         public CarPerformanceSettingMinMaxFloat IdealRPMRangeForGearChanges => idealRPMRangeForGearChanges;
-        public CarPerformanceSettingFloatArray GearRatios => gearRatios;
-        public CarPerformanceSettingFloat FinalGearRatio => finalGearRatio;
         public CarPerformanceSettingFloat RigidbodyMass => rigidbodyMass;
         public CarPerformanceSettingFloat BrakeTorque => brakeTorque;
         public CarPerformanceSettingFloat HandbrakeEaseOffDuration => handbrakeEaseOffDuration;

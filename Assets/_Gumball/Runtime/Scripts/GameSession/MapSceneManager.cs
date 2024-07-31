@@ -9,12 +9,14 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
     public class MapSceneManager : Singleton<MapSceneManager>
     {
 
+        #region STATIC
         public static void LoadMapScene()
         {
             CoroutineHelper.Instance.StartCoroutine(LoadMapSceneIE());
@@ -28,43 +30,33 @@ namespace Gumball
             yield return Addressables.LoadSceneAsync(SceneManager.MapSceneAddress, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MapSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+
+            yield return Instance.LoadMaps();
             
-            yield return Instance.LoadLastPlayedMap();
+            Instance.SelectMap(Instance.GetCurrentMap());
             
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
+        #endregion
+
+        [SerializeField, DisplayInspector] private GumballEvent currentEvent;
         
-        private const string lastPlayedEventSaveKey = "CurrentEvent";
-        private const string lastPlayedMapSaveKey = "CurrentMap";
-
-        [Tooltip("The event that will load into the map if playing for the first time.")]
-        [SerializeField] private int defaultEventIndex;
-        [Tooltip("A collection of all the Gumball events that the player can see.")]
-        [SerializeField, DisplayInspector] private GumballEvent[] allEvents;
-
+        [Header("Nodes")]
         [SerializeField] private float nodeFadeAmountWhenNotFocused = 0.2f;
         [SerializeField] private float nodeFadeDuration = 0.2f;
+
+        [Header("Arrows")]
+        [SerializeField] private Button leftArrow;
+        [SerializeField] private Button rightArrow;
         
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private GumballEvent currentSelectedEvent;
-        [SerializeField, ReadOnly] private GameSessionMap currentSelectedMap;
+        [SerializeField, ReadOnly] private GameSessionMap[] mapInstances;
+        [SerializeField, ReadOnly] private GameSessionMap selectedMap;
 
         private Sequence currentNodesTween;
-        
-        public GameSessionMap CurrentSelectedMap => currentSelectedMap;
-        
-        public GumballEvent LastPlayedEvent
-        {
-            get => allEvents[DataManager.GameSessions.Get(lastPlayedEventSaveKey, defaultEventIndex)];
-            set => DataManager.GameSessions.Set(lastPlayedEventSaveKey, allEvents.IndexOfItem(value));
-        }
-        
-        public int LastPlayedMapIndex
-        {
-            get => DataManager.GameSessions.Get(lastPlayedMapSaveKey, 0);
-            set => DataManager.GameSessions.Set(lastPlayedMapSaveKey, value);
-        }
 
+        public GameSessionMap SelectedMap => selectedMap;
+        
         protected override void Initialise()
         {
             base.Initialise();
@@ -84,39 +76,96 @@ namespace Gumball
             PrimaryContactInput.onRelease -= OnPrimaryContactRelease;
         }
 
-        public IEnumerator LoadLastPlayedMap()
+        private IEnumerator LoadMaps()
         {
-            yield return LoadMap(LastPlayedEvent, LastPlayedMapIndex);
+            mapInstances = new GameSessionMap[currentEvent.Maps.Length];
+            AsyncOperationHandle<GameObject>[] handles = new AsyncOperationHandle<GameObject>[currentEvent.Maps.Length];
+            
+            for (int index = 0; index < currentEvent.Maps.Length; index++)
+            {
+                int finalIndex = index;
+                AssetReferenceGameObject mapReference = currentEvent.Maps[index];
+                
+                handles[index] = Addressables.LoadAssetAsync<GameObject>(mapReference);
+
+                handles[index].Completed += h =>
+                {
+                    GameSessionMap map = Instantiate(h.Result).GetComponent<GameSessionMap>();
+                    map.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
+                    mapInstances[finalIndex] = map;
+                    map.gameObject.SetActive(false); //start inactive until selected
+                };
+            }
+
+            yield return new WaitUntil(() => handles.AreAllComplete());
+        }
+
+        public void SelectPreviousMap()
+        {
+            int currentIndex = mapInstances.IndexOfItem(selectedMap);
+            int newIndex = currentIndex - 1;
+            if (newIndex < 0)
+            {
+                Debug.LogWarning("No previous maps.");
+                return;
+            }
+
+            GameSessionMap newMap = mapInstances[newIndex];
+            SelectMap(newMap);
+        }
+
+        public void SelectNextMap()
+        {
+            int currentIndex = mapInstances.IndexOfItem(selectedMap);
+            int newIndex = currentIndex + 1;
+            if (newIndex >= mapInstances.Length)
+            {
+                Debug.LogWarning("No more maps.");
+                return;
+            }
+
+            GameSessionMap newMap = mapInstances[newIndex];
+            SelectMap(newMap);
         }
         
-        public IEnumerator LoadMap(GumballEvent gumballEvent, int mapIndex)
+        public void SelectMap(GameSessionMap newMap)
         {
-            if (mapIndex >= gumballEvent.Maps.Length || mapIndex < 0)
-                throw new IndexOutOfRangeException($"Event '{name}' doesn't have a map at index {mapIndex}.");
+            //disable old map
+            if (selectedMap != null)
+                selectedMap.gameObject.SetActive(false);
+            
+            //enable new map
+            selectedMap = newMap;
+            selectedMap.gameObject.SetActive(true);
+            
+            int currentIndex = mapInstances.IndexOfItem(selectedMap);
+            rightArrow.interactable = mapInstances.Length > 1 && currentIndex < mapInstances.Length - 1;
+            leftArrow.interactable = mapInstances.Length > 1 && currentIndex > 0;
+        }
 
-            if (currentSelectedMap != null)
-                Destroy(currentSelectedMap);
-            
-            AssetReferenceGameObject assetReference = gumballEvent.Maps[mapIndex];
-            AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
-            yield return handle;
-            
-            GameSessionMap map = Instantiate(handle.Result).GetComponent<GameSessionMap>();
-            map.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-            
-            currentSelectedEvent = gumballEvent;
-            currentSelectedMap = map;
+        /// <summary>
+        /// The current map is the furthest map in the map list with at least 1 node unlocked.
+        /// </summary>
+        private GameSessionMap GetCurrentMap()
+        {
+            foreach (GameSessionMap map in mapInstances)
+            {
+                if (!map.AllSessionsComplete())
+                    return map;
+            }
+
+            return mapInstances[^1];
         }
         
         public void RemoveFocusOnNode()
         {
-            if (currentSelectedMap == null)
+            if (selectedMap == null)
                 return;
             
             currentNodesTween?.Kill();
             currentNodesTween = DOTween.Sequence();
             
-            foreach (GameSessionNode node in currentSelectedMap.Nodes)
+            foreach (GameSessionNode node in selectedMap.Nodes)
             {
                 currentNodesTween.Join(node.GetComponent<CanvasGroup>(true).DOFade(1, nodeFadeDuration));
             }
@@ -158,7 +207,7 @@ namespace Gumball
             currentNodesTween = DOTween.Sequence();
             
             //fade all but this node
-            foreach (GameSessionNode node in currentSelectedMap.Nodes)
+            foreach (GameSessionNode node in selectedMap.Nodes)
             {
                 if (node == clickedNode)
                     continue;

@@ -16,8 +16,20 @@ using Random = UnityEngine.Random;
 namespace Gumball
 {
     [Serializable]
-    public abstract class GameSession : ScriptableObject, ISerializationCallbackReceiver
+    public abstract class GameSession : UniqueScriptableObject, ISerializationCallbackReceiver
     {
+
+        public delegate void OnSessionEndDelegate(GameSession session, ProgressStatus progress);
+        public static OnSessionEndDelegate onSessionEnd;
+        
+        public static Action<GameSession> onSessionStart;
+        
+        public enum ProgressStatus
+        {
+            NOT_ATTEMPTED,
+            ATTEMPTED,
+            COMPLETE
+        }
 
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
@@ -59,11 +71,12 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
-        [SerializeField, PositiveValueOnly] private int xpReward = 100;
-        [SerializeField, PositiveValueOnly] private int standardCurrencyReward = 10;
-        [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
-        [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
+        [SerializeField] private Rewards rewards;
 
+        [Header("Challenges")]
+        [SerializeField] private string mainChallengeDescription = "This is the challenge description";
+        [SerializeField] private Challenge[] subObjectives;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
         [SerializeField, ReadOnly] private GenericDictionary<AICar, RacerSessionData> currentRacers = new();
@@ -75,14 +88,22 @@ namespace Gumball
         
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
 
+        public ProgressStatus Progress
+        {
+            get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
+            private set => DataManager.Player.Set($"SessionStatus.{ID}", value);
+        }
+
+        public Challenge[] SubObjectives => subObjectives;
+        
         public string Description => description;
+        public string MainChallengeDescription => mainChallengeDescription;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
         public GenericDictionary<AICar, RacerSessionData> CurrentRacers => currentRacers;
-        public CorePart[] CorePartRewards => corePartRewards;
-        public SubPart[] SubPartRewards => subPartRewards;
+        public Rewards Rewards => rewards;
         public bool HasStarted { get; private set; }
         public bool TrafficIsProcedural => trafficIsProcedural;
         public int TrafficDensity => trafficDensity;
@@ -92,10 +113,14 @@ namespace Gumball
         public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
 
+        protected abstract GameSessionPanel GetSessionPanel();
+        protected abstract GameSessionEndPanel GetSessionEndPanel();
+
         public abstract string GetName();
 
         public void StartSession()
         {
+            HasStarted = false;
             GameSessionManager.Instance.SetCurrentSession(this);
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
@@ -120,13 +145,14 @@ namespace Gumball
         [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
         [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
 
-        private void OnValidate()
+        protected override void OnValidate()
         {
+            base.OnValidate();
+            
             TrackCorePartRewards();
             TrackSubPartRewards();
         }
 
-#if UNITY_EDITOR
         [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
         public void RandomiseTraffic()
         {
@@ -142,7 +168,7 @@ namespace Gumball
                 
                 float chunkEndDistance = chunkStartDistance + chunk.SplineLengthCached;
                 
-                int desiredCars = chunk.TrafficManager.NumberOfCarsToSpawn;
+                int desiredCars = Mathf.RoundToInt(chunk.SplineLengthCached / trafficDensity);
 
                 for (int count = 0; count < desiredCars; count++)
                 {
@@ -167,11 +193,10 @@ namespace Gumball
             trafficSpawnPositions = new CollectionWrapperTrafficSpawnPosition();
             trafficSpawnPositions.Value = spawnPositions.ToArray();
         }
-#endif
-        
+
         private void TrackCorePartRewards()
         {
-            foreach (CorePart corePart in corePartRewards)
+            foreach (CorePart corePart in rewards.CoreParts)
             {
                 if (corePart == null)
                     continue;
@@ -184,16 +209,16 @@ namespace Gumball
                 if (corePart == null)
                     continue;
                 
-                if (!corePartRewards.Contains(corePart))
+                if (!rewards.CoreParts.Contains(corePart))
                     corePart.UntrackAsReward(this);
             }
             
-            previousCorePartRewards = (CorePart[])corePartRewards.Clone();
+            previousCorePartRewards = (CorePart[])rewards.CoreParts.Clone();
         }
         
         private void TrackSubPartRewards()
         {
-            foreach (SubPart subPart in subPartRewards)
+            foreach (SubPart subPart in rewards.SubParts)
             {
                 if (subPart == null)
                     continue;
@@ -206,11 +231,11 @@ namespace Gumball
                 if (subPart == null)
                     continue;
                 
-                if (!subPartRewards.Contains(subPart))
+                if (!rewards.SubParts.Contains(subPart))
                     subPart.UntrackAsReward(this);
             }
             
-            previousSubPartRewards = (SubPart[])subPartRewards.Clone();
+            previousSubPartRewards = (SubPart[])rewards.SubParts.Clone();
         }
 #endif
 
@@ -254,9 +279,12 @@ namespace Gumball
                 AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarDrivingState>();
                 AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarDrivingState>();
             }
+            
+            //reset skill check manager
+            SkillCheckManager.Instance.ResetForSession();
         }
 
-        public void EndSession()
+        public void EndSession(ProgressStatus progress)
         {
             inProgress = false;
 
@@ -264,6 +292,19 @@ namespace Gumball
                 CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
             
             OnSessionEnd();
+            
+            if (Progress != ProgressStatus.COMPLETE && progress == ProgressStatus.COMPLETE)
+            {
+                OnCompleteSessionForFirstTime();
+            }
+            else
+            {
+                OnFailMission();
+            }
+
+            onSessionEnd?.Invoke(this, progress);
+            
+            StopTrackingObjectives();
         }
 
         public void UnloadSession()
@@ -285,25 +326,31 @@ namespace Gumball
         protected virtual void OnSessionEnd()
         {
             HasStarted = false;
-            
+
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Hide();
+            if (GetSessionEndPanel() != null)
+                GetSessionEndPanel().Show();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
             
             //disable NOS
             WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
+
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
             
             //come to a stop
             WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
-            
-            //convert skill points to followers
-            FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
-            
+
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
+            
+            //convert skill points to followers
+            FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
         }
-        
+
         public virtual void UpdateWhenCurrent()
         {
             SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
@@ -354,10 +401,39 @@ namespace Gumball
 
         protected virtual void OnSessionStart()
         {
-            HasStarted = true;
+            StartTrackingObjectives();
             
             //only take fuel once session has properly started (in case loading failed)
-            FuelManager.TakeFuel();
+            FuelManager.Instance.TakeFuel();
+            
+            onSessionStart?.Invoke(this);
+            
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Show();
+
+            HasStarted = true;
+        }
+
+        public void StartTrackingObjectives()
+        {
+            if (subObjectives == null)
+                return;
+            
+            foreach (Challenge subObjective in subObjectives)
+            {
+                subObjective.Tracker.StartListening(subObjective.ChallengeID, subObjective.Goal);
+            }
+        }
+        
+        private void StopTrackingObjectives()
+        {
+            if (subObjectives == null)
+                return;
+            
+            foreach (Challenge subObjective in subObjectives)
+            {
+                subObjective.Tracker.StopListening(subObjective.ChallengeID);
+            }
         }
 
         private IEnumerator LoadScene()
@@ -463,17 +539,19 @@ namespace Gumball
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
 
+                int finalIndex = index;
                 handle.Completed += h =>
                 {
                     if (handle.Result == null)
                     {
-                        Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                        Debug.LogError($"There is a null racer at index {finalIndex} in {name}. Skipping it.");
                         return;
                     }
                     
                     AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                     racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
 
+                    racer.SetPerformanceProfile(data.PerformanceProfile);
                     racer.InitialiseAsRacer();
 
                     currentRacers[racer] = data;
@@ -560,59 +638,35 @@ namespace Gumball
         
         private void OnCrossFinishLine()
         {
-            EndSession();
+            ProgressStatus status = ProgressStatus.ATTEMPTED;
+            if (AreAllSubObjectivesComplete())
+                status = ProgressStatus.COMPLETE;
+            
+            EndSession(status);
         }
 
-        public IEnumerator GiveRewards()
+        private bool AreAllSubObjectivesComplete()
         {
-            //give XP
-            if (xpReward > 0)
-            {
-                PanelManager.GetPanel<XPGainedPanel>().Show();
+            if (subObjectives == null)
+                return true;
             
-                int currentXP = ExperienceManager.TotalXP;
-                int newXP = ExperienceManager.TotalXP + xpReward;
-                
-                PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
-                
-                yield return new WaitUntil(() => !PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning);
-                
-                ExperienceManager.AddXP(xpReward); //add XP after in case there's a level up
-                
-                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning &&
-                                                 !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+            foreach (Challenge subObjective in subObjectives)
+            {
+                if (subObjective.Tracker.GetListener(subObjective.ChallengeID).Progress < 1)
+                    return false;
             }
 
-            //give standard currency
-            if (standardCurrencyReward > 0)
-                RewardManager.GiveStandardCurrency(standardCurrencyReward);
+            return true;
+        }
 
-            //give core parts
-            if (corePartRewards != null)
-            {
-                foreach (CorePart corePartReward in corePartRewards)
-                {
-                    if (!corePartReward.IsUnlocked)
-                        RewardManager.GiveReward(corePartReward);
-                }
-            }
-
-            //give sub parts
-            if (subPartRewards != null)
-            {
-                foreach (SubPart subPartReward in subPartRewards)
-                {
-                    if (!subPartReward.IsUnlocked)
-                        RewardManager.GiveReward(subPartReward);
-                }
-            }
-            
-            //show the reward panel with queued rewards
-            if (PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
-            {
-                PanelManager.GetPanel<RewardPanel>().Show();
-                yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);
-            }
+        private void OnCompleteSessionForFirstTime()
+        {
+            Progress = ProgressStatus.COMPLETE;
+        }
+        
+        private void OnFailMission()
+        {
+            Progress = ProgressStatus.ATTEMPTED;
         }
         
     }

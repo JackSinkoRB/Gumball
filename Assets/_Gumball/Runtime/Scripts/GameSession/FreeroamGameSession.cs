@@ -13,5 +13,15 @@ namespace Gumball
             return "Freeroam";
         }
         
+        protected override GameSessionPanel GetSessionPanel()
+        {
+            return null; //has no UI
+        }
+        
+        protected override GameSessionEndPanel GetSessionEndPanel()
+        {
+            return null; //has no end
+        }
+        
     }
 }

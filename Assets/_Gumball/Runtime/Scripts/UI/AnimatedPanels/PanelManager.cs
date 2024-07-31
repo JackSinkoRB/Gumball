@@ -42,7 +42,7 @@ public class PanelManager : PersistentSingleton<PanelManager>
     
     public static AnimatedPanel GetPanel(Type panelType)
     {
-        if (!Instance.panelLookup.ContainsKey(panelType))
+        if (!PanelExists(panelType))
             throw new NullReferenceException($"Could not find panel {panelType} in lookup. Scene is: {SceneManager.GetActiveScene().name}");
         
         return Instance.panelLookup[panelType];

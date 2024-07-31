@@ -38,7 +38,7 @@ namespace Gumball
                 return;
             
             offset *= movementSpeed;
-            velocity = MapSceneManager.Instance.CurrentSelectedMap.CameraMovementPlane.TransformDirection(Vector3.left * offset.x + Vector3.down * offset.y);
+            velocity = MapSceneManager.Instance.SelectedMap.CameraMovementPlane.TransformDirection(Vector3.left * offset.x + Vector3.down * offset.y);
             MoveCamera(velocity);
         }
 

@@ -13,12 +13,12 @@ namespace Gumball
         {
             RefreshFuelLabel();
 
-            FuelManager.onFuelChange += OnFuelChange;
+            FuelManager.Instance.onFuelChange += OnFuelChange;
         }
         
         private void OnDisable()
         {
-            FuelManager.onFuelChange -= OnFuelChange;
+            FuelManager.Instance.onFuelChange -= OnFuelChange;
         }
         
         private void OnFuelChange(int previousFuel, int newFuel)
@@ -28,7 +28,7 @@ namespace Gumball
         
         private void RefreshFuelLabel()
         {
-            fuelLabel.text = $"{FuelManager.CurrentFuel}";
+            fuelLabel.text = $"{FuelManager.Instance.CurrentFuel}";
             this.PerformAtEndOfFrame(fuelLabel.Resize);
         }
 

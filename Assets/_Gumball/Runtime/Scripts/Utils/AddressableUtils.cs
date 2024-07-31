@@ -25,13 +25,17 @@ namespace Gumball
             AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync(label, type);
             yield return handle;
 
-            foreach (IResourceLocation resourceLocation in handle.Result)
+            AsyncOperationHandle<T>[] handles = new AsyncOperationHandle<T>[handle.Result.Count];
+            for (int index = 0; index < handle.Result.Count; index++)
             {
-                var locationHandle = Addressables.LoadAssetAsync<T>(resourceLocation);
-                yield return locationHandle;
-                list.Add(locationHandle.Result);
+                IResourceLocation resourceLocation = handle.Result[index];
+                handles[index] = Addressables.LoadAssetAsync<T>(resourceLocation);;
+                
+                handles[index].Completed += h => list.Add(h.Result);
             }
-        
+
+            yield return new WaitUntil(() => handles.AreAllComplete());
+            
             Addressables.Release(handle);
             onComplete?.Invoke();
         }

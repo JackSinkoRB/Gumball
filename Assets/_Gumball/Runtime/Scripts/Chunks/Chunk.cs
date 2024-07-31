@@ -42,6 +42,8 @@ namespace Gumball
         [ConditionalField(nameof(hasCustomLoadDistance)), SerializeField] private float customLoadDistance = 3000;
         [Tooltip("If the players distance from the road is equal or greater to this distance, the player is reset.")]
         [SerializeField] private float distanceFromRoadSplineToResetPlayer = 50;
+        [Tooltip("The distance racers look ahead for the next racing line to start interpolating to its position.")]
+        [SerializeField] private float nextRacingLineInterpolateDistance = 65;
         
         [Header("Terrains")]
         [Tooltip("The distance for the player to be within to use the high LOD.")]
@@ -53,8 +55,6 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool isFullyLoaded;
         [SerializeField, ReadOnly] private bool isAccessible;
-        [Tooltip("A list of child spline meshes. These are automatically assigned when the chunk asset is saved.")]
-        [SerializeField, ReadOnly] private SplineMesh[] splineMeshes;
         [SerializeField, ReadOnly] private ChunkMeshData chunkMeshData;
         [SerializeField, ReadOnly] private GameObject chunkDetector;
         [SerializeField, ReadOnly] private float splineLengthCached = -1;
@@ -68,7 +68,6 @@ namespace Gumball
         public ChunkMeshData ChunkMeshData => chunkMeshData;
         public int LastPointIndex => splineComputer.pointCount - 1;
         public SplineComputer SplineComputer => splineComputer;
-        public SplineMesh[] SplinesMeshes => splineMeshes;
         public SplineSample[] SplineSamples => splineSampleCollection.samples;
         
         public bool IsAutomaticTerrainRecreationDisabled { get; private set; }
@@ -80,6 +79,7 @@ namespace Gumball
         public bool HasCustomLoadDistance => hasCustomLoadDistance;
         public float CustomLoadDistance => customLoadDistance;
         public float DistanceFromRoadSplineToResetPlayer => distanceFromRoadSplineToResetPlayer;
+        public float NextRacingLineInterpolateDistance => nextRacingLineInterpolateDistance;
         
         public ChunkTrafficManager TrafficManager => trafficManager;
         public ChunkPowerpoleManager PowerpoleManager => powerpoleManager;
@@ -271,7 +271,10 @@ namespace Gumball
         public void TryCreateChunkDetector()
         {
             if (chunkDetector != null)
-                return; //already exists
+            {
+                //destroy old one
+                DestroyImmediate(chunkDetector);
+            }
 
             if (terrainLowLOD == null || terrainHighLOD == null)
             {
@@ -283,62 +286,13 @@ namespace Gumball
             chunkDetector.gameObject.layer = (int) LayersAndTags.Layer.ChunkDetector;
             chunkDetector.transform.SetParent(transform);
             
-            const float yOffset = -500;
-            chunkDetector.transform.position = terrainLowLOD.transform.position.OffsetY(yOffset);
+            chunkDetector.transform.position = terrainLowLOD.transform.position;
 
             MeshCollider meshCollider = chunkDetector.AddComponent<MeshCollider>();
             meshCollider.convex = true;
             meshCollider.sharedMesh = terrainLowLOD.GetComponent<MeshFilter>().sharedMesh;
         }
         
-#if UNITY_EDITOR
-        /// <summary>
-        /// Iterates through children to find SplineMeshes, and caches the references.
-        /// </summary>
-        public void FindSplineMeshes()
-        {
-            splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
-
-            EnsureSplineMeshHaveUniqueID();
-
-            GlobalLoggers.ChunkLogger.Log($"Found {splineMeshes.Length} spline meshes under {gameObject.name}.");
-        }
-
-        private void EnsureSplineMeshHaveUniqueID()
-        {
-            bool prefabNeedsChanging = false;
-            
-            foreach (SplineMesh splineMesh in splineMeshes)
-            {
-                if (!splineMesh.HasComponent<UniqueIDAssigner>())
-                    prefabNeedsChanging = true;
-            }
-
-            if (prefabNeedsChanging)
-            {
-                string path = GameObjectUtils.GetPathToPrefabAsset(gameObject);
-                if (path.IsNullOrEmpty())
-                    return;
-
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                GameObject prefabInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-
-                SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
-                foreach (SplineMesh splineMeshInPrefab in splineMeshesInPrefab)
-                {
-                    if (!splineMeshInPrefab.HasComponent<UniqueIDAssigner>())
-                    {
-                        UniqueIDAssigner id = splineMeshInPrefab.gameObject.AddComponent<UniqueIDAssigner>();
-                        id.Initialise();
-                    }
-                }
-                
-                PrefabUtility.SaveAsPrefabAsset(prefabInstance, path);
-                DestroyImmediate(prefabInstance);
-            }
-        }
-#endif
-
         private void TryFindExistingTerrain(TerrainLOD lod)
         {
             if ((lod == TerrainLOD.HIGH && terrainHighLOD != null)
@@ -424,6 +378,21 @@ namespace Gumball
         {
             splineLengthCached = splineComputer.CalculateLength();
         }
+        
+#if UNITY_EDITOR
+        private void OnDrawGizmos()
+        {
+            //draw the interpolation distance
+            if (nextRacingLineInterpolateDistance > 0)
+            {
+                if (SplineSamples == null || SplineSamples.Length == 0)
+                    UpdateSplineSampleData();
+
+                Gizmos.color = Color.magenta;
+                Gizmos.DrawSphere(LastSample.position - LastSample.forward * nextRacingLineInterpolateDistance, 1f);
+            }
+        }
+#endif
         
     }
 }

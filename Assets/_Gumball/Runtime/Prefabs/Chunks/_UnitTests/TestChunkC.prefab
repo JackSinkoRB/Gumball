@@ -47,9 +47,8 @@ MonoBehaviour:
   driveOnLeft: 1
   racingLines: []
   speedLimitKmh: 40
-  density: 100
-  laneDistancesForward: []
-  laneDistancesBackward: []
+  lanesForward: []
+  lanesBackward: []
   chunk: {fileID: 4064674166884723120}
 --- !u!1 &5340176757185358792
 GameObject:
@@ -109,6 +108,7 @@ MonoBehaviour:
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 50
+  nextRacingLineInterpolateDistance: 65
   terrainHighLODDistance: 150
   currentLOD: 1
   terrainHighLOD: {fileID: 8910443321278746561}
@@ -5794,8 +5794,6 @@ MonoBehaviour:
       percent: 1
     optimizedIndices: 
     sampleMode: 1
-  ChunkObjectData:
-    _serializedList: []
 --- !u!114 &5272964571774866940
 MonoBehaviour:
   m_ObjectHideFlags: 0

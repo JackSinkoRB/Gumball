@@ -22,12 +22,20 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool timerHasStarted;
         
         public float TimeRemainingSeconds => timeRemainingSeconds;
-        
-        private TimedSessionPanel sessionPanel => PanelManager.GetPanel<TimedSessionPanel>();
-        
+
         public override string GetName()
         {
             return "Timed";
+        }
+
+        protected override GameSessionPanel GetSessionPanel()
+        {
+            return PanelManager.GetPanel<TimedSessionPanel>();
+        }
+        
+        protected override GameSessionEndPanel GetSessionEndPanel()
+        {
+            return PanelManager.GetPanel<TimedSessionEndPanel>();
         }
 
         protected override IEnumerator LoadSession()
@@ -35,7 +43,6 @@ namespace Gumball
             yield return base.LoadSession();
 
             InitialiseTimer();
-            sessionPanel.Show();
         }
 
         protected override void OnSessionStart()
@@ -72,19 +79,9 @@ namespace Gumball
 
         private void OnTimerExpire()
         {
-            EndSession();
+            EndSession(ProgressStatus.ATTEMPTED);
         }
 
-        protected override void OnSessionEnd()
-        {
-            base.OnSessionEnd();
-            
-            PanelManager.GetPanel<TimedSessionPanel>().Hide();
-            PanelManager.GetPanel<TimedSessionEndPanel>().Show();
-            
-            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-        }
-        
         private void InitialiseTimer()
         {
             timerHasStarted = false;

@@ -28,6 +28,9 @@ namespace Gumball
         
         public event Action onDisable;
 
+        public delegate void TeleportDelegate(Vector3 previousPosition, Vector3 newPosition); 
+        public static event TeleportDelegate onPlayerTeleport;
+
         private enum WheelConfiguration
         {
             REAR_WHEEL_DRIVE,
@@ -59,13 +62,14 @@ namespace Gumball
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
         [Header("Performance settings")]
+        [SerializeField] private CorePart defaultEngine;
+        [SerializeField] private CorePart defaultWheels;
+        [SerializeField] private CorePart defaultDrivetrain;
         [SerializeField] private CarPerformanceSettings performanceSettings;
         [Space(5)]
         [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
 
-        public float[] GearRatios => performanceSettings.GearRatios.GetValue(performanceProfile);
-        public float FinalGearRatio => performanceSettings.FinalGearRatio.GetValue(performanceProfile);
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
         public MinMaxFloat EngineRpmRange => performanceSettings.EngineRpmRange.GetValue(performanceProfile);
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
@@ -176,6 +180,8 @@ namespace Gumball
         public bool IsStationary => speed < stationarySpeed && !isAccelerating;
 
         [Header("Engine & Drivetrain")]
+        [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
+        [SerializeField] private float finalGearRatio = 3.42f;
         [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
         [SerializeField, ReadOnly] private float engineRpm;
@@ -186,7 +192,7 @@ namespace Gumball
         private bool wasAcceleratingLastFrame;
         public bool IsAutomaticTransmission => autoDrive || GearboxSetting.Setting == GearboxSetting.GearboxOption.AUTOMATIC;
         public int CurrentGear => currentGear;
-        public int NumberOfGears => GearRatios.Length;
+        public int NumberOfGears => gearRatios.Length;
         public float EngineRpm => engineRpm;
         public bool IsAccelerating => isAccelerating;
         
@@ -270,10 +276,14 @@ namespace Gumball
                                                            | 1 << (int)LayersAndTags.Layer.PlayerCar
                                                            | 1 << (int)LayersAndTags.Layer.RacerCar
                                                            | 1 << (int)LayersAndTags.Layer.Barrier
-                                                           | 1 << (int)LayersAndTags.Layer.MovementPath;
-        private static readonly LayerMask obstacleLayersNoCars = 1 << (int)LayersAndTags.Layer.Barrier
-                                                           | 1 << (int)LayersAndTags.Layer.MovementPath;
-        
+                                                           | 1 << (int)LayersAndTags.Layer.MovementPath
+                                                           | 1 << (int)LayersAndTags.Layer.RacerObstacle;
+        private static readonly LayerMask obstacleLayersNoCars = 1 << (int)LayersAndTags.Layer.Barrier 
+                                                                 | 1 << (int)LayersAndTags.Layer.MovementPath
+                                                                 | 1 << (int)LayersAndTags.Layer.RacerObstacle;
+        private static readonly LayerMask racingLineObstacleLayers = 1 << (int)LayersAndTags.Layer.Barrier
+                                                                     | 1 << (int)LayersAndTags.Layer.RacerObstacle;
+
         /// <summary>
         /// The time that the autodriving car looks ahead for curves.
         /// </summary>
@@ -287,6 +297,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isInitialised;
         [Space(5)]
         [SerializeField, ReadOnly] private Chunk currentChunkCached;
+        [SerializeField, ReadOnly] private float timeWithNoChunk;
         [SerializeField, ReadOnly] private bool isFrozen;
 
         private Vector3 targetPosition;
@@ -437,6 +448,17 @@ namespace Gumball
             InitialiseWheelStance();
         }
 
+        public CorePart GetDefaultPart(CorePart.PartType type)
+        {
+            return type switch
+            {
+                CorePart.PartType.ENGINE => defaultEngine,
+                CorePart.PartType.WHEELS => defaultWheels,
+                CorePart.PartType.DRIVETRAIN => defaultDrivetrain,
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
+        }
+        
         public void SetPerformanceProfile(CarPerformanceProfile profile)
         {
             performanceProfile = profile;
@@ -504,6 +526,8 @@ namespace Gumball
                 Rigidbody.velocity = Vector3.zero;
                 Rigidbody.angularVelocity = Vector3.zero;
             }
+
+            Vector3 previousPosition = transform.position;
             
             //move the transform AND the rigidbody, so physics calculations are updated instantly too
             transform.position = position;
@@ -525,6 +549,9 @@ namespace Gumball
             }
             
             UpdateWheelMeshes(); //force update
+
+            if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar == this)
+                onPlayerTeleport?.Invoke(previousPosition, position);
 
             GlobalLoggers.AICarLogger.Log($"Teleported {gameObject.name} to {position}.");
         }
@@ -576,14 +603,22 @@ namespace Gumball
         {
             if (!isInitialised)
                 return;
-            
-            if (CurrentChunk == null && autoDrive)
+
+            if (autoDrive)
             {
-                //current chunk may have despawned
-                Despawn();
-                return;
+                if (CurrentChunk == null)
+                {
+                    //current chunk may have despawned
+                    const float timeWithNoChunkToDespawn = 1;
+                    timeWithNoChunk += Time.deltaTime;
+                    if (timeWithNoChunk >= timeWithNoChunkToDespawn)
+                        Despawn();
+                    return;
+                }
+                
+                timeWithNoChunk = 0;
             }
-            
+
             if (!isFrozen)
             {
                 Move();
@@ -755,7 +790,7 @@ namespace Gumball
                 //check if blocked
                 Vector3 frontOfCar = transform.TransformPoint(frontOfCarPosition);
                 Vector3 direction = Vector3.Normalize(startOfRacingLine - frontOfCar);
-                int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Barrier));
+                int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), racingLineObstacleLayers);
                 Debug.DrawRay(frontOfCar, direction * Vector3.Distance(frontOfCar, startOfRacingLine), hits > 0 ? Color.red : Color.blue);
                 bool isBlocked = hits > 0;
                 if (isBlocked)
@@ -787,7 +822,7 @@ namespace Gumball
                     //check if blocked
                     Vector3 frontOfCar = transform.TransformPoint(frontOfCarPosition);
                     Vector3 direction = Vector3.Normalize(startOfRacingLine - frontOfCar);
-                    int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Barrier));
+                    int hits = Physics.RaycastNonAlloc(frontOfCar, direction, racingLineBlockedTemp, Vector3.Distance(frontOfCar, startOfRacingLine), racingLineObstacleLayers);
                     Debug.DrawRay(frontOfCar, direction * Vector3.Distance(frontOfCar, startOfRacingLine), hits > 0 ? Color.red : Color.blue);
                     bool isBlocked = hits > 0;
                     if (isBlocked)
@@ -805,7 +840,7 @@ namespace Gumball
 
             if (nearestRacingLine != null)
             {
-                float interpolationDistanceSqr = nearestRacingLine.RacerInterpolationDistance * nearestRacingLine.RacerInterpolationDistance;
+                float interpolationDistanceSqr = CurrentChunk.NextRacingLineInterpolateDistance * CurrentChunk.NextRacingLineInterpolateDistance;
                 if (nearestDistanceSqr < interpolationDistanceSqr)
                 {
                     //is within interpolation distance
@@ -968,7 +1003,7 @@ namespace Gumball
             
             float averagePoweredWheelRPM = sumOfPoweredWheelRPM / poweredWheels.Length;
 
-            float engineRpmUnclamped = EngineRpmRange.Min + averagePoweredWheelRPM * GearRatios[currentGear] * FinalGearRatio;
+            float engineRpmUnclamped = EngineRpmRange.Min + averagePoweredWheelRPM * gearRatios[currentGear] * finalGearRatio;
             engineRpm = EngineRpmRange.Clamp(engineRpmUnclamped);
         }
 
@@ -1388,7 +1423,7 @@ namespace Gumball
             {
                 //distribute the engine torque to the wheels based on gear ratios
                 float engineTorqueDistributed = engineTorque / poweredWheels.Length; //TODO: might want to distribute this unevenly - eg. give more torque to the wheel with more traction
-                float wheelTorque = engineTorqueDistributed * GearRatios[currentGear] * FinalGearRatio;
+                float wheelTorque = engineTorqueDistributed * gearRatios[currentGear] * finalGearRatio;
             
                 //apply to the wheels
                 poweredWheel.motorTorque = wheelTorque;
@@ -1836,7 +1871,8 @@ namespace Gumball
             Chunk previousChunk = currentChunkCached;
                     
             //raycast down to terrain
-            currentChunkCached = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
+            const float offset = 10;
+            currentChunkCached = Physics.Raycast(transform.position.OffsetY(offset), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
                 ? hitDown.transform.parent.GetComponent<Chunk>()
                 : null;
                     
