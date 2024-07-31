@@ -34,6 +34,9 @@ namespace Gumball
 
         private void UpdateProgressBar()
         {
+            if (currentSession.RaceDistanceMetres == 0)
+                return;
+            
             float percent = playersDistanceCalculator.DistanceTraveled / currentSession.RaceDistanceMetres;
             progressBarFill.fillAmount = Mathf.Clamp01(percent);
         }
