@@ -361,6 +361,42 @@ namespace Gumball
             EditorApplication.delayCall -= RecreateTerrain;
             EditorApplication.delayCall += RecreateTerrain;
         }
+
+        public void CheckToAssignSplineMeshIDs()
+        {
+            bool needsUpdating = false;
+            SplineMesh[] splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            foreach (SplineMesh splineMesh in splineMeshes)
+            {
+                UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                if (idAssigner == null || idAssigner.UniqueID.IsNullOrEmpty())
+                {
+                    needsUpdating = true;
+                    break;
+                }
+            }
+
+            if (needsUpdating)
+            {
+                string assetPath = GameObjectUtils.GetPathToPrefabAsset(gameObject);
+                GameObject prefabInstance = PrefabUtility.LoadPrefabContents(assetPath);
+                
+                SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+                foreach (SplineMesh splineMesh in splineMeshesInPrefab)
+                {
+                    UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                    if (idAssigner == null || idAssigner.UniqueID.IsNullOrEmpty())
+                    {
+                        idAssigner = splineMesh.gameObject.GetComponent<UniqueIDAssigner>(true);
+                        idAssigner.Initialise();
+                        Debug.Log($"Updated ID for spline mesh {splineMesh.name}");
+                    }
+                }
+
+                PrefabUtility.SaveAsPrefabAsset(prefabInstance, assetPath);
+                PrefabUtility.UnloadPrefabContents(prefabInstance);
+            }
+        }
         
         /// <summary>
         /// Force the terrain to be recreated.
@@ -370,8 +406,7 @@ namespace Gumball
             DisconnectAll();
             
             GlobalLoggers.ChunkLogger.Log($"Recreating terrain for '{chunk.name}'");
-            Material[] previousMaterials = chunk.TerrainHighLOD.GetComponent<MeshRenderer>().sharedMaterials;
-
+            
             //check if there's additional vertex color data
             VertexInstanceStream vertexInstanceStream = chunk.TerrainHighLOD.GetComponent<VertexInstanceStream>();
             GenericDictionary<int, List<VertexInstanceStream.PaintData>> paintData = null;
@@ -380,9 +415,6 @@ namespace Gumball
 
             DestroyImmediate(chunk.TerrainHighLOD);
             DestroyImmediate(chunk.TerrainLowLOD);
-
-            //need to ensure all the splinemesh are set up
-            chunk.FindSplineMeshes();
             
             chunk.SplineComputer.RebuildImmediate();
 
@@ -420,8 +452,8 @@ namespace Gumball
             if (isRuntimeChunk)
                 return;
             
-            chunk.FindSplineMeshes();
-            foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
+            SplineMesh[] splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            foreach (SplineMesh splineMesh in splineMeshes)
             {
                 if (!splineMesh.gameObject.activeSelf)
                     continue;
