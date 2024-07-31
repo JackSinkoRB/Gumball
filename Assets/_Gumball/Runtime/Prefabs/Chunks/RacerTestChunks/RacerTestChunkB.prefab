@@ -13,12 +13,13 @@ GameObject:
   - component: {fileID: 4014816275324809833}
   - component: {fileID: 141139065368875899}
   - component: {fileID: 7202433157299628710}
+  - component: {fileID: 323867514106425828}
   m_Layer: 13
   m_Name: Barriers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &5872123382692975308
 Transform:
@@ -42,7 +43,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 464771519409263772}
-  m_Mesh: {fileID: 4300000, guid: ead952ad0a8dbea4297c7739f79966fb, type: 2}
+  m_Mesh: {fileID: 0}
 --- !u!23 &4014816275324809833
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -139,7 +140,7 @@ MonoBehaviour:
   multithreaded: 0
   buildOnAwake: 1
   buildOnEnable: 0
-  _baked: 1
+  _baked: 0
   _markDynamic: 1
   _size: 1
   _color: {r: 1, g: 1, b: 1, a: 1}
@@ -156,7 +157,7 @@ MonoBehaviour:
   _uvOffset: {x: 0, y: 0}
   _uvRotation: 0
   _meshIndexFormat: 0
-  _bakedMesh: {fileID: 4300000, guid: ead952ad0a8dbea4297c7739f79966fb, type: 2}
+  _bakedMesh: {fileID: 0}
   colliderUpdateRate: 0.2
   _channels:
   - name: InvisibleBarrier
@@ -8610,7 +8611,22 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: ead952ad0a8dbea4297c7739f79966fb, type: 2}
+  m_Mesh: {fileID: 0}
+--- !u!114 &323867514106425828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 464771519409263772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5641bbc11a427a46bf4e3278bd3dd9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  perSceneUniqueness: 0
+  uniqueID: 3b2635df-b505-4e29-a370-39e452571c81
+  isPersistent: 0
 --- !u!1 &4390281897879749859
 GameObject:
   m_ObjectHideFlags: 0
@@ -10259,20 +10275,23 @@ MonoBehaviour:
   racingLines:
   - {fileID: 1123736974407435574}
   speedLimitKmh: 40
-  density: 100
   lanesForward:
   - type: 0
     distanceFromCenter: 0
     path: {fileID: 0}
+    vehicleTypes: 0
   - type: 0
     distanceFromCenter: 7
     path: {fileID: 0}
+    vehicleTypes: 0
   - type: 0
     distanceFromCenter: -7
     path: {fileID: 0}
+    vehicleTypes: 0
   - type: 1
     distanceFromCenter: -7
     path: {fileID: 4154470295858664385}
+    vehicleTypes: 0
   lanesBackward: []
   chunk: {fileID: 2213253677879832038}
 --- !u!1 &5862944500422295845
@@ -11803,12 +11822,13 @@ GameObject:
   - component: {fileID: 4565470826657915390}
   - component: {fileID: 3794194637565183283}
   - component: {fileID: 9044642964565007812}
+  - component: {fileID: 2460469109207013432}
   m_Layer: 0
   m_Name: Road
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &1206745116897341554
 Transform:
@@ -11832,7 +11852,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7430174242280004054}
-  m_Mesh: {fileID: 4300000, guid: 0c399c8b81d45d64188495bb5de51f00, type: 2}
+  m_Mesh: {fileID: 0}
 --- !u!23 &4565470826657915390
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -11930,7 +11950,7 @@ MonoBehaviour:
   multithreaded: 0
   buildOnAwake: 1
   buildOnEnable: 0
-  _baked: 1
+  _baked: 0
   _markDynamic: 1
   _size: 1
   _color: {r: 1, g: 1, b: 1, a: 1}
@@ -11947,7 +11967,7 @@ MonoBehaviour:
   _uvOffset: {x: 0, y: 0}
   _uvRotation: 0
   _meshIndexFormat: 0
-  _bakedMesh: {fileID: 4300000, guid: 0c399c8b81d45d64188495bb5de51f00, type: 2}
+  _bakedMesh: {fileID: 0}
   colliderUpdateRate: 0.2
   _channels:
   - name: Ashphalt
@@ -15985,7 +16005,22 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: 0c399c8b81d45d64188495bb5de51f00, type: 2}
+  m_Mesh: {fileID: 0}
+--- !u!114 &2460469109207013432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7430174242280004054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5641bbc11a427a46bf4e3278bd3dd9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  perSceneUniqueness: 0
+  uniqueID: d7848b0c-35a7-492d-a75c-cd1b3b43ccad
+  isPersistent: 0
 --- !u!1 &7614845137882398974
 GameObject:
   m_ObjectHideFlags: 0
@@ -16045,6 +16080,7 @@ MonoBehaviour:
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 50
+  nextRacingLineInterpolateDistance: 65
   terrainHighLODDistance: 500
   currentLOD: 1
   terrainHighLOD: {fileID: 8036354000745257767}
@@ -21646,8 +21682,6 @@ MonoBehaviour:
       percent: 1
     optimizedIndices: 
     sampleMode: 1
-  ChunkObjectData:
-    _serializedList: []
 --- !u!114 &2967296238781059148
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22027,7 +22061,9 @@ MonoBehaviour:
   _optimizeAngleThreshold: 0.5
   _space: 1
   _sampleMode: 1
-  _subscribers: []
+  _subscribers:
+  - {fileID: 3794194637565183283}
+  - {fileID: 141139065368875899}
   _rawSamples:
   - position: {x: 13.13406, y: 0, z: -4.5433025}
     up: {x: 0, y: 1, z: 0}
