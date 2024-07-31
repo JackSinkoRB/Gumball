@@ -87,7 +87,7 @@ namespace Gumball
                     GlobalLoggers.ChunkLogger.Log($"Instantiating {runtimeChunkAssetKeys[index]}");
                     AssetReferenceGameObject chunkReference = chunkReferences[index];
 
-                    GameObject chunkInstance = Instantiate(chunkReference.editorAsset.gameObject); //instantiate but keep the prefab references
+                    GameObject chunkInstance = Instantiate(chunkReference.editorAsset.gameObject, Vector3.zero, Quaternion.Euler(Vector3.zero)); //instantiate but keep the prefab references
                     Chunk chunk = chunkInstance.GetComponent<Chunk>();
                     chunkInstances[index] = chunk;
                     
