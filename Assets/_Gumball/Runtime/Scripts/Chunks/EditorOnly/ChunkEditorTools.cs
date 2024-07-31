@@ -66,14 +66,6 @@ namespace Gumball
         private bool isRuntimeChunk => name.Contains(ChunkUtils.RuntimeChunkSuffix);
 
         public static bool IsBakingMeshes;
-        
-        private void OnSavePrefab(string prefabName, string path)
-        {
-            if (!prefabName.Equals(gameObject.name))
-                return;
-            
-            CheckToBakeMeshes();
-        }
 
         private void CheckToBakeMeshes()
         {
@@ -83,6 +75,12 @@ namespace Gumball
             if (isRuntimeChunk)
                 return;
 
+            //only ever bake meshes when exiting prefab mode
+            bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject;
+            bool isExitingPrefabMode = lastOpenedChunk == this && !isPrefabMode;
+            if (!isExitingPrefabMode)
+                return;
+            
             IsBakingMeshes = true;
             chunk.FindSplineMeshes();
             ChunkUtils.BakeMeshes(chunk, false, true);
@@ -91,8 +89,6 @@ namespace Gumball
         
         private void OnEnable()
         {
-            SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
-            
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
             chunk.UpdateSplineSampleData();
         }
@@ -103,10 +99,11 @@ namespace Gumball
                 CheckToBakeMeshes();
             
             chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
-
-            SaveEditorAssetsEvents.onSavePrefab -= OnSavePrefab;
             
             Tools.hidden = false;
+            
+            if (lastOpenedChunk == this)
+                lastOpenedChunk = null;
         }
 
         private void OnDrawGizmos()
@@ -115,6 +112,8 @@ namespace Gumball
             CheckToShowVertices();
         }
 
+        private static ChunkEditorTools lastOpenedChunk;
+        
         private void Update()
         {
             CheckIfJustDeselected();
@@ -122,6 +121,10 @@ namespace Gumball
             previousSelection = Selection.activeGameObject;
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
                 timeWhenUnityLastUpdated = Time.realtimeSinceStartup;
+
+            bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject;
+            if (isPrefabMode)
+                lastOpenedChunk = this;
         }
         
         private void LateUpdate()
@@ -134,15 +137,16 @@ namespace Gumball
             CheckToUpdateMeshesImmediately();
             CheckIfTerrainIsRaycastable();
             
-            EditorApplication.delayCall -= CheckToUnbakeMeshesIfPrefabMode;
-            EditorApplication.delayCall += CheckToUnbakeMeshesIfPrefabMode;
+            EditorApplication.delayCall -= CheckToUnbakeMeshes;
+            EditorApplication.delayCall += CheckToUnbakeMeshes;
         }
 
-        private void CheckToUnbakeMeshesIfPrefabMode()
+        private void CheckToUnbakeMeshes()
         {
             try
             {
-                if (PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject)
+                bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject;
+                if (isPrefabMode)
                     UnbakeSplineMeshes();
             }
             catch (MissingReferenceException)

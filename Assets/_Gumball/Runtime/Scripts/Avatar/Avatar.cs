@@ -171,7 +171,7 @@ namespace Gumball
                 eyewearCosmetic.CurrentItem.SetActive(enable);
             
             BeardCosmetic beardCosmetic = CurrentBody.GetCosmetic<BeardCosmetic>();
-            if (beardCosmetic.CurrentItem != null)
+            if (beardCosmetic != null && beardCosmetic.CurrentItem != null)
                 beardCosmetic.CurrentItem.SetActive(enable);
             
             //head materials:

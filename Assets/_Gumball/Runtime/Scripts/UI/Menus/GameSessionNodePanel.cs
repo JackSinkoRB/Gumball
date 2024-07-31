@@ -41,7 +41,7 @@ namespace Gumball
 
         public void OnClickPlayButton()
         {
-            if (!FuelManager.HasFuel())
+            if (!FuelManager.Instance.HasFuel())
             {
                 Hide();
                 PanelManager.GetPanel<InsufficientFuelPanel>().Show();
@@ -79,7 +79,7 @@ namespace Gumball
                 child.gameObject.Pool();
             
             //core parts
-            foreach (CorePart corePart in gameSession.CorePartRewards)
+            foreach (CorePart corePart in gameSession.Rewards.CoreParts)
             {
                 GameSessionNodeReward reward = rewardPrefab.gameObject.GetSpareOrCreate<GameSessionNodeReward>(rewardsHolder);
                 reward.Initialise(corePart.DisplayName, corePart.Icon);
@@ -87,7 +87,7 @@ namespace Gumball
             }
             
             //sub parts
-            foreach (SubPart subPart in gameSession.SubPartRewards)
+            foreach (SubPart subPart in gameSession.Rewards.SubParts)
             {
                 GameSessionNodeReward reward = rewardPrefab.gameObject.GetSpareOrCreate<GameSessionNodeReward>(rewardsHolder);
                 reward.Initialise(subPart.DisplayName, subPart.Icon);
@@ -95,18 +95,18 @@ namespace Gumball
             }
             
             //standard currency
-            if (gameSession.StandardCurrencyReward > 0)
+            if (gameSession.Rewards.StandardCurrency > 0)
             {
                 GameSessionNodeReward reward = rewardPrefab.gameObject.GetSpareOrCreate<GameSessionNodeReward>(rewardsHolder);
-                reward.Initialise($"${gameSession.StandardCurrencyReward}", standardCurrencyIcon);
+                reward.Initialise($"${gameSession.Rewards.StandardCurrency}", standardCurrencyIcon);
                 reward.transform.SetAsLastSibling();
             }
             
             //xp
-            if (gameSession.XPReward > 0)
+            if (gameSession.Rewards.XP > 0)
             {
                 GameSessionNodeReward reward = rewardPrefab.gameObject.GetSpareOrCreate<GameSessionNodeReward>(rewardsHolder);
-                reward.Initialise($"{gameSession.XPReward} EXP", xpIcon);
+                reward.Initialise($"{gameSession.Rewards.XP} EXP", xpIcon);
                 reward.transform.SetAsLastSibling();
             }
         }

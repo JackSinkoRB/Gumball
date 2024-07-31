@@ -1,9 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEditor.SceneManagement;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
@@ -132,8 +129,8 @@ namespace Gumball.Runtime.Tests
             //initialise reward
             const int levelToTest = 1;
             const int premiumCurrencyToGive = 10;
-            int previousPremiumCurrencyReward = ExperienceManager.Instance.Levels[levelToTest].PremiumCurrencyReward;
-            ExperienceManager.Instance.Levels[levelToTest].SetPremiumCurrencyReward(premiumCurrencyToGive);
+            int previousPremiumCurrencyReward = ExperienceManager.Instance.Levels[levelToTest].Rewards.PremiumCurrency;
+            ExperienceManager.Instance.Levels[levelToTest].Rewards.SetPremiumCurrencyReward(premiumCurrencyToGive);
             
             ExperienceManager.SetLevel(0);
 
@@ -144,7 +141,7 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(expectedPremiumCoinsAfter, Currency.Premium.Funds);
 
             //reset
-            ExperienceManager.Instance.Levels[levelToTest].SetPremiumCurrencyReward(previousPremiumCurrencyReward);
+            ExperienceManager.Instance.Levels[levelToTest].Rewards.SetPremiumCurrencyReward(previousPremiumCurrencyReward);
         }
         
         [Test]
@@ -164,30 +161,32 @@ namespace Gumball.Runtime.Tests
             int expectedPremiumFundsAfter = premiumFundsBefore;
             for (int level = startingLevelIndex; level <= desiredLevelIndex; level++)
             {
-                expectedPremiumFundsAfter += ExperienceManager.Instance.Levels[level].PremiumCurrencyReward;
+                expectedPremiumFundsAfter += ExperienceManager.Instance.Levels[level].Rewards.PremiumCurrency;
             }
 
             Assert.AreEqual(expectedPremiumFundsAfter, Currency.Premium.Funds);
         }
         
-        [Test]
+        [UnityTest]
         [Order(7)]
-        public void GiveFuelOnLevelUp()
+        public IEnumerator GiveFuelOnLevelUp()
         {
+            yield return FuelManager.LoadInstanceAsync();
+            
             //initialise reward
             const int levelToTest = 1;
-            bool previousFuelReward = ExperienceManager.Instance.Levels[levelToTest].FuelRefillReward;
-            ExperienceManager.Instance.Levels[levelToTest].SetFuelRefillReward(true);
+            bool previousFuelReward = ExperienceManager.Instance.Levels[levelToTest].Rewards.FuelRefill;
+            ExperienceManager.Instance.Levels[levelToTest].Rewards.SetFuelRefillReward(true);
             
-            FuelManager.SetFuel(0);
+            FuelManager.Instance.SetFuel(0);
             ExperienceManager.SetLevel(0);
 
             ExperienceManager.AddXP(ExperienceManager.RemainingXPForNextLevel);
 
-            Assert.AreEqual(FuelManager.MaxFuel, FuelManager.CurrentFuel);
+            Assert.AreEqual(FuelManager.Instance.MaxFuel, FuelManager.Instance.CurrentFuel);
 
             //reset
-            ExperienceManager.Instance.Levels[levelToTest].SetFuelRefillReward(previousFuelReward);
+            ExperienceManager.Instance.Levels[levelToTest].Rewards.SetFuelRefillReward(previousFuelReward);
         }
         
     }

@@ -161,9 +161,9 @@ namespace Gumball
             for (int level = previousLevel + 1; level <= newLevel; level++)
             {
                 int levelIndex = level - 1;
-                Instance.levels[levelIndex].GiveRewards();
+                CoroutineHelper.Instance.StartCoroutine(Instance.levels[levelIndex].Rewards.GiveRewards()); //should be instant 
                 
-                unlockables.AddRange(Instance.levels[levelIndex].Unlockables);
+                unlockables.AddRange(Instance.levels[levelIndex].Rewards.Unlockables);
             }
             
             //show the level up panel with the rewards (just for the last level gained)
