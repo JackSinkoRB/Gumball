@@ -10,6 +10,11 @@ namespace Gumball
     public class CleanRunGameSession : TimedGameSession
     {
         
+        public override string GetName()
+        {
+            return "Clean run";
+        }
+
         protected override GameSessionPanel GetSessionPanel()
         {
             return PanelManager.GetPanel<CleanRunSessionPanel>();
