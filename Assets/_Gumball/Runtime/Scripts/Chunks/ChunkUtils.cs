@@ -324,6 +324,10 @@ namespace Gumball
                     Object.DestroyImmediate(chunkObjectInInstance.gameObject);
                 }
             }
+            
+            //bake spline meshes
+            runtimeInstanceChunk.FindSplineMeshes();
+            BakeMeshes(runtimeInstanceChunk, true, false);
 
             //delete empty gameobjects
             HashSet<GameObject> emptyObjects = new();
