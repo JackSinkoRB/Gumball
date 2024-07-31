@@ -169,7 +169,7 @@ namespace Gumball
                 PanelManager.GetPanel<GenericMessagePanel>().Show();
                 PanelManager.GetPanel<GenericMessagePanel>().Initialise("You have unclaimed challenge rewards!");
             
-                yield return new WaitUntil(() => !PanelManager.GetPanel<GenericMessagePanel>().IsShowing);
+                yield return new WaitUntil(() => !PanelManager.PanelExists<GenericMessagePanel>() || !PanelManager.GetPanel<GenericMessagePanel>().IsShowing);
             }
             
             if (isMinorRewardUnclaimed)
