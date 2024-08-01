@@ -210,7 +210,8 @@ namespace Gumball
                     continue;
 
                 splineMesh.Unbake();
-                splineMesh.Bake(true, true);
+                if (splineMesh.GetChannelCount() > 0)
+                    splineMesh.Bake(true, true);
                 
                 string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{uniqueIDAssigner.UniqueID}.asset";
                 Mesh existingAsset = AssetDatabase.LoadAssetAtPath<Mesh>(path);
