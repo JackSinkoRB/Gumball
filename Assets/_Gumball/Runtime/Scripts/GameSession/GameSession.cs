@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Dreamteck.Splines;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -53,6 +54,7 @@ namespace Gumball
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
         [SerializeField] protected float raceDistanceMetres;
+        [SerializeField] private CheckpointMarkers finishLineMarkers;
 
         [Header("Racers")]
         [SerializeField] protected RacerSessionData[] racerData;
@@ -427,6 +429,42 @@ namespace Gumball
             }
         }
         
+        public SplineSample GetSampleAlongSplines(float distanceFromStart)
+        {
+            if (distanceFromStart > ChunkManager.Instance.CurrentChunkMap.TotalLengthMetres)
+                throw new InvalidOperationException();
+            
+            //get the chunk the position is in
+            int chunkIndex = 0;
+            while (CurrentChunkMap.ChunkLengthsCalculated[chunkIndex] < distanceFromStart)
+            {
+                chunkIndex++;
+            }
+            
+            int previousChunkIndex = chunkIndex == 0 ? 0 : chunkIndex - 1;
+            float chunkStartDistance = ChunkManager.Instance.CurrentChunkMap.ChunkLengthsCalculated[previousChunkIndex];
+            
+            Chunk chunk = ChunkManager.Instance.CurrentChunks[chunkIndex].Chunk;
+            
+            if (chunk.SplineComputer.sampleMode != SplineComputer.SampleMode.Uniform)
+                throw new InvalidOperationException("Could not get distance travelled along spline because the samples are not in uniform.");
+
+            float distanceBetweenSamples = chunk.SplineLengthCached / chunk.SplineSamples.Length; //assuming the spline sample distance is uniform
+            
+            //get the spline sample
+            float distanceInChunkSqr = 0;
+            for (int splineSampleIndex = 1; splineSampleIndex < chunk.SplineSamples.Length; splineSampleIndex++)
+            {
+                distanceInChunkSqr += distanceBetweenSamples;
+                
+                float totalDistanceAtSample = chunkStartDistance + distanceInChunkSqr;
+                if (totalDistanceAtSample >= distanceFromStart)
+                    return chunk.SplineSamples[splineSampleIndex];
+            }
+
+            throw new InvalidOperationException();
+        }
+        
         private void StopTrackingObjectives()
         {
             if (subObjectives == null)
@@ -636,10 +674,10 @@ namespace Gumball
                 Debug.LogError($"Could not create finish line as the race distance {raceDistanceMetres} is bigger than the map length {mapLength}.");
                 return;
             }
-            
-            //TODO:
+
+            finishLineMarkers.Spawn(this, raceDistanceMetres);
         }
-        
+
         private void OnCrossFinishLine()
         {
             ProgressStatus status = ProgressStatus.ATTEMPTED;

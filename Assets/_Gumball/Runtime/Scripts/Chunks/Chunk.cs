@@ -250,7 +250,7 @@ namespace Gumball
 
             float distanceBetweenSamples = SplineLengthCached / SplineSamples.Length; //assuming the spline sample distance is uniform
             
-            var (closestSampleIndex, closestSampleDistance)  = GetClosestSampleIndexOnSpline(fromPoint);
+            var (closestSampleIndex, closestSampleDistance) = GetClosestSampleIndexOnSpline(fromPoint);
 
             float totalDistance = distanceBetweenSamples * closestSampleIndex;
             return totalDistance;

@@ -43,7 +43,7 @@ namespace Gumball
                 return 0;
             
             //get the distance in the current chunk
-            Vector3 carPosition = car.transform.position; //TODO: use front of car
+            Vector3 carPosition = car.transform.TransformPoint(car.FrontOfCarPosition);
             int currentChunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(currentChunk);
             float distanceInCurrentChunk = currentChunk.GetDistanceTravelledAlongSpline(carPosition);
             
