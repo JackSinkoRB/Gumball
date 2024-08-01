@@ -479,8 +479,9 @@ namespace Gumball
         {
             gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
             colliders.layer = (int)LayersAndTags.Layer.RacerCar;
-            
+
             SetAutoDrive(true);
+            SetObeySpeedLimit(false);
             
             InitialiseWheelStance();
         }
@@ -509,6 +510,11 @@ namespace Gumball
         public void SetTemporarySpeedLimit(float speedKmh)
         {
             tempSpeedLimit = speedKmh;
+        }
+
+        public void SetObeySpeedLimit(bool obey)
+        {
+            obeySpeedLimit = obey;
         }
 
         /// <summary>

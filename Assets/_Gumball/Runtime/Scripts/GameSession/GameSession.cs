@@ -376,6 +376,8 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            inProgress = false;
+            
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             yield return LoadChunkMap();
@@ -514,6 +516,8 @@ namespace Gumball
             
             //remove constraints
             WarehouseManager.Instance.CurrentCar.Rigidbody.constraints = RigidbodyConstraints.None;
+            
+            WarehouseManager.Instance.CurrentCar.SetObeySpeedLimit(false);
             
             //move the car to the right position
             currentCarRigidbody.Move(vehicleStartingPosition, Quaternion.Euler(vehicleStartingRotation));

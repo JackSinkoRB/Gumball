@@ -10,6 +10,8 @@ namespace Gumball
     {
         
         [SerializeField] private TextMeshProUGUI positionLabel;
+
+        protected virtual int numberOfRacers => GameSessionManager.Instance.CurrentSession.CurrentRacers.Count;
         
         protected override void LateUpdate()
         {
@@ -22,7 +24,7 @@ namespace Gumball
         {
             RaceGameSession currentSession = (RaceGameSession)GameSessionManager.Instance.CurrentSession;
             int currentRank = currentSession.GetRacePosition(WarehouseManager.Instance.CurrentCar);
-            positionLabel.text = $"{currentRank} / {currentSession.CurrentRacers.Count}";
+            positionLabel.text = $"{currentRank} / {numberOfRacers}";
         }
 
     }
