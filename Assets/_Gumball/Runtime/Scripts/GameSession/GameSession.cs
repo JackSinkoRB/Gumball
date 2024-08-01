@@ -55,7 +55,7 @@ namespace Gumball
         [SerializeField] protected float raceDistanceMetres;
 
         [Header("Racers")]
-        [SerializeField] private RacerSessionData[] racerData;
+        [SerializeField] protected RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] private float racersStartingSpeed = 70;
 
