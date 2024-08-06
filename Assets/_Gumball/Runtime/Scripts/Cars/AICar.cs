@@ -844,7 +844,7 @@ namespace Gumball
                 }
             }
 
-            if (nearestRacingLine != null && GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this))
+            if (nearestRacingLine != null)
             {
                 float interpolationDistanceSqr = CurrentChunk.NextRacingLineInterpolateDistance * CurrentChunk.NextRacingLineInterpolateDistance;
                 if (nearestDistanceSqr < interpolationDistanceSqr)
