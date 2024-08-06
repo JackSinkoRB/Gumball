@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
 
@@ -10,8 +11,12 @@ namespace Gumball
     public class SpeedCameraSprintSession : GameSession
     {
 
+        [Header("Speed camera sprint")]
         [SerializeField] private SpeedCameraZone[] speedCameraZones;
-
+        [SerializeField] private SpeedCameraZoneMarker zoneStartMarkerPrefab; 
+        [SerializeField] private SpeedCameraZoneMarker zoneEndMarkerPrefab; 
+        
+        [Header("Debugging")]
         [SerializeField, ReadOnly] private GenericDictionary<AICar, HashSet<SpeedCameraZone>> zonesPassed = new();
         [SerializeField, ReadOnly] private GenericDictionary<AICar, HashSet<SpeedCameraZone>> zonesFailed = new();
         
@@ -30,11 +35,14 @@ namespace Gumball
             return PanelManager.GetPanel<SpeedCameraSprintSessionEndPanel>();
         }
 
-        protected override void OnSessionStart()
+        protected override IEnumerator LoadSession()
         {
-            base.OnSessionStart();
-
+            yield return base.LoadSession();
+            
             zonesPassed.Clear();
+            zonesFailed.Clear();
+
+            SpawnZoneMarkers();
         }
 
         public override void UpdateWhenCurrent()
@@ -42,6 +50,25 @@ namespace Gumball
             base.UpdateWhenCurrent();
 
             CheckIfRacerHasFailedZones();
+        }
+
+        private void SpawnZoneMarkers()
+        {
+            foreach (SpeedCameraZone zone in speedCameraZones)
+            {
+                SpawnZoneMarker(zoneStartMarkerPrefab, zone.Position - zone.Length);
+                SpawnZoneMarker(zoneEndMarkerPrefab, zone.Position);
+            }
+        }
+
+        private void SpawnZoneMarker(SpeedCameraZoneMarker prefab, float distanceAlongSpline)
+        {
+            if (prefab == null)
+                return;
+
+            SplineSample start = ChunkManager.Instance.GetSampleAlongSplines(distanceAlongSpline);
+            SpeedCameraZoneMarker instance = prefab.gameObject.GetSpareOrCreate<SpeedCameraZoneMarker>(position: start.position.OffsetY(prefab.HeightAboveRoad), rotation: start.rotation);
+            instance.Initialise(distanceAlongSpline);
         }
 
         private void CheckIfRacerHasFailedZones()

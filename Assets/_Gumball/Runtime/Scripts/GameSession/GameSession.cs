@@ -428,43 +428,7 @@ namespace Gumball
                 subObjective.Tracker.StartListening(subObjective.ChallengeID, subObjective.Goal);
             }
         }
-        
-        public SplineSample GetSampleAlongSplines(float distanceFromStart)
-        {
-            if (distanceFromStart > ChunkManager.Instance.CurrentChunkMap.TotalLengthMetres)
-                throw new InvalidOperationException();
-            
-            //get the chunk the position is in
-            int chunkIndex = 0;
-            while (CurrentChunkMap.ChunkLengthsCalculated[chunkIndex] < distanceFromStart)
-            {
-                chunkIndex++;
-            }
-            
-            int previousChunkIndex = chunkIndex - 1;
-            float chunkStartDistance = previousChunkIndex < 0 ? 0 : ChunkManager.Instance.CurrentChunkMap.ChunkLengthsCalculated[previousChunkIndex];
-            
-            Chunk chunk = ChunkManager.Instance.CurrentChunks[chunkIndex].Chunk;
-            
-            if (chunk.SplineComputer.sampleMode != SplineComputer.SampleMode.Uniform)
-                throw new InvalidOperationException("Could not get distance travelled along spline because the samples are not in uniform.");
 
-            float distanceBetweenSamples = chunk.SplineLengthCached / chunk.SplineSamples.Length; //assuming the spline sample distance is uniform
-            
-            //get the spline sample
-            float distanceInChunkSqr = 0;
-            for (int splineSampleIndex = 1; splineSampleIndex < chunk.SplineSamples.Length; splineSampleIndex++)
-            {
-                distanceInChunkSqr += distanceBetweenSamples;
-                
-                float totalDistanceAtSample = chunkStartDistance + distanceInChunkSqr;
-                if (totalDistanceAtSample >= distanceFromStart)
-                    return chunk.SplineSamples[splineSampleIndex];
-            }
-
-            throw new InvalidOperationException();
-        }
-        
         private void StopTrackingObjectives()
         {
             if (subObjectives == null)
@@ -675,7 +639,7 @@ namespace Gumball
                 return;
             }
 
-            finishLineMarkers.Spawn(this, raceDistanceMetres);
+            finishLineMarkers.Spawn(raceDistanceMetres);
         }
 
         private void OnCrossFinishLine()
