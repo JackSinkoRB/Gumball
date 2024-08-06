@@ -15,6 +15,12 @@ namespace Gumball
             
         public void Spawn(GameSession session, float distanceAlongSpline)
         {
+            if (checkpointMarkerPrefab == null)
+            {
+                Debug.LogWarning("Cannot spawn checkpoint marker as there is no prefab assigned.");
+                return;
+            }
+            
             SplineSample sampleAlongSplines = session.GetSampleAlongSplines(distanceAlongSpline);
             
             //spawn the marker on both sides
@@ -23,9 +29,17 @@ namespace Gumball
 
             GameObject left = checkpointMarkerPrefab.GetSpareOrCreate(position: leftPosition, rotation: sampleAlongSplines.rotation);
             GameObject right = checkpointMarkerPrefab.GetSpareOrCreate(position: rightPosition, rotation: sampleAlongSplines.rotation);
-                
+            
             ChunkUtils.GroundObject(left.transform);
             ChunkUtils.GroundObject(right.transform);
+
+            //disable colliders after grounding
+            Collider leftCollider = left.GetComponent<Collider>();
+            if (leftCollider != null)
+                leftCollider.enabled = false;
+            Collider rightCollider = right.GetComponent<Collider>();
+            if (rightCollider != null)
+                rightCollider.enabled = false;
         }
         
     }

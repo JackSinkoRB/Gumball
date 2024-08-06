@@ -1,8 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MyBox;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
@@ -14,6 +15,8 @@ namespace Gumball
         [Tooltip("The distance (in metres) along the map for the knockout positions.")]
         [HelpBox("There is 1 knockout position per racer, with the Race Distance being the last knockout position.", MessageType.Info, HelpBoxAttribute.Position.ABOVE)]
         [SerializeField] private float[] knockoutPositions;
+        
+        [SerializeField] private CheckpointMarkers knockoutPositionMarkers;
 
         public readonly HashSet<AICar> EliminatedRacers = new();
 
@@ -37,6 +40,8 @@ namespace Gumball
             base.OnSessionStart();
 
             EliminatedRacers.Clear();
+
+            SpawnKnockoutPositionMarkers();
         }
 
         public override void UpdateWhenCurrent()
@@ -87,6 +92,14 @@ namespace Gumball
         private void OnEliminatePlayer()
         {
             EndSession(ProgressStatus.ATTEMPTED);
+        }
+
+        private void SpawnKnockoutPositionMarkers()
+        {
+            foreach (float knockoutPosition in knockoutPositions)
+            {
+                knockoutPositionMarkers.Spawn(this, knockoutPosition);
+            }
         }
         
 #if UNITY_EDITOR
