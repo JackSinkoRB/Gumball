@@ -113,6 +113,9 @@ namespace Gumball
         public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
 
+        protected abstract GameSessionPanel GetSessionPanel();
+        protected abstract GameSessionEndPanel GetSessionEndPanel();
+
         public abstract string GetName();
 
         public void StartSession()
@@ -325,11 +328,17 @@ namespace Gumball
             HasStarted = false;
 
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Hide();
+            if (GetSessionEndPanel() != null)
+                GetSessionEndPanel().Show();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
             
             //disable NOS
             WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
+
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
             
             //come to a stop
             WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
@@ -399,6 +408,9 @@ namespace Gumball
             
             onSessionStart?.Invoke(this);
             
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Show();
+
             HasStarted = true;
         }
 
