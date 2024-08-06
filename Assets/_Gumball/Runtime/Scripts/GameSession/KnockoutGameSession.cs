@@ -49,7 +49,7 @@ namespace Gumball
         private void CheckToEliminateRacers()
         {
             AICar secondLastRacer = RacersInPositionOrder[^(EliminatedRacers.Count + 2)];
-            float secondLastRacerPosition = secondLastRacer.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled;
+            float secondLastRacerPosition = secondLastRacer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap;
             
             int knockoutPositionsPassed = 0;
             foreach (float knockoutPosition in knockoutPositions)

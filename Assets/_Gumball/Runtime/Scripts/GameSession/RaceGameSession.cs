@@ -26,8 +26,7 @@ namespace Gumball
                     
                     //sort the cars based on distanceTraveled (descending order)
                     racersInPositionOrderCached = CurrentRacers.Keys.OrderByDescending(
-                        c => c.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled 
-                             + c.GetComponent<SplineTravelDistanceCalculator>().InitialDistance).ToArray();
+                        c => c.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap).ToArray();
                 }
 
                 return racersInPositionOrderCached;

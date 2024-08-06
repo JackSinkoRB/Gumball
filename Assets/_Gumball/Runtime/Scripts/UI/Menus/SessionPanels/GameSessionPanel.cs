@@ -27,7 +27,10 @@ namespace Gumball
                 return;
 
             SplineTravelDistanceCalculator playersDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
-            float percent = playersDistanceCalculator.DistanceTraveled / currentSession.RaceDistanceMetres;
+            if (playersDistanceCalculator == null)
+                return;
+            
+            float percent = playersDistanceCalculator.DistanceInMap / currentSession.RaceDistanceMetres;
             progressBarFill.fillAmount = Mathf.Clamp01(percent);
         }
         

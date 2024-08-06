@@ -10,30 +10,46 @@ namespace Gumball
     {
 
         [SerializeField, ReadOnly] private float distanceTraveled;
+        [SerializeField, ReadOnly] private float distanceInMap;
         [Tooltip("The distance along the spline from the car's starting position to the start of the map. ")]
-        [SerializeField, ReadOnly] private float initialSplineDistance;
+        [SerializeField, ReadOnly] private float initialDistance;
 
         private int lastFrameCalculated = -1;
         
         private AICar car => GetComponent<AICar>();
-
-        public float InitialDistance => initialSplineDistance;
+        
+        public float DistanceInMap
+        {
+            get
+            {
+                UpdateCache();
+                return distanceInMap;
+            }
+        }
         
         public float DistanceTraveled
         {
             get
             {
-                //only calculate once per frame
-                if (lastFrameCalculated != Time.frameCount)
-                    distanceTraveled = GetSplineDistanceTraveled() - initialSplineDistance;
-                
+                UpdateCache();
                 return distanceTraveled;
             }
         }
 
         private void OnEnable()
         {
-            initialSplineDistance = GetSplineDistanceTraveled();
+            initialDistance = GetSplineDistanceTraveled();
+        }
+
+        private void UpdateCache()
+        {
+            if (lastFrameCalculated == Time.frameCount)
+                return;
+            
+            lastFrameCalculated = Time.frameCount;
+            
+            distanceInMap = GetSplineDistanceTraveled();
+            distanceTraveled = distanceInMap - initialDistance;
         }
         
         private float GetSplineDistanceTraveled()
@@ -48,13 +64,9 @@ namespace Gumball
             float distanceInCurrentChunk = currentChunk.GetDistanceTravelledAlongSpline(carPosition);
             
             //get the distance in previous chunks
-            float distanceInPreviousChunks = 0;
-            for (int index = 0; index < currentChunkIndex; index++)
-            {
-                ChunkMapData chunkData = ChunkManager.Instance.CurrentChunkMap.GetChunkData(index);
-                distanceInPreviousChunks += chunkData.SplineLength;
-            }
-
+            int previousChunkIndex = currentChunkIndex - 1;
+            float distanceInPreviousChunks = previousChunkIndex < 0 ? 0 : ChunkManager.Instance.CurrentChunkMap.ChunkLengthsCalculated[previousChunkIndex];
+            
             return distanceInCurrentChunk + distanceInPreviousChunks;
         }
         

@@ -356,7 +356,7 @@ namespace Gumball
         public virtual void UpdateWhenCurrent()
         {
             SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
-            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceTraveled >= raceDistanceMetres)
+            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceInMap >= raceDistanceMetres)
                 OnCrossFinishLine();
         }
 
@@ -441,8 +441,8 @@ namespace Gumball
                 chunkIndex++;
             }
             
-            int previousChunkIndex = chunkIndex == 0 ? 0 : chunkIndex - 1;
-            float chunkStartDistance = ChunkManager.Instance.CurrentChunkMap.ChunkLengthsCalculated[previousChunkIndex];
+            int previousChunkIndex = chunkIndex - 1;
+            float chunkStartDistance = previousChunkIndex < 0 ? 0 : ChunkManager.Instance.CurrentChunkMap.ChunkLengthsCalculated[previousChunkIndex];
             
             Chunk chunk = ChunkManager.Instance.CurrentChunks[chunkIndex].Chunk;
             
