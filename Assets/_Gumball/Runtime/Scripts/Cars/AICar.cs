@@ -844,7 +844,7 @@ namespace Gumball
                 }
             }
 
-            if (nearestRacingLine != null)
+            if (nearestRacingLine != null && GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this))
             {
                 float interpolationDistanceSqr = CurrentChunk.NextRacingLineInterpolateDistance * CurrentChunk.NextRacingLineInterpolateDistance;
                 if (nearestDistanceSqr < interpolationDistanceSqr)
@@ -1877,7 +1877,7 @@ namespace Gumball
             Chunk previousChunk = currentChunkCached;
                     
             //raycast down to terrain
-            const float offset = 10;
+            const float offset = 500;
             currentChunkCached = Physics.Raycast(transform.position.OffsetY(offset), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
                 ? hitDown.transform.parent.GetComponent<Chunk>()
                 : null;
