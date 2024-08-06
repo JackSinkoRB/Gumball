@@ -479,8 +479,9 @@ namespace Gumball
         {
             gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
             colliders.layer = (int)LayersAndTags.Layer.RacerCar;
-            
+
             SetAutoDrive(true);
+            SetObeySpeedLimit(false);
             
             InitialiseWheelStance();
         }
@@ -509,6 +510,11 @@ namespace Gumball
         public void SetTemporarySpeedLimit(float speedKmh)
         {
             tempSpeedLimit = speedKmh;
+        }
+
+        public void SetObeySpeedLimit(bool obey)
+        {
+            obeySpeedLimit = obey;
         }
 
         /// <summary>
@@ -1871,7 +1877,7 @@ namespace Gumball
             Chunk previousChunk = currentChunkCached;
                     
             //raycast down to terrain
-            const float offset = 10;
+            const float offset = 500;
             currentChunkCached = Physics.Raycast(transform.position.OffsetY(offset), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
                 ? hitDown.transform.parent.GetComponent<Chunk>()
                 : null;
