@@ -395,7 +395,7 @@ namespace Gumball
             isHandbrakeEngaged = false;
             wasAcceleratingLastFrame = false;
             racersCollidingWith.Clear();
-            tempSpeedLimit = -1f; //clear the temp speed limit
+            RemoveTemporarySpeedLimit();
             isStuck = false;
             timeAcceleratingSinceMovingSlowly = 0;
         }
@@ -510,6 +510,11 @@ namespace Gumball
         public void SetTemporarySpeedLimit(float speedKmh)
         {
             tempSpeedLimit = speedKmh;
+        }
+
+        public void RemoveTemporarySpeedLimit()
+        {
+            tempSpeedLimit = -1;
         }
 
         public void SetObeySpeedLimit(bool obey)
@@ -1156,7 +1161,7 @@ namespace Gumball
                 return;
 
             //is speeding over the desired speed? 
-            const float speedingLeewayPercent = 5; //the amount the player can speed past the desired speed before needing to brake
+            const float speedingLeewayPercent = 0.05f; //the amount the car can speed past the desired speed before needing to brake
             float speedingLeeway = speedingLeewayPercent * DesiredSpeed;
             if (autoDrive && speed > DesiredSpeed + speedingLeeway)
             {
