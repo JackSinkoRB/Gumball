@@ -11,7 +11,7 @@ namespace Gumball
     public class RaceGameSession : GameSession
     {
 
-        [SerializeField, ReadOnly] private AICar[] racersInPositionOrderCached;
+        [SerializeField, ReadOnly] protected AICar[] racersInPositionOrderCached;
         
         private int frameLastCachedRacerPositionOrder = -1;
 
@@ -23,10 +23,7 @@ namespace Gumball
                     || frameLastCachedRacerPositionOrder != Time.frameCount)
                 {
                     frameLastCachedRacerPositionOrder = Time.frameCount;
-                    
-                    //sort the cars based on distanceTraveled (descending order)
-                    racersInPositionOrderCached = CurrentRacers.Keys.OrderByDescending(
-                        c => c.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap).ToArray();
+                    UpdateRacersPositions();
                 }
 
                 return racersInPositionOrderCached;
@@ -48,10 +45,16 @@ namespace Gumball
             return PanelManager.GetPanel<RaceSessionEndPanel>();
         }
         
-        public int GetRacePosition(AICar car)
+        public int GetRacePosition(AICar racer)
         {
-            int rank = Array.IndexOf(RacersInPositionOrder, car) + 1;
+            int rank = Array.IndexOf(RacersInPositionOrder, racer) + 1;
             return rank;
+        }
+
+        protected virtual void UpdateRacersPositions()
+        {
+            //sort the cars based on distanceTraveled (descending order)
+            racersInPositionOrderCached = CurrentRacers.Keys.OrderByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap).ToArray();
         }
         
     }

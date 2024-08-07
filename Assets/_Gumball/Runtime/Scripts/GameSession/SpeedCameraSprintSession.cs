@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
@@ -8,18 +9,25 @@ using UnityEngine;
 namespace Gumball
 {
     [CreateAssetMenu(menuName = "Gumball/GameSession/Speed camera sprint")]
-    public class SpeedCameraSprintSession : GameSession
+    public class SpeedCameraSprintSession : RaceGameSession
     {
+    
+        public event Action<AICar, SpeedCameraZone> onPassZone;
+        public event Action<AICar, SpeedCameraZone> onFailZone;
 
         [Header("Speed camera sprint")]
         [SerializeField] private SpeedCameraZone[] speedCameraZones;
+        [Tooltip("How many kmh past the speed limit can the racer be travelling without failing?")]
+        [SerializeField] private float speedLimitLeniencyKmh = 5;
         [SerializeField] private SpeedCameraZoneMarker zoneStartMarkerPrefab; 
-        [SerializeField] private SpeedCameraZoneMarker zoneEndMarkerPrefab; 
-        
+        [SerializeField] private SpeedCameraZoneMarker zoneEndMarkerPrefab;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private GenericDictionary<AICar, HashSet<SpeedCameraZone>> zonesPassed = new();
         [SerializeField, ReadOnly] private GenericDictionary<AICar, HashSet<SpeedCameraZone>> zonesFailed = new();
         
+        public SpeedCameraZone[] SpeedCameraZones => speedCameraZones;
+
         public override string GetName()
         {
             return "Speed camera sprint";
@@ -50,6 +58,23 @@ namespace Gumball
             base.UpdateWhenCurrent();
 
             CheckIfRacerHasFailedZones();
+        }
+        
+        public bool HasCarFailedZone(AICar car, SpeedCameraZone zone)
+        {
+            return zonesFailed.ContainsKey(car) && zonesFailed[car].Contains(zone);
+        }
+        
+        public bool HasCarPassedZone(AICar car, SpeedCameraZone zone)
+        {
+            return zonesPassed.ContainsKey(car) && zonesPassed[car].Contains(zone);
+        }
+
+        protected override void UpdateRacersPositions()
+        {
+            racersInPositionOrderCached = CurrentRacers.Keys.OrderBy(racer => zonesFailed.ContainsKey(racer) ? zonesFailed[racer].Count : 0)
+                .ThenByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap)
+                .ToArray();
         }
 
         private void SpawnZoneMarkers()
@@ -83,7 +108,7 @@ namespace Gumball
                     if (hasPassedZone || hasFailedZone)
                         continue;
                     
-                    if (zone.IsRacerInZone(racer) && racer.Speed >= zone.SpeedLimitKmh)
+                    if (zone.IsRacerInZone(racer) && racer.Speed >= zone.SpeedLimitKmh + speedLimitLeniencyKmh)
                     {
                         OnFailZone(racer, zone);
                     }
@@ -100,6 +125,8 @@ namespace Gumball
             HashSet<SpeedCameraZone> existingZones = zonesPassed.ContainsKey(racer) ? zonesPassed[racer] : new HashSet<SpeedCameraZone>();
             existingZones.Add(zone);
             
+            onPassZone?.Invoke(racer, zone);
+            
             GlobalLoggers.GameSessionLogger.Log($"{racer.name} passed zone at {zone.Position}m.");
         }
 
@@ -107,6 +134,8 @@ namespace Gumball
         {
             HashSet<SpeedCameraZone> existingZones = zonesFailed.ContainsKey(racer) ? zonesFailed[racer] : new HashSet<SpeedCameraZone>();
             existingZones.Add(zone);
+            
+            onFailZone?.Invoke(racer, zone);
             
             GlobalLoggers.GameSessionLogger.Log($"{racer.name} failed zone at {zone.Position}m.");
         }
