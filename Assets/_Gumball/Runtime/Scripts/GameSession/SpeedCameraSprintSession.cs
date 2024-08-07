@@ -56,19 +56,19 @@ namespace Gumball
         {
             foreach (SpeedCameraZone zone in speedCameraZones)
             {
-                SpawnZoneMarker(zoneStartMarkerPrefab, zone.Position - zone.Length);
-                SpawnZoneMarker(zoneEndMarkerPrefab, zone.Position);
+                SpawnZoneMarker(zoneStartMarkerPrefab, zone.Position - zone.Length, zone.SpeedLimitKmh);
+                SpawnZoneMarker(zoneEndMarkerPrefab, zone.Position, zone.SpeedLimitKmh);
             }
         }
 
-        private void SpawnZoneMarker(SpeedCameraZoneMarker prefab, float distanceAlongSpline)
+        private void SpawnZoneMarker(SpeedCameraZoneMarker prefab, float distanceAlongSpline, float speedLimitKmh)
         {
             if (prefab == null)
                 return;
 
             SplineSample start = ChunkManager.Instance.GetSampleAlongSplines(distanceAlongSpline);
             SpeedCameraZoneMarker instance = prefab.gameObject.GetSpareOrCreate<SpeedCameraZoneMarker>(position: start.position.OffsetY(prefab.HeightAboveRoad), rotation: start.rotation);
-            instance.Initialise(distanceAlongSpline);
+            instance.Initialise(distanceAlongSpline, speedLimitKmh);
         }
 
         private void CheckIfRacerHasFailedZones()
