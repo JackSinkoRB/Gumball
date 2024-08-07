@@ -15,7 +15,7 @@ namespace Gumball
         
         private int frameLastCachedRacerPositionOrder = -1;
 
-        public AICar[] RacersInPositionOrder
+        protected AICar[] RacersInPositionOrder
         {
             get
             {

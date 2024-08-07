@@ -395,7 +395,7 @@ namespace Gumball
             isHandbrakeEngaged = false;
             wasAcceleratingLastFrame = false;
             racersCollidingWith.Clear();
-            tempSpeedLimit = -1f; //clear the temp speed limit
+            RemoveTemporarySpeedLimit();
             isStuck = false;
             timeAcceleratingSinceMovingSlowly = 0;
         }
@@ -510,6 +510,11 @@ namespace Gumball
         public void SetTemporarySpeedLimit(float speedKmh)
         {
             tempSpeedLimit = speedKmh;
+        }
+
+        public void RemoveTemporarySpeedLimit()
+        {
+            tempSpeedLimit = -1;
         }
 
         public void SetObeySpeedLimit(bool obey)

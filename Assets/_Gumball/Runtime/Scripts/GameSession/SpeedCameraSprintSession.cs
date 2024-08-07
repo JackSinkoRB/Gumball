@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Dreamteck.Splines;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
@@ -16,13 +19,17 @@ namespace Gumball
         public event Action<AICar, SpeedCameraZone> onFailZone;
 
         [Header("Speed camera sprint")]
-        [SerializeField] private SpeedCameraZone[] speedCameraZones;
-        [Tooltip("How many kmh past the speed limit can the racer be travelling without failing?")]
-        [SerializeField] private float speedLimitLeniencyKmh = 5;
         [SerializeField] private SpeedCameraZoneMarker zoneStartMarkerPrefab; 
         [SerializeField] private SpeedCameraZoneMarker zoneEndMarkerPrefab;
+        [Tooltip("How many kmh past the speed limit can the racer be travelling without failing?")]
+        [SerializeField] private float speedLimitLeniencyKmh = 5;
+        [SerializeField] private SpeedCameraZone[] speedCameraZones;
+        [HelpBox("There is 1 value per racer.", MessageType.Info, HelpBoxAttribute.Position.ABOVE)]
+        [Tooltip("Relative to the order of the session racer data.")]
+        [SerializeField] private SpeedCameraSprintRacerData[] racerSpeedCameraSprintData;
 
         [Header("Debugging")]
+        [SerializeField, ReadOnly] private GenericDictionary<AICar, GenericDictionary<SpeedCameraZone, MinMaxFloat>> preCalculatedSpeedLimitPositions = new();
         [SerializeField, ReadOnly] private GenericDictionary<AICar, HashSet<SpeedCameraZone>> zonesPassed = new();
         [SerializeField, ReadOnly] private GenericDictionary<AICar, HashSet<SpeedCameraZone>> zonesFailed = new();
         
@@ -51,13 +58,44 @@ namespace Gumball
             zonesFailed.Clear();
 
             SpawnZoneMarkers();
+
+            CalculateTemporarySpeedLimitDistances();
+        }
+        
+        private void CalculateTemporarySpeedLimitDistances()
+        {
+            preCalculatedSpeedLimitPositions.Clear();
+
+            foreach (SpeedCameraZone zone in speedCameraZones)
+            {
+                float start = zone.Position - zone.Length;
+                float end = zone.Position;
+                
+                int racerIndex = 0;
+                foreach (AICar racer in CurrentRacers.Keys)
+                {
+                    if (racer.IsPlayerCar)
+                        continue;
+
+                    float brakingPosition = start - racerSpeedCameraSprintData[racerIndex].BrakingDistanceRange.RandomInRange();
+                    float accelerationPosition = end + racerSpeedCameraSprintData[racerIndex].AccelerationDistanceRange.RandomInRange();
+                    
+                    if (!preCalculatedSpeedLimitPositions.ContainsKey(racer))
+                        preCalculatedSpeedLimitPositions[racer] = new GenericDictionary<SpeedCameraZone, MinMaxFloat>();
+                    preCalculatedSpeedLimitPositions[racer][zone] = new MinMaxFloat(brakingPosition, accelerationPosition);
+                    
+                    racerIndex++;
+                }
+            }
+
         }
 
         public override void UpdateWhenCurrent()
         {
             base.UpdateWhenCurrent();
 
-            CheckIfRacerHasFailedZones();
+            CheckIfRacerShouldBrakeForZone();
+            CheckIfRacerHasPassedOrFailedZones();
         }
         
         public bool HasCarFailedZone(AICar car, SpeedCameraZone zone)
@@ -96,7 +134,31 @@ namespace Gumball
             instance.Initialise(distanceAlongSpline, speedLimitKmh);
         }
 
-        private void CheckIfRacerHasFailedZones()
+        private void CheckIfRacerShouldBrakeForZone()
+        {
+            foreach (AICar racer in CurrentRacers.Keys)
+            {
+                if (racer.IsPlayerCar)
+                    continue;
+                
+                racer.RemoveTemporarySpeedLimit();
+                
+                foreach (SpeedCameraZone zone in speedCameraZones)
+                {
+                    //if racer is between the distance, set temporary limit
+                    float position = racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap;
+                    MinMaxFloat brakingPositions = preCalculatedSpeedLimitPositions[racer][zone];
+                    bool isWithinZone = brakingPositions.IsInRange(position);
+                    if (isWithinZone)
+                    {
+                        racer.SetTemporarySpeedLimit(zone.SpeedLimitKmh);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void CheckIfRacerHasPassedOrFailedZones()
         {
             foreach (SpeedCameraZone zone in speedCameraZones)
             {
@@ -124,6 +186,7 @@ namespace Gumball
         {
             HashSet<SpeedCameraZone> existingZones = zonesPassed.ContainsKey(racer) ? zonesPassed[racer] : new HashSet<SpeedCameraZone>();
             existingZones.Add(zone);
+            zonesPassed[racer] = existingZones;
             
             onPassZone?.Invoke(racer, zone);
             
@@ -134,11 +197,49 @@ namespace Gumball
         {
             HashSet<SpeedCameraZone> existingZones = zonesFailed.ContainsKey(racer) ? zonesFailed[racer] : new HashSet<SpeedCameraZone>();
             existingZones.Add(zone);
+            zonesFailed[racer] = existingZones;
             
             onFailZone?.Invoke(racer, zone);
             
-            GlobalLoggers.GameSessionLogger.Log($"{racer.name} failed zone at {zone.Position}m.");
+            if (racer.IsPlayerCar)
+                GlobalLoggers.GameSessionLogger.Log($"{racer.name} failed zone at {zone.Position}m doing {racer.Speed}kmh.");
         }
+
+#if UNITY_EDITOR
+        protected override void OnValidate()
+        {
+            base.OnValidate();
+
+            UpdateRacerDataArray();
+        }
+
+        private void UpdateRacerDataArray()
+        {
+            int desiredDistances = racerData.Length; //number of AI racers (not including player)
+            
+            if (racerSpeedCameraSprintData.Length == desiredDistances)
+                return;
+            
+            if (desiredDistances <= 0)
+            {
+                racerSpeedCameraSprintData = Array.Empty<SpeedCameraSprintRacerData>();
+                return;
+            }
+
+            //copy previous values
+            SpeedCameraSprintRacerData[] newArray = new SpeedCameraSprintRacerData[desiredDistances];
+            for (int index = 0; index < desiredDistances; index++)
+            {
+                if (index >= racerSpeedCameraSprintData.Length)
+                    break;
+                
+                SpeedCameraSprintRacerData previousValue = racerSpeedCameraSprintData[index];
+                newArray[index] = previousValue;
+            }
+
+            racerSpeedCameraSprintData = newArray;
+        }
+#endif
         
     }
 }
