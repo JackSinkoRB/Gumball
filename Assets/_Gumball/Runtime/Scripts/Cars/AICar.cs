@@ -1156,7 +1156,7 @@ namespace Gumball
                 return;
 
             //is speeding over the desired speed? 
-            const float speedingLeewayPercent = 5; //the amount the player can speed past the desired speed before needing to brake
+            const float speedingLeewayPercent = 0.05f; //the amount the car can speed past the desired speed before needing to brake
             float speedingLeeway = speedingLeewayPercent * DesiredSpeed;
             if (autoDrive && speed > DesiredSpeed + speedingLeeway)
             {
