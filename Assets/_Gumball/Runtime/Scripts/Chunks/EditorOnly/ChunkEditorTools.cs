@@ -366,29 +366,62 @@ namespace Gumball
         {
             bool needsUpdating = false;
             SplineMesh[] splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            
+            //get spline meshes with duplicate IDs
+            HashSet<string> duplicateIDs = new HashSet<string>();
+            foreach (SplineMesh splineMesh in splineMeshes)
+            {
+                foreach (SplineMesh other in splineMeshes)
+                {
+                    if (other == splineMesh)
+                        continue;
+
+                    UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                    UniqueIDAssigner otherIdAssigner = other.GetComponent<UniqueIDAssigner>();
+                    if (idAssigner != null && otherIdAssigner != null && otherIdAssigner.UniqueID.Equals(idAssigner.UniqueID))
+                    {
+                        duplicateIDs.Add(splineMesh.GetComponent<UniqueIDAssigner>().UniqueID);
+                        break;
+                    }
+                }
+            }
+            
             foreach (SplineMesh splineMesh in splineMeshes)
             {
                 UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
-                if (idAssigner == null || idAssigner.UniqueID.IsNullOrEmpty())
+                if (idAssigner == null
+                    || idAssigner.UniqueID.IsNullOrEmpty()
+                    || duplicateIDs.Contains(idAssigner.UniqueID)
+                    || splineMesh.GetComponents<UniqueIDAssigner>().Length > 1)
                 {
                     needsUpdating = true;
                     break;
                 }
             }
-
+            
             if (needsUpdating)
             {
                 string assetPath = GameObjectUtils.GetPathToPrefabAsset(gameObject);
+                if (assetPath == null)
+                {
+                    Debug.Log("here");
+                }
+
                 GameObject prefabInstance = PrefabUtility.LoadPrefabContents(assetPath);
                 
                 SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
                 foreach (SplineMesh splineMesh in splineMeshesInPrefab)
                 {
                     UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
-                    if (idAssigner == null || idAssigner.UniqueID.IsNullOrEmpty())
+                    if (idAssigner == null || idAssigner.UniqueID.IsNullOrEmpty() || duplicateIDs.Contains(idAssigner.UniqueID))
                     {
-                        idAssigner = splineMesh.gameObject.GetComponent<UniqueIDAssigner>(true);
+                        //remove all existing
+                        foreach (UniqueIDAssigner uniqueIDAssigner in splineMesh.gameObject.GetComponents<UniqueIDAssigner>())
+                            DestroyImmediate(uniqueIDAssigner);
+                        
+                        idAssigner = splineMesh.gameObject.AddComponent<UniqueIDAssigner>();
                         idAssigner.Initialise();
+                        
                         Debug.Log($"Updated ID for spline mesh {splineMesh.name}");
                     }
                 }

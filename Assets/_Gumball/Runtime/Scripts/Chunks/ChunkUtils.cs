@@ -296,11 +296,9 @@ namespace Gumball
             }
 
             GameObject chunk = instanceToCopy == null ? prefab : instanceToCopy;
-            chunk.GetComponent<ChunkEditorTools>().CheckToAssignSplineMeshIDs();
             
             //create runtime chunk
             GameObject runtimeInstance = Object.Instantiate(chunk);
-            
             Chunk runtimeInstanceChunk = runtimeInstance.GetComponent<Chunk>();
             runtimeInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
 
