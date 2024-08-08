@@ -91,7 +91,7 @@ namespace Gumball
                 handles[index].Completed += h =>
                 {
                     GameSessionMap map = Instantiate(h.Result).GetComponent<GameSessionMap>();
-                    map.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
+                    map.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[finalIndex]);
                     mapInstances[finalIndex] = map;
                     map.gameObject.SetActive(false); //start inactive until selected
                 };
