@@ -30,13 +30,13 @@ namespace Gumball
 
         private void UpdateColors()
         {
-            var globalColour = GlobalColourPalette.Instance.GetGlobalColor(colourCode).WithAlphaSetTo(image.color.a);
+            Color globalColour = GlobalColourPalette.Instance.GetGlobalColor(colourCode);
         
             if (image != null)
-                image.color = globalColour;
+                image.color = globalColour.WithAlphaSetTo(image.color.a);;
 
             if (label != null)
-                label.color = globalColour;
+                label.color = globalColour.WithAlphaSetTo(label.color.a);;
         }
         
     }
