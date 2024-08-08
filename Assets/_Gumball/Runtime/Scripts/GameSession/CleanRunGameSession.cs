@@ -10,7 +10,7 @@ namespace Gumball
     public class CleanRunGameSession : TimedGameSession
     {
         
-        private const float maxCollisionImpulseAllowed = 500;
+        [SerializeField] private float maxCollisionImpulseAllowed = 500;
         
         public override string GetName()
         {
@@ -44,7 +44,7 @@ namespace Gumball
         private void OnCollision(Collision collision)
         {
             float magnitudeSqr = collision.impulse.sqrMagnitude;
-            const float maxMagnitudeSqrRequired = maxCollisionImpulseAllowed * maxCollisionImpulseAllowed;
+            float maxMagnitudeSqrRequired = maxCollisionImpulseAllowed * maxCollisionImpulseAllowed;
 
             if (magnitudeSqr >= maxMagnitudeSqrRequired)
             {

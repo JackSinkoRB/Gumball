@@ -13,7 +13,7 @@ namespace Gumball
         [SerializeField] private GameObject checkpointMarkerPrefab;
         [SerializeField] private float distanceFromSpline = 5;
             
-        public void Spawn(GameSession session, float distanceAlongSpline)
+        public void Spawn(float distanceAlongSpline)
         {
             if (checkpointMarkerPrefab == null)
             {
@@ -21,7 +21,7 @@ namespace Gumball
                 return;
             }
             
-            SplineSample sampleAlongSplines = session.GetSampleAlongSplines(distanceAlongSpline);
+            SplineSample sampleAlongSplines = ChunkManager.Instance.GetSampleAlongSplines(distanceAlongSpline);
             
             //spawn the marker on both sides
             Vector3 leftPosition = sampleAlongSplines.position + -sampleAlongSplines.right * distanceFromSpline;

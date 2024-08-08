@@ -12,6 +12,7 @@ namespace Gumball
     public class KnockoutGameSession : RaceGameSession
     {
 
+        [Header("Knockout")]
         [Tooltip("The distance (in metres) along the map for the knockout positions.")]
         [HelpBox("There is 1 knockout position per racer, with the Race Distance being the last knockout position.", MessageType.Info, HelpBoxAttribute.Position.ABOVE)]
         [SerializeField] private float[] knockoutPositions;
@@ -35,9 +36,9 @@ namespace Gumball
             return PanelManager.GetPanel<KnockoutSessionEndPanel>();
         }
 
-        protected override void OnSessionStart()
+        protected override IEnumerator LoadSession()
         {
-            base.OnSessionStart();
+            yield return base.LoadSession();
 
             EliminatedRacers.Clear();
 
@@ -98,7 +99,7 @@ namespace Gumball
         {
             foreach (float knockoutPosition in knockoutPositions)
             {
-                knockoutPositionMarkers.Spawn(this, knockoutPosition);
+                knockoutPositionMarkers.Spawn(knockoutPosition);
             }
         }
         
