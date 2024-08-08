@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Dreamteck.Splines;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -53,9 +54,10 @@ namespace Gumball
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
         [SerializeField] protected float raceDistanceMetres;
+        [SerializeField] private CheckpointMarkers finishLineMarkers;
 
         [Header("Racers")]
-        [SerializeField] private RacerSessionData[] racerData;
+        [SerializeField] protected RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] private float racersStartingSpeed = 70;
 
@@ -354,7 +356,7 @@ namespace Gumball
         public virtual void UpdateWhenCurrent()
         {
             SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
-            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceTraveled >= raceDistanceMetres)
+            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceInMap >= raceDistanceMetres)
                 OnCrossFinishLine();
         }
 
@@ -376,6 +378,8 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            inProgress = false;
+            
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             yield return LoadChunkMap();
@@ -424,7 +428,7 @@ namespace Gumball
                 subObjective.Tracker.StartListening(subObjective.ChallengeID, subObjective.Goal);
             }
         }
-        
+
         private void StopTrackingObjectives()
         {
             if (subObjectives == null)
@@ -514,6 +518,8 @@ namespace Gumball
             
             //remove constraints
             WarehouseManager.Instance.CurrentCar.Rigidbody.constraints = RigidbodyConstraints.None;
+            
+            WarehouseManager.Instance.CurrentCar.SetObeySpeedLimit(false);
             
             //move the car to the right position
             currentCarRigidbody.Move(vehicleStartingPosition, Quaternion.Euler(vehicleStartingRotation));
@@ -632,10 +638,10 @@ namespace Gumball
                 Debug.LogError($"Could not create finish line as the race distance {raceDistanceMetres} is bigger than the map length {mapLength}.");
                 return;
             }
-            
-            //TODO:
+
+            finishLineMarkers.Spawn(raceDistanceMetres);
         }
-        
+
         private void OnCrossFinishLine()
         {
             ProgressStatus status = ProgressStatus.ATTEMPTED;
