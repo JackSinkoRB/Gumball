@@ -319,7 +319,7 @@ namespace Dreamteck.Splines
             filter.hideFlags = meshRenderer.hideFlags = HideFlags.None;
             _bakedMesh = Instantiate(_mesh);
             _bakedMesh.name = meshName + " - Baked";
-            if (lightmapUV)
+            if (lightmapUV && _bakedMesh.vertexCount > 0)
             {
                 Unwrapping.GenerateSecondaryUVSet(_bakedMesh);
             }
