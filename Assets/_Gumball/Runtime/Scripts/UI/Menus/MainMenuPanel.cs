@@ -12,11 +12,6 @@ namespace Gumball
             PanelManager.GetPanel<SettingsPanel>().Show();
         }
 
-        public void ShowMapPanel()
-        {
-            MapSceneManager.LoadMapScene();
-        }
-
         public void OnClickChallengesButton()
         {
             PanelManager.GetPanel<ChallengesPanel>().Show();
