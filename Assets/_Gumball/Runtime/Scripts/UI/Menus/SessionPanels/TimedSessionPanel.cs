@@ -17,13 +17,9 @@ namespace Gumball
         
         [SerializeField] private TextMeshProUGUI timerLabel;
         [SerializeField] private Color timeNearlyOutTimerLabelColor = Color.red;
-        [SerializeField] private Image progressBarFill;
         
         private Color defaultTimerLabelColor;
         
-        private TimedGameSession currentSession => (TimedGameSession) GameSessionManager.Instance.CurrentSession;
-        private SplineTravelDistanceCalculator playersDistanceCalculator => WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
-
         protected override void Initialise()
         {
             base.Initialise();
@@ -31,31 +27,20 @@ namespace Gumball
             defaultTimerLabelColor = timerLabel.color;
         }
 
-        private void LateUpdate()
+        protected override void LateUpdate()
         {
-            GameSession session = GameSessionManager.Instance.CurrentSession;
-            if (session == null || !session.InProgress || session is not TimedGameSession)
-                return;
-
+            base.LateUpdate();
+            
             UpdateTimerLabel();
-            UpdateProgressBar();
         }
 
         private void UpdateTimerLabel()
         {
+            TimedGameSession currentSession = (TimedGameSession) GameSessionManager.Instance.CurrentSession;
+            
             timerLabel.text = TimeSpan.FromSeconds(currentSession.TimeRemainingSeconds).ToPrettyString(currentSession.TimeRemainingSeconds < timeNearlyOutTime, precise: false);
-
             timerLabel.color = currentSession.TimeRemainingSeconds > timeNearlyOutTime ? defaultTimerLabelColor : timeNearlyOutTimerLabelColor;
         }
-        
-        private void UpdateProgressBar()
-        {
-            if (currentSession.RaceDistanceMetres == 0)
-                return;
-            
-            float percent = playersDistanceCalculator.DistanceTraveled / currentSession.RaceDistanceMetres;
-            progressBarFill.fillAmount = Mathf.Clamp01(percent);
-        }
-        
+
     }
 }

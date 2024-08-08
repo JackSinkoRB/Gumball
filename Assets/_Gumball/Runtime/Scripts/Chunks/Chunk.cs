@@ -186,8 +186,14 @@ namespace Gumball
         public void SwitchTerrainLOD(TerrainLOD lod)
         {
             currentLOD = lod;
-            terrainHighLOD.SetActive(lod == TerrainLOD.HIGH);
-            terrainLowLOD.SetActive(lod == TerrainLOD.LOW);
+            terrainHighLOD.GetComponent<MeshRenderer>().enabled = lod == TerrainLOD.HIGH;
+            terrainLowLOD.GetComponent<MeshRenderer>().enabled = lod == TerrainLOD.LOW;
+            
+            //ensure they're enabled
+            if (!terrainHighLOD.activeSelf)
+                terrainHighLOD.SetActive(true);
+            if (!terrainLowLOD.activeSelf)
+                terrainLowLOD.SetActive(true);
         }
         
         public void UpdateChunkMeshData()
@@ -250,7 +256,7 @@ namespace Gumball
 
             float distanceBetweenSamples = SplineLengthCached / SplineSamples.Length; //assuming the spline sample distance is uniform
             
-            var (closestSampleIndex, closestSampleDistance)  = GetClosestSampleIndexOnSpline(fromPoint);
+            var (closestSampleIndex, closestSampleDistance) = GetClosestSampleIndexOnSpline(fromPoint);
 
             float totalDistance = distanceBetweenSamples * closestSampleIndex;
             return totalDistance;

@@ -22,6 +22,7 @@ namespace Gumball
         public static Logger CurrencyLogger => Instance.currencyLogger;
         public static Logger PlayFabLogger => Instance.playFabLogger;
         public static Logger StoreLogger => Instance.storeLogger;
+        public static Logger GameSessionLogger => Instance.gameSessionLogger;
 
         [SerializeField] private Logger loadingLogger;
         [SerializeField] private Logger chunkLogger;
@@ -36,6 +37,7 @@ namespace Gumball
         [SerializeField] private Logger currencyLogger;
         [SerializeField] private Logger playFabLogger;
         [SerializeField] private Logger storeLogger;
+        [SerializeField] private Logger gameSessionLogger;
 
     }
 }
