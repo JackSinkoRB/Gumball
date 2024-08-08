@@ -6,12 +6,7 @@ namespace Gumball
 {
     public class MainMenuPanel : AnimatedPanel
     {
-
-        public void OnClickSettingsButton()
-        {
-            PanelManager.GetPanel<SettingsPanel>().Show();
-        }
-
+        
         public void OnClickChallengesButton()
         {
             PanelManager.GetPanel<ChallengesPanel>().Show();

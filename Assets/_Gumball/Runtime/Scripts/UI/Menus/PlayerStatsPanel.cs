@@ -11,6 +11,11 @@ namespace Gumball
         {
             MapSceneManager.LoadMapScene();
         }
+
+        public void OnClickSettingsButton()
+        {
+            PanelManager.GetPanel<SettingsPanel>().Show();
+        }
         
     }
 }
