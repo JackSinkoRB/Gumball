@@ -22,12 +22,6 @@ namespace Gumball
     public class SingletonScriptable<T> : ScriptableObject where T : SingletonScriptable<T>
     {
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void RuntimeInitialise()
-        {
-            HasLoaded = false;
-        }
-        
         private static T instance;
         public static T Instance
         {
@@ -54,7 +48,7 @@ namespace Gumball
             }
         }
 
-        public static bool HasLoaded { get; private set; }
+        public static bool HasLoaded => instance != null;
         public static bool IsLoading => handle.IsValid() && !handle.IsDone;
         
         private static AsyncOperationHandle<T> handle;
@@ -70,7 +64,6 @@ namespace Gumball
                 Debug.Log("[BUG FIX] 1 Handle was loaded");
                 instance = h.Result;
                 instance.OnInstanceLoaded();
-                HasLoaded = true;
                 Debug.Log("[BUG FIX] 2 Instance was initialised");
             };
             return handle;

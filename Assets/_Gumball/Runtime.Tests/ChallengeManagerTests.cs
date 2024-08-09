@@ -41,7 +41,6 @@ namespace Gumball.Runtime.Tests
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
-            isInitialised = false;
             PersistentCooldown.IsRunningTests = false;
             DataManager.EnableTestProviders(false);
         }
@@ -56,14 +55,13 @@ namespace Gumball.Runtime.Tests
         [TearDown]
         public void TearDown()
         {
+            isInitialised = false;
             TimeUtils.SetTimeOffset(0);
         }
 
         private IEnumerator Initialise()
         {
-            ChallengeManager.LoadInstanceAsync();
-            yield return new WaitUntil(() => ChallengeManager.HasLoaded);
-            Debug.Log("[BUG FIX] 3 Set initialised");
+            yield return ChallengeManager.LoadInstanceAsync();
 
             isInitialised = true;
         }
