@@ -290,9 +290,11 @@ namespace Gumball
                 return;
 
 #if UNITY_EDITOR
-            LoadFromSourceSync();
-            Debug.LogWarning($"Tried accessing {identifier} before it was loaded, so force loaded it.");
-            return;
+            lock (accessLock) {
+                LoadFromSourceSync();
+                Debug.LogWarning($"Tried accessing {identifier} before it was loaded, so force loaded it.");
+                return;
+            }
 #endif
 
             throw new InvalidOperationException($"Tried setting value in {identifier} but is has not fully loaded yet. You should wait for loading to complete first.");
