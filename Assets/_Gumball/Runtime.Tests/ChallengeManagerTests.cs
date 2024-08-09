@@ -61,7 +61,9 @@ namespace Gumball.Runtime.Tests
 
         private IEnumerator Initialise()
         {
-            yield return ChallengeManager.LoadInstanceAsync();
+            ChallengeManager.LoadInstanceAsync();
+            yield return new WaitUntil(() => ChallengeManager.HasLoaded);
+            
             isInitialised = true;
         }
 
