@@ -446,9 +446,6 @@ namespace Gumball
             if (vertexInstanceStream != null)
                 paintData = vertexInstanceStream.paintedVertices;
 
-            DestroyImmediate(chunk.TerrainHighLOD);
-            DestroyImmediate(chunk.TerrainLowLOD);
-            
             chunk.SplineComputer.RebuildImmediate();
 
             RecreateTerrainLODs();
@@ -470,6 +467,10 @@ namespace Gumball
 
         private void RecreateTerrainLODs()
         {
+            //destroy old terrain
+            DestroyImmediate(chunk.TerrainHighLOD);
+            DestroyImmediate(chunk.TerrainLowLOD);
+            
             Dictionary<Chunk.TerrainLOD, GameObject> newTerrain = terrainData.Create(chunk);
             foreach (Chunk.TerrainLOD key in newTerrain.Keys)
             {
