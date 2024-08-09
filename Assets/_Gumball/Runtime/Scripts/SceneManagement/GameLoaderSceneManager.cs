@@ -147,7 +147,8 @@ namespace Gumball
                 IAPManager.LoadInstanceAsync(),
                 ChallengeTrackerManager.LoadInstanceAsync(),
                 ChallengeManager.LoadInstanceAsync(),
-                FuelManager.LoadInstanceAsync()
+                FuelManager.LoadInstanceAsync(),
+                GlobalColourPalette.LoadInstanceAsync()
             };
             return handles;
         }
