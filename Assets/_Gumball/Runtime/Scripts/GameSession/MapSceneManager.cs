@@ -26,13 +26,14 @@ namespace Gumball
         {
             PanelManager.GetPanel<LoadingPanel>().Show();
 
-            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
             yield return Addressables.LoadSceneAsync(SceneManager.MapSceneAddress, LoadSceneMode.Single, true);
-            sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MapSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MapSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
+            stopwatch.Restart();
             yield return Instance.LoadMaps();
-            
+            GlobalLoggers.LoadingLogger.Log($"Loading maps complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+
             Instance.SelectMap(Instance.GetCurrentMap());
             
             PanelManager.GetPanel<LoadingPanel>().Hide();
@@ -81,23 +82,25 @@ namespace Gumball
             mapInstances = new GameSessionMap[currentEvent.Maps.Length];
             AsyncOperationHandle<GameObject>[] handles = new AsyncOperationHandle<GameObject>[currentEvent.Maps.Length];
             
+            Stopwatch stopwatch = Stopwatch.StartNew();
             for (int index = 0; index < currentEvent.Maps.Length; index++)
             {
-                int finalIndex = index;
                 AssetReferenceGameObject mapReference = currentEvent.Maps[index];
-                
                 handles[index] = Addressables.LoadAssetAsync<GameObject>(mapReference);
-
-                handles[index].Completed += h =>
-                {
-                    GameSessionMap map = Instantiate(h.Result).GetComponent<GameSessionMap>();
-                    map.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
-                    mapInstances[finalIndex] = map;
-                    map.gameObject.SetActive(false); //start inactive until selected
-                };
             }
 
             yield return new WaitUntil(() => handles.AreAllComplete());
+            GlobalLoggers.LoadingLogger.Log($"Took {stopwatch.Elapsed.ToPrettyString(true)} to load all maps.");
+
+            stopwatch.Restart();
+            for (int index = 0; index < currentEvent.Maps.Length; index++)
+            {
+                GameSessionMap map = Instantiate(handles[index].Result).GetComponent<GameSessionMap>();
+                map.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[index]);
+                mapInstances[index] = map;
+                map.gameObject.SetActive(false); //start inactive until selected
+            }
+            GlobalLoggers.LoadingLogger.Log($"Took {stopwatch.Elapsed.ToPrettyString(true)} to instantiate all maps.");
         }
 
         public void SelectPreviousMap()
