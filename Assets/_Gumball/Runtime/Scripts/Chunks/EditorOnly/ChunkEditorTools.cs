@@ -54,17 +54,27 @@ namespace Gumball
 
         private bool isRuntimeChunk => name.Contains(ChunkUtils.RuntimeChunkSuffix);
 
+        private void OnSavePrefab(string prefabName, string path)
+        {
+            if (!prefabName.Equals(gameObject.name))
+                return;
+            
+            CheckToAssignSplineMeshIDs();
+        }
+        
         private void OnEnable()
         {
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
-            
+            SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
+
             chunk.UpdateSplineSampleData();
         }
 
         private void OnDisable()
         {
             chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
-            
+            SaveEditorAssetsEvents.onSavePrefab -= OnSavePrefab;
+
             Tools.hidden = false;
         }
 
@@ -402,18 +412,18 @@ namespace Gumball
             if (needsUpdating)
             {
                 string assetPath = GameObjectUtils.GetPathToPrefabAsset(gameObject);
-                if (assetPath == null)
-                {
-                    Debug.Log("here");
-                }
-
-                GameObject prefabInstance = PrefabUtility.LoadPrefabContents(assetPath);
+                
+                bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().assetPath.Equals(assetPath);
+                GameObject prefabInstance = isPrefabMode ? PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot : PrefabUtility.LoadPrefabContents(assetPath);
                 
                 SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
                 foreach (SplineMesh splineMesh in splineMeshesInPrefab)
                 {
                     UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
-                    if (idAssigner == null || idAssigner.UniqueID.IsNullOrEmpty() || duplicateIDs.Contains(idAssigner.UniqueID))
+                    if (idAssigner == null
+                        || idAssigner.UniqueID.IsNullOrEmpty()
+                        || duplicateIDs.Contains(idAssigner.UniqueID)
+                        || splineMesh.GetComponents<UniqueIDAssigner>().Length > 1)
                     {
                         //remove all existing
                         foreach (UniqueIDAssigner uniqueIDAssigner in splineMesh.gameObject.GetComponents<UniqueIDAssigner>())
@@ -426,8 +436,11 @@ namespace Gumball
                     }
                 }
 
-                PrefabUtility.SaveAsPrefabAsset(prefabInstance, assetPath);
-                PrefabUtility.UnloadPrefabContents(prefabInstance);
+                if (!isPrefabMode)
+                {
+                    PrefabUtility.SaveAsPrefabAsset(prefabInstance, assetPath);
+                    PrefabUtility.UnloadPrefabContents(prefabInstance);
+                }
             }
         }
         
