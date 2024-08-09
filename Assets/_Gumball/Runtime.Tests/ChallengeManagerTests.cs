@@ -61,7 +61,10 @@ namespace Gumball.Runtime.Tests
 
         private IEnumerator Initialise()
         {
+            Debug.Log("[BUG FIX] Initialising");
             yield return ChallengeManager.LoadInstanceAsync();
+            Debug.Log("[BUG FIX] LOADED!");
+            yield return new WaitUntil(() => ChallengeManager.Instance.HasInitialised);
 
             isInitialised = true;
         }
@@ -84,6 +87,7 @@ namespace Gumball.Runtime.Tests
         public IEnumerator ChallengesAreAssignedOnStartup()
         {
             yield return new WaitUntil(() => isInitialised);
+            Debug.Log("[BUG FIX] Has initialised");
 
             for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
                 Assert.IsNotNull(dailyChallenges.GetCurrentChallenge(slotIndex));

@@ -57,12 +57,16 @@ namespace Gumball
         {
             if (IsLoading)
                 return handle;
+
+            instance = null; //mark 'not loaded'
             
             handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
             handle.Completed += h =>
             {
+                Debug.Log("[BUG FIX] Completed singleton loading!");
                 instance = h.Result;
                 instance.OnInstanceLoaded();
+                Debug.Log("[BUG FIX] Called OnInstanceLoaded!");
             };
             return handle;
         }

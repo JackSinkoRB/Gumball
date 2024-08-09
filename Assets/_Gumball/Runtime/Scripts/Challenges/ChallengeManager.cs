@@ -15,6 +15,8 @@ namespace Gumball
 
         public Challenges Daily => daily;
         public Challenges Weekly => weekly;
+        
+        public bool HasInitialised { get; private set; }
 
         protected override void OnInstanceLoaded()
         {
@@ -22,6 +24,8 @@ namespace Gumball
 
             daily.Initialise();
             weekly.Initialise();
+            
+            HasInitialised = true;
         }
         
     }
