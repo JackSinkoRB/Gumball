@@ -63,15 +63,15 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Global logger loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
             stopwatch.Restart();
-            currentStage = Stage.Loading_save_data;
-            yield return DataManager.LoadAllAsync();
-            GlobalLoggers.LoadingLogger.Log($"Save data loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-
-            stopwatch.Restart();
             currentStage = Stage.Checking_for_new_version;
             yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
             GlobalLoggers.LoadingLogger.Log($"Check for new version completed in {stopwatch.Elapsed.ToPrettyString(true)}");
             
+            stopwatch.Restart();
+            currentStage = Stage.Loading_save_data;
+            yield return DataManager.LoadAllAsync();
+            GlobalLoggers.LoadingLogger.Log($"Save data loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+
             stopwatch.Restart();
             currentStage = Stage.Loading_scriptable_data_objects;
             singletonScriptableHandles = LoadSingletonScriptables();
