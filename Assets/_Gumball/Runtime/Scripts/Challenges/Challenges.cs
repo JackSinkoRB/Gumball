@@ -130,10 +130,13 @@ namespace Gumball
 
         private void EnsureChallengesAreAssigned()
         {
+            Debug.Log("[BUG FIX] 4 Ensuring challenges are assigned");
+            
             for (int slotIndex = 0; slotIndex < numberOfChallenges; slotIndex++)
             {
                 if (GetCurrentChallenge(slotIndex) == null)
                     SetCurrentChallenge(slotIndex, GetRandomChallengeIndex());
+                Debug.Log($"[BUG FIX] - is slot {slotIndex} null ? {GetCurrentChallenge(slotIndex) == null}");
             }
         }
 
