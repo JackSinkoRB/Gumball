@@ -64,7 +64,6 @@ namespace Gumball.Runtime.Tests
             Debug.Log("[BUG FIX] Initialising");
             yield return ChallengeManager.LoadInstanceAsync();
             Debug.Log("[BUG FIX] LOADED!");
-            yield return new WaitUntil(() => ChallengeManager.Instance.HasInitialised);
 
             isInitialised = true;
         }

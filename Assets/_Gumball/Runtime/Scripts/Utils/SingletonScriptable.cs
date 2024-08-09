@@ -29,21 +29,17 @@ namespace Gumball
             {
                 if (instance == null)
                 {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    LoadInstanceAsync();
-                    
 #if UNITY_EDITOR
                     if (!Application.isPlaying || SingletonScriptableHelper.LazyLoadingEnabled)
                     {
-                        instance = handle.WaitForCompletion();
-                        stopwatch.Stop();
-                        Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously ({stopwatch.ElapsedMilliseconds}ms)");
+                        LoadInstanceAsyncEditor();
                         return instance;
                     }
 #endif
-
+                    CoroutineHelper.Instance.StartCoroutine(LoadInstanceAsync());
                     throw new NullReferenceException($"Trying to access singleton scriptable {typeof(T).Name}, but it has not loaded yet.");
                 }
+                
                 return instance;
             }
         }
@@ -52,23 +48,37 @@ namespace Gumball
         public static bool IsLoading => handle.IsValid() && !handle.IsDone;
         
         private static AsyncOperationHandle<T> handle;
-        
-        public static AsyncOperationHandle LoadInstanceAsync()
-        {
-            if (IsLoading)
-                return handle;
 
-            instance = null; //mark 'not loaded'
-            
+#if UNITY_EDITOR
+        public static void LoadInstanceAsyncEditor()
+        {
             handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
-            handle.Completed += h =>
+            instance = handle.WaitForCompletion();
+            instance.OnInstanceLoaded();
+            
+            Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously.");
+        }
+#endif
+
+        public static IEnumerator LoadInstanceAsync()
+        {
+            Debug.Log("[BUG FIX] Checking to load...");
+            if (IsLoading)
             {
-                Debug.Log("[BUG FIX] Completed singleton loading!");
-                instance = h.Result;
-                instance.OnInstanceLoaded();
-                Debug.Log("[BUG FIX] Called OnInstanceLoaded!");
-            };
-            return handle;
+                Debug.Log("[BUG FIX] Already loading");
+                yield return handle;
+            }
+            else
+            {
+                Debug.Log("[BUG FIX] Start loading");
+                handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
+                yield return handle;
+            }
+            
+            Debug.Log("[BUG FIX] Completed singleton loading!");
+            instance = handle.Result;
+            instance.OnInstanceLoaded();
+            Debug.Log("[BUG FIX] Called OnInstanceLoaded!");
         }
 
         protected virtual void OnInstanceLoaded()

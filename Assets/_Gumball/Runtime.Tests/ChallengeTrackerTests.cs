@@ -62,7 +62,7 @@ namespace Gumball.Runtime.Tests
         {
             yield return WarehouseManager.Instance.SpawnCar(0, new Vector3(0,0,2), Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
             
-            ChallengeTrackerManager.LoadInstanceAsync();
+            yield return ChallengeTrackerManager.LoadInstanceAsync();
             yield return new WaitUntil(() => ChallengeTrackerManager.HasLoaded);
 
             GameSession.StartSession();
