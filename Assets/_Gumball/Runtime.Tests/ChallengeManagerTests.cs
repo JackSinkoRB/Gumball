@@ -84,7 +84,6 @@ namespace Gumball.Runtime.Tests
         public IEnumerator ChallengesAreAssignedOnStartup()
         {
             yield return new WaitUntil(() => isInitialised);
-            Debug.Log("[BUG FIX] 5 Start test");
 
             for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
                 Assert.IsNotNull(dailyChallenges.GetCurrentChallenge(slotIndex));

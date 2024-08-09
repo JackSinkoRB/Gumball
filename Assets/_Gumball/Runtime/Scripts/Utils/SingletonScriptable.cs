@@ -61,10 +61,8 @@ namespace Gumball
             handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
             handle.Completed += h =>
             {
-                Debug.Log("[BUG FIX] 1 Handle was loaded");
                 instance = h.Result;
                 instance.OnInstanceLoaded();
-                Debug.Log("[BUG FIX] 2 Instance was initialised");
             };
             return handle;
         }
