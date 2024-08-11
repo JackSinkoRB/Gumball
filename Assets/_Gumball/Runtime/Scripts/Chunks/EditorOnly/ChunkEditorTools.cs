@@ -22,13 +22,6 @@ namespace Gumball
 #if UNITY_EDITOR
         public static void OnDuplicateChunkAsset(string oldID, string newChunkPath, ChunkEditorTools newChunk)
         {
-            if (newChunk != null)
-            {
-                //rebake
-                newChunk.chunk.FindSplineMeshes();
-                ChunkUtils.BakeMeshes(newChunk.chunk, saveAssets: false);
-            }
-
             //find the old chunk
             string directory = Path.GetDirectoryName(newChunkPath);
             UniqueIDAssigner idAssigner = UniqueIDAssigner.FindAssignerWithIDInDirectory(oldID, directory);
@@ -38,10 +31,6 @@ namespace Gumball
                 ChunkEditorTools oldChunk = idAssigner.GetComponent<ChunkEditorTools>();
                 if (oldChunk != null)
                 {
-                    //rebake
-                    oldChunk.chunk.FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(oldChunk.chunk, saveAssets: false);
-                    
                     //rebuild the runtime chunk
                     ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, saveAssetsOnComplete: false);
                 }
@@ -65,47 +54,27 @@ namespace Gumball
 
         private bool isRuntimeChunk => name.Contains(ChunkUtils.RuntimeChunkSuffix);
 
-        public static bool IsBakingMeshes;
-        
         private void OnSavePrefab(string prefabName, string path)
         {
             if (!prefabName.Equals(gameObject.name))
                 return;
             
-            CheckToBakeMeshes();
-        }
-
-        private void CheckToBakeMeshes()
-        {
-            if (IsBakingMeshes)
-                return;
-
-            if (isRuntimeChunk)
-                return;
-
-            IsBakingMeshes = true;
-            chunk.FindSplineMeshes();
-            ChunkUtils.BakeMeshes(chunk, false, true);
-            IsBakingMeshes = false;
+            CheckToAssignSplineMeshIDs();
         }
         
         private void OnEnable()
         {
-            SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
-            
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
+            SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
+
             chunk.UpdateSplineSampleData();
         }
 
         private void OnDisable()
         {
-            if (!Application.isPlaying)
-                CheckToBakeMeshes();
-            
             chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
-
             SaveEditorAssetsEvents.onSavePrefab -= OnSavePrefab;
-            
+
             Tools.hidden = false;
         }
 
@@ -134,15 +103,16 @@ namespace Gumball
             CheckToUpdateMeshesImmediately();
             CheckIfTerrainIsRaycastable();
             
-            EditorApplication.delayCall -= CheckToUnbakeMeshesIfPrefabMode;
-            EditorApplication.delayCall += CheckToUnbakeMeshesIfPrefabMode;
+            EditorApplication.delayCall -= CheckToUnbakeMeshes;
+            EditorApplication.delayCall += CheckToUnbakeMeshes;
         }
 
-        private void CheckToUnbakeMeshesIfPrefabMode()
+        private void CheckToUnbakeMeshes()
         {
             try
             {
-                if (PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject)
+                bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject;
+                if (isPrefabMode)
                     UnbakeSplineMeshes();
             }
             catch (MissingReferenceException)
@@ -401,6 +371,78 @@ namespace Gumball
             EditorApplication.delayCall -= RecreateTerrain;
             EditorApplication.delayCall += RecreateTerrain;
         }
+
+        public void CheckToAssignSplineMeshIDs()
+        {
+            bool needsUpdating = false;
+            SplineMesh[] splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            
+            //get spline meshes with duplicate IDs
+            HashSet<string> duplicateIDs = new HashSet<string>();
+            foreach (SplineMesh splineMesh in splineMeshes)
+            {
+                foreach (SplineMesh other in splineMeshes)
+                {
+                    if (other == splineMesh)
+                        continue;
+
+                    UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                    UniqueIDAssigner otherIdAssigner = other.GetComponent<UniqueIDAssigner>();
+                    if (idAssigner != null && otherIdAssigner != null && otherIdAssigner.UniqueID.Equals(idAssigner.UniqueID))
+                    {
+                        duplicateIDs.Add(splineMesh.GetComponent<UniqueIDAssigner>().UniqueID);
+                        break;
+                    }
+                }
+            }
+            
+            foreach (SplineMesh splineMesh in splineMeshes)
+            {
+                UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                if (idAssigner == null
+                    || idAssigner.UniqueID.IsNullOrEmpty()
+                    || duplicateIDs.Contains(idAssigner.UniqueID)
+                    || splineMesh.GetComponents<UniqueIDAssigner>().Length > 1)
+                {
+                    needsUpdating = true;
+                    break;
+                }
+            }
+            
+            if (needsUpdating)
+            {
+                string assetPath = GameObjectUtils.GetPathToPrefabAsset(gameObject);
+                
+                bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().assetPath.Equals(assetPath);
+                GameObject prefabInstance = isPrefabMode ? PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot : PrefabUtility.LoadPrefabContents(assetPath);
+                
+                SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+                foreach (SplineMesh splineMesh in splineMeshesInPrefab)
+                {
+                    UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                    if (idAssigner == null
+                        || idAssigner.UniqueID.IsNullOrEmpty()
+                        || duplicateIDs.Contains(idAssigner.UniqueID)
+                        || splineMesh.GetComponents<UniqueIDAssigner>().Length > 1)
+                    {
+                        //remove all existing
+                        foreach (UniqueIDAssigner uniqueIDAssigner in splineMesh.gameObject.GetComponents<UniqueIDAssigner>())
+                            DestroyImmediate(uniqueIDAssigner);
+                        
+                        idAssigner = splineMesh.gameObject.AddComponent<UniqueIDAssigner>();
+                        idAssigner.Initialise();
+                        
+                        Debug.Log($"Updated ID for spline mesh {splineMesh.name}");
+                    }
+                }
+
+                if (!isPrefabMode)
+                {
+                    PrefabUtility.SaveAsPrefabAsset(prefabInstance, assetPath);
+                    PrefabUtility.UnloadPrefabContents(prefabInstance);
+                }
+            }
+        }
         
         /// <summary>
         /// Force the terrain to be recreated.
@@ -410,21 +452,13 @@ namespace Gumball
             DisconnectAll();
             
             GlobalLoggers.ChunkLogger.Log($"Recreating terrain for '{chunk.name}'");
-            Material[] previousMaterials = chunk.TerrainHighLOD.GetComponent<MeshRenderer>().sharedMaterials;
-
+            
             //check if there's additional vertex color data
             VertexInstanceStream vertexInstanceStream = chunk.TerrainHighLOD.GetComponent<VertexInstanceStream>();
             GenericDictionary<int, List<VertexInstanceStream.PaintData>> paintData = null;
             if (vertexInstanceStream != null)
                 paintData = vertexInstanceStream.paintedVertices;
 
-            DestroyImmediate(chunk.TerrainHighLOD);
-            DestroyImmediate(chunk.TerrainLowLOD);
-
-            //need to ensure all the splinemesh are set up
-            chunk.FindSplineMeshes();
-            ChunkUtils.BakeMeshes(chunk, false, saveAssets: false);
-            
             chunk.SplineComputer.RebuildImmediate();
 
             RecreateTerrainLODs();
@@ -446,6 +480,10 @@ namespace Gumball
 
         private void RecreateTerrainLODs()
         {
+            //destroy old terrain
+            DestroyImmediate(chunk.TerrainHighLOD);
+            DestroyImmediate(chunk.TerrainLowLOD);
+            
             Dictionary<Chunk.TerrainLOD, GameObject> newTerrain = terrainData.Create(chunk);
             foreach (Chunk.TerrainLOD key in newTerrain.Keys)
             {
@@ -458,12 +496,20 @@ namespace Gumball
 
         private void UnbakeSplineMeshes()
         {
-            chunk.FindSplineMeshes();
-            foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
+            if (isRuntimeChunk)
+                return;
+            
+            SplineMesh[] splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            foreach (SplineMesh splineMesh in splineMeshes)
             {
                 if (!splineMesh.gameObject.activeSelf)
                     continue;
-                splineMesh.Unbake();
+
+                if (splineMesh.baked)
+                {
+                    splineMesh.Unbake();
+                    EditorUtility.SetDirty(gameObject);
+                }
             }
         }
         

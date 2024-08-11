@@ -157,7 +157,7 @@ namespace Gumball
         {
             CheckIfLoaded();
 
-            if (currentValues.ContainsKey(key) && currentValues[key] == value)
+            if (currentValues.ContainsKey(key) && currentValues[key].Equals(value))
                 return;
 
             if (!currentValues.ContainsKey(key) && value == null)

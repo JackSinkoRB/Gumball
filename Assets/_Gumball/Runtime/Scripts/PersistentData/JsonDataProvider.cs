@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
@@ -23,9 +24,10 @@ namespace Gumball
         protected override void SaveToSource()
         {
             //serialise to binary file
-            using FileStream fileStream = File.Create(filePath);
+            using FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             binaryFormatter.Serialize(fileStream, currentValues);
+            fileStream.Flush();
         }
 
         protected override void LoadFromSource()
@@ -37,10 +39,17 @@ namespace Gumball
             }
 
             //deserialise from the binary file
-            using FileStream fileStream = File.Open(filePath, FileMode.Open);
+            using FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
-            object data = binaryFormatter.Deserialize(fileStream);
-            currentValues = (Dictionary<string, object>)data;
+            try
+            {
+                object data = binaryFormatter.Deserialize(fileStream);
+                currentValues = (Dictionary<string, object>)data;
+            }
+            catch (SerializationException exception)
+            {
+                Debug.LogWarning(exception.Message);
+            }
         }
 
         protected override void OnRemoveFromSource()

@@ -70,8 +70,6 @@ namespace Gumball
         [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
 
-        public float[] GearRatios => performanceSettings.GearRatios.GetValue(performanceProfile);
-        public float FinalGearRatio => performanceSettings.FinalGearRatio.GetValue(performanceProfile);
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
         public MinMaxFloat EngineRpmRange => performanceSettings.EngineRpmRange.GetValue(performanceProfile);
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
@@ -182,6 +180,8 @@ namespace Gumball
         public bool IsStationary => speed < stationarySpeed && !isAccelerating;
 
         [Header("Engine & Drivetrain")]
+        [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
+        [SerializeField] private float finalGearRatio = 3.42f;
         [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
         [SerializeField, ReadOnly] private float engineRpm;
@@ -192,7 +192,7 @@ namespace Gumball
         private bool wasAcceleratingLastFrame;
         public bool IsAutomaticTransmission => autoDrive || GearboxSetting.Setting == GearboxSetting.GearboxOption.AUTOMATIC;
         public int CurrentGear => currentGear;
-        public int NumberOfGears => GearRatios.Length;
+        public int NumberOfGears => gearRatios.Length;
         public float EngineRpm => engineRpm;
         public bool IsAccelerating => isAccelerating;
         
@@ -395,7 +395,7 @@ namespace Gumball
             isHandbrakeEngaged = false;
             wasAcceleratingLastFrame = false;
             racersCollidingWith.Clear();
-            tempSpeedLimit = -1f; //clear the temp speed limit
+            RemoveTemporarySpeedLimit();
             isStuck = false;
             timeAcceleratingSinceMovingSlowly = 0;
         }
@@ -479,8 +479,9 @@ namespace Gumball
         {
             gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
             colliders.layer = (int)LayersAndTags.Layer.RacerCar;
-            
+
             SetAutoDrive(true);
+            SetObeySpeedLimit(false);
             
             InitialiseWheelStance();
         }
@@ -509,6 +510,16 @@ namespace Gumball
         public void SetTemporarySpeedLimit(float speedKmh)
         {
             tempSpeedLimit = speedKmh;
+        }
+
+        public void RemoveTemporarySpeedLimit()
+        {
+            tempSpeedLimit = -1;
+        }
+
+        public void SetObeySpeedLimit(bool obey)
+        {
+            obeySpeedLimit = obey;
         }
 
         /// <summary>
@@ -1003,7 +1014,7 @@ namespace Gumball
             
             float averagePoweredWheelRPM = sumOfPoweredWheelRPM / poweredWheels.Length;
 
-            float engineRpmUnclamped = EngineRpmRange.Min + averagePoweredWheelRPM * GearRatios[currentGear] * FinalGearRatio;
+            float engineRpmUnclamped = EngineRpmRange.Min + averagePoweredWheelRPM * gearRatios[currentGear] * finalGearRatio;
             engineRpm = EngineRpmRange.Clamp(engineRpmUnclamped);
         }
 
@@ -1150,7 +1161,7 @@ namespace Gumball
                 return;
 
             //is speeding over the desired speed? 
-            const float speedingLeewayPercent = 5; //the amount the player can speed past the desired speed before needing to brake
+            const float speedingLeewayPercent = 0.05f; //the amount the car can speed past the desired speed before needing to brake
             float speedingLeeway = speedingLeewayPercent * DesiredSpeed;
             if (autoDrive && speed > DesiredSpeed + speedingLeeway)
             {
@@ -1423,7 +1434,7 @@ namespace Gumball
             {
                 //distribute the engine torque to the wheels based on gear ratios
                 float engineTorqueDistributed = engineTorque / poweredWheels.Length; //TODO: might want to distribute this unevenly - eg. give more torque to the wheel with more traction
-                float wheelTorque = engineTorqueDistributed * GearRatios[currentGear] * FinalGearRatio;
+                float wheelTorque = engineTorqueDistributed * gearRatios[currentGear] * finalGearRatio;
             
                 //apply to the wheels
                 poweredWheel.motorTorque = wheelTorque;
@@ -1871,7 +1882,7 @@ namespace Gumball
             Chunk previousChunk = currentChunkCached;
                     
             //raycast down to terrain
-            const float offset = 10;
+            const float offset = 500;
             currentChunkCached = Physics.Raycast(transform.position.OffsetY(offset), Vector3.down, out RaycastHit hitDown, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.ChunkDetector))
                 ? hitDown.transform.parent.GetComponent<Chunk>()
                 : null;

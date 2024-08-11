@@ -95,7 +95,12 @@ namespace Dreamteck.Splines
             for (int i = 0; i < _channels.Count; i++)
             {
                 if (_channels[i].GetMeshCount() == 0) continue;
-
+                
+                for (int j = 0; j < _channels[i].GetMeshCount(); j++)
+                {
+                    _channels[i].GetMesh(j).Refresh();
+                }
+                
                 if (_channels[i].autoCount)
                 {
                     float avgBounds = 0f;

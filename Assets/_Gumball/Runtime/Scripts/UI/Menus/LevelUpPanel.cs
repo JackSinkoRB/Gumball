@@ -15,10 +15,10 @@ namespace Gumball
         public void Populate(PlayerLevel newLevel)
         {
             //populate premium currency:
-            if (newLevel.PremiumCurrencyReward > 0)
+            if (newLevel.Rewards.PremiumCurrency > 0)
             {
                 premiumCurrencyReward.gameObject.SetActive(true);
-                premiumCurrencyLabel.text = newLevel.PremiumCurrencyReward.ToString();
+                premiumCurrencyLabel.text = newLevel.Rewards.PremiumCurrency.ToString();
             }
             else
             {

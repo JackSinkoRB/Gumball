@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Dreamteck.Splines;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -53,9 +54,10 @@ namespace Gumball
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
         [SerializeField] protected float raceDistanceMetres;
+        [SerializeField] private CheckpointMarkers finishLineMarkers;
 
         [Header("Racers")]
-        [SerializeField] private RacerSessionData[] racerData;
+        [SerializeField] protected RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] private float racersStartingSpeed = 70;
 
@@ -71,10 +73,7 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
-        [SerializeField, PositiveValueOnly] private int xpReward = 100;
-        [SerializeField, PositiveValueOnly] private int standardCurrencyReward = 10;
-        [SerializeField, DisplayInspector] private CorePart[] corePartRewards = Array.Empty<CorePart>();
-        [SerializeField, DisplayInspector] private SubPart[] subPartRewards = Array.Empty<SubPart>();
+        [SerializeField] private Rewards rewards;
 
         [Header("Challenges")]
         [SerializeField] private string mainChallengeDescription = "This is the challenge description";
@@ -106,10 +105,7 @@ namespace Gumball
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
         public GenericDictionary<AICar, RacerSessionData> CurrentRacers => currentRacers;
-        public int XPReward => xpReward;
-        public int StandardCurrencyReward => standardCurrencyReward;
-        public CorePart[] CorePartRewards => corePartRewards;
-        public SubPart[] SubPartRewards => subPartRewards;
+        public Rewards Rewards => rewards;
         public bool HasStarted { get; private set; }
         public bool TrafficIsProcedural => trafficIsProcedural;
         public int TrafficDensity => trafficDensity;
@@ -118,6 +114,9 @@ namespace Gumball
         public AssetReferenceGameObject[] TrafficTrucks => trafficTrucks;
         public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
+
+        protected abstract GameSessionPanel GetSessionPanel();
+        protected abstract GameSessionEndPanel GetSessionEndPanel();
 
         public abstract string GetName();
 
@@ -156,7 +155,6 @@ namespace Gumball
             TrackSubPartRewards();
         }
 
-#if UNITY_EDITOR
         [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
         public void RandomiseTraffic()
         {
@@ -197,11 +195,10 @@ namespace Gumball
             trafficSpawnPositions = new CollectionWrapperTrafficSpawnPosition();
             trafficSpawnPositions.Value = spawnPositions.ToArray();
         }
-#endif
-        
+
         private void TrackCorePartRewards()
         {
-            foreach (CorePart corePart in corePartRewards)
+            foreach (CorePart corePart in rewards.CoreParts)
             {
                 if (corePart == null)
                     continue;
@@ -214,16 +211,16 @@ namespace Gumball
                 if (corePart == null)
                     continue;
                 
-                if (!corePartRewards.Contains(corePart))
+                if (!rewards.CoreParts.Contains(corePart))
                     corePart.UntrackAsReward(this);
             }
             
-            previousCorePartRewards = (CorePart[])corePartRewards.Clone();
+            previousCorePartRewards = (CorePart[])rewards.CoreParts.Clone();
         }
         
         private void TrackSubPartRewards()
         {
-            foreach (SubPart subPart in subPartRewards)
+            foreach (SubPart subPart in rewards.SubParts)
             {
                 if (subPart == null)
                     continue;
@@ -236,11 +233,11 @@ namespace Gumball
                 if (subPart == null)
                     continue;
                 
-                if (!subPartRewards.Contains(subPart))
+                if (!rewards.SubParts.Contains(subPart))
                     subPart.UntrackAsReward(this);
             }
             
-            previousSubPartRewards = (SubPart[])subPartRewards.Clone();
+            previousSubPartRewards = (SubPart[])rewards.SubParts.Clone();
         }
 #endif
 
@@ -284,6 +281,9 @@ namespace Gumball
                 AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarDrivingState>();
                 AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarDrivingState>();
             }
+            
+            //reset skill check manager
+            SkillCheckManager.Instance.ResetForSession();
         }
 
         public void EndSession(ProgressStatus progress)
@@ -330,11 +330,17 @@ namespace Gumball
             HasStarted = false;
 
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Hide();
+            if (GetSessionEndPanel() != null)
+                GetSessionEndPanel().Show();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
             
             //disable NOS
             WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
+
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
             
             //come to a stop
             WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
@@ -350,7 +356,7 @@ namespace Gumball
         public virtual void UpdateWhenCurrent()
         {
             SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
-            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceTraveled >= raceDistanceMetres)
+            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceInMap >= raceDistanceMetres)
                 OnCrossFinishLine();
         }
 
@@ -372,6 +378,8 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            inProgress = false;
+            
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             yield return LoadChunkMap();
@@ -400,10 +408,13 @@ namespace Gumball
             StartTrackingObjectives();
             
             //only take fuel once session has properly started (in case loading failed)
-            FuelManager.TakeFuel();
+            FuelManager.Instance.TakeFuel();
             
             onSessionStart?.Invoke(this);
             
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Show();
+
             HasStarted = true;
         }
 
@@ -414,23 +425,21 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StartListening(GetChallengeTrackerID(subObjective), subObjective.Goal);
-            }
-        }
-        
-        private void StopTrackingObjectives()
-        {
-            foreach (Challenge subObjective in subObjectives)
-            {
-                subObjective.Tracker.StopListening(GetChallengeTrackerID(subObjective));
+                subObjective.Tracker.StartListening(subObjective.ChallengeID, subObjective.Goal);
             }
         }
 
-        public string GetChallengeTrackerID(Challenge challenge)
+        private void StopTrackingObjectives()
         {
-            return $"{name}-{challenge.Description}-{challenge.Tracker.GetType()}";
+            if (subObjectives == null)
+                return;
+            
+            foreach (Challenge subObjective in subObjectives)
+            {
+                subObjective.Tracker.StopListening(subObjective.ChallengeID);
+            }
         }
-        
+
         private IEnumerator LoadScene()
         {
             GlobalLoggers.LoadingLogger.Log("Scene loading started...");
@@ -510,6 +519,8 @@ namespace Gumball
             //remove constraints
             WarehouseManager.Instance.CurrentCar.Rigidbody.constraints = RigidbodyConstraints.None;
             
+            WarehouseManager.Instance.CurrentCar.SetObeySpeedLimit(false);
+            
             //move the car to the right position
             currentCarRigidbody.Move(vehicleStartingPosition, Quaternion.Euler(vehicleStartingRotation));
             GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {vehicleStartingPosition}");
@@ -520,7 +531,7 @@ namespace Gumball
             racerData ??= Array.Empty<RacerSessionData>();
                 
             currentRacers.Clear();
-            List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
+            AsyncOperationHandle<GameObject>[] handles = new AsyncOperationHandle<GameObject>[racerData.Length];
 
             for (int index = 0; index < racerData.Length; index++)
             {
@@ -533,31 +544,32 @@ namespace Gumball
                 }
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
-
-                handle.Completed += h =>
-                {
-                    if (handle.Result == null)
-                    {
-                        Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
-                        return;
-                    }
-                    
-                    AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
-                    racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
-
-                    racer.SetPerformanceProfile(data.PerformanceProfile);
-                    racer.InitialiseAsRacer();
-
-                    currentRacers[racer] = data;
-                };
-                handles.Add(handle);
+                handles[index] = handle;
             }
 
             //add the player's car as a racer
             currentRacers[WarehouseManager.Instance.CurrentCar] = new RacerSessionData();
 
             yield return new WaitUntil(() => handles.AreAllComplete());
-            
+
+            for (int index = 0; index < racerData.Length; index++)
+            {
+                if (handles[index].Result == null)
+                {
+                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                    continue;
+                }
+
+                RacerSessionData data = racerData[index];
+                AICar racer = Instantiate(handles[index].Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
+                racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[index]);
+
+                racer.SetPerformanceProfile(data.PerformanceProfile);
+                racer.InitialiseAsRacer();
+
+                currentRacers[racer] = data;
+            }
+
             //set initial speeds
             foreach (AICar racer in currentRacers.Keys)
             {
@@ -584,15 +596,6 @@ namespace Gumball
 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
                 trafficPrefabHandles[assetReference] = handle;
-                
-                handle.Completed += h =>
-                {
-                    if (handle.Result == null)
-                    {
-                        trafficPrefabHandles.Remove(assetReference);
-                        Debug.LogError($"There is a null traffic vehicle in {name}. Skipping it.");
-                    }
-                };
             }
             
             //wait until all cars have loaded
@@ -626,10 +629,10 @@ namespace Gumball
                 Debug.LogError($"Could not create finish line as the race distance {raceDistanceMetres} is bigger than the map length {mapLength}.");
                 return;
             }
-            
-            //TODO:
+
+            finishLineMarkers.Spawn(raceDistanceMetres);
         }
-        
+
         private void OnCrossFinishLine()
         {
             ProgressStatus status = ProgressStatus.ATTEMPTED;
@@ -646,65 +649,13 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                if (subObjective.Tracker.GetListener(GetChallengeTrackerID(subObjective)).Progress < 1)
+                if (subObjective.Tracker.GetListener(subObjective.ChallengeID).Progress < 1)
                     return false;
             }
 
             return true;
         }
 
-        public IEnumerator GiveRewards()
-        {
-            //give XP
-            if (xpReward > 0)
-            {
-                PanelManager.GetPanel<XPGainedPanel>().Show();
-            
-                int currentXP = ExperienceManager.TotalXP;
-                int newXP = ExperienceManager.TotalXP + xpReward;
-                
-                PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
-                
-                yield return new WaitUntil(() => !PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning);
-                
-                ExperienceManager.AddXP(xpReward); //add XP after in case there's a level up
-                
-                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning &&
-                                                 !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
-            }
-
-            //give standard currency
-            if (standardCurrencyReward > 0)
-                RewardManager.GiveStandardCurrency(standardCurrencyReward);
-
-            //give core parts
-            if (corePartRewards != null)
-            {
-                foreach (CorePart corePartReward in corePartRewards)
-                {
-                    if (!corePartReward.IsUnlocked)
-                        RewardManager.GiveReward(corePartReward);
-                }
-            }
-
-            //give sub parts
-            if (subPartRewards != null)
-            {
-                foreach (SubPart subPartReward in subPartRewards)
-                {
-                    if (!subPartReward.IsUnlocked)
-                        RewardManager.GiveReward(subPartReward);
-                }
-            }
-            
-            //show the reward panel with queued rewards
-            if (PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
-            {
-                PanelManager.GetPanel<RewardPanel>().Show();
-                yield return new WaitUntil(() => !PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning);
-            }
-        }
-        
         private void OnCompleteSessionForFirstTime()
         {
             Progress = ProgressStatus.COMPLETE;

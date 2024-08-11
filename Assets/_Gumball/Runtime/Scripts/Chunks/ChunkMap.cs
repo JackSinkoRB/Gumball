@@ -77,22 +77,7 @@ namespace Gumball
                 
                 GlobalLoggers.ChunkLogger.Log($"Setup = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
-                
-                //ensure meshes are baked (only check each chunk once)
-                HashSet<string> chunksBaked = new HashSet<string>();
-                for (int index = 0; index < chunkInstances.Length; index++)
-                {
-                    AssetReferenceGameObject chunkReference = chunkReferences[index];
-                    
-                    if (chunksBaked.Contains(chunkReference.editorAsset.name))
-                        continue;
 
-                    chunksBaked.Add(chunkReference.editorAsset.name);
-                    
-                    chunkReference.editorAsset.GetComponent<Chunk>().FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(chunkReference.editorAsset.GetComponent<Chunk>(), false, saveAssets: false);
-                }
-                
                 GlobalLoggers.ChunkLogger.Log($"Baking meshes = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
                 
@@ -102,7 +87,10 @@ namespace Gumball
                     GlobalLoggers.ChunkLogger.Log($"Instantiating {runtimeChunkAssetKeys[index]}");
                     AssetReferenceGameObject chunkReference = chunkReferences[index];
 
-                    GameObject chunkInstance = Instantiate(chunkReference.editorAsset.gameObject); //instantiate but keep the prefab references
+                    GameObject prefab = chunkReference.editorAsset.gameObject;
+                    prefab.GetComponent<ChunkEditorTools>().CheckToAssignSplineMeshIDs();
+
+                    GameObject chunkInstance = Instantiate(prefab, Vector3.zero, Quaternion.Euler(Vector3.zero)); //instantiate but keep the prefab references
                     Chunk chunk = chunkInstance.GetComponent<Chunk>();
                     chunkInstances[index] = chunk;
                     
