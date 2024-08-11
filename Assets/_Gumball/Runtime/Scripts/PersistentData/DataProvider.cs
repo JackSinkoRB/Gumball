@@ -102,11 +102,6 @@ namespace Gumball
             {
                 yield return new WaitForSeconds(timeBetweenAutoSaveInSeconds);
 
-#if UNITY_EDITOR
-                if (DataManager.IsUsingTestProviders)
-                    yield break; //do not use auto save when using test providers/running tests
-#endif
-                
                 SaveAllAsync();
             }
         }
@@ -260,6 +255,11 @@ namespace Gumball
         /// </summary>
         private void SaveOrRemoveFromSource()
         {
+#if UNITY_EDITOR
+            if (DataManager.IsUsingTestProviders)
+                return; //do not modify source when using test providers
+#endif
+
             lock (accessLock)
             {
                 if (currentValues.Count == 0)
