@@ -16,6 +16,10 @@ namespace Gumball
         public static JsonDataProvider Warehouse { get; private set; } = new("Warehouse");
         public static JsonDataProvider Player { get; private set; } = new("Player");
 
+#if UNITY_EDITOR
+        public static bool IsUsingTestProviders;
+#endif
+        
         /// <summary>
         /// Enable or disable whether it reads from the test providers, or the real providers.
         /// </summary>
@@ -27,6 +31,10 @@ namespace Gumball
             GameSessions = new JsonDataProvider(enableTestProviders ? "GameSessions_Tests" : "GameSessions");
             Warehouse = new JsonDataProvider(enableTestProviders ? "Warehouse_Tests" : "Warehouse");
             Player = new JsonDataProvider(enableTestProviders ? "Player_Tests" : "Player");
+
+#if UNITY_EDITOR
+            IsUsingTestProviders = enableTestProviders;
+#endif
         }
         
         /// <summary>
