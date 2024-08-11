@@ -65,6 +65,11 @@ namespace Gumball
             if (!Application.isPlaying)
                 return;
             
+#if UNITY_EDITOR
+            if (DataManager.IsUsingTestProviders)
+                return; //do not use auto save when using test providers/running tests
+#endif
+            
             if (IsAutoSaveActive)
             {
                 Debug.LogWarning("Tried running auto save, but it is already running.");
@@ -242,7 +247,6 @@ namespace Gumball
                 return; //don't save to source
 #endif
 
-            
             Stopwatch stopwatch = Stopwatch.StartNew();
             await Task.Run(SaveOrRemoveFromSource);
             stopwatch.Stop();
