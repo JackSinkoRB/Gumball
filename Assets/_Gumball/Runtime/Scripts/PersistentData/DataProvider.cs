@@ -33,8 +33,8 @@ namespace Gumball
         public static void SaveAllAsync()
         {
 #if UNITY_EDITOR
-            if (!DataEditorOptions.DataProvidersEnabled)
-                return; //don't save to source
+            if (DataManager.IsUsingTestProviders)
+                return; //do not modify source when using test providers
 #endif
             
             GlobalLoggers.SaveDataLogger.Log("Checking to save all dirty data providers (asynchronously).");
@@ -51,6 +51,11 @@ namespace Gumball
         /// </summary>
         public static void SaveAllSync()
         {
+#if UNITY_EDITOR
+            if (!DataEditorOptions.DataProvidersEnabled)
+                return; //don't save to source
+#endif
+
             GlobalLoggers.SaveDataLogger.Log("Saving all dirty data providers (synchronously).");
             foreach (DataProvider provider in dirtyProviders)
             {
@@ -255,11 +260,6 @@ namespace Gumball
         /// </summary>
         private void SaveOrRemoveFromSource()
         {
-#if UNITY_EDITOR
-            if (DataManager.IsUsingTestProviders)
-                return; //do not modify source when using test providers
-#endif
-
             lock (accessLock)
             {
                 if (currentValues.Count == 0)
