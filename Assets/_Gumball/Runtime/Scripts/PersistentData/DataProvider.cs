@@ -64,12 +64,7 @@ namespace Gumball
         {
             if (!Application.isPlaying)
                 return;
-            
-#if UNITY_EDITOR
-            if (DataManager.IsUsingTestProviders)
-                return; //do not use auto save when using test providers/running tests
-#endif
-            
+
             if (IsAutoSaveActive)
             {
                 Debug.LogWarning("Tried running auto save, but it is already running.");
@@ -107,6 +102,11 @@ namespace Gumball
             {
                 yield return new WaitForSeconds(timeBetweenAutoSaveInSeconds);
 
+#if UNITY_EDITOR
+                if (DataManager.IsUsingTestProviders)
+                    yield break; //do not use auto save when using test providers/running tests
+#endif
+                
                 SaveAllAsync();
             }
         }
