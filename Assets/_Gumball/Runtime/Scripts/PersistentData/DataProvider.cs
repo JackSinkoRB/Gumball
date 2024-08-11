@@ -32,6 +32,11 @@ namespace Gumball
         /// </summary>
         public static void SaveAllAsync()
         {
+#if UNITY_EDITOR
+            if (!DataEditorOptions.DataProvidersEnabled)
+                return; //don't save to source
+#endif
+            
             GlobalLoggers.SaveDataLogger.Log("Checking to save all dirty data providers (asynchronously).");
 
             foreach (DataProvider provider in dirtyProviders)
@@ -46,11 +51,6 @@ namespace Gumball
         /// </summary>
         public static void SaveAllSync()
         {
-#if UNITY_EDITOR
-            if (!DataEditorOptions.DataProvidersEnabled)
-                return; //don't save to source
-#endif
-
             GlobalLoggers.SaveDataLogger.Log("Saving all dirty data providers (synchronously).");
             foreach (DataProvider provider in dirtyProviders)
             {
