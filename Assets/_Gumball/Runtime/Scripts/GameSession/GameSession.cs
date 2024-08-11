@@ -531,7 +531,7 @@ namespace Gumball
             racerData ??= Array.Empty<RacerSessionData>();
                 
             currentRacers.Clear();
-            List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
+            AsyncOperationHandle<GameObject>[] handles = new AsyncOperationHandle<GameObject>[racerData.Length];
 
             for (int index = 0; index < racerData.Length; index++)
             {
@@ -544,32 +544,32 @@ namespace Gumball
                 }
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
-
-                int finalIndex = index;
-                handle.Completed += h =>
-                {
-                    if (handle.Result == null)
-                    {
-                        Debug.LogError($"There is a null racer at index {finalIndex} in {name}. Skipping it.");
-                        return;
-                    }
-                    
-                    AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
-                    racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-
-                    racer.SetPerformanceProfile(data.PerformanceProfile);
-                    racer.InitialiseAsRacer();
-
-                    currentRacers[racer] = data;
-                };
-                handles.Add(handle);
+                handles[index] = handle;
             }
 
             //add the player's car as a racer
             currentRacers[WarehouseManager.Instance.CurrentCar] = new RacerSessionData();
 
             yield return new WaitUntil(() => handles.AreAllComplete());
-            
+
+            for (int index = 0; index < racerData.Length; index++)
+            {
+                if (handles[index].Result == null)
+                {
+                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                    continue;
+                }
+
+                RacerSessionData data = racerData[index];
+                AICar racer = Instantiate(handles[index].Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
+                racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[index]);
+
+                racer.SetPerformanceProfile(data.PerformanceProfile);
+                racer.InitialiseAsRacer();
+
+                currentRacers[racer] = data;
+            }
+
             //set initial speeds
             foreach (AICar racer in currentRacers.Keys)
             {
@@ -596,15 +596,6 @@ namespace Gumball
 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
                 trafficPrefabHandles[assetReference] = handle;
-                
-                handle.Completed += h =>
-                {
-                    if (handle.Result == null)
-                    {
-                        trafficPrefabHandles.Remove(assetReference);
-                        Debug.LogError($"There is a null traffic vehicle in {name}. Skipping it.");
-                    }
-                };
             }
             
             //wait until all cars have loaded
