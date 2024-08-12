@@ -617,7 +617,7 @@ namespace Gumball
 
             if (autoDrive)
             {
-                if (CurrentChunk == null)
+                if (!isPlayerCar && CurrentChunk == null)
                 {
                     //current chunk may have despawned
                     const float timeWithNoChunkToDespawn = 1;
@@ -956,7 +956,7 @@ namespace Gumball
                 else
                 {
                     //if using racing line, set the imprecision range
-                    float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this) ? GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision() : 0;
+                    float distance = GameSessionManager.Instance.CurrentSession != null && GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this) ? GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision() : 0;
                     SetRacingLineOffset(distance);
                 }
 
