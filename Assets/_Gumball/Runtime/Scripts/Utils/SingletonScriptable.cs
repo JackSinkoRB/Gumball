@@ -30,7 +30,7 @@ namespace Gumball
 #if UNITY_EDITOR
                     if (!Application.isPlaying || SingletonScriptableHelper.LazyLoadingEnabled)
                     {
-                        LoadInstanceAsyncEditor();
+                        LoadInstanceSync();
                         return instance;
                     }
 #endif
@@ -48,8 +48,11 @@ namespace Gumball
         private static AsyncOperationHandle<T> handle;
 
 #if UNITY_EDITOR
-        public static void LoadInstanceAsyncEditor()
+        public static void LoadInstanceSync()
         {
+            if (IsLoading)
+                return;
+            
             handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
             instance = handle.WaitForCompletion();
             instance.OnInstanceLoaded();

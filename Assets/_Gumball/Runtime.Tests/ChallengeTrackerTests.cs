@@ -126,6 +126,7 @@ namespace Gumball.Runtime.Tests
             ChallengeTracker tracker = subObjective.Tracker;
             string trackerId = subObjective.ChallengeID;
             
+            tracker.StartListening(trackerId, subObjective.Goal);
             Assert.IsNotNull(tracker.GetListener(trackerId));
 
             //ensure teleport doesn't add to it

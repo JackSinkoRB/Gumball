@@ -47,11 +47,13 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void RuntimeInitialise()
         {
+            Debug.Log("[BUG TEST] Set HasLoaded FALSE");
             HasLoaded = false;
         }
         
         private IEnumerator Start()
         {
+            Debug.Log("[BUG TEST] Called Start");
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
             Debug.Log($"{SceneManager.GameLoaderSceneAddress} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
@@ -132,6 +134,7 @@ namespace Gumball
 
             GlobalLoggers.LoadingLogger.Log($"Total boot time = {TimeSpan.FromSeconds(Time.realtimeSinceStartup).ToPrettyString(true)}");
 
+            Debug.Log("[BUG TEST] Set HasLoaded TRUE");
             HasLoaded = true;
         }
 
