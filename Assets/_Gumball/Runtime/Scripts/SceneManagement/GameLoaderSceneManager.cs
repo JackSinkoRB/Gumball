@@ -56,7 +56,7 @@ namespace Gumball
         private IEnumerator Start()
         {
             Instance = this;
-            Debug.Log($"[BUG TEST] Called Start - How many loaded scenes? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount}");
+            Debug.Log($"[BUG TEST] Called Start - How many loaded scenes? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount}  - Active scene is {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
             Debug.Log($"{SceneManager.GameLoaderSceneAddress} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
@@ -101,9 +101,13 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Starting to load {SceneManager.MainSceneAddress} async...");
             stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
-            mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Additive, true);
-            GlobalLoggers.LoadingLogger.Log($"[BUG TEST] Started loading: How many loaded scenes? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount} - is main scene handle complete? {mainSceneHandle.PercentComplete}  {mainSceneHandle.IsValid()}  {mainSceneHandle.IsDone}  {mainSceneHandle.Status}  {mainSceneHandle.OperationException}");
+            mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Additive, false);
+            GlobalLoggers.LoadingLogger.Log($"[BUG TEST] Started loading: How many loaded scenes? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount} - is main scene handle complete? {mainSceneHandle.PercentComplete}  {mainSceneHandle.IsValid()}  {mainSceneHandle.IsDone}  {mainSceneHandle.Status}  {mainSceneHandle.OperationException}  - Active scene is {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
             yield return mainSceneHandle;
+            AsyncOperation activate = mainSceneHandle.Result.ActivateAsync();
+            GlobalLoggers.LoadingLogger.Log($"[BUG TEST] Activating: How many loaded scenes? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount} - is main scene handle complete? {mainSceneHandle.PercentComplete}  {mainSceneHandle.IsValid()}  {mainSceneHandle.IsDone}  {mainSceneHandle.Status}  {mainSceneHandle.OperationException}  - Active scene is {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+            yield return activate;
+            GlobalLoggers.LoadingLogger.Log($"[BUG TEST] Activated! How many loaded scenes? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount} - is main scene handle complete? {mainSceneHandle.PercentComplete}  {mainSceneHandle.IsValid()}  {mainSceneHandle.IsDone}  {mainSceneHandle.Status}  {mainSceneHandle.OperationException}  - Active scene is {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
             stopwatch.Restart();
