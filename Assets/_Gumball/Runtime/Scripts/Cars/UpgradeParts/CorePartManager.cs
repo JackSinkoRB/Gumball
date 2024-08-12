@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using UnityEngine;
 using Debug = UnityEngine.Debug;
 
 namespace Gumball
@@ -20,9 +21,22 @@ namespace Gumball
         private static readonly Dictionary<string, CorePart> partsMappedByID = new();
 
         public static ReadOnlyCollection<CorePart> AllParts => allParts.AsReadOnly();
+
+        private static bool isInitialised;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RuntimeInitialise()
+        {
+            isInitialised = false;
+        }
         
         public static IEnumerator Initialise()
         {
+            if (isInitialised)
+                yield break;
+
+            isInitialised = true;
+            
             yield return FindParts();
         }
         

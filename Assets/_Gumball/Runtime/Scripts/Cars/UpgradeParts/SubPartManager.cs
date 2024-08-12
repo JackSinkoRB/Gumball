@@ -21,8 +21,22 @@ namespace Gumball
         
         public static ReadOnlyCollection<SubPart> AllParts => allParts.AsReadOnly();
         
+        
+        private static bool isInitialised;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RuntimeInitialise()
+        {
+            isInitialised = false;
+        }
+
         public static IEnumerator Initialise()
         {
+            if (isInitialised)
+                yield break;
+
+            isInitialised = true;
+            
             yield return FindParts();
 
             CreateIDLookup();

@@ -55,14 +55,21 @@ namespace Gumball.Runtime.Tests
 
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(carIndexToUse, 
-                Vector3.zero, 
-                Quaternion.Euler(Vector3.zero), 
-                (car) =>
+            CoroutineHelper.Instance.StartCoroutine(Initialise());
+        }
+        
+        private IEnumerator Initialise()
+        {
+            //require the part managers to spawn the player car
+            yield return CorePartManager.Initialise();
+            yield return SubPartManager.Initialise();
+
+            yield return WarehouseManager.Instance.SpawnCar(carIndexToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
+                (carInstance) =>
                 {
-                    WarehouseManager.Instance.SetCurrentCar(car);
+                    WarehouseManager.Instance.SetCurrentCar(carInstance);
                     isInitialised = true;
-                }));
+                });
         }
         
         [UnityTest]
