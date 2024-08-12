@@ -133,6 +133,11 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
 
+      # Ensure Split Application Binary is enabled
+      - name: Ensure Split Application Binary
+        if: ${{ matrix.targetPlatform }} == 'Android'
+        run: sed -i 's/AndroidUseAPKExpansionFiles: 0/AndroidUseAPKExpansionFiles: 1/' ProjectSettings/ProjectSettings.asset
+
       # Build
       - uses: game-ci/unity-builder@v4
         id: buildStep
