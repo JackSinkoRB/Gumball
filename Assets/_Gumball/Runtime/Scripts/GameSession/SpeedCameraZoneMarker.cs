@@ -35,6 +35,9 @@ namespace Gumball
         private void UpdateDistanceLabel()
         {
             SplineTravelDistanceCalculator travelCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
+            if (travelCalculator == null)
+                return;
+            
             float playersDistanceAlongSpline = travelCalculator.DistanceInMap;
             
             float distance = Mathf.Max(0, distanceAlongSpline - playersDistanceAlongSpline);

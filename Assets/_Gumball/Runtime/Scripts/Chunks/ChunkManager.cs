@@ -657,7 +657,7 @@ namespace Gumball
                     return chunk.SplineSamples[splineSampleIndex];
             }
 
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("Could not get the spline sample along the map spline.");
         }
         
     }
