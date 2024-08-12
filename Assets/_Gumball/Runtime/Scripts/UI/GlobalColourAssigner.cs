@@ -24,13 +24,17 @@ namespace Gumball
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            if (!DataManager.IsUsingTestProviders) //disable if running tests as it causes issues in OnValidate
-                UpdateColors();
+            UpdateColors();
         }
 #endif
 
         private void UpdateColors()
         {
+#if UNITY_EDITOR
+            if (DataManager.IsUsingTestProviders) //disable if running tests as it causes issues
+                return;
+#endif
+            
             Color globalColour = GlobalColourPalette.Instance.GetGlobalColor(colourCode);
         
             if (image != null)
