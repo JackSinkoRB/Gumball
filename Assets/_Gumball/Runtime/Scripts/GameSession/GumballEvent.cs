@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -22,6 +24,7 @@ namespace Gumball
             if (Application.isPlaying)
                 throw new InvalidOperationException("Cannot rebuild during play mode.");
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
             HashSet<AssetReferenceT<ChunkMap>> chunkMapsToRebuild = new();
 
             //find all the chunks maps
@@ -38,11 +41,15 @@ namespace Gumball
             //rebuild the data (but only recreate runtime chunks once)
             foreach (AssetReferenceT<ChunkMap> chunkMap in chunkMapsToRebuild)
             {
+                if (chunkMap == null || chunkMap.editorAsset == null)
+                    continue;
+                
                 chunkMap.editorAsset.RebuildData(false);
             }
             
             //reset the runtime chunk creation tracking
             ChunkMap.ClearRuntimeChunksCreatedTracking();
+            Debug.Log($"Complete process took {stopwatch.Elapsed.ToPrettyString()}");
         }
 #endif
         
