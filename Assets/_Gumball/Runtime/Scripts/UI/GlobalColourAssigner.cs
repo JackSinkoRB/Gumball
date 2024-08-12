@@ -24,7 +24,8 @@ namespace Gumball
 #if UNITY_EDITOR
         private void OnValidate()
         {
-            UpdateColors();
+            if (!DataManager.IsUsingTestProviders) //disable if running tests as it causes issues in OnValidate
+                UpdateColors();
         }
 #endif
 
