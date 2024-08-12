@@ -98,6 +98,7 @@ namespace Gumball
             //start loading unity services (async)
             TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
             
+            GlobalLoggers.LoadingLogger.Log($"Starting to load {SceneManager.MainSceneAddress} async...");
             stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Additive, true);
