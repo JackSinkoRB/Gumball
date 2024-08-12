@@ -37,6 +37,11 @@ namespace Gumball
             FRONT_WHEEL_DRIVE,
             ALL_WHEEL_DRIVE
         }
+
+        [Header("Details")]
+        [SerializeField] private string displayName;
+
+        public string DisplayName => displayName.IsNullOrEmpty() ? name.Replace("(Clone)", "").Replace("_", " ") : displayName;
         
         [Header("Player car")]
         [SerializeField] private bool canBeDrivenByPlayer;

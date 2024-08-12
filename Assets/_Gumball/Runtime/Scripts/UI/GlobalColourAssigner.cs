@@ -18,7 +18,7 @@ namespace Gumball
 
         private void OnEnable()
         {
-            UpdateColors();
+            this.PerformAfterTrue(() => GlobalColourPalette.HasLoaded, UpdateColors);
         }
 
 #if UNITY_EDITOR

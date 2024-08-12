@@ -17,5 +17,10 @@ namespace Gumball
             PanelManager.GetPanel<SettingsPanel>().Show();
         }
         
+        public void OnClickShopItemButton()
+        {
+            PanelManager.GetPanel<StorePanel>().Show();
+        }
+        
     }
 }

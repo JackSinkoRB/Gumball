@@ -9,7 +9,7 @@ namespace Gumball
     public class MultiImageButton : Button
     {
 
-        [SerializeField, ReadOnly] private List<Graphic> targetGraphics;
+        [SerializeField, ReadOnly] private List<Graphic> targetGraphics = new();
 
         protected override void Start()
         {

@@ -54,8 +54,8 @@ namespace Gumball
 
         private void RefreshExperienceBar()
         {
-            float endsPercent = 1 - (progressBarFillStart + progressBarFillEnd);
-            experienceBar.fillAmount = progressBarFillStart + (endsPercent * ExperienceManager.GetPercentToNextLevel(ExperienceManager.TotalXP));
+            float difference = progressBarFillEnd - progressBarFillStart;
+            experienceBar.fillAmount = progressBarFillStart + (difference * ExperienceManager.GetPercentToNextLevel(ExperienceManager.TotalXP));
         }
         
     }
