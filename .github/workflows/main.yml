@@ -135,7 +135,7 @@ jobs:
 
       # Ensure Split Application Binary is enabled
       - name: Ensure Split Application Binary
-        if: ${{ matrix.targetPlatform }} == 'Android'
+        if: matrix.targetPlatform == 'Android'
         run: sed -i 's/AndroidUseAPKExpansionFiles: 0/AndroidUseAPKExpansionFiles: 1/' ProjectSettings/ProjectSettings.asset
 
       # Build
