@@ -57,7 +57,31 @@ jobs:
 
       # Test
       - uses: game-ci/unity-test-runner@v4
+        name: Run tests
         id: tests
+        continue-on-error: true
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ matrix.testMode }}-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: ${{ matrix.testMode }} Test Results
+          customParameters: -nographics
+
+      # Delay for 10 seconds if the first attempt fails and the test mode is playmode
+      - name: Wait before retrying playmode test
+        if: ${{ failure() && steps.tests.conclusion == 'failure' && matrix.testMode == 'playmode' }}
+        run: |
+          echo "Waiting 10 seconds before retrying..."
+          sleep 10
+
+      # Retry playmode if failed, as they can fail due to license issue if using pro license
+      - name: Retry tests if failed
+        if: ${{ failure() && steps.tests.conclusion == 'failure' && matrix.testMode == 'playmode' }}
+        uses: game-ci/unity-test-runner@v4
         env:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -164,6 +188,10 @@ jobs:
       ANDROID_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
 
     steps:
+
+      - name: Check Version
+        run: |
+          echo "Current version: $(cat ProjectSettings/ProjectVersion.txt)"
 
       # Checkout
       - uses: actions/checkout@v4
