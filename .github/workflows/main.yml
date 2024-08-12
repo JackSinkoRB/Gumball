@@ -123,36 +123,77 @@ jobs:
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
+          androidExportType: androidAppBundle
+          androidTargetSdkVersion: 34
           buildName: 'Gumball'
+
+      # Upload artifact for Google Play deployment step
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && ${{ matrix.targetPlatform }} == 'Android'
+        with:
+          name: build-Android
+          path: build/Android
 
       # Zip Build Files
       - name: Zip Build Files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && ${{ matrix.targetPlatform }} == 'StandaloneWindows'
         run: |
           find build/${{ matrix.targetPlatform }} -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
           zip -r Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}
 
       # Move Build Files
       - name: Move Build Files
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && ${{ matrix.targetPlatform }} == 'StandaloneWindows'
         run: mv Gumball-${{ matrix.targetPlatform }}.zip /var/www/html
 
       # Delete build folder to save space
       - name: Delete build folder
         run: rm -rf build
 
-  cleanup:
-    if: ${{ always() }}
+  deployToGoogle:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     needs: build
-    name: Cleanup
+    name: Deploy to Google Play internal track
     runs-on: self-hosted
-    strategy:
-      fail-fast: false
+    env:
+      GOOGLE_PLAY_KEY_FILE: ${{ secrets.GOOGLE_PLAY_KEY_FILE }}
+      GOOGLE_PLAY_KEY_FILE_PATH:
+        ${{ format('{0}/fastlane/google-fastlane.json', github.workspace) }}
+      ANDROID_BUILD_FILE_PATH: ${{ format('{0}/build/Android/Gumball.aab', github.workspace) }}
+      ANDROID_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
 
     steps:
 
-      # Delete library folders to save space - must do this after build job as post-cache needs to cache it
-      - name: Delete runner1 Library
-        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/Library || true
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Download Android artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-Android
+          path: build/Android
+
+      - name: Add Authentication
+        run: echo "$GOOGLE_PLAY_KEY_FILE" > $GOOGLE_PLAY_KEY_FILE_PATH
+
+      - name: Set up Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: true
+
+      - name: Upload to Google Play Internal
+        uses: maierj/fastlane-action@v3.1.0
+        with:
+          lane: 'android internal'
+
+      - name: Cleanup to avoid storage limit
+        if: always()
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build-Android
 
   deployToDiscord:
     needs: build
@@ -213,7 +254,7 @@ jobs:
             [{
               "title": "Gumball has a new build available.",
               "fields": [
-                { "name": "Android", "value": "[Download](http://${{ needs.build.outputs.Android-runner-ip }}/Gumball-Android.zip)", "inline": true },
+                { "name": "Android", "value": "[Google Play](https://play.google.com/apps/internaltest/4700966647029801843)", "inline": true },
                 { "name": "Windows", "value": "[Download](http://${{ needs.build.outputs.StandaloneWindows-runner-ip }}/Gumball-StandaloneWindows.zip)", "inline": true },
                 { "name": "Latest commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}})" },
                 { "name": "Commits (${{ steps.pre-checkout.outputs.number-of-commits }})", "value": "${{ steps.pre-checkout.outputs.commit-messages }}" }
