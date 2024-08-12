@@ -60,6 +60,7 @@ namespace Gumball.Runtime.Tests
         
         private IEnumerator Initialise()
         {
+            Debug.Log($"[BUG TEST] Scene is : {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name} - Loaded? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount}");
             yield return WarehouseManager.Instance.SpawnCar(0, new Vector3(0,0,2), Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
             
             yield return ChallengeTrackerManager.LoadInstanceAsync();
