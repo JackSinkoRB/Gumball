@@ -135,8 +135,8 @@ jobs:
           path: build/Android
 
       # Zip Build Files
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && ${{ matrix.targetPlatform }} == 'StandaloneWindows'
       - name: Zip Build Files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && ${{ matrix.targetPlatform }} == 'StandaloneWindows'
         run: |
           find build/${{ matrix.targetPlatform }} -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
           zip -r Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}
