@@ -57,9 +57,12 @@ namespace Gumball.Runtime.Tests
         {
             CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
-        
+
         private IEnumerator Initialise()
         {
+            //require the part managers to spawn the player car
+            yield return CorePartManager.Initialise();
+            yield return SubPartManager.Initialise();
             yield return WarehouseManager.Instance.SpawnCar(0, new Vector3(0,0,2), Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
             
             ChallengeTrackerManager.LoadInstanceAsync();
