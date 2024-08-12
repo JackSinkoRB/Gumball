@@ -69,6 +69,9 @@ namespace Gumball.Runtime.Tests
                 
                 yield return new WaitForSeconds(1);
                 totalTimeWaiting += 1;
+                
+                if (totalTimeWaiting > maxLoadTimeAllowed)
+                    break;
             }
             
             Assert.Less(totalTimeWaiting, maxLoadTimeAllowed);

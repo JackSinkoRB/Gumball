@@ -25,16 +25,16 @@ namespace Gumball
         /// </summary>
         public static void EnableTestProviders(bool enableTestProviders)
         {
+#if UNITY_EDITOR
+            IsUsingTestProviders = enableTestProviders;
+#endif
+            
             Settings = new JsonDataProvider(enableTestProviders ? "Settings_Tests" : "Settings");
             Cars = new JsonDataProvider(enableTestProviders ? "Cars_Tests" : "Cars");
             Avatar = new JsonDataProvider(enableTestProviders ? "Avatar_Tests" : "Avatar");
             GameSessions = new JsonDataProvider(enableTestProviders ? "GameSessions_Tests" : "GameSessions");
             Warehouse = new JsonDataProvider(enableTestProviders ? "Warehouse_Tests" : "Warehouse");
             Player = new JsonDataProvider(enableTestProviders ? "Player_Tests" : "Player");
-            
-#if UNITY_EDITOR
-            IsUsingTestProviders = enableTestProviders;
-#endif
         }
         
         /// <summary>

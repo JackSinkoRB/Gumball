@@ -37,7 +37,7 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI debugLabel;
 
         private Stage currentStage;
-        private AsyncOperationHandle[] singletonScriptableHandles;
+        private List<TrackedCoroutine> singletonScriptableHandles;
         private AsyncOperationHandle<SceneInstance> mainSceneHandle;
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
@@ -135,23 +135,25 @@ namespace Gumball
             HasLoaded = true;
         }
 
-        private AsyncOperationHandle[] LoadSingletonScriptables()
+        private List<TrackedCoroutine> LoadSingletonScriptables()
         {
-            var handles = new[] {
-                //LOAD ALL SINGLETON SCRIPTABLES HERE
-                DecalManager.LoadInstanceAsync(),
-                AvatarManager.LoadInstanceAsync(),
-                WarehouseManager.LoadInstanceAsync(),
-                GlobalPaintPresets.LoadInstanceAsync(),
-                ExperienceManager.LoadInstanceAsync(),
-                IAPManager.LoadInstanceAsync(),
-                ChallengeTrackerManager.LoadInstanceAsync(),
-                ChallengeManager.LoadInstanceAsync(),
-                FuelManager.LoadInstanceAsync()
+            List<TrackedCoroutine> trackedCoroutines = new List<TrackedCoroutine>
+            {
+                new(DecalManager.LoadInstanceAsync()),
+                new(AvatarManager.LoadInstanceAsync()),
+                new(WarehouseManager.LoadInstanceAsync()),
+                new(GlobalPaintPresets.LoadInstanceAsync()),
+                new(ExperienceManager.LoadInstanceAsync()),
+                new(IAPManager.LoadInstanceAsync()),
+                new(ChallengeTrackerManager.LoadInstanceAsync()),
+                new(ChallengeManager.LoadInstanceAsync()),
+                new(FuelManager.LoadInstanceAsync()),
+                new(GlobalColourPalette.LoadInstanceAsync())
             };
-            return handles;
+            
+            return trackedCoroutines;
         }
-        
+
         private void Update()
         {
             UpdateDebugLabel();
