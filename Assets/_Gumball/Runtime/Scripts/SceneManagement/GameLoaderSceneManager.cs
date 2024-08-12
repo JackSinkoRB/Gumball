@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using MyBox;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -103,7 +104,7 @@ namespace Gumball
             currentStage = Stage.Loading_mainscene;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Additive, true);
             GlobalLoggers.LoadingLogger.Log($"[BUG TEST] Started loading: How many loaded scenes? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount} - is main scene handle complete? {mainSceneHandle.PercentComplete}  {mainSceneHandle.IsValid()}  {mainSceneHandle.IsDone}  {mainSceneHandle.Status}  {mainSceneHandle.OperationException}  - Active scene is {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
-            yield return mainSceneHandle;
+            yield return new WaitUntil(() => mainSceneHandle.PercentComplete.Approximately(1));
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
             stopwatch.Restart();
