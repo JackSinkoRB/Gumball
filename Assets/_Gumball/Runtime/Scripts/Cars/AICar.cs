@@ -788,6 +788,9 @@ namespace Gumball
             
             if (CurrentChunk == null)
                 return;
+
+            if (GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this))
+                return; //active/initialised racers only
             
             CustomDrivingPath nearestRacingLine = null;
             float nearestDistanceSqr = Mathf.Infinity;
@@ -959,7 +962,7 @@ namespace Gumball
                 else
                 {
                     //if using racing line, set the imprecision range
-                    float distance = GameSessionManager.Instance.CurrentSession != null && GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this) ? GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision() : 0;
+                    float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision();
                     SetRacingLineOffset(distance);
                 }
 
@@ -1575,6 +1578,7 @@ namespace Gumball
             
             //if it cannot cross the middle, check if crossing the middle and cancel if so
             if (GameSessionManager.Instance.CurrentSession != null
+                && GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this)
                 && !GameSessionManager.Instance.CurrentSession.CurrentRacers[this].CanCrossMiddle
                 && autoDrive && useRacingLine)
             {
