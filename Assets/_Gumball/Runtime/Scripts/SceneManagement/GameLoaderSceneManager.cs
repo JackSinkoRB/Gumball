@@ -18,6 +18,8 @@ namespace Gumball
     public class GameLoaderSceneManager : MonoBehaviour
     {
 
+        public static GameLoaderSceneManager Instance;
+
         private enum Stage
         {
             Checking_for_new_version,
@@ -38,7 +40,7 @@ namespace Gumball
 
         private Stage currentStage;
         private List<TrackedCoroutine> singletonScriptableHandles;
-        private AsyncOperationHandle<SceneInstance> mainSceneHandle;
+        public AsyncOperationHandle<SceneInstance> mainSceneHandle;
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
 
@@ -53,6 +55,7 @@ namespace Gumball
         
         private IEnumerator Start()
         {
+            Instance = this;
             Debug.Log("[BUG TEST] Called Start");
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
