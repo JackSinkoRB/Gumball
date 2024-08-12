@@ -149,7 +149,7 @@ jobs:
           androidExportType: androidAppBundle
           androidTargetSdkVersion: 34
           buildName: 'Gumball'
-          versioning: None
+          versioning: Semantic
 
       # Upload artifact for Google Play deployment step
       - uses: actions/upload-artifact@v4
@@ -187,6 +187,10 @@ jobs:
       ANDROID_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
 
     steps:
+
+      - name: Check Version
+        run: |
+          echo "Current version: $(cat ProjectSettings/ProjectVersion.txt)"
 
       # Checkout
       - uses: actions/checkout@v4
