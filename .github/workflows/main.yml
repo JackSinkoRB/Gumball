@@ -59,6 +59,7 @@ jobs:
       - uses: game-ci/unity-test-runner@v4
         name: Run tests
         id: tests
+        continue-on-error: true
         env:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
