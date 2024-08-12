@@ -786,9 +786,12 @@ namespace Gumball
         {
             //check if there's a racing line with interpolation distance in current or next chunk
             
+            if (CurrentChunk == null)
+                return;
+            
             CustomDrivingPath nearestRacingLine = null;
             float nearestDistanceSqr = Mathf.Infinity;
-            
+
             //get the racing lines in the current chunk
             int closestSampleIndexToPlayer = CurrentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
