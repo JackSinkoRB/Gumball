@@ -18,13 +18,15 @@ namespace Gumball
             base.Start();
         }
 
+#if UNITY_EDITOR
         protected override void OnValidate()
         {
             targetGraphics = transform.GetComponentsInAllChildren<Graphic>();
             
             base.OnValidate();
         }
-
+#endif
+        
         protected override void DoStateTransition(SelectionState state, bool instant)
         {
             var targetColor =
