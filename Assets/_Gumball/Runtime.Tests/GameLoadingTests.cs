@@ -70,9 +70,6 @@ namespace Gumball.Runtime.Tests
                 yield return new WaitForSeconds(1);
                 totalTimeWaiting += 1;
 
-                if (totalTimeWaiting % 10 == 0)
-                    Debug.Log($"[BUG TEST] Current scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name} - How many loaded? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount} - is main scene handle complete? {GameLoaderSceneManager.Instance.mainSceneHandle.PercentComplete}  {GameLoaderSceneManager.Instance.mainSceneHandle.IsValid()}  {GameLoaderSceneManager.Instance.mainSceneHandle.IsDone}  {GameLoaderSceneManager.Instance.mainSceneHandle.Status}  {GameLoaderSceneManager.Instance.mainSceneHandle.OperationException}");
-
                 if (totalTimeWaiting > maxLoadTimeAllowed)
                     break;
             }

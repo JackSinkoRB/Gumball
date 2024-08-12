@@ -50,14 +50,12 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void RuntimeInitialise()
         {
-            Debug.Log("[BUG TEST] Set HasLoaded FALSE");
             HasLoaded = false;
         }
         
         private IEnumerator Start()
         {
             Instance = this;
-            Debug.Log($"[BUG TEST] Called Start - How many loaded scenes? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount}  - Active scene is {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
             Debug.Log($"{SceneManager.GameLoaderSceneAddress} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
@@ -103,7 +101,6 @@ namespace Gumball
             stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Additive, true);
-            GlobalLoggers.LoadingLogger.Log($"[BUG TEST] Started loading: How many loaded scenes? {UnityEngine.SceneManagement.SceneManager.loadedSceneCount} - is main scene handle complete? {mainSceneHandle.PercentComplete}  {mainSceneHandle.IsValid()}  {mainSceneHandle.IsDone}  {mainSceneHandle.Status}  {mainSceneHandle.OperationException}  - Active scene is {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
             yield return new WaitUntil(() => mainSceneHandle.PercentComplete.Approximately(1));
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
@@ -140,7 +137,6 @@ namespace Gumball
 
             GlobalLoggers.LoadingLogger.Log($"Total boot time = {TimeSpan.FromSeconds(Time.realtimeSinceStartup).ToPrettyString(true)}");
 
-            Debug.Log("[BUG TEST] Set HasLoaded TRUE");
             HasLoaded = true;
         }
 
