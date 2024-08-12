@@ -69,12 +69,16 @@ jobs:
           checkName: ${{ matrix.testMode }} Test Results
           customParameters: -nographics
 
-      # Retry playmode tests if failed after 10 seconds, as they can fail due to license issue if using pro license
-      - name: Retry Tests if Failed
-        if: failure() && ${{ matrix.testMode }} == 'playmode'
+      # Delay for 10 seconds if the first attempt fails and the test mode is playmode
+      - name: Wait before retrying playmode test
+        if: failure() && matrix.testMode == 'playmode'
         run: |
           echo "Waiting 10 seconds before retrying..."
           sleep 10
+
+      # Retry playmode if failed, as they can fail due to license issue if using pro license
+      - name: Retry Tests if Failed
+        if: failure() && ${{ matrix.testMode }} == 'playmode'
         uses: game-ci/unity-test-runner@v4
         env:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
@@ -144,7 +148,7 @@ jobs:
           androidExportType: androidAppBundle
           androidTargetSdkVersion: 34
           buildName: 'Gumball'
-          versioning: Semantic
+          versioning: None
 
       # Upload artifact for Google Play deployment step
       - uses: actions/upload-artifact@v4
