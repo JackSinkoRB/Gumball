@@ -69,6 +69,24 @@ jobs:
           checkName: ${{ matrix.testMode }} Test Results
           customParameters: -nographics
 
+      # Retry playmode tests if failed after 10 seconds, as they can fail due to license issue if using pro license
+      - name: Retry Tests if Failed
+        if: failure() && ${{ matrix.testMode }} == 'playmode'
+        run: |
+          echo "Waiting 10 seconds before retrying..."
+          sleep 10
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          testMode: ${{ matrix.testMode }}
+          artifactsPath: ${{ matrix.testMode }}-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: ${{ matrix.testMode }} Test Results
+          customParameters: -nographics
+
   build:
     needs: testAllModes
     name: Build for ${{ matrix.targetPlatform }}
