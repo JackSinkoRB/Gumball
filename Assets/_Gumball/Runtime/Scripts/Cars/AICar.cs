@@ -283,7 +283,9 @@ namespace Gumball
                                                                  | 1 << (int)LayersAndTags.Layer.RacerObstacle;
         private static readonly LayerMask racingLineObstacleLayers = 1 << (int)LayersAndTags.Layer.Barrier
                                                                      | 1 << (int)LayersAndTags.Layer.RacerObstacle;
-
+        private static readonly LayerMask groundLayers = 1 << (int)LayersAndTags.Layer.Ground
+                                                         | 1 << (int)LayersAndTags.Layer.Default
+                                                         | 1 << (int)LayersAndTags.Layer.Terrain;
         /// <summary>
         /// The time that the autodriving car looks ahead for curves.
         /// </summary>
@@ -557,6 +559,7 @@ namespace Gumball
                 wheelCollider.motorTorque = 0;
                 wheelCollider.rotationSpeed = 0;
                 wheelCollider.steerAngle = 0;
+                wheelCollider.ResetSprungMasses();
             }
             
             UpdateWheelMeshes(); //force update
@@ -569,7 +572,7 @@ namespace Gumball
 
         public void SetGrounded()
         {
-            int numberOfHitsDown = Physics.RaycastNonAlloc(transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Ground));
+            int numberOfHitsDown = Physics.RaycastNonAlloc(transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, groundLayers);
 
             if (numberOfHitsDown == 0)
             {
