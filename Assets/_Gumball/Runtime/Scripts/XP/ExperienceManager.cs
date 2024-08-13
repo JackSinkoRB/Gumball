@@ -15,6 +15,27 @@ namespace Gumball
 
         public PlayerLevel[] Levels => levels;
 
+        protected override void OnInstanceLoaded()
+        {
+            base.OnInstanceLoaded();
+
+            CheckToUnlockUnlockables();
+        }
+        
+        private void CheckToUnlockUnlockables()
+        {
+            foreach (PlayerLevel level in levels)
+            {
+                if (TotalXP < level.XPRequired)
+                    break; //not yet unlocked
+                
+                foreach (Unlockable unlockable in level.Rewards.Unlockables)
+                {
+                    unlockable.Unlock();
+                }
+            }
+        }
+        
 #if UNITY_EDITOR
         /// <remarks>Only for testing.</remarks>
         [ButtonMethod]
