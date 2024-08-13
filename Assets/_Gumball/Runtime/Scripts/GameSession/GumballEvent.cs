@@ -49,7 +49,13 @@ namespace Gumball
             
             //reset the runtime chunk creation tracking
             ChunkMap.ClearRuntimeChunksCreatedTracking();
-            Debug.Log($"Complete process took {stopwatch.Elapsed.ToPrettyString()}");
+
+            Debug.Log($"Rebuild process took {stopwatch.Elapsed.ToPrettyString()}");
+            
+            //cleanup old spline meshes
+            CleanupChunkAssets.RemoveUnusedChunkMeshes();
+            
+            Debug.Log($"Total process took {stopwatch.Elapsed.ToPrettyString()}");
         }
 #endif
         
