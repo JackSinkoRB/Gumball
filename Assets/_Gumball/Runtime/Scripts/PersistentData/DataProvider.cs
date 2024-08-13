@@ -32,6 +32,14 @@ namespace Gumball
         /// </summary>
         public static void SaveAllAsync()
         {
+#if UNITY_EDITOR
+            if (DataManager.IsUsingTestProviders)
+            {
+                SaveAllSync();
+                return; //do not save ASYNC when using test providers
+            }
+#endif
+
             GlobalLoggers.SaveDataLogger.Log("Checking to save all dirty data providers (asynchronously).");
 
             foreach (DataProvider provider in dirtyProviders)

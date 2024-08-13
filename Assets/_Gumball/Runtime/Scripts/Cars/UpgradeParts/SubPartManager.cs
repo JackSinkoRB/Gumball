@@ -21,7 +21,6 @@ namespace Gumball
         
         public static ReadOnlyCollection<SubPart> AllParts => allParts.AsReadOnly();
         
-        
         private static bool isInitialised;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
