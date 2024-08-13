@@ -93,30 +93,14 @@ jobs:
           checkName: ${{ matrix.testMode }} Test Results
           customParameters: -nographics
 
-  build:
+  buildAndDeployAndroid:
     needs: testAllModes
-    name: Build for ${{ matrix.targetPlatform }}
+    name: Build and deploy Android
     runs-on: self-hosted
-    outputs:
-      Android-runner-ip: ${{ steps.set-runner-ips.outputs.Android-runner-ip }}
-      StandaloneWindows-runner-ip: ${{ steps.set-runner-ips.outputs.StandaloneWindows-runner-ip }}
     strategy:
       fail-fast: false
-      matrix:
-        targetPlatform:
-          - Android
-          - StandaloneWindows
-    steps:
 
-      # Set runner-specific IP addresses
-      - name: Set runner-specific IP addresses
-        id: set-runner-ips
-        run: |
-          if [[ "${{ runner.name }}" == "Hostinger-Runner-3-Singapore" ]]; then
-            echo "${{ matrix.targetPlatform }}-runner-ip=141.136.47.108" >> "$GITHUB_OUTPUT"
-          else
-            echo "${{ matrix.targetPlatform }}-runner-ip=178.16.143.69" >> "$GITHUB_OUTPUT"
-          fi
+    steps:
 
       # Checkout
       - uses: actions/checkout@v4
@@ -131,11 +115,10 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-Android
 
       # Ensure Split Application Binary is enabled
       - name: Ensure Split Application Binary enabled
-        if: matrix.targetPlatform == 'Android'
         run: |
           sed -i 's/APKExpansionFiles: 0/APKExpansionFiles: 1/' ProjectSettings/ProjectSettings.asset
 
@@ -152,68 +135,18 @@ jobs:
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
+          targetPlatform: Android
           androidExportType: androidAppBundle
           androidTargetSdkVersion: 34
           buildName: 'Gumball'
           versioning: Semantic
 
-      # Upload artifact for Google Play deployment step
-      - uses: actions/upload-artifact@v4
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && ${{ matrix.targetPlatform }} == 'Android'
-        with:
-          name: build-Android
-          path: build/Android
-
-      # Zip Build Files
-      - name: Zip Build Files
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && ${{ matrix.targetPlatform }} == 'StandaloneWindows'
-        run: |
-          find build/${{ matrix.targetPlatform }} -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
-          zip -r Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}
-
-      # Move Build Files
-      - name: Move Build Files
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop' && ${{ matrix.targetPlatform }} == 'StandaloneWindows'
-        run: mv Gumball-${{ matrix.targetPlatform }}.zip /var/www/html
-
-      # Delete build folder to save space
-      - name: Delete build folder
-        run: rm -rf build
-
-  deployToGoogle:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    needs: build
-    name: Deploy to Google Play internal track
-    runs-on: self-hosted
-    env:
-      GOOGLE_PLAY_KEY_FILE: ${{ secrets.GOOGLE_PLAY_KEY_FILE }}
-      GOOGLE_PLAY_KEY_FILE_PATH:
-        ${{ format('{0}/fastlane/google-fastlane.json', github.workspace) }}
-      ANDROID_BUILD_FILE_PATH: ${{ format('{0}/build/Android/Gumball.aab', github.workspace) }}
-      ANDROID_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
-
-    steps:
-
-      - name: Check Version
-        run: |
-          echo "Current version: $(cat ProjectSettings/ProjectVersion.txt)"
-
-      # Checkout
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: Download Android artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-Android
-          path: build/Android
-
       - name: Add Authentication
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: echo "$GOOGLE_PLAY_KEY_FILE" > $GOOGLE_PLAY_KEY_FILE_PATH
 
       - name: Set up Fastlane
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3
@@ -224,14 +157,76 @@ jobs:
         with:
           lane: 'android internal'
 
-      - name: Cleanup to avoid storage limit
-        if: always()
-        uses: geekyeggo/delete-artifact@v5
+      # Delete build folder to save space
+      - name: Delete build folder
+        run: rm -rf build
+
+  buildAndDeployWindows:
+    needs: testAllModes
+    name: Build and deploy Windows
+    runs-on: self-hosted
+    outputs:
+      StandaloneWindows-runner-ip: ${{ steps.set-runner-ips.outputs.StandaloneWindows-runner-ip }}
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      # Set runner-specific IP addresses
+      - name: Set runner-specific IP addresses
+        id: set-runner-ips
+        run: |
+          if [[ "${{ runner.name }}" == "Hostinger-Runner-3-Singapore" ]]; then
+            echo "StandaloneWindows-runner-ip=141.136.47.108" >> "$GITHUB_OUTPUT"
+          else
+            echo "StandaloneWindows-runner-ip=178.16.143.69" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Checkout
+      - uses: actions/checkout@v4
         with:
-          name: build-Android
+          lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
+
+      # Cache
+      - uses: JackSinkoRB/local-cache@main
+        with:
+          path: Library
+          key: Library-StandaloneWindows
+
+      # Build
+      - uses: game-ci/unity-builder@v4
+        id: buildStep
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows
+          buildName: 'Gumball'
+          versioning: Semantic
+
+      # Zip Build Files
+      - name: Zip Build Files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: |
+          find build/StandaloneWindows -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
+          zip -r Gumball-StandaloneWindows.zip build/StandaloneWindows
+
+      # Move Build Files
+      - name: Move Build Files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: mv Gumball-StandaloneWindows.zip /var/www/html
+
+      # Delete build folder to save space
+      - name: Delete build folder
+        run: rm -rf build
 
   deployToDiscord:
-    needs: build
+    needs: [buildAndDeployAndroid, buildAndDeployWindows]
     name: Deploy to Discord
     runs-on: self-hosted
     if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
