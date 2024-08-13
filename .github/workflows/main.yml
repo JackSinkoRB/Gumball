@@ -105,7 +105,7 @@ jobs:
 
       # Delay for 10 seconds if the first attempt fails and the test mode is playmode
       - name: Wait before retrying playmode test
-        if: ${{ steps.tests.outcome == 'failure' }}
+        if: ${{ always() && steps.tests.outcome == 'failure' }}
         run: |
           echo "Waiting 10 seconds before retrying..."
           sleep 10
@@ -113,7 +113,7 @@ jobs:
       # Retry playmode if failed, as they can fail due to license issue if using pro license
       - name: Retry tests if failed
         id: retry-test
-        if: ${{ steps.tests.outcome == 'failure' }}
+        if: ${{ always() && steps.tests.outcome == 'failure' }}
         uses: game-ci/unity-test-runner@v4
         env:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
