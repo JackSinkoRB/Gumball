@@ -31,15 +31,6 @@ namespace Gumball
         {
             float totalWidth = 0;
             float totalHeight = 0;
-            foreach (RectTransform child in transform)
-            {
-                if (!child.gameObject.activeSelf)
-                    continue;
-                
-                totalWidth += child.rect.width;
-                totalHeight += child.rect.height;
-            }
-            
             foreach (RectTransform additionalObject in additionalRects)
             {
                 if (!additionalObject.gameObject.activeSelf)
