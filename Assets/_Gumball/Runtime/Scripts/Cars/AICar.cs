@@ -71,7 +71,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
 
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
-        public MinMaxFloat EngineRpmRange => performanceSettings.EngineRpmRange.GetValue(performanceProfile);
+        public MinMaxFloat EngineRpmRange => new(performanceSettings.EngineRpmRangeMin.GetValue(performanceProfile), performanceSettings.EngineRpmRangeMax.GetValue(performanceProfile));
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
         public float BrakeTorque => performanceSettings.BrakeTorque.GetValue(performanceProfile);
         public float HandbrakeTorque => performanceSettings.HandbrakeTorque.GetValue(performanceProfile);
