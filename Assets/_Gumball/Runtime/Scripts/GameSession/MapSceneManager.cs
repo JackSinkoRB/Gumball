@@ -183,6 +183,9 @@ namespace Gumball
         
         private void CheckIfClickedSessionNode()
         {
+            if (PrimaryContactInput.IsGraphicUnderPointer(leftArrow.image) || PrimaryContactInput.IsGraphicUnderPointer(rightArrow.image))
+                return;
+            
             foreach (Graphic graphic in PrimaryContactInput.GetClickableGraphicsUnderPointer())
             {
                 GameSessionNode nodeOnObject = graphic.GetComponent<GameSessionNode>();
