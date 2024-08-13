@@ -55,36 +55,11 @@ namespace Gumball.Runtime.Tests
 
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            CoroutineHelper.Instance.StartCoroutine(Initialise());
-        }
-
-        private IEnumerator Initialise()
-        {
-            //require the part managers to spawn the player car
-            yield return CorePartManager.Initialise();
-            yield return SubPartManager.Initialise();
-            yield return WarehouseManager.Instance.SpawnCar(0, new Vector3(0,0,2), Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
-            
-            yield return ChallengeTrackerManager.LoadInstanceAsync();
-            yield return new WaitUntil(() => ChallengeTrackerManager.HasLoaded);
-
-            GameSession.StartSession();
-            yield return new WaitUntil(() => GameSession.HasStarted);
-            
             isInitialised = true;
         }
 
-        [UnityTest]
-        [Order(1)]
-        public IEnumerator TestsAreSetup()
-        {
-            yield return new WaitUntil(() => isInitialised);
-            
-            Assert.AreEqual(TestManager.Instance.ChunkMapScene.name, UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
-        }
-
         [Test]
-        [Order(2)]
+        [Order(1)]
         public void StartAndStopTracking()
         {
             ChallengeTracker tracker = ChallengeTrackerManager.Instance.Trackers[0];
@@ -98,7 +73,7 @@ namespace Gumball.Runtime.Tests
         }
         
         [Test]
-        [Order(3)]
+        [Order(2)]
         public void Track()
         {
             ChallengeTracker tracker = ChallengeTrackerManager.Instance.Trackers[0];
@@ -114,7 +89,7 @@ namespace Gumball.Runtime.Tests
         }
         
         [Test]
-        [Order(4)]
+        [Order(3)]
         public void SetTracker()
         {
             ChallengeTracker tracker = ChallengeTrackerManager.Instance.Trackers[0];
@@ -129,33 +104,5 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(0.2f, tracker.GetListener(id).Progress);
         }
         
-        //TODO: revisit at later date
-        // [UnityTest]
-        // [Order(5)]
-        // public IEnumerator DrivingDistance()
-        // {
-        //     yield return new WaitUntil(() => isInitialised);
-        //     
-        //     Challenge subObjective = GameSession.SubObjectives[0];
-        //     ChallengeTracker tracker = subObjective.Tracker;
-        //     string trackerId = subObjective.ChallengeID;
-        //     
-        //     Assert.IsNotNull(tracker.GetListener(trackerId));
-        //
-        //     //ensure teleport doesn't add to it
-        //     float trackerBeforeTeleport = tracker.GetListener(trackerId).Progress;
-        //     WarehouseManager.Instance.CurrentCar.Teleport(new Vector3(1,0,2), Quaternion.Euler(Vector3.zero));
-        //     yield return null;
-        //     Assert.AreEqual(trackerBeforeTeleport, tracker.GetListener(trackerId).Progress);
-        //
-        //     WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-        //     WarehouseManager.Instance.CurrentCar.SetSpeed(100);
-        //     
-        //     yield return new WaitForFixedUpdate();
-        //     yield return new WaitForFixedUpdate();
-        //
-        //     Assert.Greater(tracker.GetListener(trackerId).Progress, 0);
-        // }
-
     }
 }

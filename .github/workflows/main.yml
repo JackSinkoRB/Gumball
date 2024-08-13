@@ -31,17 +31,13 @@ jobs:
       - name: Install Git
         run: sudo apt-get update && sudo apt-get install git
 
-
-  testAllModes:
+  testEditMode:
     needs: setup
-    name: Test in ${{ matrix.testMode }}
+    name: Test in Edit Mode
     runs-on: self-hosted
     strategy:
       fail-fast: false
-      matrix:
-        testMode:
-          - playmode
-          - editmode
+
     steps:
 
       # Checkout
@@ -53,48 +49,94 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-${{ matrix.testMode }}
+          key: Library-editmode
 
       # Test
       - uses: game-ci/unity-test-runner@v4
         name: Run tests
         id: tests
-        continue-on-error: true
         env:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          testMode: ${{ matrix.testMode }}
-          artifactsPath: ${{ matrix.testMode }}-artifacts
+          testMode: editmode
+          artifactsPath: editmode-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: ${{ matrix.testMode }} Test Results
+          checkName: Edit Mode Test Results
+          customParameters: -nographics
+
+  testPlayMode:
+    needs: setup
+    name: Test in Play Mode
+    runs-on: self-hosted
+    outputs:
+      testsPassed: ${{ steps.test_output.outputs.passed }}
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Cache
+      - uses: JackSinkoRB/local-cache@main
+        with:
+          path: Library
+          key: Library-playmode
+
+      # Test
+      - uses: game-ci/unity-test-runner@v4
+        name: Run tests
+        id: tests
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          testMode: playmode
+          artifactsPath: playmode-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Play Mode Test Results
           customParameters: -nographics
 
       # Delay for 10 seconds if the first attempt fails and the test mode is playmode
       - name: Wait before retrying playmode test
-        if: ${{ steps.tests.conclusion == 'failure' && matrix.testMode == 'playmode' }}
+        if: ${{ steps.tests.outcome == 'failure' }}
         run: |
           echo "Waiting 10 seconds before retrying..."
           sleep 10
 
       # Retry playmode if failed, as they can fail due to license issue if using pro license
       - name: Retry tests if failed
-        if: ${{ steps.tests.conclusion == 'failure' && matrix.testMode == 'playmode' }}
+        id: retry-test
+        if: ${{ steps.tests.outcome == 'failure' }}
         uses: game-ci/unity-test-runner@v4
         env:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          testMode: ${{ matrix.testMode }}
-          artifactsPath: ${{ matrix.testMode }}-artifacts
+          testMode: playmode
+          artifactsPath: playmode-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: ${{ matrix.testMode }} Test Results
+          checkName: Play Mode Retry Test Results
           customParameters: -nographics
 
+      - name: Generate output
+        id: test_output
+        run: |
+          if [[ "${{ steps.tests.conclusion }}" == "success" || "${{ steps.retry-test.conclusion }}" == "success" ]]; then
+            echo "testsPassed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "testsPassed=false" >> "$GITHUB_OUTPUT"
+
   buildAndDeployAndroid:
-    needs: testAllModes
+    needs: [testEditMode, testPlayMode]
+    if: ${{ needs.testEditMode.result == 'success' && needs.testPlayMode.outputs.testsPassed == 'true' }}
     name: Build and deploy Android
     runs-on: self-hosted
     strategy:
@@ -169,7 +211,8 @@ jobs:
         run: rm -rf build
 
   buildAndDeployWindows:
-    needs: testAllModes
+    needs: [testEditMode, testPlayMode]
+    if: ${{ needs.testEditMode.result == 'success' && needs.testPlayMode.outputs.testsPassed == 'true' }}
     name: Build and deploy Windows
     runs-on: self-hosted
     outputs:
@@ -292,7 +335,7 @@ jobs:
               "title": "Gumball has a new build available.",
               "fields": [
                 { "name": "Android", "value": "[Google Play](https://play.google.com/apps/internaltest/4700966647029801843)", "inline": true },
-                { "name": "Windows", "value": "[Download](http://${{ needs.build.outputs.StandaloneWindows-runner-ip }}/Gumball-StandaloneWindows.zip)", "inline": true },
+                { "name": "Windows", "value": "[Download](http://${{ needs.buildAndDeployWindows.outputs.StandaloneWindows-runner-ip }}/Gumball-StandaloneWindows.zip)", "inline": true },
                 { "name": "Latest commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}})" },
                 { "name": "Commits (${{ steps.pre-checkout.outputs.number-of-commits }})", "value": "${{ steps.pre-checkout.outputs.commit-messages }}" }
               ],
