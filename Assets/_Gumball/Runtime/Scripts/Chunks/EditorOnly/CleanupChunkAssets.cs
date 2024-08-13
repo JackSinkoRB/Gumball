@@ -6,6 +6,7 @@ using System.IO;
 using Dreamteck.Splines;
 using Gumball.Editor;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -24,6 +25,10 @@ namespace Gumball
         private static void OnSavePrefab(string sceneName, string path)
         {
             if (EditorApplication.isUpdating)
+                return;
+            
+            bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().assetPath.Equals(path);
+            if (!isPrefabMode)
                 return;
             
             RemoveUnusedSplineMeshes(path);

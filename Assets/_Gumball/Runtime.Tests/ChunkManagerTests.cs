@@ -60,6 +60,9 @@ namespace Gumball.Runtime.Tests
         
         private IEnumerator Initialise()
         {
+            //require the part managers to spawn the player car
+            yield return CorePartManager.Initialise();
+            yield return SubPartManager.Initialise();
             yield return WarehouseManager.Instance.SpawnCar(0, Vector3.zero, Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
             yield return GameSession.LoadChunkMap();
             yield return GameSession.SetupSession();

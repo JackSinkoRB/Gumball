@@ -4,7 +4,7 @@ on:
   # Runs on pushes targeting the default branch
   push:
     tags:
-      - "v*.*.*"
+      - "v*.*"
 
 concurrency:
   group: ${{ github.repository }}
@@ -55,6 +55,7 @@ jobs:
           androidExportType: androidAppBundle
           androidTargetSdkVersion: 34
           buildName: 'Gumball'
+          versioning: Semantic
 
       - uses: actions/upload-artifact@v4
         with:
@@ -169,21 +170,3 @@ jobs:
               "description": "It will be available on TestFlight and GooglePlay soon."
             }]
         uses: Ilshidur/action-discord@0.3.2
-
-  cleanup:
-    if: ${{ always() }}
-    needs: [deployToApple, deployToGoogle]
-    name: Cleanup
-    runs-on: self-hosted
-    strategy:
-      fail-fast: false
-
-    steps:
-
-      # Delete library folders to save space - must do this after build job as post-cache needs to cache it
-      - name: Delete runner1 Library folder
-        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/Library || true
-
-      # Delete build folder to save space
-      - name: Delete runner1 build folder
-        run: rm -rf /root/runner1-actions/_work/Gumball/Gumball/build || true

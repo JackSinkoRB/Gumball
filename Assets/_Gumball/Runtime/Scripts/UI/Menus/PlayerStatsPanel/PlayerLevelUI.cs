@@ -13,6 +13,9 @@ namespace Gumball
         [SerializeField] private AutosizeTextMeshPro levelLabel;
         [SerializeField] private Image experienceBar;
 
+        [SerializeField] private float progressBarFillStart = 0.1f;
+        [SerializeField] private float progressBarFillEnd = 0.9f;
+
         private void OnEnable()
         {
             Refresh();
@@ -51,7 +54,8 @@ namespace Gumball
 
         private void RefreshExperienceBar()
         {
-            experienceBar.fillAmount = ExperienceManager.GetPercentToNextLevel(ExperienceManager.TotalXP);
+            float difference = progressBarFillEnd - progressBarFillStart;
+            experienceBar.fillAmount = progressBarFillStart + (difference * ExperienceManager.GetPercentToNextLevel(ExperienceManager.TotalXP));
         }
         
     }

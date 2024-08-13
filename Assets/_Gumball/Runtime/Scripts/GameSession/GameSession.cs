@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Dreamteck.Splines;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -53,9 +54,10 @@ namespace Gumball
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
         [SerializeField] protected float raceDistanceMetres;
+        [SerializeField] private CheckpointMarkers finishLineMarkers;
 
         [Header("Racers")]
-        [SerializeField] private RacerSessionData[] racerData;
+        [SerializeField] protected RacerSessionData[] racerData;
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] private float racersStartingSpeed = 70;
 
@@ -112,6 +114,9 @@ namespace Gumball
         public AssetReferenceGameObject[] TrafficTrucks => trafficTrucks;
         public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
+
+        protected abstract GameSessionPanel GetSessionPanel();
+        protected abstract GameSessionEndPanel GetSessionEndPanel();
 
         public abstract string GetName();
 
@@ -325,11 +330,17 @@ namespace Gumball
             HasStarted = false;
 
             PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Hide();
+            if (GetSessionEndPanel() != null)
+                GetSessionEndPanel().Show();
             
             drivingCameraController.SetState(drivingCameraController.OutroState);
             
             //disable NOS
             WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
+
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
             
             //come to a stop
             WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
@@ -345,7 +356,7 @@ namespace Gumball
         public virtual void UpdateWhenCurrent()
         {
             SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
-            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceTraveled >= raceDistanceMetres)
+            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceInMap >= raceDistanceMetres)
                 OnCrossFinishLine();
         }
 
@@ -367,6 +378,8 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            inProgress = false;
+            
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             yield return LoadChunkMap();
@@ -399,6 +412,9 @@ namespace Gumball
             
             onSessionStart?.Invoke(this);
             
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Show();
+
             HasStarted = true;
         }
 
@@ -412,7 +428,7 @@ namespace Gumball
                 subObjective.Tracker.StartListening(subObjective.ChallengeID, subObjective.Goal);
             }
         }
-        
+
         private void StopTrackingObjectives()
         {
             if (subObjectives == null)
@@ -503,6 +519,8 @@ namespace Gumball
             //remove constraints
             WarehouseManager.Instance.CurrentCar.Rigidbody.constraints = RigidbodyConstraints.None;
             
+            WarehouseManager.Instance.CurrentCar.SetObeySpeedLimit(false);
+            
             //move the car to the right position
             currentCarRigidbody.Move(vehicleStartingPosition, Quaternion.Euler(vehicleStartingRotation));
             GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {vehicleStartingPosition}");
@@ -513,7 +531,7 @@ namespace Gumball
             racerData ??= Array.Empty<RacerSessionData>();
                 
             currentRacers.Clear();
-            List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
+            AsyncOperationHandle<GameObject>[] handles = new AsyncOperationHandle<GameObject>[racerData.Length];
 
             for (int index = 0; index < racerData.Length; index++)
             {
@@ -526,32 +544,32 @@ namespace Gumball
                 }
                 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
-
-                int finalIndex = index;
-                handle.Completed += h =>
-                {
-                    if (handle.Result == null)
-                    {
-                        Debug.LogError($"There is a null racer at index {finalIndex} in {name}. Skipping it.");
-                        return;
-                    }
-                    
-                    AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
-                    racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
-
-                    racer.SetPerformanceProfile(data.PerformanceProfile);
-                    racer.InitialiseAsRacer();
-
-                    currentRacers[racer] = data;
-                };
-                handles.Add(handle);
+                handles[index] = handle;
             }
 
             //add the player's car as a racer
             currentRacers[WarehouseManager.Instance.CurrentCar] = new RacerSessionData();
 
             yield return new WaitUntil(() => handles.AreAllComplete());
-            
+
+            for (int index = 0; index < racerData.Length; index++)
+            {
+                if (handles[index].Result == null)
+                {
+                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                    continue;
+                }
+
+                RacerSessionData data = racerData[index];
+                AICar racer = Instantiate(handles[index].Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
+                racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[index]);
+
+                racer.SetPerformanceProfile(data.PerformanceProfile);
+                racer.InitialiseAsRacer();
+
+                currentRacers[racer] = data;
+            }
+
             //set initial speeds
             foreach (AICar racer in currentRacers.Keys)
             {
@@ -578,15 +596,6 @@ namespace Gumball
 
                 AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
                 trafficPrefabHandles[assetReference] = handle;
-                
-                handle.Completed += h =>
-                {
-                    if (handle.Result == null)
-                    {
-                        trafficPrefabHandles.Remove(assetReference);
-                        Debug.LogError($"There is a null traffic vehicle in {name}. Skipping it.");
-                    }
-                };
             }
             
             //wait until all cars have loaded
@@ -620,10 +629,10 @@ namespace Gumball
                 Debug.LogError($"Could not create finish line as the race distance {raceDistanceMetres} is bigger than the map length {mapLength}.");
                 return;
             }
-            
-            //TODO:
+
+            finishLineMarkers.Spawn(raceDistanceMetres);
         }
-        
+
         private void OnCrossFinishLine()
         {
             ProgressStatus status = ProgressStatus.ATTEMPTED;

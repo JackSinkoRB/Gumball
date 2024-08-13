@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using Dreamteck.Splines;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -621,6 +622,42 @@ namespace Gumball
                 return null; //chunk hasn't loaded or is the end of the map
 
             return nextChunk.Value.Chunk;
+        }
+        
+        public SplineSample GetSampleAlongSplines(float distanceFromStart)
+        {
+            if (distanceFromStart > currentChunkMap.TotalLengthMetres)
+                throw new InvalidOperationException();
+            
+            //get the chunk the position is in
+            int chunkIndex = 0;
+            while (currentChunkMap.ChunkLengthsCalculated[chunkIndex] <= distanceFromStart)
+            {
+                chunkIndex++;
+            }
+            
+            int previousChunkIndex = chunkIndex - 1;
+            float chunkStartDistance = previousChunkIndex < 0 ? 0 : currentChunkMap.ChunkLengthsCalculated[previousChunkIndex];
+            
+            Chunk chunk = currentChunks[chunkIndex].Chunk;
+            
+            if (chunk.SplineComputer.sampleMode != SplineComputer.SampleMode.Uniform)
+                throw new InvalidOperationException("Could not get distance travelled along spline because the samples are not in uniform.");
+
+            float distanceBetweenSamples = chunk.SplineLengthCached / chunk.SplineSamples.Length; //assuming the spline sample distance is uniform
+            
+            //get the spline sample
+            float distanceInChunkSqr = 0;
+            for (int splineSampleIndex = 1; splineSampleIndex < chunk.SplineSamples.Length; splineSampleIndex++)
+            {
+                distanceInChunkSqr += distanceBetweenSamples;
+                
+                float totalDistanceAtSample = chunkStartDistance + distanceInChunkSqr;
+                if (totalDistanceAtSample >= distanceFromStart)
+                    return chunk.SplineSamples[splineSampleIndex];
+            }
+
+            throw new InvalidOperationException($"Could not get the spline sample {distanceFromStart}m along the map spline.");
         }
         
     }

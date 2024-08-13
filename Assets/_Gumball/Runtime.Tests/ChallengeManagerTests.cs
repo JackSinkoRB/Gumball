@@ -56,6 +56,7 @@ namespace Gumball.Runtime.Tests
         [TearDown]
         public void TearDown()
         {
+            isInitialised = false;
             TimeUtils.SetTimeOffset(0);
         }
 

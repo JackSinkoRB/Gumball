@@ -58,8 +58,14 @@ namespace Gumball
         }
 
 #if UNITY_EDITOR
-        [ButtonMethod]
-        public void RebuildData()
+        private static readonly HashSet<string> runtimeChunksCreated = new();
+
+        public static void ClearRuntimeChunksCreatedTracking()
+        {
+            runtimeChunksCreated.Clear();
+        }
+        
+        public void RebuildData(bool clearRuntimeChunksCreatedOnComplete)
         {
             Chunk[] chunkInstances = new Chunk[chunkReferences.Length];
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -77,22 +83,7 @@ namespace Gumball
                 
                 GlobalLoggers.ChunkLogger.Log($"Setup = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
-                
-                //ensure meshes are baked (only check each chunk once)
-                HashSet<string> chunksBaked = new HashSet<string>();
-                for (int index = 0; index < chunkInstances.Length; index++)
-                {
-                    AssetReferenceGameObject chunkReference = chunkReferences[index];
-                    
-                    if (chunksBaked.Contains(chunkReference.editorAsset.name))
-                        continue;
 
-                    chunksBaked.Add(chunkReference.editorAsset.name);
-                    
-                    chunkReference.editorAsset.GetComponent<Chunk>().FindSplineMeshes();
-                    ChunkUtils.BakeMeshes(chunkReference.editorAsset.GetComponent<Chunk>(), false, saveAssets: false);
-                }
-                
                 GlobalLoggers.ChunkLogger.Log($"Baking meshes = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
                 
@@ -102,7 +93,10 @@ namespace Gumball
                     GlobalLoggers.ChunkLogger.Log($"Instantiating {runtimeChunkAssetKeys[index]}");
                     AssetReferenceGameObject chunkReference = chunkReferences[index];
 
-                    GameObject chunkInstance = Instantiate(chunkReference.editorAsset.gameObject); //instantiate but keep the prefab references
+                    GameObject prefab = chunkReference.editorAsset.gameObject;
+                    prefab.GetComponent<ChunkEditorTools>().CheckToAssignSplineMeshIDs();
+
+                    GameObject chunkInstance = Instantiate(prefab, Vector3.zero, Quaternion.Euler(Vector3.zero)); //instantiate but keep the prefab references
                     Chunk chunk = chunkInstance.GetComponent<Chunk>();
                     chunkInstances[index] = chunk;
                     
@@ -116,7 +110,6 @@ namespace Gumball
                 GlobalLoggers.ChunkLogger.Log($"Instantiate chunks = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
 
-                HashSet<string> runtimeChunksCreated = new HashSet<string>();
                 for (int index = 0; index < chunkReferences.Length; index++)
                 {
                     AssetReferenceGameObject chunkReference = chunkReferences[index];
@@ -190,10 +183,19 @@ namespace Gumball
                 //reopen the scene to discard changes
                 string currentScenePath = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
                 EditorSceneManager.OpenScene(currentScenePath);
+             
+                if (clearRuntimeChunksCreatedOnComplete)
+                    runtimeChunksCreated.Clear();
                 
                 GlobalLoggers.ChunkLogger.Log($"Destroying = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
             }
+        }
+        
+        [ButtonMethod]
+        public void RebuildData()
+        {
+            RebuildData(true);
         }
 #endif
     }
