@@ -137,7 +137,7 @@ jobs:
       - name: Ensure Split Application Binary enabled
         if: matrix.targetPlatform == 'Android'
         run: |
-          sed -i 's/AndroidUseAPKExpansionFiles: 0/AndroidUseAPKExpansionFiles: 1/' ProjectSettings/ProjectSettings.asset
+          sed -i 's/APKExpansionFiles: 0/APKExpansionFiles: 1/' ProjectSettings/ProjectSettings.asset
 
       # Build
       - uses: game-ci/unity-builder@v4
