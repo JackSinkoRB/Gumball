@@ -7,7 +7,20 @@ namespace Gumball
     public class PlayerStatsPanel : AnimatedPanel
     {
         
+        public void OnClickDriveButton()
+        {
+            MapSceneManager.LoadMapScene();
+        }
+
+        public void OnClickSettingsButton()
+        {
+            PanelManager.GetPanel<SettingsPanel>().Show();
+        }
         
+        public void OnClickShopItemButton()
+        {
+            PanelManager.GetPanel<StorePanel>().Show();
+        }
         
     }
 }

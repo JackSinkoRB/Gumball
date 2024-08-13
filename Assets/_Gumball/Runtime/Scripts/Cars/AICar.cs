@@ -37,6 +37,11 @@ namespace Gumball
             FRONT_WHEEL_DRIVE,
             ALL_WHEEL_DRIVE
         }
+
+        [Header("Details")]
+        [SerializeField] private string displayName;
+
+        public string DisplayName => displayName.IsNullOrEmpty() ? name.Replace("(Clone)", "").Replace("_", " ") : displayName;
         
         [Header("Player car")]
         [SerializeField] private bool canBeDrivenByPlayer;
@@ -71,7 +76,7 @@ namespace Gumball
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
 
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
-        public MinMaxFloat EngineRpmRange => performanceSettings.EngineRpmRange.GetValue(performanceProfile);
+        public MinMaxFloat EngineRpmRange => new(performanceSettings.EngineRpmRangeMin.GetValue(performanceProfile), performanceSettings.EngineRpmRangeMax.GetValue(performanceProfile));
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
         public float BrakeTorque => performanceSettings.BrakeTorque.GetValue(performanceProfile);
         public float HandbrakeTorque => performanceSettings.HandbrakeTorque.GetValue(performanceProfile);
@@ -283,7 +288,9 @@ namespace Gumball
                                                                  | 1 << (int)LayersAndTags.Layer.RacerObstacle;
         private static readonly LayerMask racingLineObstacleLayers = 1 << (int)LayersAndTags.Layer.Barrier
                                                                      | 1 << (int)LayersAndTags.Layer.RacerObstacle;
-
+        private static readonly LayerMask groundLayers = 1 << (int)LayersAndTags.Layer.Ground
+                                                         | 1 << (int)LayersAndTags.Layer.Default
+                                                         | 1 << (int)LayersAndTags.Layer.Terrain;
         /// <summary>
         /// The time that the autodriving car looks ahead for curves.
         /// </summary>
@@ -557,6 +564,7 @@ namespace Gumball
                 wheelCollider.motorTorque = 0;
                 wheelCollider.rotationSpeed = 0;
                 wheelCollider.steerAngle = 0;
+                wheelCollider.ResetSprungMasses();
             }
             
             UpdateWheelMeshes(); //force update
@@ -569,7 +577,7 @@ namespace Gumball
 
         public void SetGrounded()
         {
-            int numberOfHitsDown = Physics.RaycastNonAlloc(transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Ground));
+            int numberOfHitsDown = Physics.RaycastNonAlloc(transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, groundLayers);
 
             if (numberOfHitsDown == 0)
             {
@@ -617,7 +625,7 @@ namespace Gumball
 
             if (autoDrive)
             {
-                if (CurrentChunk == null)
+                if (!isPlayerCar && CurrentChunk == null)
                 {
                     //current chunk may have despawned
                     const float timeWithNoChunkToDespawn = 1;
@@ -786,9 +794,15 @@ namespace Gumball
         {
             //check if there's a racing line with interpolation distance in current or next chunk
             
+            if (CurrentChunk == null)
+                return;
+
+            if (GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this))
+                return; //active/initialised racers only
+            
             CustomDrivingPath nearestRacingLine = null;
             float nearestDistanceSqr = Mathf.Infinity;
-            
+
             //get the racing lines in the current chunk
             int closestSampleIndexToPlayer = CurrentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
@@ -956,7 +970,7 @@ namespace Gumball
                 else
                 {
                     //if using racing line, set the imprecision range
-                    float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this) ? GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision() : 0;
+                    float distance = GameSessionManager.Instance.CurrentSession.CurrentRacers[this].GetRandomRacingLineImprecision();
                     SetRacingLineOffset(distance);
                 }
 
@@ -1572,6 +1586,7 @@ namespace Gumball
             
             //if it cannot cross the middle, check if crossing the middle and cancel if so
             if (GameSessionManager.Instance.CurrentSession != null
+                && GameSessionManager.Instance.CurrentSession.CurrentRacers.ContainsKey(this)
                 && !GameSessionManager.Instance.CurrentSession.CurrentRacers[this].CanCrossMiddle
                 && autoDrive && useRacingLine)
             {

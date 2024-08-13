@@ -38,7 +38,7 @@ namespace Gumball.Runtime.Tests
         public void OneTimeTearDown()
         {
             DataManager.EnableTestProviders(false);
-            if (WarehouseManager.Instance.CurrentCar != null)
+            if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null)
                 Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
         }
 
@@ -69,6 +69,9 @@ namespace Gumball.Runtime.Tests
                 
                 yield return new WaitForSeconds(1);
                 totalTimeWaiting += 1;
+
+                if (totalTimeWaiting > maxLoadTimeAllowed)
+                    break;
             }
             
             Assert.Less(totalTimeWaiting, maxLoadTimeAllowed);

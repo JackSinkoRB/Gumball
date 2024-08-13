@@ -9,6 +9,7 @@ namespace Gumball
 
         public enum Layer
         {
+            Default = 0,
             Ground = 3,
             LiveDecal = 6,
             Terrain = 7,

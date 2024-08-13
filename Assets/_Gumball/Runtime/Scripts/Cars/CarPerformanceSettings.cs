@@ -25,7 +25,9 @@ namespace Gumball
         [SerializeField] private CarPerformanceSettingPercent minTorquePercentToPeak = new(0.8f);
 
         [Header("RPM range")]
-        [SerializeField] private CarPerformanceSettingMinMaxFloat engineRpmRange = new(new MinMaxFloat(1000, 7000), new MinMaxFloat(1000, 9000));
+        [SerializeField] private CarPerformanceSettingFloat engineRpmRangeMin = new(600, 1000);
+        [SerializeField] private CarPerformanceSettingFloat engineRpmRangeMax = new(6000, 10000);
+
         [Tooltip("If RPM goes outside this range, it will try upshift/downshift to the desired RPM. For optimal power, the ideal range is where the torque is the highest.")]
         [SerializeField] private CarPerformanceSettingMinMaxFloat idealRPMRangeForGearChanges = new(new MinMaxFloat(3000, 6000), new MinMaxFloat(3000, 8000));
 
@@ -53,7 +55,8 @@ namespace Gumball
         [Tooltip("How much additional torque added to the car when NOS is activated.")]
         [SerializeField] private CarPerformanceSettingFloat nosTorqueAddition = new(1000f, 2000f);
         
-        public CarPerformanceSettingMinMaxFloat EngineRpmRange => engineRpmRange;
+        public CarPerformanceSettingFloat EngineRpmRangeMin => engineRpmRangeMin;
+        public CarPerformanceSettingFloat EngineRpmRangeMax => engineRpmRangeMax;
         public CarPerformanceSettingMinMaxFloat IdealRPMRangeForGearChanges => idealRPMRangeForGearChanges;
         public CarPerformanceSettingFloat RigidbodyMass => rigidbodyMass;
         public CarPerformanceSettingFloat BrakeTorque => brakeTorque;
