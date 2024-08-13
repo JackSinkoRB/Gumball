@@ -52,6 +52,7 @@ namespace Gumball.Runtime.Tests
         public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
         public string DecalEditorScenePath => AssetDatabase.GetAssetPath(decalEditorScene);
         public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
+        public SceneAsset ChunkMapScene => chunkMapScene;
         public string ChunkMapScenePath => AssetDatabase.GetAssetPath(chunkMapScene);
         public string WorkshopScenePath => AssetDatabase.GetAssetPath(workshopScene);
 
