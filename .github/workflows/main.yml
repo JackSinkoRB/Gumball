@@ -133,6 +133,7 @@ jobs:
             echo "testsPassed=true" >> "$GITHUB_OUTPUT"
           else
             echo "testsPassed=false" >> "$GITHUB_OUTPUT"
+          fi
 
   buildAndDeployAndroid:
     needs: [testEditMode, testPlayMode]
