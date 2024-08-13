@@ -631,7 +631,7 @@ namespace Gumball
             
             //get the chunk the position is in
             int chunkIndex = 0;
-            while (currentChunkMap.ChunkLengthsCalculated[chunkIndex] < distanceFromStart)
+            while (currentChunkMap.ChunkLengthsCalculated[chunkIndex] <= distanceFromStart)
             {
                 chunkIndex++;
             }
@@ -657,7 +657,7 @@ namespace Gumball
                     return chunk.SplineSamples[splineSampleIndex];
             }
 
-            throw new InvalidOperationException("Could not get the spline sample along the map spline.");
+            throw new InvalidOperationException($"Could not get the spline sample {distanceFromStart}m along the map spline.");
         }
         
     }
