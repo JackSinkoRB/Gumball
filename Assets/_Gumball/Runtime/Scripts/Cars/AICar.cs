@@ -615,7 +615,8 @@ namespace Gumball
 
         private void Update()
         {
-            CheckIfStuck();
+            if (!autoDrive)
+                CheckIfStuck();
         }
         
         private void FixedUpdate()
@@ -2062,7 +2063,7 @@ namespace Gumball
 
         private bool ShouldBeStuck()
         {
-            const float minSpeedForStuckKmh = 0.5f;
+            const float minSpeedForStuckKmh = 1f;
             if (speed > minSpeedForStuckKmh)
             {
                 timeAcceleratingSinceMovingSlowly = 0;
@@ -2072,7 +2073,7 @@ namespace Gumball
             if (IsAccelerating || IsReversing)
                 timeAcceleratingSinceMovingSlowly += Time.deltaTime;
             
-            const float timeAcceleratingWithNoMovementForReset = 1;
+            const float timeAcceleratingWithNoMovementForReset = 0.5f;
             if (timeAcceleratingSinceMovingSlowly > timeAcceleratingWithNoMovementForReset)
                 return true;
 
