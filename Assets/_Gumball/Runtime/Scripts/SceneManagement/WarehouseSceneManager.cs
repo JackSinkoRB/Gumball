@@ -27,51 +27,25 @@ namespace Gumball
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.WarehouseSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
+            WarehouseManager.Instance.CurrentCar.SetGrounded();
+
+            Instance.SetupCamera();
+            
             AvatarManager.Instance.HideAvatars(true);
 
-            yield return Instance.PopulateSlots();
-            Instance.SelectSlot(0); //select the first slot
-            
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
         #endregion
 
-        public event Action<WarehouseCarSlot> onSelectSlot;
+        [SerializeField] private WorkshopCameraController cameraController;
         
-        [SerializeField] private WarehouseCarSlot[] carSlots;
-        [SerializeField, ReadOnly] private WarehouseCarSlot currentSelectedSlot;
-
-        public WarehouseCarSlot[] CarSlots => carSlots;
-
-        public void SelectSlot(WarehouseCarSlot slot)
+        private void SetupCamera()
         {
-            currentSelectedSlot = slot;
-
-            slot.OnSelected();
-            onSelectSlot?.Invoke(slot);
+            if (WarehouseManager.Instance.CurrentCar != null)
+                cameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform, cameraController.DefaultTargetOffset);
+            
+            cameraController.SetInitialPosition();
         }
-        
-        public void SelectSlot(int slotIndex) => SelectSlot(carSlots[slotIndex]);
 
-        public IEnumerator PopulateSlots()
-        {
-            int index = 0;
-            HashSet<TrackedCoroutine> slotHandles = new HashSet<TrackedCoroutine>();
-            foreach (WarehouseCarSlot slot in carSlots)
-            {
-                if (index >= WarehouseManager.Instance.AllCars.Count)
-                    break; //not enough cars
-
-                if (index == WarehouseManager.Instance.CurrentCar.CarIndex)
-                    slot.PopulateWithCar(WarehouseManager.Instance.CurrentCar); //can reuse the car
-                else
-                    slotHandles.Add(new TrackedCoroutine(slot.PopulateWithCar(index))); //spawn new car
-                
-                index++;
-            }
-
-            yield return new WaitUntil(slotHandles.AreAllComplete);
-        }
-        
     }
 }
