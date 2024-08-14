@@ -10,8 +10,20 @@ namespace Gumball
 
         public void OnClickBackButton()
         {
-            MainSceneManager.LoadMainScene();
+            WarehouseSceneManager.Instance.ExitWarehouseScene();
         }
         
+        public void OnClickUpgradeButton()
+        {
+            Hide();
+            PanelManager.GetPanel<UpgradeWorkshopPanel>().Show();
+        }
+        
+        public void OnClickCustomiseButton()
+        {
+            Hide();
+            PanelManager.GetPanel<CustomiseWorkshopPanel>().Show();
+        }
+
     }
 }

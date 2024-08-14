@@ -6,6 +6,7 @@ using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -38,6 +39,36 @@ namespace Gumball
         #endregion
 
         [SerializeField] private WorkshopCameraController cameraController;
+        
+        private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
+        
+        public void ExitWarehouseScene()
+        {
+            SaveRideHeight();
+            MainSceneManager.LoadMainScene();
+        }
+        
+        /// <summary>
+        /// Calculates the distance to the ground and saves it to file. 
+        /// </summary>
+        private void SaveRideHeight()
+        {
+            AICar currentCar = WarehouseManager.Instance.CurrentCar;
+            int numberOfHitsDown = Physics.RaycastNonAlloc(currentCar.transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Ground));
+
+            if (numberOfHitsDown == 0)
+            {
+                Debug.LogWarning($"Could not save ride height for {currentCar.name} because there is no ground above or below.");
+                return;
+            }
+
+            Vector3 offset = currentCar.transform.position - groundedHitsCached[0].point;
+            float rideHeight = offset.y;
+            
+            DataManager.Cars.Set($"{currentCar.SaveKey}.RideHeight", rideHeight);
+            
+            GlobalLoggers.AICarLogger.Log($"Saved ride height for {currentCar.SaveKey} to {rideHeight}");
+        }
         
         private void SetupCamera()
         {
