@@ -112,6 +112,8 @@ public class PanelManager : PersistentSingleton<PanelManager>
         
         stopwatch.Stop();
         GlobalLoggers.LoadingLogger.Log($"Took {stopwatch.Elapsed.ToPrettyString(true)} to create the panel lookup for {sceneName}.");
+        
+        Canvas.ForceUpdateCanvases();
     }
     
     /// <summary>
