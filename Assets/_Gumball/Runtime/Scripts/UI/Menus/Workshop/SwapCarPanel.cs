@@ -10,10 +10,10 @@ namespace Gumball
     {
 
         [SerializeField] private CarOptionUI carOptionPrefab;
+        [SerializeField] private Transform carOptionHolder;
 
-        [SerializeField, ReadOnly] private CarOptionUI[] optionInstances;
         [SerializeField, ReadOnly] private CarOptionUI selectedOption;
-
+        
         protected override void OnShow()
         {
             base.OnShow();
@@ -35,9 +35,13 @@ namespace Gumball
 
         private void Populate()
         {
+            foreach (Transform child in carOptionHolder)
+                child.gameObject.Pool();
+            
             foreach (WarehouseCarData car in WarehouseManager.Instance.AllCarData)
             {
-                    
+                CarOptionUI carOptionInstance = carOptionPrefab.gameObject.GetSpareOrCreate<CarOptionUI>(carOptionHolder);
+                carOptionInstance.Initialise(car);
             }
         }
         
