@@ -67,6 +67,21 @@ namespace Gumball
             DontDestroyOnLoad(car.gameObject);
         }
         
+        public IEnumerator SwapCurrentCar(int carIndex, Action onComplete = null)
+        {
+            if (SavedCarIndex == carIndex)
+                yield break; //already selected
+                
+            Destroy(CurrentCar.gameObject);
+            
+            yield return SpawnCar(carIndex, 
+                CurrentCar.transform.position, 
+                CurrentCar.transform.rotation,
+                SetCurrentCar);
+            
+            onComplete?.Invoke();
+        }
+        
         public IEnumerator SpawnSavedCar(Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
         {
             yield return SpawnCar(SavedCarIndex, position, rotation, onComplete);

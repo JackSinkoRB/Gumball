@@ -38,7 +38,7 @@ namespace Gumball
         }
         #endregion
 
-        [SerializeField] private WorkshopCameraController cameraController;
+        [SerializeField] private WarehouseCameraController cameraController;
         
         private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
         
