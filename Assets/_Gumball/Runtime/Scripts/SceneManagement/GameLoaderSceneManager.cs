@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using MyBox;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -17,6 +18,8 @@ namespace Gumball
     /// </summary>
     public class GameLoaderSceneManager : MonoBehaviour
     {
+
+        public static GameLoaderSceneManager Instance;
 
         private enum Stage
         {
@@ -37,8 +40,8 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI debugLabel;
 
         private Stage currentStage;
-        private AsyncOperationHandle[] singletonScriptableHandles;
-        private AsyncOperationHandle<SceneInstance> mainSceneHandle;
+        private List<TrackedCoroutine> singletonScriptableHandles;
+        public AsyncOperationHandle<SceneInstance> mainSceneHandle;
         private float loadingDurationSeconds;
         private float asyncLoadingDurationSeconds;
 
@@ -52,6 +55,7 @@ namespace Gumball
         
         private IEnumerator Start()
         {
+            Instance = this;
             loadingDurationSeconds = Time.realtimeSinceStartup - BootSceneManager.BootDurationSeconds;
 #if ENABLE_LOGS
             Debug.Log($"{SceneManager.GameLoaderSceneAddress} loading complete in {TimeSpan.FromSeconds(loadingDurationSeconds).ToPrettyString(true)}");
@@ -63,15 +67,15 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Global logger loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
             stopwatch.Restart();
-            currentStage = Stage.Loading_save_data;
-            yield return DataManager.LoadAllAsync();
-            GlobalLoggers.LoadingLogger.Log($"Save data loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-
-            stopwatch.Restart();
             currentStage = Stage.Checking_for_new_version;
             yield return VersionUpdatedDetector.CheckIfNewVersionAsync();
             GlobalLoggers.LoadingLogger.Log($"Check for new version completed in {stopwatch.Elapsed.ToPrettyString(true)}");
             
+            stopwatch.Restart();
+            currentStage = Stage.Loading_save_data;
+            yield return DataManager.LoadAllAsync();
+            GlobalLoggers.LoadingLogger.Log($"Save data loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+
             stopwatch.Restart();
             currentStage = Stage.Loading_scriptable_data_objects;
             singletonScriptableHandles = LoadSingletonScriptables();
@@ -93,10 +97,11 @@ namespace Gumball
             //start loading unity services (async)
             TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
             
+            GlobalLoggers.LoadingLogger.Log($"Starting to load {SceneManager.MainSceneAddress} async...");
             stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
             mainSceneHandle = Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Additive, true);
-            yield return mainSceneHandle;
+            yield return new WaitUntil(() => mainSceneHandle.PercentComplete.Approximately(1));
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
             stopwatch.Restart();
@@ -135,23 +140,25 @@ namespace Gumball
             HasLoaded = true;
         }
 
-        private AsyncOperationHandle[] LoadSingletonScriptables()
+        private List<TrackedCoroutine> LoadSingletonScriptables()
         {
-            var handles = new[] {
-                //LOAD ALL SINGLETON SCRIPTABLES HERE
-                DecalManager.LoadInstanceAsync(),
-                AvatarManager.LoadInstanceAsync(),
-                WarehouseManager.LoadInstanceAsync(),
-                GlobalPaintPresets.LoadInstanceAsync(),
-                ExperienceManager.LoadInstanceAsync(),
-                IAPManager.LoadInstanceAsync(),
-                ChallengeTrackerManager.LoadInstanceAsync(),
-                ChallengeManager.LoadInstanceAsync(),
-                FuelManager.LoadInstanceAsync()
+            List<TrackedCoroutine> trackedCoroutines = new List<TrackedCoroutine>
+            {
+                new(DecalManager.LoadInstanceAsync()),
+                new(AvatarManager.LoadInstanceAsync()),
+                new(WarehouseManager.LoadInstanceAsync()),
+                new(GlobalPaintPresets.LoadInstanceAsync()),
+                new(ExperienceManager.LoadInstanceAsync()),
+                new(IAPManager.LoadInstanceAsync()),
+                new(ChallengeTrackerManager.LoadInstanceAsync()),
+                new(ChallengeManager.LoadInstanceAsync()),
+                new(FuelManager.LoadInstanceAsync()),
+                new(GlobalColourPalette.LoadInstanceAsync())
             };
-            return handles;
+            
+            return trackedCoroutines;
         }
-        
+
         private void Update()
         {
             UpdateDebugLabel();

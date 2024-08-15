@@ -58,8 +58,14 @@ namespace Gumball
         }
 
 #if UNITY_EDITOR
-        [ButtonMethod]
-        public void RebuildData()
+        private static readonly HashSet<string> runtimeChunksCreated = new();
+
+        public static void ClearRuntimeChunksCreatedTracking()
+        {
+            runtimeChunksCreated.Clear();
+        }
+        
+        public void RebuildData(bool clearRuntimeChunksCreatedOnComplete)
         {
             Chunk[] chunkInstances = new Chunk[chunkReferences.Length];
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -104,7 +110,6 @@ namespace Gumball
                 GlobalLoggers.ChunkLogger.Log($"Instantiate chunks = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
 
-                HashSet<string> runtimeChunksCreated = new HashSet<string>();
                 for (int index = 0; index < chunkReferences.Length; index++)
                 {
                     AssetReferenceGameObject chunkReference = chunkReferences[index];
@@ -178,10 +183,19 @@ namespace Gumball
                 //reopen the scene to discard changes
                 string currentScenePath = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
                 EditorSceneManager.OpenScene(currentScenePath);
+             
+                if (clearRuntimeChunksCreatedOnComplete)
+                    runtimeChunksCreated.Clear();
                 
                 GlobalLoggers.ChunkLogger.Log($"Destroying = {stopwatch.Elapsed.ToPrettyString(true)}");
                 stopwatch.Restart();
             }
+        }
+        
+        [ButtonMethod]
+        public void RebuildData()
+        {
+            RebuildData(true);
         }
 #endif
     }

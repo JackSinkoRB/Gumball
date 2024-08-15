@@ -201,8 +201,7 @@ namespace Gumball
             
             onFailZone?.Invoke(racer, zone);
             
-            if (racer.IsPlayerCar)
-                GlobalLoggers.GameSessionLogger.Log($"{racer.name} failed zone at {zone.Position}m doing {racer.Speed}kmh.");
+            GlobalLoggers.GameSessionLogger.Log($"{racer.name} failed zone at {zone.Position}m doing {racer.Speed}kmh.");
         }
 
 #if UNITY_EDITOR

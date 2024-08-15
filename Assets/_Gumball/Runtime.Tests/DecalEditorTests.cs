@@ -14,6 +14,8 @@ namespace Gumball.Runtime.Tests
     public class DecalEditorTests : IPrebuildSetup, IPostBuildCleanup
     {
 
+        private const int carIndexToUse = 0; //test with the XJ
+        
         private bool isInitialised;
 
         public void Setup()
@@ -59,17 +61,24 @@ namespace Gumball.Runtime.Tests
         {
             yield return DecalEditor.Instance.EndSession();
         }
-        
+
         private void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(0, 
-                Vector3.zero, 
-                Quaternion.Euler(Vector3.zero), 
-                    (car) =>
-                    {
-                        WarehouseManager.Instance.SetCurrentCar(car);
-                        isInitialised = true;
-                    }));
+            CoroutineHelper.Instance.StartCoroutine(Initialise());
+        }
+        
+        private IEnumerator Initialise()
+        {
+            //require the part managers to spawn the player car
+            yield return CorePartManager.Initialise();
+            yield return SubPartManager.Initialise();
+
+            yield return WarehouseManager.Instance.SpawnCar(carIndexToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
+                (carInstance) =>
+                {
+                    WarehouseManager.Instance.SetCurrentCar(carInstance);
+                    isInitialised = true;
+                });
         }
         
         [UnityTest]

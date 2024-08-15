@@ -12,6 +12,7 @@ namespace Gumball
         [SerializeField] private GameObject failed;
 
         private SpeedCameraZone zone;
+        private SpeedCameraSprintSession sessionSubscribedTo;
         
         private SpeedCameraSprintSession session => (SpeedCameraSprintSession)GameSessionManager.Instance.CurrentSession;
 
@@ -25,12 +26,14 @@ namespace Gumball
             
             session.onPassZone += OnPassZone;
             session.onFailZone += OnFailZone;
+
+            sessionSubscribedTo = session;
         }
 
         private void OnDisable()
         {
-            session.onPassZone -= OnPassZone;
-            session.onFailZone -= OnFailZone;
+            sessionSubscribedTo.onPassZone -= OnPassZone;
+            sessionSubscribedTo.onFailZone -= OnFailZone;
         }
 
         private void OnPassZone(AICar racer, SpeedCameraZone zone)

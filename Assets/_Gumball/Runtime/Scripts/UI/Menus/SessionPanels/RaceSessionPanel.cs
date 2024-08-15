@@ -23,6 +23,10 @@ namespace Gumball
         private void UpdatePositionLabel()
         {
             RaceGameSession currentSession = (RaceGameSession)GameSessionManager.Instance.CurrentSession;
+
+            if (!currentSession.InProgress)
+                return;
+            
             int currentRank = currentSession.GetRacePosition(WarehouseManager.Instance.CurrentCar);
             positionLabel.text = $"{currentRank} / {numberOfRacers}";
         }
