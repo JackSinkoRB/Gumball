@@ -60,11 +60,6 @@ namespace Gumball
         }
         
 #if UNITY_EDITOR
-        public void OnValidate()
-        {
-            CacheCarData();
-        }
-
         public void CacheCarData()
         {
             if (carPrefabReference.editorAsset == null)
@@ -75,8 +70,6 @@ namespace Gumball
                 return;
             
             cachedData.Cache(car);
-            
-            EditorUtility.SetDirty(WarehouseManager.Instance);
         }
 #endif
 

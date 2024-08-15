@@ -33,7 +33,7 @@ namespace Gumball
 #if UNITY_EDITOR
             foreach (WarehouseCarData carData in allCarData)
             {
-                carData.OnValidate();
+                carData.CacheCarData();
             }
 #endif
         }
