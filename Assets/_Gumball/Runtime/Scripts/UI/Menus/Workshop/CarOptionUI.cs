@@ -13,7 +13,11 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI nameLabel;
         [SerializeField] private Image icon;
         [SerializeField] private GameObject frame;
-
+        [SerializeField] private Image glow;
+        [SerializeField] private GlobalColourPalette.ColourCode glowCurrentCarColor;
+        [SerializeField] private GlobalColourPalette.ColourCode glowSelectedColor;
+        [SerializeField] private GlobalColourPalette.ColourCode glowDeselectedColor;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private WarehouseCarData carData;
         [SerializeField, ReadOnly] private int carIndex;
@@ -43,11 +47,16 @@ namespace Gumball
         public void OnSelect()
         {
             frame.SetActive(true);
+            
+            if (!IsCurrentCar)
+                glow.color = GlobalColourPalette.Instance.GetGlobalColor(glowSelectedColor);
         }
 
         public void OnDeselect()
         {
             frame.SetActive(false);
+            
+            glow.color = GlobalColourPalette.Instance.GetGlobalColor(IsCurrentCar ? glowCurrentCarColor : glowDeselectedColor);
         }
 
     }
