@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
 using Dreamteck.Splines;
 #if UNITY_EDITOR
@@ -11,7 +10,6 @@ using MyBox;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
-using Random = UnityEngine.Random;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
@@ -74,7 +72,10 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
-
+        [Tooltip("This is calculated from the performance settings and profile when a profile is applied at runtime.")]
+        [SerializeField, ReadOnly] private int performanceRating;
+        
+        public int PerformanceRating => performanceRating;
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
         public MinMaxFloat EngineRpmRange => new(performanceSettings.EngineRpmRangeMin.GetValue(performanceProfile), performanceSettings.EngineRpmRangeMax.GetValue(performanceProfile));
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
@@ -475,6 +476,8 @@ namespace Gumball
             
             //initialise torque curve
             UpdateTorqueCurve();
+
+            CalculatePerformanceRating();
         }
 
         public void UpdateTorqueCurve(float additionalTorque = 0)
@@ -2094,6 +2097,11 @@ namespace Gumball
                 isStuck = false;
             else if (!isStuck && shouldBeStuck)
                 isStuck = true;
+        }
+        
+        private void CalculatePerformanceRating()
+        {
+            performanceRating = 0;
         }
         
 #if UNITY_EDITOR

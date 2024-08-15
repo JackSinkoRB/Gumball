@@ -44,9 +44,9 @@ namespace Gumball.Runtime.Tests
         [Order(1)]
         public void NoNullCarsInCatalogue()
         {
-            foreach (AssetReferenceGameObject carAsset in WarehouseManager.Instance.AllCars)
+            foreach (WarehouseCarData carData in WarehouseManager.Instance.AllCarData)
             {
-                Assert.IsNotNull(carAsset, "Car catalogue cannot contain a null asset.");
+                Assert.IsNotNull(carData.CarPrefabReference, "Car catalogue cannot contain a null asset.");
             }
         }
         
@@ -54,9 +54,9 @@ namespace Gumball.Runtime.Tests
         [Order(2)]
         public void AllCarsHaveCarComponent()
         {
-            for (int index = 0; index < WarehouseManager.Instance.AllCars.Count; index++)
+            for (int index = 0; index < WarehouseManager.Instance.AllCarData.Count; index++)
             {
-                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCars[index];
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCarData[index].CarPrefabReference;
                 
                 AICar car = carAsset.editorAsset.GetComponent<AICar>();
                 Assert.IsNotNull(car, $"Asset at index {index} is missing the car component.");
@@ -71,9 +71,9 @@ namespace Gumball.Runtime.Tests
             Assert.IsNotNull(carTemplatePrefab);
             
             string carsThatArentUsingTemplate = "";
-            for (int index = 0; index < WarehouseManager.Instance.AllCars.Count; index++)
+            for (int index = 0; index < WarehouseManager.Instance.AllCarData.Count; index++)
             {
-                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCars[index];
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCarData[index].CarPrefabReference;
                 AICar car = carAsset.editorAsset.GetComponent<AICar>();
                 if (car == null)
                     continue;
@@ -94,9 +94,9 @@ namespace Gumball.Runtime.Tests
         public void AllCarsHaveCameraPositionsAssigned()
         {
             string carsMissingCameraPositions = "";
-            for (int index = 0; index < WarehouseManager.Instance.AllCars.Count; index++)
+            for (int index = 0; index < WarehouseManager.Instance.AllCarData.Count; index++)
             {
-                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCars[index];
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCarData[index].CarPrefabReference;
                 AICar car = carAsset.editorAsset.GetComponent<AICar>();
                 if (car == null)
                     continue;
@@ -116,9 +116,9 @@ namespace Gumball.Runtime.Tests
         public void AllCarsHaveSteeringWheelsAssigned()
         {
             string carsMissingSteeringWheelReferences = "";
-            for (int index = 0; index < WarehouseManager.Instance.AllCars.Count; index++)
+            for (int index = 0; index < WarehouseManager.Instance.AllCarData.Count; index++)
             {
-                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCars[index];
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCarData[index].CarPrefabReference;
                 AICar car = carAsset.editorAsset.GetComponent<AICar>();
                 if (car == null)
                     continue;
@@ -135,9 +135,9 @@ namespace Gumball.Runtime.Tests
         public void NoAvatarsExistInCars()
         {
             string carsWithAvatars = "";
-            for (int index = 0; index < WarehouseManager.Instance.AllCars.Count; index++)
+            for (int index = 0; index < WarehouseManager.Instance.AllCarData.Count; index++)
             {
-                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCars[index];
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCarData[index].CarPrefabReference;
                 AICar car = carAsset.editorAsset.GetComponent<AICar>();
                 if (car == null)
                     continue;

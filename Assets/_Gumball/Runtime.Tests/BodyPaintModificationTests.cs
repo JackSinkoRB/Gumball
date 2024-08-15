@@ -37,7 +37,7 @@ namespace Gumball.Runtime.Tests
             DecalEditor.IsRunningTests = true;
             DataManager.EnableTestProviders(true);
 
-            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WorkshopScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WarehouseScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadWorkshopScene.completed += OnSceneLoadComplete;
         }
 
