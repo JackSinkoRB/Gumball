@@ -13,6 +13,8 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI nameLabel;
         [SerializeField] private Image icon;
         [SerializeField] private GameObject frame;
+        [SerializeField] private TextMeshProUGUI performanceRatingLabel;
+        [Space(5)]
         [SerializeField] private Image glow;
         [SerializeField] private GlobalColourPalette.ColourCode glowCurrentCarColor;
         [SerializeField] private GlobalColourPalette.ColourCode glowSelectedColor;
@@ -33,6 +35,7 @@ namespace Gumball
             this.carIndex = carIndex;
             
             nameLabel.text = carData.DisplayName;
+            performanceRatingLabel.text = $"{PerformanceRatingCalculator.Calculate(carData.PerformanceSettings, new CarPerformanceProfile(carIndex))}";
             
             icon.sprite = carData.Icon;
             icon.gameObject.SetActive(icon.sprite != null);

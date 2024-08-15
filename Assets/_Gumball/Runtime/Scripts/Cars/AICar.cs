@@ -73,9 +73,14 @@ namespace Gumball
         [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
         [Tooltip("This is calculated from the performance settings and profile when a profile is applied at runtime.")]
-        [SerializeField, ReadOnly] private int performanceRating;
+        [SerializeField, ReadOnly] private int currentPerformanceRating;
+#if UNITY_EDITOR
+        [SerializeField, ReadOnly] private int performanceRatingWithMinProfile;
+        [SerializeField, ReadOnly] private int performanceRatingWithMaxProfile;
+#endif
         
-        public int PerformanceRating => performanceRating;
+        public CarPerformanceSettings PerformanceSettings => performanceSettings; 
+        public int CurrentPerformanceRating => currentPerformanceRating;
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
         public MinMaxFloat EngineRpmRange => new(performanceSettings.EngineRpmRangeMin.GetValue(performanceProfile), performanceSettings.EngineRpmRangeMax.GetValue(performanceProfile));
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
@@ -477,7 +482,7 @@ namespace Gumball
             //initialise torque curve
             UpdateTorqueCurve();
 
-            CalculatePerformanceRating();
+            currentPerformanceRating = PerformanceRatingCalculator.Calculate(performanceSettings, performanceProfile);
         }
 
         public void UpdateTorqueCurve(float additionalTorque = 0)
@@ -2098,12 +2103,7 @@ namespace Gumball
             else if (!isStuck && shouldBeStuck)
                 isStuck = true;
         }
-        
-        private void CalculatePerformanceRating()
-        {
-            performanceRating = 0;
-        }
-        
+
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
@@ -2112,6 +2112,14 @@ namespace Gumball
             Gizmos.DrawSphere(carCentreOfMassWorld, 0.5f);
         }
 #endif
+
+        private void OnValidate()
+        {
+#if UNITY_EDITOR
+            performanceRatingWithMinProfile = PerformanceRatingCalculator.Calculate(performanceSettings, new CarPerformanceProfile(0, 0, 0, 0));
+            performanceRatingWithMaxProfile = PerformanceRatingCalculator.Calculate(performanceSettings, new CarPerformanceProfile(1, 1, 1, 1));
+#endif
+        }
         
     }
 }

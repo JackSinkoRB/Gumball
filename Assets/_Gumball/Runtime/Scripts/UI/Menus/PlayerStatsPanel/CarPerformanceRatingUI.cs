@@ -34,7 +34,7 @@ namespace Gumball
                 return;
             }
 
-            ratingLabel.text = $"{WarehouseManager.Instance.CurrentCar.PerformanceRating}";
+            ratingLabel.text = $"{WarehouseManager.Instance.CurrentCar.CurrentPerformanceRating}";
             this.PerformAtEndOfFrame(ratingLabel.Resize);
         }
         
