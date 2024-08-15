@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using Random = UnityEngine.Random;
@@ -18,6 +19,7 @@ namespace Gumball
         [SerializeField] private float racingLineImprecisionMaxDistance = 3f;
         [SerializeField] private PositionAndRotation startingPosition;
         [SerializeField] private CarPerformanceProfile performanceProfile;
+        [SerializeField, ReadOnly] private int currentPerformanceRating;
 
         public AssetReferenceGameObject AssetReference => assetReference;
         public PositionAndRotation StartingPosition => startingPosition;
@@ -28,6 +30,14 @@ namespace Gumball
         {
             return Random.Range(-racingLineImprecisionMaxDistance, racingLineImprecisionMaxDistance);
         }
-        
+
+#if UNITY_EDITOR
+        public void OnValidate()
+        {
+            if (assetReference != null && assetReference.editorAsset != null && assetReference.editorAsset.GetComponent<AICar>() != null)
+                currentPerformanceRating = PerformanceRatingCalculator.Calculate(assetReference.editorAsset.GetComponent<AICar>().PerformanceSettings, performanceProfile);
+        }
+#endif
+
     }
 }

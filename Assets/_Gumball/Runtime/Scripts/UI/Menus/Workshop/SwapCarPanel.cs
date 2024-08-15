@@ -41,6 +41,9 @@ namespace Gumball
         
         public void SelectCarOption(CarOptionUI option)
         {
+            if (option == selectedOption)
+                return; //already selected
+            
             if (selectedOption != null)
                 selectedOption.OnDeselect();
             
