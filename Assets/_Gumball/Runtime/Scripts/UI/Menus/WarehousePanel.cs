@@ -24,6 +24,14 @@ namespace Gumball
             Hide();
             PanelManager.GetPanel<CustomiseWorkshopPanel>().Show();
         }
+        
+        public void OnClickBrowseButton()
+        {
+            Hide();
+            PanelManager.GetPanel<PlayerStatsPanel>().Hide();
+            
+            PanelManager.GetPanel<SwapCarPanel>().Show();
+        }
 
     }
 }

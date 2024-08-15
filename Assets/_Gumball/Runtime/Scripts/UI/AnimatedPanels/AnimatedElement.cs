@@ -43,6 +43,9 @@ public abstract class AnimatedElement
     {
         if (!doShowAnimation)
             return null;
+        
+        if (startHidden)
+            DoHideAnimation().Complete();
 
         Initialise();
             
