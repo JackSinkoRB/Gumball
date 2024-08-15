@@ -153,6 +153,9 @@ namespace Gumball
             
             TrackCorePartRewards();
             TrackSubPartRewards();
+
+            foreach (RacerSessionData data in racerData)
+                data.OnValidate();
         }
 
         [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]

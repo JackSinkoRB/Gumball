@@ -15,7 +15,7 @@ namespace Gumball
         public void OnClickBackButton()
         {
             Hide();
-            PanelManager.GetPanel<WorkshopSelectPanel>().Show();
+            PanelManager.GetPanel<WarehousePanel>().Show();
         }
 
         protected override void OnShow()

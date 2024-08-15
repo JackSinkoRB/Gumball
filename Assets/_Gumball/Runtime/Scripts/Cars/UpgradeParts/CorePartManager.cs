@@ -49,8 +49,8 @@ namespace Gumball
         {
             string saveKey = $"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}";
             
-            AICar car = WarehouseManager.Instance.GetCarInstance(carIndex);
-            CorePart defaultPart = car.GetDefaultPart(type);
+            WarehouseCarData carData = WarehouseManager.Instance.AllCarData[carIndex];
+            CorePart defaultPart = carData.GetDefaultPart(type);
             
             string partID = DataManager.Cars.Get(saveKey, defaultPart != null ? defaultPart.ID : null);
             return GetPartByID(partID);
@@ -148,8 +148,17 @@ namespace Gumball
             
             yield return AddressableUtils.LoadAssetsAsync(CorePartsAssetLabel, allParts, typeof(CorePart));
 
+            InitialiseSubPartSlots();
             GroupParts();
             CreateIDLookup();
+        }
+
+        private static void InitialiseSubPartSlots()
+        {
+            foreach (CorePart part in allParts)
+            {
+                part.InitialiseSubPartSlots();
+            }
         }
 
         private static void GroupParts()

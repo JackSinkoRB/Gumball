@@ -115,8 +115,6 @@ namespace Gumball
             }
 
             CarBelongsToIndex = carIndex;
-
-            InitialiseSubPartSlots();
         }
 
         public void RemoveFromCar()
@@ -153,7 +151,7 @@ namespace Gumball
             return subPartModifiers * performanceModifiers;
         }
 
-        private void InitialiseSubPartSlots()
+        public void InitialiseSubPartSlots()
         {
             if (subPartSlots == null)
                 return;

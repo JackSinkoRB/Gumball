@@ -54,7 +54,7 @@ namespace Gumball
         [SerializeField] private CarPerformanceSettingFloat nosFillRate = new(60, 30);
         [Tooltip("How much additional torque added to the car when NOS is activated.")]
         [SerializeField] private CarPerformanceSettingFloat nosTorqueAddition = new(1000f, 2000f);
-        
+
         public CarPerformanceSettingFloat EngineRpmRangeMin => engineRpmRangeMin;
         public CarPerformanceSettingFloat EngineRpmRangeMax => engineRpmRangeMax;
         public CarPerformanceSettingMinMaxFloat IdealRPMRangeForGearChanges => idealRPMRangeForGearChanges;
@@ -70,14 +70,38 @@ namespace Gumball
         public CarPerformanceSettingFloat NosTorqueAddition => nosTorqueAddition;
 
         private AnimationCurve torqueCurveCached;
+
+        public float GetPeakTorque(CarPerformanceProfile profile)
+        {
+            CalculateTorqueCurve(profile);
+
+            float maxValue = 0;
+            
+            foreach (Keyframe keyframe in torqueCurveCached.keys)
+            {
+                if (keyframe.value > maxValue)
+                    maxValue = keyframe.value;
+            }
+
+            return maxValue;
+        }
+        
+        public float GetStartingTorque(CarPerformanceProfile profile)
+        {
+            CalculateTorqueCurve(profile);
+            
+            return torqueCurveCached.keys[0].value;
+        }
         
         public AnimationCurve CalculateTorqueCurve(CarPerformanceProfile profile, float additionalTorque = 0)
         {
-            torqueCurveCached ??= new AnimationCurve(minTorqueCurve.keys);
+            if (torqueCurveCached == null || torqueCurveCached.keys.Length != minTorqueCurve.keys.Length)
+                torqueCurveCached = new AnimationCurve(minTorqueCurve.keys);
+            
             float additionalPeakTorqueValue = additionalPeakTorque.GetValue(profile);
             
             //reset the curve to default
-            for (int index = 0; index < torqueCurveCached.keys.Length; index++) //just the middle keys
+            for (int index = 0; index < torqueCurveCached.keys.Length; index++)
             {
                 Keyframe keyframe = torqueCurveCached.keys[index];
                 float originalValue = minTorqueCurve.keys[index].value;
@@ -110,6 +134,6 @@ namespace Gumball
 
             return torqueCurveCached;
         }
-        
+
     }
 }
