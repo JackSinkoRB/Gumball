@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -12,8 +13,8 @@ namespace Gumball
     [CreateAssetMenu(menuName = "Gumball/Singletons/Warehouse Manager")]
     public class WarehouseManager : SingletonScriptable<WarehouseManager>
     {
-        
-        [SerializeField] private List<AssetReferenceGameObject> allCars;
+
+        [SerializeField] private List<WarehouseCarData> allCarData = new();
 
         [SerializeField] private GenericDictionary<int, AICar> playerCarInstances = new();
 
@@ -21,12 +22,20 @@ namespace Gumball
         public event CarChangedDelegate onCurrentCarChanged;
 
         public AICar CurrentCar { get; private set; }
-        public List<AssetReferenceGameObject> AllCars => allCars;
+        public List<WarehouseCarData> AllCarData => allCarData;
         
         public int SavedCarIndex
         {
             get => DataManager.Warehouse.Get("CurrentCar.Index", 0);
             private set => DataManager.Warehouse.Set("CurrentCar.Index", value);
+        }
+
+        private void OnValidate()
+        {
+            foreach (WarehouseCarData carData in allCarData)
+            {
+                carData.OnValidate();
+            }
         }
 
         public AICar GetCarInstance(int carIndex)
@@ -67,7 +76,7 @@ namespace Gumball
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             
-            AssetReferenceGameObject assetReference = allCars[index];
+            AssetReferenceGameObject assetReference = allCarData[index].CarPrefabReference;
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
             yield return handle;
             
