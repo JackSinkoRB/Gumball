@@ -24,7 +24,8 @@ namespace Gumball
 
         public AnimationCurve GetValue(CarPerformanceProfile profile)
         {
-            resultCached ??= new AnimationCurve(min.keys);
+            if (resultCached == null || resultCached.keys.Length != min.keys.Length)
+                resultCached = new AnimationCurve(min.keys);
             
             float finalWeight = GetFinalWeight(profile);
             if (lastKnownFinalWeight.Approximately(finalWeight))

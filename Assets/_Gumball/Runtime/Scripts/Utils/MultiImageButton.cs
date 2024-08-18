@@ -13,7 +13,7 @@ namespace Gumball
 
         protected override void Start()
         {
-            targetGraphics = transform.GetComponentsInAllChildren<Graphic>();
+            FindTargetGraphics();
             
             base.Start();
         }
@@ -21,11 +21,20 @@ namespace Gumball
 #if UNITY_EDITOR
         protected override void OnValidate()
         {
-            targetGraphics = transform.GetComponentsInAllChildren<Graphic>();
-            
+            FindTargetGraphics();
+
             base.OnValidate();
         }
 #endif
+
+        private void FindTargetGraphics()
+        {
+            targetGraphics = transform.GetComponentsInAllChildren<Graphic>();
+            
+            Graphic ownGraphic = transform.GetComponent<Graphic>();
+            if (ownGraphic != null)
+                targetGraphics.Add(ownGraphic);
+        }
         
         protected override void DoStateTransition(SelectionState state, bool instant)
         {

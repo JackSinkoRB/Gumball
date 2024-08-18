@@ -38,6 +38,11 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
 
+      # Ensure Split Application Binary is enabled
+      - name: Ensure Split Application Binary enabled
+        run: |
+          sed -i 's/APKExpansionFiles: 0/APKExpansionFiles: 1/' ProjectSettings/ProjectSettings.asset
+
       # Build
       - uses: game-ci/unity-builder@v4
         id: buildStep
