@@ -27,6 +27,7 @@ namespace Gumball
         private void OnDisable()
         {
             PrimaryContactInput.onPress -= OnPress;
+            PrimaryContactInput.onDrag -= OnDragToRotate; //remove listener if disabled mid-press
             AvatarCosmeticSelector.onSelectCosmetic -= OnSelectCosmetic;
             OnRelease();
         }

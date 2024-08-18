@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
 using Dreamteck.Splines;
 #if UNITY_EDITOR
@@ -11,7 +10,6 @@ using MyBox;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
-using Random = UnityEngine.Random;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
@@ -74,7 +72,15 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
-
+        [Tooltip("This is calculated from the performance settings and profile when a profile is applied at runtime.")]
+        [SerializeField, ReadOnly] private int currentPerformanceRating;
+#if UNITY_EDITOR
+        [SerializeField, ReadOnly] private int performanceRatingWithMinProfile;
+        [SerializeField, ReadOnly] private int performanceRatingWithMaxProfile;
+#endif
+        
+        public CarPerformanceSettings PerformanceSettings => performanceSettings; 
+        public int CurrentPerformanceRating => currentPerformanceRating;
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
         public MinMaxFloat EngineRpmRange => new(performanceSettings.EngineRpmRangeMin.GetValue(performanceProfile), performanceSettings.EngineRpmRangeMax.GetValue(performanceProfile));
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
@@ -475,6 +481,8 @@ namespace Gumball
             
             //initialise torque curve
             UpdateTorqueCurve();
+
+            currentPerformanceRating = PerformanceRatingCalculator.Calculate(performanceSettings, performanceProfile);
         }
 
         public void UpdateTorqueCurve(float additionalTorque = 0)
@@ -615,7 +623,8 @@ namespace Gumball
 
         private void Update()
         {
-            CheckIfStuck();
+            if (!autoDrive)
+                CheckIfStuck();
         }
         
         private void FixedUpdate()
@@ -2062,7 +2071,7 @@ namespace Gumball
 
         private bool ShouldBeStuck()
         {
-            const float minSpeedForStuckKmh = 0.5f;
+            const float minSpeedForStuckKmh = 1f;
             if (speed > minSpeedForStuckKmh)
             {
                 timeAcceleratingSinceMovingSlowly = 0;
@@ -2072,7 +2081,7 @@ namespace Gumball
             if (IsAccelerating || IsReversing)
                 timeAcceleratingSinceMovingSlowly += Time.deltaTime;
             
-            const float timeAcceleratingWithNoMovementForReset = 1;
+            const float timeAcceleratingWithNoMovementForReset = 0.5f;
             if (timeAcceleratingSinceMovingSlowly > timeAcceleratingWithNoMovementForReset)
                 return true;
 
@@ -2094,7 +2103,7 @@ namespace Gumball
             else if (!isStuck && shouldBeStuck)
                 isStuck = true;
         }
-        
+
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
@@ -2103,6 +2112,14 @@ namespace Gumball
             Gizmos.DrawSphere(carCentreOfMassWorld, 0.5f);
         }
 #endif
+
+        private void OnValidate()
+        {
+#if UNITY_EDITOR
+            performanceRatingWithMinProfile = PerformanceRatingCalculator.Calculate(performanceSettings, new CarPerformanceProfile(0, 0, 0, 0));
+            performanceRatingWithMaxProfile = PerformanceRatingCalculator.Calculate(performanceSettings, new CarPerformanceProfile(1, 1, 1, 1));
+#endif
+        }
         
     }
 }

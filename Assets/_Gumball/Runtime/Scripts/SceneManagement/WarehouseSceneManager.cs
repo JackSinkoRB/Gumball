@@ -6,6 +6,7 @@ using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -27,51 +28,55 @@ namespace Gumball
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.WarehouseSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
+            WarehouseManager.Instance.CurrentCar.SetGrounded();
+
+            Instance.SetupCamera();
+            
             AvatarManager.Instance.HideAvatars(true);
 
-            yield return Instance.PopulateSlots();
-            Instance.SelectSlot(0); //select the first slot
-            
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
         #endregion
 
-        public event Action<WarehouseCarSlot> onSelectSlot;
+        [SerializeField] private WarehouseCameraController cameraController;
         
-        [SerializeField] private WarehouseCarSlot[] carSlots;
-        [SerializeField, ReadOnly] private WarehouseCarSlot currentSelectedSlot;
-
-        public WarehouseCarSlot[] CarSlots => carSlots;
-
-        public void SelectSlot(WarehouseCarSlot slot)
+        private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
+        
+        public void ExitWarehouseScene()
         {
-            currentSelectedSlot = slot;
-
-            slot.OnSelected();
-            onSelectSlot?.Invoke(slot);
+            SaveRideHeight();
+            MainSceneManager.LoadMainScene();
         }
         
-        public void SelectSlot(int slotIndex) => SelectSlot(carSlots[slotIndex]);
-
-        public IEnumerator PopulateSlots()
+        /// <summary>
+        /// Calculates the distance to the ground and saves it to file. 
+        /// </summary>
+        private void SaveRideHeight()
         {
-            int index = 0;
-            HashSet<TrackedCoroutine> slotHandles = new HashSet<TrackedCoroutine>();
-            foreach (WarehouseCarSlot slot in carSlots)
-            {
-                if (index >= WarehouseManager.Instance.AllCars.Count)
-                    break; //not enough cars
+            AICar currentCar = WarehouseManager.Instance.CurrentCar;
+            int numberOfHitsDown = Physics.RaycastNonAlloc(currentCar.transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Ground));
 
-                if (index == WarehouseManager.Instance.CurrentCar.CarIndex)
-                    slot.PopulateWithCar(WarehouseManager.Instance.CurrentCar); //can reuse the car
-                else
-                    slotHandles.Add(new TrackedCoroutine(slot.PopulateWithCar(index))); //spawn new car
-                
-                index++;
+            if (numberOfHitsDown == 0)
+            {
+                Debug.LogWarning($"Could not save ride height for {currentCar.name} because there is no ground above or below.");
+                return;
             }
 
-            yield return new WaitUntil(slotHandles.AreAllComplete);
+            Vector3 offset = currentCar.transform.position - groundedHitsCached[0].point;
+            float rideHeight = offset.y;
+            
+            DataManager.Cars.Set($"{currentCar.SaveKey}.RideHeight", rideHeight);
+            
+            GlobalLoggers.AICarLogger.Log($"Saved ride height for {currentCar.SaveKey} to {rideHeight}");
         }
         
+        private void SetupCamera()
+        {
+            if (WarehouseManager.Instance.CurrentCar != null)
+                cameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform, cameraController.DefaultTargetOffset);
+            
+            cameraController.SetInitialPosition();
+        }
+
     }
 }

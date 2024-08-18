@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -12,16 +13,14 @@ namespace Gumball
     [CreateAssetMenu(menuName = "Gumball/Singletons/Warehouse Manager")]
     public class WarehouseManager : SingletonScriptable<WarehouseManager>
     {
-        
-        [SerializeField] private List<AssetReferenceGameObject> allCars;
 
-        [SerializeField] private GenericDictionary<int, AICar> playerCarInstances = new();
+        [SerializeField] private List<WarehouseCarData> allCarData = new();
 
         public delegate void CarChangedDelegate(AICar newCar);
         public event CarChangedDelegate onCurrentCarChanged;
 
         public AICar CurrentCar { get; private set; }
-        public List<AssetReferenceGameObject> AllCars => allCars;
+        public List<WarehouseCarData> AllCarData => allCarData;
         
         public int SavedCarIndex
         {
@@ -29,15 +28,14 @@ namespace Gumball
             private set => DataManager.Warehouse.Set("CurrentCar.Index", value);
         }
 
-        public AICar GetCarInstance(int carIndex)
+        private void OnValidate()
         {
-            if (!playerCarInstances.ContainsKey(carIndex) || playerCarInstances[carIndex] == null)
+#if UNITY_EDITOR
+            foreach (WarehouseCarData carData in allCarData)
             {
-                Debug.LogError($"There is no active car instance for car index {carIndex}.");
-                return null;
+                carData.CacheCarData();
             }
-            
-            return playerCarInstances[carIndex];
+#endif
         }
         
         public void SetCurrentCar(AICar car)
@@ -58,6 +56,21 @@ namespace Gumball
             DontDestroyOnLoad(car.gameObject);
         }
         
+        public IEnumerator SwapCurrentCar(int carIndex, Action onComplete = null)
+        {
+            if (SavedCarIndex == carIndex)
+                yield break; //already selected
+                
+            Destroy(CurrentCar.gameObject);
+            
+            yield return SpawnCar(carIndex, 
+                CurrentCar.transform.position, 
+                CurrentCar.transform.rotation,
+                SetCurrentCar);
+            
+            onComplete?.Invoke();
+        }
+        
         public IEnumerator SpawnSavedCar(Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
         {
             yield return SpawnCar(SavedCarIndex, position, rotation, onComplete);
@@ -67,14 +80,12 @@ namespace Gumball
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             
-            AssetReferenceGameObject assetReference = allCars[index];
+            AssetReferenceGameObject assetReference = allCarData[index].CarPrefabReference;
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
             yield return handle;
             
             AICar car = Instantiate(handle.Result, position, rotation).GetComponent<AICar>();
             car.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
-            
-            playerCarInstances[index] = car;
             
             car.InitialiseAsPlayer(index);
             car.SetGrounded();

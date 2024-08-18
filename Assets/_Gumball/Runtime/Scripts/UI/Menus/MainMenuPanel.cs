@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,26 +13,22 @@ namespace Gumball
             PanelManager.GetPanel<ChallengesPanel>().Show();
         }
         
+        [Obsolete("move to garage")]
         public void LoadDecalEditor()
         {
             DecalEditor.LoadEditor();
         }
 
-        public void LoadAvatarEditor()
+        public void OnClickWardrobeButton()
         {
             AvatarEditor.LoadEditor();
         }
 
-        public void LoadWarehouse()
+        public void OnClickGarageButton()
         {
             WarehouseSceneManager.LoadWarehouse();
         }
 
-        public void LoadWorkshop()
-        {
-            WorkshopSceneManager.LoadWorkshop();
-        }
-        
         public void OnClickStoreButton()
         {
             PanelManager.GetPanel<StorePanel>().Show();

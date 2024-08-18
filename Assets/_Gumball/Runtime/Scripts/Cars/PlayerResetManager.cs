@@ -18,12 +18,11 @@ namespace Gumball
         [SerializeField] private Ease fadeEaseIn = Ease.InOutSine;
         [SerializeField] private Ease fadeEaseOut = Ease.InOutSine;
         
-        [Header("Reset button")]
-        [SerializeField] private Button resetButton;
-        
         private bool isResetting;
         private Sequence fadeTween;
 
+        private DrivingResetButtonPanel resetButtonPanel => PanelManager.GetPanel<DrivingResetButtonPanel>();
+        
         protected override void Initialise()
         {
             base.Initialise();
@@ -39,8 +38,7 @@ namespace Gumball
                 return;
             
             CheckIfPlayerIsTooFarFromRoad();
-
-            resetButton.gameObject.SetActive(WarehouseManager.Instance.CurrentCar.IsStuck);
+            CheckToShowResetButton();
         }
 
         public void ResetToNearestRandomLane()
@@ -63,7 +61,22 @@ namespace Gumball
                     fadeObject.gameObject.SetActive(false);
                 });
         }
-
+        
+        private void CheckToShowResetButton()
+        {
+            if (WarehouseManager.Instance.CurrentCar.IsStuck && !resetButtonPanel.IsShowing)
+            {
+                resetButtonPanel.Show();
+                return;
+            }
+            
+            if (!WarehouseManager.Instance.CurrentCar.IsStuck && resetButtonPanel.IsShowing)
+            {
+                resetButtonPanel.Hide();
+                return;
+            }
+        }
+        
         /// <summary>
         /// Gets the nearest spline sample and choses a random lane offset position.
         /// </summary>

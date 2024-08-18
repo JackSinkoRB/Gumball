@@ -36,7 +36,7 @@ namespace Gumball.Runtime.Tests
             DataManager.EnableTestProviders(true);
             DataManager.RemoveAllData();
 
-            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WorkshopScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WarehouseScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadWorkshopScene.completed += OnSceneLoadComplete;
         }
 
