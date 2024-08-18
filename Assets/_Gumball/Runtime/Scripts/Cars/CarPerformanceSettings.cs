@@ -89,6 +89,9 @@ namespace Gumball
         public float GetStartingTorque(CarPerformanceProfile profile)
         {
             CalculateTorqueCurve(profile);
+
+            if (torqueCurveCached.keys.Length == 0)
+                return 0;
             
             return torqueCurveCached.keys[0].value;
         }
