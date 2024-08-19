@@ -1,19 +1,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
 {
     public class UpgradeWorkshopPanel : AnimatedPanel
     {
-
+        
         [Header("Sub part menus")]
-        [SerializeField] private SubPartsWorkshopSubMenu engineSubPartMenu;
-        [SerializeField] private SubPartsWorkshopSubMenu wheelsSubPartMenu;
-        [SerializeField] private SubPartsWorkshopSubMenu drivetrainSubPartMenu;
+        [SerializeField] private ModifyWorkshopSubMenu modifySubMenu;
 
-        private SubPartsWorkshopSubMenu currentSubPartMenu;
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private WorkshopSubMenu currentSubMenu;
+
+        public ModifyWorkshopSubMenu ModifySubMenu => modifySubMenu;
         
         protected override void OnShow()
         {
@@ -30,43 +32,23 @@ namespace Gumball
 
         public void OnClickCancelButton()
         {
-            if (currentSubPartMenu != null)
-                currentSubPartMenu.Hide();
+            if (currentSubMenu != null)
+                currentSubMenu.Hide();
         }
         
-        public void OpenSubMenu(SubPartsWorkshopSubMenu subMenu)
+        public void OpenSubMenu(WorkshopSubMenu subMenu)
         {
             if (subMenu != null && subMenu.IsShowing)
                 return; //already open
 
-            currentSubPartMenu = subMenu;
+            currentSubMenu = subMenu;
             
             //hide all other menus
-            engineSubPartMenu.Hide();
-            wheelsSubPartMenu.Hide();
-            drivetrainSubPartMenu.Hide();
+            modifySubMenu.Hide();
             
             //just show this menu
             if (subMenu != null)
                 subMenu.Show();
-        }
-
-        public void OpenSubMenu(CorePart.PartType type)
-        {
-            switch (type)
-            {
-                case CorePart.PartType.ENGINE:
-                    OpenSubMenu(engineSubPartMenu);
-                    break;
-                case CorePart.PartType.WHEELS:
-                    OpenSubMenu(wheelsSubPartMenu);
-                    break;
-                case CorePart.PartType.DRIVETRAIN:
-                    OpenSubMenu(drivetrainSubPartMenu);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
 
     }

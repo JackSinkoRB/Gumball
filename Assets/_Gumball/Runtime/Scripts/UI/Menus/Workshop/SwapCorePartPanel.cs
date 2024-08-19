@@ -61,7 +61,7 @@ namespace Gumball
             if (isStockPart)
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(null);
             else
-                PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(partType);
+                PanelManager.GetPanel<UpgradeWorkshopPanel>().ModifySubMenu.OpenSubMenu(partType);
         }
 
         private ScrollItem CreateScrollItem(CorePart.PartType type, CorePart part)
