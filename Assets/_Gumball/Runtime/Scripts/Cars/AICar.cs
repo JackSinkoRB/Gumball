@@ -74,8 +74,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
         [Tooltip("This is calculated at runtime only, using the upgrade data.")]
         [SerializeField, ReadOnly] private PerformanceRatingCalculator currentPerformanceRating;
-        [Space(5)]
 #if UNITY_EDITOR
+        [Space(5)]
         [SerializeField, ReadOnly] private PerformanceRatingCalculator performanceRatingWithMinProfile;
         [SerializeField, ReadOnly] private PerformanceRatingCalculator performanceRatingWithMaxProfile;
 #endif
