@@ -1,623 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1958394408713327278
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1961751066201008732}
-  - component: {fileID: 1807999483306295581}
-  - component: {fileID: 4265109705167609565}
-  - component: {fileID: 5426185443309259188}
-  - component: {fileID: 4936016413967907638}
-  m_Layer: 10
-  m_Name: Road_Edge_Blend
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1961751066201008732
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1958394408713327278}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3484799456111798066}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &1807999483306295581
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1958394408713327278}
-  m_Mesh: {fileID: 0}
---- !u!23 &4265109705167609565
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1958394408713327278}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: cd326181810326c4994b1391571d39d6, type: 2}
-  - {fileID: 2100000, guid: 0a26d9fc1e4d35d4fad55239c6d5ea75, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &5426185443309259188
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1958394408713327278}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8e405fbab136934590641eb781310b4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  updateMethod: 0
-  _spline: {fileID: 548465593941109952}
-  _autoUpdate: 1
-  _rotationModifier:
-    blend: 1
-    useClippedPercent: 0
-    keys: []
-  _offsetModifier:
-    blend: 1
-    useClippedPercent: 0
-    keys: []
-  _colorModifier:
-    blend: 1
-    useClippedPercent: 0
-    keys: []
-  _sizeModifier:
-    blend: 1
-    useClippedPercent: 0
-    keys: []
-  _clipFromSample:
-    position: {x: 0, y: 0, z: 0}
-    up: {x: 0, y: 1, z: 0}
-    forward: {x: 0, y: 0, z: 1}
-    color: {r: 1, g: 1, b: 1, a: 1}
-    size: 1
-    percent: 0
-  _clipToSample:
-    position: {x: 0, y: 0, z: 100}
-    up: {x: 0, y: 1, z: 0}
-    forward: {x: 0, y: 0, z: 1}
-    color: {r: 1, g: 1, b: 1, a: 1}
-    size: 1
-    percent: 1
-  _loopSamples: 0
-  _clipFrom: 0
-  _clipTo: 1
-  animClipFrom: 0
-  animClipTo: 1
-  multithreaded: 0
-  buildOnAwake: 1
-  buildOnEnable: 0
-  _baked: 0
-  _markDynamic: 1
-  _size: 1
-  _color: {r: 1, g: 1, b: 1, a: 1}
-  _offset: {x: 0, y: 0, z: 0}
-  _normalMethod: 1
-  _calculateTangents: 1
-  _useSplineSize: 1
-  _useSplineColor: 1
-  _rotation: 0
-  _flipFaces: 0
-  _doubleSided: 0
-  _uvMode: 0
-  _uvScale: {x: 1, y: 1}
-  _uvOffset: {x: 0, y: 0}
-  _uvRotation: 0
-  _meshIndexFormat: 0
-  _bakedMesh: {fileID: 0}
-  colliderUpdateRate: 0.2
-  _channels:
-  - name: Dirt_Edge_Inside
-    _iterationSeed: 0
-    _offsetSeed: 0
-    _rotationSeed: 0
-    _scaleSeed: 0
-    owner: {fileID: 5426185443309259188}
-    meshes:
-    - vertices:
-      - {x: -0.21373835, y: -0.013885106, z: 1}
-      - {x: 0.21373844, y: -0.013885175, z: 1}
-      - {x: 0.2137384, y: -0.013885175, z: -0.000000009342802}
-      - {x: -0.2137384, y: -0.013885106, z: 0.000000009342802}
-      - {x: -0.21373844, y: -0.013885106, z: -1}
-      - {x: 0.21373835, y: -0.013885175, z: -1}
-      normals:
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      tangents:
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      colors:
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      uv:
-      - {x: 0.000034233075, y: 0.000000014901161}
-      - {x: 0.11724342, y: -0.000000014901161}
-      - {x: 0.11724344, y: 0.49999994}
-      - {x: 0.000034261015, y: 0.5}
-      - {x: 0.00003428895, y: 1}
-      - {x: 0.11724347, y: 0.99999994}
-      uv2: []
-      uv3: []
-      uv4: []
-      triangles: 000000000100000002000000000000000200000003000000020000000400000003000000020000000500000004000000
-      subMeshes:
-      - triangles: 000000000100000002000000000000000200000003000000020000000400000003000000020000000500000004000000
-      bounds:
-        center: {x: 0, y: -0.0069425874, z: 0}
-        extents: {x: 0.21373844, y: 0.0069425874, z: 1}
-        max: {x: 0.21373844, y: 0, z: 1}
-        min: {x: -0.21373844, y: -0.013885175, z: -1}
-        size: {x: 0.42747688, y: 0.013885175, z: 2}
-      vertexGroups:
-      - value: 1
-        percent: 1
-        ids: 0000000001000000
-      - value: 0.000000009342802
-        percent: 0.500000004671401
-        ids: 03000000
-      - value: -0.000000009342802
-        percent: 0.49999999532859896
-        ids: 02000000
-      - value: -1
-        percent: 0
-        ids: 0400000005000000
-      _mesh: {fileID: -4560169822949658252, guid: 47b1444e3f0c642468ab5fad5406bac4,
-        type: 3}
-      _rotation: {x: 0, y: 0, z: 0}
-      _offset: {x: 0, y: 0, z: 0}
-      _scale: {x: 1, y: 1, z: 1}
-      _uvScale: {x: 1, y: 1}
-      _uvOffset: {x: 0, y: 0}
-      _uvRotation: 0
-      _mirror: 0
-      _spacing:
-        front: 0
-        back: 0
-      _vertexGroupingMargin: 0
-      _removeInnerFaces: 0
-      _flipFaces: 0
-      _doubleSided: 0
-    _clipFrom: 0
-    _clipTo: 1
-    _randomOrder: 0
-    _overrideUVs: 0
-    _uvScale: {x: 1, y: 1}
-    _uvOffset: {x: 0, y: 0}
-    _overrideNormal: 0
-    _customNormal: {x: 0, y: 1, z: 0}
-    _type: 0
-    _count: 8
-    _autoCount: 0
-    _spacing: 0
-    _randomRotation: 0
-    _minRotation: {x: 0, y: 0, z: 0}
-    _maxRotation: {x: 0, y: 0, z: 0}
-    _randomOffset: 0
-    _minOffset: {x: -1.84, y: 0.04}
-    _maxOffset: {x: 0, y: 0}
-    _randomScale: 0
-    _uniformRandomScale: 0
-    _minScale: {x: 3.13, y: 1, z: 1}
-    _maxScale: {x: 1, y: 1, z: 1}
-    _overrideMaterialID: 1
-    _targetMaterialID: 1
-    _scaleModifier:
-      blend: 1
-      useClippedPercent: 0
-      keys: []
-  - name: Dirt_Edge_Inside
-    _iterationSeed: 0
-    _offsetSeed: 0
-    _rotationSeed: 0
-    _scaleSeed: 0
-    owner: {fileID: 5426185443309259188}
-    meshes:
-    - vertices:
-      - {x: -0.21373835, y: -0.013885106, z: 1}
-      - {x: 0.21373844, y: -0.013885175, z: 1}
-      - {x: 0.2137384, y: -0.013885175, z: -0.000000009342802}
-      - {x: -0.2137384, y: -0.013885106, z: 0.000000009342802}
-      - {x: -0.21373844, y: -0.013885106, z: -1}
-      - {x: 0.21373835, y: -0.013885175, z: -1}
-      normals:
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      tangents:
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      colors:
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      uv:
-      - {x: 0.000034233075, y: 0.000000014901161}
-      - {x: 0.11724342, y: -0.000000014901161}
-      - {x: 0.11724344, y: 0.49999994}
-      - {x: 0.000034261015, y: 0.5}
-      - {x: 0.00003428895, y: 1}
-      - {x: 0.11724347, y: 0.99999994}
-      uv2: []
-      uv3: []
-      uv4: []
-      triangles: 000000000100000002000000000000000200000003000000020000000400000003000000020000000500000004000000
-      subMeshes:
-      - triangles: 000000000100000002000000000000000200000003000000020000000400000003000000020000000500000004000000
-      bounds:
-        center: {x: 0, y: -0.0069425874, z: 0}
-        extents: {x: 0.21373844, y: 0.0069425874, z: 1}
-        max: {x: 0.21373844, y: 0, z: 1}
-        min: {x: -0.21373844, y: -0.013885175, z: -1}
-        size: {x: 0.42747688, y: 0.013885175, z: 2}
-      vertexGroups:
-      - value: 1
-        percent: 1
-        ids: 0000000001000000
-      - value: 0.000000009342802
-        percent: 0.500000004671401
-        ids: 03000000
-      - value: -0.000000009342802
-        percent: 0.49999999532859896
-        ids: 02000000
-      - value: -1
-        percent: 0
-        ids: 0400000005000000
-      _mesh: {fileID: -4560169822949658252, guid: 47b1444e3f0c642468ab5fad5406bac4,
-        type: 3}
-      _rotation: {x: 0, y: 0, z: 0}
-      _offset: {x: 0, y: 0, z: 0}
-      _scale: {x: 1, y: 1, z: 1}
-      _uvScale: {x: 1, y: 1}
-      _uvOffset: {x: 0, y: 0}
-      _uvRotation: 0
-      _mirror: 0
-      _spacing:
-        front: 0
-        back: 0
-      _vertexGroupingMargin: 0
-      _removeInnerFaces: 0
-      _flipFaces: 0
-      _doubleSided: 0
-    _clipFrom: 0
-    _clipTo: 1
-    _randomOrder: 0
-    _overrideUVs: 0
-    _uvScale: {x: 1, y: 1}
-    _uvOffset: {x: 0, y: 0}
-    _overrideNormal: 0
-    _customNormal: {x: 0, y: 1, z: 0}
-    _type: 0
-    _count: 12
-    _autoCount: 0
-    _spacing: 0
-    _randomRotation: 0
-    _minRotation: {x: 0, y: 0, z: 0}
-    _maxRotation: {x: 0, y: 0, z: 0}
-    _randomOffset: 0
-    _minOffset: {x: 1.84, y: 0.04}
-    _maxOffset: {x: 0, y: 0}
-    _randomScale: 0
-    _uniformRandomScale: 0
-    _minScale: {x: 2.27, y: 1, z: 1}
-    _maxScale: {x: 1, y: 1, z: 1}
-    _overrideMaterialID: 1
-    _targetMaterialID: 1
-    _scaleModifier:
-      blend: 1
-      useClippedPercent: 0
-      keys: []
-  - name: Dirt_Edge_Outside
-    _iterationSeed: 0
-    _offsetSeed: 0
-    _rotationSeed: 0
-    _scaleSeed: 0
-    owner: {fileID: 5426185443309259188}
-    meshes:
-    - vertices:
-      - {x: -0.21373835, y: -0.013885106, z: 1}
-      - {x: 0.21373844, y: -0.013885175, z: 1}
-      - {x: 0.2137384, y: -0.013885175, z: -0.000000009342802}
-      - {x: -0.2137384, y: -0.013885106, z: 0.000000009342802}
-      - {x: -0.21373844, y: -0.013885106, z: -1}
-      - {x: 0.21373835, y: -0.013885175, z: -1}
-      normals:
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      tangents:
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      colors:
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      uv:
-      - {x: 0.000034233075, y: 0.000000014901161}
-      - {x: 0.11724342, y: -0.000000014901161}
-      - {x: 0.11724344, y: 0.49999994}
-      - {x: 0.000034261015, y: 0.5}
-      - {x: 0.00003428895, y: 1}
-      - {x: 0.11724347, y: 0.99999994}
-      uv2: []
-      uv3: []
-      uv4: []
-      triangles: 000000000100000002000000000000000200000003000000020000000400000003000000020000000500000004000000
-      subMeshes:
-      - triangles: 000000000100000002000000000000000200000003000000020000000400000003000000020000000500000004000000
-      bounds:
-        center: {x: 0, y: -0.0069425874, z: 0}
-        extents: {x: 0.21373844, y: 0.0069425874, z: 1}
-        max: {x: 0.21373844, y: 0, z: 1}
-        min: {x: -0.21373844, y: -0.013885175, z: -1}
-        size: {x: 0.42747688, y: 0.013885175, z: 2}
-      vertexGroups:
-      - value: 1
-        percent: 1
-        ids: 0000000001000000
-      - value: 0.000000009342802
-        percent: 0.500000004671401
-        ids: 03000000
-      - value: -0.000000009342802
-        percent: 0.49999999532859896
-        ids: 02000000
-      - value: -1
-        percent: 0
-        ids: 0400000005000000
-      _mesh: {fileID: -4560169822949658252, guid: 47b1444e3f0c642468ab5fad5406bac4,
-        type: 3}
-      _rotation: {x: 0, y: 0, z: 0}
-      _offset: {x: 0, y: 0, z: 0}
-      _scale: {x: 1, y: 1, z: 1}
-      _uvScale: {x: 1, y: 1}
-      _uvOffset: {x: 0, y: 0}
-      _uvRotation: 0
-      _mirror: 0
-      _spacing:
-        front: 0
-        back: 0
-      _vertexGroupingMargin: 0
-      _removeInnerFaces: 0
-      _flipFaces: 0
-      _doubleSided: 0
-    _clipFrom: 0
-    _clipTo: 1
-    _randomOrder: 0
-    _overrideUVs: 0
-    _uvScale: {x: 1, y: 1}
-    _uvOffset: {x: 0, y: 0}
-    _overrideNormal: 0
-    _customNormal: {x: 0, y: 1, z: 0}
-    _type: 0
-    _count: 10
-    _autoCount: 0
-    _spacing: 0
-    _randomRotation: 0
-    _minRotation: {x: 0, y: 0, z: 0}
-    _maxRotation: {x: 0, y: 0, z: 0}
-    _randomOffset: 0
-    _minOffset: {x: -24.3, y: 0.04}
-    _maxOffset: {x: 0, y: 0}
-    _randomScale: 0
-    _uniformRandomScale: 0
-    _minScale: {x: 2.27, y: 1, z: 1}
-    _maxScale: {x: 1, y: 1, z: 1}
-    _overrideMaterialID: 0
-    _targetMaterialID: 1
-    _scaleModifier:
-      blend: 1
-      useClippedPercent: 0
-      keys: []
-  - name: Dirt_Edge_Outside
-    _iterationSeed: 0
-    _offsetSeed: 0
-    _rotationSeed: 0
-    _scaleSeed: 0
-    owner: {fileID: 5426185443309259188}
-    meshes:
-    - vertices:
-      - {x: -0.21373835, y: -0.013885106, z: 1}
-      - {x: 0.21373844, y: -0.013885175, z: 1}
-      - {x: 0.2137384, y: -0.013885175, z: -0.000000009342802}
-      - {x: -0.2137384, y: -0.013885106, z: 0.000000009342802}
-      - {x: -0.21373844, y: -0.013885106, z: -1}
-      - {x: 0.21373835, y: -0.013885175, z: -1}
-      normals:
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      - {x: 0, y: 1, z: 0}
-      tangents:
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      - {x: 1, y: 0, z: 0, w: 0}
-      colors:
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      - {r: 1, g: 1, b: 1, a: 1}
-      uv:
-      - {x: 0.000034233075, y: 0.000000014901161}
-      - {x: 0.11724342, y: -0.000000014901161}
-      - {x: 0.11724344, y: 0.49999994}
-      - {x: 0.000034261015, y: 0.5}
-      - {x: 0.00003428895, y: 1}
-      - {x: 0.11724347, y: 0.99999994}
-      uv2: []
-      uv3: []
-      uv4: []
-      triangles: 000000000100000002000000000000000200000003000000020000000400000003000000020000000500000004000000
-      subMeshes:
-      - triangles: 000000000100000002000000000000000200000003000000020000000400000003000000020000000500000004000000
-      bounds:
-        center: {x: 0, y: -0.0069425874, z: 0}
-        extents: {x: 0.21373844, y: 0.0069425874, z: 1}
-        max: {x: 0.21373844, y: 0, z: 1}
-        min: {x: -0.21373844, y: -0.013885175, z: -1}
-        size: {x: 0.42747688, y: 0.013885175, z: 2}
-      vertexGroups:
-      - value: 1
-        percent: 1
-        ids: 0000000001000000
-      - value: 0.000000009342802
-        percent: 0.500000004671401
-        ids: 03000000
-      - value: -0.000000009342802
-        percent: 0.49999999532859896
-        ids: 02000000
-      - value: -1
-        percent: 0
-        ids: 0400000005000000
-      _mesh: {fileID: -4560169822949658252, guid: 47b1444e3f0c642468ab5fad5406bac4,
-        type: 3}
-      _rotation: {x: 0, y: 0, z: 0}
-      _offset: {x: 0, y: 0, z: 0}
-      _scale: {x: 1, y: 1, z: 1}
-      _uvScale: {x: 1, y: 1}
-      _uvOffset: {x: 0, y: 0}
-      _uvRotation: 0
-      _mirror: 0
-      _spacing:
-        front: 0
-        back: 0
-      _vertexGroupingMargin: 0
-      _removeInnerFaces: 0
-      _flipFaces: 0
-      _doubleSided: 0
-    _clipFrom: 0
-    _clipTo: 1
-    _randomOrder: 0
-    _overrideUVs: 0
-    _uvScale: {x: 1, y: 1}
-    _uvOffset: {x: 0, y: 0}
-    _overrideNormal: 0
-    _customNormal: {x: 0, y: 1, z: 0}
-    _type: 0
-    _count: 10
-    _autoCount: 0
-    _spacing: 0
-    _randomRotation: 0
-    _minRotation: {x: 0, y: 0, z: 0}
-    _maxRotation: {x: 0, y: 0, z: 0}
-    _randomOffset: 0
-    _minOffset: {x: 24.3, y: 0.04}
-    _maxOffset: {x: 0, y: 0}
-    _randomScale: 0
-    _uniformRandomScale: 0
-    _minScale: {x: 2.27, y: 1, z: 1}
-    _maxScale: {x: 1, y: 1, z: 1}
-    _overrideMaterialID: 1
-    _targetMaterialID: 0
-    _scaleModifier:
-      blend: 1
-      useClippedPercent: 0
-      keys: []
---- !u!114 &4936016413967907638
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1958394408713327278}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c5641bbc11a427a46bf4e3278bd3dd9e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  perSceneUniqueness: 0
-  uniqueID: bc0bdb25-3496-4d50-be2b-528903462c11
-  isPersistent: 0
 --- !u!1 &2006700348024447491
 GameObject:
   m_ObjectHideFlags: 0
@@ -12593,7 +11975,6 @@ Transform:
   - {fileID: 5871290147686676964}
   - {fileID: 5506711345700256095}
   - {fileID: 8956335842086669605}
-  - {fileID: 1961751066201008732}
   - {fileID: 8248771806123017575}
   - {fileID: 5977766940691333333}
   - {fileID: 5468755179125117667}
@@ -16856,7 +16237,6 @@ MonoBehaviour:
   _space: 1
   _sampleMode: 1
   _subscribers:
-  - {fileID: 5426185443309259188}
   - {fileID: 2723631659985403054}
   - {fileID: 9047122830903421205}
   - {fileID: 6750848655663464090}
@@ -20198,6 +19578,11 @@ PrefabInstance:
       propertyPath: chunkBelongsTo
       value: 
       objectReference: {fileID: 6860265999645676851}
+    - target: {fileID: 2622990815491093618, guid: 4958b800bd8c7b44d8b28c89fc732db2,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 2760021448846095264, guid: 4958b800bd8c7b44d8b28c89fc732db2,
         type: 3}
       propertyPath: chunkBelongsTo
@@ -20535,6 +19920,11 @@ PrefabInstance:
       propertyPath: chunkBelongsTo
       value: 
       objectReference: {fileID: 6860265999645676851}
+    - target: {fileID: 2906544322998858362, guid: 22c51799b18e6384fba075861a63534a,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 3363325096706499731, guid: 22c51799b18e6384fba075861a63534a,
         type: 3}
       propertyPath: chunkBelongsTo
@@ -20622,7 +20012,7 @@ PrefabInstance:
     - target: {fileID: 834144243183145102, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 834144243183145102, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
@@ -20657,7 +20047,7 @@ PrefabInstance:
     - target: {fileID: 9170745452097778764, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 9170745452097778764, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
@@ -21215,7 +20605,7 @@ PrefabInstance:
     - target: {fileID: 7064991171155811824, guid: bd5c3fc4a8141b44fa1371aa9709b13c,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.049804688
+      value: -0.05078125
       objectReference: {fileID: 0}
     - target: {fileID: 7064991171155811824, guid: bd5c3fc4a8141b44fa1371aa9709b13c,
         type: 3}
@@ -21250,7 +20640,7 @@ PrefabInstance:
     - target: {fileID: 9170745452097778764, guid: bd5c3fc4a8141b44fa1371aa9709b13c,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.049804688
+      value: -0.05078125
       objectReference: {fileID: 0}
     - target: {fileID: 9170745452097778764, guid: bd5c3fc4a8141b44fa1371aa9709b13c,
         type: 3}
@@ -21907,7 +21297,7 @@ PrefabInstance:
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -21962,7 +21352,7 @@ PrefabInstance:
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -22044,6 +21434,11 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2840493488570910516, guid: 22c51799b18e6384fba075861a63534a,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
+    - target: {fileID: 2906544322998858362, guid: 22c51799b18e6384fba075861a63534a,
         type: 3}
       propertyPath: chunkBelongsTo
       value: 
@@ -22699,7 +22094,7 @@ PrefabInstance:
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.05078125
+      value: -0.049804688
       objectReference: {fileID: 0}
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -22754,7 +22149,7 @@ PrefabInstance:
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.05078125
+      value: -0.049804688
       objectReference: {fileID: 0}
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -23033,6 +22428,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: P_BB-072
       objectReference: {fileID: 0}
+    - target: {fileID: 7630259582438442028, guid: dda6c28ff029cc54d84039fde612bdb3,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -23268,7 +22668,7 @@ PrefabInstance:
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -23323,7 +22723,7 @@ PrefabInstance:
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -24102,6 +23502,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 4836063385772316878, guid: fe71d15a521bc594abcea3795faf7583,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
+    - target: {fileID: 8216037538745328658, guid: fe71d15a521bc594abcea3795faf7583,
         type: 3}
       propertyPath: chunkBelongsTo
       value: 
@@ -37166,6 +36571,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 354322439310663064}
     m_Modifications:
+    - target: {fileID: 2597418034412240133, guid: 1bc12dbebc0b3d94b89597eaa7147d5f,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 2995299027819909302, guid: 1bc12dbebc0b3d94b89597eaa7147d5f,
         type: 3}
       propertyPath: chunkBelongsTo
@@ -38050,7 +37460,7 @@ PrefabInstance:
     - target: {fileID: 834144243183145102, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.05078125
+      value: -0.049804688
       objectReference: {fileID: 0}
     - target: {fileID: 834144243183145102, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
@@ -38085,7 +37495,7 @@ PrefabInstance:
     - target: {fileID: 9170745452097778764, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.05078125
+      value: -0.049804688
       objectReference: {fileID: 0}
     - target: {fileID: 9170745452097778764, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
@@ -38268,7 +37678,7 @@ PrefabInstance:
     - target: {fileID: 834144243183145102, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.048828125
+      value: -0.05078125
       objectReference: {fileID: 0}
     - target: {fileID: 834144243183145102, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
@@ -38303,7 +37713,7 @@ PrefabInstance:
     - target: {fileID: 9170745452097778764, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.048828125
+      value: -0.05078125
       objectReference: {fileID: 0}
     - target: {fileID: 9170745452097778764, guid: 856244700bb564d4fa7c55f8b2976854,
         type: 3}
@@ -39066,6 +38476,11 @@ PrefabInstance:
       propertyPath: lastKnownPositionWhenGrounded.z
       value: 87.5
       objectReference: {fileID: 0}
+    - target: {fileID: 1218944956326586946, guid: cbec75c48b24e1d4fa05abfdc707c981,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 1983455178445363929, guid: cbec75c48b24e1d4fa05abfdc707c981,
         type: 3}
       propertyPath: chunkBelongsTo
@@ -39284,6 +38699,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2981393456989823417, guid: 2d88e44b0e8db1942aaffef41dcf7aa6,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 3136244033967243917, guid: 2d88e44b0e8db1942aaffef41dcf7aa6,
         type: 3}
       propertyPath: chunkBelongsTo
@@ -39679,6 +39099,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: P_BC-022
       objectReference: {fileID: 0}
+    - target: {fileID: 1670925913668610961, guid: 78376de99d09b01418e589701572df86,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 1991692301869282017, guid: 78376de99d09b01418e589701572df86,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -39801,7 +39226,7 @@ PrefabInstance:
     - target: {fileID: 5181172649463753176, guid: 17dee897704d18147a15a13fc611d858,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.0009765625
       objectReference: {fileID: 0}
     - target: {fileID: 5181172649463753176, guid: 17dee897704d18147a15a13fc611d858,
         type: 3}
@@ -39861,7 +39286,7 @@ PrefabInstance:
     - target: {fileID: 5851595552483282095, guid: 17dee897704d18147a15a13fc611d858,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: 0
+      value: -0.0009765625
       objectReference: {fileID: 0}
     - target: {fileID: 5851595552483282095, guid: 17dee897704d18147a15a13fc611d858,
         type: 3}
@@ -40026,6 +39451,11 @@ PrefabInstance:
       propertyPath: lastKnownPositionWhenGrounded.z
       value: 87.5
       objectReference: {fileID: 0}
+    - target: {fileID: 1218944956326586946, guid: cbec75c48b24e1d4fa05abfdc707c981,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 1983455178445363929, guid: cbec75c48b24e1d4fa05abfdc707c981,
         type: 3}
       propertyPath: chunkBelongsTo
@@ -40143,7 +39573,7 @@ PrefabInstance:
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.048828125
+      value: -0.05078125
       objectReference: {fileID: 0}
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -40198,7 +39628,7 @@ PrefabInstance:
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.048828125
+      value: -0.05078125
       objectReference: {fileID: 0}
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -40442,6 +39872,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: P_BB-024
       objectReference: {fileID: 0}
+    - target: {fileID: 5234789621835420281, guid: b9b4aefb69d85e549ab805e1bfeec2f8,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     - target: {fileID: 5365582092243384423, guid: b9b4aefb69d85e549ab805e1bfeec2f8,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -40623,7 +40058,7 @@ PrefabInstance:
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.048828125
+      value: -0.05078125
       objectReference: {fileID: 0}
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -40678,7 +40113,7 @@ PrefabInstance:
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.048828125
+      value: -0.05078125
       objectReference: {fileID: 0}
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -41068,7 +40503,7 @@ PrefabInstance:
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -41123,7 +40558,7 @@ PrefabInstance:
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -41157,7 +40592,7 @@ PrefabInstance:
     - target: {fileID: 5181172649463753176, guid: 17dee897704d18147a15a13fc611d858,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.0009765625
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5181172649463753176, guid: 17dee897704d18147a15a13fc611d858,
         type: 3}
@@ -41217,7 +40652,7 @@ PrefabInstance:
     - target: {fileID: 5851595552483282095, guid: 17dee897704d18147a15a13fc611d858,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.0009765625
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5851595552483282095, guid: 17dee897704d18147a15a13fc611d858,
         type: 3}
@@ -41271,7 +40706,7 @@ PrefabInstance:
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -41326,7 +40761,7 @@ PrefabInstance:
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: -0.05078125
+      value: -0.048828125
       objectReference: {fileID: 0}
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -41516,6 +40951,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: P_BC-025
       objectReference: {fileID: 0}
+    - target: {fileID: 5754283497385576848, guid: cf426048206890242a1803b289b951d0,
+        type: 3}
+      propertyPath: chunkBelongsTo
+      value: 
+      objectReference: {fileID: 6860265999645676851}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
