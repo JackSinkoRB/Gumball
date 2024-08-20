@@ -20,9 +20,12 @@ namespace Gumball
         [SerializeField] private GlobalColourPalette.ColourCode glowDeselectedColor;
 
         [Header("Debugging")]
-        [SerializeField] private CorePart corePart;
-        
-        private bool IsCurrentPart => corePart == CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, corePart.Type);
+        [SerializeField, ReadOnly] private CorePart corePart;
+
+        private Button button => GetComponent<Button>();
+
+        public CorePart CorePart => corePart;
+        public bool IsCurrentPart => corePart == CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, corePart.Type);
 
         public void Initialise(CorePart corePart)
         {
@@ -31,14 +34,15 @@ namespace Gumball
             title.text = corePart == null ? "Stock" : corePart.DisplayName;
             
             icon.sprite = corePart == null ? null : corePart.Icon;
-            icon.gameObject.SetActive(icon.sprite != null);
-            
+
+            button.interactable = corePart != null && corePart.CarType == WarehouseManager.Instance.CurrentCar.CarType;
+                
             OnDeselect();
         }
 
         public void OnClickButton()
         {
-            
+            PanelManager.GetPanel<SwapCorePartPanel>().SelectPartOption(this);
         }
         
         public void OnSelect()

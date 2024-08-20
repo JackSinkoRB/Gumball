@@ -42,6 +42,8 @@ namespace Gumball
                 AutosizeTextMeshPro label = filterButton.GetComponent<AutosizeTextMeshPro>();
                 label.color = selectedOption == filterButton ? selectedFilterButtonColor : deselectedFilterButtonColor;
             }
+
+            PanelManager.GetPanel<SwapCorePartPanel>().PopulateParts();
         }
         
         private void InitialiseCategories()

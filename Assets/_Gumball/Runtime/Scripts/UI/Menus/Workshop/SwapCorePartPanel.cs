@@ -12,9 +12,7 @@ namespace Gumball
     public class SwapCorePartPanel : AnimatedPanel
     {
 
-        [SerializeField] private MagneticScroll partsMagneticScroll;
         [SerializeField] private SwapCorePartInstallButton installButton;
-        [SerializeField] private TextMeshProUGUI countLabel;
         [SerializeField] private SwapCorePartHeaderFilter headerFilter;
         [Space(5)]
         [SerializeField] private Transform optionButtonHolder;
@@ -22,33 +20,48 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private CorePart.PartType partType;
-        [SerializeField, ReadOnly] private CorePart currentSelectedPart;
+        [SerializeField, ReadOnly] private SwapCorePartOptionButton selectedOption;
 
         public void Initialise(CorePart.PartType type)
         {
             partType = type;
-            
-            headerFilter.Select(WarehouseManager.Instance.CurrentCar.CarType);
-            PopulateParts();
+
+            this.PerformAtEndOfFrame(() => headerFilter.Select(WarehouseManager.Instance.CurrentCar.CarType));
         }
 
+        public void SelectPartOption(SwapCorePartOptionButton option)
+        {
+            if (option == selectedOption)
+                return; //already selected
+            
+            if (selectedOption != null)
+                selectedOption.OnDeselect();
+            
+            selectedOption = option;
+            selectedOption.OnSelect();
+
+            //don't show interactable if already selected
+            //TODO:
+            //selectButton.interactable = !option.IsCurrentCar;
+        }
+        
         public void OnClickInstallButton()
         {
-            bool isStockPart = currentSelectedPart == null;
+            bool isStockPart = selectedOption.CorePart == null;
             if (!isStockPart)
             {
                 //take funds
-                if (!Currency.Standard.HasEnoughFunds(currentSelectedPart.StandardCurrencyInstallCost))
+                if (!Currency.Standard.HasEnoughFunds(selectedOption.CorePart.StandardCurrencyInstallCost))
                 {
                     PanelManager.GetPanel<InsufficientStandardCurrencyPanel>().Show();
                     return;
                 }
 
-                Currency.Standard.TakeFunds(currentSelectedPart.StandardCurrencyInstallCost);
+                Currency.Standard.TakeFunds(selectedOption.CorePart.StandardCurrencyInstallCost);
             }
 
-            CorePartManager.InstallPartOnCar(partType, currentSelectedPart, WarehouseManager.Instance.CurrentCar.CarIndex);
-            installButton.Initialise(partType, currentSelectedPart);
+            CorePartManager.InstallPartOnCar(partType, selectedOption.CorePart, WarehouseManager.Instance.CurrentCar.CarIndex);
+            installButton.Initialise(partType, selectedOption.CorePart);
 
             //update the sub parts menu
             if (isStockPart)
@@ -57,15 +70,16 @@ namespace Gumball
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().ModifySubMenu.OpenSubMenu(partType);
         }
 
-        private void PopulateParts()
+        public void PopulateParts()
         {
             foreach (Transform child in optionButtonHolder)
                 child.gameObject.Pool();
 
             //add the current part option as it doesn't show in spare parts
             CorePart currentPart = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, partType);
-            CreatePartButtonInstance(currentPart);
-            
+            if (currentPart != null && currentPart.CarType == headerFilter.CurrentSelected)
+                CreatePartButtonInstance(currentPart);
+
             foreach (CorePart part in CorePartManager.GetSpareParts(partType, headerFilter.CurrentSelected))
                 CreatePartButtonInstance(part);
         }
