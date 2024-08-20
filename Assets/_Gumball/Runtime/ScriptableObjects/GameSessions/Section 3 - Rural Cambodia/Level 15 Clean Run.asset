@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff023cbf706d2f64dace4263ec5fe7ef, type: 3}
   m_Name: Level 15 Clean Run
   m_EditorClassIdentifier: 
+  uniqueID: 3d56dc2e78dcadf4283b3602b6536e6a
+  lastKnownName: Level 15 Clean Run
   description: Description of session
   scene:
     scene:
@@ -26,15 +28,19 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  vehicleStartingPosition: {x: 3, y: 0.2, z: 0}
+  vehicleStartingPosition: {x: 3, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
   globalLightIntensity: 1
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2400
+  raceDistanceMetres: 1700
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
+      type: 3}
+    distanceFromSpline: 5
   racerData: []
-  racersStartingSpeed: 70
+  racersStartingSpeed: 100
   trafficIsProcedural: 0
   trafficDensity: 150
   trafficBikes: []
@@ -125,10 +131,16 @@ MonoBehaviour:
     - distanceFromMapStart: 2452.44
       laneDirection: 1
       laneIndex: 3
-  xpReward: 100
-  standardCurrencyReward: 1000
-  corePartRewards: []
-  subPartRewards: []
+  rewards:
+    xp: 600
+    standardCurrency: 1500
+    premiumCurrency: 0
+    fuelRefill: 0
+    coreParts: []
+    subParts: []
+    unlockables: []
+  mainChallengeDescription: This is the challenge description
+  subObjectives: []
   inProgress: 0
   currentRacers:
     list:
@@ -149,6 +161,7 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
+        currentPerformanceRating: 0
     keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards: []
