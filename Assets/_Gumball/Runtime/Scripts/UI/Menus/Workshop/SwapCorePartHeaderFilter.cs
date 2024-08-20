@@ -44,6 +44,7 @@ namespace Gumball
             }
 
             PanelManager.GetPanel<SwapCorePartPanel>().PopulateParts();
+            PanelManager.GetPanel<SwapCorePartPanel>().SelectPartOption(null);
         }
         
         private void InitialiseCategories()

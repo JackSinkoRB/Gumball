@@ -21,28 +21,29 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private CorePart.PartType partType;
         [SerializeField, ReadOnly] private SwapCorePartOptionButton selectedOption;
+        [SerializeField, ReadOnly] private List<SwapCorePartOptionButton> partOptions = new();
 
         public void Initialise(CorePart.PartType type)
         {
             partType = type;
 
-            this.PerformAtEndOfFrame(() => headerFilter.Select(WarehouseManager.Instance.CurrentCar.CarType));
+            this.PerformAtEndOfFrame(() =>
+            {
+                headerFilter.Select(WarehouseManager.Instance.CurrentCar.CarType);
+                SelectPartOption(null);
+            });
         }
 
         public void SelectPartOption(SwapCorePartOptionButton option)
         {
-            if (option == selectedOption)
-                return; //already selected
-            
             if (selectedOption != null)
                 selectedOption.OnDeselect();
             
             selectedOption = option;
-            selectedOption.OnSelect();
-
-            //don't show interactable if already selected
-            //TODO:
-            //selectButton.interactable = !option.IsCurrentCar;
+            if (selectedOption != null)
+                selectedOption.OnSelect();
+            
+            installButton.Initialise(partType, selectedOption == null ? null : selectedOption.CorePart);
         }
         
         public void OnClickInstallButton()
@@ -72,6 +73,8 @@ namespace Gumball
 
         public void PopulateParts()
         {
+            partOptions.Clear();
+            
             foreach (Transform child in optionButtonHolder)
                 child.gameObject.Pool();
 
@@ -89,6 +92,8 @@ namespace Gumball
             SwapCorePartOptionButton instance = optionButtonPrefab.gameObject.GetSpareOrCreate<SwapCorePartOptionButton>(optionButtonHolder);
             instance.Initialise(part);
             instance.transform.SetAsLastSibling();
+            
+            partOptions.Add(instance);
         }
 
     }
