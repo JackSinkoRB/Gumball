@@ -14,6 +14,7 @@ namespace Gumball
 
         [SerializeField] private SwapCorePartInstallButton installButton;
         [SerializeField] private SwapCorePartHeaderFilter headerFilter;
+        [SerializeField] private SwapCorePartHeaderFilterInfo infoHeaderFilter;
         [Space(5)]
         [SerializeField] private Transform optionButtonHolder;
         [SerializeField] private SwapCorePartOptionButton optionButtonPrefab;
@@ -30,6 +31,7 @@ namespace Gumball
             this.PerformAtEndOfFrame(() =>
             {
                 headerFilter.Select(WarehouseManager.Instance.CurrentCar.CarType);
+                infoHeaderFilter.Select(0);
                 SelectPartOption(null);
             });
         }
@@ -86,7 +88,7 @@ namespace Gumball
             foreach (CorePart part in CorePartManager.GetSpareParts(partType, headerFilter.CurrentSelected))
                 CreatePartButtonInstance(part);
         }
-        
+
         private void CreatePartButtonInstance(CorePart part)
         {
             SwapCorePartOptionButton instance = optionButtonPrefab.gameObject.GetSpareOrCreate<SwapCorePartOptionButton>(optionButtonHolder);
@@ -95,6 +97,6 @@ namespace Gumball
             
             partOptions.Add(instance);
         }
-
+        
     }
 }
