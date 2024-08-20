@@ -67,7 +67,6 @@ namespace Gumball
                 options.Add(instance);
             }
             
-            Canvas.ForceUpdateCanvases();
         }
         
     }

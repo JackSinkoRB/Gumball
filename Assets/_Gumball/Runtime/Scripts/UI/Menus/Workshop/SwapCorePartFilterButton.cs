@@ -12,7 +12,7 @@ namespace Gumball
         public void Initialise(CarType type)
         {
             label.text = type.ToString();
-            label.Resize();
+            this.PerformAtEndOfFrame(label.Resize);
         }
 
     }

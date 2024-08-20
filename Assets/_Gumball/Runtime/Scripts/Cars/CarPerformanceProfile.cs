@@ -30,10 +30,10 @@ namespace Gumball
         /// <summary>
         /// Construct a performance profile from a players car depending on installed parts.
         /// </summary>
-        public CarPerformanceProfile(int playerCarIndex)
+        public CarPerformanceProfile(int carIndex)
         {
             //load parts
-            CorePart[] allParts = CorePartManager.GetCoreParts(playerCarIndex);
+            CorePart[] allParts = CorePartManager.GetCoreParts(carIndex);
 
             CarPerformanceProfileModifiers finalModifiers = new CarPerformanceProfileModifiers();
             

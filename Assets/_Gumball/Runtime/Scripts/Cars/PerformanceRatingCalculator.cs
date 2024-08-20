@@ -10,13 +10,21 @@ namespace Gumball
     public struct PerformanceRatingCalculator
     {
 
+        public enum Component
+        {
+            MAX_SPEED,
+            ACCELERATION,
+            HANDLING,
+            NOS
+        }
+        
         public static PerformanceRatingCalculator GetCalculator(CarPerformanceSettings settings, CarPerformanceProfile profile)
         {
             PerformanceRatingCalculator calculator = new PerformanceRatingCalculator();
             calculator.Calculate(settings, profile);
             return calculator;
         }
-        
+
         [SerializeField, ReadOnly] private int totalRating;
         [SerializeField, ReadOnly] private int maxSpeedRating;
         [SerializeField, ReadOnly] private int accelerationSpeedRating;
@@ -37,6 +45,18 @@ namespace Gumball
             nosRating = GetNosRating(settings, profile);
 
             totalRating = maxSpeedRating + accelerationSpeedRating + handlingRating + nosRating;
+        }
+        
+        public int GetRating(Component component)
+        {
+            return component switch
+            {
+                Component.MAX_SPEED => maxSpeedRating,
+                Component.ACCELERATION => accelerationSpeedRating,
+                Component.HANDLING => handlingRating,
+                Component.NOS => nosRating,
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
 
         private int GetMaxSpeedRating(CarPerformanceSettings settings, CarPerformanceProfile profile)
