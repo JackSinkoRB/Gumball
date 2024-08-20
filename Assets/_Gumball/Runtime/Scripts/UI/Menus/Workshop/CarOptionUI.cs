@@ -35,7 +35,7 @@ namespace Gumball
             this.carIndex = carIndex;
             
             nameLabel.text = carData.DisplayName;
-            performanceRatingLabel.text = $"{PerformanceRatingCalculator.Calculate(carData.PerformanceSettings, new CarPerformanceProfile(carIndex))}";
+            performanceRatingLabel.text = $"{PerformanceRatingCalculator.GetCalculator(carData.PerformanceSettings, new CarPerformanceProfile(carIndex)).TotalRating}";
             
             icon.sprite = carData.Icon;
             icon.gameObject.SetActive(icon.sprite != null);
