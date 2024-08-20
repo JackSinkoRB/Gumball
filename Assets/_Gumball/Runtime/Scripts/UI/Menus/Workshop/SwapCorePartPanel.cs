@@ -16,7 +16,10 @@ namespace Gumball
         [SerializeField] private SwapCorePartInstallButton installButton;
         [SerializeField] private TextMeshProUGUI countLabel;
         [SerializeField] private SwapCorePartHeaderFilter headerFilter;
-
+        [Space(5)]
+        [SerializeField] private Transform optionButtonHolder;
+        [SerializeField] private SwapCorePartOptionButton optionButtonPrefab;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private CorePart.PartType partType;
         [SerializeField, ReadOnly] private CorePart currentSelectedPart;
@@ -24,10 +27,9 @@ namespace Gumball
         public void Initialise(CorePart.PartType type)
         {
             partType = type;
-
-            PopulateParts();
             
-            this.PerformAtEndOfFrame(() => headerFilter.Select(WarehouseManager.Instance.CurrentCar.CarType));
+            headerFilter.Select(WarehouseManager.Instance.CurrentCar.CarType);
+            PopulateParts();
         }
 
         public void OnClickInstallButton()
@@ -54,45 +56,25 @@ namespace Gumball
             else
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().ModifySubMenu.OpenSubMenu(partType);
         }
-        
+
         private void PopulateParts()
         {
-            List<ScrollItem> scrollItems = new List<ScrollItem>();
-            
+            foreach (Transform child in optionButtonHolder)
+                child.gameObject.Pool();
+
             //add the current part option as it doesn't show in spare parts
             CorePart currentPart = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, partType);
-            ScrollItem currentScrollItem = CreateScrollItem(partType, currentPart);
-            scrollItems.Add(currentScrollItem);
+            CreatePartButtonInstance(currentPart);
             
-            foreach (CorePart part in CorePartManager.GetSpareParts(partType))
-            {
-                ScrollItem scrollItem = CreateScrollItem(partType, part);
-                scrollItems.Add(scrollItem);
-            }
-
-            partsMagneticScroll.SetItems(scrollItems);
+            foreach (CorePart part in CorePartManager.GetSpareParts(partType, headerFilter.CurrentSelected))
+                CreatePartButtonInstance(part);
         }
-
-        private ScrollItem CreateScrollItem(CorePart.PartType type, CorePart part)
+        
+        private void CreatePartButtonInstance(CorePart part)
         {
-            ScrollItem scrollItem = new ScrollItem();
-
-            scrollItem.onLoad += () =>
-            {
-                CorePartScrollIcon scrollIcon = (CorePartScrollIcon)scrollItem.CurrentIcon;
-                scrollIcon.Initialise(part);
-            };
-
-            scrollItem.onSelect += () =>
-            {
-                countLabel.text = $"{partsMagneticScroll.Items.IndexOf(scrollItem) + 1} / {partsMagneticScroll.Items.Count}";
-                currentSelectedPart = part;
-                
-                //populate details
-                installButton.Initialise(type, part);
-            };
-
-            return scrollItem;
+            SwapCorePartOptionButton instance = optionButtonPrefab.gameObject.GetSpareOrCreate<SwapCorePartOptionButton>(optionButtonHolder);
+            instance.Initialise(part);
+            instance.transform.SetAsLastSibling();
         }
 
     }

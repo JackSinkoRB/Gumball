@@ -21,6 +21,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private List<SwapCorePartFilterButton> options = new();
         [SerializeField, ReadOnly] private CarType currentSelected;
 
+        public CarType CurrentSelected => currentSelected;
+
         private void OnEnable()
         {
             InitialiseCategories();

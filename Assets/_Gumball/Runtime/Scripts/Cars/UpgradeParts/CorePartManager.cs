@@ -92,7 +92,7 @@ namespace Gumball
         }
         
         /// <returns>A collection of unlocked parts of type 'partType'.</returns>
-        public static HashSet<CorePart> GetSpareParts(CorePart.PartType partType)
+        public static HashSet<CorePart> GetSpareParts(CorePart.PartType partType, CarType? carType = null)
         {
             HashSet<CorePart> spareParts = new();
 
@@ -101,7 +101,7 @@ namespace Gumball
             
             foreach (CorePart part in allPartsGrouped[partType])
             {
-                if (part.IsUnlocked && !part.IsAppliedToCar)
+                if (part.IsUnlocked && !part.IsAppliedToCar && (carType == null || carType.Value == part.CarType))
                     spareParts.Add(part);
             }
             
