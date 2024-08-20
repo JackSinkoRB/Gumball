@@ -28,15 +28,19 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  vehicleStartingPosition: {x: 10, y: 0, z: 50}
+  vehicleStartingPosition: {x: 10, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
   globalLightIntensity: 1
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2550
+  raceDistanceMetres: 2000
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
+      type: 3}
+    distanceFromSpline: 5
   racerData: []
-  racersStartingSpeed: 70
+  racersStartingSpeed: 100
   trafficIsProcedural: 0
   trafficDensity: 25
   trafficBikes: []
@@ -355,10 +359,16 @@ MonoBehaviour:
     - distanceFromMapStart: 2567.9768
       laneDirection: 1
       laneIndex: 2
-  xpReward: 100
-  standardCurrencyReward: 1000
-  corePartRewards: []
-  subPartRewards: []
+  rewards:
+    xp: 600
+    standardCurrency: 1500
+    premiumCurrency: 0
+    fuelRefill: 0
+    coreParts: []
+    subParts: []
+    unlockables: []
+  mainChallengeDescription: This is the challenge description
+  subObjectives: []
   inProgress: 1
   currentRacers:
     list:
@@ -379,7 +389,8 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
-    keyCollision: 0
+        currentPerformanceRating: 0
+    keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards: []
   timeAllowedSeconds: 55
