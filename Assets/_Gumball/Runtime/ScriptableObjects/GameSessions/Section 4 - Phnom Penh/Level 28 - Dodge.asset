@@ -34,23 +34,36 @@ MonoBehaviour:
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 0
+  raceDistanceMetres: 2100
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
+      type: 3}
+    distanceFromSpline: 5
   racerData: []
   racersStartingSpeed: 100
   trafficIsProcedural: 1
   trafficDensity: 100
   trafficBikes: []
-  trafficCars: []
+  trafficCars:
+  - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 81825441c04ee5c468680e955e2bb0b3
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficTrucks: []
   trafficSpawnPositions:
     Value: []
   rewards:
-    xp: 0
-    standardCurrency: 0
+    xp: 650
+    standardCurrency: 1750
     premiumCurrency: 0
     fuelRefill: 0
     coreParts: []
-    subParts: []
+    subParts:
+    - {fileID: 11400000, guid: 7394944cb85a36c4d98509d1e594ab09, type: 2}
     unlockables: []
   mainChallengeDescription: This is the challenge description
   subObjectives: []
@@ -59,7 +72,9 @@ MonoBehaviour:
     list: []
     keyCollision: 0
   previousCorePartRewards: []
-  previousSubPartRewards: []
+  previousSubPartRewards:
+  - {fileID: 11400000, guid: 7394944cb85a36c4d98509d1e594ab09, type: 2}
   timeAllowedSeconds: 45
   timeRemainingSeconds: 0
   timerHasStarted: 0
+  maxCollisionImpulseAllowed: 500

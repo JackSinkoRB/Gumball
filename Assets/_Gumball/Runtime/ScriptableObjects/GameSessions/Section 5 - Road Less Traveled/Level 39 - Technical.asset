@@ -34,87 +34,117 @@ MonoBehaviour:
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2350
+  raceDistanceMetres: 2100
   finishLineMarkers:
     checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
       type: 3}
     distanceFromSpline: 5
   racerData:
   - assetReference:
-      m_AssetGUID: 6f46e795bac33904aa0828a7953feaf1
+      m_AssetGUID: 731da51f959bc554aaa0545c94562d25
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 2
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     startingPosition:
       position: {x: 3, y: 0.1, z: 125}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.336
+      acceleration: 0.302
+      handling: 0.312
+      nos: 0.281
+    currentPerformanceRating:
+      totalRating: 330
+      maxSpeedRating: 131
+      accelerationSpeedRating: 74
+      handlingRating: 60
+      nosRating: 65
   - assetReference:
       m_AssetGUID: b5028991c62dbc64a99eb0b82d8b0745
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 2
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     startingPosition:
       position: {x: 3, y: 0.1, z: 150}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.172
+      acceleration: 0.186
+      handling: 0.161
+      nos: 0.082
+    currentPerformanceRating:
+      totalRating: 330
+      maxSpeedRating: 108
+      accelerationSpeedRating: 101
+      handlingRating: 45
+      nosRating: 76
   - assetReference:
-      m_AssetGUID: 99c974c8da4d7ca4f9489658e6adb107
+      m_AssetGUID: d2502054733f50042a64ef15cf60e626
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 2
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     startingPosition:
       position: {x: 3, y: 0.1, z: 175}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.487
+      acceleration: 0.516
+      handling: 0.543
+      nos: 0.494
+    currentPerformanceRating:
+      totalRating: 330
+      maxSpeedRating: 142
+      accelerationSpeedRating: 70
+      handlingRating: 78
+      nosRating: 40
   - assetReference:
-      m_AssetGUID: 2810a7c750d016a4eafcd426871217b5
+      m_AssetGUID: 84f0cc59c380ea34098e0ce3c1cd53e3
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 2
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     startingPosition:
       position: {x: 3, y: 0.1, z: 200}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.116
+      acceleration: 0.105
+      handling: 0.082
+      nos: 0.089
+    currentPerformanceRating:
+      totalRating: 330
+      maxSpeedRating: 106
+      accelerationSpeedRating: 127
+      handlingRating: 43
+      nosRating: 54
   - assetReference:
-      m_AssetGUID: 007b6760012e172418eb7e49956334ab
+      m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 2
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     startingPosition:
       position: {x: 3, y: 0.1, z: 225}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.425
+      acceleration: 0.418
+      handling: 0.409
+      nos: 0.407
+    currentPerformanceRating:
+      totalRating: 330
+      maxSpeedRating: 131
+      accelerationSpeedRating: 99
+      handlingRating: 59
+      nosRating: 41
   racersStartingSpeed: 100
   trafficIsProcedural: 1
   trafficDensity: 100
@@ -132,28 +162,42 @@ MonoBehaviour:
   trafficSpawnPositions:
     Value: []
   rewards:
-    xp: 0
-    standardCurrency: 0
+    xp: 700
+    standardCurrency: 2000
     premiumCurrency: 0
     fuelRefill: 0
     coreParts: []
-    subParts: []
+    subParts:
+    - {fileID: 11400000, guid: a55d83d841d2c034c9c0d5b78634d52c, type: 2}
     unlockables: []
   mainChallengeDescription: This is the challenge description
-  subObjectives: []
+  subObjectives:
+  - description: Get 100 Slipstream score
+    tracker: {fileID: 11400000, guid: e46f156a197b2cf49a23ea72b06f03e1, type: 2}
+    goal: 100
+    rewards:
+      xp: 0
+      standardCurrency: 0
+      premiumCurrency: 0
+      fuelRefill: 0
+      coreParts: []
+      subParts: []
+      unlockables: []
+    uniqueID: 2f555eb1-2978-4df2-8e0a-c313efb2c2d9
   inProgress: 0
   currentRacers:
     list: []
     keyCollision: 0
   previousCorePartRewards: []
-  previousSubPartRewards: []
+  previousSubPartRewards:
+  - {fileID: 11400000, guid: a55d83d841d2c034c9c0d5b78634d52c, type: 2}
   racersInPositionOrderCached: []
   knockoutPositions:
   - 470
   - 940
   - 1410
   - 1880
-  - 2350
+  - 2100
   knockoutPositionMarkers:
     checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
       type: 3}
