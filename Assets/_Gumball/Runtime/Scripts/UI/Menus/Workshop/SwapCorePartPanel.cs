@@ -14,16 +14,24 @@ namespace Gumball
 
         [SerializeField] private SwapCorePartInstallButton installButton;
         [SerializeField] private SwapCorePartHeaderFilter headerFilter;
-        [SerializeField] private SwapCorePartHeaderFilterInfo infoHeaderFilter;
         [Space(5)]
         [SerializeField] private Transform optionButtonHolder;
         [SerializeField] private SwapCorePartOptionButton optionButtonPrefab;
+        
+        [Header("Properties")]
+        [SerializeField] private TextMeshProUGUI descriptionLabel;
+        [SerializeField] private PerformanceRatingSlider maxSpeedSlider;
+        [SerializeField] private PerformanceRatingSlider accelerationSlider;
+        [SerializeField] private PerformanceRatingSlider handlingSlider;
+        [SerializeField] private PerformanceRatingSlider nosSlider;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private CorePart.PartType partType;
         [SerializeField, ReadOnly] private SwapCorePartOptionButton selectedOption;
         [SerializeField, ReadOnly] private List<SwapCorePartOptionButton> partOptions = new();
 
+        private AICar currentCar => WarehouseManager.Instance.CurrentCar;
+        
         public SwapCorePartOptionButton SelectedOption => selectedOption;
 
         public void Initialise(CorePart.PartType type)
@@ -32,8 +40,7 @@ namespace Gumball
 
             this.PerformAtEndOfFrame(() =>
             {
-                headerFilter.Select(WarehouseManager.Instance.CurrentCar.CarType);
-                infoHeaderFilter.Select(0);
+                headerFilter.Select(currentCar.CarType);
                 SelectPartOption(null);
             });
         }
@@ -52,7 +59,8 @@ namespace Gumball
             
             installButton.Initialise(partType, selectedOption == null ? null : selectedOption.CorePart);
             
-            infoHeaderFilter.Select(infoHeaderFilter.CurrentSelected);
+            UpdateDescription();
+            UpdatePerformanceRatingSliders();
         }
         
         public void OnClickInstallButton()
@@ -70,7 +78,7 @@ namespace Gumball
                 Currency.Standard.TakeFunds(selectedOption.CorePart.StandardCurrencyInstallCost);
             }
 
-            CorePartManager.InstallPartOnCar(partType, selectedOption.CorePart, WarehouseManager.Instance.CurrentCar.CarIndex);
+            CorePartManager.InstallPartOnCar(partType, selectedOption.CorePart, currentCar.CarIndex);
             installButton.Initialise(partType, selectedOption.CorePart);
 
             //update the sub parts menu
@@ -88,12 +96,39 @@ namespace Gumball
                 child.gameObject.Pool();
 
             //add the current part option as it doesn't show in spare parts
-            CorePart currentPart = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, partType);
+            CorePart currentPart = CorePartManager.GetCorePart(currentCar.CarIndex, partType);
             if (currentPart != null && currentPart.CarType == headerFilter.CurrentSelected)
                 CreatePartButtonInstance(currentPart);
 
             foreach (CorePart part in CorePartManager.GetSpareParts(partType, headerFilter.CurrentSelected))
                 CreatePartButtonInstance(part);
+        }
+        
+        private void UpdateDescription()
+        {
+            descriptionLabel.text = selectedOption == null || selectedOption.CorePart == null ? "" : selectedOption.CorePart.Description;
+        }
+        
+        private void UpdatePerformanceRatingSliders()
+        {
+            maxSpeedSlider.gameObject.SetActive(selectedOption != null);
+            accelerationSlider.gameObject.SetActive(selectedOption != null);
+            handlingSlider.gameObject.SetActive(selectedOption != null);
+            nosSlider.gameObject.SetActive(selectedOption != null);
+            
+            if (selectedOption == null)
+                return;
+            
+            //create a profile with the specific core part
+            Dictionary<CorePart.PartType, CorePart> allParts = CorePartManager.GetCoreParts(currentCar.CarIndex);
+            allParts[selectedOption.CorePart.Type] = selectedOption.CorePart;
+
+            CarPerformanceProfile profileWithPart = new CarPerformanceProfile(allParts.Values);
+            
+            maxSpeedSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
+            accelerationSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
+            handlingSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
+            nosSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
         }
 
         private void CreatePartButtonInstance(CorePart part)
@@ -107,12 +142,12 @@ namespace Gumball
         
         private SwapCorePartOptionButton GetCurrentInstalledOption()
         {
-            if (headerFilter.CurrentSelected != WarehouseManager.Instance.CurrentCar.CarType)
+            if (headerFilter.CurrentSelected != currentCar.CarType)
                 return null; //category not showing
             
             foreach (SwapCorePartOptionButton optionButton in partOptions)
             {
-                CorePart currentInstalledPart = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, partType);
+                CorePart currentInstalledPart = CorePartManager.GetCorePart(currentCar.CarIndex, partType);
                 if (optionButton.CorePart == currentInstalledPart)
                     return optionButton;
             }
