@@ -86,11 +86,12 @@ namespace Gumball
             float handbrake = settings.HandbrakeTorque.GetValue(profile) * 0.001f;
             float steerSpeed = settings.SteerSpeed.GetValue(profile) * 5f;
             float steerReleaseSpeed = settings.SteerReleaseSpeed.GetValue(profile) * 0.25f;
-            float maxSteerAngle = settings.MaxSteerAngle.GetValue(profile).keys[1].value * 0.5f; //just use the max speed value
+            float maxSteerAngle = settings.MaxSteerAngle.GetValue(profile).keys.Length < 1 ? 0
+                : settings.MaxSteerAngle.GetValue(profile).keys[1].value * 0.5f; //just use the max speed value
 
             return Mathf.CeilToInt(brake + handbrakeEaseOffDuration + handbrake + steerSpeed + steerReleaseSpeed + maxSteerAngle);
         }
-                
+        
         private int GetNosRating(CarPerformanceSettings settings, CarPerformanceProfile profile)
         {
             float depletionRate = settings.NosDepletionRate.GetValue(profile) * 3;
