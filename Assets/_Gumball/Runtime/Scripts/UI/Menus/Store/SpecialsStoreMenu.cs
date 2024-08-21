@@ -7,16 +7,15 @@ namespace Gumball
 {
     public class SpecialsStoreMenu : StoreSubMenu
     {
-
-        private bool isInitialised;
         
-        private void OnEnable()
+        protected override void Initialise()
         {
-            if (!isInitialised)
-                Initialise();
+            base.Initialise();
+
+            CreateSpecials();
         }
 
-        private void Initialise()
+        private void CreateSpecials()
         {
             //TODO: keep list of purchase buttons in this menu - in StorePurchaseButton OnValidate check if it's got the special menu in the parent, then add it to the list
             foreach (StorePurchaseButton purchaseButton in transform.GetComponentsInAllChildren<StorePurchaseButton>())
@@ -29,5 +28,6 @@ namespace Gumball
                 storeOption.gameObject.SetActive(isShown);
             }
         }
+        
     }
 }
