@@ -12,7 +12,7 @@ namespace Gumball
         {
             base.Initialise();
 
-            CreateSpecials();
+            CoroutineHelper.Instance.PerformAfterTrue(() => PlayFabManager.ConnectionStatus == PlayFabManager.ConnectionStatusType.SUCCESS, CreateSpecials);
         }
 
         private void CreateSpecials()
