@@ -217,6 +217,7 @@ MonoBehaviour:
   objectParent: {fileID: 3186611742869528155}
   prefabs:
   - {fileID: 6544492484705523080, guid: 59ac05174ee456a4bada1202c8840e6e, type: 3}
+  updateImmediately: 1
 --- !u!1 &1398388826635120653
 GameObject:
   m_ObjectHideFlags: 0
@@ -554,6 +555,7 @@ MonoBehaviour:
   objectParent: {fileID: 5819118820327690099}
   prefabs:
   - {fileID: 6544492484705523080, guid: 59ac05174ee456a4bada1202c8840e6e, type: 3}
+  updateImmediately: 1
 --- !u!1 &4295926730706708539
 GameObject:
   m_ObjectHideFlags: 0
@@ -8599,16 +8601,13 @@ MonoBehaviour:
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 50
+  nextRacingLineInterpolateDistance: 65
   terrainHighLODDistance: 500
   currentLOD: 1
   terrainHighLOD: {fileID: 6614618042288515969}
   terrainLowLOD: {fileID: 8962827412244323653}
   isFullyLoaded: 0
   isAccessible: 0
-  splineMeshes:
-  - {fileID: 5224868912029315885}
-  - {fileID: 949205140703125954}
-  - {fileID: 8362887169881950937}
   chunkMeshData:
     chunk: {fileID: 6860265999645676851}
     vertices:
@@ -14961,8 +14960,6 @@ MonoBehaviour:
       percent: 1
     optimizedIndices: 
     sampleMode: 1
-  ChunkObjectData:
-    _serializedList: []
 --- !u!114 &461874578867610291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20207,17 +20204,8 @@ MonoBehaviour:
   driveOnLeft: 1
   racingLines: []
   speedLimitKmh: 60
-  density: 70
-  laneDistancesForward:
-  - 5
-  - 10
-  - 15
-  - 20
-  laneDistancesBackward:
-  - -5
-  - -10
-  - -15
-  - -20
+  lanesForward: []
+  lanesBackward: []
   chunk: {fileID: 6860265999645676851}
 --- !u!1 &7798578973857286584
 GameObject:

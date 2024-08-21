@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -24,8 +26,9 @@ namespace Gumball
         [SerializeField] private PartType type;
         [SerializeField] private CarType carType;
         [SerializeField] private string displayName;
+        [SerializeField] private string description = "This is the description for the core part.";
         [SerializeField] private Sprite icon;
-
+        
         [Header("Cost")]
         [Tooltip("This is the cost to install the core part on a car.")]
         [SerializeField] private int standardCurrencyInstallCost = 500;
@@ -44,11 +47,13 @@ namespace Gumball
 
         public PartType Type => type;
         public CarType CarType => carType;
-        public string DisplayName => displayName;
+        public string DisplayName => displayName.IsNullOrEmpty() ? name : displayName;
+        public string Description => description;
         public Sprite Icon => icon;
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public SubPartSlot[] SubPartSlots => subPartSlots;
-        
+        public ReadOnlyCollection<GameSession> SessionsThatGiveReward => sessionsThatGiveReward.AsReadOnly();
+
         public bool IsUnlocked
         {
             get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.IsUnlocked", false);
@@ -77,6 +82,18 @@ namespace Gumball
                 {
                     level.SetupInspector(this);
                 }
+            }
+
+            CheckRewardsAreStillTracked();
+        }
+        
+        private void CheckRewardsAreStillTracked()
+        {
+            for (int index = sessionsThatGiveReward.Count - 1; index >= 0; index--)
+            {
+                GameSession session = sessionsThatGiveReward[index];
+                if (session == null || !session.Rewards.CoreParts.Contains(this))
+                    UntrackAsReward(session);
             }
         }
 
