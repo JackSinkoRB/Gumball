@@ -16,12 +16,40 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI lockedLabel;
 
         private GameSession session;
-        private SubPart part;
+        private SubPart subPart;
+        private CorePart corePart;
 
         public void Initialise(GameSession session, SubPart part)
         {
             this.session = session;
-            this.part = part;
+            subPart = part;
+            
+            label.text = session.Description;
+            
+            //TODO: if session is not yet unlocked, set button disabled
+            
+            if (part.IsUnlocked)
+            {
+                button.interactable = false;
+                lockedLabel.gameObject.SetActive(true);
+                lockedLabel.text = obtainedText;
+                
+                //strikethrough the name
+                label.fontStyle = FontStyles.Strikethrough;
+            }
+            else
+            {
+                button.interactable = true;
+                lockedLabel.gameObject.SetActive(false);
+                
+                label.fontStyle = FontStyles.Normal;
+            }
+        }
+        
+        public void Initialise(GameSession session, CorePart part)
+        {
+            this.session = session;
+            corePart = part;
             
             label.text = session.Description;
             

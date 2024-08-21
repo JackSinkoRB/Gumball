@@ -27,7 +27,9 @@ namespace Gumball
         
         [Header("Events tab")]
         [SerializeField] private GameObject events;
-
+        [SerializeField] private Transform eventHolder;
+        [SerializeField] private EventScrollItem eventPrefab;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private int currentSelected;
 
@@ -38,8 +40,11 @@ namespace Gumball
 
         public void Select(int option)
         {
-            ShowInfoProperties(option == 0 && currentPartOption != null);
-            ShowInfoEvents(option == 1 && currentPartOption != null);
+            foreach (CorePart corePaart in CorePartManager.AllParts)
+                corePaart.SetUnlocked(true);
+            
+            properties.SetActive(option == 0 && currentPartOption != null);
+            events.SetActive(option == 1 && currentPartOption != null);
 
             SwapCorePartFilterButton selectedOption = options[option];
             RectTransform rectTransform = selectedOption.GetComponent<RectTransform>();
@@ -53,18 +58,30 @@ namespace Gumball
                 AutosizeTextMeshPro label = filterButton.GetComponent<AutosizeTextMeshPro>();
                 label.color = selectedOption == filterButton ? selectedFilterButtonColor : deselectedFilterButtonColor;
             }
+
+            if (currentPartOption != null)
+            {
+                UpdateDescription();
+                UpdateEvents();
+                UpdatePerformanceRatingSliders();
+            }
         }
         
-        private void ShowInfoProperties(bool show)
+        private void UpdateDescription()
         {
-            properties.SetActive(show);
+            descriptionLabel.text = currentPartOption.CorePart.Description;
+        }
 
-            if (show)
+        private void UpdateEvents()
+        {
+            foreach (Transform child in eventHolder)
+                child.gameObject.Pool();
+
+            foreach (GameSession session in currentPartOption.CorePart.SessionsThatGiveReward)
             {
-                //update
-                descriptionLabel.text = currentPartOption.CorePart.Description;
-
-                UpdatePerformanceRatingSliders();
+                EventScrollItem eventScrollItem = eventPrefab.gameObject.GetSpareOrCreate<EventScrollItem>(eventHolder);
+                eventScrollItem.transform.SetAsLastSibling();
+                eventScrollItem.Initialise(session, currentPartOption.CorePart);
             }
         }
 
@@ -80,17 +97,6 @@ namespace Gumball
             accelerationSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
             handlingSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
             nosSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
-        }
-
-        private void ShowInfoEvents(bool show)
-        {
-            events.SetActive(show);
-
-            if (show)
-            {
-                //update
-                
-            }
         }
 
     }

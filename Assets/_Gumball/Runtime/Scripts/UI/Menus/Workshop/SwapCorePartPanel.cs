@@ -40,6 +40,9 @@ namespace Gumball
 
         public void SelectPartOption(SwapCorePartOptionButton option)
         {
+            if (option == null)
+                option = GetCurrentInstalledOption(); //try select the current installed option
+            
             if (selectedOption != null)
                 selectedOption.OnDeselect();
             
@@ -100,6 +103,21 @@ namespace Gumball
             instance.transform.SetAsLastSibling();
             
             partOptions.Add(instance);
+        }
+        
+        private SwapCorePartOptionButton GetCurrentInstalledOption()
+        {
+            if (headerFilter.CurrentSelected != WarehouseManager.Instance.CurrentCar.CarType)
+                return null; //category not showing
+            
+            foreach (SwapCorePartOptionButton optionButton in partOptions)
+            {
+                CorePart currentInstalledPart = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, partType);
+                if (optionButton.CorePart == currentInstalledPart)
+                    return optionButton;
+            }
+
+            return null;
         }
         
     }

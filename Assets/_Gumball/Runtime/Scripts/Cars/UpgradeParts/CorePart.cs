@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -50,7 +52,8 @@ namespace Gumball
         public Sprite Icon => icon;
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public SubPartSlot[] SubPartSlots => subPartSlots;
-        
+        public ReadOnlyCollection<GameSession> SessionsThatGiveReward => sessionsThatGiveReward.AsReadOnly();
+
         public bool IsUnlocked
         {
             get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.IsUnlocked", false);
@@ -79,6 +82,18 @@ namespace Gumball
                 {
                     level.SetupInspector(this);
                 }
+            }
+
+            CheckRewardsAreStillTracked();
+        }
+        
+        private void CheckRewardsAreStillTracked()
+        {
+            for (int index = sessionsThatGiveReward.Count - 1; index >= 0; index--)
+            {
+                GameSession session = sessionsThatGiveReward[index];
+                if (session == null || !session.Rewards.CoreParts.Contains(this))
+                    UntrackAsReward(session);
             }
         }
 
