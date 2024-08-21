@@ -24,6 +24,8 @@ namespace Gumball
         [SerializeField, ReadOnly] private SwapCorePartOptionButton selectedOption;
         [SerializeField, ReadOnly] private List<SwapCorePartOptionButton> partOptions = new();
 
+        public SwapCorePartOptionButton SelectedOption => selectedOption;
+
         public void Initialise(CorePart.PartType type)
         {
             partType = type;
@@ -46,6 +48,8 @@ namespace Gumball
                 selectedOption.OnSelect();
             
             installButton.Initialise(partType, selectedOption == null ? null : selectedOption.CorePart);
+            
+            infoHeaderFilter.Select(infoHeaderFilter.CurrentSelected);
         }
         
         public void OnClickInstallButton()

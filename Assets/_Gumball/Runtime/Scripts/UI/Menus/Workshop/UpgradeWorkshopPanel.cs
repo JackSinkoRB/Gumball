@@ -9,7 +9,7 @@ namespace Gumball
     public class UpgradeWorkshopPanel : AnimatedPanel
     {
         
-        [Header("Sub part menus")]
+        [SerializeField] private VirtualButton cancelButton;
         [SerializeField] private ModifyWorkshopSubMenu modifySubMenu;
 
         [Header("Debugging")]
@@ -33,7 +33,10 @@ namespace Gumball
         public void OnClickCancelButton()
         {
             if (currentSubMenu != null)
+            {
                 currentSubMenu.Hide();
+                cancelButton.gameObject.SetActive(false); //disable cancel button if no menus open as it blocks
+            }
         }
         
         public void OpenSubMenu(WorkshopSubMenu subMenu)
@@ -49,6 +52,8 @@ namespace Gumball
             //just show this menu
             if (subMenu != null)
                 subMenu.Show();
+            
+            cancelButton.gameObject.SetActive(subMenu != null); //disable cancel button if no menus open as it blocks
         }
 
     }

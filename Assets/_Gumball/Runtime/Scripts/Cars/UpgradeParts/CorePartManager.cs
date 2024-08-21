@@ -56,22 +56,19 @@ namespace Gumball
             return GetPartByID(partID);
         }
 
-        public static CorePart[] GetCoreParts(int carIndex)
+        public static Dictionary<CorePart.PartType, CorePart> GetCoreParts(int carIndex)
         {
-            CorePart.PartType[] coreParts = (CorePart.PartType[]) Enum.GetValues(typeof(CorePart.PartType));
-            CorePart[] parts = new CorePart[coreParts.Length];
+            Dictionary<CorePart.PartType, CorePart> parts = new();
             
-            for (int index = 0; index < coreParts.Length; index++) {
-                CorePart.PartType type = coreParts[index];
-                parts[index] = GetCorePart(carIndex, type);
-            }
-
+            foreach (CorePart.PartType partType in Enum.GetValues(typeof(CorePart.PartType)))
+                parts[partType] = GetCorePart(carIndex, partType);
+            
             return parts;
         }
 
         public static void InstallParts(int carIndex)
         {
-            foreach (CorePart part in GetCoreParts(carIndex))
+            foreach (CorePart part in GetCoreParts(carIndex).Values)
             {
                 if (part == null)
                     continue; //no part applied

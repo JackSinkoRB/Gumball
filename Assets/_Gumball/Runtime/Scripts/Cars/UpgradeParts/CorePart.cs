@@ -24,8 +24,9 @@ namespace Gumball
         [SerializeField] private PartType type;
         [SerializeField] private CarType carType;
         [SerializeField] private string displayName;
+        [SerializeField] private string description = "This is the description for the core part.";
         [SerializeField] private Sprite icon;
-
+        
         [Header("Cost")]
         [Tooltip("This is the cost to install the core part on a car.")]
         [SerializeField] private int standardCurrencyInstallCost = 500;
@@ -44,7 +45,8 @@ namespace Gumball
 
         public PartType Type => type;
         public CarType CarType => carType;
-        public string DisplayName => displayName;
+        public string DisplayName => displayName.IsNullOrEmpty() ? name : displayName;
+        public string Description => description;
         public Sprite Icon => icon;
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public SubPartSlot[] SubPartSlots => subPartSlots;
