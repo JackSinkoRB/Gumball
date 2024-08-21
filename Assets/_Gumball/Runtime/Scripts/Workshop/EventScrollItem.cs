@@ -10,6 +10,7 @@ namespace Gumball
     {
 
         private const string obtainedText = "Obtained!";
+        private const string unobtainedText = "Unobtained";
         
         [SerializeField] private Button button;
         [SerializeField] private TextMeshProUGUI label;
@@ -31,7 +32,6 @@ namespace Gumball
             if (part.IsUnlocked)
             {
                 button.interactable = false;
-                lockedLabel.gameObject.SetActive(true);
                 lockedLabel.text = obtainedText;
                 
                 //strikethrough the name
@@ -40,8 +40,8 @@ namespace Gumball
             else
             {
                 button.interactable = true;
-                lockedLabel.gameObject.SetActive(false);
-                
+                lockedLabel.text = unobtainedText;
+
                 label.fontStyle = FontStyles.Normal;
             }
         }
@@ -58,7 +58,6 @@ namespace Gumball
             if (part.IsUnlocked)
             {
                 button.interactable = false;
-                lockedLabel.gameObject.SetActive(true);
                 lockedLabel.text = obtainedText;
                 
                 //strikethrough the name
@@ -67,8 +66,8 @@ namespace Gumball
             else
             {
                 button.interactable = true;
-                lockedLabel.gameObject.SetActive(false);
-                
+                lockedLabel.text = unobtainedText;
+
                 label.fontStyle = FontStyles.Normal;
             }
         }

@@ -9,9 +9,9 @@ namespace Gumball
     public class SwapCorePartInstallButton : MonoBehaviour
     {
 
-        [SerializeField] private TextMeshProUGUI label;
+        [SerializeField] private AutosizeTextMeshPro label;
         [SerializeField] private GameObject costHolder;
-        [SerializeField] private TextMeshProUGUI costLabel;
+        [SerializeField] private AutosizeTextMeshPro costLabel;
         
         private Button button => GetComponent<Button>();
 
@@ -22,6 +22,7 @@ namespace Gumball
             {
                 label.alignment = TextAlignmentOptions.Center;
                 label.text = "Installed";
+                this.PerformAtEndOfFrame(label.Resize);
                 button.interactable = false;
 
                 costHolder.SetActive(false);
@@ -29,6 +30,7 @@ namespace Gumball
             else
             {
                 label.text = "Install";
+                this.PerformAtEndOfFrame(label.Resize);
                 button.interactable = WarehouseManager.Instance.CurrentCar.CarType == part.CarType;
 
                 bool isStockPart = part == null;
