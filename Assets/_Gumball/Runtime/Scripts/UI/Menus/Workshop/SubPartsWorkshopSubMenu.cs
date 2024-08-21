@@ -19,15 +19,10 @@ namespace Gumball
         public void Initialise(CorePart.PartType corePartType)
         {
             this.corePartType = corePartType;
-        }
-        
-        public override void Show()
-        {
-            base.Show();
-            
+
             SetupSubPartSlots();
         }
-
+        
         public void OnClickSwapButton()
         {
             PanelManager.GetPanel<SwapCorePartPanel>().Show();

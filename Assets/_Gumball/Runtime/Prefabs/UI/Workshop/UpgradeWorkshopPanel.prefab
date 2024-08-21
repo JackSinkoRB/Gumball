@@ -331,10 +331,10 @@ RectTransform:
   - {fileID: 3657938605171976015}
   m_Father: {fileID: 140331945801531713}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 2028.559, y: 1022.20355}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5104109735523916254
 MonoBehaviour:
@@ -348,6 +348,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 514f8a9ab54cb19469a86dc434907a13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isAddedToPanelStack: 1
+  ignoreTimescale: 1
+  disableWhenHidden: 1
+  fadeElements:
+  - ignoreTimescale: 0
+    startHidden: 0
+    disableWhenHidden: 0
+    doShowAnimation: 1
+    doHideAnimation: 1
+    showDelay: 0
+    hideDelay: 0
+    showDuration: 0.2
+    hideDuration: 0.2
+    rectTransform: {fileID: 5055586270887855253}
+    showEase: 4
+    hideEase: 4
+  slideElements:
+  - ignoreTimescale: 0
+    startHidden: 0
+    disableWhenHidden: 0
+    doShowAnimation: 1
+    doHideAnimation: 1
+    showDelay: 0
+    hideDelay: 0
+    showDuration: 0.3
+    hideDuration: 0.2
+    rectTransform: {fileID: 5055586270887855253}
+    shownPosition: {x: 0, y: 0, z: 0}
+    hideOutsideScreen: 0
+    hiddenPosition: {x: 60, y: 0}
+    showEase: 27
+    hideEase: 26
   subPartMenu: {fileID: 1234110201168235419}
   corePartButtons:
   - {fileID: 5778608891507340838}
@@ -4604,6 +4636,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71ed3e21ac2648d489b1996572c822b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isAddedToPanelStack: 1
+  ignoreTimescale: 1
+  disableWhenHidden: 1
+  fadeElements: []
+  slideElements: []
   slotButtonsHolder: {fileID: 4756166517520397895}
   slotButtonPrefab: {fileID: 1205629328598122056, guid: 4c7e1a610532a7445b09959d012c48ea,
     type: 3}

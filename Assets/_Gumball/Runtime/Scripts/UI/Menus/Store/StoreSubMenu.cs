@@ -12,16 +12,16 @@ namespace Gumball
         [SerializeField] private Color selectedCategoryButtonColor = Color.white;
         [SerializeField] private Color deselectedCategoryButtonColor = Color.white;
         
-        public override void Show()
+        protected override void OnShow()
         {
-            base.Show();
+            base.OnShow();
 
             categoryButton.image.color = selectedCategoryButtonColor;
         }
 
-        public override void Hide()
+        protected override void OnHide()
         {
-            base.Hide();
+            base.OnHide();
             
             categoryButton.image.color = deselectedCategoryButtonColor;
         }

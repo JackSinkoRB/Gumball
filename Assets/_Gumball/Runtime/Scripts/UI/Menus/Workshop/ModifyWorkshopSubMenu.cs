@@ -20,9 +20,9 @@ namespace Gumball
 
         public int SelectedCorePartIndex => selectedCorePartIndex;
         
-        public override void Show()
+        protected override void OnShow()
         {
-            base.Show();
+            base.OnShow();
             
             OpenSubMenu(0);
         }
