@@ -7,16 +7,21 @@ namespace Gumball
 {
     public class SpecialsStoreMenu : StoreSubMenu
     {
-        
-        protected override void Initialise()
-        {
-            base.Initialise();
 
-            CreateSpecials();
+        private bool hasCreatedSpecials;
+
+        protected override void OnShow()
+        {
+            base.OnShow();
+            
+            if (!hasCreatedSpecials)
+                CreateSpecials();
         }
 
         private void CreateSpecials()
         {
+            hasCreatedSpecials = true;
+            
             //TODO: keep list of purchase buttons in this menu - in StorePurchaseButton OnValidate check if it's got the special menu in the parent, then add it to the list
             foreach (StorePurchaseButton purchaseButton in transform.GetComponentsInAllChildren<StorePurchaseButton>())
             {
