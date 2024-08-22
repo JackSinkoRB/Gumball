@@ -32,9 +32,9 @@ namespace Gumball
             : (wheelsToModifyPosition == WheelsToModifyPosition.FRONT ?
                 WarehouseManager.Instance.CurrentCar.FrontWheelColliders : WarehouseManager.Instance.CurrentCar.RearWheelColliders);
 
-        public override void Show()
+        protected override void OnShow()
         {
-            base.Show();
+            base.OnShow();
 
             SetWheelsToModifyPosition(WheelsToModifyPosition.ALL);
         }

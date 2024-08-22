@@ -34,98 +34,84 @@ MonoBehaviour:
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2200
+  raceDistanceMetres: 2000
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
+      type: 3}
+    distanceFromSpline: 5
   racerData:
+  - assetReference:
+      m_AssetGUID: e88edf073eda248429d699a6081a669f
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.7
+    startingPosition:
+      position: {x: 3, y: 0.1, z: 125}
+      rotation: {x: 0, y: 0, z: 0, w: 0}
+    performanceProfile:
+      maxSpeed: 0.2
+      acceleration: 0.275
+      handling: 0.062
+      nos: 0.045
+    currentPerformanceRating: 290
   - assetReference:
       m_AssetGUID: b5028991c62dbc64a99eb0b82d8b0745
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 0
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.7
     startingPosition:
-      position: {x: 3, y: 0.1, z: 125}
+      position: {x: 3, y: 0.1, z: 150}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
+      maxSpeed: 0.037
+      acceleration: 0.054
       handling: 0
       nos: 0
+    currentPerformanceRating: 290
   - assetReference:
-      m_AssetGUID: 6f46e795bac33904aa0828a7953feaf1
+      m_AssetGUID: 9e6cb95863f6d6a4bbd5c83903375a7a
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 0
-    startingPosition:
-      position: {x: 0, y: 0, z: 0}
-      rotation: {x: 0, y: 0, z: 0, w: 0}
-    performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
-  - assetReference:
-      m_AssetGUID: 007b6760012e172418eb7e49956334ab
-      m_SubObjectName: 
-      m_SubObjectType: 
-      m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 0
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.7
     startingPosition:
       position: {x: 3, y: 0.1, z: 175}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
-  - assetReference:
-      m_AssetGUID: 2810a7c750d016a4eafcd426871217b5
-      m_SubObjectName: 
-      m_SubObjectType: 
-      m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 0
-    startingPosition:
-      position: {x: 3, y: 0.1, z: 225}
-      rotation: {x: 0, y: 0, z: 0, w: 0}
-    performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
-  - assetReference:
-      m_AssetGUID: 99c974c8da4d7ca4f9489658e6adb107
-      m_SubObjectName: 
-      m_SubObjectType: 
-      m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 0
-    startingPosition:
-      position: {x: 3, y: 0.1, z: 275}
-      rotation: {x: 0, y: 0, z: 0, w: 0}
-    performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
-  racersStartingSpeed: 70
+      maxSpeed: 0.186
+      acceleration: 0.174
+      handling: 0.153
+      nos: 0.114
+    currentPerformanceRating: 290
+  racersStartingSpeed: 60
   trafficIsProcedural: 1
   trafficDensity: 100
   trafficBikes: []
-  trafficCars: []
+  trafficCars:
+  - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 81825441c04ee5c468680e955e2bb0b3
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficTrucks: []
   trafficSpawnPositions:
     Value: []
   rewards:
-    xp: 0
-    standardCurrency: 0
+    xp: 650
+    standardCurrency: 1750
     premiumCurrency: 0
     fuelRefill: 0
     coreParts: []
-    subParts: []
+    subParts:
+    - {fileID: 11400000, guid: 672a9a21b3dbdff4fb49b19db856747b, type: 2}
     unlockables: []
   mainChallengeDescription: This is the challenge description
   subObjectives: []
@@ -134,5 +120,6 @@ MonoBehaviour:
     list: []
     keyCollision: 0
   previousCorePartRewards: []
-  previousSubPartRewards: []
-  racersInPositionOrder: []
+  previousSubPartRewards:
+  - {fileID: 11400000, guid: 672a9a21b3dbdff4fb49b19db856747b, type: 2}
+  racersInPositionOrderCached: []

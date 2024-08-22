@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff023cbf706d2f64dace4263ec5fe7ef, type: 3}
   m_Name: Level 14 Narrow Highways
   m_EditorClassIdentifier: 
+  uniqueID: 120f916b29bc3ce4fbf25c214adfed9c
+  lastKnownName: Level 14 Narrow Highways
   description: Description of session
   scene:
     scene:
@@ -26,15 +28,19 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  vehicleStartingPosition: {x: 10, y: 0.2, z: 0}
+  vehicleStartingPosition: {x: 10, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
   globalLightIntensity: 1
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2400
+  raceDistanceMetres: 1900
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
+      type: 3}
+    distanceFromSpline: 5
   racerData: []
-  racersStartingSpeed: 70
+  racersStartingSpeed: 100
   trafficIsProcedural: 0
   trafficDensity: 25
   trafficBikes: []
@@ -350,10 +356,17 @@ MonoBehaviour:
     - distanceFromMapStart: 2416.9011
       laneDirection: 2
       laneIndex: 0
-  xpReward: 100
-  standardCurrencyReward: 1000
-  corePartRewards: []
-  subPartRewards: []
+  rewards:
+    xp: 600
+    standardCurrency: 1500
+    premiumCurrency: 0
+    fuelRefill: 0
+    coreParts: []
+    subParts:
+    - {fileID: 11400000, guid: 67ba516f5e1100f4bb1e75c8b13a5cee, type: 2}
+    unlockables: []
+  mainChallengeDescription: This is the challenge description
+  subObjectives: []
   inProgress: 0
   currentRacers:
     list:
@@ -374,9 +387,11 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
-    keyCollision: 0
+        currentPerformanceRating: 0
+    keyCollision: 1
   previousCorePartRewards: []
-  previousSubPartRewards: []
+  previousSubPartRewards:
+  - {fileID: 11400000, guid: 67ba516f5e1100f4bb1e75c8b13a5cee, type: 2}
   timeAllowedSeconds: 45
   timeRemainingSeconds: 1.1777459
   timerHasStarted: 1

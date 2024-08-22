@@ -10,13 +10,21 @@ namespace Gumball
     public struct PerformanceRatingCalculator
     {
 
+        public enum Component
+        {
+            MAX_SPEED,
+            ACCELERATION,
+            HANDLING,
+            NOS
+        }
+        
         public static PerformanceRatingCalculator GetCalculator(CarPerformanceSettings settings, CarPerformanceProfile profile)
         {
             PerformanceRatingCalculator calculator = new PerformanceRatingCalculator();
             calculator.Calculate(settings, profile);
             return calculator;
         }
-        
+
         [SerializeField, ReadOnly] private int totalRating;
         [SerializeField, ReadOnly] private int maxSpeedRating;
         [SerializeField, ReadOnly] private int accelerationSpeedRating;
@@ -37,6 +45,18 @@ namespace Gumball
             nosRating = GetNosRating(settings, profile);
 
             totalRating = maxSpeedRating + accelerationSpeedRating + handlingRating + nosRating;
+        }
+        
+        public int GetRating(Component component)
+        {
+            return component switch
+            {
+                Component.MAX_SPEED => maxSpeedRating,
+                Component.ACCELERATION => accelerationSpeedRating,
+                Component.HANDLING => handlingRating,
+                Component.NOS => nosRating,
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
 
         private int GetMaxSpeedRating(CarPerformanceSettings settings, CarPerformanceProfile profile)
@@ -66,11 +86,12 @@ namespace Gumball
             float handbrake = settings.HandbrakeTorque.GetValue(profile) * 0.001f;
             float steerSpeed = settings.SteerSpeed.GetValue(profile) * 5f;
             float steerReleaseSpeed = settings.SteerReleaseSpeed.GetValue(profile) * 0.25f;
-            float maxSteerAngle = settings.MaxSteerAngle.GetValue(profile).keys[1].value * 0.5f; //just use the max speed value
+            float maxSteerAngle = settings.MaxSteerAngle.GetValue(profile).keys.Length < 1 ? 0
+                : settings.MaxSteerAngle.GetValue(profile).keys[1].value * 0.5f; //just use the max speed value
 
             return Mathf.CeilToInt(brake + handbrakeEaseOffDuration + handbrake + steerSpeed + steerReleaseSpeed + maxSteerAngle);
         }
-                
+        
         private int GetNosRating(CarPerformanceSettings settings, CarPerformanceProfile profile)
         {
             float depletionRate = settings.NosDepletionRate.GetValue(profile) * 3;

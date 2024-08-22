@@ -11,9 +11,9 @@ namespace Gumball
 
         [SerializeField] private MagneticScroll magneticScroll;
 
-        public override void Show()
+        protected override void OnShow()
         {
-            base.Show();
+            base.OnShow();
 
             PopulateScrollWithBodyKits();
         }
