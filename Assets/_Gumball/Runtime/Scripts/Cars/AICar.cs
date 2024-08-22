@@ -817,6 +817,12 @@ namespace Gumball
             int closestSampleIndexToPlayer = CurrentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
+                if (racingLine == null)
+                {
+                    Debug.LogError($"There's a missing/null racing line in {CurrentChunk.name}'s TrafficManager.");
+                    continue;
+                }
+                
                 if (racingLine.SplineSamples == null || racingLine.SplineSamples.Length == 0)
                     continue;
                 
@@ -914,6 +920,12 @@ namespace Gumball
             
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
+                if (racingLine == null)
+                {
+                    Debug.LogError($"There's a missing/null racing line in {CurrentChunk.name}'s TrafficManager.");
+                    continue;
+                }
+                
                 UpdateAutoDriveTargetPosition();
                 
                 if (targetPos == null)

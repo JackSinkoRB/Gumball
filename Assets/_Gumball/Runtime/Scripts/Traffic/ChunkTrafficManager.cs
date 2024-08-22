@@ -188,7 +188,7 @@ namespace Gumball
 
             if (lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE && lane.Path == null)
             {
-                Debug.LogError($"Could not spawn car in lane in {chunk.name.Replace("(Clone)", "")} because there is no path assigned.");
+                Debug.LogError($"Could not spawn car in a custom path lane in {chunk.name.Replace("(Clone)", "")} because there is no path assigned.");
                 return false;
             }
             
