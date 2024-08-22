@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Dreamteck.Splines;
 using JBooth.VertexPainterPro;
 using MyBox;
@@ -11,6 +12,7 @@ using Gumball.Editor;
 using UnityEditor;
 #endif
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
 
 namespace Gumball
@@ -648,8 +650,53 @@ namespace Gumball
         [SerializeField] private bool showDebugLines;
 
         public bool ShowDebugLines => showDebugLines;
-        
+
+        [Header("Chunk map search")]
+        [SerializeField] private GumballEvent[] eventsToSearchIn;
+        [SerializeField, ReadOnly] private ChunkMap[] mapsUsingChunk;
+
+        [ButtonMethod]
+        public void UpdateMapsUsingChunk()
+        {
+            if (eventsToSearchIn == null || eventsToSearchIn.Length == 0)
+            {
+                Debug.LogError($"Add an event to search for in the {nameof(eventsToSearchIn)} field.");
+                return;
+            }
+
+            HashSet<ChunkMap> chunkMaps = new();
+            //find all the chunks maps
+            foreach (GumballEvent eventToSearchIn in eventsToSearchIn)
+            {
+                if (eventToSearchIn == null)
+                    continue;
+                
+                foreach (AssetReferenceGameObject mapReference in eventToSearchIn.Maps)
+                {
+                    GameSessionMap map = mapReference.editorAsset.GetComponent<GameSessionMap>();
+                    foreach (GameSessionNode node in map.Nodes)
+                    {
+                        ChunkMap chunkMap = node.GameSession.ChunkMapAssetReference.editorAsset;
+                        if (chunkMap == null)
+                            continue;
+                        foreach (AssetReferenceGameObject chunkReference in chunkMap.ChunkReferences)
+                        {
+                            Chunk chunkInMap = chunkReference.editorAsset.GetComponent<Chunk>();
+                            if (chunkInMap.UniqueID.Equals(chunk.UniqueID))
+                            {
+                                chunkMaps.Add(chunkMap);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            mapsUsingChunk = chunkMaps.ToArray();
+            Debug.Log($"Found {mapsUsingChunk.Length} chunk maps using chunk {gameObject.name}.");
+        }
+
 #endif
-        
+
     }
 }
