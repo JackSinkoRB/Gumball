@@ -34,8 +34,7 @@ namespace Gumball
                 return;
             }
 
-            //TODO - display level once blueprints are in
-            label.text = $"NA";
+            label.text = $"{BlueprintManager.Instance.GetLevelIndex(WarehouseManager.Instance.CurrentCar.CarIndex) + 1}";
             this.PerformAtEndOfFrame(label.Resize);
         }
 
