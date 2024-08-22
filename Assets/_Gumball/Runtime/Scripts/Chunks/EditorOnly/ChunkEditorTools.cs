@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Dreamteck.Splines;
 using JBooth.VertexPainterPro;
@@ -13,6 +14,7 @@ using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 namespace Gumball
@@ -654,16 +656,13 @@ namespace Gumball
         [Header("Chunk map search")]
         [SerializeField] private GumballEvent[] eventsToSearchIn;
         [SerializeField, ReadOnly] private ChunkMap[] mapsUsingChunk;
-
+        
         [ButtonMethod]
-        public void UpdateMapsUsingChunk()
+        public void FindMapsUsingChunk()
         {
             if (eventsToSearchIn == null || eventsToSearchIn.Length == 0)
-            {
-                Debug.LogError($"Add an event to search for in the {nameof(eventsToSearchIn)} field.");
-                return;
-            }
-
+                throw new InvalidOperationException($"Add an event to search for in the {nameof(eventsToSearchIn)} field.");
+                
             HashSet<ChunkMap> chunkMaps = new();
             //find all the chunks maps
             foreach (GumballEvent eventToSearchIn in eventsToSearchIn)
@@ -696,6 +695,30 @@ namespace Gumball
             Debug.Log($"Found {mapsUsingChunk.Length} chunk maps using chunk {gameObject.name}.");
         }
 
+        [ButtonMethod]
+        public void RebuildMapsUsingChunk()
+        {
+            FindMapsUsingChunk();
+            
+            if (Application.isPlaying)
+                throw new InvalidOperationException("Cannot rebuild during play mode.");
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            //rebuild the data (but only recreate runtime chunks once)
+            foreach (ChunkMap chunkMap in mapsUsingChunk)
+            {
+                if (chunkMap == null)
+                    continue;
+                
+                chunkMap.RebuildData(false);
+            }
+            
+            //reset the runtime chunk creation tracking
+            ChunkMap.ClearRuntimeChunksCreatedTracking();
+
+            Debug.Log($"Rebuild process took {stopwatch.Elapsed.ToPrettyString()}");
+        }
 #endif
 
     }
