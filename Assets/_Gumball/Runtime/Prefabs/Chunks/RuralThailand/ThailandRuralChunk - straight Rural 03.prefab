@@ -5632,15 +5632,13 @@ MonoBehaviour:
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 50
+  nextRacingLineInterpolateDistance: 65
   terrainHighLODDistance: 500
   currentLOD: 1
   terrainHighLOD: {fileID: 5830931116194303291}
   terrainLowLOD: {fileID: 7140231227100275189}
   isFullyLoaded: 0
   isAccessible: 0
-  splineMeshes:
-  - {fileID: 4107420243816553111}
-  - {fileID: 6230824291809491558}
   chunkMeshData:
     chunk: {fileID: 6860265999645676851}
     vertices:
@@ -9591,8 +9589,6 @@ MonoBehaviour:
       percent: 1
     optimizedIndices: 
     sampleMode: 1
-  ChunkObjectData:
-    _serializedList: []
 --- !u!114 &461874578867610291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9705,6 +9701,8 @@ MonoBehaviour:
   verticesCombined: []
   chunkToConnectWith: {fileID: 0}
   showDebugLines: 0
+  eventsToSearchIn: []
+  mapsUsingChunk: []
 --- !u!114 &548465593941109952
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10612,15 +10610,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driveOnLeft: 1
-  racingLine: {fileID: 4503799474479618766}
+  racingLines: []
   speedLimitKmh: 60
-  density: 70
-  laneDistancesForward:
-  - -12.5
-  - -7.5
-  laneDistancesBackward:
-  - 12.5
-  - 7.5
+  lanesForward: []
+  lanesBackward: []
   chunk: {fileID: 6860265999645676851}
 --- !u!1 &8738830741209872534
 GameObject:
