@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8a19ef3a28625148862c647c7ad89f6, type: 3}
   m_Name: Level 3 - Channel Road
   m_EditorClassIdentifier: 
-  uniqueID: 5143c719304ad4d40939f2f19c17bf83
-  lastKnownName: Level3
+  uniqueID: 93ff92af2bb3d9a449cff4ea53e96d15
+  lastKnownName: Level 3 - Channel Road
   description: Race along Saigon's Channel
   scene:
     scene:
@@ -34,7 +34,7 @@ MonoBehaviour:
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2500
+  raceDistanceMetres: 2100
   finishLineMarkers:
     checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
       type: 3}
@@ -55,7 +55,12 @@ MonoBehaviour:
       acceleration: 0.047
       handling: 0.057
       nos: 0
-    currentPerformanceRating: 235
+    currentPerformanceRating:
+      totalRating: 235
+      maxSpeedRating: 100
+      accelerationSpeedRating: 63
+      handlingRating: 41
+      nosRating: 31
   racersStartingSpeed: 70
   trafficIsProcedural: 1
   trafficDensity: 100
@@ -83,11 +88,59 @@ MonoBehaviour:
     unlockables: []
   mainChallengeDescription: This is the challenge description
   subObjectives: []
-  inProgress: 0
+  inProgress: 1
   currentRacers:
-    list: []
+    list:
+    - Key: {fileID: 0}
+      Value:
+        assetReference:
+          m_AssetGUID: 
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        canCrossMiddle: 1
+        racingLineImprecisionMaxDistance: 3
+        startingPosition:
+          position: {x: 0, y: 0, z: 0}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0
+          handling: 0
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 0
+          maxSpeedRating: 0
+          accelerationSpeedRating: 0
+          handlingRating: 0
+          nosRating: 0
+    - Key: {fileID: 0}
+      Value:
+        assetReference:
+          m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 5
+        startingPosition:
+          position: {x: 10, y: 0.1, z: 125}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        performanceProfile:
+          maxSpeed: 0.121
+          acceleration: 0.047
+          handling: 0.057
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 235
+          maxSpeedRating: 100
+          accelerationSpeedRating: 63
+          handlingRating: 41
+          nosRating: 31
     keyCollision: 0
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 7394944cb85a36c4d98509d1e594ab09, type: 2}
-  racersInPositionOrderCached: []
+  racersInPositionOrderCached:
+  - {fileID: 0}
+  - {fileID: 0}
