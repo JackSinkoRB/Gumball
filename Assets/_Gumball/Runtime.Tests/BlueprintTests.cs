@@ -98,29 +98,6 @@ namespace Gumball.Runtime.Tests
             
             Assert.AreEqual(before + amountToAdd, BlueprintManager.Instance.GetBlueprints(carIndex));
         }
-        
-        [UnityTest]
-        [Order(4)]
-        public IEnumerator GetLevel()
-        {
-            yield return new WaitUntil(() => isInitialised);
-            
-            //start with no level
-            Assert.AreEqual(-1, BlueprintManager.Instance.GetLevelIndex(carIndex));
-            
-            const int blueprints1 = 10;
-            BlueprintManager.Instance.SetBlueprints(carIndex, blueprints1);
-            Assert.AreEqual(0, BlueprintManager.Instance.GetLevelIndex(carIndex));
-
-            const int blueprints2 = 35;
-            BlueprintManager.Instance.SetBlueprints(carIndex, blueprints2);
-            Assert.AreEqual(2, BlueprintManager.Instance.GetLevelIndex(carIndex));
-
-            //max level
-            const int blueprints3 = int.MaxValue;
-            BlueprintManager.Instance.SetBlueprints(carIndex, blueprints3);
-            Assert.AreEqual(BlueprintManager.Instance.BlueprintsRequiredForEachLevel.Count - 1, BlueprintManager.Instance.GetLevelIndex(carIndex));
-        }
 
     }
 }

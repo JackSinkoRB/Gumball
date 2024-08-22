@@ -9,15 +9,23 @@ namespace Gumball
     public class BlueprintManager : SingletonScriptable<BlueprintManager>
     {
 
-        [SerializeField] private List<int> blueprintsRequiredForEachLevel = new();
+        public delegate void OnValueChangeDelegate(int carIndex, int previousAmount, int newAmount);
+        public static event OnValueChangeDelegate onBlueprintsChange;
+        public static event OnValueChangeDelegate onLevelChange;
 
-        public List<int> BlueprintsRequiredForEachLevel => blueprintsRequiredForEachLevel;
+        [RuntimeInitializeOnLoadMethod]
+        private static void RuntimeInitialise()
+        {
+            onBlueprintsChange = null;
+        }
+        
+        [SerializeField] private List<int> blueprintsRequiredForEachLevel = new();
 
         public int GetBlueprints(int carIndex)
         {
-            return DataManager.Cars.Get(GetSaveKey(carIndex), 0);
+            return DataManager.Cars.Get($"{GetSaveKey(carIndex)}.Amount", 0);
         }
-        
+
         public void SetBlueprints(int carIndex, int amount)
         {
             if (amount < 0)
@@ -25,13 +33,43 @@ namespace Gumball
                 Debug.LogError("Cannot set blueprints below 0");
                 amount = 0;
             }
-            
-            DataManager.Cars.Set(GetSaveKey(carIndex), amount);
-        }
 
+            int previous = GetBlueprints(carIndex);
+            if (previous == amount)
+                return; //no change
+            
+            DataManager.Cars.Set($"{GetSaveKey(carIndex)}.Amount", amount);
+            
+            onBlueprintsChange?.Invoke(carIndex, previous, amount);
+        }
+        
         public void AddBlueprints(int carIndex, int amount)
         {
             SetBlueprints(carIndex, GetBlueprints(carIndex) + amount);
+        }
+        
+        public int GetLevelIndex(int carIndex)
+        {
+            bool isUnlockedByDefault = WarehouseManager.Instance.AllCarData[carIndex].IsUnlockedByDefault;
+            int startingLevel = WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
+            return DataManager.Cars.Get($"{GetSaveKey(carIndex)}.LevelIndex", isUnlockedByDefault ? startingLevel : -1);
+        }
+        
+        public void SetLevelIndex(int carIndex, int levelIndex)
+        {
+            if (levelIndex < -1)
+            {
+                Debug.LogError("Cannot set level below -1");
+                levelIndex = -1;
+            }
+
+            int previous = GetLevelIndex(carIndex);
+            if (previous == levelIndex)
+                return; //no change
+            
+            DataManager.Cars.Set($"{GetSaveKey(carIndex)}.LevelIndex", levelIndex);
+            
+            onLevelChange?.Invoke(carIndex, previous, levelIndex);
         }
 
         public bool IsUnlocked(int carIndex)
@@ -41,26 +79,20 @@ namespace Gumball
 
         public int GetLevelToUnlock(int carIndex)
         {
-            return WarehouseManager.Instance.AllCarData[carIndex].LevelToUnlock;
+            return WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
         }
-        
-        public int GetLevelIndex(int carIndex)
-        {
-            return GetLevelIndexFromBlueprints(GetBlueprints(carIndex));
-        }
-        
-        public int GetLevelIndexFromBlueprints(int blueprints)
-        {
-            for (int count = 0; count < blueprintsRequiredForEachLevel.Count; count++)
-            {
-                int levelIndex = count - 1;
-                int nextLevelBlueprints = blueprintsRequiredForEachLevel[count];
-                if (nextLevelBlueprints > blueprints)
-                    return levelIndex;
-            }
 
-            int maxLevelIndex = blueprintsRequiredForEachLevel.Count - 1;
-            return maxLevelIndex;
+        public int GetNextLevel(int carIndex)
+        {
+            int unlockLevelIndex = WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
+            int currentLevelIndex = GetLevelIndex(carIndex);
+            int nextLevelIndex = IsUnlocked(carIndex) ? currentLevelIndex + 1 : unlockLevelIndex;
+            return nextLevelIndex;
+        }
+
+        public int GetBlueprintsRequiredForLevel(int levelIndex)
+        {
+            return blueprintsRequiredForEachLevel[levelIndex];
         }
 
         private string GetSaveKey(int carIndex)

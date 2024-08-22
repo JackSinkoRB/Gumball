@@ -8,22 +8,25 @@ namespace Gumball
     {
         
         [SerializeField] private AutosizeTextMeshPro label;
+
+        private int currentCarIndex => WarehouseManager.Instance.CurrentCar.CarIndex;
         
         private void OnEnable()
         {
             RefreshLabel();
 
-            WarehouseManager.Instance.onCurrentCarChanged += OnCarChange;
+            BlueprintManager.onBlueprintsChange += OnBlueprintsChange;
         }
 
         private void OnDisable()
         {
-            WarehouseManager.Instance.onCurrentCarChanged -= OnCarChange;
+            BlueprintManager.onBlueprintsChange -= OnBlueprintsChange;
         }
         
-        private void OnCarChange(AICar newcar)
+        private void OnBlueprintsChange(int carIndex, int previousAmount, int newAmount)
         {
-            RefreshLabel();
+            if (WarehouseManager.Instance.CurrentCar != null && carIndex == currentCarIndex)
+                RefreshLabel();
         }
         
         private void RefreshLabel()
@@ -34,8 +37,12 @@ namespace Gumball
                 return;
             }
 
-            //TODO - display blueprints to next level once blueprints are in
-            label.text = $"NA/NA";
+            int currentBlueprints = BlueprintManager.Instance.GetBlueprints(currentCarIndex);
+            
+            int nextLevelIndex = BlueprintManager.Instance.GetNextLevel(currentCarIndex);
+            int blueprintsForNextLevel = BlueprintManager.Instance.GetBlueprintsRequiredForLevel(nextLevelIndex);
+            
+            label.text = $"{currentBlueprints}/{blueprintsForNextLevel}";
             this.PerformAtEndOfFrame(label.Resize);
         }
 

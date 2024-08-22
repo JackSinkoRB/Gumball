@@ -41,13 +41,16 @@ namespace Gumball
             
         [SerializeField] private AssetReferenceGameObject carPrefabReference;
         [SerializeField] private Sprite icon;
-        [Tooltip("The index of the first level (starting at index 0) for the car blueprint level upgrades.")]
-        [SerializeField] private int levelToUnlock;
+        [Tooltip("The index (starting at index 0) that the car needs to be unlocked. Setting to -1 means it will be unlocked by default.")]
+        [SerializeField] private int startingLevelIndex = -1;
+        [Tooltip("If enabled, the car will be unlocked at the start of the game (eg. a starting car).")]
+        [SerializeField] private bool isUnlockedByDefault;
         [SerializeField, ReadOnly] private CachedData cachedData;
 
         public AssetReferenceGameObject CarPrefabReference => carPrefabReference;
         public Sprite Icon => icon;
-        public int LevelToUnlock => levelToUnlock;
+        public int StartingLevelIndex => startingLevelIndex;
+        public bool IsUnlockedByDefault => isUnlockedByDefault;
         public string DisplayName => cachedData.DisplayName;
         public CarPerformanceSettings PerformanceSettings => cachedData.PerformanceSettings;
         

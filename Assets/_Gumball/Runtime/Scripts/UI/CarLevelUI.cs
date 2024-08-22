@@ -13,17 +13,18 @@ namespace Gumball
         {
             RefreshLabel();
 
-            WarehouseManager.Instance.onCurrentCarChanged += OnCarChange;
+            BlueprintManager.onLevelChange += OnLevelChange;
         }
 
         private void OnDisable()
         {
-            WarehouseManager.Instance.onCurrentCarChanged -= OnCarChange;
+            BlueprintManager.onLevelChange -= OnLevelChange;
         }
         
-        private void OnCarChange(AICar newcar)
+        private void OnLevelChange(int carIndex, int previousAmount, int newAmount)
         {
-            RefreshLabel();
+            if (WarehouseManager.Instance.CurrentCar != null && carIndex == WarehouseManager.Instance.CurrentCar.CarIndex)
+                RefreshLabel();
         }
         
         private void RefreshLabel()
