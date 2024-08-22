@@ -34,10 +34,11 @@ MonoBehaviour:
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2200
+  raceDistanceMetres: 1800
   finishLineMarkers:
-    checkpointMarkerPrefab: {fileID: 0}
-    distanceFromSpline: 5
+    checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
+      type: 3}
+    distanceFromSpline: 30
   racerData:
   - assetReference:
       m_AssetGUID: d2502054733f50042a64ef15cf60e626
@@ -54,7 +55,12 @@ MonoBehaviour:
       acceleration: 0.139
       handling: 0.023
       nos: 0.097
-    currentPerformanceRating: 240
+    currentPerformanceRating:
+      totalRating: 240
+      maxSpeedRating: 111
+      accelerationSpeedRating: 51
+      handlingRating: 46
+      nosRating: 32
   racersStartingSpeed: 70
   trafficIsProcedural: 1
   trafficDensity: 100
@@ -81,10 +87,58 @@ MonoBehaviour:
     unlockables: []
   mainChallengeDescription: This is the challenge description
   subObjectives: []
-  inProgress: 0
+  inProgress: 1
   currentRacers:
-    list: []
+    list:
+    - Key: {fileID: 0}
+      Value:
+        assetReference:
+          m_AssetGUID: 
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        canCrossMiddle: 1
+        racingLineImprecisionMaxDistance: 3
+        startingPosition:
+          position: {x: 0, y: 0, z: 0}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0
+          handling: 0
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 0
+          maxSpeedRating: 0
+          accelerationSpeedRating: 0
+          handlingRating: 0
+          nosRating: 0
+    - Key: {fileID: 0}
+      Value:
+        assetReference:
+          m_AssetGUID: d2502054733f50042a64ef15cf60e626
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 5
+        startingPosition:
+          position: {x: 10, y: 0.1, z: 125}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        performanceProfile:
+          maxSpeed: 0.177
+          acceleration: 0.139
+          handling: 0.023
+          nos: 0.097
+        currentPerformanceRating:
+          totalRating: 240
+          maxSpeedRating: 111
+          accelerationSpeedRating: 51
+          handlingRating: 46
+          nosRating: 32
     keyCollision: 0
   previousCorePartRewards: []
   previousSubPartRewards: []
-  racersInPositionOrderCached: []
+  racersInPositionOrderCached:
+  - {fileID: 0}
+  - {fileID: 0}
