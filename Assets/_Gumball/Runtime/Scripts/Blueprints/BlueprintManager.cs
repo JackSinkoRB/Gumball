@@ -11,6 +11,8 @@ namespace Gumball
 
         [SerializeField] private List<int> blueprintsRequiredForEachLevel = new();
 
+        public List<int> BlueprintsRequiredForEachLevel => blueprintsRequiredForEachLevel;
+
         public int GetBlueprints(int carIndex)
         {
             return DataManager.Cars.Get(GetSaveKey(carIndex), 0);
@@ -34,7 +36,12 @@ namespace Gumball
 
         public bool IsUnlocked(int carIndex)
         {
-            return GetLevelIndex(carIndex) >= 0;
+            return GetLevelIndex(carIndex) >= GetLevelToUnlock(carIndex);
+        }
+
+        public int GetLevelToUnlock(int carIndex)
+        {
+            return WarehouseManager.Instance.AllCarData[carIndex].LevelToUnlock;
         }
         
         public int GetLevelIndex(int carIndex)
@@ -42,7 +49,6 @@ namespace Gumball
             return GetLevelIndexFromBlueprints(GetBlueprints(carIndex));
         }
         
-        /// <returns>The current level, or 0 if not enough enough to be unlocked.</returns>
         public int GetLevelIndexFromBlueprints(int blueprints)
         {
             for (int count = 0; count < blueprintsRequiredForEachLevel.Count; count++)
