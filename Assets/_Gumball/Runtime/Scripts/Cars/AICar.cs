@@ -7,6 +7,7 @@ using Dreamteck.Splines;
 using Gumball.Editor;
 #endif
 using MyBox;
+using Unity.Profiling;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
@@ -724,40 +725,63 @@ namespace Gumball
         private void Move()
         {
             speed = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
+
+            using (new ProfilerMarker("Car.1").Auto())
+            {
+                TryCreateMovementPathCollider();
+                CheckIfPlayerDriving();
+            }
+
+            using (new ProfilerMarker("Car.2").Auto())
+            {
+                if (autoDrive)
+                    CheckForCorner();
+            }
+
+            using (new ProfilerMarker("Car.3").Auto())
+                CalculateTargetPosition();
+
+            using (new ProfilerMarker("Car.4").Auto())
+            {
+                if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
+                    CalculateSteerAngle();
+            }
+
+            using (new ProfilerMarker("Car.5").Auto())
+                CheckIfPushingAnotherRacer();
+
+            using (new ProfilerMarker("Car.6").Auto())
+                UpdateBrakingValues();
+            using (new ProfilerMarker("Car.7").Auto())
+                DoBrakeEvents();
+
+            using (new ProfilerMarker("Car.8").Auto())
+                CheckForHandbrake();
+            using (new ProfilerMarker("Car.9").Auto())
+                CheckToReverse();
+
+            using (new ProfilerMarker("Car.10").Auto())
+                UpdateCurrentGear();
             
-            TryCreateMovementPathCollider();
-            CheckIfPlayerDriving();
+            using (new ProfilerMarker("Car.11").Auto())
+                CheckToAccelerate();
+            using (new ProfilerMarker("Car.12").Auto())
+                DoAccelerationEvents();
             
-            if (autoDrive)
-                CheckForCorner();
-
-            CalculateTargetPosition();
-
-            if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
-                CalculateSteerAngle();
-
-            CheckIfPushingAnotherRacer();
+            using (new ProfilerMarker("Car.13").Auto())
+                ApplySteering();
             
-            UpdateBrakingValues();
-            DoBrakeEvents();
+            using (new ProfilerMarker("Car.14").Auto())
+                UpdateWheelMeshes();
 
-            CheckForHandbrake();
-            CheckToReverse();
+            using (new ProfilerMarker("Car.15").Auto())
+                CalculateEngineRPM();
 
-            UpdateCurrentGear();
-            
-            CheckToAccelerate();
-            DoAccelerationEvents();
-            
-            ApplySteering();
-            
-            UpdateWheelMeshes();
+            using (new ProfilerMarker("Car.16").Auto())
+                UpdateDrag();
 
-            CalculateEngineRPM();
-
-            UpdateDrag();
-
-            UpdateMovementPathCollider();
+            using (new ProfilerMarker("Car.17").Auto())
+                UpdateMovementPathCollider();
             
             //debug directions:
             Debug.DrawLine(transform.TransformPoint(frontOfCarPosition), targetPosition, 
