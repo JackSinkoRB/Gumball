@@ -17,6 +17,7 @@ namespace Gumball
         [SerializeField, DisplayInspector] private CorePart[] coreParts = Array.Empty<CorePart>();
         [SerializeField, DisplayInspector] private SubPart[] subParts = Array.Empty<SubPart>();
         [SerializeField] private Unlockable[] unlockables = Array.Empty<Unlockable>();
+        [SerializeField] private BlueprintReward[] blueprints = Array.Empty<BlueprintReward>();
         
         public int XP => xp;
         public int StandardCurrency => standardCurrency;
@@ -96,6 +97,10 @@ namespace Gumball
             foreach (Unlockable unlockable in unlockables)
                 unlockable.Unlock();
 
+            //give blueprints
+            foreach (BlueprintReward blueprintReward in blueprints)
+                blueprintReward.GiveReward();
+            
             //show the reward panel with queued rewards
             if (PanelManager.PanelExists<RewardPanel>() && PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
             {
