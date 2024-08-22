@@ -185,6 +185,13 @@ namespace Gumball
         {
             //get a random lane
             float additionalOffset = Random.Range(-randomLaneOffset, randomLaneOffset);
+
+            if (lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE && lane.Path == null)
+            {
+                Debug.LogError($"Could not spawn car in lane in {chunk.name.Replace("(Clone)", "")} because there is no path assigned.");
+                return false;
+            }
+            
             PositionAndRotation lanePosition = lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE
                 ? GetLanePosition(lane.Path.SplineSamples.GetRandom(), additionalOffset, direction)
                 : GetLanePosition(chunk.SplineSamples.GetRandom(), lane.DistanceFromCenter + additionalOffset, direction);
