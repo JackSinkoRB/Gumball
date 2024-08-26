@@ -6,37 +6,31 @@ using Random = UnityEngine.Random;
 namespace Gumball
 {
     [ExecuteAlways]
-    public class UniqueColorSetter : MonoBehaviour, ISerializationCallbackReceiver
+    public class UniqueColorSetter : MonoBehaviour
     {
 
         private static readonly int ColorSeed = Shader.PropertyToID("_ColorSeed");
 
         [SerializeField, ReadOnly] private Renderer[] renderersCached;
 
+        private bool isInitialised;
+        
         private void Start()
         {
+            if (!isInitialised)
+                Initialise();
+            
             PickRandomColor();
         }
 
-        public void OnBeforeSerialize()
+        private void Initialise()
         {
-            //cache the renderers
+            isInitialised = true;
             renderersCached = GetComponentsInChildren<Renderer>(true);
-        }
-
-        public void OnAfterDeserialize()
-        {
-            
         }
 
         private void PickRandomColor()
         {
-            if (renderersCached == null || renderersCached.Length == 0)
-            {
-                //have to find them at runtime
-                renderersCached = GetComponentsInChildren<Renderer>(true);
-            }
-            
             //apply the seed to all child renderers
             float seed = Random.Range(1, 50);
             foreach (Renderer rend in renderersCached)
