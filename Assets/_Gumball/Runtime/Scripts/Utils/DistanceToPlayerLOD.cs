@@ -9,6 +9,8 @@ namespace Gumball
     public class DistanceToPlayerLOD : MonoBehaviour
     {
 
+        private const float timeBetweenChecks = 0.5f;
+
         [Serializable]
         private struct LODLevel
         {
@@ -30,13 +32,26 @@ namespace Gumball
             }
         }
         
-        [SerializeField] private List<LODLevel> lods;
+        [SerializeField] private List<LODLevel> lods = new();
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private LODLevel currentLevel;
+
+        private float timeSinceLastCheck;
         
         private void LateUpdate()
         {
+            DoCheck();
+        }
+
+        private void DoCheck()
+        {
+            timeSinceLastCheck += Time.deltaTime;
+            if (timeSinceLastCheck < timeBetweenChecks)
+                return;
+            
+            timeSinceLastCheck = 0;
+
             LODLevel? desiredLevel = GetDesiredLevel();
 
             if (desiredLevel == null)
