@@ -757,62 +757,39 @@ namespace Gumball
 
             CheckIfDumb();
             
-            using (new ProfilerMarker("Car.1").Auto())
-            {
-                TryCreateMovementPathCollider();
-                CheckIfPlayerDriving();
-            }
+            TryCreateMovementPathCollider();
+            CheckIfPlayerDriving();
 
-            using (new ProfilerMarker("Car.2").Auto())
-            {
-                if (autoDrive)
-                    CheckForCorner();
-            }
+            if (autoDrive)
+                CheckForCorner();
 
-            using (new ProfilerMarker("Car.3").Auto())
-                CalculateTargetPosition();
+            CalculateTargetPosition();
 
-            using (new ProfilerMarker("Car.4").Auto())
-            {
-                if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
-                    CalculateSteerAngle();
-            }
+            if (!autoDrive || !recoveringFromCollision) //don't update steering angle in collision
+                CalculateSteerAngle();
 
-            using (new ProfilerMarker("Car.5").Auto())
-                CheckIfPushingAnotherRacer();
+            CheckIfPushingAnotherRacer();
 
-            using (new ProfilerMarker("Car.6").Auto())
-                UpdateBrakingValues();
-            using (new ProfilerMarker("Car.7").Auto())
-                DoBrakeEvents();
+            UpdateBrakingValues();
+            DoBrakeEvents();
 
-            using (new ProfilerMarker("Car.8").Auto())
-                CheckForHandbrake();
-            using (new ProfilerMarker("Car.9").Auto())
-                CheckToReverse();
+            CheckForHandbrake();
+            CheckToReverse();
 
-            using (new ProfilerMarker("Car.10").Auto())
-                UpdateCurrentGear();
+            UpdateCurrentGear();
             
-            using (new ProfilerMarker("Car.11").Auto())
-                CheckToAccelerate();
-            using (new ProfilerMarker("Car.12").Auto())
-                DoAccelerationEvents();
+            CheckToAccelerate();
+            DoAccelerationEvents();
             
-            using (new ProfilerMarker("Car.13").Auto())
-                ApplySteering();
+            ApplySteering();
             
-            using (new ProfilerMarker("Car.14").Auto())
-                UpdateWheelMeshes();
+            UpdateWheelMeshes();
 
-            using (new ProfilerMarker("Car.15").Auto())
-                CalculateEngineRPM();
+            CalculateEngineRPM();
 
-            using (new ProfilerMarker("Car.16").Auto())
-                UpdateDrag();
+            UpdateDrag();
 
-            using (new ProfilerMarker("Car.17").Auto())
-                UpdateMovementPathCollider();
+            UpdateMovementPathCollider();
             
             //debug directions:
             Debug.DrawLine(transform.TransformPoint(frontOfCarPosition), targetPosition, 
@@ -1491,29 +1468,21 @@ namespace Gumball
         
         private void UpdateMovementPathCollider()
         {
-            using (new ProfilerMarker("Car.17.1").Auto())
-                movementPathCollider.transform.localPosition = frontOfCarPosition;
+            movementPathCollider.transform.localPosition = frontOfCarPosition;
             
             if (isDumb)
                 return;
                 
-            using (new ProfilerMarker("Car.17.2").Auto())
-            {
-                Vector3 direction = Rigidbody.velocity.sqrMagnitude > 1 ? Rigidbody.velocity : transform.forward;
-                float distanceToPredictedPosition = direction.magnitude * predictedPositionReactionTime;
-                movementPathCollider.size = new Vector3(carWidth, carWidth, distanceToPredictedPosition);
-            }
+            Vector3 direction = Rigidbody.velocity.sqrMagnitude > 1 ? Rigidbody.velocity : transform.forward;
+            float distanceToPredictedPosition = direction.magnitude * predictedPositionReactionTime;
+            movementPathCollider.size = new Vector3(carWidth, carWidth, distanceToPredictedPosition);
 
-            using (new ProfilerMarker("Car.17.3").Auto())
-                //center is half the size so it points outwards
-                movementPathCollider.center = new Vector3(0, 0, movementPathCollider.size.z / 2f);
+            //center is half the size so it points outwards
+            movementPathCollider.center = new Vector3(0, 0, movementPathCollider.size.z / 2f);
 
-            using (new ProfilerMarker("Car.17.4").Auto())
-            {
-                //rotate towards target position
-                Vector3 finalTargetPosition = targetPosition.OffsetY(frontOfCarPosition.y);
-                movementPathCollider.transform.LookAt(finalTargetPosition);
-            }
+            //rotate towards target position
+            Vector3 finalTargetPosition = targetPosition.OffsetY(frontOfCarPosition.y);
+            movementPathCollider.transform.LookAt(finalTargetPosition);
         }
 
         private void OnStartAccelerating()
