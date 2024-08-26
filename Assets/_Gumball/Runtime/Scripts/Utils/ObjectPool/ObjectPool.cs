@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using System.Diagnostics;
 using AYellowpaper.SerializedCollections;
+using MyBox;
 using Debug = UnityEngine.Debug;
 
 namespace Gumball
@@ -102,6 +103,9 @@ namespace Gumball
             }
             
             string prefabName = pooledObject.PrefabName;
+            if (prefabName.IsNullOrEmpty())
+                return;
+            
             if (!spareObjectsByName.ContainsKey(prefabName))
             {
                 // create a new pool

@@ -72,15 +72,16 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
         [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
-        [Tooltip("This is calculated from the performance settings and profile when a profile is applied at runtime.")]
-        [SerializeField, ReadOnly] private int currentPerformanceRating;
+        [Tooltip("This is calculated at runtime only, using the upgrade data.")]
+        [SerializeField, ReadOnly] private PerformanceRatingCalculator currentPerformanceRating;
 #if UNITY_EDITOR
-        [SerializeField, ReadOnly] private int performanceRatingWithMinProfile;
-        [SerializeField, ReadOnly] private int performanceRatingWithMaxProfile;
+        [Space(5)]
+        [SerializeField, ReadOnly] private PerformanceRatingCalculator performanceRatingWithMinProfile;
+        [SerializeField, ReadOnly] private PerformanceRatingCalculator performanceRatingWithMaxProfile;
 #endif
         
         public CarPerformanceSettings PerformanceSettings => performanceSettings; 
-        public int CurrentPerformanceRating => currentPerformanceRating;
+        public PerformanceRatingCalculator CurrentPerformanceRating => currentPerformanceRating;
         public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
         public MinMaxFloat EngineRpmRange => new(performanceSettings.EngineRpmRangeMin.GetValue(performanceProfile), performanceSettings.EngineRpmRangeMax.GetValue(performanceProfile));
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
@@ -482,7 +483,7 @@ namespace Gumball
             //initialise torque curve
             UpdateTorqueCurve();
 
-            currentPerformanceRating = PerformanceRatingCalculator.Calculate(performanceSettings, performanceProfile);
+            currentPerformanceRating.Calculate(performanceSettings, performanceProfile);
         }
 
         public void UpdateTorqueCurve(float additionalTorque = 0)
@@ -816,6 +817,12 @@ namespace Gumball
             int closestSampleIndexToPlayer = CurrentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
+                if (racingLine == null)
+                {
+                    Debug.LogError($"There's a missing/null racing line in {CurrentChunk.name}'s TrafficManager.");
+                    continue;
+                }
+                
                 if (racingLine.SplineSamples == null || racingLine.SplineSamples.Length == 0)
                     continue;
                 
@@ -913,6 +920,12 @@ namespace Gumball
             
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
+                if (racingLine == null)
+                {
+                    Debug.LogError($"There's a missing/null racing line in {CurrentChunk.name}'s TrafficManager.");
+                    continue;
+                }
+                
                 UpdateAutoDriveTargetPosition();
                 
                 if (targetPos == null)
@@ -2116,8 +2129,8 @@ namespace Gumball
         private void OnValidate()
         {
 #if UNITY_EDITOR
-            performanceRatingWithMinProfile = PerformanceRatingCalculator.Calculate(performanceSettings, new CarPerformanceProfile(0, 0, 0, 0));
-            performanceRatingWithMaxProfile = PerformanceRatingCalculator.Calculate(performanceSettings, new CarPerformanceProfile(1, 1, 1, 1));
+            performanceRatingWithMinProfile.Calculate(performanceSettings, new CarPerformanceProfile(0, 0, 0, 0));
+            performanceRatingWithMaxProfile.Calculate(performanceSettings, new CarPerformanceProfile(1, 1, 1, 1));
 #endif
         }
         

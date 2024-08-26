@@ -9,11 +9,9 @@ namespace Gumball
     public class SwapSubPartInstallButton : MonoBehaviour
     {
         
-        [SerializeField] private TextMeshProUGUI label;
-        [SerializeField] private Color installColor = Color.blue;
-        [SerializeField] private Color uninstallColor = Color.red;
+        [SerializeField] private AutosizeTextMeshPro label;
         [SerializeField] private GameObject costHolder;
-        [SerializeField] private TextMeshProUGUI costLabel;
+        [SerializeField] private AutosizeTextMeshPro costLabel;
         
         private SubPartSlot slot;
         
@@ -29,7 +27,6 @@ namespace Gumball
                 button.interactable = true;
                 label.alignment = TextAlignmentOptions.Center;
                 label.text = "Uninstall";
-                button.image.color = uninstallColor;
                 costHolder.SetActive(false);
                 return;
             }
@@ -40,8 +37,8 @@ namespace Gumball
                 //show not available
                 button.interactable = false;
                 label.alignment = TextAlignmentOptions.Center;
-                label.text = "Not available";
-                button.image.color = installColor;
+                label.text = "Not obtained";
+                this.PerformAtEndOfFrame(label.Resize);
                 costHolder.SetActive(false);
                 return;
             }
@@ -49,7 +46,7 @@ namespace Gumball
             button.interactable = true;
             label.alignment = TextAlignmentOptions.Right;
             label.text = "Install";
-            button.image.color = installColor;
+            this.PerformAtEndOfFrame(label.Resize);
             costHolder.SetActive(true);
             costLabel.text = sparePart.StandardCurrencyInstallCost.ToString();
         }

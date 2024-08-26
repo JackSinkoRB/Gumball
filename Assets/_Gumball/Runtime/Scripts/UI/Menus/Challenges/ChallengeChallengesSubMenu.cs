@@ -24,9 +24,9 @@ namespace Gumball
         
         protected abstract Challenges GetChallengeManager();
 
-        public override void Show()
+        protected override void OnShow()
         {
-            base.Show();
+            base.OnShow();
             
             SetupChallengeItems();
             UpdateTimerLabel();

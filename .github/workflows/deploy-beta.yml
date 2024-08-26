@@ -38,6 +38,11 @@ jobs:
           path: Library
           key: Library-${{ matrix.targetPlatform }}
 
+      # Ensure Split Application Binary is enabled
+      - name: Ensure Split Application Binary enabled
+        run: |
+          sed -i 's/APKExpansionFiles: 0/APKExpansionFiles: 1/' ProjectSettings/ProjectSettings.asset
+
       # Build
       - uses: game-ci/unity-builder@v4
         id: buildStep
@@ -141,7 +146,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3
-          bundler-cache: true
+          bundler-cache: false
 
       - name: Upload to Google Play Internal
         uses: maierj/fastlane-action@v3.1.0

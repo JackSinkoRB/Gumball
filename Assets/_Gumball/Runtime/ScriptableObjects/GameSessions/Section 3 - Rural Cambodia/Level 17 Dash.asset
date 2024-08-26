@@ -28,59 +28,65 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  vehicleStartingPosition: {x: 3, y: 0.2, z: 20}
+  vehicleStartingPosition: {x: 3, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
   globalLightIntensity: 1
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 2500
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 0}
+    distanceFromSpline: 5
   racerData:
   - assetReference:
-      m_AssetGUID: b5028991c62dbc64a99eb0b82d8b0745
+      m_AssetGUID: 9e6cb95863f6d6a4bbd5c83903375a7a
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 0
+    racingLineImprecisionMaxDistance: 3
     startingPosition:
-      position: {x: 3, y: 0, z: 50}
+      position: {x: 3, y: 0, z: 125}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.113
+      acceleration: 0.154
+      handling: 0.089
+      nos: 0.12
+    currentPerformanceRating: 275
   - assetReference:
-      m_AssetGUID: 6f46e795bac33904aa0828a7953feaf1
+      m_AssetGUID: d2502054733f50042a64ef15cf60e626
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 0
+    racingLineImprecisionMaxDistance: 3
     startingPosition:
-      position: {x: 3, y: 0, z: 80}
+      position: {x: 3, y: 0, z: 150}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.316
+      acceleration: 0.266
+      handling: 0.221
+      nos: 0.272
+    currentPerformanceRating: 275
   - assetReference:
-      m_AssetGUID: 007b6760012e172418eb7e49956334ab
+      m_AssetGUID: d2502054733f50042a64ef15cf60e626
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 0
+    racingLineImprecisionMaxDistance: 3
     startingPosition:
-      position: {x: 3, y: 0, z: 110}
+      position: {x: 3, y: 0, z: 175}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.266
+      acceleration: 0.339
+      handling: 0.221
+      nos: 0.306
+    currentPerformanceRating: 275
   racersStartingSpeed: 100
   trafficIsProcedural: 0
   trafficDensity: 50
@@ -259,10 +265,17 @@ MonoBehaviour:
     - distanceFromMapStart: 2669.4558
       laneDirection: 2
       laneIndex: 0
-  xpReward: 100
-  standardCurrencyReward: 1000
-  corePartRewards: []
-  subPartRewards: []
+  rewards:
+    xp: 600
+    standardCurrency: 1500
+    premiumCurrency: 0
+    fuelRefill: 0
+    coreParts: []
+    subParts:
+    - {fileID: 11400000, guid: fd0cd1bf3f56cbf46ba590bb0bed72b4, type: 2}
+    unlockables: []
+  mainChallengeDescription: This is the challenge description
+  subObjectives: []
   inProgress: 0
   currentRacers:
     list:
@@ -283,6 +296,7 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
+        currentPerformanceRating: 0
     - Key: {fileID: 0}
       Value:
         assetReference:
@@ -300,6 +314,7 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
+        currentPerformanceRating: 0
     - Key: {fileID: 0}
       Value:
         assetReference:
@@ -317,6 +332,7 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
+        currentPerformanceRating: 0
     - Key: {fileID: 0}
       Value:
         assetReference:
@@ -334,11 +350,9 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
-    keyCollision: 0
+        currentPerformanceRating: 0
+    keyCollision: 1
   previousCorePartRewards: []
-  previousSubPartRewards: []
-  racersInPositionOrder:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  previousSubPartRewards:
+  - {fileID: 11400000, guid: fd0cd1bf3f56cbf46ba590bb0bed72b4, type: 2}
+  racersInPositionOrderCached: []

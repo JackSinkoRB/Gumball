@@ -52,7 +52,7 @@ namespace Gumball
         private void UpdateDescriptionLabel()
         {
             descriptionLabel.text = challenge.Description;
-            descriptionLabel.Resize();
+            this.PerformAtEndOfFrame(descriptionLabel.Resize);
         }
 
         private void UpdateProgressLabel()
@@ -66,7 +66,7 @@ namespace Gumball
             ChallengeTracker.Listener listener = challenge.Tracker.GetListener(challenge.ChallengeID);
             int progressAsPercent = Mathf.RoundToInt(listener.Progress * 100);
             progressLabel.text = $"{progressAsPercent}%";
-            progressLabel.Resize();
+            this.PerformAtEndOfFrame(progressLabel.Resize);
         }
         
         private void UpdateClaimButton()

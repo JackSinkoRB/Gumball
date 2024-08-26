@@ -10,18 +10,20 @@ namespace Gumball
     {
 
         private const string obtainedText = "Obtained!";
+        private const string unobtainedText = "Unobtained";
         
         [SerializeField] private Button button;
         [SerializeField] private TextMeshProUGUI label;
         [SerializeField] private TextMeshProUGUI lockedLabel;
 
         private GameSession session;
-        private SubPart part;
+        private SubPart subPart;
+        private CorePart corePart;
 
         public void Initialise(GameSession session, SubPart part)
         {
             this.session = session;
-            this.part = part;
+            subPart = part;
             
             label.text = session.Description;
             
@@ -30,7 +32,6 @@ namespace Gumball
             if (part.IsUnlocked)
             {
                 button.interactable = false;
-                lockedLabel.gameObject.SetActive(true);
                 lockedLabel.text = obtainedText;
                 
                 //strikethrough the name
@@ -39,8 +40,34 @@ namespace Gumball
             else
             {
                 button.interactable = true;
-                lockedLabel.gameObject.SetActive(false);
+                lockedLabel.text = unobtainedText;
+
+                label.fontStyle = FontStyles.Normal;
+            }
+        }
+        
+        public void Initialise(GameSession session, CorePart part)
+        {
+            this.session = session;
+            corePart = part;
+            
+            label.text = session.Description;
+            
+            //TODO: if session is not yet unlocked, set button disabled
+            
+            if (part.IsUnlocked)
+            {
+                button.interactable = false;
+                lockedLabel.text = obtainedText;
                 
+                //strikethrough the name
+                label.fontStyle = FontStyles.Strikethrough;
+            }
+            else
+            {
+                button.interactable = true;
+                lockedLabel.text = unobtainedText;
+
                 label.fontStyle = FontStyles.Normal;
             }
         }

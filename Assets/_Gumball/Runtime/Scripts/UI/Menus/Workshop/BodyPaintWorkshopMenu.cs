@@ -29,9 +29,9 @@ namespace Gumball
         
         private BodyPaintModification paintModification => WarehouseManager.Instance.CurrentCar.BodyPaintModification;
 
-        public override void Show()
+        protected override void OnShow()
         {
-            base.Show();
+            base.OnShow();
 
             SelectTab(paintModification.CurrentPaintMode);
         }
