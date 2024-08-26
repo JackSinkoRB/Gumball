@@ -7,6 +7,7 @@ using Dreamteck.Splines;
 using Gumball.Editor;
 #endif
 using MyBox;
+using Unity.Profiling;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
@@ -36,6 +37,9 @@ namespace Gumball
             ALL_WHEEL_DRIVE
         }
 
+        private const float dumbDistance = 150;
+        private const float timeBetweenCornerChecksWhenDumb = 1;
+        
         [Header("Details")]
         [SerializeField] private string displayName;
 
@@ -313,17 +317,20 @@ namespace Gumball
         [SerializeField, ReadOnly] private Chunk currentChunkCached;
         [SerializeField, ReadOnly] private float timeWithNoChunk;
         [SerializeField, ReadOnly] private bool isFrozen;
+        [SerializeField, ReadOnly] private bool isDumb;
 
         private Vector3 targetPosition;
         private Vector3 cornerTargetPosition;
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion, SplineSample)? targetPos;
         private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
+        private float timeSinceLastCornerCheck;
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => collisionRecoverDuration > 0 && (InCollision || timeSinceCollision < collisionRecoverDuration);
         private bool faceForward => useRacingLine || currentLaneDirection == ChunkTrafficManager.LaneDirection.FORWARD;
         private bool isRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
+        private bool isTraffic => gameObject.layer == (int)LayersAndTags.Layer.TrafficCar;
         private bool isPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
 
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
@@ -721,13 +728,38 @@ namespace Gumball
             racingLineOffset = offset;
         }
 
+        private void SetDumb(bool setEnabled)
+        {
+            if (setEnabled == isDumb)
+                return; //is already set
+            
+            isDumb = setEnabled;
+            GlobalLoggers.AICarLogger.Log($"Set {gameObject.name} dumb to {isDumb}.");
+        }
+        
+        private void CheckIfDumb()
+        {
+            if (WarehouseManager.Instance.CurrentCar == null)
+            {
+                SetDumb(true);
+                return;
+            }
+
+            const float dumbDistanceSqr = dumbDistance * dumbDistance;
+            float distanceToPlayerSqr = Vector3.SqrMagnitude(WarehouseManager.Instance.CurrentCar.transform.position - transform.position);
+            bool shouldBeDumb = distanceToPlayerSqr > dumbDistanceSqr;
+            SetDumb(shouldBeDumb);
+        }
+
         private void Move()
         {
             speed = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
+
+            CheckIfDumb();
             
             TryCreateMovementPathCollider();
             CheckIfPlayerDriving();
-            
+
             if (autoDrive)
                 CheckForCorner();
 
@@ -737,7 +769,7 @@ namespace Gumball
                 CalculateSteerAngle();
 
             CheckIfPushingAnotherRacer();
-            
+
             UpdateBrakingValues();
             DoBrakeEvents();
 
@@ -1220,7 +1252,7 @@ namespace Gumball
                 isBrakingForCorner = true;
             }
 
-            if (autoDrive && brakeForObstacles)
+            if (autoDrive && brakeForObstacles && (!isDumb || !isTraffic))
             {
                 float speedPercent = (speed - speedForBrakingRaycastLength.Min) / (speedForBrakingRaycastLength.Max - speedForBrakingRaycastLength.Min);
                 float raycastLength = brakingRaycastLength.Min + ((brakingRaycastLength.Max - brakingRaycastLength.Min) * speedPercent);
@@ -1381,9 +1413,19 @@ namespace Gumball
                 wheelCollider.brakeTorque = 0;
             }
         }
-        
+
         private void CheckForCorner()
         {
+            //only do corner check periodically for traffic as it's fairly expensive
+            if (isTraffic && isDumb)
+            {
+                timeSinceLastCornerCheck += Time.deltaTime;
+                if (timeSinceLastCornerCheck < timeBetweenCornerChecksWhenDumb)
+                    return;
+            }
+            
+            timeSinceLastCornerCheck = 0;
+
             const float min = 2;
             float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speed));
             float visionDistance = metresPerSecond * cornerReactionTime;
@@ -1427,14 +1469,17 @@ namespace Gumball
         private void UpdateMovementPathCollider()
         {
             movementPathCollider.transform.localPosition = frontOfCarPosition;
-
+            
+            if (isDumb)
+                return;
+                
             Vector3 direction = Rigidbody.velocity.sqrMagnitude > 1 ? Rigidbody.velocity : transform.forward;
             float distanceToPredictedPosition = direction.magnitude * predictedPositionReactionTime;
             movementPathCollider.size = new Vector3(carWidth, carWidth, distanceToPredictedPosition);
-            
+
             //center is half the size so it points outwards
             movementPathCollider.center = new Vector3(0, 0, movementPathCollider.size.z / 2f);
-            
+
             //rotate towards target position
             Vector3 finalTargetPosition = targetPosition.OffsetY(frontOfCarPosition.y);
             movementPathCollider.transform.LookAt(finalTargetPosition);
@@ -1498,6 +1543,9 @@ namespace Gumball
         /// </summary>
         public void UpdateWheelMeshes()
         {
+            if (isDumb)
+                return;
+            
             //do rear wheels first as the front wheels require their rotation
             for (int count = 0; count < rearWheelMeshes.Length; count++)
             {
@@ -1715,7 +1763,7 @@ namespace Gumball
         private void Despawn()
         {
             gameObject.Pool();
-            GlobalLoggers.AICarLogger.Log($"Despawned at {transform.position}");
+            GlobalLoggers.AICarLogger.Log($"Despawned {gameObject.name} at {transform.position}");
         }
 
         private void CacheAllWheelMeshes()

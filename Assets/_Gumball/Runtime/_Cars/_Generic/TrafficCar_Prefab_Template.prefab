@@ -356,6 +356,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5035245195932717381}
+  - {fileID: 6208597204174825414}
   - {fileID: 7790142791568334042}
   - {fileID: 8970157884259570229}
   - {fileID: 8435276353931753562}
@@ -400,6 +401,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da187e7637980114d820c1c8bc7370c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  displayName: 
   canBeDrivenByPlayer: 0
   avatarIKManager: {fileID: 0}
   steeringWheel: {fileID: 0}
@@ -408,43 +410,135 @@ MonoBehaviour:
   isPlayerCar: 0
   isPlayerDrivingEnabled: 0
   carIndex: 0
-  carPartManager: {fileID: 0}
-  bodyPaintModification: {fileID: 0}
-  partModification: {fileID: 0}
-  nosManager: {fileID: 0}
-  frontOfCarPosition: {x: 0, y: 1, z: 2}
-  carWidth: 2
-  isStuck: 0
-  wheelConfiguration: 0
-  frontWheelMeshes:
-  - {fileID: 9043339163879661521}
-  - {fileID: 1105666816679582017}
-  rearWheelMeshes:
-  - {fileID: 6558256558857518016}
-  - {fileID: 433908596705436509}
-  frontWheelColliders:
-  - {fileID: 7799509976271006927}
-  - {fileID: 4092913797718754227}
-  rearWheelColliders:
-  - {fileID: 8740142090009083934}
-  - {fileID: 8572414990509320796}
-  autoDrive: 1
-  obeySpeedLimit: 1
-  tempSpeedLimit: -1
-  useRacingLine: 0
-  currentLane:
-    type: 0
-    distanceFromCenter: 0
-    path: {fileID: 0}
-  additionalLaneOffset: 0
-  currentLaneDirection: 0
-  racingLineOffset: 0
-  dragWhenAccelerating: 0
-  dragWhenIdle: 0.15
-  dragWhenBraking: 1
-  dragWhenHandbraking: 0.5
-  angularDragWhenHandbraking: 6
-  speed: 0
+  defaultEngine: {fileID: 0}
+  defaultWheels: {fileID: 0}
+  defaultDrivetrain: {fileID: 0}
+  performanceSettings:
+    gearboxAccelerationPerformancePoints: 0
+    gearboxMaxSpeedPerformancePoints: 0
+    minTorqueCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    additionalPeakTorque:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      max: 2000
+    minTorquePercentToPeak:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      maxPercent: 0.8
+    engineRpmRangeMin:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 600
+      max: 1000
+    engineRpmRangeMax:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 6000
+      max: 10000
+    idealRPMRangeForGearChanges:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min:
+        Min: 3000
+        Max: 6000
+      max:
+        Min: 3000
+        Max: 8000
+    rigidbodyMass:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 1300
+      max: 1000
+    brakeTorque:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 800
+      max: 1200
+    handbrakeEaseOffDuration:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 1
+      max: 1
+    handbrakeTorque:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 5000
+      max: 5000
+    steerSpeed:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 2.5
+      max: 2.5
+    steerReleaseSpeed:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 15
+      max: 15
+    maxSteerAngle:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      max:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+    nosDepletionRate:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 6
+      max: 3
+    nosFillRate:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 60
+      max: 30
+    nosTorqueAddition:
+      maxSpeedWeight: 0
+      accelerationWeight: 0
+      handlingWeight: 0
+      nosWeight: 0
+      min: 1000
+      max: 2000
   torqueCurve:
     serializedVersion: 2
     m_Curve:
@@ -478,6 +572,67 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  performanceProfile:
+    maxSpeed: 0
+    acceleration: 0
+    handling: 0
+    nos: 0
+  currentPerformanceRating:
+    totalRating: 0
+    maxSpeedRating: 0
+    accelerationSpeedRating: 0
+    handlingRating: 0
+    nosRating: 0
+  performanceRatingWithMinProfile:
+    totalRating: 203
+    maxSpeedRating: 94
+    accelerationSpeedRating: 22
+    handlingRating: 37
+    nosRating: 50
+  performanceRatingWithMaxProfile:
+    totalRating: 203
+    maxSpeedRating: 94
+    accelerationSpeedRating: 22
+    handlingRating: 37
+    nosRating: 50
+  carType: 0
+  carPartManager: {fileID: 0}
+  bodyPaintModification: {fileID: 0}
+  nosManager: {fileID: 0}
+  frontOfCarPosition: {x: 0, y: 1, z: 2}
+  carWidth: 2
+  isStuck: 0
+  wheelConfiguration: 0
+  frontWheelMeshes:
+  - {fileID: 9043339163879661521}
+  - {fileID: 1105666816679582017}
+  rearWheelMeshes:
+  - {fileID: 6558256558857518016}
+  - {fileID: 433908596705436509}
+  frontWheelColliders:
+  - {fileID: 7799509976271006927}
+  - {fileID: 4092913797718754227}
+  rearWheelColliders:
+  - {fileID: 8740142090009083934}
+  - {fileID: 8572414990509320796}
+  autoDrive: 1
+  obeySpeedLimit: 1
+  tempSpeedLimit: -1
+  useRacingLine: 0
+  currentLane:
+    type: 0
+    distanceFromCenter: 0
+    path: {fileID: 0}
+    vehicleTypes: 0
+  additionalLaneOffset: 0
+  currentLaneDirection: 0
+  racingLineOffset: 0
+  dragWhenAccelerating: 0
+  dragWhenIdle: 0.15
+  dragWhenBraking: 1
+  dragWhenHandbraking: 0.5
+  angularDragWhenHandbraking: 6
+  speed: 0
   gearRatios:
   - -1.5
   - 2.66
@@ -487,48 +642,14 @@ MonoBehaviour:
   - 0.7
   - 0.5
   finalGearRatio: 3.42
-  engineRpmRange:
-    Min: 1000
-    Max: 6500
-  idealRPMRangeForGearChanges:
-    Min: 3000
-    Max: 5500
   currentGear: 0
   isAccelerating: 0
   engineRpm: 0
   maxReverseSpeed: 25
   isReversing: 0
-  steerSpeed: 10
-  releaseSpeed: 15
-  visualSteerSpeed: 5
   autoDriveMaxSteerAngle: 65
-  maxSteerAngleCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 65
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 65
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   desiredSteerAngle: 0
   visualSteerAngle: 0
-  brakeTorque: 1000
   cornerReactionTime: 1.1
   cornerBrakingCurve:
     serializedVersion: 2
@@ -559,8 +680,6 @@ MonoBehaviour:
   speedToBrakeTo: 0
   cornerAngleAhead: 0
   isBrakingForCorner: 0
-  handbrakeEaseOffDuration: 1
-  handbrakeTorque: 5000
   isHandbrakeEngaged: 0
   colliders: {fileID: 4078845925293983926}
   collisionRecoverDuration: 1
@@ -590,9 +709,9 @@ MonoBehaviour:
   currentRacingLine: {fileID: 0}
   obstacleAvoidanceOffset: 0
   allDirectionsAreBlocked: 0
-  defaultPeakTorque: 0
   isInitialised: 0
   currentChunkCached: {fileID: 0}
+  timeWithNoChunk: 0
   isFrozen: 0
 --- !u!114 &4439358765367373677
 MonoBehaviour:
@@ -864,6 +983,54 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &5152840463422440606
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6208597204174825414}
+  - component: {fileID: 8001686030286725959}
+  m_Layer: 0
+  m_Name: LODManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6208597204174825414
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5152840463422440606}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3955003717186090731}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8001686030286725959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5152840463422440606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9053859515f9ea4f86a70d6ffb0b426, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lods: []
+  currentLevel:
+    transformsToEnable: []
+    distance: 0
 --- !u!1 &5661782853647663183
 GameObject:
   m_ObjectHideFlags: 0
