@@ -84,8 +84,8 @@ namespace Gumball
         
         public CarPerformanceSettings PerformanceSettings => performanceSettings; 
         public PerformanceRatingCalculator CurrentPerformanceRating => currentPerformanceRating;
-        public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
         public MinMaxFloat EngineRpmRange => new(performanceSettings.EngineRpmRangeMin.GetValue(performanceProfile), performanceSettings.EngineRpmRangeMax.GetValue(performanceProfile));
+        public MinMaxFloat IdealRPMRangeForGearChanges => new(idealRPMPercentForGearChanges.Min * EngineRpmRange.Max, idealRPMPercentForGearChanges.Max * EngineRpmRange.Max);
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
         public float BrakeTorque => performanceSettings.BrakeTorque.GetValue(performanceProfile);
         public float HandbrakeTorque => performanceSettings.HandbrakeTorque.GetValue(performanceProfile);
@@ -197,6 +197,8 @@ namespace Gumball
         [Header("Engine & Drivetrain")]
         [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
         [SerializeField] private float finalGearRatio = 3.42f;
+        [Tooltip("If RPM goes outside this range, it will try upshift/downshift to the desired RPM.")]
+        [SerializeField] private MinMaxFloat idealRPMPercentForGearChanges = new(0.5f, 0.9f);
         [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
         [SerializeField, ReadOnly] private float engineRpm;
