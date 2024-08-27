@@ -16,6 +16,8 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
 
+        private Coroutine checkToEnableCoroutine;
+        
         public AICar CarBelongsTo => carBelongsTo;
 
         public void Initialise(AICar carBelongsTo)
@@ -31,6 +33,12 @@ namespace Gumball
             CheckToDisable();
         }
 
+        private void OnDestroy()
+        {
+            if (CoroutineHelper.ExistsRuntime)
+                CoroutineHelper.Instance.StopCoroutine(checkToEnableCoroutine);
+        }
+
         private void CheckToDisable()
         {
             if (carBelongsTo == null) //not yet initialised
@@ -42,7 +50,7 @@ namespace Gumball
             if (GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.HasLoaded)
             {
                 gameObject.SetActive(false);
-                CoroutineHelper.Instance.PerformAfterTrue(
+                checkToEnableCoroutine = CoroutineHelper.Instance.PerformAfterTrue(
                     () => GameSessionManager.Instance.CurrentSession != null && GameSessionManager.Instance.CurrentSession.HasLoaded, 
                     () => gameObject.SetActive(true));
             }
