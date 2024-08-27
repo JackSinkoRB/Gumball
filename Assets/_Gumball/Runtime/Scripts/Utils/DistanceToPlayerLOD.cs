@@ -63,10 +63,8 @@ namespace Gumball
         private LODLevel? GetDesiredLevel()
         {
             if (WarehouseManager.Instance.CurrentCar == null)
-            {
-                return lods[0];
-            }
-            
+                return null;
+
             if (lods.Count == 0)
                 return null;
             
