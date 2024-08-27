@@ -13,9 +13,11 @@ namespace Gumball
     [CreateAssetMenu(menuName = "Gumball/Singletons/Warehouse Manager")]
     public class WarehouseManager : SingletonScriptable<WarehouseManager>
     {
+        
+        private static readonly GenericDictionary<PerformanceRatingCalculator.Component, int> maxPerformanceRatingValuesCached = new();
 
         [SerializeField] private List<WarehouseCarData> allCarData = new();
-
+        
         public delegate void CarChangedDelegate(AICar newCar);
         public event CarChangedDelegate onCurrentCarChanged;
 
@@ -28,6 +30,12 @@ namespace Gumball
             private set => DataManager.Warehouse.Set("CurrentCar.Index", value);
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RuntimeInitialise()
+        {
+            maxPerformanceRatingValuesCached.Clear();
+        }
+        
         private void OnValidate()
         {
 #if UNITY_EDITOR
@@ -97,6 +105,33 @@ namespace Gumball
 #if ENABLE_LOGS
             Debug.Log($"Vehicle loading for {CurrentCar.name} took {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
+        }
+
+        public int GetMaxRating(PerformanceRatingCalculator.Component ratingComponent)
+        {
+            if (!maxPerformanceRatingValuesCached.ContainsKey(ratingComponent))
+            {
+                maxPerformanceRatingValuesCached[ratingComponent] = CalculateMaxRating(ratingComponent);
+                Debug.Log($"Cached max performance rating for {ratingComponent.ToString()} as {maxPerformanceRatingValuesCached[ratingComponent]}.");
+            }
+
+            return maxPerformanceRatingValuesCached[ratingComponent];
+        }
+        
+        private int CalculateMaxRating(PerformanceRatingCalculator.Component ratingComponent)
+        {
+            int maxRating = 0;
+            for (int carIndex = 0; carIndex < allCarData.Count; carIndex++)
+            {
+                WarehouseCarData carData = allCarData[carIndex];
+                PerformanceRatingCalculator calculator = PerformanceRatingCalculator.GetCalculator(carData.PerformanceSettings, new CarPerformanceProfile(1,1,1,1));
+                
+                int ratingComponentValue = calculator.GetRating(ratingComponent);
+                if (ratingComponentValue > maxRating)
+                    maxRating = ratingComponentValue;
+            }
+
+            return maxRating;
         }
         
     }

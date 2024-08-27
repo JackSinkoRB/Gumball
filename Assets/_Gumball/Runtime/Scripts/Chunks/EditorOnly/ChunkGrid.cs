@@ -107,6 +107,7 @@ namespace Gumball
 
         private void UpdateGridData()
         {
+            chunk.CalculateSplineLength();
             GridCenter = chunk.GetCenterOfSpline();
             GridLength = chunk.SplineComputer.CalculateLength() + (widthAroundRoad);
             distanceBetweenVertices = GridLength / resolution;

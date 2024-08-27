@@ -34,56 +34,75 @@ MonoBehaviour:
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2350
+  raceDistanceMetres: 2200
   finishLineMarkers:
-    checkpointMarkerPrefab: {fileID: 0}
+    checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
+      type: 3}
     distanceFromSpline: 5
   racerData:
   - assetReference:
-      m_AssetGUID: 6f46e795bac33904aa0828a7953feaf1
+      m_AssetGUID: 007b6760012e172418eb7e49956334ab
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 2
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     startingPosition:
       position: {x: 5, y: 0.1, z: 125}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
+      maxSpeed: 0.076
+      acceleration: 0.088
+      handling: 0.118
       nos: 0
+    currentPerformanceRating:
+      totalRating: 330
+      maxSpeedRating: 122
+      accelerationSpeedRating: 86
+      handlingRating: 43
+      nosRating: 79
   - assetReference:
       m_AssetGUID: b5028991c62dbc64a99eb0b82d8b0745
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 2
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     startingPosition:
       position: {x: 15, y: 0.1, z: 150}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.211
+      acceleration: 0.163
+      handling: 0.144
+      nos: 0.132
+    currentPerformanceRating:
+      totalRating: 330
+      maxSpeedRating: 112
+      accelerationSpeedRating: 98
+      handlingRating: 44
+      nosRating: 76
   - assetReference:
-      m_AssetGUID: 99c974c8da4d7ca4f9489658e6adb107
+      m_AssetGUID: 84f0cc59c380ea34098e0ce3c1cd53e3
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     canCrossMiddle: 1
-    racingLineImprecisionMaxDistance: 2
+    racingLineImprecisionMaxDistance: 2.1
     startingPosition:
       position: {x: 10, y: 0.1, z: 175}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
+      maxSpeed: 0.14
+      acceleration: 0.126
+      handling: 0.047
       nos: 0
+    currentPerformanceRating:
+      totalRating: 330
+      maxSpeedRating: 109
+      accelerationSpeedRating: 131
+      handlingRating: 41
+      nosRating: 49
   racersStartingSpeed: 100
   trafficIsProcedural: 1
   trafficDensity: 100
@@ -101,15 +120,27 @@ MonoBehaviour:
   trafficSpawnPositions:
     Value: []
   rewards:
-    xp: 0
-    standardCurrency: 0
+    xp: 700
+    standardCurrency: 2000
     premiumCurrency: 0
     fuelRefill: 0
     coreParts: []
     subParts: []
     unlockables: []
   mainChallengeDescription: This is the challenge description
-  subObjectives: []
+  subObjectives:
+  - description: Perform 5 Close Calls
+    tracker: {fileID: 11400000, guid: 0f21c9d34faefb849b7a29310f279693, type: 2}
+    goal: 5
+    rewards:
+      xp: 0
+      standardCurrency: 0
+      premiumCurrency: 0
+      fuelRefill: 0
+      coreParts: []
+      subParts: []
+      unlockables: []
+    uniqueID: bae16089-51e6-4858-8c72-4a18d74be944
   inProgress: 0
   currentRacers:
     list: []
