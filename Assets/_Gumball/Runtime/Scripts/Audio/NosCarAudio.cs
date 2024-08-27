@@ -76,6 +76,8 @@ namespace Gumball
         {
             const float duration = 1f;
 
+            source.time = 0; //restart for nos start sound
+            
             currentFadeTween?.Kill();
             currentFadeTween = source.DOFade(0, duration);
             currentFadeTween.OnComplete(() => gameObject.SetActive(false));
