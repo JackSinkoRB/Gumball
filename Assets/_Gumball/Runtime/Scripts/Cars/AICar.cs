@@ -109,6 +109,7 @@ namespace Gumball
         public CarType CarType => carType;
         public CarPartManager CarPartManager => carPartManager;
         public BodyPaintModification BodyPaintModification => bodyPaintModification;
+        public CarAudioManager CarAudioManager => carAudioManager;
         public NosManager NosManager => nosManager;
         
         [Header("Sizing")]

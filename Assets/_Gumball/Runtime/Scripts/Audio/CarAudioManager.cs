@@ -28,8 +28,24 @@ namespace Gumball
 
         private void LateUpdate()
         {
-            if (carBelongsTo == null)
+            CheckToDisable();
+        }
+
+        private void CheckToDisable()
+        {
+            if (carBelongsTo == null) //not yet initialised
+            {
                 gameObject.SetActive(false);
+                return;
+            }
+
+            if (GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.HasLoaded)
+            {
+                gameObject.SetActive(false);
+                CoroutineHelper.Instance.PerformAfterTrue(
+                    () => GameSessionManager.Instance.CurrentSession != null && GameSessionManager.Instance.CurrentSession.HasLoaded, 
+                    () => gameObject.SetActive(true));
+            }
         }
 
     }
