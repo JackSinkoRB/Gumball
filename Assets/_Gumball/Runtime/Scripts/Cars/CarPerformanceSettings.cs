@@ -10,12 +10,6 @@ namespace Gumball
     public class CarPerformanceSettings
     {
 
-        [Header("Drivetrain")]
-        [Tooltip("The amount to contibute to the acceleration performance points for the gearbox.")]
-        [SerializeField, PositiveValueOnly] private int gearboxAccelerationPerformancePoints;
-        [Tooltip("The amount to contibute to the max speed performance points for the gearbox.")]
-        [SerializeField, PositiveValueOnly] private int gearboxMaxSpeedPerformancePoints;
-        
         [Header("Torque")]
         [Tooltip("The engine torque output (y axis - value) (in Newton metres) compared to the engine RPM (x axis - time), between the min and max RPM ranges (where x = 0 is minEngineRpm and x = 1 is maxEngineRpm)")]
         [SerializeField] private AnimationCurve minTorqueCurve;

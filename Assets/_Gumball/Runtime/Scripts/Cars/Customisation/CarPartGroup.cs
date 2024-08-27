@@ -76,7 +76,7 @@ namespace Gumball
 
         private void SaveData()
         {
-            if (!carBelongsTo.IsPlayerCar)
+            if (!carBelongsTo.IsPlayer)
                 return; //non player cars don't get saved
             
             DataManager.Cars.Set(savedPartIndexKey, currentPartIndex);

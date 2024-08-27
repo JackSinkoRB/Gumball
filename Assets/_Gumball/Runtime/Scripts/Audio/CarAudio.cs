@@ -9,41 +9,49 @@ namespace Gumball
     public class CarAudio : MonoBehaviour
     {
 
-        [SerializeField] private AudioSource source;
-        [SerializeField] private AnimationCurve volumeRpmModifier;
-        [SerializeField] private AnimationCurve pitchRpmModifier;
-        [SerializeField] private float smoothSpeed = 5;
+        [SerializeField] protected AudioSource source;
         
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private AICar carBelongsTo;
-        [SerializeField, ReadOnly] private float normalisedRpmInterpolated;
-        
-        private bool isInitialised;
-        
-        private void OnEnable()
+        [SerializeField, ReadOnly] protected CarAudioManager managerBelongsTo;
+        [SerializeField, ReadOnly] protected float volumeModifier;
+
+        public void Initialise(CarAudioManager managerBelongsTo)
         {
-            if (!isInitialised)
-                Initialise();
+            this.managerBelongsTo = managerBelongsTo;
+            
+            if (managerBelongsTo.CarBelongsTo.IsTraffic)
+                InitialiseAsTraffic();
+            else if (managerBelongsTo.CarBelongsTo.IsRacer)
+                InitialiseAsRacer();
+            else if (managerBelongsTo.CarBelongsTo.IsPlayer)
+                InitialiseAsPlayer();
         }
 
-        private void Initialise()
+        public void SetVolumeModifier(float volumeModifier)
         {
-            isInitialised = true;
-            
-            carBelongsTo = transform.GetComponentInAllParents<AICar>();
-        }
-
-        private void LateUpdate()
-        {
-            if (!source.isPlaying)
-                source.Play();
-            
-            float desiredRpm = Mathf.Clamp01((carBelongsTo.EngineRpm - carBelongsTo.EngineRpmRange.Min) / carBelongsTo.EngineRpmRange.Difference);
-            normalisedRpmInterpolated = Mathf.Lerp(normalisedRpmInterpolated, desiredRpm, smoothSpeed * Time.deltaTime);
-            
-            source.volume = volumeRpmModifier.Evaluate(normalisedRpmInterpolated);
-            source.pitch = pitchRpmModifier.Evaluate(normalisedRpmInterpolated);
+            this.volumeModifier = Mathf.Clamp01(volumeModifier);
         }
         
+        public void SetVolumeDistance(MinMaxFloat volumeDistance)
+        {
+            source.minDistance = volumeDistance.Min;
+            source.maxDistance = volumeDistance.Max;
+        }
+        
+        protected virtual void InitialiseAsTraffic()
+        {
+            
+        }
+
+        protected virtual void InitialiseAsRacer()
+        {
+            
+        }
+
+        protected virtual void InitialiseAsPlayer()
+        {
+            
+        }
+
     }
 }

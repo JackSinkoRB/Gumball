@@ -55,11 +55,9 @@ namespace Gumball
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform rearViewCameraTarget;
         
         [Space(5)]
-        [SerializeField, ReadOnly] private bool isPlayerCar;
         [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
 
-        public bool IsPlayerCar => isPlayerCar;
         public CarIKManager AvatarIKManager => avatarIKManager;
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
@@ -103,6 +101,7 @@ namespace Gumball
         [SerializeField] private CarType carType;
         [SerializeField] private CarPartManager carPartManager;
         [SerializeField] private BodyPaintModification bodyPaintModification;
+        [SerializeField] private CarAudioManager carAudioManager;
         [Space(5)]
         [Tooltip("This gets added on initialise for every player car.")]
         [SerializeField, ReadOnly] private NosManager nosManager;
@@ -329,10 +328,11 @@ namespace Gumball
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => collisionRecoverDuration > 0 && (InCollision || timeSinceCollision < collisionRecoverDuration);
         private bool faceForward => useRacingLine || currentLaneDirection == ChunkTrafficManager.LaneDirection.FORWARD;
-        private bool isRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
-        private bool isTraffic => gameObject.layer == (int)LayersAndTags.Layer.TrafficCar;
-        private bool isPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
-
+        
+        public bool IsRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
+        public bool IsTraffic => gameObject.layer == (int)LayersAndTags.Layer.TrafficCar;
+        public bool IsPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
+        
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
         public float Speed => speed;
         public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : Mathf.Infinity));
@@ -431,12 +431,13 @@ namespace Gumball
             
             CachePoweredWheels();
             InitialiseSize();
+            
+            if (carAudioManager != null)
+                carAudioManager.Initialise(this);
         }
 
         public void InitialiseAsPlayer(int carIndex)
         {
-            isPlayerCar = true;
-            
             this.carIndex = carIndex;
             
             gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
@@ -608,7 +609,7 @@ namespace Gumball
             GlobalLoggers.AICarLogger.Log($"Grounded {gameObject.name} - moved {offset}");
             
             //check to apply ride height - currently only for player cars
-            if (isPlayerCar)
+            if (IsPlayer)
             {
                 float rideHeight = DataManager.Cars.Get<float>($"{SaveKey}.RideHeight");
                 transform.position = transform.position.OffsetY(rideHeight);
@@ -642,7 +643,7 @@ namespace Gumball
 
             if (autoDrive)
             {
-                if (!isPlayerCar && CurrentChunk == null)
+                if (!IsPlayer && CurrentChunk == null)
                 {
                     //current chunk may have despawned
                     const float timeWithNoChunkToDespawn = 1;
@@ -1091,7 +1092,7 @@ namespace Gumball
         /// </summary>
         private void CheckIfPushingAnotherRacer()
         {
-            if (!isPlayer && !isRacer)
+            if (!IsPlayer && !IsRacer)
                 return;
             
             //check if colliding with another racer or player
@@ -1222,7 +1223,7 @@ namespace Gumball
             isBrakingForCorner = false;
             speedToBrakeTo = Mathf.Infinity;
             
-            if (InCollision && autoDrive && !isRacer && !isPlayer)
+            if (InCollision && autoDrive && !IsRacer && !IsPlayer)
                 return;
             
             if (isReversing)
@@ -1252,7 +1253,7 @@ namespace Gumball
                 isBrakingForCorner = true;
             }
 
-            if (autoDrive && brakeForObstacles && (!isDumb || !isTraffic))
+            if (autoDrive && brakeForObstacles && (!isDumb || !IsTraffic))
             {
                 float speedPercent = (speed - speedForBrakingRaycastLength.Min) / (speedForBrakingRaycastLength.Max - speedForBrakingRaycastLength.Min);
                 float raycastLength = brakingRaycastLength.Min + ((brakingRaycastLength.Max - brakingRaycastLength.Min) * speedPercent);
@@ -1417,7 +1418,7 @@ namespace Gumball
         private void CheckForCorner()
         {
             //only do corner check periodically for traffic as it's fairly expensive
-            if (isTraffic && isDumb)
+            if (IsTraffic && isDumb)
             {
                 timeSinceLastCornerCheck += Time.deltaTime;
                 if (timeSinceLastCornerCheck < timeBetweenCornerChecksWhenDumb)
@@ -1687,7 +1688,7 @@ namespace Gumball
                     AICar hitCar = hit.rigidbody.gameObject.GetComponent<AICar>();
                     if (hitCar != null)
                     {
-                        if (isPlayer && hitCar.isRacer)
+                        if (IsPlayer && hitCar.IsRacer)
                             continue; //when player is autodriving, don't try avoid racers
                         
                         bool otherCarIsAhead = IsPositionAhead(hit.transform.position + hitCar.frontOfCarPosition);
@@ -2105,10 +2106,10 @@ namespace Gumball
         
         private void CheckIfCollidedWithRacer(AICar car, bool adding)
         {
-            if (!isRacer && !isPlayer)
+            if (!IsRacer && !IsPlayer)
                 return;
             
-            if (!car.isRacer && !car.isPlayer)
+            if (!car.IsRacer && !car.IsPlayer)
                 return;
 
             if (car == this)
