@@ -22,7 +22,7 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private float normalisedRpmInterpolated;
-        
+
         protected override void InitialiseAsTraffic()
         {
             base.InitialiseAsTraffic();
@@ -35,7 +35,6 @@ namespace Gumball
         {
             base.InitialiseAsRacer();
             
-            SetVolumeModifier(racerVolumeModifier);
             SetVolumeDistance(racerVolumeDistance);
         }
 
@@ -43,7 +42,6 @@ namespace Gumball
         {
             base.InitialiseAsPlayer();
             
-            SetVolumeModifier(1);
             SetVolumeDistance(playerVolumeDistance);
         }
 
@@ -54,8 +52,12 @@ namespace Gumball
             
             float desiredRpm = Mathf.Clamp01((managerBelongsTo.CarBelongsTo.EngineRpm - managerBelongsTo.CarBelongsTo.EngineRpmRange.Min) / managerBelongsTo.CarBelongsTo.EngineRpmRange.Difference);
             normalisedRpmInterpolated = Mathf.Lerp(normalisedRpmInterpolated, desiredRpm, smoothSpeed * Time.deltaTime);
+
+            float desiredVolume = volumeRpmModifier.Evaluate(normalisedRpmInterpolated);
+            if (managerBelongsTo.CarBelongsTo.IsRacer)
+                desiredVolume *= racerVolumeModifier;
             
-            source.volume = volumeRpmModifier.Evaluate(normalisedRpmInterpolated) * volumeModifier;
+            source.volume = desiredVolume;
             source.pitch = pitchRpmModifier.Evaluate(normalisedRpmInterpolated);
         }
         

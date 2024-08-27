@@ -11,6 +11,7 @@ namespace Gumball
 
         [Header("Engine")]
         [SerializeField, DisplayInspector] private CarAudio revving;
+        [SerializeField, DisplayInspector] private CarAudio nos;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
@@ -22,6 +23,7 @@ namespace Gumball
             this.carBelongsTo = carBelongsTo;
             
             revving.Initialise(this);
+            nos.Initialise(this);
         }
 
         private void LateUpdate()

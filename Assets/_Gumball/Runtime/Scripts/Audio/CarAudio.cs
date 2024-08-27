@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using MyBox;
 using UnityEngine;
 
@@ -13,9 +14,8 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected CarAudioManager managerBelongsTo;
-        [SerializeField, ReadOnly] protected float volumeModifier;
 
-        public void Initialise(CarAudioManager managerBelongsTo)
+        public virtual void Initialise(CarAudioManager managerBelongsTo)
         {
             this.managerBelongsTo = managerBelongsTo;
             
@@ -27,11 +27,6 @@ namespace Gumball
                 InitialiseAsPlayer();
         }
 
-        public void SetVolumeModifier(float volumeModifier)
-        {
-            this.volumeModifier = Mathf.Clamp01(volumeModifier);
-        }
-        
         public void SetVolumeDistance(MinMaxFloat volumeDistance)
         {
             source.minDistance = volumeDistance.Min;

@@ -433,9 +433,6 @@ namespace Gumball
             
             CachePoweredWheels();
             InitialiseSize();
-            
-            if (carAudioManager != null)
-                carAudioManager.Initialise(this);
         }
 
         public void InitialiseAsPlayer(int carIndex)
@@ -470,6 +467,9 @@ namespace Gumball
             }
             
             InitialiseWheelStance();
+
+            if (carAudioManager != null)
+                carAudioManager.Initialise(this);
         }
 
         public CorePart GetDefaultPart(CorePart.PartType type)
@@ -510,6 +510,9 @@ namespace Gumball
             SetObeySpeedLimit(false);
             
             InitialiseWheelStance();
+            
+            if (carAudioManager != null)
+                carAudioManager.Initialise(this);
         }
         
         public void InitialiseAsTraffic()
@@ -518,6 +521,9 @@ namespace Gumball
             colliders.layer = (int)LayersAndTags.Layer.TrafficCar;
             
             SetAutoDrive(true);
+            
+            if (carAudioManager != null)
+                carAudioManager.Initialise(this);
         }
         
         public void SetAutoDrive(bool autoDrive)
