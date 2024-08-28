@@ -187,5 +187,40 @@ namespace Gumball.Runtime.Tests
             }
         }
         
+        
+        [UnityTest]
+        [Order(5)]
+        public IEnumerator OnlySaveForPlayer()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            foreach (WheelMesh wheelMesh in WarehouseManager.Instance.CurrentCar.AllWheelMeshes)
+            {
+                WheelPaintModification paintModification = wheelMesh.GetComponent<WheelPaintModification>();
+                paintModification.LoadFromSave();
+                ColourSwatchSerialized initialSwatch = paintModification.SavedSwatch;
+
+                WarehouseManager.Instance.CurrentCar.InitialiseAsRacer();
+
+                ColourSwatch swatchToTest = new();
+                swatchToTest.SetColor(Color.cyan);
+                swatchToTest.SetSpecular(Color.green);
+                swatchToTest.SetSmoothness(0.9f);
+                swatchToTest.SetClearcoat(0.6f);
+
+                paintModification.ApplySwatch(swatchToTest);
+                paintModification.LoadFromSave();
+
+                WarehouseManager.Instance.CurrentCar.InitialiseAsPlayer(carIndexToUse); //have to set as player again to retrieve the saved swatch
+                ColourSwatchSerialized currentSwatch = paintModification.SavedSwatch;
+
+                Assert.AreEqual(initialSwatch.Color, currentSwatch.Color);
+                Assert.AreEqual(initialSwatch.Specular, currentSwatch.Specular);
+                Assert.AreEqual(initialSwatch.Smoothness, currentSwatch.Smoothness);
+                Assert.AreEqual(initialSwatch.ClearCoat, currentSwatch.ClearCoat);
+                Assert.AreEqual(initialSwatch.ClearCoatSmoothness, currentSwatch.ClearCoatSmoothness);
+            }
+        }
+        
     }
 }
