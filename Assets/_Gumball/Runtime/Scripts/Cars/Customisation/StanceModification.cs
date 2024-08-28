@@ -43,7 +43,7 @@ namespace Gumball
             
             FindWheelMesh();
             
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 ApplySavedPlayerData();
             else ApplyDefaultData();
         }
@@ -112,7 +112,7 @@ namespace Gumball
             wheelCollider.suspensionDistance = heightValue;
 
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.SuspensionHeight", heightValue);
             
             carBelongsTo.UpdateWheelMeshes();
@@ -123,7 +123,7 @@ namespace Gumball
             CurrentCamber = rotationValue;
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.Camber", rotationValue);
             
             carBelongsTo.UpdateWheelMeshes();
@@ -134,7 +134,7 @@ namespace Gumball
             wheelCollider.transform.localPosition = wheelCollider.transform.localPosition.SetX(offsetValue);
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.Offset", offsetValue);
             
             carBelongsTo.UpdateWheelMeshes();
@@ -145,7 +145,7 @@ namespace Gumball
             WheelMesh.transform.localScale = WheelMesh.transform.localScale.SetYZ(rimDiameterValue, rimDiameterValue);
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.RimDiameter", rimDiameterValue);
             
             UpdateWheelColliderRadius();
@@ -156,7 +156,7 @@ namespace Gumball
             WheelMesh.transform.localScale = WheelMesh.transform.localScale.SetX(rimWidthValue);
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.RimWidth", rimWidthValue);
         }
                                 
@@ -165,7 +165,7 @@ namespace Gumball
             WheelMesh.Tyre.transform.localScale = WheelMesh.Tyre.transform.localScale.SetXY(tyreProfileValue, tyreProfileValue);
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.TyreProfile", tyreProfileValue);
             
             WheelMesh.StretchTyre();
@@ -177,7 +177,7 @@ namespace Gumball
             WheelMesh.Tyre.transform.localScale = WheelMesh.Tyre.transform.localScale.SetZ(tyreWidthValue);
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.TyreWidth", tyreWidthValue);
             
             WheelMesh.StretchTyre();

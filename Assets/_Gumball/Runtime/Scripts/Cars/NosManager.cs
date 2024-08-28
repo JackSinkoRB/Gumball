@@ -11,6 +11,9 @@ namespace Gumball
     {
 
         public const float MinPercentToActivate = 0.1f;
+
+        public event Action onActivate;
+        public event Action onDeactivate;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
@@ -75,6 +78,8 @@ namespace Gumball
             carBelongsTo.UpdateTorqueCurve(carBelongsTo.NosTorqueAddition);
             
             ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(true);
+
+            onActivate?.Invoke();
         }
         
         public void Deactivate()
@@ -90,6 +95,8 @@ namespace Gumball
             carBelongsTo.UpdateTorqueCurve();
 
             ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(false);
+
+            onDeactivate?.Invoke();
         }
         
         private void Deplete()

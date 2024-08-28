@@ -2105,6 +2105,7 @@ Transform:
   - {fileID: 6836316462123091794}
   - {fileID: 8122091738299496973}
   - {fileID: 5994811658601468452}
+  - {fileID: 2131609871474109795}
   - {fileID: 3522902415297503478}
   - {fileID: 3598331306860555585}
   - {fileID: 1909353466429399051}
@@ -2158,15 +2159,12 @@ MonoBehaviour:
   steeringWheel: {fileID: 7747513796075811436}
   cockpitCameraTarget: {fileID: 8755564724976412588}
   rearViewCameraTarget: {fileID: 6053927852014389221}
-  isPlayerCar: 0
   isPlayerDrivingEnabled: 0
   carIndex: 0
   defaultEngine: {fileID: 0}
   defaultWheels: {fileID: 0}
   defaultDrivetrain: {fileID: 0}
   performanceSettings:
-    gearboxAccelerationPerformancePoints: 0
-    gearboxMaxSpeedPerformancePoints: 0
     minTorqueCurve:
       serializedVersion: 2
       m_Curve:
@@ -2430,6 +2428,7 @@ MonoBehaviour:
   carType: 0
   carPartManager: {fileID: 7904050704453231355}
   bodyPaintModification: {fileID: 659532544896480163}
+  carAudioManager: {fileID: 2266151552355324959}
   nosManager: {fileID: 0}
   frontOfCarPosition: {x: 0, y: 1, z: 2}
   carWidth: 2
@@ -2942,6 +2941,92 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 683e6afd404ba4c4299c55f3e720e93f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1001 &863115728947113911
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6836390663536110284}
+    m_Modifications:
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5606380373793223183, guid: e78712ec4edb2d743b963b92e8a97b48,
+        type: 3}
+      propertyPath: m_Name
+      value: CarAudio
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e78712ec4edb2d743b963b92e8a97b48, type: 3}
+--- !u!4 &2131609871474109795 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1616397321755411156, guid: e78712ec4edb2d743b963b92e8a97b48,
+    type: 3}
+  m_PrefabInstance: {fileID: 863115728947113911}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2266151552355324959 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1479603976619375528, guid: e78712ec4edb2d743b963b92e8a97b48,
+    type: 3}
+  m_PrefabInstance: {fileID: 863115728947113911}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d02deb4b214f1848b5a49a5b42a78cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &2194045195196720183
