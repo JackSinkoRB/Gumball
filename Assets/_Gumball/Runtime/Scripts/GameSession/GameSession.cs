@@ -571,8 +571,8 @@ namespace Gumball
                 AICar racer = Instantiate(handles[index].Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                 racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[index]);
 
-                racer.SetPerformanceProfile(data.PerformanceProfile);
                 racer.InitialiseAsRacer();
+                data.LoadIntoCar(racer);
 
                 currentRacers[racer] = data;
             }

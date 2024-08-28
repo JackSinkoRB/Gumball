@@ -96,10 +96,10 @@ namespace Gumball
         
         private void OnSelectAdvancedTab()
         {
-            advancedSwatch.SetColor(paintModification.CurrentSwatch.Color.ToColor());
-            advancedSwatch.SetSpecular(paintModification.CurrentSwatch.Specular.ToColor());
-            advancedSwatch.SetSmoothness(paintModification.CurrentSwatch.Smoothness);
-            advancedSwatch.SetClearcoat(paintModification.CurrentSwatch.ClearCoat);
+            advancedSwatch.SetColor(paintModification.SavedSwatch.Color.ToColor());
+            advancedSwatch.SetSpecular(paintModification.SavedSwatch.Specular.ToColor());
+            advancedSwatch.SetSmoothness(paintModification.SavedSwatch.Smoothness);
+            advancedSwatch.SetClearcoat(paintModification.SavedSwatch.ClearCoat);
             
             //update the UI
             primaryColorPicker.AssignColor(advancedSwatch.Color);
@@ -118,7 +118,7 @@ namespace Gumball
             if (showCustomSwatchOption)
             {
                 //add an additional ScrollItem at the beginning with the advanced colour settings
-                ColourSwatchSerialized colourSwatch = bodyPaintModification.CurrentSwatch;
+                ColourSwatchSerialized colourSwatch = bodyPaintModification.SavedSwatch;
                 ScrollItem customSwatchItem = new ScrollItem();
                 
                 customSwatchItem.onLoad += () =>
@@ -152,13 +152,13 @@ namespace Gumball
                 scrollItem.onSelect += () =>
                 {
                     bodyPaintModification.ApplySwatch(colourSwatch);
-                    bodyPaintModification.CurrentSelectedPresetIndex = finalIndex;
+                    bodyPaintModification.SavedSelectedPresetIndex = finalIndex;
                 };
 
                 scrollItems.Add(scrollItem);
             }
 
-            int indexToShow = showCustomSwatchOption ? 0 : bodyPaintModification.CurrentSelectedPresetIndex;
+            int indexToShow = showCustomSwatchOption ? 0 : bodyPaintModification.SavedSelectedPresetIndex;
             swatchMagneticScroll.SetItems(scrollItems, indexToShow);
         }
         

@@ -447,9 +447,6 @@ namespace Gumball
             
             if (carPartManager != null)
                 carPartManager.Initialise(this);
-            
-            if (bodyPaintModification != null)
-                bodyPaintModification.Initialise(this);
 
             //load the parts
             CorePartManager.InstallParts(carIndex);
@@ -459,6 +456,39 @@ namespace Gumball
 
             nosManager = transform.GetOrAddComponent<NosManager>();
             nosManager.Initialise(this);
+
+            InitialiseWheelStance();
+
+            OnInitialiseTypeComplete();
+        }
+
+        public void InitialiseAsRacer()
+        {
+            gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
+            colliders.layer = (int)LayersAndTags.Layer.RacerCar;
+
+            SetAutoDrive(true);
+            SetObeySpeedLimit(false);
+            
+            InitialiseWheelStance();
+            
+            OnInitialiseTypeComplete();
+        }
+
+        public void InitialiseAsTraffic()
+        {
+            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
+            colliders.layer = (int)LayersAndTags.Layer.TrafficCar;
+            
+            SetAutoDrive(true);
+            
+            OnInitialiseTypeComplete();
+        }
+
+        private void OnInitialiseTypeComplete()
+        {
+            if (bodyPaintModification != null)
+                bodyPaintModification.Initialise(this);
             
             foreach (WheelMesh wheelMesh in AllWheelMeshes)
             {
@@ -467,12 +497,10 @@ namespace Gumball
                     wheelPaintModification.Initialise(this);
             }
             
-            InitialiseWheelStance();
-
             if (carAudioManager != null)
                 carAudioManager.Initialise(this);
         }
-
+        
         public CorePart GetDefaultPart(CorePart.PartType type)
         {
             return type switch
@@ -500,31 +528,6 @@ namespace Gumball
         public void UpdateTorqueCurve(float additionalTorque = 0)
         {
             torqueCurve = performanceSettings.CalculateTorqueCurve(performanceProfile, additionalTorque);
-        }
-        
-        public void InitialiseAsRacer()
-        {
-            gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
-            colliders.layer = (int)LayersAndTags.Layer.RacerCar;
-
-            SetAutoDrive(true);
-            SetObeySpeedLimit(false);
-            
-            InitialiseWheelStance();
-            
-            if (carAudioManager != null)
-                carAudioManager.Initialise(this);
-        }
-        
-        public void InitialiseAsTraffic()
-        {
-            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
-            colliders.layer = (int)LayersAndTags.Layer.TrafficCar;
-            
-            SetAutoDrive(true);
-            
-            if (carAudioManager != null)
-                carAudioManager.Initialise(this);
         }
         
         public void SetAutoDrive(bool autoDrive)
