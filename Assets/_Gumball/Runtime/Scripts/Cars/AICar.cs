@@ -143,7 +143,7 @@ namespace Gumball
         {
             get
             {
-                if (allWheelMeshesCached == null || allWheelMeshesCached.Length == 0 || allWheelMeshesCached[0] == null)
+                if (allWheelMeshesCached == null || allWheelMeshesCached.Length == 0 || allWheelMeshesCached[0] == null || allWheelMeshesCached.Length != frontWheelMeshes.Length + rearWheelMeshes.Length)
                     CacheAllWheelMeshes();
                 return allWheelMeshesCached; 
             }
@@ -153,7 +153,7 @@ namespace Gumball
         {
             get
             {
-                if (allWheelCollidersCached == null || allWheelCollidersCached.Length == 0 || allWheelCollidersCached[0] == null)
+                if (allWheelCollidersCached == null || allWheelCollidersCached.Length == 0 || allWheelCollidersCached[0] == null || allWheelCollidersCached.Length != frontWheelColliders.Length + rearWheelColliders.Length)
                     CacheAllWheelColliders();
                 return allWheelCollidersCached;
             }
@@ -434,8 +434,22 @@ namespace Gumball
             
             CachePoweredWheels();
             InitialiseSize();
+            CheckToLockRigidbodyRotation();
+            
+            this.PerformAfterFixedUpdate(UpdateWheelMeshes); //update the wheels in case the cars spawns too far away from the update radius
         }
 
+        /// <summary>
+        /// Freeze the Y rotation if the vehicle only has 2 wheels (eg. a bike)
+        /// </summary>
+        private void CheckToLockRigidbodyRotation()
+        {
+            if (AllWheelColliders.Length > 2)
+                return; //no need to lock
+
+            Rigidbody.constraints = RigidbodyConstraints.FreezeRotationZ;
+        }
+        
         public void InitialiseAsPlayer(int carIndex)
         {
             this.carIndex = carIndex;
@@ -793,7 +807,8 @@ namespace Gumball
             
             ApplySteering();
             
-            UpdateWheelMeshes();
+            if (!isDumb)
+                UpdateWheelMeshes();
 
             CalculateEngineRPM();
 
@@ -1553,9 +1568,6 @@ namespace Gumball
         /// </summary>
         public void UpdateWheelMeshes()
         {
-            if (isDumb)
-                return;
-            
             //do rear wheels first as the front wheels require their rotation
             for (int count = 0; count < rearWheelMeshes.Length; count++)
             {
@@ -1814,11 +1826,21 @@ namespace Gumball
                 indexCount++;
             }
         }
+
+        private int GetNumberOfPoweredWheels()
+        {
+            return wheelConfiguration switch
+            {
+                WheelConfiguration.ALL_WHEEL_DRIVE => frontWheelColliders.Length + rearWheelColliders.Length,
+                WheelConfiguration.FRONT_WHEEL_DRIVE => frontWheelColliders.Length,
+                WheelConfiguration.REAR_WHEEL_DRIVE => rearWheelColliders.Length,
+                _ => 0
+            };
+        }
         
         private void CachePoweredWheels()
         {
-            int numberOfPoweredWheels = wheelConfiguration == WheelConfiguration.ALL_WHEEL_DRIVE ? 4 : 2;
-            poweredWheels = new WheelCollider[numberOfPoweredWheels];
+            poweredWheels = new WheelCollider[GetNumberOfPoweredWheels()];
 
             int indexCount = 0;
             foreach (WheelCollider wheelCollider in frontWheelColliders)

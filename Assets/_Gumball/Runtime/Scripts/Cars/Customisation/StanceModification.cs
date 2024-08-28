@@ -162,6 +162,9 @@ namespace Gumball
                                 
         public void ApplyTyreProfile(float tyreProfileValue)
         {
+            if (WheelMesh.Tyre == null)
+                return;
+            
             WheelMesh.Tyre.transform.localScale = WheelMesh.Tyre.transform.localScale.SetXY(tyreProfileValue, tyreProfileValue);
             
             //save to file
@@ -174,6 +177,9 @@ namespace Gumball
         
         public void ApplyTyreWidth(float tyreWidthValue)
         {
+            if (WheelMesh.Tyre == null)
+                return;
+            
             WheelMesh.Tyre.transform.localScale = WheelMesh.Tyre.transform.localScale.SetZ(tyreWidthValue);
             
             //save to file
@@ -197,11 +203,27 @@ namespace Gumball
 
         private void UpdateWheelColliderRadius()
         {
+            MeshFilter wheelMesh = GetWheelMesh();
+
+            if (wheelMesh == null)
+                return;
+
             //the tyre is always larger than the wheel, so get the tyre extents (accounting for transform scales)
-            Vector3 tyreSize = WheelMesh.Tyre.transform.TransformPoint(WheelMesh.Tyre.MeshFilter.sharedMesh.bounds.extents) - WheelMesh.Tyre.transform.position;
+            Vector3 tyreSize = wheelMesh.transform.TransformPoint(wheelMesh.sharedMesh.bounds.extents) - wheelMesh.transform.position;
             
             //tyre is circular, so add the height and width and divide by 2. This is because we're working with world position and the tyre might be rotated in world space.
             wheelCollider.radius = (Mathf.Abs(tyreSize.y) + Mathf.Abs(tyreSize.z)) / 2f;
+        }
+
+        private MeshFilter GetWheelMesh()
+        {
+            if (WheelMesh.Tyre != null)
+                return WheelMesh.Tyre.MeshFilter;
+
+            if (WheelMesh.Rim != null && WheelMesh.Rim.Barrel != null)
+                return WheelMesh.Rim.Barrel;
+
+            return null;
         }
         
     }
