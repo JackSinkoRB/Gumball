@@ -62,11 +62,9 @@ namespace Gumball
         private int GetMaxSpeedRating(CarPerformanceSettings settings, CarPerformanceProfile profile)
         {
             float maxRpmValue = settings.EngineRpmRangeMax.GetValue(profile) * 0.005f;
-            float idealRpmRangeMin = settings.IdealRPMRangeForGearChanges.GetValue(profile).Min * 0.005f;
-            float idealRpmRangeMax = settings.IdealRPMRangeForGearChanges.GetValue(profile).Max * 0.005f;
             float mass = (5000 - settings.RigidbodyMass.GetValue(profile)) * 0.005f;
             
-            return Mathf.CeilToInt(maxRpmValue + idealRpmRangeMin + idealRpmRangeMax + mass);
+            return Mathf.CeilToInt(maxRpmValue + mass + settings.BaseMaxSpeed);
         }
         
         private int GetAccelerationRating(CarPerformanceSettings settings, CarPerformanceProfile profile)
@@ -76,7 +74,7 @@ namespace Gumball
             float startingTorque = settings.GetStartingTorque(profile) * 0.005f;
             float mass = (5000 - settings.RigidbodyMass.GetValue(profile)) * 0.005f;
             
-            return Mathf.CeilToInt(torque + minRpmValue + startingTorque + mass);
+            return Mathf.CeilToInt(torque + minRpmValue + startingTorque + mass + settings.BaseAcceleration);
         }
         
         private int GetHandlingRating(CarPerformanceSettings settings, CarPerformanceProfile profile)
@@ -89,7 +87,7 @@ namespace Gumball
             float maxSteerAngle = settings.MaxSteerAngle.GetValue(profile).keys.Length < 1 ? 0
                 : settings.MaxSteerAngle.GetValue(profile).keys[1].value * 0.5f; //just use the max speed value
 
-            return Mathf.CeilToInt(brake + handbrakeEaseOffDuration + handbrake + steerSpeed + steerReleaseSpeed + maxSteerAngle);
+            return Mathf.CeilToInt(brake + handbrakeEaseOffDuration + handbrake + steerSpeed + steerReleaseSpeed + maxSteerAngle + settings.BaseHandling);
         }
         
         private int GetNosRating(CarPerformanceSettings settings, CarPerformanceProfile profile)
@@ -98,7 +96,7 @@ namespace Gumball
             float fillRate = settings.NosFillRate.GetValue(profile) * 0.2f;
             float torqueAddition = settings.NosTorqueAddition.GetValue(profile) * 0.02f;
 
-            return Mathf.CeilToInt(depletionRate + fillRate + torqueAddition);
+            return Mathf.CeilToInt(depletionRate + fillRate + torqueAddition + settings.BaseNos);
         }
         
     }

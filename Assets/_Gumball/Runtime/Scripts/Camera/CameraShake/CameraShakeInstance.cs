@@ -126,6 +126,12 @@ namespace Gumball
             }
         }
 
+        public void Kill()
+        {
+            currentFadeTween?.Kill();
+            currentState = State.Inactive;
+        }
+
         public void DoShake(float magnitudeModifier = 1)
         {
             if (currentState != State.Inactive)

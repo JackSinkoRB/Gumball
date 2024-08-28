@@ -74,7 +74,7 @@ namespace Gumball
                 int racerIndex = 0;
                 foreach (AICar racer in CurrentRacers.Keys)
                 {
-                    if (racer.IsPlayerCar)
+                    if (racer.IsPlayer)
                         continue;
 
                     float brakingPosition = start - racerSpeedCameraSprintData[racerIndex].BrakingDistanceRange.RandomInRange();
@@ -138,7 +138,7 @@ namespace Gumball
         {
             foreach (AICar racer in CurrentRacers.Keys)
             {
-                if (racer.IsPlayerCar)
+                if (racer.IsPlayer)
                     continue;
                 
                 racer.RemoveTemporarySpeedLimit();

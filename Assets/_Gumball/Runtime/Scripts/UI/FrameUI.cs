@@ -23,13 +23,8 @@ namespace Gumball
             Randomise();
         }
 
-        private void OnValidate()
-        {
-            if (!Application.isPlaying)
-                Randomise();
-        }
-
-        private void Randomise()
+        [ButtonMethod]
+        public void Randomise()
         {
             const float defaultVerticalRotation = 90;
             left.transform.rotation = Quaternion.Euler(left.transform.rotation.eulerAngles.SetZ(Random.Range(defaultVerticalRotation-maxRandomRotation, defaultVerticalRotation+maxRandomRotation)));

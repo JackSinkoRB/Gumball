@@ -7,6 +7,7 @@ using Dreamteck.Splines;
 using Gumball.Editor;
 #endif
 using MyBox;
+using Unity.Profiling;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
@@ -36,6 +37,9 @@ namespace Gumball
             ALL_WHEEL_DRIVE
         }
 
+        private const float dumbDistance = 150;
+        private const float timeBetweenCornerChecksWhenDumb = 1;
+        
         [Header("Details")]
         [SerializeField] private string displayName;
 
@@ -51,11 +55,9 @@ namespace Gumball
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField] private Transform rearViewCameraTarget;
         
         [Space(5)]
-        [SerializeField, ReadOnly] private bool isPlayerCar;
         [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
         [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
 
-        public bool IsPlayerCar => isPlayerCar;
         public CarIKManager AvatarIKManager => avatarIKManager;
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
@@ -82,8 +84,8 @@ namespace Gumball
         
         public CarPerformanceSettings PerformanceSettings => performanceSettings; 
         public PerformanceRatingCalculator CurrentPerformanceRating => currentPerformanceRating;
-        public MinMaxFloat IdealRPMRangeForGearChanges => performanceSettings.IdealRPMRangeForGearChanges.GetValue(performanceProfile);
         public MinMaxFloat EngineRpmRange => new(performanceSettings.EngineRpmRangeMin.GetValue(performanceProfile), performanceSettings.EngineRpmRangeMax.GetValue(performanceProfile));
+        public MinMaxFloat IdealRPMRangeForGearChanges => new(idealRPMPercentForGearChanges.Min * EngineRpmRange.Max, idealRPMPercentForGearChanges.Max * EngineRpmRange.Max);
         public float RigidbodyMass => performanceSettings.RigidbodyMass.GetValue(performanceProfile);
         public float BrakeTorque => performanceSettings.BrakeTorque.GetValue(performanceProfile);
         public float HandbrakeTorque => performanceSettings.HandbrakeTorque.GetValue(performanceProfile);
@@ -99,6 +101,7 @@ namespace Gumball
         [SerializeField] private CarType carType;
         [SerializeField] private CarPartManager carPartManager;
         [SerializeField] private BodyPaintModification bodyPaintModification;
+        [SerializeField] private CarAudioManager carAudioManager;
         [Space(5)]
         [Tooltip("This gets added on initialise for every player car.")]
         [SerializeField, ReadOnly] private NosManager nosManager;
@@ -106,6 +109,7 @@ namespace Gumball
         public CarType CarType => carType;
         public CarPartManager CarPartManager => carPartManager;
         public BodyPaintModification BodyPaintModification => bodyPaintModification;
+        public CarAudioManager CarAudioManager => carAudioManager;
         public NosManager NosManager => nosManager;
         
         [Header("Sizing")]
@@ -194,6 +198,8 @@ namespace Gumball
         [Header("Engine & Drivetrain")]
         [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
         [SerializeField] private float finalGearRatio = 3.42f;
+        [Tooltip("If RPM goes outside this range, it will try upshift/downshift to the desired RPM.")]
+        [SerializeField] private MinMaxFloat idealRPMPercentForGearChanges = new(0.5f, 0.9f);
         [SerializeField, ReadOnly] private int currentGear;
         [SerializeField, ReadOnly] private bool isAccelerating;
         [SerializeField, ReadOnly] private float engineRpm;
@@ -313,19 +319,23 @@ namespace Gumball
         [SerializeField, ReadOnly] private Chunk currentChunkCached;
         [SerializeField, ReadOnly] private float timeWithNoChunk;
         [SerializeField, ReadOnly] private bool isFrozen;
+        [SerializeField, ReadOnly] private bool isDumb;
 
         private Vector3 targetPosition;
         private Vector3 cornerTargetPosition;
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion, SplineSample)? targetPos;
         private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
+        private float timeSinceLastCornerCheck;
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
         private bool recoveringFromCollision => collisionRecoverDuration > 0 && (InCollision || timeSinceCollision < collisionRecoverDuration);
         private bool faceForward => useRacingLine || currentLaneDirection == ChunkTrafficManager.LaneDirection.FORWARD;
-        private bool isRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
-        private bool isPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
-
+        
+        public bool IsRacer => gameObject.layer == (int)LayersAndTags.Layer.RacerCar;
+        public bool IsTraffic => gameObject.layer == (int)LayersAndTags.Layer.TrafficCar;
+        public bool IsPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
+        
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
         public float Speed => speed;
         public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : Mathf.Infinity));
@@ -428,8 +438,6 @@ namespace Gumball
 
         public void InitialiseAsPlayer(int carIndex)
         {
-            isPlayerCar = true;
-            
             this.carIndex = carIndex;
             
             gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
@@ -460,6 +468,9 @@ namespace Gumball
             }
             
             InitialiseWheelStance();
+
+            if (carAudioManager != null)
+                carAudioManager.Initialise(this);
         }
 
         public CorePart GetDefaultPart(CorePart.PartType type)
@@ -500,6 +511,9 @@ namespace Gumball
             SetObeySpeedLimit(false);
             
             InitialiseWheelStance();
+            
+            if (carAudioManager != null)
+                carAudioManager.Initialise(this);
         }
         
         public void InitialiseAsTraffic()
@@ -508,6 +522,9 @@ namespace Gumball
             colliders.layer = (int)LayersAndTags.Layer.TrafficCar;
             
             SetAutoDrive(true);
+            
+            if (carAudioManager != null)
+                carAudioManager.Initialise(this);
         }
         
         public void SetAutoDrive(bool autoDrive)
@@ -601,7 +618,7 @@ namespace Gumball
             GlobalLoggers.AICarLogger.Log($"Grounded {gameObject.name} - moved {offset}");
             
             //check to apply ride height - currently only for player cars
-            if (isPlayerCar)
+            if (IsPlayer)
             {
                 float rideHeight = DataManager.Cars.Get<float>($"{SaveKey}.RideHeight");
                 transform.position = transform.position.OffsetY(rideHeight);
@@ -635,7 +652,7 @@ namespace Gumball
 
             if (autoDrive)
             {
-                if (!isPlayerCar && CurrentChunk == null)
+                if (!IsPlayer && CurrentChunk == null)
                 {
                     //current chunk may have despawned
                     const float timeWithNoChunkToDespawn = 1;
@@ -721,13 +738,38 @@ namespace Gumball
             racingLineOffset = offset;
         }
 
+        private void SetDumb(bool setEnabled)
+        {
+            if (setEnabled == isDumb)
+                return; //is already set
+            
+            isDumb = setEnabled;
+            GlobalLoggers.AICarLogger.Log($"Set {gameObject.name} dumb to {isDumb}.");
+        }
+        
+        private void CheckIfDumb()
+        {
+            if (WarehouseManager.Instance.CurrentCar == null)
+            {
+                SetDumb(true);
+                return;
+            }
+
+            const float dumbDistanceSqr = dumbDistance * dumbDistance;
+            float distanceToPlayerSqr = Vector3.SqrMagnitude(WarehouseManager.Instance.CurrentCar.transform.position - transform.position);
+            bool shouldBeDumb = distanceToPlayerSqr > dumbDistanceSqr;
+            SetDumb(shouldBeDumb);
+        }
+
         private void Move()
         {
             speed = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
+
+            CheckIfDumb();
             
             TryCreateMovementPathCollider();
             CheckIfPlayerDriving();
-            
+
             if (autoDrive)
                 CheckForCorner();
 
@@ -737,7 +779,7 @@ namespace Gumball
                 CalculateSteerAngle();
 
             CheckIfPushingAnotherRacer();
-            
+
             UpdateBrakingValues();
             DoBrakeEvents();
 
@@ -817,6 +859,12 @@ namespace Gumball
             int closestSampleIndexToPlayer = CurrentChunk.GetClosestSampleIndexOnSpline(transform.position).Item1;
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
+                if (racingLine == null)
+                {
+                    Debug.LogError($"There's a missing/null racing line in {CurrentChunk.name}'s TrafficManager.");
+                    continue;
+                }
+                
                 if (racingLine.SplineSamples == null || racingLine.SplineSamples.Length == 0)
                     continue;
                 
@@ -914,6 +962,12 @@ namespace Gumball
             
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
+                if (racingLine == null)
+                {
+                    Debug.LogError($"There's a missing/null racing line in {CurrentChunk.name}'s TrafficManager.");
+                    continue;
+                }
+                
                 UpdateAutoDriveTargetPosition();
                 
                 if (targetPos == null)
@@ -1047,7 +1101,7 @@ namespace Gumball
         /// </summary>
         private void CheckIfPushingAnotherRacer()
         {
-            if (!isPlayer && !isRacer)
+            if (!IsPlayer && !IsRacer)
                 return;
             
             //check if colliding with another racer or player
@@ -1178,7 +1232,7 @@ namespace Gumball
             isBrakingForCorner = false;
             speedToBrakeTo = Mathf.Infinity;
             
-            if (InCollision && autoDrive && !isRacer && !isPlayer)
+            if (InCollision && autoDrive && !IsRacer && !IsPlayer)
                 return;
             
             if (isReversing)
@@ -1208,7 +1262,7 @@ namespace Gumball
                 isBrakingForCorner = true;
             }
 
-            if (autoDrive && brakeForObstacles)
+            if (autoDrive && brakeForObstacles && (!isDumb || !IsTraffic))
             {
                 float speedPercent = (speed - speedForBrakingRaycastLength.Min) / (speedForBrakingRaycastLength.Max - speedForBrakingRaycastLength.Min);
                 float raycastLength = brakingRaycastLength.Min + ((brakingRaycastLength.Max - brakingRaycastLength.Min) * speedPercent);
@@ -1369,9 +1423,19 @@ namespace Gumball
                 wheelCollider.brakeTorque = 0;
             }
         }
-        
+
         private void CheckForCorner()
         {
+            //only do corner check periodically for traffic as it's fairly expensive
+            if (IsTraffic && isDumb)
+            {
+                timeSinceLastCornerCheck += Time.deltaTime;
+                if (timeSinceLastCornerCheck < timeBetweenCornerChecksWhenDumb)
+                    return;
+            }
+            
+            timeSinceLastCornerCheck = 0;
+
             const float min = 2;
             float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speed));
             float visionDistance = metresPerSecond * cornerReactionTime;
@@ -1415,14 +1479,17 @@ namespace Gumball
         private void UpdateMovementPathCollider()
         {
             movementPathCollider.transform.localPosition = frontOfCarPosition;
-
+            
+            if (isDumb)
+                return;
+                
             Vector3 direction = Rigidbody.velocity.sqrMagnitude > 1 ? Rigidbody.velocity : transform.forward;
             float distanceToPredictedPosition = direction.magnitude * predictedPositionReactionTime;
             movementPathCollider.size = new Vector3(carWidth, carWidth, distanceToPredictedPosition);
-            
+
             //center is half the size so it points outwards
             movementPathCollider.center = new Vector3(0, 0, movementPathCollider.size.z / 2f);
-            
+
             //rotate towards target position
             Vector3 finalTargetPosition = targetPosition.OffsetY(frontOfCarPosition.y);
             movementPathCollider.transform.LookAt(finalTargetPosition);
@@ -1486,6 +1553,9 @@ namespace Gumball
         /// </summary>
         public void UpdateWheelMeshes()
         {
+            if (isDumb)
+                return;
+            
             //do rear wheels first as the front wheels require their rotation
             for (int count = 0; count < rearWheelMeshes.Length; count++)
             {
@@ -1627,7 +1697,7 @@ namespace Gumball
                     AICar hitCar = hit.rigidbody.gameObject.GetComponent<AICar>();
                     if (hitCar != null)
                     {
-                        if (isPlayer && hitCar.isRacer)
+                        if (IsPlayer && hitCar.IsRacer)
                             continue; //when player is autodriving, don't try avoid racers
                         
                         bool otherCarIsAhead = IsPositionAhead(hit.transform.position + hitCar.frontOfCarPosition);
@@ -1703,7 +1773,7 @@ namespace Gumball
         private void Despawn()
         {
             gameObject.Pool();
-            GlobalLoggers.AICarLogger.Log($"Despawned at {transform.position}");
+            GlobalLoggers.AICarLogger.Log($"Despawned {gameObject.name} at {transform.position}");
         }
 
         private void CacheAllWheelMeshes()
@@ -2045,10 +2115,10 @@ namespace Gumball
         
         private void CheckIfCollidedWithRacer(AICar car, bool adding)
         {
-            if (!isRacer && !isPlayer)
+            if (!IsRacer && !IsPlayer)
                 return;
             
-            if (!car.isRacer && !car.isPlayer)
+            if (!car.IsRacer && !car.IsPlayer)
                 return;
 
             if (car == this)

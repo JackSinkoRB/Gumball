@@ -86,7 +86,7 @@ namespace Gumball
             
             lastRacer.SetObeySpeedLimit(true);
 
-            if (lastRacer.IsPlayerCar)
+            if (lastRacer.IsPlayer)
                 OnEliminatePlayer();
         }
 

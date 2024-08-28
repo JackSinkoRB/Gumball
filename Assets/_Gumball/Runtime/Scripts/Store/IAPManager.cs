@@ -64,7 +64,7 @@ namespace Gumball
             StandardPurchasingModule.Instance().useFakeStoreUIMode = FakeStoreUIMode.StandardUser;
 #endif
             
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
             //the CrossPlatform validator only supports Google Play and Apple App Store
             if (IsCurrentStoreSupportedByValidator)
             {

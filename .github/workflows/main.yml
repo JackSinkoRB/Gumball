@@ -202,7 +202,12 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3
-          bundler-cache: true
+          bundler-cache: false
+
+      # Bundle install
+      - name: bundle install
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: bundle install
 
       - name: Upload to Google Play Internal
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -284,7 +289,8 @@ jobs:
     needs: [buildAndDeployAndroid, buildAndDeployWindows]
     name: Deploy to Discord
     runs-on: self-hosted
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    if: |
+      always() && github.event_name == 'push' && github.ref == 'refs/heads/develop' && needs.buildAndDeployAndroid.result == 'success' && needs.buildAndDeployWindows.result == 'success'
     steps:
 
       # Get all the commits
