@@ -67,19 +67,19 @@ namespace Gumball
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
         [Header("Performance settings")]
-        [SerializeField] private CorePart defaultEngine;
-        [SerializeField] private CorePart defaultWheels;
-        [SerializeField] private CorePart defaultDrivetrain;
-        [SerializeField] private CarPerformanceSettings performanceSettings;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultWheels;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultDrivetrain;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarPerformanceSettings performanceSettings;
         [Space(5)]
-        [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
-        [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
+        [SerializeField, ReadOnly(nameof(canBeDrivenByPlayer))] private AnimationCurve torqueCurve;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private CarPerformanceProfile performanceProfile;
         [Tooltip("This is calculated at runtime only, using the upgrade data.")]
-        [SerializeField, ReadOnly] private PerformanceRatingCalculator currentPerformanceRating;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private PerformanceRatingCalculator currentPerformanceRating;
 #if UNITY_EDITOR
         [Space(5)]
-        [SerializeField, ReadOnly] private PerformanceRatingCalculator performanceRatingWithMinProfile;
-        [SerializeField, ReadOnly] private PerformanceRatingCalculator performanceRatingWithMaxProfile;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private PerformanceRatingCalculator performanceRatingWithMinProfile;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private PerformanceRatingCalculator performanceRatingWithMaxProfile;
 #endif
         
         public CarPerformanceSettings PerformanceSettings => performanceSettings; 
@@ -98,13 +98,13 @@ namespace Gumball
         public float NosTorqueAddition => performanceSettings.NosTorqueAddition.GetValue(performanceProfile);
         
         [Header("Customisation")]
-        [SerializeField] private CarType carType;
-        [SerializeField] private CarPartManager carPartManager;
-        [SerializeField] private BodyPaintModification bodyPaintModification;
-        [SerializeField] private CarAudioManager carAudioManager;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarType carType;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarPartManager carPartManager;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private BodyPaintModification bodyPaintModification;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarAudioManager carAudioManager;
         [Space(5)]
         [Tooltip("This gets added on initialise for every player car.")]
-        [SerializeField, ReadOnly] private NosManager nosManager;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private NosManager nosManager;
         
         public CarType CarType => carType;
         public CarPartManager CarPartManager => carPartManager;
