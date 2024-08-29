@@ -23,7 +23,11 @@ namespace Gumball
             public void Enable(bool enable)
             {
                 foreach (Transform transform in transformsToEnable)
+                {
+                    if (transform == null)
+                        continue;
                     transform.gameObject.SetActive(enable);
+                }
             }
 
             public void SetDistance(float distance)
@@ -71,13 +75,13 @@ namespace Gumball
             float distanceToPlayerSqr = Vector3.SqrMagnitude(WarehouseManager.Instance.CurrentCar.transform.position - transform.position);
 
             LODLevel closestLevel = lods[0];
-            for (int index = 1; index < lods.Count; index++)
+            for (int index = lods.Count - 1; index >= 0; index--)
             {
                 LODLevel level = lods[index];
                 
-                float distanceSqr = level.DistanceToActivate * level.DistanceToActivate;
-                if (distanceSqr > distanceToPlayerSqr) //use the first level that is greater than the player's distance
-                    return level;
+                float activationDistanceSqr = level.DistanceToActivate * level.DistanceToActivate;
+                if (distanceToPlayerSqr > activationDistanceSqr)
+                    return lods[index];
             }
 
             return closestLevel;

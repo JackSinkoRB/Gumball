@@ -106,6 +106,7 @@ namespace Gumball
         public float RaceDistanceMetres => raceDistanceMetres;
         public GenericDictionary<AICar, RacerSessionData> CurrentRacers => currentRacers;
         public Rewards Rewards => rewards;
+        public bool HasLoaded { get; private set; }
         public bool HasStarted { get; private set; }
         public bool TrafficIsProcedural => trafficIsProcedural;
         public int TrafficDensity => trafficDensity;
@@ -122,6 +123,7 @@ namespace Gumball
 
         public void StartSession()
         {
+            HasLoaded = false;
             HasStarted = false;
             GameSessionManager.Instance.SetCurrentSession(this);
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
@@ -393,7 +395,9 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log("Loading session...");
             yield return LoadSession();
 
+            HasLoaded = true;
             PanelManager.GetPanel<LoadingPanel>().Hide();
+            
             InputManager.Instance.CarInput.Enable();
             
             yield return IntroCinematicIE();
@@ -567,8 +571,8 @@ namespace Gumball
                 AICar racer = Instantiate(handles[index].Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                 racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[index]);
 
-                racer.SetPerformanceProfile(data.PerformanceProfile);
                 racer.InitialiseAsRacer();
+                data.LoadIntoCar(racer);
 
                 currentRacers[racer] = data;
             }
