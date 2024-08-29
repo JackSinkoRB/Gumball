@@ -379,31 +379,34 @@ namespace Gumball
             }
 
             //check to blend
-            foreach (ChunkObject chunkObject in chunkObjects)
+            if (desiredOffsets.Count == 0) //if there's already flattening from something underneath, then don't blend with other objects
             {
-                if (!chunkObject.isActiveAndEnabled)
-                    continue;
-                
-                if (desiredOffsets.ContainsKey(chunkObject) || !chunkObject.CanFlattenTerrain || chunkObject.FlattenTerrainBlendDistance <= 0)
-                    continue;
-                
-                float maxDistanceSqr = chunkObject.FlattenTerrainBlendDistance * chunkObject.FlattenTerrainBlendDistance;
-                //get distance from collider to currentPosition
-                var (closestPosition, distanceSqr) = chunkObject.ColliderToFlattenTo.ClosestVertex(currentPosition, true);
-                
-                bool isWithinBlendRadius = distanceSqr <= maxDistanceSqr;
-                if (!isWithinBlendRadius)
-                    continue;
+                foreach (ChunkObject chunkObject in chunkObjects)
+                {
+                    if (!chunkObject.isActiveAndEnabled)
+                        continue;
 
-                float blendPercent = distanceSqr / maxDistanceSqr;
-                float blendPercentWithCurve = chunkObject.FlattenTerrainBlendCurve.Evaluate(blendPercent);
-                float blendModifier = Mathf.Clamp01(blendPercentWithCurve); //furthest away = 0 : 1
-                float offset = closestPosition.y - currentPosition.y;
+                    if (desiredOffsets.ContainsKey(chunkObject) || !chunkObject.CanFlattenTerrain || chunkObject.FlattenTerrainBlendDistance <= 0)
+                        continue;
 
-                float offsetWithBlending = offset * blendModifier;
-                
-                desiredOffsets[chunkObject] = offsetWithBlending;
-                sumOfOffsets += offsetWithBlending;
+                    float maxDistanceSqr = chunkObject.FlattenTerrainBlendDistance * chunkObject.FlattenTerrainBlendDistance;
+                    //get distance from collider to currentPosition
+                    var (closestPosition, distanceSqr) = chunkObject.ColliderToFlattenTo.ClosestVertex(currentPosition, true);
+
+                    bool isWithinBlendRadius = distanceSqr <= maxDistanceSqr;
+                    if (!isWithinBlendRadius)
+                        continue;
+
+                    float blendPercent = distanceSqr / maxDistanceSqr;
+                    float blendPercentWithCurve = chunkObject.FlattenTerrainBlendCurve.Evaluate(blendPercent);
+                    float blendModifier = Mathf.Clamp01(blendPercentWithCurve); //furthest away = 0 : 1
+                    float offset = closestPosition.y - currentPosition.y;
+
+                    float offsetWithBlending = offset * blendModifier;
+
+                    desiredOffsets[chunkObject] = offsetWithBlending;
+                    sumOfOffsets += offsetWithBlending;
+                }
             }
 
             if (desiredOffsets.Count == 0)

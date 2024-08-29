@@ -67,19 +67,19 @@ namespace Gumball
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
         [Header("Performance settings")]
-        [SerializeField] private CorePart defaultEngine;
-        [SerializeField] private CorePart defaultWheels;
-        [SerializeField] private CorePart defaultDrivetrain;
-        [SerializeField] private CarPerformanceSettings performanceSettings;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultWheels;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultDrivetrain;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarPerformanceSettings performanceSettings;
         [Space(5)]
-        [SerializeField, ReadOnly] private AnimationCurve torqueCurve;
-        [SerializeField, ReadOnly] private CarPerformanceProfile performanceProfile;
+        [SerializeField, ReadOnly(nameof(canBeDrivenByPlayer))] private AnimationCurve torqueCurve;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private CarPerformanceProfile performanceProfile;
         [Tooltip("This is calculated at runtime only, using the upgrade data.")]
-        [SerializeField, ReadOnly] private PerformanceRatingCalculator currentPerformanceRating;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private PerformanceRatingCalculator currentPerformanceRating;
 #if UNITY_EDITOR
         [Space(5)]
-        [SerializeField, ReadOnly] private PerformanceRatingCalculator performanceRatingWithMinProfile;
-        [SerializeField, ReadOnly] private PerformanceRatingCalculator performanceRatingWithMaxProfile;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private PerformanceRatingCalculator performanceRatingWithMinProfile;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private PerformanceRatingCalculator performanceRatingWithMaxProfile;
 #endif
         
         public CarPerformanceSettings PerformanceSettings => performanceSettings; 
@@ -98,13 +98,13 @@ namespace Gumball
         public float NosTorqueAddition => performanceSettings.NosTorqueAddition.GetValue(performanceProfile);
         
         [Header("Customisation")]
-        [SerializeField] private CarType carType;
-        [SerializeField] private CarPartManager carPartManager;
-        [SerializeField] private BodyPaintModification bodyPaintModification;
-        [SerializeField] private CarAudioManager carAudioManager;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarType carType;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarPartManager carPartManager;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private BodyPaintModification bodyPaintModification;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarAudioManager carAudioManager;
         [Space(5)]
         [Tooltip("This gets added on initialise for every player car.")]
-        [SerializeField, ReadOnly] private NosManager nosManager;
+        [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private NosManager nosManager;
         
         public CarType CarType => carType;
         public CarPartManager CarPartManager => carPartManager;
@@ -143,7 +143,7 @@ namespace Gumball
         {
             get
             {
-                if (allWheelMeshesCached == null || allWheelMeshesCached.Length == 0 || allWheelMeshesCached[0] == null)
+                if (allWheelMeshesCached == null || allWheelMeshesCached.Length == 0 || allWheelMeshesCached[0] == null || allWheelMeshesCached.Length != frontWheelMeshes.Length + rearWheelMeshes.Length)
                     CacheAllWheelMeshes();
                 return allWheelMeshesCached; 
             }
@@ -153,7 +153,7 @@ namespace Gumball
         {
             get
             {
-                if (allWheelCollidersCached == null || allWheelCollidersCached.Length == 0 || allWheelCollidersCached[0] == null)
+                if (allWheelCollidersCached == null || allWheelCollidersCached.Length == 0 || allWheelCollidersCached[0] == null || allWheelCollidersCached.Length != frontWheelColliders.Length + rearWheelColliders.Length)
                     CacheAllWheelColliders();
                 return allWheelCollidersCached;
             }
@@ -434,8 +434,22 @@ namespace Gumball
             
             CachePoweredWheels();
             InitialiseSize();
+            CheckToLockRigidbodyRotation();
+            
+            this.PerformAfterFixedUpdate(UpdateWheelMeshes); //update the wheels in case the cars spawns too far away from the update radius
         }
 
+        /// <summary>
+        /// Freeze the Y rotation if the vehicle only has 2 wheels (eg. a bike)
+        /// </summary>
+        private void CheckToLockRigidbodyRotation()
+        {
+            if (AllWheelColliders.Length > 2)
+                return; //no need to lock
+
+            Rigidbody.constraints = RigidbodyConstraints.FreezeRotationZ;
+        }
+        
         public void InitialiseAsPlayer(int carIndex)
         {
             this.carIndex = carIndex;
@@ -447,9 +461,6 @@ namespace Gumball
             
             if (carPartManager != null)
                 carPartManager.Initialise(this);
-            
-            if (bodyPaintModification != null)
-                bodyPaintModification.Initialise(this);
 
             //load the parts
             CorePartManager.InstallParts(carIndex);
@@ -459,6 +470,39 @@ namespace Gumball
 
             nosManager = transform.GetOrAddComponent<NosManager>();
             nosManager.Initialise(this);
+
+            InitialiseWheelStance();
+
+            OnInitialiseTypeComplete();
+        }
+
+        public void InitialiseAsRacer()
+        {
+            gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
+            colliders.layer = (int)LayersAndTags.Layer.RacerCar;
+
+            SetAutoDrive(true);
+            SetObeySpeedLimit(false);
+            
+            InitialiseWheelStance();
+            
+            OnInitialiseTypeComplete();
+        }
+
+        public void InitialiseAsTraffic()
+        {
+            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
+            colliders.layer = (int)LayersAndTags.Layer.TrafficCar;
+            
+            SetAutoDrive(true);
+            
+            OnInitialiseTypeComplete();
+        }
+
+        private void OnInitialiseTypeComplete()
+        {
+            if (bodyPaintModification != null)
+                bodyPaintModification.Initialise(this);
             
             foreach (WheelMesh wheelMesh in AllWheelMeshes)
             {
@@ -467,12 +511,10 @@ namespace Gumball
                     wheelPaintModification.Initialise(this);
             }
             
-            InitialiseWheelStance();
-
             if (carAudioManager != null)
                 carAudioManager.Initialise(this);
         }
-
+        
         public CorePart GetDefaultPart(CorePart.PartType type)
         {
             return type switch
@@ -500,31 +542,6 @@ namespace Gumball
         public void UpdateTorqueCurve(float additionalTorque = 0)
         {
             torqueCurve = performanceSettings.CalculateTorqueCurve(performanceProfile, additionalTorque);
-        }
-        
-        public void InitialiseAsRacer()
-        {
-            gameObject.layer = (int)LayersAndTags.Layer.RacerCar;
-            colliders.layer = (int)LayersAndTags.Layer.RacerCar;
-
-            SetAutoDrive(true);
-            SetObeySpeedLimit(false);
-            
-            InitialiseWheelStance();
-            
-            if (carAudioManager != null)
-                carAudioManager.Initialise(this);
-        }
-        
-        public void InitialiseAsTraffic()
-        {
-            gameObject.layer = (int)LayersAndTags.Layer.TrafficCar;
-            colliders.layer = (int)LayersAndTags.Layer.TrafficCar;
-            
-            SetAutoDrive(true);
-            
-            if (carAudioManager != null)
-                carAudioManager.Initialise(this);
         }
         
         public void SetAutoDrive(bool autoDrive)
@@ -793,7 +810,8 @@ namespace Gumball
             
             ApplySteering();
             
-            UpdateWheelMeshes();
+            if (!isDumb)
+                UpdateWheelMeshes();
 
             CalculateEngineRPM();
 
@@ -1553,9 +1571,6 @@ namespace Gumball
         /// </summary>
         public void UpdateWheelMeshes()
         {
-            if (isDumb)
-                return;
-            
             //do rear wheels first as the front wheels require their rotation
             for (int count = 0; count < rearWheelMeshes.Length; count++)
             {
@@ -1814,11 +1829,21 @@ namespace Gumball
                 indexCount++;
             }
         }
+
+        private int GetNumberOfPoweredWheels()
+        {
+            return wheelConfiguration switch
+            {
+                WheelConfiguration.ALL_WHEEL_DRIVE => frontWheelColliders.Length + rearWheelColliders.Length,
+                WheelConfiguration.FRONT_WHEEL_DRIVE => frontWheelColliders.Length,
+                WheelConfiguration.REAR_WHEEL_DRIVE => rearWheelColliders.Length,
+                _ => 0
+            };
+        }
         
         private void CachePoweredWheels()
         {
-            int numberOfPoweredWheels = wheelConfiguration == WheelConfiguration.ALL_WHEEL_DRIVE ? 4 : 2;
-            poweredWheels = new WheelCollider[numberOfPoweredWheels];
+            poweredWheels = new WheelCollider[GetNumberOfPoweredWheels()];
 
             int indexCount = 0;
             foreach (WheelCollider wheelCollider in frontWheelColliders)
