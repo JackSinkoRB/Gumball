@@ -98,6 +98,9 @@ namespace Gumball
             
             WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter += OnCollisionEnter;
+            
+            if (WarehouseManager.Instance.CurrentCar.NosManager.IsActivated)
+                nosShake.DoShake();
         }
 
         public override void OnNoLongerCurrent()
@@ -110,6 +113,8 @@ namespace Gumball
             //reset FOV in case it was in progress
             fovTween?.Kill();
             Camera.main.fieldOfView = initialFov;
+            
+            nosShake.Kill();
         }
 
         public override void Snap()
