@@ -144,7 +144,6 @@ namespace Gumball.Runtime.Tests
             //create a custom swatch
             Color primaryColor = Color.red;
             Color secondaryColor = Color.blue;
-            const float metallic = 0.5f;
             const float smoothness = 0.2f;
             const float clearcoat = 0.1f;
             
@@ -172,6 +171,36 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(swatchToTest.ClearCoat, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatShaderID));
             Assert.AreEqual(swatchToTest.ClearCoatSmoothness, meshToTest.sharedMaterial.GetFloat(BodyPaintModification.ClearCoatSmoothnessShaderID));
         }
-        
+
+        [UnityTest]
+        [Order(5)]
+        public IEnumerator OnlySaveForPlayer()
+        {
+            yield return new WaitUntil(() => isInitialised);
+            
+            BodyPaintModification.LoadFromSave();
+            ColourSwatchSerialized initialSwatch = BodyPaintModification.SavedSwatch;
+
+            WarehouseManager.Instance.CurrentCar.InitialiseAsRacer();
+            
+            ColourSwatch swatchToTest = new();
+            swatchToTest.SetColor(Color.cyan);
+            swatchToTest.SetSpecular(Color.green);
+            swatchToTest.SetSmoothness(0.9f);
+            swatchToTest.SetClearcoat(0.6f);
+            
+            BodyPaintModification.ApplySwatch(swatchToTest);
+            BodyPaintModification.LoadFromSave();
+            
+            WarehouseManager.Instance.CurrentCar.InitialiseAsPlayer(carIndexToUse); //have to set as player again to retrieve the saved swatch
+            ColourSwatchSerialized currentSwatch = BodyPaintModification.SavedSwatch;
+            
+            Assert.AreEqual(initialSwatch.Color, currentSwatch.Color);
+            Assert.AreEqual(initialSwatch.Specular, currentSwatch.Specular);
+            Assert.AreEqual(initialSwatch.Smoothness, currentSwatch.Smoothness);
+            Assert.AreEqual(initialSwatch.ClearCoat, currentSwatch.ClearCoat);
+            Assert.AreEqual(initialSwatch.ClearCoatSmoothness, currentSwatch.ClearCoatSmoothness);
+        }
+
     }
 }
