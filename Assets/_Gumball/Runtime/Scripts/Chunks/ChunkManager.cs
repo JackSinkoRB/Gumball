@@ -488,7 +488,12 @@ namespace Gumball
             GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), transform);
             instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             Chunk chunkInstance = instantiatedChunk.GetComponent<Chunk>();
-            chunkInstance.ChunkDetector.SetActive(false);
+            
+            if (chunkInstance.ChunkDetector == null)
+                Debug.LogError($"Chunk {chunkInstance} is missing a chunk detector. You may need to update the terrain or rebuild the map '{currentChunkMap.name}'.");
+            else
+                chunkInstance.ChunkDetector.SetActive(false);
+            
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to instantiate.");
             stopwatch.Restart();
             
@@ -526,7 +531,8 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to update components.");
             stopwatch.Restart();
 
-            chunkInstance.ChunkDetector.SetActive(true);
+            if (chunkInstance.ChunkDetector != null)
+                chunkInstance.ChunkDetector.SetActive(true);
             
             if (HasLoaded)
                 yield return null;
