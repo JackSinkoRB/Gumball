@@ -37,6 +37,7 @@ namespace Gumball
                 Resize();
         }
         
+        [ButtonMethod]
         public void Resize()
         {
             //changing the size of the elements
@@ -67,7 +68,7 @@ namespace Gumball
             foreach (RectTransform child in transform)
             {
                 child.anchorMin = new Vector2(0, 1);
-                child.anchorMin = new Vector2(0, 1);
+                child.anchorMax = new Vector2(0, 1);
                 child.pivot = new Vector2(0, 1);
                 
                 child.sizeDelta = Vector2.one * elementSize;
