@@ -10,6 +10,8 @@ namespace Gumball
 
         [SerializeField] private Vector3 positionOffset;
         
+        //TODO: experiment with changing particle color transparency and amount of particles depending on the player's speed
+        
         private void LateUpdate()
         {
             MoveToPlayer();
