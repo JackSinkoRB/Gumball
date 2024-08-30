@@ -67,6 +67,9 @@ namespace Gumball
             int count = 0;
             foreach (RectTransform child in transform)
             {
+                if (!child.gameObject.activeSelf)
+                    continue;
+                
                 child.anchorMin = new Vector2(0, 1);
                 child.anchorMax = new Vector2(0, 1);
                 child.pivot = new Vector2(0, 1);
