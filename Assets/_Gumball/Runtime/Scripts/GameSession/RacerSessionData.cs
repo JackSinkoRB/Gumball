@@ -14,6 +14,7 @@ namespace Gumball
         
         [SerializeField] private AssetReferenceGameObject assetReference;
         [SerializeField] private PositionAndRotation startingPosition;
+        [SerializeField] private Sprite icon;
 
         [Header("Behaviour")]
         [Tooltip("Can the racer cross the middle of the chunks? Disabling this will enable an invisible barrier for the car in the middle.")]
@@ -42,6 +43,7 @@ namespace Gumball
         {
             car.SetPerformanceProfile(performanceProfile);
 
+            car.RacerIcon.SetIcon(icon);
             ApplyBodyPaintToCar(car);
             ApplyWheelPaintToCar(car);
         }
