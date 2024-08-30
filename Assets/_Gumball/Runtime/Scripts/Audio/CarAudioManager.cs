@@ -35,7 +35,7 @@ namespace Gumball
 
         private void OnDestroy()
         {
-            if (CoroutineHelper.ExistsRuntime)
+            if (CoroutineHelper.ExistsRuntime && checkToEnableCoroutine != null)
                 CoroutineHelper.Instance.StopCoroutine(checkToEnableCoroutine);
         }
 

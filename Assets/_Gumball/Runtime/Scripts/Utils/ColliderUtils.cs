@@ -11,7 +11,7 @@ namespace Gumball
         /// <returns>The closest vertex position, and the distance (squared) to the vertex from the given position.</returns>
         public static (Vector3, float) ClosestVertex(this Collider collider, Vector3 position, bool flatten = false)
         {
-            if (collider is not MeshCollider meshCollider)
+            if (collider is not MeshCollider meshCollider || meshCollider.convex)
             {
                 Vector3 closestPoint = collider.ClosestPoint(position);
                 return (closestPoint, (closestPoint - position).sqrMagnitude);
