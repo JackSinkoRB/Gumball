@@ -45,9 +45,9 @@ namespace Gumball
     {
         [SerializeField] private Color color = Color.white;
         [SerializeField] private Color specular = Color.black;
-        [SerializeField] private float smoothness = 0.5f;
-        [SerializeField] private float clearCoat = 1;
-        [SerializeField] private float clearCoatSmoothness = 1;
+        [SerializeField, Range(0,1)] private float smoothness = 0.5f;
+        [SerializeField, Range(0,1)] private float clearCoat = 1;
+        [SerializeField, Range(0,1)] private float clearCoatSmoothness = 1;
         
         public Color Color => color;
         public Color Specular => specular;
