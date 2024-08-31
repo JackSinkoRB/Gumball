@@ -15,7 +15,8 @@ namespace Gumball
         public static event Action onDeselectCosmetic;
 
         [SerializeField] private AvatarCosmeticPanel cosmeticPanel;
-        [SerializeField] private MagneticScroll magneticScroll;
+        [SerializeField] private GridLayoutWithScreenSize cosmeticButtonsHolder;
+        [SerializeField] private GameObject cosmeticButtonPrefab;
 
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
@@ -54,34 +55,43 @@ namespace Gumball
 
         public void SelectCategory(AvatarCosmeticCategory category)
         {
-            Dictionary<AvatarCosmeticCategory, List<AvatarCosmetic>> cosmetics = AvatarEditor.Instance.CurrentSelectedAvatar.CurrentBody.CosmeticsGrouped;
-            
-            List<ScrollItem> scrollItems = new List<ScrollItem>();
-            if (cosmetics.ContainsKey(category))
-            {
-                foreach (AvatarCosmetic cosmetic in cosmetics[category])
-                {
-                    ScrollItem scrollItem = new ScrollItem();
-                    scrollItem.onLoad += () => scrollItem.CurrentIcon.ImageComponent.sprite = cosmetic.Icon;
-                    scrollItem.onSelectComplete += () => SelectCosmetic(cosmetic);
-                    scrollItems.Add(scrollItem);
-                }
-            }
-
-            magneticScroll.SetItems(scrollItems);
+            PopulateCategoryButtons(category);
 
             //also populate the first cosmetic for the category
+            Dictionary<AvatarCosmeticCategory, List<AvatarCosmetic>> cosmetics = AvatarEditor.Instance.CurrentSelectedAvatar.CurrentBody.CosmeticsGrouped;
             AvatarCosmetic firstCosmeticInCategory = cosmetics.ContainsKey(category) && cosmetics[category].Count > 0 ? cosmetics[category][0] : null;
             SelectCosmetic(firstCosmeticInCategory);
             
             SetButtonSelected(category == AvatarCosmeticCategory.Body);
         }
 
-        private void SelectCosmetic(AvatarCosmetic cosmetic)
+        public void SelectCosmetic(AvatarCosmetic cosmetic)
         {
             cosmeticPanel.PopulateCosmeticOptions(cosmetic);
             cosmeticPanel.Show();
             onSelectCosmetic?.Invoke(cosmetic);
+        }
+
+        private void PopulateCategoryButtons(AvatarCosmeticCategory category)
+        {
+            Dictionary<AvatarCosmeticCategory, List<AvatarCosmetic>> cosmetics = AvatarEditor.Instance.CurrentSelectedAvatar.CurrentBody.CosmeticsGrouped;
+            
+            //hide previous
+            foreach (Transform child in cosmeticButtonsHolder.transform)
+                child.gameObject.Pool();
+            
+            if (cosmetics.ContainsKey(category))
+            {
+                foreach (AvatarCosmetic cosmetic in cosmetics[category])
+                {
+                    AvatarEditorCosmeticButton buttonInstance = cosmeticButtonPrefab.GetSpareOrCreate<AvatarEditorCosmeticButton>(cosmeticButtonsHolder.transform);
+                    buttonInstance.Initialise(this, cosmetic);
+                    
+                    buttonInstance.transform.SetAsLastSibling();
+                }
+            }
+            
+            cosmeticButtonsHolder.Resize();
         }
 
         private void DeselectCosmetic()
