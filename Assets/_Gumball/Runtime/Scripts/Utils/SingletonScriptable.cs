@@ -57,7 +57,7 @@ namespace Gumball
             if (IsLoading)
                 return;
 
-            if (!UnityThread.allowsAPI)
+            if (!UnityThread.allowsAPI && !Application.isPlaying && !Application.isBatchMode) //don't use editor application on CI/CD runners
             {
                 //run on the editor thread
                 EditorApplication.update -= LoadInstance;
