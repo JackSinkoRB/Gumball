@@ -123,7 +123,7 @@ namespace MagneticScrollUtils
         [Tooltip("Show an outline image around the selected icon? Note: only supported when all icons are the same size")]
         [SerializeField] private bool useOutlineEffect;
 
-        [ConditionalField(nameof(useOutlineEffect)), SerializeField] private Image outlineEffectImage;
+        [ConditionalField(nameof(useOutlineEffect)), SerializeField] private RectTransform outlineEffectHolder;
         [ConditionalField(nameof(useOutlineEffect)), SerializeField] private float outlineEffectMinScale = 0.5f;
         [ConditionalField(nameof(useOutlineEffect)), SerializeField] private float outlineEffectMaxScale = 1f;
 
@@ -1039,12 +1039,12 @@ namespace MagneticScrollUtils
             ScrollIcon closestIconToMagnet = icons[ClosestIconToMagnetIndex];
             Vector2 newPos = closestIconToMagnet.RectTransform.anchoredPosition
                              + closestIconToMagnet.ImageComponent.rectTransform.anchoredPosition; //add the image rect in case there's an offset effect
-            outlineEffectImage.rectTransform.anchoredPosition = newPos;
+            outlineEffectHolder.anchoredPosition = newPos;
 
             float percent = GetOutlineEffectPercent();
 
             float finalScale = outlineEffectMinScale + (percent * (outlineEffectMaxScale - outlineEffectMinScale));
-            outlineEffectImage.rectTransform.localScale = new Vector2(finalScale, finalScale);
+            outlineEffectHolder.localScale = new Vector2(finalScale, finalScale);
         }
 
         private float GetOutlineEffectPercent()
@@ -1073,7 +1073,7 @@ namespace MagneticScrollUtils
             if (maxDistance == 0)
                 return 0;
 
-            float existingPos = IsHorizontal ? outlineEffectImage.rectTransform.anchoredPosition.x : outlineEffectImage.rectTransform.anchoredPosition.y;
+            float existingPos = IsHorizontal ? outlineEffectHolder.anchoredPosition.x : outlineEffectHolder.anchoredPosition.y;
             float centre = IsHorizontal ? (scrollMinPos / 2).x : (scrollMinPos / 2).y;
             float percent = 1 - (Mathf.Abs(existingPos - centre) / maxDistance);
             return Mathf.Clamp01(percent);
