@@ -3,7 +3,6 @@ match_org, match_repo = (ENV["MATCH_REPOSITORY"]||"").split("/")
 
 platform :ios do
   lane :init_ci do
-    xcversion(version: "15.4")
     github_action(
       api_token: ENV["GH_PAT"],
       org: org,
@@ -16,7 +15,6 @@ platform :ios do
 
   desc "Sync codesigning certificates"
   lane :sync_certificates do
-    xcversion(version: "15.4")
     app_store_connect_api_key(
       key_id: ENV["APPSTORE_KEY_ID"],
       issuer_id: ENV["APPSTORE_ISSUER_ID"],
@@ -34,14 +32,12 @@ platform :ios do
 
   desc "Deliver a new Release build to the App Store"
   lane :release do
-    xcversion(version: "15.4")
     build
     upload_to_app_store
   end
 
   desc "Deliver a new Beta build to Apple TestFlight"
   lane :beta do
-    xcversion(version: "15.4")
     # Missing Export Compliance can also be set through Deliverfile
     update_info_plist(
       xcodeproj: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcodeproj",
@@ -56,7 +52,6 @@ platform :ios do
 
   desc "Create .ipa"
   lane :build do
-    xcversion(version: "15.4")
     setup_ci
 
     sync_certificates
