@@ -334,13 +334,16 @@ namespace Gumball
         {
             HasStarted = false;
 
-            PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+            if (PanelManager.ExistsRuntime && PanelManager.PanelExists<DrivingControlsPanel>())
+                PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+            
             if (GetSessionPanel() != null)
                 GetSessionPanel().Hide();
             if (GetSessionEndPanel() != null)
                 GetSessionEndPanel().Show();
             
-            drivingCameraController.SetState(drivingCameraController.OutroState);
+            if (ChunkMapSceneManager.ExistsRuntime)
+                drivingCameraController.SetState(drivingCameraController.OutroState);
             
             //disable NOS
             WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
@@ -355,7 +358,8 @@ namespace Gumball
             RemoveDistanceCalculators();
             
             //convert skill points to followers
-            FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
+            if (SkillCheckManager.ExistsRuntime)
+                FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
         }
 
         public virtual void UpdateWhenCurrent()

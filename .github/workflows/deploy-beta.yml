@@ -73,16 +73,34 @@ jobs:
     runs-on: macos-latest
     steps:
 
-      # Checkout
-      - uses: actions/checkout@v4
+      - name: Check disk space
+        run: df -h
+
+      - name: Checkout necessary files for Fastlane
+        uses: actions/checkout@v4
         with:
-          lfs: true
+          # Only fetch the necessary files for Fastlane
+          fetch-depth: 1
+          # Limit checkout to specific files or directories (e.g., fastlane, Gemfile)
+          sparse-checkout: |
+            Gemfile
+            Gemfile.lock
+            fastlane
+
+      - name: Show directories and files
+        run: ls -la /
+
+      - name: Check disk space 2
+        run: df -h
 
       - name: Download IOS artifact
         uses: actions/download-artifact@v4
         with:
           name: build-iOS
           path: build/iOS
+
+      - name: Check disk space 3
+        run: df -h
 
       - name: Fix File Permissions and Run fastlane
         env:
