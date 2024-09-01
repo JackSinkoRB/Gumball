@@ -2,10 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
+using UnityEngine.TestTools;
 
-namespace Gumball.Editor.Tests
+namespace Gumball.Runtime.Tests
 {
-    public class DataProviderTests
+    public class DataProviderTests : IPrebuildSetup, IPostBuildCleanup
     {
         
         private static readonly DataProvider[] providers = { new JsonDataProvider("JsonDataProviderTests") };
@@ -25,15 +26,28 @@ namespace Gumball.Editor.Tests
             }
         }
         
-        [SetUp]
         public void Setup()
         {
-            foreach (DataProvider provider in providers)
-            {
-                provider.RemoveFromSource();
-            }
+            BootSceneClear.TrySetup();
+            
+            SingletonScriptableHelper.LazyLoadingEnabled = true;
+        }
+
+        public void Cleanup()
+        {
+            BootSceneClear.TryCleanup();
+            
+            SingletonScriptableHelper.LazyLoadingEnabled = false;
         }
         
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
+        {
+            DecalEditor.IsRunningTests = true;
+            IAPManager.IsRunningTests = true;
+            DataManager.EnableTestProviders(true);
+        }
+
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
@@ -41,8 +55,19 @@ namespace Gumball.Editor.Tests
             {
                 provider.RemoveFromSource();
             }
+            
+            DataManager.EnableTestProviders(false);
         }
-        
+
+        [SetUp]
+        public void SetUp()
+        {
+            foreach (DataProvider provider in providers)
+            {
+                provider.RemoveFromSource();
+            }
+        }
+
         [TestCaseSource(nameof(providers))]
         public void LoadFromSourceSync(DataProvider provider)
         {
