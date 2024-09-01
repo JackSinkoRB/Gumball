@@ -73,16 +73,25 @@ jobs:
     runs-on: macos-latest
     steps:
 
+      - name: Check disk space
+        run: df -h
+
       # Checkout
       - uses: actions/checkout@v4
         with:
           lfs: true
+
+      - name: Check disk space 2
+        run: df -h
 
       - name: Download IOS artifact
         uses: actions/download-artifact@v4
         with:
           name: build-iOS
           path: build/iOS
+
+      - name: Check disk space 3
+        run: df -h
 
       - name: Fix File Permissions and Run fastlane
         env:
