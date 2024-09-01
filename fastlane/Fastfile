@@ -51,6 +51,7 @@ platform :ios do
 
   desc "Upload to TestFlight"
   lane :upload do
+    sync_certificates
     upload_to_testflight(skip_waiting_for_build_processing: true)
   end
 
