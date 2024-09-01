@@ -81,12 +81,14 @@ jobs:
         with:
           # Only fetch the necessary files for Fastlane
           fetch-depth: 1
-          path: fastlane
           # Limit checkout to specific files or directories (e.g., fastlane, Gemfile)
           sparse-checkout: |
             Gemfile
             Gemfile.lock
             fastlane
+
+      - name: Show directories and files
+        run: ls -la /
 
       - name: Check disk space 2
         run: df -h
