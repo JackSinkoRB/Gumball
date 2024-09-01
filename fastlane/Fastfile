@@ -47,6 +47,10 @@ platform :ios do
       end
     )
     build
+  end
+
+  desc "Upload to TestFlight"
+  lane :upload do
     upload_to_testflight(skip_waiting_for_build_processing: true)
   end
 

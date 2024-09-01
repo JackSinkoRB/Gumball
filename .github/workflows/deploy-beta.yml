@@ -73,10 +73,16 @@ jobs:
     runs-on: macos-latest
     steps:
 
-      # Checkout
-      - uses: actions/checkout@v4
+      - name: Checkout necessary files for Fastlane
+        uses: actions/checkout@v4
         with:
-          lfs: true
+          # Only fetch the necessary files for Fastlane
+          fetch-depth: 1
+          # Limit checkout to specific files or directories (e.g., fastlane, Gemfile)
+          sparse-checkout: |
+            Gemfile
+            Gemfile.lock
+            fastlane
 
       - name: Download IOS artifact
         uses: actions/download-artifact@v4
@@ -106,8 +112,12 @@ jobs:
           ssh-add - <<< "${MATCH_DEPLOY_KEY}"
           find $IOS_BUILD_PATH -type f -name "**.sh" -exec chmod +x {} \;
           find $IOS_BUILD_PATH -type f -iname "usymtool" -exec chmod +x {} \;
+          ls -l /private/var/folders/m4
           bundle install
+          df -h
           bundle exec fastlane ios beta
+          df -h
+          bundle exec fastlane ios upload
 
       - name: Cleanup to avoid storage limit
         if: always()
