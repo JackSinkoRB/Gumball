@@ -117,6 +117,11 @@ jobs:
           df -h
           bundle exec fastlane ios beta
           df -h
+          rm -rf /Users/runner/work/Gumball/Gumball/build
+          rm -rf /Users/runner/Library/Developer/Xcode/Archives
+          df -h
+          export TMPDIR=$GITHUB_WORKSPACE
+          echo "TMPDIR is set to $TMPDIR"
           bundle exec fastlane ios upload
 
       - name: Cleanup to avoid storage limit
