@@ -134,7 +134,7 @@ jobs:
           echo "TMPDIR is set to $TMPDIR"
 
           # Run Fastlane to upload the build
-          bundle exec fastlane ios upload-testflight
+          bundle exec fastlane ios upload_testflight
 
       - name: Cleanup to avoid storage limit
         if: always()
