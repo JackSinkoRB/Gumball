@@ -213,7 +213,8 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         uses: maierj/fastlane-action@v3.1.0
         with:
-          lane: 'android internal'
+          platform: 'android'
+          lane: 'internal'
 
       # Delete build folder to save space
       - name: Delete build folder
