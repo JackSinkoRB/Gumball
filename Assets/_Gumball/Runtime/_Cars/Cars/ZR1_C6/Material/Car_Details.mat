@@ -7,14 +7,13 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ZR1_C6_Details
-  m_Shader: {fileID: 4800000, guid: c1d2d2de89da4ee429074d76e820bed6, type: 3}
+  m_Name: Car_Details
+  m_Shader: {fileID: 4800000, guid: be86769b000b8f146b59f3a3f6a4c611, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
-  - _COLOR_ON
-  - _OUTLINEENABLED_ON
+  - _HEADLIGHTS_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -31,6 +30,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _BackTex:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BrakeLights:
+        m_Texture: {fileID: 2800000, guid: 22345e8bd6c2b3a4ba8626c1821f98d5, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -251,9 +254,11 @@ Material:
     - _AlphaCutoff: 0.5
     - _AlphaMultiplier: 0.51
     - _Asym: 0
+    - _BakeLightStrength: 0
     - _Bias: 0
     - _BlendAmount: 1
     - _Blur: 0.5
+    - _Brake: 0
     - _Brightness: 1
     - _BumpScale: 1
     - _ClampBlack: 0
@@ -303,8 +308,10 @@ Material:
     - _Glossiness: 0.9
     - _GlossyReflections: 1
     - _Grip: 1
+    - _Headlights: 1
     - _Highlight: 0.1
     - _Intensity: 1
+    - _LightStrength: 0
     - _Metal: 0
     - _Metallic: 0.05
     - _MixPower: 0.808
