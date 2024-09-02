@@ -35,9 +35,12 @@ MonoBehaviour:
   fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 0
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 0}
+    distanceFromSpline: 5
   racerData:
   - assetReference:
-      m_AssetGUID: 99c974c8da4d7ca4f9489658e6adb107
+      m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
@@ -47,10 +50,11 @@ MonoBehaviour:
       position: {x: 5, y: 0.1, z: 150}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     performanceProfile:
-      maxSpeed: 0
-      acceleration: 0
-      handling: 0
-      nos: 0
+      maxSpeed: 0.351
+      acceleration: 0.237
+      handling: 0.122
+      nos: 0.182
+    currentPerformanceRating: 285
   racersStartingSpeed: 100
   trafficIsProcedural: 0
   trafficDensity: 100
@@ -128,8 +132,8 @@ MonoBehaviour:
       laneDirection: 1
       laneIndex: 2
   rewards:
-    xp: 0
-    standardCurrency: 0
+    xp: 600
+    standardCurrency: 1500
     premiumCurrency: 0
     fuelRefill: 0
     coreParts: []
@@ -157,7 +161,8 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
+        currentPerformanceRating: 0
     keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards: []
-  racersInPositionOrder: []
+  racersInPositionOrderCached: []

@@ -34,13 +34,25 @@ MonoBehaviour:
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2500
+  raceDistanceMetres: 2000
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
+      type: 3}
+    distanceFromSpline: 5
   racerData: []
   racersStartingSpeed: 100
   trafficIsProcedural: 1
   trafficDensity: 75
   trafficBikes: []
-  trafficCars: []
+  trafficCars:
+  - m_AssetGUID: 81825441c04ee5c468680e955e2bb0b3
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficTrucks: []
   trafficSpawnPositions:
     Value:
@@ -135,13 +147,13 @@ MonoBehaviour:
       laneDirection: 1
       laneIndex: 0
   rewards:
-    xp: 500
-    standardCurrency: 1000
+    xp: 600
+    standardCurrency: 1500
     premiumCurrency: 0
     fuelRefill: 0
     coreParts: []
     subParts:
-    - {fileID: 11400000, guid: 13885b6d7cb66f64bba6cdcd19814f78, type: 2}
+    - {fileID: 11400000, guid: 6724960ec50d5d640afcba858b65223e, type: 2}
     unlockables: []
   mainChallengeDescription: This is the challenge description
   subObjectives: []
@@ -165,10 +177,11 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
-    keyCollision: 0
+        currentPerformanceRating: 0
+    keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards:
-  - {fileID: 11400000, guid: 13885b6d7cb66f64bba6cdcd19814f78, type: 2}
+  - {fileID: 11400000, guid: 6724960ec50d5d640afcba858b65223e, type: 2}
   timeAllowedSeconds: 60
   timeRemainingSeconds: 0
   timerHasStarted: 1

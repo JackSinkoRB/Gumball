@@ -42,9 +42,9 @@ namespace Gumball
             : (wheelsToModifyPosition == WheelsToModifyPosition.FRONT ?
                 WarehouseManager.Instance.CurrentCar.FrontWheelMeshes : WarehouseManager.Instance.CurrentCar.RearWheelMeshes);
         
-        public override void Show()
+        protected override void OnShow()
         {
-            base.Show();
+            base.OnShow();
             
             SetWheelsToModifyPosition(WheelsToModifyPosition.ALL);
             
@@ -130,10 +130,10 @@ namespace Gumball
         private void UpdateInputUI()
         {
             //read from the actual material
-            advancedSwatch.SetColor(selectedWheelPaintModification.CurrentSwatch.Color.ToColor());
-            advancedSwatch.SetSpecular(selectedWheelPaintModification.CurrentSwatch.Specular.ToColor());
-            advancedSwatch.SetSmoothness(selectedWheelPaintModification.CurrentSwatch.Smoothness);
-            advancedSwatch.SetClearcoat(selectedWheelPaintModification.CurrentSwatch.ClearCoat);
+            advancedSwatch.SetColor(selectedWheelPaintModification.SavedSwatch.Color.ToColor());
+            advancedSwatch.SetSpecular(selectedWheelPaintModification.SavedSwatch.Specular.ToColor());
+            advancedSwatch.SetSmoothness(selectedWheelPaintModification.SavedSwatch.Smoothness);
+            advancedSwatch.SetClearcoat(selectedWheelPaintModification.SavedSwatch.ClearCoat);
             
             primaryColorPicker.AssignColor(advancedSwatch.Color);
             secondaryColorPicker.AssignColor(advancedSwatch.Specular);
@@ -144,7 +144,7 @@ namespace Gumball
 
         private void OnSelectSimpleTab()
         {
-            bool isCustomSwatch = selectedWheelPaintModification.GetCurrentSwatchIndexInPresets() == -1;
+            bool isCustomSwatch = selectedWheelPaintModification.GetSavedSwatchIndexInPresets() == -1;
             PopulateSwatchScroll(isCustomSwatch);
             
             simpleMenu.gameObject.SetActive(true);
@@ -164,7 +164,7 @@ namespace Gumball
             if (showCustomSwatchOption)
             {
                 //add an additional ScrollItem at the beginning with the advanced colour settings
-                ColourSwatchSerialized colourSwatch = selectedWheelPaintModification.CurrentSwatch;
+                ColourSwatchSerialized colourSwatch = selectedWheelPaintModification.SavedSwatch;
                 ScrollItem customSwatchItem = new ScrollItem();
                 
                 customSwatchItem.onLoad += () =>
@@ -201,14 +201,14 @@ namespace Gumball
                     {
                         WheelPaintModification paintModification = wheelMesh.GetComponent<WheelPaintModification>();
                         paintModification.ApplySwatch(colourSwatch);
-                        paintModification.CurrentSelectedPresetIndex = finalIndex;
+                        paintModification.SavedSelectedPresetIndex = finalIndex;
                     }
                 };
 
                 scrollItems.Add(scrollItem);
             }
 
-            int indexToShow = showCustomSwatchOption ? 0 : selectedWheelPaintModification.CurrentSelectedPresetIndex;
+            int indexToShow = showCustomSwatchOption ? 0 : selectedWheelPaintModification.SavedSelectedPresetIndex;
             swatchMagneticScroll.SetItems(scrollItems, indexToShow);
         }
         

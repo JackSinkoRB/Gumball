@@ -14,6 +14,8 @@ namespace Gumball
         
         [SerializeField] private SubPart.SubPartType type;
         [SerializeField] private SubPart.SubPartRarity rarity;
+        [SerializeField] private string displayName = "Missing name";
+        [SerializeField] private string description = "This is the description for the sub part.";
         [SerializeField] private Sprite icon;
         
         [SerializeField, HideInInspector] private CorePart corePartBelongsTo;
@@ -23,6 +25,8 @@ namespace Gumball
         
         public SubPart.SubPartType Type => type;
         public SubPart.SubPartRarity Rarity => rarity;
+        public string DisplayName => displayName;
+        public string Description => description;
         public Sprite Icon => icon;
         
         public SubPart CurrentSubPart

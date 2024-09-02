@@ -1,6 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -28,7 +32,7 @@ namespace Gumball
                 if (instance == null)
                 {
 #if UNITY_EDITOR
-                    if (!Application.isPlaying || SingletonScriptableHelper.LazyLoadingEnabled)
+                    if ((UnityThread.allowsAPI && !Application.isPlaying && !Application.isBatchMode) || SingletonScriptableHelper.LazyLoadingEnabled)
                     {
                         LoadInstanceSync();
                         return instance;
@@ -53,11 +57,25 @@ namespace Gumball
             if (IsLoading)
                 return;
             
-            handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
-            instance = handle.WaitForCompletion();
-            instance.OnInstanceLoaded();
-            
-            Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously.");
+            if (!UnityThread.allowsAPI)
+            {
+                //run on the editor thread
+                EditorApplication.update -= LoadInstance;
+                EditorApplication.update += LoadInstance;
+            }
+            else
+            {
+                LoadInstance();
+            }
+
+            void LoadInstance()
+            {
+                handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
+                instance = handle.WaitForCompletion();
+                instance.OnInstanceLoaded();
+
+                Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously.");
+            }
         }
 #endif
 

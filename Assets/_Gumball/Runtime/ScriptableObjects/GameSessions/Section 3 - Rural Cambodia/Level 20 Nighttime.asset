@@ -34,9 +34,13 @@ MonoBehaviour:
   reflectionIntensity: 1
   fakeLightingIntensity: 0
   introTime: 3
-  raceDistanceMetres: 2500
+  raceDistanceMetres: 2000
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
+      type: 3}
+    distanceFromSpline: 5
   racerData: []
-  racersStartingSpeed: 70
+  racersStartingSpeed: 100
   trafficIsProcedural: 0
   trafficDensity: 50
   trafficBikes: []
@@ -215,8 +219,8 @@ MonoBehaviour:
       laneDirection: 1
       laneIndex: 0
   rewards:
-    xp: 0
-    standardCurrency: 0
+    xp: 600
+    standardCurrency: 1500
     premiumCurrency: 0
     fuelRefill: 0
     coreParts: []
@@ -244,6 +248,7 @@ MonoBehaviour:
           acceleration: 0
           handling: 0
           nos: 0
+        currentPerformanceRating: 0
     keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards: []
