@@ -43,7 +43,10 @@ namespace Gumball
         {
             car.SetPerformanceProfile(performanceProfile);
 
-            car.RacerIcon.SetIcon(icon);
+            if (icon != null)
+                car.RacerIcon.SetIcon(icon);
+            else Debug.LogError($"{car.name} doesn't have a racer icon.");
+            
             ApplyBodyPaintToCar(car);
             ApplyWheelPaintToCar(car);
         }
