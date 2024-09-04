@@ -25,6 +25,8 @@ namespace Gumball
             RacerInfoProfile infoProfile = GameSessionManager.Instance.CurrentSession.CurrentRacers[racer].InfoProfile;
             if (infoProfile != null && infoProfile.Icon != null)
                 icon.sprite = infoProfile.Icon;
+
+            rectTransform.anchoredPosition = rectTransform.anchoredPosition.SetX(0);
         }
 
         private void LateUpdate()
@@ -34,13 +36,13 @@ namespace Gumball
                 return;
 
             SplineTravelDistanceCalculator racersDistanceCalculator = racer.GetComponent<SplineTravelDistanceCalculator>();
-            if (racersDistanceCalculator == null)
+            if (racersDistanceCalculator == null || racersDistanceCalculator.DistanceInMap < 0)
                 return;
             
             float percent = Mathf.Clamp01(racersDistanceCalculator.DistanceInMap / currentSession.RaceDistanceMetres);
-
+            
             RectTransform progressBarRect = progressBar.GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = rectTransform.anchoredPosition.SetX(percent * progressBarRect.rect.width);
+            rectTransform.anchoredPosition = Vector2.Lerp(rectTransform.anchoredPosition, rectTransform.anchoredPosition.SetX(percent * progressBarRect.rect.width), progressBar.InterpolateSpeed * Time.deltaTime);
         }
         
     }

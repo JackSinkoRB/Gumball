@@ -11,10 +11,14 @@ namespace Gumball
         
         [SerializeField] private Image progressBarFill;
         [SerializeField] private SessionProgressBarRacerIcon racerIconPrefab;
-        [SerializeField] private Transform racerIconHolder;
+        [SerializeField] private float interpolateSpeed = 1;
+
+        public float InterpolateSpeed => interpolateSpeed;
         
         private void OnEnable()
         {
+            progressBarFill.fillAmount = 0;
+            
             SetupRacerIcons();
         }
 
@@ -30,7 +34,7 @@ namespace Gumball
                 if (racer.IsPlayer)
                     continue;
                 
-                SessionProgressBarRacerIcon instance = Instantiate(racerIconPrefab, racerIconHolder).GetComponent<SessionProgressBarRacerIcon>();
+                SessionProgressBarRacerIcon instance = Instantiate(racerIconPrefab, transform).GetComponent<SessionProgressBarRacerIcon>();
                 instance.Initialise(this, racer);
             }
         }
@@ -42,11 +46,11 @@ namespace Gumball
                 return;
 
             SplineTravelDistanceCalculator playersDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
-            if (playersDistanceCalculator == null)
+            if (playersDistanceCalculator == null || playersDistanceCalculator.DistanceInMap < 0)
                 return;
             
             float percent = Mathf.Clamp01(playersDistanceCalculator.DistanceInMap / currentSession.RaceDistanceMetres);
-            progressBarFill.fillAmount = percent;
+            progressBarFill.fillAmount = Mathf.Lerp(progressBarFill.fillAmount, percent, interpolateSpeed * Time.deltaTime);
         }
 
     }
