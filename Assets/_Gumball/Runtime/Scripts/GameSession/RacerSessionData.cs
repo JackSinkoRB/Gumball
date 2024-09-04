@@ -31,7 +31,8 @@ namespace Gumball
         [Header("Customisation")]
         [SerializeField] private ColourSwatch bodyPaintSwatch = new();
         [SerializeField] private ColourSwatch wheelPaintSwatch = new();
-        
+
+        public RacerInfoProfile InfoProfile => infoProfile;
         public AssetReferenceGameObject CarAssetReference => carAssetReference;
         public PositionAndRotation StartingPosition => startingPosition;
         public bool CanCrossMiddle => canCrossMiddle;
