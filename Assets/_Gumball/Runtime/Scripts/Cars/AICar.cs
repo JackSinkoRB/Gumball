@@ -102,6 +102,7 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarPartManager carPartManager;
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private BodyPaintModification bodyPaintModification;
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CarAudioManager carAudioManager;
+        [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private RacerIcon racerIcon;
         [Space(5)]
         [Tooltip("This gets added on initialise for every player car.")]
         [SerializeField, ReadOnly, ConditionalField(nameof(canBeDrivenByPlayer))] private NosManager nosManager;
@@ -110,6 +111,7 @@ namespace Gumball
         public CarPartManager CarPartManager => carPartManager;
         public BodyPaintModification BodyPaintModification => bodyPaintModification;
         public CarAudioManager CarAudioManager => carAudioManager;
+        public RacerIcon RacerIcon => racerIcon;
         public NosManager NosManager => nosManager;
         
         [Header("Sizing")]
@@ -462,6 +464,9 @@ namespace Gumball
             if (carPartManager != null)
                 carPartManager.Initialise(this);
 
+            if (racerIcon != null)
+                racerIcon.gameObject.SetActive(false);
+
             //load the parts
             CorePartManager.InstallParts(carIndex);
 
@@ -483,7 +488,10 @@ namespace Gumball
 
             SetAutoDrive(true);
             SetObeySpeedLimit(false);
-            
+
+            if (racerIcon != null)
+                racerIcon.gameObject.SetActive(true);
+
             InitialiseWheelStance();
             
             OnInitialiseTypeComplete();

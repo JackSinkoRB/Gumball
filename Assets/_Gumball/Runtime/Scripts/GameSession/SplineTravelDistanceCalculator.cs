@@ -56,7 +56,7 @@ namespace Gumball
         {
             Chunk currentChunk = car.CurrentChunk;
             if (currentChunk == null)
-                return 0;
+                return -1;
             
             //get the distance in the current chunk
             Vector3 carPosition = car.transform.TransformPoint(car.FrontOfCarPosition);

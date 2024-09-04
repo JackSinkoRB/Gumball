@@ -27,10 +27,8 @@ namespace Gumball
             defaultTimerLabelColor = timerLabel.color;
         }
 
-        protected override void LateUpdate()
+        private void LateUpdate()
         {
-            base.LateUpdate();
-            
             UpdateTimerLabel();
         }
 
