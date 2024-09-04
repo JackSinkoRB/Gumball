@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 namespace Gumball
@@ -11,12 +12,13 @@ namespace Gumball
     [Serializable]
     public class RacerSessionData
     {
-        
-        [SerializeField] private AssetReferenceGameObject assetReference;
-        [SerializeField] private PositionAndRotation startingPosition;
-        [SerializeField] private Sprite icon;
 
+        [Header("Info")]
+        [FormerlySerializedAs("assetReference")] [SerializeField] private AssetReferenceGameObject carAssetReference;
+        [SerializeField] private RacerInfoProfile infoProfile;
+        
         [Header("Behaviour")]
+        [SerializeField] private PositionAndRotation startingPosition;
         [Tooltip("Can the racer cross the middle of the chunks? Disabling this will enable an invisible barrier for the car in the middle.")]
         [SerializeField] private bool canCrossMiddle = true;
         [Tooltip("This is the maximum distance +/- from the racing line that the racer could drive (randomly chosen).")]
@@ -30,7 +32,7 @@ namespace Gumball
         [SerializeField] private ColourSwatch bodyPaintSwatch = new();
         [SerializeField] private ColourSwatch wheelPaintSwatch = new();
         
-        public AssetReferenceGameObject AssetReference => assetReference;
+        public AssetReferenceGameObject CarAssetReference => carAssetReference;
         public PositionAndRotation StartingPosition => startingPosition;
         public bool CanCrossMiddle => canCrossMiddle;
         
@@ -43,8 +45,8 @@ namespace Gumball
         {
             car.SetPerformanceProfile(performanceProfile);
 
-            if (icon != null)
-                car.RacerIcon.SetIcon(icon);
+            if (infoProfile.Icon != null)
+                car.RacerIcon.SetIcon(infoProfile.Icon);
             else Debug.LogError($"{car.name} doesn't have a racer icon.");
             
             ApplyBodyPaintToCar(car);
@@ -54,8 +56,8 @@ namespace Gumball
 #if UNITY_EDITOR
         public void OnValidate()
         {
-            if (assetReference != null && assetReference.editorAsset != null && assetReference.editorAsset.GetComponent<AICar>() != null)
-                currentPerformanceRating.Calculate(assetReference.editorAsset.GetComponent<AICar>().PerformanceSettings, performanceProfile);
+            if (carAssetReference != null && carAssetReference.editorAsset != null && carAssetReference.editorAsset.GetComponent<AICar>() != null)
+                currentPerformanceRating.Calculate(carAssetReference.editorAsset.GetComponent<AICar>().PerformanceSettings, performanceProfile);
         }
 #endif
         
