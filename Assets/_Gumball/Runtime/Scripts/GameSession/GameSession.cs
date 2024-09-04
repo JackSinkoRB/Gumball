@@ -548,13 +548,13 @@ namespace Gumball
             {
                 RacerSessionData data = racerData[index];
 
-                if (data.AssetReference == null)
+                if (data.CarAssetReference == null)
                 {
                     Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
                     continue;
                 }
                 
-                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
+                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.CarAssetReference);
                 handles[index] = handle;
             }
 

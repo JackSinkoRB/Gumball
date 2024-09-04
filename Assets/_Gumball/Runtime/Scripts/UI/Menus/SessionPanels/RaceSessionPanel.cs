@@ -13,10 +13,8 @@ namespace Gumball
 
         protected virtual int numberOfRacers => GameSessionManager.Instance.CurrentSession.CurrentRacers.Count;
         
-        protected override void LateUpdate()
+        private void LateUpdate()
         {
-            base.LateUpdate();
-            
             UpdatePositionLabel();
         }
 
