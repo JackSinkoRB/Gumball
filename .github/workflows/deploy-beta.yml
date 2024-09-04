@@ -90,7 +90,7 @@ jobs:
           name: build-iOS
           path: build/iOS
 
-      - name: Fix File Permissions and Run fastlane
+      - name: Build and upload with fastlane
         env:
           APPLE_CONNECT_EMAIL: ${{ secrets.APPLE_CONNECT_EMAIL }}
           APPLE_DEVELOPER_EMAIL: ${{ secrets.APPLE_DEVELOPER_EMAIL }}
@@ -108,16 +108,33 @@ jobs:
           IOS_BUNDLE_ID: com.RoadburnGames.Gumball
           PROJECT_NAME: Gumball
         run: |
+          # Start the SSH agent
           eval "$(ssh-agent -s)"
+
+          # Add the SSH deploy key
           ssh-add - <<< "${MATCH_DEPLOY_KEY}"
+
+          # Fix file permissions for shell scripts and usymtool
           find $IOS_BUILD_PATH -type f -name "**.sh" -exec chmod +x {} \;
           find $IOS_BUILD_PATH -type f -iname "usymtool" -exec chmod +x {} \;
-          ls -l /private/var/folders/m4
+
+          # Install Ruby gems
           bundle install
-          df -h
-          bundle exec fastlane ios beta
-          df -h
-          bundle exec fastlane ios upload
+
+          # Run Fastlane to build the app
+          bundle exec fastlane ios build
+
+          # Clean up old build and archive directories
+          echo "Cleaning up build and archive directories"
+          rm -rf /Users/runner/work/Gumball/Gumball/build
+          rm -rf /Users/runner/Library/Developer/Xcode/Archives
+
+          # Set the TMPDIR environment variable to a directory with more space
+          export TMPDIR=$GITHUB_WORKSPACE
+          echo "TMPDIR is set to $TMPDIR"
+
+          # Run Fastlane to upload the build
+          bundle exec fastlane ios upload_testflight
 
       - name: Cleanup to avoid storage limit
         if: always()
