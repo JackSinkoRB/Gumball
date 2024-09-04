@@ -15,13 +15,38 @@ MonoBehaviour:
   active: 1
   shadows:
     m_OverrideState: 1
-    m_Value: {r: 0.29201704, g: 0.26210397, b: 0.3584906, a: 1}
+    m_Value: {r: 0.25849947, g: 0.2726139, b: 0.3490566, a: 1}
   highlights:
     m_OverrideState: 1
-    m_Value: {r: 0.9056604, g: 0.72440624, b: 0.5767177, a: 1}
+    m_Value: {r: 0.9339623, g: 0.8680892, b: 0.7797704, a: 1}
   balance:
     m_OverrideState: 1
     m_Value: 5
+--- !u!114 &-6893801760060088190
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccf1aba9553839d41ae37dd52e9ebcce, type: 3}
+  m_Name: MotionBlur
+  m_EditorClassIdentifier: 
+  active: 0
+  mode:
+    m_OverrideState: 0
+    m_Value: 0
+  quality:
+    m_OverrideState: 1
+    m_Value: 2
+  intensity:
+    m_OverrideState: 1
+    m_Value: 1
+  clamp:
+    m_OverrideState: 1
+    m_Value: 0
 --- !u!114 &-1381743183817041934
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -43,10 +68,10 @@ MonoBehaviour:
     m_Value: 10
   gaussianEnd:
     m_OverrideState: 1
-    m_Value: 80
+    m_Value: 120
   gaussianMaxRadius:
     m_OverrideState: 1
-    m_Value: 0.55
+    m_Value: 0.5
   highQualitySampling:
     m_OverrideState: 0
     m_Value: 0
@@ -85,6 +110,7 @@ MonoBehaviour:
   - {fileID: -8575507323874469277}
   - {fileID: 7476281505522206251}
   - {fileID: -1381743183817041934}
+  - {fileID: -6893801760060088190}
 --- !u!114 &2080960796788677476
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -131,19 +157,19 @@ MonoBehaviour:
     m_Value: 1
   threshold:
     m_OverrideState: 1
-    m_Value: 0.73
+    m_Value: 1.16
   intensity:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 10
   scatter:
     m_OverrideState: 1
-    m_Value: 0.35
+    m_Value: 0.345
   clamp:
-    m_OverrideState: 1
-    m_Value: 65472
+    m_OverrideState: 0
+    m_Value: 100
   tint:
     m_OverrideState: 1
-    m_Value: {r: 1, g: 1, b: 1, a: 1}
+    m_Value: {r: 0.6650943, g: 0.7652611, b: 0.8867924, a: 1}
   highQualityFiltering:
     m_OverrideState: 1
     m_Value: 0
