@@ -12,38 +12,21 @@ namespace Gumball
 
         [SerializeField] private Image icon;
 
-        private SessionProgressBar progressBar;
         private AICar racer;
 
-        private RectTransform rectTransform => transform as RectTransform;
+        public RectTransform RectTransform => transform as RectTransform;
+        public AICar Racer => racer;
         
-        public void Initialise(SessionProgressBar progressBar, AICar racer)
+        public void Initialise(AICar racer)
         {
-            this.progressBar = progressBar;
             this.racer = racer;
 
             RacerInfoProfile infoProfile = GameSessionManager.Instance.CurrentSession.CurrentRacers[racer].InfoProfile;
             if (infoProfile != null && infoProfile.Icon != null)
                 icon.sprite = infoProfile.Icon;
 
-            rectTransform.anchoredPosition = rectTransform.anchoredPosition.SetX(0);
+            RectTransform.anchoredPosition = RectTransform.anchoredPosition.SetX(0);
         }
 
-        private void LateUpdate()
-        {
-            GameSession currentSession = GameSessionManager.Instance.CurrentSession;
-            if (currentSession.RaceDistanceMetres == 0)
-                return;
-
-            SplineTravelDistanceCalculator racersDistanceCalculator = racer.GetComponent<SplineTravelDistanceCalculator>();
-            if (racersDistanceCalculator == null || racersDistanceCalculator.DistanceInMap < 0)
-                return;
-            
-            float percent = Mathf.Clamp01(racersDistanceCalculator.DistanceInMap / currentSession.RaceDistanceMetres);
-            
-            RectTransform progressBarRect = progressBar.GetComponent<RectTransform>();
-            rectTransform.anchoredPosition = Vector2.Lerp(rectTransform.anchoredPosition, rectTransform.anchoredPosition.SetX(percent * progressBarRect.rect.width), progressBar.InterpolateSpeed * Time.deltaTime);
-        }
-        
     }
 }
