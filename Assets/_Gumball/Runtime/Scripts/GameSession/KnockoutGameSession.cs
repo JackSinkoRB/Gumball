@@ -95,6 +95,8 @@ namespace Gumball
             GlobalLoggers.GameSessionLogger.Log($"Eliminating {lastRacer.name}");
 
             EliminatedRacers.Add(lastRacer);
+
+            PanelManager.GetPanel<KnockoutSessionPanel>().ProgressBar.RemoveRacerIcon(lastRacer);
             
             lastRacer.SetObeySpeedLimit(true);
 
