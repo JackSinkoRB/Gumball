@@ -32,7 +32,8 @@ namespace Gumball
                 if (instance == null)
                 {
 #if UNITY_EDITOR
-                    if (!Application.isPlaying || SingletonScriptableHelper.LazyLoadingEnabled)
+                    if ((UnityThread.allowsAPI && !Application.isPlaying && !Application.isBatchMode) //Application.isPlaying can only be called from main thread
+                        || SingletonScriptableHelper.LazyLoadingEnabled)
                     {
                         LoadInstanceSync();
                         return instance;
@@ -57,7 +58,7 @@ namespace Gumball
             if (IsLoading)
                 return;
             
-            if (!UnityThread.allowsAPI && !Application.isBatchMode)
+            if (!UnityThread.allowsAPI && !Application.isBatchMode) //don't use editor application in batch mode
             {
                 //run on the editor thread
                 EditorApplication.update -= LoadInstance;
