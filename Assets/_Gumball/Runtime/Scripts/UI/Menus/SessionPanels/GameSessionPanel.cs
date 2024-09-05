@@ -8,8 +8,10 @@ namespace Gumball
 {
     public abstract class GameSessionPanel : AnimatedPanel
     {
-        
-        
-        
+
+        [SerializeField] private SessionProgressBar progressBar;
+
+        public SessionProgressBar ProgressBar => progressBar;
+
     }
 }

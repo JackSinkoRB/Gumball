@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MyBox;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,9 +16,11 @@ namespace Gumball
         [SerializeField] private float interpolateSpeed = 1;
         [SerializeField] private Transform racerIconHolder;
 
-        private SessionProgressBarRacerIcon[] currentRacerIcons;
+        private Dictionary<AICar, SessionProgressBarRacerIcon> currentRacerIcons = new();
         
         private GameSession currentSession => GameSessionManager.Instance.CurrentSession;
+
+        public Dictionary<AICar, SessionProgressBarRacerIcon> CurrentRacerIcons => currentRacerIcons;
         
         private void OnEnable()
         {
@@ -38,8 +41,6 @@ namespace Gumball
 
         private void SetupRacerIcons()
         {
-            List<SessionProgressBarRacerIcon> icons = new();
-            
             foreach (AICar racer in GameSessionManager.Instance.CurrentSession.CurrentRacers.Keys)
             {
                 if (racer.IsPlayer)
@@ -48,10 +49,8 @@ namespace Gumball
                 SessionProgressBarRacerIcon instance = Instantiate(racerIconPrefab, racerIconHolder).GetComponent<SessionProgressBarRacerIcon>();
                 instance.Initialise(racer);
                 
-                icons.Add(instance);
+                currentRacerIcons[racer] = instance;
             }
-
-            currentRacerIcons = icons.ToArray();
         }
 
         private void UpdatePlayer()
@@ -66,7 +65,7 @@ namespace Gumball
 
         private void UpdateRacerIconPositions()
         {
-            foreach (SessionProgressBarRacerIcon racerIcon in currentRacerIcons)
+            foreach (SessionProgressBarRacerIcon racerIcon in currentRacerIcons.Values)
             {
                 SplineTravelDistanceCalculator racersDistanceCalculator = racerIcon.Racer.GetComponent<SplineTravelDistanceCalculator>();
                 if (racersDistanceCalculator == null || racersDistanceCalculator.DistanceInMap < 0)
@@ -86,7 +85,8 @@ namespace Gumball
                 return;
             
             //sort the racer icons by their distance from the player's distance
-            Array.Sort(currentRacerIcons, (racerIcon1, racerIcon2) => 
+            SessionProgressBarRacerIcon[] currentRacerIconsSorted = currentRacerIcons.Values.ToArray();
+            Array.Sort(currentRacerIconsSorted, (racerIcon1, racerIcon2) => 
             {
                 SplineTravelDistanceCalculator racer1Dist = racerIcon1.Racer.GetComponent<SplineTravelDistanceCalculator>();
                 SplineTravelDistanceCalculator racer2Dist = racerIcon2.Racer.GetComponent<SplineTravelDistanceCalculator>();
@@ -101,11 +101,21 @@ namespace Gumball
             });
             
             //set the sibling index based on the sorted order
-            for (int i = 0; i < currentRacerIcons.Length; i++)
+            for (int i = 0; i < currentRacerIconsSorted.Length; i++)
             {
-                int invertedIndex = currentRacerIcons.Length - 1 - i;
-                currentRacerIcons[i].transform.SetSiblingIndex(invertedIndex);
+                int invertedIndex = currentRacerIconsSorted.Length - 1 - i;
+                currentRacerIconsSorted[i].transform.SetSiblingIndex(invertedIndex);
             }
+        }
+
+        public void RemoveRacerIcon(AICar racer)
+        {
+            if (racer.IsPlayer)
+                return; //player doesn't have an icon
+            
+            SessionProgressBarRacerIcon icon = currentRacerIcons[racer];
+            Destroy(icon.gameObject);
+            currentRacerIcons.Remove(racer);
         }
         
     }

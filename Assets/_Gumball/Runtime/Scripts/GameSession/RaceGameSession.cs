@@ -11,11 +11,11 @@ namespace Gumball
     public class RaceGameSession : GameSession
     {
 
-        [SerializeField, ReadOnly] protected AICar[] racersInPositionOrderCached;
+        [SerializeField, ReadOnly] protected List<AICar> racersInPositionOrderCached;
         
         private int frameLastCachedRacerPositionOrder = -1;
 
-        protected AICar[] RacersInPositionOrder
+        protected List<AICar> RacersInPositionOrder
         {
             get
             {
@@ -47,14 +47,14 @@ namespace Gumball
         
         public int GetRacePosition(AICar racer)
         {
-            int rank = Array.IndexOf(RacersInPositionOrder, racer) + 1;
+            int rank = RacersInPositionOrder.IndexOf(racer) + 1;
             return rank;
         }
 
         protected virtual void UpdateRacersPositions()
         {
             //sort the cars based on distanceTraveled (descending order)
-            racersInPositionOrderCached = CurrentRacers.Keys.OrderByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap).ToArray();
+            racersInPositionOrderCached = CurrentRacers.Keys.OrderByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap).ToList();
         }
         
     }
