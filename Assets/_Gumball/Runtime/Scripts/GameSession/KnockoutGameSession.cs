@@ -19,6 +19,17 @@ namespace Gumball
         
         [SerializeField] private CheckpointMarkers knockoutPositionMarkers;
 
+        private List<AICar> remainingRacersInOrder
+        {
+            get
+            {
+                List<AICar> racers = new List<AICar>(RacersInPositionOrder);
+                foreach (AICar eliminatedRacer in EliminatedRacers)
+                    racers.Remove(eliminatedRacer);
+                return racers;
+            }
+        }
+        
         public readonly HashSet<AICar> EliminatedRacers = new();
 
         public override string GetName()
@@ -79,7 +90,8 @@ namespace Gumball
 
         private void EliminateLastRacer()
         {
-            AICar lastRacer = RacersInPositionOrder[^(EliminatedRacers.Count + 1)];
+            AICar lastRacer = remainingRacersInOrder[^1];
+            
             GlobalLoggers.GameSessionLogger.Log($"Eliminating {lastRacer.name}");
 
             EliminatedRacers.Add(lastRacer);
