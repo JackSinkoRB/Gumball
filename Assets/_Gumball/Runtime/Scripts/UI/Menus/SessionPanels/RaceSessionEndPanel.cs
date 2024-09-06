@@ -14,8 +14,6 @@ namespace Gumball
             base.OnShow();
 
             int finishingRank = raceSession.GetRacePosition(WarehouseManager.Instance.CurrentCar);
-            
-            SetVictory(finishingRank == 1);
             ShowPosition(true, finishingRank);
         }
 

@@ -29,6 +29,7 @@ namespace Gumball
             base.OnShow();
             
             SetLevelName();
+            SetVictory(GameSessionManager.Instance.CurrentSession.LastProgress == GameSession.ProgressStatus.COMPLETE);
         }
 
         private void SetLevelName()

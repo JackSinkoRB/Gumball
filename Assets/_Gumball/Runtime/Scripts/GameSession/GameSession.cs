@@ -90,6 +90,7 @@ namespace Gumball
         
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
 
+        public ProgressStatus LastProgress { get; private set; }
         public ProgressStatus Progress
         {
             get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
@@ -294,7 +295,8 @@ namespace Gumball
         public void EndSession(ProgressStatus progress)
         {
             inProgress = false;
-
+            LastProgress = progress;
+            
             if (sessionCoroutine != null)
                 CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
             
