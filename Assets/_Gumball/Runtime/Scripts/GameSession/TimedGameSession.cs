@@ -33,7 +33,7 @@ namespace Gumball
             return PanelManager.GetPanel<TimedSessionPanel>();
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<TimedSessionEndPanel>();
         }

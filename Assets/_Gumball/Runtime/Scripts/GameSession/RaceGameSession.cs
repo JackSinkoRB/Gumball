@@ -40,7 +40,7 @@ namespace Gumball
             return PanelManager.GetPanel<RaceSessionPanel>();
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<RaceSessionEndPanel>();
         }
@@ -53,6 +53,9 @@ namespace Gumball
 
         protected virtual void UpdateRacersPositions()
         {
+            if (!GameSessionManager.Instance.CurrentSession.InProgress)
+                return; //don't keep updating the positions once the session has ended
+            
             //sort the cars based on distanceTraveled (descending order)
             racersInPositionOrderCached = CurrentRacers.Keys.OrderByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap).ToList();
         }

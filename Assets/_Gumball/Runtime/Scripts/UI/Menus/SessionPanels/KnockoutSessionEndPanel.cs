@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class KnockoutSessionEndPanel : GameSessionEndPanel
+    public class KnockoutSessionEndPanel : SessionEndPanel
     {
 
         

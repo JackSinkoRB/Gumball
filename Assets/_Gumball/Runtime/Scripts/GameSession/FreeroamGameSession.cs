@@ -18,7 +18,7 @@ namespace Gumball
             return null; //has no UI
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return null; //has no end
         }

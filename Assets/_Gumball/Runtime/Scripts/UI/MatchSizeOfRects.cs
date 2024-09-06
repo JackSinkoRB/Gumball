@@ -22,7 +22,7 @@ namespace Gumball
 
         private RectTransform rectTransform => transform as RectTransform;
 
-        private void Update()
+        private void LateUpdate()
         {
             UpdateSize();
         }

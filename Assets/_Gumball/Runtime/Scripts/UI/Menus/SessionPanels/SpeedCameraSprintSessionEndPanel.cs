@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class SpeedCameraSprintSessionEndPanel : GameSessionEndPanel
+    public class SpeedCameraSprintSessionEndPanel : SessionEndPanel
     {
 
         

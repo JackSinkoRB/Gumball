@@ -117,7 +117,7 @@ namespace Gumball
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
 
         protected abstract GameSessionPanel GetSessionPanel();
-        protected abstract GameSessionEndPanel GetSessionEndPanel();
+        protected abstract SessionEndPanel GetSessionEndPanel();
 
         public abstract string GetName();
 
