@@ -9,9 +9,9 @@ namespace Gumball
     public abstract class SessionEndPanel : AnimatedPanel
     {
 
+        private const float secondsToShowPanel = 2.5f;
         [SerializeField] private AutosizeTextMeshPro levelNameLabel;
         [Space(5)]
-        [SerializeField] private Transform positionHolder;
         [SerializeField] private TextMeshProUGUI positionLabel;
         [Space(5)]
         [SerializeField] private AutosizeTextMeshPro victoryDefeatLabel;
@@ -30,6 +30,12 @@ namespace Gumball
             
             SetLevelName();
             SetVictory(GameSessionManager.Instance.CurrentSession.LastProgress == GameSession.ProgressStatus.COMPLETE);
+
+            this.PerformAfterDelay(secondsToShowPanel, () =>
+            {
+                Hide();
+                PanelManager.GetPanel<SessionScorePanel>().Show();
+            });
         }
 
         private void SetLevelName()
