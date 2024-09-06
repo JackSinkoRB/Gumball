@@ -17,5 +17,10 @@ namespace Gumball
             SetPosition(finishingRank);
         }
 
+        protected override void OnShowScorePanel()
+        {
+            PanelManager.GetPanel<SessionScorePanel>().PopulateMainObjective("1st");
+        }
+        
     }
 }

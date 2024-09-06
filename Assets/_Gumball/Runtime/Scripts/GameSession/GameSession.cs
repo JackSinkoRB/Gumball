@@ -121,6 +121,7 @@ namespace Gumball
         protected abstract SessionEndPanel GetSessionEndPanel();
 
         public abstract string GetName();
+        public abstract ObjectiveUI.FakeChallengeData GetChallengeData();
 
         public void StartSession()
         {

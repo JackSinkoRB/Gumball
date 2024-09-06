@@ -29,6 +29,9 @@ namespace Gumball
 
         private void UpdateSize()
         {
+            if (!isHorizontal && !isVertical)
+                return;
+            
             float totalWidth = 0;
             float totalHeight = 0;
             foreach (RectTransform additionalObject in additionalRects)

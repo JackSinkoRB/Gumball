@@ -24,6 +24,8 @@ namespace Gumball
         [Space(5)]
         [SerializeField] private GameObject confettiParticles;
 
+        private Coroutine showScorePanelCoroutine;
+
         protected override void OnShow()
         {
             base.OnShow();
@@ -31,12 +33,26 @@ namespace Gumball
             SetLevelName();
             SetVictory(GameSessionManager.Instance.CurrentSession.LastProgress == GameSession.ProgressStatus.COMPLETE);
 
-            this.PerformAfterDelay(secondsToShowPanel, () =>
+            showScorePanelCoroutine = this.PerformAfterDelay(secondsToShowPanel, () =>
             {
+                if (!IsShowing)
+                    return;
+                
                 Hide();
                 PanelManager.GetPanel<SessionScorePanel>().Show();
+                OnShowScorePanel();
             });
         }
+
+        protected override void OnHide()
+        {
+            base.OnHide();
+
+            if (showScorePanelCoroutine != null)
+                StopCoroutine(showScorePanelCoroutine);
+        }
+
+        protected abstract void OnShowScorePanel();
 
         private void SetLevelName()
         {

@@ -22,6 +22,10 @@ namespace Gumball
         {
             return null; //has no end
         }
-        
+
+        public override ObjectiveUI.FakeChallengeData GetChallengeData()
+        {
+            return GameSessionManager.Instance.RacePositionChallengeData;
+        }
     }
 }

@@ -34,7 +34,12 @@ namespace Gumball
         {
             return "Race";
         }
-        
+
+        public override ObjectiveUI.FakeChallengeData GetChallengeData()
+        {
+            return GameSessionManager.Instance.RacePositionChallengeData;
+        }
+
         protected override GameSessionPanel GetSessionPanel()
         {
             return PanelManager.GetPanel<RaceSessionPanel>();
