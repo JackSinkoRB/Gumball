@@ -15,6 +15,9 @@ namespace Gumball
             base.OnShow();
             
             mainAudioMixer.SetFloat("MasterVolume", -80f);
+            
+            if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
+                PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
         }
 
         protected override void OnHide()
