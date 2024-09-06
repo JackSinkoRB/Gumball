@@ -338,6 +338,9 @@ namespace Gumball
 
             if (PanelManager.ExistsRuntime && PanelManager.PanelExists<DrivingControlsPanel>())
                 PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+
+            if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
+                PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
             
             if (GetSessionPanel() != null)
                 GetSessionPanel().Hide();
