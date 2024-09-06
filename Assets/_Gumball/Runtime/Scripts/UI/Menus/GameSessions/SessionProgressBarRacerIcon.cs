@@ -21,10 +21,8 @@ namespace Gumball
         {
             this.racer = racer;
 
-            RacerInfoProfile infoProfile = GameSessionManager.Instance.CurrentSession.CurrentRacers[racer].InfoProfile;
-            if (infoProfile != null && infoProfile.Icon != null)
-                icon.sprite = infoProfile.Icon;
-
+            icon.sprite = racer.RacerIcon.CurrentIcon;
+            
             RectTransform.anchoredPosition = RectTransform.anchoredPosition.SetX(0);
         }
 
