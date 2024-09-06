@@ -49,14 +49,9 @@ namespace Gumball
             victoryDefeatLabel.Resize();
         }
 
-        protected void ShowPosition(bool show, int position = -1)
+        protected void SetPosition(int position)
         {
-            positionHolder.gameObject.SetActive(show);
-
-            if (show)
-            {
-                positionLabel.text = position.ToOrdinalString();
-            }
+            positionLabel.text = position.ToOrdinalString();
         }
 
     }
