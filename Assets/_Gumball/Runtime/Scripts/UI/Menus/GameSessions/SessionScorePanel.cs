@@ -32,7 +32,21 @@ namespace Gumball
         {
             GameSessionManager.Instance.RestartCurrentSession();
         }
+
+        public void OnClickNextButton()
+        {
+            Hide();
+            CoroutineHelper.Instance.StartCoroutine(GiveRewardsThenExitIE());
+        }
         
+        private IEnumerator GiveRewardsThenExitIE()
+        {
+            yield return GameSessionManager.Instance.CurrentSession.Rewards.GiveRewards();
+            
+            GameSessionManager.Instance.CurrentSession.UnloadSession();
+            MainSceneManager.LoadMainScene();
+        }
+
         private void SetLevelName()
         {
             levelNameLabel.text = GameSessionManager.Instance.CurrentSession.name;

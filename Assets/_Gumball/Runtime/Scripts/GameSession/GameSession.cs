@@ -313,8 +313,6 @@ namespace Gumball
             }
 
             onSessionEnd?.Invoke(this, progress);
-            
-            StopTrackingObjectives();
         }
 
         public void UnloadSession()
@@ -323,6 +321,8 @@ namespace Gumball
             
             if (chunkMapHandle.IsValid())
                 Addressables.Release(chunkMapHandle);
+            
+            StopTrackingObjectives();
             
             Destroy(currentChunkMapCached);
             trafficPrefabHandles.Clear(); //remove the traffic car references so they can be unloaded 
