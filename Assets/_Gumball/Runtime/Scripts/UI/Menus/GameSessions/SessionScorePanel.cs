@@ -10,6 +10,8 @@ namespace Gumball
         [SerializeField] private AutosizeTextMeshPro levelNameLabel;
         [SerializeField] private ObjectiveUI objectiveUIPrefab;
         [SerializeField] private Transform objectiveUIHolder;
+        [SerializeField] private Transform scoresUIHolder;
+        [SerializeField] private AutosizeTextMeshPro totalScoreLabel;
         
         protected override void OnShow()
         {
@@ -17,6 +19,7 @@ namespace Gumball
             
             SetLevelName();
             PopulateSubObjectives();
+            PopulateScores();
         }
 
         public void PopulateMainObjective(string challengeValue)
@@ -39,6 +42,23 @@ namespace Gumball
                 ObjectiveUI objectiveUI = Instantiate(objectiveUIPrefab.gameObject, objectiveUIHolder).GetComponent<ObjectiveUI>();
                 objectiveUI.Initialise(subObjective);
             }
+        }
+        
+        private void PopulateScores()
+        {
+            foreach (SkillCheck skillCheck in SkillCheckManager.Instance.AllSkillChecks)
+            {
+                int points = Mathf.RoundToInt(skillCheck.PointsSinceSessionStart);
+                if (points < 1)
+                    continue;
+                
+                ObjectiveUI objectiveUI = Instantiate(objectiveUIPrefab.gameObject, scoresUIHolder).GetComponent<ObjectiveUI>();
+                objectiveUI.Initialise(skillCheck);
+                objectiveUI.transform.SetAsFirstSibling();
+            }
+
+            totalScoreLabel.text = Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints).ToString();
+            totalScoreLabel.Resize();
         }
         
     }

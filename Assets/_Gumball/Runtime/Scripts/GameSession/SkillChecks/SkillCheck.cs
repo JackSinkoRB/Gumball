@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using TMPro;
 using UnityEngine;
 
@@ -12,20 +13,31 @@ namespace Gumball
 
         public event Action onPerformed;
 
+        [SerializeField] private string displayName;
+        [SerializeField] private Sprite icon;
+        [Space(5)]
         [SerializeField] protected TextMeshProUGUI label;
-
         [SerializeField] protected float pointBonus;
         [SerializeField, Range(0,1)] protected float nosBonus;
 
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private float pointsSinceSessionStart;
+
+        public string DisplayName => displayName;
+        public Sprite Icon => icon;
         public TextMeshProUGUI Label => label;
+        public float PointsSinceSessionStart => pointsSinceSessionStart;
 
         public abstract void CheckIfPerformed();
 
         protected virtual void OnPerformed()
         {
-            SkillCheckManager.Instance.AddPoints(GetPointsToAddWhenPerformed());
+            float pointsToAdd = GetPointsToAddWhenPerformed();
+            SkillCheckManager.Instance.AddPoints(pointsToAdd);
+            pointsSinceSessionStart += pointsToAdd;
+
             WarehouseManager.Instance.CurrentCar.NosManager.AddNos(GetNosToAddWhenPerformed());
-            
+
             onPerformed?.Invoke();
         }
 

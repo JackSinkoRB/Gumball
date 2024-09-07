@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using MyBox;
 using TMPro;
 using UnityEngine;
@@ -45,6 +46,13 @@ namespace Gumball
             nameLabel.text = objectiveData.DisplayName;
             icon.sprite = objectiveData.Icon;
             goalValueLabel.text = objectiveValue;
+        }
+        
+        public void Initialise(SkillCheck skillCheck)
+        {
+            nameLabel.text = skillCheck.DisplayName;
+            icon.sprite = skillCheck.Icon;
+            goalValueLabel.text = Mathf.RoundToInt(skillCheck.PointsSinceSessionStart).ToString(CultureInfo.InvariantCulture);
         }
 
     }
