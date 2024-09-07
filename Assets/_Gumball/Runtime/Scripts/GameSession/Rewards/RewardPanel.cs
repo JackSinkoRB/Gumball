@@ -9,8 +9,10 @@ namespace Gumball
     public class RewardPanel : AnimatedPanel
     {
         
-        [SerializeField] private MagneticScroll magneticScroll;
         [SerializeField] private Sprite standardCurrencyIcon;
+        [SerializeField] private RewardUI rewardUIPrefab;
+        [SerializeField] private Transform rewardsHolder;
+        [SerializeField] private Transform retryButton;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<CorePart> rewardQueueCoreParts = new();
@@ -22,8 +24,26 @@ namespace Gumball
         protected override void OnShow()
         {
             base.OnShow();
-            
+
+            ShowRetryButton(false);
             Populate();
+        }
+
+        public void OnClickContinueButton()
+        {
+            Hide();
+            
+            //if showing reward panel for game session, go back to the main scene after
+            if (GameSessionManager.Instance.CurrentSession != null)
+            {
+                GameSessionManager.Instance.CurrentSession.UnloadSession();
+                MainSceneManager.LoadMainScene();
+            }
+        }
+
+        public void ShowRetryButton(bool show)
+        {
+            retryButton.gameObject.SetActive(show);
         }
 
         public void QueueReward(CorePart corePart)
@@ -55,54 +75,37 @@ namespace Gumball
         
         public void Populate()
         {
-            List<ScrollItem> scrollItems = new List<ScrollItem>();
+            foreach (Transform child in rewardsHolder)
+                child.gameObject.Pool();
             
             //do core parts first
             foreach (CorePart corePart in rewardQueueCoreParts)
             {
-                ScrollItem scrollItem = new ScrollItem();
-
-                scrollItem.onLoad += () =>
-                {
-                    RewardScrollIcon rewardScrollIcon = (RewardScrollIcon) scrollItem.CurrentIcon;
-                    rewardScrollIcon.Initialise(corePart.DisplayName, corePart.Icon);
-                };
-                
-                scrollItems.Add(scrollItem);
+                RewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<RewardUI>(rewardsHolder);
+                instance.Initialise(corePart.Icon, corePart.DisplayName);
             }
             rewardQueueCoreParts.Clear();
 
             //show sub parts
             foreach (SubPart subPart in rewardQueueSubParts)
             {
-                ScrollItem scrollItem = new ScrollItem();
-
-                scrollItem.onLoad += () =>
-                {
-                    RewardScrollIcon rewardScrollIcon = (RewardScrollIcon) scrollItem.CurrentIcon;
-                    rewardScrollIcon.Initialise(subPart.DisplayName, subPart.Icon);
-                };
-                
-                scrollItems.Add(scrollItem);
+                RewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<RewardUI>(rewardsHolder);
+                instance.Initialise(subPart.Icon, subPart.DisplayName);
             }
             rewardQueueSubParts.Clear();
             
             //show standard currency
             foreach (int amount in rewardQueueStandardCurrency)
             {
-                ScrollItem scrollItem = new ScrollItem();
-
-                scrollItem.onLoad += () =>
-                {
-                    RewardScrollIcon rewardScrollIcon = (RewardScrollIcon) scrollItem.CurrentIcon;
-                    rewardScrollIcon.Initialise($"{amount}", standardCurrencyIcon);
-                };
-
-                scrollItems.Add(scrollItem);
+                RewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<RewardUI>(rewardsHolder);
+                instance.Initialise(standardCurrencyIcon, $"{amount}");
             }
             rewardQueueStandardCurrency.Clear();
-
-            magneticScroll.SetItems(scrollItems);
+        }
+        
+        public void OnClickRetryButton()
+        {
+            GameSessionManager.Instance.RestartCurrentSession();
         }
         
     }

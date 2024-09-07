@@ -12,7 +12,8 @@ namespace Gumball
     [Serializable]
     public class NearMissSkillCheck : SkillCheck
     {
-
+        
+        [Header("Near miss")]
         [SerializeField] private float labelDuration = 1;
         [Tooltip("The minimum speed the player must be going for a near miss.")]
         [SerializeField] private float minSpeedKmh = 50;

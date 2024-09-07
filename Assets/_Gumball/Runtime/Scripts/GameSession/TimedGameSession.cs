@@ -20,7 +20,8 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private float timeRemainingSeconds;
         [SerializeField, ReadOnly] private bool timerHasStarted;
-        
+
+        public float TimeAllowedSeconds => timeAllowedSeconds;
         public float TimeRemainingSeconds => timeRemainingSeconds;
 
         public override string GetName()
@@ -33,9 +34,14 @@ namespace Gumball
             return PanelManager.GetPanel<TimedSessionPanel>();
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<TimedSessionEndPanel>();
+        }
+        
+        public override ObjectiveUI.FakeChallengeData GetChallengeData()
+        {
+            return GameSessionManager.Instance.TimeChallengeData;
         }
 
         protected override IEnumerator LoadSession()

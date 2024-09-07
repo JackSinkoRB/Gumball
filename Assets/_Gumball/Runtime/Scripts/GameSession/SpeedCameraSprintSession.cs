@@ -45,7 +45,7 @@ namespace Gumball
             return PanelManager.GetPanel<SpeedCameraSprintSessionPanel>();
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<SpeedCameraSprintSessionEndPanel>();
         }
