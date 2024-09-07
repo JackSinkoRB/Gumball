@@ -33,5 +33,16 @@ namespace Gumball
                 currentSession.UpdateWhenCurrent();
             }
         }
+
+        public void RestartCurrentSession()
+        {
+            if (currentSession == null)
+                throw new NullReferenceException("Cannot restart session because there is none current.");
+
+            GameSession session = CurrentSession;
+            session.EndSession(GameSession.ProgressStatus.ATTEMPTED);
+            session.UnloadSession();
+            session.StartSession();
+        }
     }
 }
