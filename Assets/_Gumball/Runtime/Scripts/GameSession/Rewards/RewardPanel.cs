@@ -12,6 +12,7 @@ namespace Gumball
         [SerializeField] private Sprite standardCurrencyIcon;
         [SerializeField] private RewardUI rewardUIPrefab;
         [SerializeField] private Transform rewardsHolder;
+        [SerializeField] private Transform retryButton;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<CorePart> rewardQueueCoreParts = new();
@@ -23,8 +24,26 @@ namespace Gumball
         protected override void OnShow()
         {
             base.OnShow();
-            
+
+            ShowRetryButton(false);
             Populate();
+        }
+
+        public void OnClickContinueButton()
+        {
+            Hide();
+            
+            //if showing reward panel for game session, go back to the main scene after
+            if (GameSessionManager.Instance.CurrentSession != null)
+            {
+                GameSessionManager.Instance.CurrentSession.UnloadSession();
+                MainSceneManager.LoadMainScene();
+            }
+        }
+
+        public void ShowRetryButton(bool show)
+        {
+            retryButton.gameObject.SetActive(show);
         }
 
         public void QueueReward(CorePart corePart)
@@ -82,6 +101,11 @@ namespace Gumball
                 instance.Initialise(standardCurrencyIcon, $"{amount}");
             }
             rewardQueueStandardCurrency.Clear();
+        }
+        
+        public void OnClickRetryButton()
+        {
+            GameSessionManager.Instance.RestartCurrentSession();
         }
         
     }

@@ -97,21 +97,14 @@ namespace Gumball
                 unlockable.Unlock();
 
             //show the reward panel with queued rewards
-            if (GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null && GameSessionManager.Instance.CurrentSession.InProgress)
+            if (PanelManager.PanelExists<RewardPanel>() && PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
             {
-                if (PanelManager.PanelExists<SessionRewardPanel>() && PanelManager.GetPanel<SessionRewardPanel>().PendingRewards > 0)
-                {
-                    PanelManager.GetPanel<SessionRewardPanel>().Show();
-                    yield return new WaitUntil(() => !PanelManager.PanelExists<SessionRewardPanel>() || (!PanelManager.GetPanel<SessionRewardPanel>().IsShowing && !PanelManager.GetPanel<SessionRewardPanel>().IsTransitioning));
-                }
-            }
-            else
-            {
-                if (PanelManager.PanelExists<RewardPanel>() && PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
-                {
-                    PanelManager.GetPanel<RewardPanel>().Show();
-                    yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || !PanelManager.GetPanel<RewardPanel>().IsShowing);
-                }
+                PanelManager.GetPanel<RewardPanel>().Show();
+                
+                if (GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null)
+                    PanelManager.GetPanel<RewardPanel>().ShowRetryButton(true);
+                
+                yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || !PanelManager.GetPanel<RewardPanel>().IsShowing);
             }
 
         }

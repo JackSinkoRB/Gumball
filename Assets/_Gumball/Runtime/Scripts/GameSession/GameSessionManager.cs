@@ -40,7 +40,8 @@ namespace Gumball
                 throw new NullReferenceException("Cannot restart session because there is none current.");
 
             GameSession session = CurrentSession;
-            session.EndSession(GameSession.ProgressStatus.ATTEMPTED);
+            if (session.InProgress)
+                session.EndSession(GameSession.ProgressStatus.NOT_ATTEMPTED);
             session.UnloadSession();
             session.StartSession();
         }
