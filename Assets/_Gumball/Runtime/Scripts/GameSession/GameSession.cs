@@ -653,10 +653,15 @@ namespace Gumball
         private void OnCrossFinishLine()
         {
             ProgressStatus status = ProgressStatus.ATTEMPTED;
-            if (AreAllSubObjectivesComplete())
+            if (AreAllSubObjectivesComplete() && IsCompleteOnCrossFinishLine())
                 status = ProgressStatus.COMPLETE;
             
             EndSession(status);
+        }
+
+        protected virtual bool IsCompleteOnCrossFinishLine()
+        {
+            return true;
         }
 
         private bool AreAllSubObjectivesComplete()

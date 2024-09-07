@@ -44,12 +44,18 @@ namespace Gumball
         {
             return PanelManager.GetPanel<RaceSessionPanel>();
         }
-        
+
         protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<RaceSessionEndPanel>();
         }
-        
+
+        protected override bool IsCompleteOnCrossFinishLine()
+        {
+            int finishingRank = GetRacePosition(WarehouseManager.Instance.CurrentCar);
+            return finishingRank == 1;
+        }
+
         public int GetRacePosition(AICar racer)
         {
             int rank = RacersInPositionOrder.IndexOf(racer) + 1;
