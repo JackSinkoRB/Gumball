@@ -73,6 +73,9 @@ jobs:
     runs-on: macos-latest
     steps:
 
+      - name: Show disk space 1
+        run: df -h
+
       - name: Checkout necessary files for Fastlane
         uses: actions/checkout@v4
         with:
@@ -84,11 +87,17 @@ jobs:
             Gemfile.lock
             fastlane
 
+      - name: Show disk space 2
+        run: df -h
+
       - name: Download IOS artifact
         uses: actions/download-artifact@v4
         with:
           name: build-iOS
           path: build/iOS
+
+      - name: Show disk space 3
+        run: df -h
 
       - name: Build and upload with fastlane
         env:
@@ -138,6 +147,9 @@ jobs:
 
           # Run Fastlane to upload the build
           bundle exec fastlane ios upload_testflight
+
+      - name: Show disk space 4
+        run: df -h
 
       - name: Cleanup to avoid storage limit
         if: always()
