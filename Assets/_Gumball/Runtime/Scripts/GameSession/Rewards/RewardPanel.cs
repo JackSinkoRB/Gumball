@@ -29,18 +29,6 @@ namespace Gumball
             Populate();
         }
 
-        public void OnClickContinueButton()
-        {
-            Hide();
-            
-            //if showing reward panel for game session, go back to the main scene after
-            if (GameSessionManager.Instance.CurrentSession != null)
-            {
-                GameSessionManager.Instance.CurrentSession.UnloadSession();
-                MainSceneManager.LoadMainScene();
-            }
-        }
-
         public void ShowRetryButton(bool show)
         {
             retryButton.gameObject.SetActive(show);

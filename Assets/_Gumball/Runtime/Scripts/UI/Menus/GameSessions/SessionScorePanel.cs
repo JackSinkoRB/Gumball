@@ -36,7 +36,18 @@ namespace Gumball
         public void OnClickContinueButton()
         {
             Hide();
-            CoroutineHelper.Instance.StartCoroutine(GameSessionManager.Instance.CurrentSession.Rewards.GiveRewards());
+            CoroutineHelper.Instance.StartCoroutine(GiveRewardsThenExitIE());
+        }
+
+        private IEnumerator GiveRewardsThenExitIE()
+        {
+            yield return GameSessionManager.Instance.CurrentSession.Rewards.GiveRewards();
+            
+            //show the loading panel before unloading as unloading can take some time
+            PanelManager.GetPanel<LoadingPanel>().Show();
+
+            GameSessionManager.Instance.CurrentSession.UnloadSession();
+            MainSceneManager.LoadMainScene();
         }
 
         private void SetLevelName()
