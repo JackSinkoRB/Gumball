@@ -14,7 +14,10 @@ namespace Gumball
     {
 
         [SerializeField] private bool isUnlockedByDefault;
+        [SerializeField] private Sprite icon;
 
+        public Sprite Icon => icon;
+        
         public bool IsUnlocked
         {
             get => DataManager.Player.Get($"Unlockable.{name}-{ID}.IsUnlocked", isUnlockedByDefault);

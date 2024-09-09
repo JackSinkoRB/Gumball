@@ -11,7 +11,7 @@ namespace Gumball
 
         [SerializeField] private Transform fuelRefillUI;
         [SerializeField] private Transform premiumCurrencyUI;
-        [SerializeField] private TextMeshProUGUI premiumCurrencyLabel;
+        [SerializeField] private AutosizeTextMeshPro premiumCurrencyLabel;
 
         public void Populate(PlayerLevel newLevel)
         {
@@ -21,6 +21,7 @@ namespace Gumball
             //premium currency:
             premiumCurrencyUI.gameObject.SetActive(newLevel.Rewards.PremiumCurrency > 0);
             premiumCurrencyLabel.text = newLevel.Rewards.PremiumCurrency.ToString();
+            premiumCurrencyLabel.Resize();
         }
 
     }
