@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,12 +11,21 @@ namespace Gumball
     {
 
         [SerializeField] private AutosizeTextMeshPro levelLabel;
+        [SerializeField] private TextMeshProUGUI xpGainedLabel;
         [Space(5)]
         [SerializeField] private Image experienceBar;
         [SerializeField] private float experienceBarTweenDuration;
         [SerializeField] private Ease experienceBarTweenEase;
 
-        public void TweenExperienceBar(int previousTotalXP, int newTotalXP)
+        public void Initialise(int previousTotalXP, int newTotalXP)
+        {
+            TweenExperienceBar(previousTotalXP, newTotalXP);
+
+            int difference = newTotalXP - previousTotalXP;
+            xpGainedLabel.text = $"+{difference}";
+        }
+        
+        private void TweenExperienceBar(int previousTotalXP, int newTotalXP)
         {
             levelLabel.text = $"{ExperienceManager.GetLevelIndexFromTotalXP(previousTotalXP) + 1}";
 

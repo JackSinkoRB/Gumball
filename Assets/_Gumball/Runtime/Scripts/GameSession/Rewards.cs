@@ -49,7 +49,7 @@ namespace Gumball
                 if (PanelManager.PanelExists<XPGainedPanel>())
                 {
                     PanelManager.GetPanel<XPGainedPanel>().Show();
-                    PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
+                    PanelManager.GetPanel<XPGainedPanel>().Initialise(currentXP, newXP);
                     
                     yield return new WaitUntil(() => !PanelManager.PanelExists<XPGainedPanel>() || (!PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning));
                 }
