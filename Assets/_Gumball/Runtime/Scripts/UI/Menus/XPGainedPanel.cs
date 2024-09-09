@@ -16,13 +16,22 @@ namespace Gumball
         [SerializeField] private Image experienceBar;
         [SerializeField] private float experienceBarTweenDuration;
         [SerializeField] private Ease experienceBarTweenEase;
+        
+        private Tween experienceBarTween;
+        private Tween experienceLabelTween;
 
         public void Initialise(int previousTotalXP, int newTotalXP)
         {
             TweenExperienceBar(previousTotalXP, newTotalXP);
+            TweenExperienceLabel(newTotalXP - previousTotalXP);
+        }
 
-            int difference = newTotalXP - previousTotalXP;
-            xpGainedLabel.text = $"+{difference}";
+        private void TweenExperienceLabel(int xpGained)
+        {
+            experienceLabelTween?.Kill();
+            xpGainedLabel.text = "0";
+            experienceLabelTween = DOTween.To(() => int.Parse(xpGainedLabel.text), value => xpGainedLabel.text = $"+{value}", xpGained, experienceBarTweenDuration)
+                .SetEase(experienceBarTweenEase);
         }
         
         private void TweenExperienceBar(int previousTotalXP, int newTotalXP)
@@ -36,7 +45,9 @@ namespace Gumball
             float desiredFill = previousLevel == newLevel ? ExperienceManager.GetPercentToNextLevel(Mathf.Max(0, newTotalXP)) : 1; //if increasing level, just tween to full
             
             experienceBar.fillAmount = startingFill;
-            experienceBar.DOFillAmount(desiredFill, experienceBarTweenDuration).SetEase(experienceBarTweenEase);
+
+            experienceBarTween?.Kill();
+            experienceBarTween = experienceBar.DOFillAmount(desiredFill, experienceBarTweenDuration).SetEase(experienceBarTweenEase);
         }
 
     }
