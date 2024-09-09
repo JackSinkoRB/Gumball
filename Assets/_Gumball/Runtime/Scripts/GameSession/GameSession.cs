@@ -342,12 +342,13 @@ namespace Gumball
 
             if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
                 PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
-            
+
+            PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
             if (GetSessionPanel() != null)
                 GetSessionPanel().Hide();
             if (GetSessionEndPanel() != null)
                 GetSessionEndPanel().Show();
-            
+
             if (ChunkMapSceneManager.ExistsRuntime)
                 drivingCameraController.SetState(drivingCameraController.OutroState);
             
