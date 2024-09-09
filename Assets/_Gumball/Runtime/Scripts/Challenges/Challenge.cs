@@ -12,11 +12,13 @@ namespace Gumball
     {
         
         [SerializeField] private string description = "Description of challenge";
+        [SerializeField] private Sprite icon;
         [SerializeField] private ChallengeTracker tracker;
         [SerializeField] private int goal;
         [SerializeField] private Rewards rewards;
-        
+
         public string Description => description;
+        public Sprite Icon => icon;
         public ChallengeTracker Tracker => tracker;
         public int Goal => goal;
         public Rewards Rewards => rewards;

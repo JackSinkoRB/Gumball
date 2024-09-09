@@ -90,6 +90,7 @@ namespace Gumball
         
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
 
+        public ProgressStatus LastProgress { get; private set; }
         public ProgressStatus Progress
         {
             get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
@@ -117,9 +118,10 @@ namespace Gumball
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
 
         protected abstract GameSessionPanel GetSessionPanel();
-        protected abstract GameSessionEndPanel GetSessionEndPanel();
+        protected abstract SessionEndPanel GetSessionEndPanel();
 
         public abstract string GetName();
+        public abstract ObjectiveUI.FakeChallengeData GetChallengeData();
 
         public void StartSession()
         {
@@ -294,7 +296,8 @@ namespace Gumball
         public void EndSession(ProgressStatus progress)
         {
             inProgress = false;
-
+            LastProgress = progress;
+            
             if (sessionCoroutine != null)
                 CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
             
@@ -310,8 +313,6 @@ namespace Gumball
             }
 
             onSessionEnd?.Invoke(this, progress);
-            
-            StopTrackingObjectives();
         }
 
         public void UnloadSession()
@@ -320,6 +321,8 @@ namespace Gumball
             
             if (chunkMapHandle.IsValid())
                 Addressables.Release(chunkMapHandle);
+            
+            StopTrackingObjectives();
             
             Destroy(currentChunkMapCached);
             trafficPrefabHandles.Clear(); //remove the traffic car references so they can be unloaded 
@@ -336,6 +339,9 @@ namespace Gumball
 
             if (PanelManager.ExistsRuntime && PanelManager.PanelExists<DrivingControlsPanel>())
                 PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+
+            if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
+                PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
             
             if (GetSessionPanel() != null)
                 GetSessionPanel().Hide();
@@ -647,10 +653,15 @@ namespace Gumball
         private void OnCrossFinishLine()
         {
             ProgressStatus status = ProgressStatus.ATTEMPTED;
-            if (AreAllSubObjectivesComplete())
+            if (AreAllSubObjectivesComplete() && IsCompleteOnCrossFinishLine())
                 status = ProgressStatus.COMPLETE;
             
             EndSession(status);
+        }
+
+        protected virtual bool IsCompleteOnCrossFinishLine()
+        {
+            return true;
         }
 
         private bool AreAllSubObjectivesComplete()

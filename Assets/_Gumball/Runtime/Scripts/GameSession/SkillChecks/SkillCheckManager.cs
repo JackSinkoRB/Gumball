@@ -17,6 +17,8 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private float currentPoints;
         
+        public SkillCheck[] AllSkillChecks { get; private set; }
+        
         public float CurrentPoints => currentPoints;
         public SlipStreamSkillCheck SlipStream => slipStream;
         public NearMissSkillCheck NearMiss => nearMiss;
@@ -25,7 +27,8 @@ namespace Gumball
         protected override void Initialise()
         {
             base.Initialise();
-            
+
+            FindAllChecks();
             DisableUI();
         }
 
@@ -54,6 +57,17 @@ namespace Gumball
             nearMiss.CheckIfPerformed();
             slipStream.CheckIfPerformed();
             airTime.CheckIfPerformed();
+        }
+        
+        private void FindAllChecks()
+        {
+            List<SkillCheck> allChecks = new List<SkillCheck>
+            {
+                nearMiss,
+                airTime,
+                slipStream
+            };
+            AllSkillChecks = allChecks.ToArray();
         }
 
         private void DisableUI()

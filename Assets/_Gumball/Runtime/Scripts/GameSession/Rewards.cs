@@ -100,8 +100,13 @@ namespace Gumball
             if (PanelManager.PanelExists<RewardPanel>() && PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
             {
                 PanelManager.GetPanel<RewardPanel>().Show();
-                yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || (!PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning));
+                
+                if (GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null)
+                    PanelManager.GetPanel<RewardPanel>().ShowRetryButton(true);
+                
+                yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || !PanelManager.GetPanel<RewardPanel>().IsShowing);
             }
+
         }
         
     }

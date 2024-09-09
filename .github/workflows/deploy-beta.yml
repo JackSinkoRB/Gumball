@@ -121,6 +121,9 @@ jobs:
           # Install Ruby gems
           bundle install
 
+          # Show disk space
+          df -h
+
           # Run Fastlane to build the app
           bundle exec fastlane ios build
 

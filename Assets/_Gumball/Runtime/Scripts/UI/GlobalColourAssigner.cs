@@ -28,6 +28,12 @@ namespace Gumball
         }
 #endif
 
+        public void SetColour(GlobalColourPalette.ColourCode colourCode)
+        {
+            this.colourCode = colourCode;
+            UpdateColors();
+        }
+
         private void UpdateColors()
         {
 #if UNITY_EDITOR
