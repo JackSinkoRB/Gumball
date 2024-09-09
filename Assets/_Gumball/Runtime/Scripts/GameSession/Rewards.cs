@@ -40,9 +40,13 @@ namespace Gumball
         
         public IEnumerator GiveRewards()
         {
+            bool startedShowingVignette = false;
             if (PanelManager.PanelExists<VignetteBackgroundPanel>())
+            {
                 PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
-            
+                startedShowingVignette = true;
+            }
+
             //give XP
             if (xp > 0)
             {
@@ -110,7 +114,7 @@ namespace Gumball
                 yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || !PanelManager.GetPanel<RewardPanel>().IsShowing);
             }
             
-            if (PanelManager.PanelExists<VignetteBackgroundPanel>())
+            if (startedShowingVignette && PanelManager.PanelExists<VignetteBackgroundPanel>())
                 PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
         }
         
