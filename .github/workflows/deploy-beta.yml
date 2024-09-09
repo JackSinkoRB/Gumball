@@ -76,6 +76,197 @@ jobs:
       - name: Show disk space 1
         run: df -h
 
+      - name: Clear unnecessary files
+        run: |
+          # .NET Core SDKs
+          rm -rf /usr/local/share/dotnet/sdk/7.0.102
+          rm -rf /usr/local/share/dotnet/sdk/7.0.202
+          rm -rf /usr/local/share/dotnet/sdk/7.0.306
+          rm -rf /usr/local/share/dotnet/sdk/7.0.410
+          rm -rf /usr/local/share/dotnet/sdk/8.0.101
+          rm -rf /usr/local/share/dotnet/sdk/8.0.204
+          rm -rf /usr/local/share/dotnet/sdk/8.0.303
+          rm -rf /usr/local/share/dotnet/sdk/8.0.401
+
+          # Bash
+          rm -rf /bin/bash
+
+          # Clang/LLVM
+          rm -rf /usr/local/clang_14.0.3
+          rm -rf $(brew --prefix llvm@15)
+
+          # GCC
+          rm -rf /usr/local/bin/gcc-12
+          rm -rf /usr/local/bin/gcc-13
+          rm -rf /usr/local/bin/gcc-14
+
+          # Fortran
+          rm -rf /usr/local/bin/gfortran-12
+          rm -rf /usr/local/bin/gfortran-13
+          rm -rf /usr/local/bin/gfortran-14
+
+          # Kotlin
+          rm -rf /usr/local/bin/kotlin
+
+          # Mono
+          rm -rf /usr/local/mono
+
+          # Node.js
+          rm -rf /usr/local/bin/node
+
+          # Perl
+          rm -rf /usr/local/bin/perl
+
+          # Python
+          rm -rf /usr/local/bin/python3
+
+          # Carthage
+          rm -rf /usr/local/bin/carthage
+
+          # Homebrew
+          rm -rf /usr/local/Homebrew
+
+          # NPM
+          rm -rf /usr/local/bin/npm
+
+          # NuGet
+          rm -rf /usr/local/bin/nuget
+
+          # Pip3
+          rm -rf /usr/local/bin/pip3
+
+          # Pipx
+          rm -rf /usr/local/bin/pipx
+
+          # Yarn
+          rm -rf /usr/local/bin/yarn
+
+          # Apache Ant
+          rm -rf /usr/local/bin/ant
+
+          # Apache Maven
+          rm -rf /usr/local/bin/mvn
+
+          # Gradle
+          rm -rf /usr/local/bin/gradle
+
+          # 7-Zip
+          rm -rf /usr/local/bin/7z
+
+          # aria2
+          rm -rf /usr/local/bin/aria2c
+
+          # azcopy
+          rm -rf /usr/local/bin/azcopy
+
+          # Bazel
+          rm -rf /usr/local/bin/bazel
+
+          # Bazelisk
+          rm -rf /usr/local/bin/bazelisk
+
+          # Git
+          rm -rf /usr/local/bin/git
+          rm -rf /usr/local/bin/git-lfs
+
+          # GitHub CLI
+          rm -rf /usr/local/bin/gh
+
+          # Curl
+          rm -rf /usr/local/bin/curl
+
+          # GNU Tar
+          rm -rf /usr/local/bin/gtar
+
+          # GNU Wget
+          rm -rf /usr/local/bin/wget
+
+          # GPG
+          rm -rf /usr/local/bin/gpg
+
+          # jq
+          rm -rf /usr/local/bin/jq
+
+          # OpenSSL
+          rm -rf /usr/local/bin/openssl
+
+          # Packer
+          rm -rf /usr/local/bin/packer
+
+          # pkg-config
+          rm -rf /usr/local/bin/pkg-config
+
+          # yq
+          rm -rf /usr/local/bin/yq
+
+          # zstd
+          rm -rf /usr/local/bin/zstd
+
+          # AWS CLI
+          rm -rf /usr/local/bin/aws
+
+          # AWS SAM CLI
+          rm -rf /usr/local/bin/sam
+
+          # Azure CLI
+          rm -rf /usr/local/bin/az
+
+          # Bicep CLI
+          rm -rf /usr/local/bin/bicep
+
+          # CMake
+          rm -rf /usr/local/bin/cmake
+
+          # SwiftFormat
+          rm -rf /usr/local/bin/swiftformat
+
+          # ChromeDriver
+          rm -rf /usr/local/share/chromedriver-mac-arm64
+
+          # Java SDKs
+          rm -rf $JAVA_HOME_11_arm64
+          rm -rf $JAVA_HOME_17_arm64
+          rm -rf $JAVA_HOME_21_arm64
+
+          # Python (cached versions)
+          rm -rf ~/.pyenv/versions/3.9.13
+          rm -rf ~/.pyenv/versions/3.10.11
+          rm -rf ~/.pyenv/versions/3.11.9
+          rm -rf ~/.pyenv/versions/3.12.5
+
+          # Node.js (cached versions)
+          rm -rf ~/.nvm/versions/node/v18.20.4
+          rm -rf ~/.nvm/versions/node/v20.17.0
+
+          # Go (cached versions)
+          rm -rf ~/.goenv/versions/1.20.14
+          rm -rf ~/.goenv/versions/1.21.13
+          rm -rf ~/.goenv/versions/1.22.6
+
+          # Rust
+          rm -rf ~/.cargo/bin/rustup
+          rm -rf ~/.cargo/bin/rustc
+          rm -rf ~/.cargo/bin/cargo
+
+          # PowerShell
+          rm -rf /usr/local/bin/pwsh
+
+          # PowerShell Modules
+          rm -rf ~/.local/share/powershell/Modules/Az
+          rm -rf ~/.local/share/powershell/Modules/Pester
+          rm -rf ~/.local/share/powershell/Modules/PSScriptAnalyzer
+
+          # Xcode Versions
+          rm -rf /Applications/Xcode_16.1_beta.app
+          rm -rf /Applications/Xcode_16_beta_6.app
+          rm -rf /Applications/Xcode_15.3.app
+          rm -rf /Applications/Xcode_15.2.app
+          rm -rf /Applications/Xcode_15.1.app
+          rm -rf /Applications/Xcode_15.0.1.app
+          rm -rf /Applications/Xcode_14.3.1.app
+
+          df -h
+
       - name: Checkout necessary files for Fastlane
         uses: actions/checkout@v4
         with:
@@ -117,10 +308,6 @@ jobs:
           IOS_BUNDLE_ID: com.RoadburnGames.Gumball
           PROJECT_NAME: Gumball
         run: |
-          # Set the TMPDIR environment variable to a directory with more space
-          export TMPDIR=$GITHUB_WORKSPACE
-          echo "TMPDIR is set to $TMPDIR"
-
           # Start the SSH agent
           eval "$(ssh-agent -s)"
 
