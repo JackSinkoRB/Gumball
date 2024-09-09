@@ -28,11 +28,6 @@ namespace Gumball
             objectiveUI.Initialise(GameSessionManager.Instance.CurrentSession.GetChallengeData(), challengeValue);
         }
 
-        public void OnClickRetryButton()
-        {
-            GameSessionManager.Instance.RestartCurrentSession();
-        }
-
         public void OnClickContinueButton()
         {
             Hide();

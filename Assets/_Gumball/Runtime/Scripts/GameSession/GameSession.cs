@@ -344,6 +344,7 @@ namespace Gumball
                 PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
 
             PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
             if (GetSessionPanel() != null)
                 GetSessionPanel().Hide();
             if (GetSessionEndPanel() != null)
