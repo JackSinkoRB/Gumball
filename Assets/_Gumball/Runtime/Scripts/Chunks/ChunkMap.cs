@@ -20,6 +20,7 @@ namespace Gumball
     {
         
         [Obsolete("Chunk load distance currently driven by global factor.")]
+        [HelpBox("Chunk load distance currently driven by global factor.", MessageType.Warning, HelpBoxAttribute.Position.ABOVE)]
         [SerializeField] private float chunkLoadDistance = 700;
         [Tooltip("The chunk index from the chunk references that gets loaded at the world origin.")]
         [SerializeField] private int startingChunkIndex;

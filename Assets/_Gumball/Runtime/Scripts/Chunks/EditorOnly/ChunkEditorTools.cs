@@ -488,14 +488,14 @@ namespace Gumball
             DestroyImmediate(chunk.TerrainHighLOD);
             DestroyImmediate(chunk.TerrainLowLOD);
             
-            Dictionary<Chunk.TerrainLOD, GameObject> newTerrain = terrainData.Create(chunk);
-            foreach (Chunk.TerrainLOD key in newTerrain.Keys)
+            Dictionary<Chunk.ChunkLOD, GameObject> newTerrain = terrainData.Create(chunk);
+            foreach (Chunk.ChunkLOD key in newTerrain.Keys)
             {
                 GameObject terrain = newTerrain[key];
                 chunk.SetTerrain(key, terrain);
             }
             
-            chunk.SwitchTerrainLOD(Chunk.TerrainLOD.HIGH);
+            chunk.SwitchTerrainLOD(Chunk.ChunkLOD.HIGH);
         }
 
         private void UnbakeSplineMeshes()

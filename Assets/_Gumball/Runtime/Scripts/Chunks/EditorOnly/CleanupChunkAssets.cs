@@ -61,7 +61,7 @@ namespace Gumball
             }
             
             //ignore terrain
-            foreach (Chunk.TerrainLOD lod in Enum.GetValues(typeof(Chunk.TerrainLOD)))
+            foreach (Chunk.ChunkLOD lod in Enum.GetValues(typeof(Chunk.ChunkLOD)))
                 safeFileNames.Add($"Terrain-{lod.ToString()}");
             
             //delete any assets that aren't used in the chunk directory
