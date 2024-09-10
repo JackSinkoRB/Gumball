@@ -22,13 +22,16 @@ namespace Gumball
 
         private RectTransform rectTransform => transform as RectTransform;
 
-        private void Update()
+        private void LateUpdate()
         {
             UpdateSize();
         }
 
         private void UpdateSize()
         {
+            if (!isHorizontal && !isVertical)
+                return;
+            
             float totalWidth = 0;
             float totalHeight = 0;
             foreach (RectTransform additionalObject in additionalRects)

@@ -45,7 +45,7 @@ namespace Gumball
             return PanelManager.GetPanel<SpeedCameraSprintSessionPanel>();
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<SpeedCameraSprintSessionEndPanel>();
         }
@@ -112,7 +112,7 @@ namespace Gumball
         {
             racersInPositionOrderCached = CurrentRacers.Keys.OrderBy(racer => zonesFailed.ContainsKey(racer) ? zonesFailed[racer].Count : 0)
                 .ThenByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap)
-                .ToArray();
+                .ToList();
         }
 
         private void SpawnZoneMarkers()

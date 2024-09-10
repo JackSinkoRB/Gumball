@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 namespace Gumball
@@ -15,9 +16,11 @@ namespace Gumball
             [SerializeField] private float goal;
             [SerializeField] private float current;
 
+            public float Goal => goal;
+            public float Current => current;
             public float Progress => Mathf.Clamp01(current / goal);
             public bool IsComplete => Progress >= 1;
-            
+
             public Listener(float goal)
             {
                 this.goal = goal;
@@ -36,6 +39,14 @@ namespace Gumball
 
         }
 
+        [SerializeField] private string displayName = "Challenge";
+        [SerializeField] private Sprite icon;
+
+        public string DisplayName => displayName;
+        public Sprite Icon => icon;
+
+        public virtual string GetValueFormatted(float value) => value.ToString(CultureInfo.InvariantCulture);
+        
         protected Dictionary<string, Listener> listeners
         {
             get => DataManager.GameSessions.Get($"Challenges.Listeners.{GetType()}", new Dictionary<string, Listener>());

@@ -64,6 +64,9 @@ namespace Gumball
             Stopwatch stopwatch = Stopwatch.StartNew();
             currentStage = Stage.Loading_loggers;
             yield return GlobalLoggers.LoadInstanceAsync();
+            #if UNITY_EDITOR
+            yield return new WaitUntil(() => GlobalLoggers.HasLoaded);
+            #endif
             GlobalLoggers.LoadingLogger.Log($"Global logger loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
             stopwatch.Restart();

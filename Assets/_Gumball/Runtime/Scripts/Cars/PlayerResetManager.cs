@@ -36,7 +36,13 @@ namespace Gumball
         {
             if (WarehouseManager.Instance.CurrentCar == null)
                 return;
-            
+
+            if (GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.InProgress)
+                return;
+
+            if (PanelManager.GetPanel<PausePanelDriving>().IsShowing)
+                return; //don't show while paused
+
             CheckIfPlayerIsTooFarFromRoad();
             CheckToShowResetButton();
         }

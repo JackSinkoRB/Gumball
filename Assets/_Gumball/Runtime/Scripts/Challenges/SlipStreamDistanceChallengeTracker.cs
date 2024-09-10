@@ -21,6 +21,11 @@ namespace Gumball
                 () => SkillCheckManager.Instance.SlipStream.onPerformed += OnSlipStream);
         }
 
+        public override string GetValueFormatted(float value)
+        {
+            return SpeedUtils.GetDistanceUserFriendly(value);
+        }
+
         private void OnPlayerTeleport(Vector3 previousPos, Vector3 newPos)
         {
             previousPosition = WarehouseManager.Instance.CurrentCar.transform.position;

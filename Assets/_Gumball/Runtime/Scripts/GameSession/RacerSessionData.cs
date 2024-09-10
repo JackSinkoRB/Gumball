@@ -46,9 +46,9 @@ namespace Gumball
         {
             car.SetPerformanceProfile(performanceProfile);
 
-            if (infoProfile.Icon != null)
-                car.RacerIcon.SetIcon(infoProfile.Icon);
-            else Debug.LogError($"{car.name} doesn't have a racer icon.");
+            if (infoProfile.Icon == null)
+                Debug.LogError($"{car.name} doesn't have a racer icon.");
+            car.RacerIcon.SetIcon(infoProfile.Icon);
             
             ApplyBodyPaintToCar(car);
             ApplyWheelPaintToCar(car);

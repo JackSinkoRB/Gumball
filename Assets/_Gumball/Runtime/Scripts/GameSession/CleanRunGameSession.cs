@@ -22,7 +22,7 @@ namespace Gumball
             return PanelManager.GetPanel<CleanRunSessionPanel>();
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<CleanRunSessionEndPanel>();
         }

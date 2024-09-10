@@ -47,7 +47,7 @@ namespace Gumball
         
         private void UpdateSpeedLabel()
         {
-            float speedLimitLocalised = UnitOfSpeedSetting.UseMiles ? SpeedUtils.FromKphToMph(speedLimitKmh) : speedLimitKmh;
+            float speedLimitLocalised = UnitOfSpeedSetting.UseMiles ? SpeedUtils.FromKmToMiles(speedLimitKmh) : speedLimitKmh;
             speedLabel.text = $"{Mathf.RoundToInt(speedLimitLocalised)}";
         }
         
