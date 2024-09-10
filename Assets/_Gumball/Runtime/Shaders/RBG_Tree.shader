@@ -542,7 +542,7 @@ Shader "RBG/Tree"
 
 				float3 BaseColor = temp_output_38_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = ( temp_output_38_0 * ( 0.5 * ase_lightColor.a ) ).rgb;
+				float3 Emission = ( temp_output_38_0 * ( 1.0 * ase_lightColor.a ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -1658,7 +1658,7 @@ Shader "RBG/Tree"
 				
 
 				float3 BaseColor = temp_output_38_0.rgb;
-				float3 Emission = ( temp_output_38_0 * ( 0.5 * ase_lightColor.a ) ).rgb;
+				float3 Emission = ( temp_output_38_0 * ( 1.0 * ase_lightColor.a ) ).rgb;
 				float Alpha = tex2DNode1.a;
 				float AlphaClipThreshold = _Clip;
 
@@ -2644,7 +2644,7 @@ Shader "RBG/Tree"
 
 				float3 BaseColor = temp_output_38_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = ( temp_output_38_0 * ( 0.5 * ase_lightColor.a ) ).rgb;
+				float3 Emission = ( temp_output_38_0 * ( 1.0 * ase_lightColor.a ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -3273,7 +3273,7 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;169;1792.34,191.996;Float;F
 Node;AmplifyShaderEditor.RangedFloatNode;110;1302.877,543.2866;Inherit;False;Property;_Clip;Clip;2;0;Create;True;0;0;0;False;0;False;0.7;0.7;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;185;1284.279,290.5935;Inherit;False;Constant;_Float0;Float 0;5;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.LightColorNode;187;826.91,376.5799;Inherit;False;0;3;COLOR;0;FLOAT3;1;FLOAT;2
-Node;AmplifyShaderEditor.RangedFloatNode;189;840.9844,205.5287;Inherit;False;Constant;_Float1;Float 1;3;0;Create;True;0;0;0;False;0;False;0.5;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;189;840.9844,205.5287;Inherit;False;Constant;_Float1;Float 1;3;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;192;1059.326,315.731;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;191;1203.326,147.731;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
 WireConnection;38;0;37;0
@@ -3290,4 +3290,4 @@ WireConnection;192;1;187;2
 WireConnection;191;0;38;0
 WireConnection;191;1;192;0
 ASEEND*/
-//CHKSM=2E9E5D2E5E9D30B2FCF16B085E4F1F4E59882D09
+//CHKSM=D4676F027FA270CDBC2A0CE767BFC145542AE8D4
