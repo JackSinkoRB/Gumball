@@ -37,7 +37,7 @@ namespace Gumball
             ALL_WHEEL_DRIVE
         }
 
-        private const float dumbDistance = 150;
+        private const float dumbDistance = 50;
         private const float timeBetweenCornerChecksWhenDumb = 1;
         
         [Header("Details")]
