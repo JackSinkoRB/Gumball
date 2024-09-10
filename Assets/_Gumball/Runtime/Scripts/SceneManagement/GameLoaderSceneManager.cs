@@ -32,7 +32,7 @@ namespace Gumball
             Loading_mainscene,
             Loading_vehicle,
             Loading_avatars,
-            Loading_vehicle_and_drivers,
+            Setup_vehicle_and_drivers,
             Connecting_to_PlayFab,
             Initialising_Unity_services,
         }
@@ -90,6 +90,8 @@ namespace Gumball
             PlayFabManager.Initialise();
             //start loading unity services (async)
             TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
+            TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver());
+            TrackedCoroutine coDriverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnCoDriver());
             
             stopwatch.Restart();
             currentStage = Stage.Initialising_parts;
@@ -112,11 +114,10 @@ namespace Gumball
             Quaternion carStartingRotation = Quaternion.Euler(Vector3.zero);
             TrackedCoroutine carLoadCoroutine = new TrackedCoroutine(WarehouseManager.Instance.SpawnSavedCar(carStartingPosition, carStartingRotation, (car) => WarehouseManager.Instance.SetCurrentCar(car)));
             
-            currentStage = Stage.Loading_avatars;
-            TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation));
-            TrackedCoroutine coDriverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnCoDriver(MainSceneManager.Instance.CoDriverStandingPosition, MainSceneManager.Instance.CoDriverStandingRotation));
+            currentStage = Stage.Setup_vehicle_and_drivers;
+            AvatarManager.Instance.DriverAvatar.Teleport(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation);
+            AvatarManager.Instance.CoDriverAvatar.Teleport(MainSceneManager.Instance.CoDriverStandingPosition, MainSceneManager.Instance.CoDriverStandingRotation);
             
-            currentStage = Stage.Loading_vehicle_and_drivers;
             yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying && !coDriverAvatarLoadCoroutine.IsPlaying);
             GlobalLoggers.LoadingLogger.Log($"Vehicle and driver loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
