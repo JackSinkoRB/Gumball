@@ -289,6 +289,10 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 323937445240617731, guid: 11193eb2b006daa4580cb2e91b21e7e6,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7618985398445653889}
     - targetCorrespondingSourceObject: {fileID: 2206643340151679107, guid: 11193eb2b006daa4580cb2e91b21e7e6,
         type: 3}
       insertIndex: -1
@@ -323,8 +327,68 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 14, y: 45.108166, z: 1.718583}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 14, y: 45.108166, z: 0.40570602}
+  m_Center: {x: 0, y: 2.2231278e-15, z: 0.6564386}
+--- !u!1 &3940118037093271447 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 323937445240617731, guid: 11193eb2b006daa4580cb2e91b21e7e6,
+    type: 3}
+  m_PrefabInstance: {fileID: 3661645408432454804}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7618985398445653889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3940118037093271447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ignoreAtRuntime: 0
+  loadSeparately: 1
+  hideWhenFarAway: 1
+  alwaysGrounded: 0
+  keepAtSpecificDistanceFromRoad: 0
+  distanceFromRoad: 10
+  flattenTerrain: 1
+  colliderToFlattenTo: {fileID: 472340313255673213}
+  flattenTerrainBlendDistance: 20
+  flattenTerrainBlendCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  colourTerrain: 0
+  colorModifier:
+    colliderToColourAround: {fileID: 0}
+    useColor: 0
+    color: {r: 1, g: 0, b: 0, a: 0.5}
+    useAlpha: 0
+    alpha: 0
+  chunkBelongsTo: {fileID: 0}
+  lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!4 &4460196226494471469 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1095795070096105913, guid: 11193eb2b006daa4580cb2e91b21e7e6,

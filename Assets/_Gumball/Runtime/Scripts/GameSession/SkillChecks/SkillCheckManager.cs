@@ -38,6 +38,9 @@ namespace Gumball
             DisableUI();
 
             currentPoints = 0;
+            slipStream.ResetSessionPoints();
+            nearMiss.ResetSessionPoints();
+            airTime.ResetSessionPoints();
         }
 
         public void AddPoints(float points)

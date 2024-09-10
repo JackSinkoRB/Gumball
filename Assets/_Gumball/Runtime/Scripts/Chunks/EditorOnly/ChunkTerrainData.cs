@@ -52,15 +52,15 @@ namespace Gumball
         public ChunkGrid GridLowLOD { get; private set; }
         public ChunkGrid Grid { get; private set; }
 
-        public Dictionary<Chunk.TerrainLOD, GameObject> Create(Chunk chunkToUse)
+        public Dictionary<Chunk.ChunkLOD, GameObject> Create(Chunk chunkToUse)
         {
             chunk = chunkToUse;
             UpdateGrid();
 
-            Dictionary<Chunk.TerrainLOD, GameObject> terrains = new()
+            Dictionary<Chunk.ChunkLOD, GameObject> terrains = new()
             {
-                [Chunk.TerrainLOD.LOW] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.LOW),
-                [Chunk.TerrainLOD.HIGH] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.HIGH)
+                [Chunk.ChunkLOD.LOW] = GenerateTerrainMeshFromGrid(Chunk.ChunkLOD.LOW),
+                [Chunk.ChunkLOD.HIGH] = GenerateTerrainMeshFromGrid(Chunk.ChunkLOD.HIGH)
             };
             
             return terrains;
@@ -72,9 +72,9 @@ namespace Gumball
             Grid = new ChunkGrid(chunk, resolution, widthAroundRoad);
         }
         
-        private GameObject GenerateTerrainMeshFromGrid(Chunk.TerrainLOD lod)
+        private GameObject GenerateTerrainMeshFromGrid(Chunk.ChunkLOD lod)
         {
-            ChunkGrid grid = lod == Chunk.TerrainLOD.HIGH ? Grid : GridLowLOD;
+            ChunkGrid grid = lod == Chunk.ChunkLOD.HIGH ? Grid : GridLowLOD;
             
             //create the gameobject
             GameObject terrain = new GameObject($"Terrain-{lod.ToString()}");
@@ -129,7 +129,7 @@ namespace Gumball
             AssetDatabase.SaveAssets();
 
             //add a collider
-            if (lod == Chunk.TerrainLOD.HIGH)
+            if (lod == Chunk.ChunkLOD.HIGH)
                 terrain.AddComponent<MeshCollider>().sharedMesh = newMesh;
             
             return terrain;
