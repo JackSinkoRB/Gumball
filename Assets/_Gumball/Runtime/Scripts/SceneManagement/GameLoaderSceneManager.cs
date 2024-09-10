@@ -84,6 +84,12 @@ namespace Gumball
             singletonScriptableHandles = LoadSingletonScriptables();
             yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete());
             GlobalLoggers.LoadingLogger.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+
+            currentStage = Stage.Starting_async_loading;
+            //start loading playfab (async)
+            PlayFabManager.Initialise();
+            //start loading unity services (async)
+            TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
             
             stopwatch.Restart();
             currentStage = Stage.Initialising_parts;
@@ -93,13 +99,6 @@ namespace Gumball
                                              && !initialiseSubParts.IsPlaying);
             GlobalLoggers.LoadingLogger.Log($"Parts initialisation complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
-            currentStage = Stage.Starting_async_loading;
-            //start loading playfab (async)
-            PlayFabManager.Initialise();
-
-            //start loading unity services (async)
-            TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
-            
             GlobalLoggers.LoadingLogger.Log($"Starting to load {SceneManager.MainSceneAddress} async...");
             stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
