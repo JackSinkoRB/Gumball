@@ -38,7 +38,7 @@ namespace Gumball
                 coDriverAvatar.gameObject.SetActive(!hide);
         }
         
-        public IEnumerator SpawnDriver(Vector3 position, Quaternion rotation)
+        public IEnumerator SpawnDriver(Vector3 position = default, Quaternion rotation = default)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(avatarPrefab);
@@ -57,7 +57,7 @@ namespace Gumball
             GlobalLoggers.AvatarLogger.Log($"Driver avatar loading took {stopwatch.Elapsed.ToPrettyString(true)}");
         }
         
-        public IEnumerator SpawnCoDriver(Vector3 position, Quaternion rotation)
+        public IEnumerator SpawnCoDriver(Vector3 position = default, Quaternion rotation = default)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(avatarPrefab);
