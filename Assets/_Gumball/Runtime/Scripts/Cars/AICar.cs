@@ -1431,7 +1431,7 @@ namespace Gumball
         {
             Rigidbody.drag = dragWhenBraking;
             
-            foreach (WheelCollider wheelCollider in AllWheelColliders)
+            foreach (WheelCollider wheelCollider in FrontWheelColliders)
             {
                 wheelCollider.brakeTorque = BrakeTorque;
             }
