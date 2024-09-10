@@ -37,7 +37,7 @@ namespace Gumball
             ALL_WHEEL_DRIVE
         }
 
-        private const float dumbDistance = 150;
+        private const float dumbDistance = 50;
         private const float timeBetweenCornerChecksWhenDumb = 1;
         
         [Header("Details")]
@@ -437,8 +437,10 @@ namespace Gumball
             CachePoweredWheels();
             InitialiseSize();
             CheckToLockRigidbodyRotation();
-            
-            this.PerformAfterFixedUpdate(UpdateWheelMeshes); //update the wheels in case the cars spawns too far away from the update radius
+
+            //set the wheel mesh positions to match the colliders
+            for (int wheelIndex = 0; wheelIndex < AllWheelColliders.Length; wheelIndex++)
+                AllWheelMeshes[wheelIndex].transform.position = AllWheelColliders[wheelIndex].transform.position;
         }
 
         /// <summary>
