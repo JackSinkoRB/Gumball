@@ -292,6 +292,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4894057695564345657}
+  - component: {fileID: 5700840298833935705}
   m_Layer: 0
   m_Name: Traffic_Scooter
   m_TagString: Untagged
@@ -316,6 +317,21 @@ Transform:
   - {fileID: 3063997429573118429}
   m_Father: {fileID: 3261763503728798085}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5700840298833935705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5233463313409600387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89a96073c2168b64c9c7614f74996df4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  renderersCached:
+  - {fileID: 8443697050513836531}
+  - {fileID: 831041366623140569}
 --- !u!1 &5746463382793723832
 GameObject:
   m_ObjectHideFlags: 0
@@ -642,7 +658,11 @@ PrefabInstance:
     - {fileID: 4742473837712756890, guid: e235eadf94f44c7458e57e4d61527451, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e235eadf94f44c7458e57e4d61527451,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1331143408282960562}
   m_SourcePrefab: {fileID: 100100000, guid: e235eadf94f44c7458e57e4d61527451, type: 3}
 --- !u!23 &2568962211099713297 stripped
 MeshRenderer:
@@ -668,6 +688,27 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 5455736006044370328}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5149799292677421257 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: e235eadf94f44c7458e57e4d61527451,
+    type: 3}
+  m_PrefabInstance: {fileID: 5455736006044370328}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1331143408282960562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5149799292677421257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89a96073c2168b64c9c7614f74996df4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  renderersCached:
+  - {fileID: 2568962211099713297}
+  - {fileID: 3380193901950243069}
 --- !u!4 &5493287088548225651 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e235eadf94f44c7458e57e4d61527451,
@@ -850,7 +891,7 @@ PrefabInstance:
     - target: {fileID: 3530765675035934667, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.948
+      value: -0.614
       objectReference: {fileID: 0}
     - target: {fileID: 3530765675035934667, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
@@ -1249,6 +1290,7 @@ PrefabInstance:
       objectReference: {fileID: 331222121091540063}
     m_RemovedComponents:
     - {fileID: 8222543484109432132, guid: 4b3374a17dbc5b440ab459d25f69ea0c, type: 3}
+    - {fileID: 241823489512647594, guid: 4b3374a17dbc5b440ab459d25f69ea0c, type: 3}
     m_RemovedGameObjects:
     - {fileID: 9063276329786421939, guid: 4b3374a17dbc5b440ab459d25f69ea0c, type: 3}
     - {fileID: 3443403425826948743, guid: 4b3374a17dbc5b440ab459d25f69ea0c, type: 3}
