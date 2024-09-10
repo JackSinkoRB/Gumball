@@ -30,6 +30,11 @@ namespace Gumball
 
         public abstract void CheckIfPerformed();
 
+        public void ResetSessionPoints()
+        {
+            pointsSinceSessionStart = 0;
+        }
+        
         protected virtual void OnPerformed()
         {
             float pointsToAdd = GetPointsToAddWhenPerformed();
