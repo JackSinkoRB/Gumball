@@ -259,7 +259,8 @@ MonoBehaviour:
   distanceFromRoadSplineToResetPlayer: 50
   nextRacingLineInterpolateDistance: 65
   terrainHighLODDistance: 500
-  currentLOD: 1
+  currentTerrainLOD: 0
+  currentChildMeshLOD: 0
   terrainHighLOD: {fileID: 5975583160931873043}
   terrainLowLOD: {fileID: 8165324746815480322}
   isFullyLoaded: 0
@@ -3610,6 +3611,7 @@ MonoBehaviour:
     vertexColors: []
   chunkDetector: {fileID: 1237989935863111040}
   splineLengthCached: 100
+  childMeshRenderers: []
   splineSampleCollection:
     samples:
     - position: {x: 0, y: 0, z: 0}
@@ -9592,7 +9594,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7478321496233485891}
-  m_Mesh: {fileID: 4300000, guid: 0ffbb80da4590a64b9d41883a2ae6993, type: 2}
+  m_Mesh: {fileID: 4300000, guid: 6bae9c6dc35fddc42a72f3d0421835ad, type: 2}
 --- !u!23 &3098696658456255400
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -9706,7 +9708,7 @@ MonoBehaviour:
   _uvOffset: {x: 0, y: 0}
   _uvRotation: 0
   _meshIndexFormat: 0
-  _bakedMesh: {fileID: 4300000, guid: 0ffbb80da4590a64b9d41883a2ae6993, type: 2}
+  _bakedMesh: {fileID: 4300000, guid: 6bae9c6dc35fddc42a72f3d0421835ad, type: 2}
   colliderUpdateRate: 0.2
   _channels:
   - name: Dirt_Edge_Inside
@@ -10023,7 +10025,7 @@ MonoBehaviour:
     _overrideNormal: 0
     _customNormal: {x: 0, y: 1, z: 0}
     _type: 0
-    _count: 10
+    _count: 8
     _autoCount: 0
     _spacing: 0
     _randomRotation: 0
@@ -10034,7 +10036,7 @@ MonoBehaviour:
     _maxOffset: {x: 0, y: 0}
     _randomScale: 0
     _uniformRandomScale: 0
-    _minScale: {x: 2.27, y: 1, z: 1}
+    _minScale: {x: 4, y: 1, z: 1}
     _maxScale: {x: 1, y: 1, z: 1}
     _overrideMaterialID: 0
     _targetMaterialID: 1
@@ -10134,7 +10136,7 @@ MonoBehaviour:
     _overrideNormal: 0
     _customNormal: {x: 0, y: 1, z: 0}
     _type: 0
-    _count: 10
+    _count: 8
     _autoCount: 0
     _spacing: 0
     _randomRotation: 0
@@ -10145,7 +10147,7 @@ MonoBehaviour:
     _maxOffset: {x: 0, y: 0}
     _randomScale: 0
     _uniformRandomScale: 0
-    _minScale: {x: 2.27, y: 1, z: 1}
+    _minScale: {x: 4, y: 1, z: 1}
     _maxScale: {x: 1, y: 1, z: 1}
     _overrideMaterialID: 1
     _targetMaterialID: 0
@@ -10166,7 +10168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   perSceneUniqueness: 0
-  uniqueID: 41bf376a-4d96-4993-8b25-46cc3bebf138
+  uniqueID: bf3d03bb-bf72-490d-aa85-c100f0545769
   isPersistent: 0
 --- !u!1 &7701108178527010836
 GameObject:
