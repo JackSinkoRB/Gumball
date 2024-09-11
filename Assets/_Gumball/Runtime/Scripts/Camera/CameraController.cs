@@ -30,6 +30,9 @@ namespace Gumball
 
         private void Update()
         {
+            if (Time.timeScale == 0)
+                return; //don't update cameras while frozen
+            
             timeSinceStateChange += Time.deltaTime;
             
             SetPositionAndRotation();
