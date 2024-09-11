@@ -63,16 +63,20 @@ namespace Gumball
         [Tooltip("X = width - Y = height - Z = depth")]
         [SerializeField] private Vector3 lookAtOffset = new(0, 1, 0);
         
-        [Header("NOS")]
-        [SerializeField] private float nosFovTweenDuration = 1.5f;
-        [SerializeField] private Ease nosFovTweenEase = Ease.OutBack;
-        [Space(5)]
+        [Header("Shakes")]
         [SerializeField] private CameraShakeInstance nosShake;
+        [Space(5)]
+        [SerializeField] private MinMaxFloat speedForCameraShakeKmh = new(60, 150);
         [SerializeField] private CameraShakeInstance speedShake;
-        
-        private float initialFov;
-        private Tween fovTween;
 
+        [Header("FOV")]
+        [SerializeField] private MinMaxFloat desiredFOVBasedOnSpeed = new(55, 95);
+        [SerializeField] private float speedForMaxFOVKmh = 100;
+        [SerializeField] private float fovSpeedBraking = 0.7f;
+        [SerializeField] private float fovSpeedAccelerating = 2;
+        [SerializeField] private float fovSpeedNos = 4;
+        [SerializeField] private float additionalFovWhenUsingNos = 20;
+        
         [Header("Collisions")]
         [SerializeField] private float minCollisionMagnitudeForShake;
         [SerializeField] private float collisionMagnitudeForMaxShake;
@@ -80,17 +84,10 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected Transform otherTarget;
-        
+
         private Transform target => otherTarget != null ? otherTarget : WarehouseManager.Instance.CurrentCar.transform;
         private Rigidbody carRigidbody => WarehouseManager.Instance.CurrentCar.Rigidbody;
         private Vector3 pivotPoint => target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
-
-        protected override void Initialise()
-        {
-            base.Initialise();
-            
-            initialFov = Camera.main.fieldOfView;
-        }
         
         public override void OnSetCurrent(CameraController controller)
         {
@@ -108,8 +105,6 @@ namespace Gumball
             DoCameraShake();
         }
         
-        [SerializeField] private MinMaxFloat speedForCameraShakeKmh = new(60, 150);
-
         private void DoCameraShake()
         {
             if (WarehouseManager.Instance.CurrentCar.NosManager.IsActivated)
@@ -133,13 +128,6 @@ namespace Gumball
             speedShake.SetMagnitude(speedPercent);
         }
 
-        [SerializeField] private MinMaxFloat desiredFOVBasedOnSpeed = new(55, 95);
-        [SerializeField] private float speedForMaxFOVKmh = 100;
-        [SerializeField] private float fovSpeedBraking = 0.7f;
-        [SerializeField] private float fovSpeedAccelerating = 2;
-        [SerializeField] private float fovSpeedNos = 4;
-        [SerializeField] private float additionalFovWhenUsingNos = 20;
-        
         private float GetDesiredFOV()
         {
             if (WarehouseManager.Instance.CurrentCar.IsBraking)
@@ -166,11 +154,8 @@ namespace Gumball
             WarehouseManager.Instance.CurrentCar.onGearChanged -= OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter -= OnCollisionEnter;
 
-            //reset FOV in case it was in progress
-            fovTween?.Kill();
-            Camera.main.fieldOfView = initialFov;
-            
             nosShake.Kill();
+            speedShake.Kill();
         }
 
         public override void Snap()
