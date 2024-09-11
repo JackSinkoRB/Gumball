@@ -19,17 +19,8 @@ namespace Gumball
             [SerializeField] private List<Transform> transformsToEnable;
             
             public float DistanceToActivate => distanceToActivate;
+            public List<Transform> TransformsToEnable => transformsToEnable;
             
-            public void Enable(bool enable)
-            {
-                foreach (Transform transform in transformsToEnable)
-                {
-                    if (transform == null)
-                        continue;
-                    transform.gameObject.SetActive(enable);
-                }
-            }
-
             public void SetDistance(float distance)
             {
                 distanceToActivate = distance;
@@ -94,9 +85,25 @@ namespace Gumball
             
             currentLevel = desiredLevel;
 
-            //enable only the selected level
-            foreach (LODLevel lod in lods)
-                lod.Enable(lod.Equals(desiredLevel));
+            //enable only the selected level (in reverse order so it doesn't disable shared transforms)
+            for (int i = lods.Count - 1; i >= 0; i--)
+            {
+                LODLevel lod = lods[i];
+                bool isCurrentLevel = lod.Equals(desiredLevel);
+                
+                //enable/disable all the transforms
+                foreach (Transform lodTransform in lod.TransformsToEnable)
+                {
+                    //don't disable transforms that are being enabled by the current level
+                    if (!isCurrentLevel && currentLevel.TransformsToEnable.Contains(lodTransform))
+                        continue;
+                    
+                    if (lodTransform == null)
+                        continue;
+                    
+                    lodTransform.gameObject.SetActive(isCurrentLevel);
+                }
+            }
             
             Debug.Log($"Set LOD for {gameObject.name} to {desiredLevel}");
         }
