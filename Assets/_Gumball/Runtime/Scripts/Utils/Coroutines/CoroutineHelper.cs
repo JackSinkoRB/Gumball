@@ -30,7 +30,7 @@ namespace Gumball
         public static void StartCoroutineOnCurrentScene(IEnumerator routine)
         {
             string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-            if (!sceneCoroutineInstances.ContainsKey(sceneName))
+            if (!sceneCoroutineInstances.ContainsKey(sceneName) || sceneCoroutineInstances[sceneName] == null)
                 sceneCoroutineInstances[sceneName] = new GameObject($"CoroutineHelper-{sceneName}").AddComponent<CoroutineHelperInstance>();
             
             sceneCoroutineInstances[sceneName].StartCoroutine(routine);
