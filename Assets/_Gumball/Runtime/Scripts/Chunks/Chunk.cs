@@ -399,13 +399,15 @@ namespace Gumball
         }
         
 #if UNITY_EDITOR
+        private const string pathToBarrierMaterial = "Slippery";
+        
         public void EnsureBarriersHaveCorrectPhysicsMaterial()
         {
             foreach (Collider childCollider in transform.GetComponentsInAllChildren<Collider>())
             {
                 if (childCollider.gameObject.layer == (int)LayersAndTags.Layer.Barrier)
                 {
-                    childCollider.sharedMaterial = ChunkManager.Instance.SlipperyPhysicsMaterial;
+                    childCollider.sharedMaterial = Resources.Load<PhysicMaterial>(pathToBarrierMaterial);
                     EditorUtility.SetDirty(childCollider);
                 }
             }
