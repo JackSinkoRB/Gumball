@@ -95,6 +95,8 @@ namespace Gumball
             
             WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter += OnCollisionEnter;
+            
+            Snap();
         }
 
         public override void UpdateWhenCurrent()
