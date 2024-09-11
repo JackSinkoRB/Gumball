@@ -419,7 +419,10 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(true); //auto accelerate
+            
+            //auto accelerate (for non-buttons layout)
+            DrivingControlLayoutManager layoutManager = PanelManager.GetPanel<DrivingControlsPanel>().LayoutManager;
+            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(layoutManager.CurrentLayout.AutoAccelerate);
         }
 
         protected virtual void OnSessionStart()
