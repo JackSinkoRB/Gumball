@@ -35,7 +35,14 @@ namespace Gumball
                     PanelManager.GetPanel<PlayerStatsPanel>().Show();
                 });
         }
-        
+
+        protected override void Initialise()
+        {
+            base.Initialise();
+            
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
+        }
+
         public static void LoadMainScene()
         {
             CoroutineHelper.Instance.StartCoroutine(LoadMainSceneIE());
