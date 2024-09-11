@@ -36,7 +36,6 @@ namespace Gumball
 
         [SerializeField] private ChunkTrafficManager trafficManager;
         [SerializeField] private ChunkPowerpoleManager powerpoleManager;
-        [SerializeField] private Collider[] barriers;
         
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, onlyShowWhenDefaultValue: true, inverse: true)]
@@ -134,8 +133,6 @@ namespace Gumball
         {
             splineComputer.updateMode = SplineComputer.UpdateMode.None; //make sure the spline computer doesn't update automatically at runtime
             splineComputer.sampleMode = SplineComputer.SampleMode.Uniform;
-            
-            InitialiseBarriers();
         }
 
         private void LateUpdate()
@@ -395,28 +392,27 @@ namespace Gumball
             float distanceToEndSqr = Vector3.SqrMagnitude(carPosition - LastSample.position);
             return distanceToStartSqr < distanceToEndSqr ? distanceToStartSqr : distanceToEndSqr;
         }
-        
-        private void InitialiseBarriers()
-        {
-            foreach (Collider barrier in barriers)
-            {
-                if (barrier == null)
-                {
-                    Debug.LogWarning($"Chunk {name} has a barrier that is null.");
-                    continue;
-                }
-                
-                barrier.gameObject.layer = (int) LayersAndTags.Layer.Barrier;
-                barrier.sharedMaterial = ChunkManager.Instance.SlipperyPhysicsMaterial;
-            }
-        }
-        
+
         public void CalculateSplineLength()
         {
             splineLengthCached = splineComputer.CalculateLength();
         }
         
 #if UNITY_EDITOR
+        private const string pathToBarrierMaterial = "Slippery";
+        
+        public void EnsureBarriersHaveCorrectPhysicsMaterial()
+        {
+            foreach (Collider childCollider in transform.GetComponentsInAllChildren<Collider>())
+            {
+                if (childCollider.gameObject.layer == (int)LayersAndTags.Layer.Barrier)
+                {
+                    childCollider.sharedMaterial = Resources.Load<PhysicMaterial>(pathToBarrierMaterial);
+                    EditorUtility.SetDirty(childCollider);
+                }
+            }
+        }
+        
         private void OnDrawGizmos()
         {
             //draw the interpolation distance
