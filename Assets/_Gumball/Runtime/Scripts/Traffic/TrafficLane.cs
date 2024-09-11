@@ -123,7 +123,7 @@ namespace Gumball
             }
         }
 
-        public float GetDistanceFromCenter(AICar playerCar)
+        public float GetDistanceFromCenter(AICar car)
         {
             //if a path,
 
@@ -132,10 +132,13 @@ namespace Gumball
 
             if (type == LaneType.CUSTOM_SPLINE)
             {
+                if (path == null)
+                    throw new NullReferenceException($"The traffic has an error because a TrafficManager in a chunk has a lane with a CUSTOM_SPLINE path, but the path is not assigned.");
+                
                 //get the closest sample on the path to the player
-                var (closestSample, closestSampleDistance) = path.SampleCollection.GetClosestSampleOnSpline(playerCar.transform.position);
+                var (closestSample, closestSampleDistance) = path.SampleCollection.GetClosestSampleOnSpline(car.transform.position);
                 //then get the distance to the closest sample on the chunk spline
-                var (closestSampleOnChunk, closestSampleDistanceOnChunk) = playerCar.LastKnownChunk.GetClosestSampleOnSpline(closestSample.position);
+                var (closestSampleOnChunk, closestSampleDistanceOnChunk) = car.LastKnownChunk.GetClosestSampleOnSpline(closestSample.position);
                 return closestSampleDistanceOnChunk;
             }
 

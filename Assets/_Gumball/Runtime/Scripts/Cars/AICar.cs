@@ -327,7 +327,7 @@ namespace Gumball
         private Vector3 cornerTargetPosition;
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion, SplineSample)? targetPos;
-        private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
+        private readonly RaycastHit[] groundedHitsCached = new RaycastHit[10];
         private float timeSinceLastCornerCheck;
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
@@ -637,6 +637,10 @@ namespace Gumball
                 Debug.LogWarning($"Could not ground car {gameObject.name} because there is no ground above or below.");
                 return;
             }
+            
+            //sort so the tallest hit is first
+            Array.Sort(groundedHitsCached, 0, numberOfHitsDown, Comparer<RaycastHit>.Create(
+                (hit1, hit2) => hit2.point.y.CompareTo(hit1.point.y)));
 
             Vector3 offset = groundedHitsCached[0].point - transform.position;
 
@@ -776,6 +780,9 @@ namespace Gumball
         
         private void CheckIfDumb()
         {
+            if (IsPlayer)
+                return; //don't ever set player dumb
+            
             if (WarehouseManager.Instance.CurrentCar == null)
             {
                 SetDumb(true);

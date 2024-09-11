@@ -23,7 +23,6 @@ namespace Gumball
         public const float GlobalChunkLoadDistance = Mathf.Infinity;
         private const float timeBetweenLoadingChecks = 0.5f;
 
-        [SerializeField] private PhysicMaterial slipperyPhysicsMaterial;
         [SerializeField] private Material terrainMaterial;
         
         [Header("Debugging")]
@@ -52,7 +51,6 @@ namespace Gumball
         private readonly List<TrackedCoroutine> chunksBeforeLoading = new();
         private readonly List<TrackedCoroutine> chunksAfterLoading = new();
 
-        public PhysicMaterial SlipperyPhysicsMaterial => slipperyPhysicsMaterial;
         public Material TerrainMaterial => terrainMaterial;
         
         public bool HasLoaded;

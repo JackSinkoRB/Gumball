@@ -234,9 +234,21 @@ namespace Gumball
                     Debug.LogError($"The traffic spawn position in {chunk.name} at index {index} is invalid. There is no lanes in direction {spawnPosition.LaneDirection.ToString()}.");
                     continue;
                 }
-                
-                TrafficLane lane = spawnPosition.LaneDirection == LaneDirection.FORWARD ? lanesForward[spawnPosition.LaneIndex] : lanesBackward[spawnPosition.LaneIndex];
-                
+
+                TrafficLane[] lanes = spawnPosition.LaneDirection == LaneDirection.FORWARD ? lanesForward : lanesBackward;
+                int finalLaneIndex = spawnPosition.LaneIndex;
+                if (finalLaneIndex >= lanes.Length)
+                {
+                    Debug.LogError($"The traffic spawn position at index {index} is invalid. There are no lanes at index {spawnPosition.LaneIndex} in chunk {chunk.name}.");
+                    if (lanes.Length == 0)
+                        continue;
+
+                    finalLaneIndex = lanes.Length - 1; //just use the last lane
+                    Debug.Log($" - using the last lane in the chunk instead ({finalLaneIndex}).");
+                }
+
+                TrafficLane lane = lanes[finalLaneIndex];
+
                 if (!TrySpawnCarInLane(lane, spawnPosition.LaneDirection))
                     GlobalLoggers.AICarLogger.Log($"Could not spawn traffic car at index {index} because there was no room.");
             }
