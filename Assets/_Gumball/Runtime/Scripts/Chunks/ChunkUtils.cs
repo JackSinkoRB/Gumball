@@ -344,6 +344,8 @@ namespace Gumball
 
             //calculate the spline length
             runtimeInstanceChunk.CalculateSplineLength();
+
+            runtimeInstanceChunk.EnsureBarriersHaveCorrectPhysicsMaterial();
             
             //save the runtime chunk asset
             string runtimeChunkPath = GetRuntimeChunkPath(prefab);

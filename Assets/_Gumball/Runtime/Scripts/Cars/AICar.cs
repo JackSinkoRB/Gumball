@@ -191,11 +191,15 @@ namespace Gumball
         [SerializeField] private float angularDragWhenHandbraking = 6;
         
         [Header("Movement")]
-        [SerializeField, ReadOnly] private float speed;
+        [SerializeField, ReadOnly] private float speedKmh;
+        [SerializeField, ReadOnly] private float accelerationKmh;
+        private float speedLastFrameKmh;
         private bool wasMovingLastFrame;
         private const float stationarySpeed = 2;
         
-        public bool IsStationary => speed < stationarySpeed && !isAccelerating;
+        public bool IsStationary => speedKmh < stationarySpeed && !isAccelerating;
+        public float SpeedKmh => speedKmh;
+        public float AccelerationKmh => accelerationKmh;
 
         [Header("Engine & Drivetrain")]
         [SerializeField] private float[] gearRatios = { -1.5f, 2.66f, 1.78f, 1.3f, 1, 0.7f, 0.5f };
@@ -327,7 +331,7 @@ namespace Gumball
         private Vector3 cornerTargetPosition;
         private int lastFrameChunkWasCached = -1;
         private (Chunk, Vector3, Quaternion, SplineSample)? targetPos;
-        private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
+        private readonly RaycastHit[] groundedHitsCached = new RaycastHit[10];
         private float timeSinceLastCornerCheck;
         
         private float timeSinceCollision => Time.time - timeOfLastCollision;
@@ -339,7 +343,6 @@ namespace Gumball
         public bool IsPlayer => gameObject.layer == (int)LayersAndTags.Layer.PlayerCar;
         
         public Rigidbody Rigidbody => GetComponent<Rigidbody>();
-        public float Speed => speed;
         public float DesiredSpeed => tempSpeedLimit >= 0 ? tempSpeedLimit : (isReversing ? maxReverseSpeed : (obeySpeedLimit && CurrentChunk != null ? CurrentChunk.TrafficManager.SpeedLimitKmh : Mathf.Infinity));
         
         public bool IsInAir
@@ -637,6 +640,10 @@ namespace Gumball
                 Debug.LogWarning($"Could not ground car {gameObject.name} because there is no ground above or below.");
                 return;
             }
+            
+            //sort so the tallest hit is first
+            Array.Sort(groundedHitsCached, 0, numberOfHitsDown, Comparer<RaycastHit>.Create(
+                (hit1, hit2) => hit2.point.y.CompareTo(hit1.point.y)));
 
             Vector3 offset = groundedHitsCached[0].point - transform.position;
 
@@ -670,8 +677,10 @@ namespace Gumball
         {
             if (!autoDrive)
                 CheckIfStuck();
+
+            CalculateAcceleration();
         }
-        
+
         private void FixedUpdate()
         {
             if (!isInitialised)
@@ -776,6 +785,9 @@ namespace Gumball
         
         private void CheckIfDumb()
         {
+            if (IsPlayer)
+                return; //don't ever set player dumb
+            
             if (WarehouseManager.Instance.CurrentCar == null)
             {
                 SetDumb(true);
@@ -790,8 +802,6 @@ namespace Gumball
 
         private void Move()
         {
-            speed = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
-
             CheckIfDumb();
             
             TryCreateMovementPathCollider();
@@ -1173,13 +1183,13 @@ namespace Gumball
         private void CheckToAccelerate()
         {
             //don't accelerate if braking
-            if (isBraking && speed > stationarySpeed)
+            if (isBraking && speedKmh > stationarySpeed)
                 isAccelerating = false;
             //don't accelerate if in collision (auto drive only)
             else if (autoDrive && recoveringFromCollision)
                 isAccelerating = false;
             //can't accelerate if above desired speed
-            else if (speed > DesiredSpeed)
+            else if (speedKmh > DesiredSpeed)
                 isAccelerating = false;
             else if (DesiredSpeed == 0)
                 isAccelerating = false;
@@ -1226,11 +1236,11 @@ namespace Gumball
         
         private void CalculateSteerAngle()
         {
-            if (speed <= 0) 
+            if (speedKmh <= 0) 
                 return;
 
             const float speedForMaxAngle = 300;
-            float speedPercent = Mathf.Clamp01(speed / speedForMaxAngle);
+            float speedPercent = Mathf.Clamp01(speedKmh / speedForMaxAngle);
             float maxSteerAngle = autoDrive ? autoDriveMaxSteerAngle : MaxSteerAngleCurve.Evaluate(speedPercent);
 
             if (autoDrive)
@@ -1249,7 +1259,7 @@ namespace Gumball
             
             //set the visual steer angle (same for all front wheels)
             const float minSpeedVisualSteerModifier = 20;
-            float speedModifier = Mathf.Clamp01(speed / minSpeedVisualSteerModifier); //adjust for low speed
+            float speedModifier = Mathf.Clamp01(speedKmh / minSpeedVisualSteerModifier); //adjust for low speed
             visualSteerAngle = Mathf.LerpAngle(visualSteerAngle, desiredSteerAngle, visualSteerSpeed * speedModifier * Time.deltaTime);
         }
 
@@ -1269,7 +1279,7 @@ namespace Gumball
             //is speeding over the desired speed? 
             const float speedingLeewayPercent = 0.05f; //the amount the car can speed past the desired speed before needing to brake
             float speedingLeeway = speedingLeewayPercent * DesiredSpeed;
-            if (autoDrive && speed > DesiredSpeed + speedingLeeway)
+            if (autoDrive && speedKmh > DesiredSpeed + speedingLeeway)
             {
                 speedToBrakeTo = DesiredSpeed;
                 isBraking = true;
@@ -1283,7 +1293,7 @@ namespace Gumball
             }
 
             //brake around corners
-            if (autoDrive && speed > corneringSpeed && corneringSpeed < speedToBrakeTo)
+            if (autoDrive && speedKmh > corneringSpeed && corneringSpeed < speedToBrakeTo)
             {
                 speedToBrakeTo = corneringSpeed;
                 isBraking = true;
@@ -1292,7 +1302,7 @@ namespace Gumball
 
             if (autoDrive && brakeForObstacles && (!isDumb || !IsTraffic))
             {
-                float speedPercent = (speed - speedForBrakingRaycastLength.Min) / (speedForBrakingRaycastLength.Max - speedForBrakingRaycastLength.Min);
+                float speedPercent = (speedKmh - speedForBrakingRaycastLength.Min) / (speedForBrakingRaycastLength.Max - speedForBrakingRaycastLength.Min);
                 float raycastLength = brakingRaycastLength.Min + ((brakingRaycastLength.Max - brakingRaycastLength.Min) * speedPercent);
                 brakeForObstaclesRaycast.SetRaycastLength(raycastLength);
                 
@@ -1312,7 +1322,7 @@ namespace Gumball
             
             if (autoDrive && useObstacleAvoidance && allDirectionsAreBlocked)
             {
-                if (speed > speedToBrakeToIfBlocked && speedToBrakeToIfBlocked < speedToBrakeTo)
+                if (speedKmh > speedToBrakeToIfBlocked && speedToBrakeToIfBlocked < speedToBrakeTo)
                 {
                     speedToBrakeTo = speedToBrakeToIfBlocked;
                     isBraking = true;
@@ -1360,7 +1370,7 @@ namespace Gumball
             
             if (isReversing && !InputManager.Instance.CarInput.Brake.IsPressed)
                 OnStopReversing();
-            if (!isReversing && (IsStationary || speed < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
+            if (!isReversing && (IsStationary || speedKmh < 1 || currentGear == 0) && InputManager.Instance.CarInput.Brake.IsPressed)
                 OnStartReversing();
         }
         
@@ -1465,7 +1475,7 @@ namespace Gumball
             timeSinceLastCornerCheck = 0;
 
             const float min = 2;
-            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speed));
+            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speedKmh));
             float visionDistance = metresPerSecond * cornerReactionTime;
 
             (Chunk, Vector3, Quaternion, SplineSample)? cornerTargetPos = GetPositionAhead(visionDistance, false);
@@ -1730,8 +1740,8 @@ namespace Gumball
                             continue; //don't include if this car is ahead of the other
 
                         const float percentAllowed = 0.1f;
-                        float percentOfSpeed = hitCar.speed * percentAllowed;
-                        bool isGoingSlower = speed < hitCar.speed - percentOfSpeed;
+                        float percentOfSpeed = hitCar.speedKmh * percentAllowed;
+                        bool isGoingSlower = speedKmh < hitCar.speedKmh - percentOfSpeed;
                         if (isGoingSlower)
                             continue;
                     }
@@ -1791,7 +1801,7 @@ namespace Gumball
         private float GetMovementTargetDistance()
         {
             const float min = 2;
-            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speed));
+            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speedKmh));
             return metresPerSecond * predictedPositionReactionTime;
         }
         
@@ -2178,7 +2188,7 @@ namespace Gumball
         private bool ShouldBeStuck()
         {
             const float minSpeedForStuckKmh = 1f;
-            if (speed > minSpeedForStuckKmh)
+            if (speedKmh > minSpeedForStuckKmh)
             {
                 timeAcceleratingSinceMovingSlowly = 0;
                 return false;
@@ -2208,6 +2218,14 @@ namespace Gumball
                 isStuck = false;
             else if (!isStuck && shouldBeStuck)
                 isStuck = true;
+        }
+        
+        private void CalculateAcceleration()
+        {
+            speedKmh = SpeedUtils.FromMsToKmh(Rigidbody.velocity.magnitude);
+            accelerationKmh = speedKmh - speedLastFrameKmh;
+            
+            speedLastFrameKmh = speedKmh;
         }
 
 #if UNITY_EDITOR

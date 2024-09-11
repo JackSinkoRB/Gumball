@@ -31,7 +31,7 @@ namespace Gumball
         public void OnClickContinueButton()
         {
             Hide();
-            CoroutineHelper.Instance.StartCoroutine(GiveRewardsThenExitIE());
+            CoroutineHelper.StartCoroutineOnCurrentScene(GiveRewardsThenExitIE());
         }
 
         private IEnumerator GiveRewardsThenExitIE()
