@@ -33,6 +33,9 @@ namespace Gumball
             timeSinceStateChange += Time.deltaTime;
             
             SetPositionAndRotation();
+            
+            if (currentState != null)
+                currentState.UpdateWhenCurrent();
         }
         
         public CameraTransition GetCurrentTransition()
