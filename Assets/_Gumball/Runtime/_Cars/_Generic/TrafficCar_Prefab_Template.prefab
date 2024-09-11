@@ -648,6 +648,7 @@ MonoBehaviour:
   carPartManager: {fileID: 0}
   bodyPaintModification: {fileID: 0}
   carAudioManager: {fileID: 0}
+  racerIcon: {fileID: 0}
   nosManager: {fileID: 0}
   frontOfCarPosition: {x: 0, y: 1, z: 2}
   carWidth: 2
@@ -682,7 +683,8 @@ MonoBehaviour:
   dragWhenBraking: 1
   dragWhenHandbraking: 0.5
   angularDragWhenHandbraking: 6
-  speed: 0
+  speedKmh: 0
+  accelerationKmh: 0
   gearRatios:
   - -1.5
   - 2.66
@@ -1159,13 +1161,18 @@ MonoBehaviour:
   lods:
   - distanceToActivate: 0
     transformsToEnable:
-    - {fileID: 0}
+    - {fileID: 7790142791568334042}
+    - {fileID: 8435276353931753562}
   - distanceToActivate: 50
     transformsToEnable:
-    - {fileID: 0}
+    - {fileID: 7790142791568334042}
+    - {fileID: 8435276353931753562}
   - distanceToActivate: 100
     transformsToEnable:
-    - {fileID: 0}
+    - {fileID: 7790142791568334042}
+    - {fileID: 8435276353931753562}
+  - distanceToActivate: 700
+    transformsToEnable: []
   currentLevel:
     distanceToActivate: 0
     transformsToEnable: []
