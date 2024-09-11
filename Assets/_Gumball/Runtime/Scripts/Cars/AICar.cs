@@ -776,6 +776,9 @@ namespace Gumball
         
         private void CheckIfDumb()
         {
+            if (IsPlayer)
+                return; //don't ever set player dumb
+            
             if (WarehouseManager.Instance.CurrentCar == null)
             {
                 SetDumb(true);

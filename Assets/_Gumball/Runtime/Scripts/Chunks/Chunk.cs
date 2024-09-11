@@ -318,6 +318,9 @@ namespace Gumball
                 
                 if (childMeshRenderer.gameObject.tag.Equals(LayersAndTags.Tag.DontHideMeshWhenFarAway.ToString()))
                     continue;
+
+                if (!childMeshRenderer.enabled)
+                    continue;
                 
                 hashSet.Add(childMeshRenderer);
             }

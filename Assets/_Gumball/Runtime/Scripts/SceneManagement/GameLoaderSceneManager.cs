@@ -31,7 +31,6 @@ namespace Gumball
             Starting_async_loading,
             Loading_mainscene,
             Loading_vehicle,
-            Loading_avatars,
             Setup_vehicle_and_drivers,
             Connecting_to_PlayFab,
             Initialising_Unity_services,
@@ -90,6 +89,7 @@ namespace Gumball
             PlayFabManager.Initialise();
             //start loading unity services (async)
             TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
+            //start loading avatars
             TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver());
             TrackedCoroutine coDriverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnCoDriver());
             
@@ -115,12 +115,11 @@ namespace Gumball
             TrackedCoroutine carLoadCoroutine = new TrackedCoroutine(WarehouseManager.Instance.SpawnSavedCar(carStartingPosition, carStartingRotation, (car) => WarehouseManager.Instance.SetCurrentCar(car)));
             
             currentStage = Stage.Setup_vehicle_and_drivers;
+            yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying && !coDriverAvatarLoadCoroutine.IsPlaying);
             AvatarManager.Instance.DriverAvatar.Teleport(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation);
             AvatarManager.Instance.CoDriverAvatar.Teleport(MainSceneManager.Instance.CoDriverStandingPosition, MainSceneManager.Instance.CoDriverStandingRotation);
+            GlobalLoggers.LoadingLogger.Log($"Vehicle and driver setup complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             
-            yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying && !coDriverAvatarLoadCoroutine.IsPlaying);
-            GlobalLoggers.LoadingLogger.Log($"Vehicle and driver loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-
             currentStage = Stage.Connecting_to_PlayFab;
             yield return new WaitUntil(() => PlayFabManager.ConnectionStatus != PlayFabManager.ConnectionStatusType.LOADING);
             
