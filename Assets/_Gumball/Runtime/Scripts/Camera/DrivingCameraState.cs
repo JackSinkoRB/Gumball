@@ -180,7 +180,7 @@ namespace Gumball
             if (!offsetIsLocalised)
             {
                 float heightRelativeToCar = target.TransformPoint(offset).y;
-                float heightInterpolated = interpolate ? Mathf.Lerp(controller.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
+                float heightInterpolated = interpolate ? Mathf.Lerp(fakeController.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
                 fakeController.transform.position = target.position.SetY(heightInterpolated) + offset.SetY(0);
             }
             else
