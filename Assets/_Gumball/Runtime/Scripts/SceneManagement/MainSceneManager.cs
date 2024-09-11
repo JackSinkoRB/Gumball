@@ -40,7 +40,8 @@ namespace Gumball
         {
             base.Initialise();
             
-            WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
+            this.PerformAfterTrue(() => WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null, 
+                () => WarehouseManager.Instance.CurrentCar.SetAutoDrive(false));
         }
 
         public static void LoadMainScene()
