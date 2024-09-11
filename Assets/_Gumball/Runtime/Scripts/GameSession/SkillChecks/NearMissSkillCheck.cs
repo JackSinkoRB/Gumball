@@ -41,7 +41,7 @@ namespace Gumball
             if (timeSinceLastCollision < minTimeWithNoCollision)
                 return;
             
-            if (WarehouseManager.Instance.CurrentCar.Speed < minSpeedKmh)
+            if (WarehouseManager.Instance.CurrentCar.SpeedKmh < minSpeedKmh)
                 return;
             
             Vector3 halfExtents = new Vector3(WarehouseManager.Instance.CurrentCar.CarWidth / 2f + maxDistance, 1, WarehouseManager.Instance.CurrentCar.FrontOfCarPosition.z + maxDistance);

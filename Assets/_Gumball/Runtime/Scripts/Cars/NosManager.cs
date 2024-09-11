@@ -77,8 +77,6 @@ namespace Gumball
 
             carBelongsTo.UpdateTorqueCurve(carBelongsTo.NosTorqueAddition);
             
-            ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(true);
-
             onActivate?.Invoke();
         }
         
@@ -93,8 +91,6 @@ namespace Gumball
             IsActivated = false;
             
             carBelongsTo.UpdateTorqueCurve();
-
-            ChunkMapSceneManager.Instance.DrivingCameraController.CurrentDrivingState.EnableNos(false);
 
             onDeactivate?.Invoke();
         }

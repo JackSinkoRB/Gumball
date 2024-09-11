@@ -63,16 +63,20 @@ namespace Gumball
         [Tooltip("X = width - Y = height - Z = depth")]
         [SerializeField] private Vector3 lookAtOffset = new(0, 1, 0);
         
-        [Header("NOS")]
-        [SerializeField] private float nosFov = 75;
-        [SerializeField] private float nosFovTweenDuration = 1.5f;
-        [SerializeField] private Ease nosFovTweenEase = Ease.OutBack;
-        [Space(5)]
+        [Header("Shakes")]
         [SerializeField] private CameraShakeInstance nosShake;
-        
-        private float initialFov;
-        private Tween fovTween;
+        [Space(5)]
+        [SerializeField] private MinMaxFloat speedForCameraShakeKmh = new(60, 150);
+        [SerializeField] private CameraShakeInstance speedShake;
 
+        [Header("FOV")]
+        [SerializeField] private MinMaxFloat desiredFOVBasedOnSpeed = new(55, 95);
+        [SerializeField] private float speedForMaxFOVKmh = 100;
+        [SerializeField] private float fovSpeedBraking = 0.7f;
+        [SerializeField] private float fovSpeedAccelerating = 2;
+        [SerializeField] private float fovSpeedNos = 4;
+        [SerializeField] private float additionalFovWhenUsingNos = 20;
+        
         [Header("Collisions")]
         [SerializeField] private float minCollisionMagnitudeForShake;
         [SerializeField] private float collisionMagnitudeForMaxShake;
@@ -80,17 +84,10 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected Transform otherTarget;
-        
+
         private Transform target => otherTarget != null ? otherTarget : WarehouseManager.Instance.CurrentCar.transform;
         private Rigidbody carRigidbody => WarehouseManager.Instance.CurrentCar.Rigidbody;
         private Vector3 pivotPoint => target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
-
-        protected override void Initialise()
-        {
-            base.Initialise();
-            
-            initialFov = Camera.main.fieldOfView;
-        }
         
         public override void OnSetCurrent(CameraController controller)
         {
@@ -99,8 +96,57 @@ namespace Gumball
             WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter += OnCollisionEnter;
             
+            Snap();
+        }
+
+        public override void UpdateWhenCurrent()
+        {
+            base.UpdateWhenCurrent();
+
+            Camera.main.fieldOfView = GetDesiredFOV();
+            DoCameraShake();
+        }
+        
+        private void DoCameraShake()
+        {
             if (WarehouseManager.Instance.CurrentCar.NosManager.IsActivated)
-                nosShake.DoShake();
+            {
+                if (nosShake.CurrentState is CameraShakeInstance.State.Inactive or CameraShakeInstance.State.FadingOut)
+                {
+                    speedShake.StartFadeOut();
+                    nosShake.DoShake();
+                }
+
+                return;
+            }
+
+            if (speedShake.CurrentState is CameraShakeInstance.State.Inactive or CameraShakeInstance.State.FadingOut)
+            {
+                nosShake.StartFadeOut();
+                speedShake.DoShake();
+            }
+
+            float speedPercent = Mathf.Clamp01((WarehouseManager.Instance.CurrentCar.SpeedKmh - speedForCameraShakeKmh.Min) / speedForCameraShakeKmh.Max);
+            speedShake.SetMagnitude(speedPercent);
+        }
+
+        private float GetDesiredFOV()
+        {
+            if (WarehouseManager.Instance.CurrentCar.IsBraking)
+            {
+                return Mathf.Lerp(Camera.main.fieldOfView, desiredFOVBasedOnSpeed.Min, Time.deltaTime * fovSpeedBraking);
+            }
+
+            //speed fov
+            float speedPercent = Mathf.Clamp01(WarehouseManager.Instance.CurrentCar.SpeedKmh / speedForMaxFOVKmh);
+            float speedFov = desiredFOVBasedOnSpeed.Min + (desiredFOVBasedOnSpeed.Difference * speedPercent);
+
+            bool isUsingNos = WarehouseManager.Instance.CurrentCar.NosManager.IsActivated;
+            if (isUsingNos)
+                speedFov += additionalFovWhenUsingNos;
+            
+            float lerpSpeed = isUsingNos ? fovSpeedNos : fovSpeedAccelerating;
+            return Mathf.Lerp(Camera.main.fieldOfView, speedFov, Time.deltaTime * lerpSpeed);
         }
 
         public override void OnNoLongerCurrent()
@@ -110,11 +156,8 @@ namespace Gumball
             WarehouseManager.Instance.CurrentCar.onGearChanged -= OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter -= OnCollisionEnter;
 
-            //reset FOV in case it was in progress
-            fovTween?.Kill();
-            Camera.main.fieldOfView = initialFov;
-            
             nosShake.Kill();
+            speedShake.Kill();
         }
 
         public override void Snap()
@@ -139,7 +182,7 @@ namespace Gumball
             if (!offsetIsLocalised)
             {
                 float heightRelativeToCar = target.TransformPoint(offset).y;
-                float heightInterpolated = interpolate ? Mathf.Lerp(controller.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
+                float heightInterpolated = interpolate ? Mathf.Lerp(fakeController.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
                 fakeController.transform.position = target.position.SetY(heightInterpolated) + offset.SetY(0);
             }
             else
@@ -192,29 +235,6 @@ namespace Gumball
             return operations;
         }
 
-        public void EnableNos(bool isUsingNos)
-        {
-            TweenFieldOfView(isUsingNos ? nosFov : initialFov, nosFovTweenDuration, nosFovTweenEase);
-
-            if (isUsingNos)
-            {
-                nosShake.DoShake();
-                nosShake.StartFadeIn();
-            }
-            else
-            {
-                nosShake.StartFadeOut();
-            }
-        }
-
-        private void TweenFieldOfView(float fov, float duration, Ease ease)
-        {
-            fovTween?.Kill();
-            fovTween = DOTween.To(() => Camera.main.fieldOfView, 
-                    x => Camera.main.fieldOfView = x, fov, duration)
-                .SetEase(ease);
-        }
-        
         private void OnGearChange(int previousGear, int currentGear)
         {
             if (currentGear > previousGear && WarehouseManager.Instance.CurrentCar.IsAccelerating)
