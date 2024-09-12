@@ -91,6 +91,7 @@ namespace Gumball
         {
             PanelManager.GetPanel<GameSessionNodePanel>().Show();
             PanelManager.GetPanel<GameSessionNodePanel>().Initialise(this);
+            PanelManager.GetPanel<GameSessionMapPanel>().Hide();
         }
         
     }

@@ -39,6 +39,9 @@ namespace Gumball
 
             if (MapSceneManager.ExistsRuntime)
                 MapSceneManager.Instance.RemoveFocusOnNode();
+            
+            if (PanelManager.PanelExists<GameSessionMapPanel>())
+                PanelManager.GetPanel<GameSessionMapPanel>().Show();
         }
 
         public void OnClickPlayButton()
