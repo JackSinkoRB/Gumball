@@ -181,7 +181,7 @@ namespace Gumball
             return null;
         }
 
-        private bool TrySpawnCarInLane(TrafficLane lane, LaneDirection direction)
+        private bool TrySpawnCarInLane(TrafficLane lane, LaneDirection direction, SplineSample? splineSampleToSpawnAt = null)
         {
             //get a random lane
             float additionalOffset = Random.Range(-maxRandomLaneOffset, maxRandomLaneOffset);
@@ -191,10 +191,16 @@ namespace Gumball
                 Debug.LogError($"Could not spawn car in a custom path lane in {chunk.name.Replace("(Clone)", "")} because there is no path assigned.");
                 return false;
             }
+
+            if (splineSampleToSpawnAt == null)
+            {
+                //get random sample in chunk
+                splineSampleToSpawnAt = lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE ? lane.Path.SplineSamples.GetRandom() : chunk.SplineSamples.GetRandom();
+            }
             
             PositionAndRotation lanePosition = lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE
-                ? GetLanePosition(lane.Path.SplineSamples.GetRandom(), additionalOffset, direction)
-                : GetLanePosition(chunk.SplineSamples.GetRandom(), lane.DistanceFromCenter + additionalOffset, direction);
+                ? GetLanePosition(splineSampleToSpawnAt.Value, additionalOffset, direction)
+                : GetLanePosition(splineSampleToSpawnAt.Value, lane.DistanceFromCenter + additionalOffset, direction);
 
             GameObject randomVariantPrefab = lane.GetVehicleToSpawn();
             if (randomVariantPrefab == null)
@@ -249,7 +255,7 @@ namespace Gumball
 
                 TrafficLane lane = lanes[finalLaneIndex];
 
-                if (!TrySpawnCarInLane(lane, spawnPosition.LaneDirection))
+                if (!TrySpawnCarInLane(lane, spawnPosition.LaneDirection, chunk.GetClosestSampleOnSpline(spawnPosition.DistanceFromMapStart)))
                     GlobalLoggers.AICarLogger.Log($"Could not spawn traffic car at index {index} because there was no room.");
             }
         }

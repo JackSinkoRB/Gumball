@@ -268,6 +268,37 @@ namespace Gumball
             return totalDistance;
         }
         
+        public SplineSample? GetClosestSampleOnSpline(float distanceFromMapStart)
+        {
+            if (SplineComputer.sampleMode != SplineComputer.SampleMode.Uniform)
+            {
+                Debug.LogError("Could not get distance travelled along spline because the samples are not in uniform.");
+                return null;
+            }
+            
+            int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(this);
+            float distanceInChunk = chunkIndex == 0 ? distanceFromMapStart : distanceFromMapStart - ChunkManager.Instance.CurrentChunkMap.ChunkLengthsCalculated[chunkIndex - 1];
+
+            if (distanceFromMapStart < 0)
+            {
+                Debug.LogError("Distance from map start is less than 0. The spawn position doesn't belong to this chunk.");
+                return null;
+            }
+            
+            float distanceBetweenSamples = SplineLengthCached / SplineSamples.Length; //assuming the spline sample distance is uniform
+            float totalDistance = 0;
+            foreach (SplineSample splineSample in SplineSamples)
+            {
+                if (totalDistance >= distanceInChunk)
+                    return splineSample;
+                
+                totalDistance += distanceBetweenSamples;
+            }
+
+            Debug.LogError("Distance from map start is greater than the spline length. The spawn position doesn't belong to this chunk.");
+            return null;
+        }
+        
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint)
         {
             UpdateSplineSampleData();
