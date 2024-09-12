@@ -90,6 +90,8 @@ namespace Gumball
             foreach (MeshRenderer meshRenderer in colourableParts)
             {
                 meshRenderer.sharedMaterial = GlobalPaintPresets.Instance.DefaultWheelMaterial;
+                ColourSwatch defaultSwatch = GlobalPaintPresets.Instance.WheelSwatchPresets[defaultSwatchIndex];
+                ApplySwatch(defaultSwatch);
             }
         }
 #endif
