@@ -32,5 +32,11 @@ namespace Gumball
         {
             return GameSessionManager.Instance.RacePositionChallengeData;
         }
+
+        public override string GetMainObjectiveGoalValue()
+        {
+            return "";
+        }
+        
     }
 }

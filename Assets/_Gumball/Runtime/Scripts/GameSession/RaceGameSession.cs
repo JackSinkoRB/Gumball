@@ -55,6 +55,11 @@ namespace Gumball
             return PanelManager.GetPanel<RaceSessionEndPanel>();
         }
 
+        public override string GetMainObjectiveGoalValue()
+        {
+            return "1st";
+        }
+
         protected override bool IsCompleteOnCrossFinishLine()
         {
             int finishingRank = GetRacePosition(WarehouseManager.Instance.CurrentCar);

@@ -12,6 +12,15 @@ namespace Gumball
         [SerializeField] private Transform objectiveUIHolder;
         [SerializeField] private Transform scoresUIHolder;
         [SerializeField] private AutosizeTextMeshPro totalScoreLabel;
+
+        private GameSession gameSession;
+        
+        public void Initialise(GameSession gameSession)
+        {
+            this.gameSession = gameSession;
+            
+            PopulateMainObjective();
+        }
         
         protected override void OnShow()
         {
@@ -22,10 +31,10 @@ namespace Gumball
             PopulateScores();
         }
 
-        public void PopulateMainObjective(string challengeValue)
+        private void PopulateMainObjective()
         {
             ObjectiveUI objectiveUI = Instantiate(objectiveUIPrefab.gameObject, objectiveUIHolder).GetComponent<ObjectiveUI>();
-            objectiveUI.Initialise(GameSessionManager.Instance.CurrentSession.GetChallengeData(), challengeValue);
+            objectiveUI.Initialise(gameSession.GetChallengeData(), gameSession.GetMainObjectiveGoalValue());
         }
 
         public void OnClickContinueButton()

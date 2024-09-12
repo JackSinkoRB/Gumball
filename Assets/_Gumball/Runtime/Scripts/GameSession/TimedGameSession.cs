@@ -49,6 +49,12 @@ namespace Gumball
             return GameSessionManager.Instance.TimeChallengeData;
         }
 
+        public override string GetMainObjectiveGoalValue()
+        {
+            string timeGoalUserFriendly = TimeSpan.FromSeconds(timeAllowedSeconds).ToPrettyString();
+            return timeGoalUserFriendly;
+        }
+
         protected override IEnumerator LoadSession()
         {
             yield return base.LoadSession();

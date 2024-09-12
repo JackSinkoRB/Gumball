@@ -9,10 +9,11 @@ namespace Gumball
     {
 
         [SerializeField] private TextMeshProUGUI titleLabel;
+        [SerializeField] private TextMeshProUGUI modeLabel;
 
         [Space(5)]
-        [SerializeField] private GameObject objectiveLabelPrefab;
-        [SerializeField] private Transform objectivesHolder;
+        [SerializeField] private ObjectiveUI objectiveUIPrefab;
+        [SerializeField] private Transform objectiveUIHolder;
 
         [Space(5)]
         [SerializeField] private GameSessionNodeReward rewardPrefab;
@@ -25,7 +26,8 @@ namespace Gumball
         public void Initialise(GameSessionNode node)
         {
             currentNode = node;
-            titleLabel.text = $"{node.GameSession.name}";
+            titleLabel.text = $"{node.GameSession.DisplayName}";
+            modeLabel.text = $"{node.GameSession.GetModeDisplayName()}";
 
             InitialiseObjectives(node.GameSession);
             InitialiseRewards(node.GameSession);
@@ -53,22 +55,22 @@ namespace Gumball
         
         private void InitialiseObjectives(GameSession gameSession)
         {
-            foreach (Transform child in objectivesHolder)
+            foreach (Transform child in objectiveUIHolder)
                 child.gameObject.Pool();
 
             //add main challenge
-            TextMeshProUGUI mainChallengeLabel = objectiveLabelPrefab.GetSpareOrCreate<TextMeshProUGUI>(objectivesHolder);
-            mainChallengeLabel.text = gameSession.MainChallengeDescription ?? "";
-            mainChallengeLabel.transform.SetAsLastSibling();
+            ObjectiveUI mainObjectiveUI = objectiveUIPrefab.gameObject.GetSpareOrCreate<ObjectiveUI>(objectiveUIHolder);
+            mainObjectiveUI.Initialise(gameSession.GetChallengeData(), gameSession.GetMainObjectiveGoalValue());
+            mainObjectiveUI.transform.SetAsLastSibling();
             
             //add subobjectives
             if (gameSession.SubObjectives != null)
             {
-                foreach (Challenge challenge in gameSession.SubObjectives)
+                foreach (Challenge subObjective in gameSession.SubObjectives)
                 {
-                    TextMeshProUGUI challengeLabel = objectiveLabelPrefab.GetSpareOrCreate<TextMeshProUGUI>(objectivesHolder);
-                    challengeLabel.text = challenge.Description;
-                    challengeLabel.transform.SetAsLastSibling();
+                    ObjectiveUI objectiveUI = objectiveUIPrefab.gameObject.GetSpareOrCreate<ObjectiveUI>(objectiveUIHolder);
+                    objectiveUI.Initialise(subObjective);
+                    objectiveUI.transform.SetAsLastSibling();
                 }
             }
         }

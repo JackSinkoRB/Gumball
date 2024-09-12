@@ -35,6 +35,7 @@ namespace Gumball
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
         [Header("Info")]
+        [SerializeField] private string displayName = "Level";
         [SerializeField] private string description = "Description of session";
         
         [Header("Map setup")]
@@ -76,7 +77,6 @@ namespace Gumball
         [SerializeField] private Rewards rewards;
 
         [Header("Challenges")]
-        [SerializeField] private string mainChallengeDescription = "This is the challenge description";
         [SerializeField] private Challenge[] subObjectives;
         
         [Header("Debugging")]
@@ -98,9 +98,9 @@ namespace Gumball
         }
 
         public Challenge[] SubObjectives => subObjectives;
-        
+
+        public string DisplayName => displayName;
         public string Description => description;
-        public string MainChallengeDescription => mainChallengeDescription;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;
@@ -123,6 +123,7 @@ namespace Gumball
         public abstract string GetModeDisplayName();
         public abstract Sprite GetModeIcon();
         public abstract ObjectiveUI.FakeChallengeData GetChallengeData();
+        public abstract string GetMainObjectiveGoalValue();
 
         public void StartSession()
         {
