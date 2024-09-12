@@ -1200,7 +1200,7 @@ namespace Gumball
             else
             {
                 isAccelerating = autoDrive ||
-                                 (isPlayerDrivingEnabled && (InputManager.Instance.CarInput.Accelerate.IsPressed || isReversing));
+                                 (isPlayerDrivingEnabled && (InputManager.Instance.CarInput.Accelerate.IsPressed || isReversing || nosManager.IsActivated));
                 
                 //if accelerating from reverse, change the gear
                 if (isPlayerDrivingEnabled && InputManager.Instance.CarInput.Accelerate.IsPressed && currentGear == 0)
@@ -1383,6 +1383,15 @@ namespace Gumball
                 OnHandbrakeDisengage();
             if (!isHandbrakeEngaged && InputManager.Instance.CarInput.Handbrake.IsPressed)
                 OnHandbrakeEngage();
+
+            if (isHandbrakeEngaged)
+                OnHandbrakeUpdate();
+        }
+
+        private void OnHandbrakeUpdate()
+        {
+            if (nosManager != null && nosManager.IsActivated)
+                nosManager.Deactivate();
         }
 
         private void OnHandbrakeEngage()
@@ -1449,7 +1458,8 @@ namespace Gumball
         
         private void OnBrake()
         {
-            
+            if (nosManager != null && nosManager.IsActivated)
+                nosManager.Deactivate();
         }
 
         private void OnStopBraking()
