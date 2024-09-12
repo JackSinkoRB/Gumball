@@ -35,9 +35,14 @@ namespace Gumball
         
         public SpeedCameraZone[] SpeedCameraZones => speedCameraZones;
 
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Speed camera sprint";
+        }
+        
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.SpeedCameraSprintIcon;
         }
 
         protected override GameSessionPanel GetSessionPanel()

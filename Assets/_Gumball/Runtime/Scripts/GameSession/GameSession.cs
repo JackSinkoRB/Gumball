@@ -120,7 +120,8 @@ namespace Gumball
         protected abstract GameSessionPanel GetSessionPanel();
         protected abstract SessionEndPanel GetSessionEndPanel();
 
-        public abstract string GetName();
+        public abstract string GetModeDisplayName();
+        public abstract Sprite GetModeIcon();
         public abstract ObjectiveUI.FakeChallengeData GetChallengeData();
 
         public void StartSession()

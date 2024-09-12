@@ -30,9 +30,14 @@ namespace Gumball
             }
         }
         
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Race";
+        }
+        
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.RaceIcon;
         }
 
         public override ObjectiveUI.FakeChallengeData GetChallengeData()

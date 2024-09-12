@@ -24,9 +24,14 @@ namespace Gumball
         public float TimeAllowedSeconds => timeAllowedSeconds;
         public float TimeRemainingSeconds => timeRemainingSeconds;
 
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Timed";
+        }
+
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.TimedIcon;
         }
 
         protected override GameSessionPanel GetSessionPanel()

@@ -8,11 +8,16 @@ namespace Gumball
     public class FreeroamGameSession : GameSession
     {
         
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Freeroam";
         }
-        
+
+        public override Sprite GetModeIcon()
+        {
+            return null; //no icon exists yet
+        }
+
         protected override GameSessionPanel GetSessionPanel()
         {
             return null; //has no UI
