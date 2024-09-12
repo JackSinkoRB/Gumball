@@ -24,9 +24,14 @@ namespace Gumball
         public float TimeAllowedSeconds => timeAllowedSeconds;
         public float TimeRemainingSeconds => timeRemainingSeconds;
 
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Timed";
+        }
+
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.TimedIcon;
         }
 
         protected override GameSessionPanel GetSessionPanel()
@@ -42,6 +47,12 @@ namespace Gumball
         public override ObjectiveUI.FakeChallengeData GetChallengeData()
         {
             return GameSessionManager.Instance.TimeChallengeData;
+        }
+
+        public override string GetMainObjectiveGoalValue()
+        {
+            string timeGoalUserFriendly = TimeSpan.FromSeconds(timeAllowedSeconds).ToPrettyString();
+            return timeGoalUserFriendly;
         }
 
         protected override IEnumerator LoadSession()

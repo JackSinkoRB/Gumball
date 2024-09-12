@@ -45,10 +45,6 @@ namespace Gumball
         [Header("Nodes")]
         [SerializeField] private float nodeFadeAmountWhenNotFocused = 0.2f;
         [SerializeField] private float nodeFadeDuration = 0.2f;
-
-        [Header("Arrows")]
-        [SerializeField] private Button leftArrow;
-        [SerializeField] private Button rightArrow;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private GameSessionMap[] mapInstances;
@@ -142,8 +138,8 @@ namespace Gumball
             selectedMap.gameObject.SetActive(true);
             
             int currentIndex = mapInstances.IndexOfItem(selectedMap);
-            rightArrow.interactable = mapInstances.Length > 1 && currentIndex < mapInstances.Length - 1;
-            leftArrow.interactable = mapInstances.Length > 1 && currentIndex > 0;
+            PanelManager.GetPanel<GameSessionMapPanel>().RightArrow.interactable = mapInstances.Length > 1 && currentIndex < mapInstances.Length - 1;
+            PanelManager.GetPanel<GameSessionMapPanel>().LeftArrow.interactable = mapInstances.Length > 1 && currentIndex > 0;
         }
 
         /// <summary>
@@ -183,7 +179,8 @@ namespace Gumball
         
         private void CheckIfClickedSessionNode()
         {
-            if (PrimaryContactInput.IsGraphicUnderPointer(leftArrow.image) || PrimaryContactInput.IsGraphicUnderPointer(rightArrow.image))
+            if (PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<GameSessionMapPanel>().LeftArrow.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<GameSessionMapPanel>().RightArrow.image))
                 return;
             
             foreach (Graphic graphic in PrimaryContactInput.GetClickableGraphicsUnderPointer())
