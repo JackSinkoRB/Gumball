@@ -111,7 +111,7 @@ namespace Gumball
             if (gameSession.Rewards.XP > 0)
             {
                 GameSessionNodeReward reward = rewardPrefab.gameObject.GetSpareOrCreate<GameSessionNodeReward>(rewardsHolder);
-                reward.Initialise($"{gameSession.Rewards.XP} EXP", xpIcon);
+                reward.Initialise($"{gameSession.Rewards.XP}xp", xpIcon);
                 reward.transform.SetAsLastSibling();
             }
         }
