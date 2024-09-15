@@ -32,9 +32,14 @@ namespace Gumball
         
         public readonly HashSet<AICar> EliminatedRacers = new();
 
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Knockout";
+        }
+        
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.KnockoutIcon;
         }
         
         protected override GameSessionPanel GetSessionPanel()

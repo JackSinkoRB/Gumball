@@ -40,7 +40,7 @@ namespace Gumball
                 
                 Hide();
                 PanelManager.GetPanel<SessionScorePanel>().Show();
-                OnShowScorePanel();
+                PanelManager.GetPanel<SessionScorePanel>().Initialise(GameSessionManager.Instance.CurrentSession);
             });
         }
 
@@ -51,9 +51,7 @@ namespace Gumball
             if (showScorePanelCoroutine != null)
                 StopCoroutine(showScorePanelCoroutine);
         }
-
-        protected abstract void OnShowScorePanel();
-
+        
         private void SetLevelName()
         {
             levelNameLabel.text = GameSessionManager.Instance.CurrentSession.name;

@@ -16,11 +16,6 @@ namespace Gumball
             int finishingRank = raceSession.GetRacePosition(WarehouseManager.Instance.CurrentCar);
             SetPosition(finishingRank);
         }
-
-        protected override void OnShowScorePanel()
-        {
-            PanelManager.GetPanel<SessionScorePanel>().PopulateMainObjective("1st");
-        }
         
     }
 }

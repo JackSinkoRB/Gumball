@@ -30,9 +30,14 @@ namespace Gumball
             }
         }
         
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Race";
+        }
+        
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.RaceIcon;
         }
 
         public override ObjectiveUI.FakeChallengeData GetChallengeData()
@@ -48,6 +53,11 @@ namespace Gumball
         protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<RaceSessionEndPanel>();
+        }
+
+        public override string GetMainObjectiveGoalValue()
+        {
+            return "1st";
         }
 
         protected override bool IsCompleteOnCrossFinishLine()

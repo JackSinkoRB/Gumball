@@ -8,6 +8,7 @@ using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.UI;
 
 namespace Gumball
 {
@@ -29,8 +30,8 @@ namespace Gumball
         [SerializeField, DisplayInspector] private GameSession gameSession;
         
         [Header("UI")]
-        [SerializeField] private TextMeshProUGUI typeLabel;
-        [SerializeField] private GameObject lockObject;
+        [SerializeField] private Image modeIcon;
+        [SerializeField] private Transform lockObject;
 
         public bool IsUnlocked {
             get
@@ -65,7 +66,7 @@ namespace Gumball
             string nodeName = "GameSessionNode";
             if (gameSession != null)
             {
-                nodeName = $"{gameSession.GetName()} - {gameSession.name}";
+                nodeName = $"{gameSession.GetModeDisplayName()} - {gameSession.name}";
                 AssetReferenceT<ChunkMap> chunkMap = gameSession.ChunkMapAssetReference;
                 if (chunkMap != null && chunkMap.editorAsset != null)
                     nodeName += $" - {chunkMap.editorAsset.name}";
@@ -77,9 +78,9 @@ namespace Gumball
         
         private void OnEnable()
         {
-            typeLabel.text = GameSession.GetName();
+            modeIcon.sprite = gameSession.GetModeIcon();
             
-            lockObject.SetActive(!IsUnlocked);
+            lockObject.gameObject.SetActive(!IsUnlocked);
             
             //nodes that require followers don't show on the map until there's enough followers
             if (requireFans && FollowersManager.CurrentFollowers < fansRequired)
@@ -90,6 +91,7 @@ namespace Gumball
         {
             PanelManager.GetPanel<GameSessionNodePanel>().Show();
             PanelManager.GetPanel<GameSessionNodePanel>().Initialise(this);
+            PanelManager.GetPanel<GameSessionMapPanel>().Hide();
         }
         
     }

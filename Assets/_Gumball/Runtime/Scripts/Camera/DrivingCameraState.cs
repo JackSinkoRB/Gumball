@@ -132,7 +132,7 @@ namespace Gumball
 
         private float GetDesiredFOV()
         {
-            if (WarehouseManager.Instance.CurrentCar.IsBraking)
+            if (WarehouseManager.Instance.CurrentCar.IsBraking || WarehouseManager.Instance.CurrentCar.IsHandbrakeEngaged)
             {
                 return Mathf.Lerp(Camera.main.fieldOfView, desiredFOVBasedOnSpeed.Min, Time.deltaTime * fovSpeedBraking);
             }
