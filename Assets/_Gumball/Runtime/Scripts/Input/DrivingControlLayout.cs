@@ -40,6 +40,8 @@ namespace Gumball
         private Vector2 horizontalInputChangeSincePress;
         
         protected DrivingControlLayoutManager layoutManager => PanelManager.GetPanel<DrivingControlsPanel>().LayoutManager;
+
+        public bool AutoAccelerate => autoAccelerate;
         
         private void OnDisable()
         {

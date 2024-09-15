@@ -12,6 +12,13 @@ namespace Gumball
 
         [SerializeField, ReadOnly] private GameSession currentSession;
 
+        [Header("Mode icons")]
+        [SerializeField] private Sprite raceIcon;
+        [SerializeField] private Sprite timedIcon;
+        [SerializeField] private Sprite speedCameraSprintIcon;
+        [SerializeField] private Sprite knockoutIcon;
+        [SerializeField] private Sprite cleanRunIcon;
+        
         [Header("Challenge data for objectives")]
         [SerializeField] private ObjectiveUI.FakeChallengeData racePositionChallengeData;
         [SerializeField] private ObjectiveUI.FakeChallengeData timeChallengeData;
@@ -20,6 +27,12 @@ namespace Gumball
         public ObjectiveUI.FakeChallengeData TimeChallengeData => timeChallengeData;
         
         public GameSession CurrentSession => currentSession;
+        
+        public Sprite RaceIcon => raceIcon;
+        public Sprite TimedIcon => timedIcon;
+        public Sprite SpeedCameraSprintIcon => speedCameraSprintIcon;
+        public Sprite KnockoutIcon => knockoutIcon;
+        public Sprite CleanRunIcon => cleanRunIcon;
 
         public void SetCurrentSession(GameSession session)
         {

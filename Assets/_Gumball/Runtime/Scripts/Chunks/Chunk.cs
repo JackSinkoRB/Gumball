@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using AYellowpaper.SerializedCollections;
 using Dreamteck.Splines;
 using MyBox;
@@ -19,7 +20,7 @@ namespace Gumball
     public class Chunk : MonoBehaviour
     {
 
-        public enum TerrainLOD
+        public enum ChunkLOD
         {
             LOW,
             HIGH
@@ -31,9 +32,10 @@ namespace Gumball
         public event Action onTerrainChanged;
         public event Action onChunkUnload;
         
+        private const float childMeshRendererDistance = 800;
+
         [SerializeField] private ChunkTrafficManager trafficManager;
         [SerializeField] private ChunkPowerpoleManager powerpoleManager;
-        [SerializeField] private Collider[] barriers;
         
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, onlyShowWhenDefaultValue: true, inverse: true)]
@@ -48,7 +50,8 @@ namespace Gumball
         [Header("Terrains")]
         [Tooltip("The distance for the player to be within to use the high LOD.")]
         [SerializeField] private float terrainHighLODDistance = 500;
-        [SerializeField, ReadOnly] private TerrainLOD currentLOD;
+        [SerializeField, ReadOnly] private ChunkLOD currentTerrainLOD;
+        [SerializeField, ReadOnly] private ChunkLOD currentChildMeshLOD;
         [SerializeField, ReadOnly] private GameObject terrainHighLOD;
         [SerializeField, ReadOnly] private GameObject terrainLowLOD;
         
@@ -59,6 +62,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private GameObject chunkDetector;
         [SerializeField, ReadOnly] private float splineLengthCached = -1;
 
+        [SerializeField, HideInInspector] private MeshRenderer[] childMeshRenderers;
+        private bool hasInitialisedLODs;
+        
         private SplineComputer splineComputer => GetComponent<SplineComputer>();
         public string UniqueID => GetComponent<UniqueIDAssigner>().UniqueID;
 
@@ -100,7 +106,7 @@ namespace Gumball
             {
                 if (terrainLowLOD != null)
                     return terrainLowLOD;
-                TryFindExistingTerrain(TerrainLOD.LOW);
+                TryFindExistingTerrain(ChunkLOD.LOW);
                 return terrainLowLOD;
             }
         }
@@ -111,7 +117,7 @@ namespace Gumball
             {
                 if (terrainHighLOD != null)
                     return terrainHighLOD;
-                TryFindExistingTerrain(TerrainLOD.HIGH);
+                TryFindExistingTerrain(ChunkLOD.HIGH);
                 return terrainHighLOD;
             }
         }
@@ -119,21 +125,19 @@ namespace Gumball
         [SerializeField, HideInInspector] private SampleCollection splineSampleCollection = new();
         public SampleCollection SplineSampleCollection => splineSampleCollection;
 
-        private const float secondsBetweenTerrainLODChecks = 1;
-        private float timeOfLastLODCheck = -secondsBetweenTerrainLODChecks;
-        private float timeSinceTerrainLODCheck => Time.realtimeSinceStartup - timeOfLastLODCheck;
+        private const float secondsBetweenLODChecks = 1;
+        private float timeOfLastLODCheck = -secondsBetweenLODChecks;
+        private float timeSinceLODCheck => Time.realtimeSinceStartup - timeOfLastLODCheck;
         
         private void OnEnable()
         {
             splineComputer.updateMode = SplineComputer.UpdateMode.None; //make sure the spline computer doesn't update automatically at runtime
             splineComputer.sampleMode = SplineComputer.SampleMode.Uniform;
-            
-            InitialiseBarriers();
         }
 
         private void LateUpdate()
         {
-            DoTerrainLODCheck();
+            DoLODCheck();
         }
 
         /// <summary>
@@ -141,6 +145,8 @@ namespace Gumball
         /// </summary>
         public void OnFullyLoaded()
         {
+            CacheChildMeshRenderers();
+            
             isFullyLoaded = true;
             onFullyLoaded?.Invoke();
         }
@@ -168,26 +174,26 @@ namespace Gumball
             data.SetChunk(this);
         }
         
-        public void SetTerrain(TerrainLOD lod, GameObject terrain)
+        public void SetTerrain(ChunkLOD lod, GameObject terrain)
         {
-            if (lod == TerrainLOD.HIGH)
+            if (lod == ChunkLOD.HIGH)
             {
                 terrainHighLOD = terrain;
                 UpdateChunkMeshData();
                 onTerrainChanged?.Invoke();
             }
 
-            if (lod == TerrainLOD.LOW)
+            if (lod == ChunkLOD.LOW)
             {
                 terrainLowLOD = terrain;
             }
         }
 
-        public void SwitchTerrainLOD(TerrainLOD lod)
+        public void SwitchTerrainLOD(ChunkLOD lod)
         {
-            currentLOD = lod;
-            terrainHighLOD.GetComponent<MeshRenderer>().enabled = lod == TerrainLOD.HIGH;
-            terrainLowLOD.GetComponent<MeshRenderer>().enabled = lod == TerrainLOD.LOW;
+            currentTerrainLOD = lod;
+            terrainHighLOD.GetComponent<MeshRenderer>().enabled = lod == ChunkLOD.HIGH;
+            terrainLowLOD.GetComponent<MeshRenderer>().enabled = lod == ChunkLOD.LOW;
             
             //ensure they're enabled
             if (!terrainHighLOD.activeSelf)
@@ -262,6 +268,37 @@ namespace Gumball
             return totalDistance;
         }
         
+        public SplineSample? GetClosestSampleOnSpline(float distanceFromMapStart)
+        {
+            if (SplineComputer.sampleMode != SplineComputer.SampleMode.Uniform)
+            {
+                Debug.LogError("Could not get distance travelled along spline because the samples are not in uniform.");
+                return null;
+            }
+            
+            int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(this);
+            float distanceInChunk = chunkIndex == 0 ? distanceFromMapStart : distanceFromMapStart - ChunkManager.Instance.CurrentChunkMap.ChunkLengthsCalculated[chunkIndex - 1];
+
+            if (distanceFromMapStart < 0)
+            {
+                Debug.LogError("Distance from map start is less than 0. The spawn position doesn't belong to this chunk.");
+                return null;
+            }
+            
+            float distanceBetweenSamples = SplineLengthCached / SplineSamples.Length; //assuming the spline sample distance is uniform
+            float totalDistance = 0;
+            foreach (SplineSample splineSample in SplineSamples)
+            {
+                if (totalDistance >= distanceInChunk)
+                    return splineSample;
+                
+                totalDistance += distanceBetweenSamples;
+            }
+
+            Debug.LogError("Distance from map start is greater than the spline length. The spawn position doesn't belong to this chunk.");
+            return null;
+        }
+        
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint)
         {
             UpdateSplineSampleData();
@@ -299,93 +336,114 @@ namespace Gumball
             meshCollider.sharedMesh = terrainLowLOD.GetComponent<MeshFilter>().sharedMesh;
         }
         
-        private void TryFindExistingTerrain(TerrainLOD lod)
+        private void CacheChildMeshRenderers()
         {
-            if ((lod == TerrainLOD.HIGH && terrainHighLOD != null)
-                || (lod == TerrainLOD.LOW && terrainLowLOD != null))
+            HashSet<MeshRenderer> hashSet = new();
+            foreach (MeshRenderer childMeshRenderer in transform.GetComponentsInAllChildren<MeshRenderer>())
+            {
+                if (childMeshRenderer.gameObject == terrainHighLOD || childMeshRenderer.gameObject == terrainLowLOD)
+                    continue;
+                
+                if (childMeshRenderer.gameObject.tag.Equals(LayersAndTags.Tag.DontHideMeshWhenFarAway.ToString()))
+                    continue;
+
+                if (!childMeshRenderer.enabled)
+                    continue;
+                
+                hashSet.Add(childMeshRenderer);
+            }
+            childMeshRenderers = hashSet.ToArray();
+        }
+        
+        private void TryFindExistingTerrain(ChunkLOD lod)
+        {
+            if ((lod == ChunkLOD.HIGH && terrainHighLOD != null)
+                || (lod == ChunkLOD.LOW && terrainLowLOD != null))
                 return; //already exists
 
             foreach (Transform child in transform)
             {
                 if (child.tag.Equals(ChunkUtils.TerrainTag))
                 {
-                    if (lod == TerrainLOD.LOW)
+                    if (lod == ChunkLOD.LOW)
                         terrainLowLOD = child.gameObject;
-                    if (lod == TerrainLOD.HIGH)
+                    if (lod == ChunkLOD.HIGH)
                         terrainHighLOD = child.gameObject;
                     return;
                 }
             }
         }
 
-        private void DoTerrainLODCheck()
+        private void DoLODCheck()
         {
             if (!ChunkManager.ExistsRuntime || WarehouseManager.Instance.CurrentCar == null)
                 return;
 
             if (!isFullyLoaded)
-                return; //don't switch to low until it's fully loaded, as the high LOD is needed for the collider for chunk objects
+                return;
             
-            if (timeSinceTerrainLODCheck < secondsBetweenTerrainLODChecks)
+            if (timeSinceLODCheck < secondsBetweenLODChecks)
                 return;
 
             timeOfLastLODCheck = Time.realtimeSinceStartup;
 
-            TerrainLOD desiredLOD = GetDesiredLOD();
+            float shortestDistanceSqr = GetShortestDistanceToChunk();
             
-            if (currentLOD != desiredLOD)
-                SwitchTerrainLOD(desiredLOD);
+            //terrain LOD:
+            float highLODDistanceSqr = terrainHighLODDistance * terrainHighLODDistance;
+            ChunkLOD desiredTerrainLOD = shortestDistanceSqr <= highLODDistanceSqr ? ChunkLOD.HIGH : ChunkLOD.LOW;
+            if (currentTerrainLOD != desiredTerrainLOD || !hasInitialisedLODs)
+                SwitchTerrainLOD(desiredTerrainLOD);
+
+            //child mesh LOD:
+            const float childMeshRendererDistanceSqr = childMeshRendererDistance * childMeshRendererDistance;
+            ChunkLOD desiredChildMeshLOD = shortestDistanceSqr <= childMeshRendererDistanceSqr ? ChunkLOD.HIGH : ChunkLOD.LOW;
+            if (currentChildMeshLOD != desiredChildMeshLOD || !hasInitialisedLODs)
+            {
+                currentChildMeshLOD = desiredTerrainLOD;
+                foreach (MeshRenderer meshRenderer in childMeshRenderers)
+                    meshRenderer.enabled = desiredChildMeshLOD == ChunkLOD.HIGH;
+            }
+
+            hasInitialisedLODs = true;
         }
 
-        private TerrainLOD GetDesiredLOD()
+        private float GetShortestDistanceToChunk()
         {
-            //if player is on the chunk, return high
-            //else, check if forward or backward is closer, then get the distance to whicher is closer
-
             Vector3 carPosition = WarehouseManager.Instance.CurrentCar.transform.position;
             Chunk chunkPlayerIsOn = WarehouseManager.Instance.CurrentCar.CurrentChunk;
-
-            float shortestDistanceSqr;
+            
             if (chunkPlayerIsOn == null)
-                shortestDistanceSqr = Vector3.SqrMagnitude(carPosition - GetCenterOfSpline());
-            else if (chunkPlayerIsOn == this)
-                return TerrainLOD.HIGH;
-            else
-            {
-                float distanceToStartSqr = Vector3.SqrMagnitude(carPosition - FirstSample.position);
-                float distanceToEndSqr = Vector3.SqrMagnitude(carPosition - LastSample.position);
-
-                if (distanceToStartSqr < distanceToEndSqr)
-                    shortestDistanceSqr = distanceToStartSqr;
-                else shortestDistanceSqr = distanceToEndSqr;
-            }
-
-            float highLODDistanceSqr = terrainHighLODDistance * terrainHighLODDistance;
-
-            return shortestDistanceSqr <= highLODDistanceSqr ? TerrainLOD.HIGH : TerrainLOD.LOW;
-        }
-        
-        private void InitialiseBarriers()
-        {
-            foreach (Collider barrier in barriers)
-            {
-                if (barrier == null)
-                {
-                    Debug.LogWarning($"Chunk {name} has a barrier that is null.");
-                    continue;
-                }
+                return Vector3.SqrMagnitude(carPosition - GetCenterOfSpline());
                 
-                barrier.gameObject.layer = (int) LayersAndTags.Layer.Barrier;
-                barrier.sharedMaterial = ChunkManager.Instance.SlipperyPhysicsMaterial;
-            }
+            if (chunkPlayerIsOn == this)
+                return 0;
+            
+            float distanceToStartSqr = Vector3.SqrMagnitude(carPosition - FirstSample.position);
+            float distanceToEndSqr = Vector3.SqrMagnitude(carPosition - LastSample.position);
+            return distanceToStartSqr < distanceToEndSqr ? distanceToStartSqr : distanceToEndSqr;
         }
-        
+
         public void CalculateSplineLength()
         {
             splineLengthCached = splineComputer.CalculateLength();
         }
         
 #if UNITY_EDITOR
+        private const string pathToBarrierMaterial = "Slippery";
+        
+        public void EnsureBarriersHaveCorrectPhysicsMaterial()
+        {
+            foreach (Collider childCollider in transform.GetComponentsInAllChildren<Collider>())
+            {
+                if (childCollider.gameObject.layer == (int)LayersAndTags.Layer.Barrier)
+                {
+                    childCollider.sharedMaterial = Resources.Load<PhysicMaterial>(pathToBarrierMaterial);
+                    EditorUtility.SetDirty(childCollider);
+                }
+            }
+        }
+        
         private void OnDrawGizmos()
         {
             //draw the interpolation distance

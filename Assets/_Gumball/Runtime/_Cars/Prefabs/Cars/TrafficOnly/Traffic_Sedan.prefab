@@ -181,8 +181,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barrel: {fileID: 4446190494337546523}
   spoke: {fileID: 0}
-  outsideVertices: 
-  insideVertices: 
+  outsideVertices: 0200000003000000080000000d00000011000000180000001c00000023000000270000002e00000032000000390000003d00000044000000480000004f00000051000000
+  insideVertices: 0b00000013000000140000001e0000001f000000290000002a00000034000000350000003f000000400000004a0000004b00000057000000580000005a0000005b000000
 --- !u!1 &3688091035945767069
 GameObject:
   m_ObjectHideFlags: 0
@@ -281,8 +281,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barrel: {fileID: 1957797497950324979}
   spoke: {fileID: 0}
-  outsideVertices: 
-  insideVertices: 
+  outsideVertices: 0b00000013000000140000001e0000001f000000290000002a00000034000000350000003f000000400000004a0000004b00000057000000580000005a0000005b000000
+  insideVertices: 0100000003000000080000000d00000011000000180000001c00000023000000270000002e00000032000000390000003d00000044000000480000004f00000051000000
 --- !u!1 &3704550364144419592
 GameObject:
   m_ObjectHideFlags: 0
@@ -375,7 +375,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3555217641230541839}
-  - component: {fileID: 8578429520958264190}
   m_Layer: 0
   m_Name: Traffic_Sedan
   m_TagString: Untagged
@@ -401,36 +400,6 @@ Transform:
   - {fileID: 595147225068016466}
   m_Father: {fileID: 3261763503728798085}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &8578429520958264190
-LODGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4187638705316429493}
-  serializedVersion: 2
-  m_LocalReferencePoint: {x: 0, y: 0.7504763, z: -0.0941751}
-  m_Size: 4.823346
-  m_FadeMode: 0
-  m_AnimateCrossFading: 0
-  m_LastLODIsBillboard: 0
-  m_LODs:
-  - screenRelativeHeight: 0.25
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 4077258475493036793}
-    - renderer: {fileID: 5829995824069906638}
-    - renderer: {fileID: 3994636661918097075}
-    - renderer: {fileID: 0}
-  - screenRelativeHeight: 0.125
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 1877508135902025255}
-  - screenRelativeHeight: 0.01
-    fadeTransitionWidth: 0
-    renderers:
-    - renderer: {fileID: 8726463420229494558}
-  m_Enabled: 1
 --- !u!1 &7361234701026146067
 GameObject:
   m_ObjectHideFlags: 0
@@ -612,8 +581,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barrel: {fileID: 7931486924565895772}
   spoke: {fileID: 0}
-  outsideVertices: 
-  insideVertices: 
+  outsideVertices: 0200000003000000080000000d00000011000000180000001c00000023000000270000002e00000032000000390000003d00000044000000480000004f00000051000000
+  insideVertices: 0b00000013000000140000001e0000001f000000290000002a00000034000000350000003f000000400000004a0000004b00000057000000580000005a0000005b000000
 --- !u!1 &9190639821489706264
 GameObject:
   m_ObjectHideFlags: 0
@@ -712,8 +681,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   barrel: {fileID: 634149937937551755}
   spoke: {fileID: 0}
-  outsideVertices: 
-  insideVertices: 
+  outsideVertices: 0b00000013000000140000001e0000001f000000290000002a00000034000000350000003f000000400000004a0000004b00000057000000580000005a0000005b000000
+  insideVertices: 0100000003000000080000000d00000011000000180000001c00000023000000270000002e00000032000000390000003d00000044000000480000004f00000051000000
 --- !u!1001 &6364716051322376671
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -835,7 +804,7 @@ PrefabInstance:
     - target: {fileID: 3530765675035934667, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 3530765675035934667, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
@@ -1035,7 +1004,7 @@ PrefabInstance:
     - target: {fileID: 5898198982286228161, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 5898198982286228161, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
@@ -1119,17 +1088,32 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8001686030286725959, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
-      propertyPath: lods.Array.data[0].transformsToEnable.Array.data[0]
+      propertyPath: lods.Array.data[0].transformsToEnable.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8001686030286725959, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: lods.Array.data[1].transformsToEnable.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8001686030286725959, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: lods.Array.data[2].transformsToEnable.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8001686030286725959, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: lods.Array.data[0].transformsToEnable.Array.data[2]
       value: 
       objectReference: {fileID: 7119334016886781360}
     - target: {fileID: 8001686030286725959, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
-      propertyPath: lods.Array.data[1].transformsToEnable.Array.data[0]
+      propertyPath: lods.Array.data[1].transformsToEnable.Array.data[2]
       value: 
       objectReference: {fileID: 9169308256508544857}
     - target: {fileID: 8001686030286725959, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
-      propertyPath: lods.Array.data[2].transformsToEnable.Array.data[0]
+      propertyPath: lods.Array.data[2].transformsToEnable.Array.data[2]
       value: 
       objectReference: {fileID: 595147225068016466}
     - target: {fileID: 8222543484109432132, guid: 4b3374a17dbc5b440ab459d25f69ea0c,

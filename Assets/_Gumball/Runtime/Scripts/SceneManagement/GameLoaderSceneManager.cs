@@ -31,8 +31,7 @@ namespace Gumball
             Starting_async_loading,
             Loading_mainscene,
             Loading_vehicle,
-            Loading_avatars,
-            Loading_vehicle_and_drivers,
+            Setup_vehicle_and_drivers,
             Connecting_to_PlayFab,
             Initialising_Unity_services,
         }
@@ -84,6 +83,15 @@ namespace Gumball
             singletonScriptableHandles = LoadSingletonScriptables();
             yield return new WaitUntil(() => singletonScriptableHandles.AreAllComplete());
             GlobalLoggers.LoadingLogger.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+
+            currentStage = Stage.Starting_async_loading;
+            //start loading playfab (async)
+            PlayFabManager.Initialise();
+            //start loading unity services (async)
+            TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
+            //start loading avatars
+            TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver());
+            TrackedCoroutine coDriverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnCoDriver());
             
             stopwatch.Restart();
             currentStage = Stage.Initialising_parts;
@@ -93,13 +101,6 @@ namespace Gumball
                                              && !initialiseSubParts.IsPlaying);
             GlobalLoggers.LoadingLogger.Log($"Parts initialisation complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
-            currentStage = Stage.Starting_async_loading;
-            //start loading playfab (async)
-            PlayFabManager.Initialise();
-
-            //start loading unity services (async)
-            TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
-            
             GlobalLoggers.LoadingLogger.Log($"Starting to load {SceneManager.MainSceneAddress} async...");
             stopwatch.Restart();
             currentStage = Stage.Loading_mainscene;
@@ -113,14 +114,12 @@ namespace Gumball
             Quaternion carStartingRotation = Quaternion.Euler(Vector3.zero);
             TrackedCoroutine carLoadCoroutine = new TrackedCoroutine(WarehouseManager.Instance.SpawnSavedCar(carStartingPosition, carStartingRotation, (car) => WarehouseManager.Instance.SetCurrentCar(car)));
             
-            currentStage = Stage.Loading_avatars;
-            TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation));
-            TrackedCoroutine coDriverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnCoDriver(MainSceneManager.Instance.CoDriverStandingPosition, MainSceneManager.Instance.CoDriverStandingRotation));
-            
-            currentStage = Stage.Loading_vehicle_and_drivers;
+            currentStage = Stage.Setup_vehicle_and_drivers;
             yield return new WaitUntil(() => !carLoadCoroutine.IsPlaying && !driverAvatarLoadCoroutine.IsPlaying && !coDriverAvatarLoadCoroutine.IsPlaying);
-            GlobalLoggers.LoadingLogger.Log($"Vehicle and driver loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
-
+            AvatarManager.Instance.DriverAvatar.Teleport(MainSceneManager.Instance.DriverStandingPosition, MainSceneManager.Instance.DriverStandingRotation);
+            AvatarManager.Instance.CoDriverAvatar.Teleport(MainSceneManager.Instance.CoDriverStandingPosition, MainSceneManager.Instance.CoDriverStandingRotation);
+            GlobalLoggers.LoadingLogger.Log($"Vehicle and driver setup complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+            
             currentStage = Stage.Connecting_to_PlayFab;
             yield return new WaitUntil(() => PlayFabManager.ConnectionStatus != PlayFabManager.ConnectionStatusType.LOADING);
             

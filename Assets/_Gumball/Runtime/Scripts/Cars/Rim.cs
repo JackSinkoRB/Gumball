@@ -65,7 +65,7 @@ namespace Gumball
 
                 float distanceToMiddleSqr = Vector3.SqrMagnitude(middle - vertexPositionWorld);
 
-                if (distanceToMiddleSqr.Approximately(furthestDistanceSqr, 0.001f))
+                if (distanceToMiddleSqr.Approximately(furthestDistanceSqr, 0.01f))
                 {
                     verticesFurthestFromMiddleTemp.Add(vertexIndex);
                     Debug.DrawLine(vertexPositionWorld, middle, Color.blue, 15);

@@ -28,7 +28,7 @@ namespace Gumball
         /// The minimum distance around a position required to not have an obstacle in order to spawn a car.
         /// </summary>
         private const float minDistanceRequiredToSpawn = 10f;
-        private const float randomLaneOffset = 1f;
+        private const float maxRandomLaneOffset = 2.1f;
         
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
@@ -181,20 +181,26 @@ namespace Gumball
             return null;
         }
 
-        private bool TrySpawnCarInLane(TrafficLane lane, LaneDirection direction)
+        private bool TrySpawnCarInLane(TrafficLane lane, LaneDirection direction, SplineSample? splineSampleToSpawnAt = null)
         {
             //get a random lane
-            float additionalOffset = Random.Range(-randomLaneOffset, randomLaneOffset);
+            float additionalOffset = Random.Range(-maxRandomLaneOffset, maxRandomLaneOffset);
 
             if (lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE && lane.Path == null)
             {
                 Debug.LogError($"Could not spawn car in a custom path lane in {chunk.name.Replace("(Clone)", "")} because there is no path assigned.");
                 return false;
             }
+
+            if (splineSampleToSpawnAt == null)
+            {
+                //get random sample in chunk
+                splineSampleToSpawnAt = lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE ? lane.Path.SplineSamples.GetRandom() : chunk.SplineSamples.GetRandom();
+            }
             
             PositionAndRotation lanePosition = lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE
-                ? GetLanePosition(lane.Path.SplineSamples.GetRandom(), additionalOffset, direction)
-                : GetLanePosition(chunk.SplineSamples.GetRandom(), lane.DistanceFromCenter + additionalOffset, direction);
+                ? GetLanePosition(splineSampleToSpawnAt.Value, additionalOffset, direction)
+                : GetLanePosition(splineSampleToSpawnAt.Value, lane.DistanceFromCenter + additionalOffset, direction);
 
             GameObject randomVariantPrefab = lane.GetVehicleToSpawn();
             if (randomVariantPrefab == null)
@@ -234,10 +240,22 @@ namespace Gumball
                     Debug.LogError($"The traffic spawn position in {chunk.name} at index {index} is invalid. There is no lanes in direction {spawnPosition.LaneDirection.ToString()}.");
                     continue;
                 }
-                
-                TrafficLane lane = spawnPosition.LaneDirection == LaneDirection.FORWARD ? lanesForward[spawnPosition.LaneIndex] : lanesBackward[spawnPosition.LaneIndex];
-                
-                if (!TrySpawnCarInLane(lane, spawnPosition.LaneDirection))
+
+                TrafficLane[] lanes = spawnPosition.LaneDirection == LaneDirection.FORWARD ? lanesForward : lanesBackward;
+                int finalLaneIndex = spawnPosition.LaneIndex;
+                if (finalLaneIndex >= lanes.Length)
+                {
+                    Debug.LogError($"The traffic spawn position at index {index} is invalid. There are no lanes at index {spawnPosition.LaneIndex} in chunk {chunk.name}.");
+                    if (lanes.Length == 0)
+                        continue;
+
+                    finalLaneIndex = lanes.Length - 1; //just use the last lane
+                    Debug.Log($" - using the last lane in the chunk instead ({finalLaneIndex}).");
+                }
+
+                TrafficLane lane = lanes[finalLaneIndex];
+
+                if (!TrySpawnCarInLane(lane, spawnPosition.LaneDirection, chunk.GetClosestSampleOnSpline(spawnPosition.DistanceFromMapStart)))
                     GlobalLoggers.AICarLogger.Log($"Could not spawn traffic car at index {index} because there was no room.");
             }
         }
