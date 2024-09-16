@@ -372,11 +372,15 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 1
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer:
+  - {fileID: 6121922357221768001}
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &655841645591059707
@@ -503,11 +507,15 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 1
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer:
+  - {fileID: 1621545133622253810}
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &721869669330144690
@@ -784,11 +792,15 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 1
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer:
+  - {fileID: 1621545133622253810}
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &1096020135886034786
@@ -990,11 +1002,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &1149206353549725021
@@ -1121,13 +1136,92 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 1
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer:
+  - {fileID: 4388606964635607938}
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
+--- !u!1 &1154585815385901696
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1621545133622253810}
+  - component: {fileID: 1379944677086988465}
+  - component: {fileID: 5688851862971878212}
+  m_Layer: 5
+  m_Name: SteerRightIcon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1621545133622253810
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154585815385901696}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6011394423249971175}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 1611, y: 484}
+  m_SizeDelta: {x: 200, y: 200}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &1379944677086988465
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154585815385901696}
+  m_CullTransparentMesh: 1
+--- !u!114 &5688851862971878212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154585815385901696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.28235295}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 9eaa52b849490934ab894675e035a538, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &1159655489317049793
 GameObject:
   m_ObjectHideFlags: 0
@@ -1332,11 +1426,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 1
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &1365165292833183327
@@ -1463,11 +1560,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 1
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &1411638196445565411
@@ -1482,6 +1582,7 @@ GameObject:
   - component: {fileID: 2123880109386518065}
   - component: {fileID: 369254140952442507}
   - component: {fileID: 2209828153997706973}
+  - component: {fileID: 5678899480095421132}
   m_Layer: 5
   m_Name: HornButton
   m_TagString: Untagged
@@ -1591,6 +1692,40 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5678899480095421132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1411638196445565411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c860658a76de64b856d047b3bf6da8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onStartPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
+  onStopPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  canOnlyBePressedOnPointerDown: 1
+  pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 0
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
+  disabledAlpha: 0.5
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
+  isPressingButton: 0
+  targetGraphics: []
 --- !u!1 &1444092443270930457
 GameObject:
   m_ObjectHideFlags: 0
@@ -1603,6 +1738,7 @@ GameObject:
   - component: {fileID: 730324162928440577}
   - component: {fileID: 3402543967503497254}
   - component: {fileID: 2054649292158794185}
+  - component: {fileID: 2395631232992643708}
   m_Layer: 5
   m_Name: HornButton
   m_TagString: Untagged
@@ -1712,6 +1848,40 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2395631232992643708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1444092443270930457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c860658a76de64b856d047b3bf6da8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onStartPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
+  onStopPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  canOnlyBePressedOnPointerDown: 1
+  pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 0
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
+  disabledAlpha: 0.5
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
+  isPressingButton: 0
+  targetGraphics: []
 --- !u!1 &1445636435188352888
 GameObject:
   m_ObjectHideFlags: 0
@@ -1860,11 +2030,15 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 1
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer:
+  - {fileID: 6121922357221768001}
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &1591835794582972503
@@ -2067,11 +2241,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &1686840402429771212
@@ -2198,11 +2375,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &1829444907331238612
@@ -2970,13 +3150,54 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 1
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 1
+  ignoreMainGraphic: 0
   pressedColorDarkeningPercent: 0.3
   pressedTweenDuration: 0.15
-  disabledAlpha: 0.4
+  disabledAlpha: 0.5
   disabledTweenDuration: 0.2
-  isInteractable: 0
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
+--- !u!1 &2886244548854592807
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6011394423249971175}
+  m_Layer: 5
+  m_Name: ScreenSpaceButtonPressIcons
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &6011394423249971175
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2886244548854592807}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4388606964635607938}
+  - {fileID: 1621545133622253810}
+  - {fileID: 6121922357221768001}
+  m_Father: {fileID: 6557188955257155058}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &3011981527237292227
 GameObject:
   m_ObjectHideFlags: 0
@@ -2993,7 +3214,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3054134034607711243
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4016,11 +4237,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 1
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &4128263672938414703
@@ -4064,6 +4288,81 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &4164289476527484955
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4388606964635607938}
+  - component: {fileID: 4393232536093035418}
+  - component: {fileID: 2185916340474755631}
+  m_Layer: 5
+  m_Name: SteerLeftIcon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &4388606964635607938
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4164289476527484955}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6011394423249971175}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 317, y: 484}
+  m_SizeDelta: {x: 200, y: 200}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &4393232536093035418
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4164289476527484955}
+  m_CullTransparentMesh: 1
+--- !u!114 &2185916340474755631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4164289476527484955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.28235295}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 9eaa52b849490934ab894675e035a538, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &4243401877312645391
 GameObject:
   m_ObjectHideFlags: 0
@@ -4320,11 +4619,15 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 1
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer:
+  - {fileID: 4388606964635607938}
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &4386835250220401312
@@ -4339,6 +4642,7 @@ GameObject:
   - component: {fileID: 4336273917161866880}
   - component: {fileID: 2743620752480301059}
   - component: {fileID: 7878670594116824965}
+  - component: {fileID: 8726736807776951775}
   m_Layer: 5
   m_Name: HornButton
   m_TagString: Untagged
@@ -4448,6 +4752,40 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8726736807776951775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4386835250220401312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c860658a76de64b856d047b3bf6da8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onStartPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
+  onStopPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  canOnlyBePressedOnPointerDown: 1
+  pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 0
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
+  disabledAlpha: 0.5
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
+  isPressingButton: 0
+  targetGraphics: []
 --- !u!1 &4418803817531138281
 GameObject:
   m_ObjectHideFlags: 0
@@ -4573,11 +4911,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 1
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &4435105630359347117
@@ -4969,11 +5310,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 1
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &4912107008984136447
@@ -5100,13 +5444,91 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 1
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
+--- !u!1 &5072882245031525543
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6121922357221768001}
+  - component: {fileID: 2402235127748869334}
+  - component: {fileID: 9194883511916435159}
+  m_Layer: 5
+  m_Name: BrakeIcon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &6121922357221768001
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5072882245031525543}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6011394423249971175}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 950.4, y: 290.5}
+  m_SizeDelta: {x: 150, y: 150}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &2402235127748869334
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5072882245031525543}
+  m_CullTransparentMesh: 1
+--- !u!114 &9194883511916435159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5072882245031525543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.28235295}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 83f13c24f5ea756449143096ee05d56e, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &5102867566466547172
 GameObject:
   m_ObjectHideFlags: 0
@@ -5215,6 +5637,7 @@ RectTransform:
   - {fileID: 362639760934422226}
   - {fileID: 3405930844429831306}
   - {fileID: 7998805398072265393}
+  - {fileID: 6011394423249971175}
   - {fileID: 7681062576772628162}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5625,11 +6048,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 1
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &6074064425280357129
@@ -5780,11 +6206,15 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 1
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer:
+  - {fileID: 6121922357221768001}
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &6221359489751337272
@@ -5911,11 +6341,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &6287539364136332626
@@ -5930,6 +6363,7 @@ GameObject:
   - component: {fileID: 2485948623232118586}
   - component: {fileID: 4304266899065449545}
   - component: {fileID: 5552696957968397330}
+  - component: {fileID: 6816015517165229084}
   m_Layer: 5
   m_Name: HornButton
   m_TagString: Untagged
@@ -6039,6 +6473,40 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6816015517165229084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6287539364136332626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c860658a76de64b856d047b3bf6da8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onStartPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
+  onStopPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  canOnlyBePressedOnPointerDown: 1
+  pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 0
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
+  disabledAlpha: 0.5
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
+  isPressingButton: 0
+  targetGraphics: []
 --- !u!1 &6401959310557617572
 GameObject:
   m_ObjectHideFlags: 0
@@ -6238,11 +6706,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &6768666735459519603
@@ -6467,6 +6938,7 @@ GameObject:
   - component: {fileID: 4466998813138176526}
   - component: {fileID: 8234669083402447861}
   - component: {fileID: 2668806236991901364}
+  - component: {fileID: 2438216487566874874}
   m_Layer: 5
   m_Name: HornButton
   m_TagString: Untagged
@@ -6576,6 +7048,40 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2438216487566874874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6886005830049578615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6c860658a76de64b856d047b3bf6da8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onStartPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  onHoldPress:
+    m_PersistentCalls:
+      m_Calls: []
+  onStopPressing:
+    m_PersistentCalls:
+      m_Calls: []
+  canOnlyBePressedOnPointerDown: 1
+  pointerMustBeOnRect: 1
+  canBePressedIfBlocked: 0
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
+  disabledAlpha: 0.5
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
+  isPressingButton: 0
+  targetGraphics: []
 --- !u!1 &6979737217325510615
 GameObject:
   m_ObjectHideFlags: 0
@@ -7470,11 +7976,15 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 1
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer:
+  - {fileID: 6121922357221768001}
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &8668984157036808171
@@ -7676,11 +8186,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &8817308371874928971
@@ -7819,11 +8332,14 @@ MonoBehaviour:
   canOnlyBePressedOnPointerDown: 0
   pointerMustBeOnRect: 1
   canBePressedIfBlocked: 0
-  pressedColorDarkeningPercent: 0.5
-  pressedTweenDuration: 0.5
+  ignoreMainGraphic: 0
+  pressedColorDarkeningPercent: 0.3
+  pressedTweenDuration: 0.15
   disabledAlpha: 0.5
-  disabledTweenDuration: 0.5
-  isInteractable: 0
+  disabledTweenDuration: 0.2
+  transformsToMoveFadeTweenDuration: 0.15
+  transformsToMoveUnderPointer: []
+  isInteractable: 1
   isPressingButton: 0
   targetGraphics: []
 --- !u!1 &8817834840608539263

@@ -39,11 +39,17 @@ namespace Gumball
         [SerializeField] private bool canBePressedIfBlocked = true;
 
         [Header("Cosmetic")]
+        [SerializeField] private bool ignoreMainGraphic;
+        [Space(5)]
         [SerializeField, Range(0,1)] private float pressedColorDarkeningPercent = 0.3f;
         [SerializeField] private float pressedTweenDuration = 0.15f;
         [Space(5)]
         [SerializeField, Range(0,1)] private float disabledAlpha = 0.5f;
         [SerializeField] private float disabledTweenDuration = 0.2f;
+        [Space(5)]
+        [SerializeField] private float transformsToMoveFadeTweenDuration = 0.15f;
+        [Tooltip("This will move the listed transforms under the pointer when holding the button.")]
+        [SerializeField] private RectTransform[] transformsToMoveUnderPointer;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool isInteractable = true;
@@ -54,7 +60,9 @@ namespace Gumball
         private readonly Dictionary<Graphic, Color> initialColors = new();
         private Sequence pressedColorTween;
         private Sequence interactableColorTween;
-        
+        private Sequence transformsToMoveFadeTween;
+
+        private RectTransform canvasRectTransform;
         private Vector2 lastKnownPosition;
         private ReadOnlyArray<Touch> previousTouches;
         private GraphicRaycaster graphicRaycasterCached;
@@ -77,6 +85,10 @@ namespace Gumball
         {
             if (!isInitialised)
                 Initialise();
+            
+            //disable the transforms to move until pressed
+            foreach (RectTransform rectTransformToMove in transformsToMoveUnderPointer)
+                rectTransformToMove.gameObject.SetActive(false);
         }
 
         private void Initialise()
@@ -84,6 +96,8 @@ namespace Gumball
             isInitialised = true;
 
             FindTargetGraphics();
+
+            canvasRectTransform = transform.GetComponentInAllParents<CanvasScaler>().transform as RectTransform;
         }
 
         private void Update()
@@ -106,10 +120,13 @@ namespace Gumball
         private void FindTargetGraphics()
         {
             targetGraphics = transform.GetComponentsInAllChildren<Graphic>();
-            
-            Graphic ownGraphic = transform.GetComponent<Graphic>();
-            if (ownGraphic != null)
-                targetGraphics.Add(ownGraphic);
+
+            if (!ignoreMainGraphic)
+            {
+                Graphic ownGraphic = transform.GetComponent<Graphic>();
+                if (ownGraphic != null)
+                    targetGraphics.Add(ownGraphic);
+            }
 
             foreach (Graphic graphic in targetGraphics)
                 initialColors[graphic] = graphic.color;
@@ -169,6 +186,7 @@ namespace Gumball
             lastKnownPosition = PrimaryContactInput.Position;
 
             DoPressColorTween(true);
+            DoTransformsToMoveColorTween(true);
             
             onPress?.Invoke();
             onStartPressing?.Invoke();
@@ -180,6 +198,7 @@ namespace Gumball
             isPressingButton = false;
 
             DoPressColorTween(false);
+            DoTransformsToMoveColorTween(false);
 
             onRelease?.Invoke();
             onStopPressing?.Invoke();
@@ -194,12 +213,48 @@ namespace Gumball
             if (offset.sqrMagnitude > 0.01f)
                 OnDrag(offset);
 
+            MoveTransformsUnderPointer();
+
             onHoldPress?.Invoke();
         }
 
         private void OnDrag(Vector2 offset)
         {
             onDrag?.Invoke(offset);
+        }
+        
+        private void DoTransformsToMoveColorTween(bool enabling)
+        {
+            transformsToMoveFadeTween?.Kill();
+            transformsToMoveFadeTween = DOTween.Sequence();
+            
+            foreach (RectTransform rectTransformToMove in transformsToMoveUnderPointer)
+            {
+                if (enabling)
+                    rectTransformToMove.GetOrAddComponent<CanvasGroup>().alpha = 0; //start at 0 whenever it's moved
+                
+                rectTransformToMove.gameObject.SetActive(true);
+                transformsToMoveFadeTween.Join(rectTransformToMove.GetOrAddComponent<CanvasGroup>().DOFade(enabling ? 1 : 0, transformsToMoveFadeTweenDuration));
+            }
+
+            if (!enabling)
+            {
+                transformsToMoveFadeTween.OnComplete(() =>
+                {
+                    foreach (RectTransform rectTransformToMove in transformsToMoveUnderPointer)
+                        rectTransformToMove.gameObject.SetActive(false);
+                });
+            }
+        }
+
+        private void MoveTransformsUnderPointer()
+        {
+            foreach (RectTransform rectTransformToMove in transformsToMoveUnderPointer)
+            {
+                //convert screen position to local position within the canvas
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, PrimaryContactInput.Position, null, out Vector2 localPoint);
+                rectTransformToMove.localPosition = localPoint;
+            }
         }
         
         private bool IsScreenPositionWithinGraphic(Graphic graphic, Vector2 screenPosition)
