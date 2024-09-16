@@ -80,24 +80,20 @@ namespace Gumball
         
         private void UpdateRacerLayering()
         {
+            if (GameSessionManager.Instance.CurrentSession is not RaceGameSession raceSession)
+                return; //only race sessions have racer positions
+            
             SplineTravelDistanceCalculator playersDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
             if (playersDistanceCalculator == null || playersDistanceCalculator.DistanceInMap < 0)
                 return;
             
-            //sort the racer icons by their distance from the player's distance
+            //sort the racer icons by their race position
             SessionProgressBarRacerIcon[] currentRacerIconsSorted = currentRacerIcons.Values.ToArray();
             Array.Sort(currentRacerIconsSorted, (racerIcon1, racerIcon2) => 
             {
-                SplineTravelDistanceCalculator racer1Dist = racerIcon1.Racer.GetComponent<SplineTravelDistanceCalculator>();
-                SplineTravelDistanceCalculator racer2Dist = racerIcon2.Racer.GetComponent<SplineTravelDistanceCalculator>();
-
-                if (racer1Dist == null || racer1Dist.DistanceInMap < 0) return 1;
-                if (racer2Dist == null || racer2Dist.DistanceInMap < 0) return -1;
-
-                float distanceDiff1 = Mathf.Abs(racer1Dist.DistanceInMap - playersDistanceCalculator.DistanceInMap);
-                float distanceDiff2 = Mathf.Abs(racer2Dist.DistanceInMap - playersDistanceCalculator.DistanceInMap);
-
-                return distanceDiff1.CompareTo(distanceDiff2);
+                int racer1Position = raceSession.GetRacePosition(racerIcon1.Racer);
+                int racer2Position = raceSession.GetRacePosition(racerIcon2.Racer);
+                return racer1Position.CompareTo(racer2Position);
             });
             
             //set the sibling index based on the sorted order

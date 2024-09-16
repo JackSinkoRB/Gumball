@@ -26,7 +26,7 @@ namespace Gumball
                 return;
             
             int currentRank = currentSession.GetRacePosition(WarehouseManager.Instance.CurrentCar);
-            positionLabel.text = $"{currentRank} / {numberOfRacers}";
+            positionLabel.text = $"<size=62>{currentRank}</size>/{numberOfRacers}";
         }
 
     }
