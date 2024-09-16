@@ -518,6 +518,7 @@ namespace Gumball
         private IEnumerator IntroCountdownIE()
         {
             PanelManager.GetPanel<SessionIntroPanel>().Show();
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Show();
             
             int remainingIntroTime = Mathf.CeilToInt(introTime);
             while (remainingIntroTime > 0)
@@ -529,6 +530,7 @@ namespace Gumball
                 remainingIntroTime -= timeBetweenCountdownUpdates;
             }
             
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
             PanelManager.GetPanel<SessionIntroPanel>().Hide();
         }
 

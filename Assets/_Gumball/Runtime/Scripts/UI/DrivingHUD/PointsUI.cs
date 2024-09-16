@@ -14,6 +14,8 @@ namespace Gumball
         private void LateUpdate()
         {
             pointsLabel.text = $"{Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints)}";
+            if (pointsLabel is AutosizeTextMeshPro autoSizeLabel)
+                autoSizeLabel.Resize();
         }
 
     }
