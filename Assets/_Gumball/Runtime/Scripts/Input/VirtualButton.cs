@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using MyBox;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -37,8 +38,22 @@ namespace Gumball
         [Tooltip("Can the button be pressed if it is blocked by graphics on top of this one?")]
         [SerializeField] private bool canBePressedIfBlocked = true;
 
+        [Header("Cosmetic")]
+        [SerializeField, Range(0,1)] private float pressedColorDarkeningPercent = 0.3f;
+        [SerializeField] private float pressedTweenDuration = 0.15f;
+        [Space(5)]
+        [SerializeField, Range(0,1)] private float disabledAlpha = 0.5f;
+        [SerializeField] private float disabledTweenDuration = 0.2f;
+
         [Header("Debugging")]
+        [SerializeField, ReadOnly] private bool isInteractable = true;
         [SerializeField, ReadOnly] private bool isPressingButton;
+        [SerializeField, ReadOnly] private List<Graphic> targetGraphics = new();
+        
+        private bool isInitialised;
+        private readonly Dictionary<Graphic, Color> initialColors = new();
+        private Sequence pressedColorTween;
+        private Sequence interactableColorTween;
         
         private Vector2 lastKnownPosition;
         private ReadOnlyArray<Touch> previousTouches;
@@ -57,7 +72,20 @@ namespace Gumball
                 return graphicRaycasterCached;
             }
         }
-        
+
+        private void OnEnable()
+        {
+            if (!isInitialised)
+                Initialise();
+        }
+
+        private void Initialise()
+        {
+            isInitialised = true;
+
+            FindTargetGraphics();
+        }
+
         private void Update()
         {
             CheckIfButtonIsPressed();
@@ -65,6 +93,28 @@ namespace Gumball
                 OnHold();
         }
 
+        public void SetInteractable(bool isInteractable)
+        {
+            if (this.isInteractable == isInteractable)
+                return; //already set
+                
+            this.isInteractable = isInteractable;
+
+            DoInteractableColorTween(isInteractable);
+        }
+        
+        private void FindTargetGraphics()
+        {
+            targetGraphics = transform.GetComponentsInAllChildren<Graphic>();
+            
+            Graphic ownGraphic = transform.GetComponent<Graphic>();
+            if (ownGraphic != null)
+                targetGraphics.Add(ownGraphic);
+
+            foreach (Graphic graphic in targetGraphics)
+                initialColors[graphic] = graphic.color;
+        }
+        
         private void CheckIfButtonIsPressed()
         {
             bool isPressed = false;
@@ -79,7 +129,7 @@ namespace Gumball
 
             previousTouches = InputManager.ActiveTouches;
 
-            if (isPressed && !IsPressingButton)
+            if (isPressed && !IsPressingButton && isInteractable)
                 OnPress();
 
             if (pointerMustBeOnRect)
@@ -96,7 +146,7 @@ namespace Gumball
         
         private bool IsButtonPressedWithTouch(Touch touch)
         {
-            if (canOnlyBePressedOnPointerDown && previousTouches.Contains(touch))
+            if (!IsPressingButton && canOnlyBePressedOnPointerDown && previousTouches.Contains(touch))
                 return false;
 
             if (!IsScreenPositionWithinGraphic(image, touch.screenPosition))
@@ -118,6 +168,8 @@ namespace Gumball
             
             lastKnownPosition = PrimaryContactInput.Position;
 
+            DoPressColorTween(true);
+            
             onPress?.Invoke();
             onStartPressing?.Invoke();
             GlobalLoggers.InputLogger.Log($"Pressed {gameObject.name}");
@@ -126,6 +178,8 @@ namespace Gumball
         private void OnRelease()
         {
             isPressingButton = false;
+
+            DoPressColorTween(false);
 
             onRelease?.Invoke();
             onStopPressing?.Invoke();
@@ -168,6 +222,39 @@ namespace Gumball
             return rectWithPadding.Contains(screenPosition);
         }
 
+        private void DoInteractableColorTween(bool isInteractable)
+        {
+            pressedColorTween?.Kill(); //take priority over press color tween
+            interactableColorTween?.Kill();
+            interactableColorTween = DOTween.Sequence();
+            
+            foreach (Graphic graphic in targetGraphics)
+            {
+                Color interactableColor = initialColors[graphic];
+                Color disabledColor = initialColors[graphic].WithAlphaSetTo(disabledAlpha);
+                
+                interactableColorTween.Join(graphic.DOColor(isInteractable ? interactableColor : disabledColor, disabledTweenDuration));
+            }
+        }
+        
+        private void DoPressColorTween(bool isPressed)
+        {
+            if (!isInteractable)
+                return; //interactable color tween takes priority
+            
+            interactableColorTween?.Kill();
+            pressedColorTween?.Kill();
+            pressedColorTween = DOTween.Sequence();
+            
+            foreach (Graphic graphic in targetGraphics)
+            {
+                Color pressedColor = new Color(graphic.color.r - pressedColorDarkeningPercent, graphic.color.g - pressedColorDarkeningPercent, graphic.color.b - pressedColorDarkeningPercent);
+                Color depressedColor = initialColors[graphic];
+                
+                pressedColorTween.Join(graphic.DOColor(isPressed ? pressedColor : depressedColor, pressedTweenDuration));
+            }
+        }
+        
 #if UNITY_EDITOR
         private Rect rectToDraw;
         private void OnDrawGizmos()
