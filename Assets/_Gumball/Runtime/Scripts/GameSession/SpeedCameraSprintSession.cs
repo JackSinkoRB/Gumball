@@ -35,9 +35,14 @@ namespace Gumball
         
         public SpeedCameraZone[] SpeedCameraZones => speedCameraZones;
 
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Speed camera sprint";
+        }
+        
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.SpeedCameraSprintIcon;
         }
 
         protected override GameSessionPanel GetSessionPanel()
@@ -45,7 +50,7 @@ namespace Gumball
             return PanelManager.GetPanel<SpeedCameraSprintSessionPanel>();
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<SpeedCameraSprintSessionEndPanel>();
         }
@@ -74,7 +79,7 @@ namespace Gumball
                 int racerIndex = 0;
                 foreach (AICar racer in CurrentRacers.Keys)
                 {
-                    if (racer.IsPlayerCar)
+                    if (racer.IsPlayer)
                         continue;
 
                     float brakingPosition = start - racerSpeedCameraSprintData[racerIndex].BrakingDistanceRange.RandomInRange();
@@ -112,7 +117,7 @@ namespace Gumball
         {
             racersInPositionOrderCached = CurrentRacers.Keys.OrderBy(racer => zonesFailed.ContainsKey(racer) ? zonesFailed[racer].Count : 0)
                 .ThenByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap)
-                .ToArray();
+                .ToList();
         }
 
         private void SpawnZoneMarkers()
@@ -138,7 +143,7 @@ namespace Gumball
         {
             foreach (AICar racer in CurrentRacers.Keys)
             {
-                if (racer.IsPlayerCar)
+                if (racer.IsPlayer)
                     continue;
                 
                 racer.RemoveTemporarySpeedLimit();
@@ -170,7 +175,7 @@ namespace Gumball
                     if (hasPassedZone || hasFailedZone)
                         continue;
                     
-                    if (zone.IsRacerInZone(racer) && racer.Speed >= zone.SpeedLimitKmh + speedLimitLeniencyKmh)
+                    if (zone.IsRacerInZone(racer) && racer.SpeedKmh >= zone.SpeedLimitKmh + speedLimitLeniencyKmh)
                     {
                         OnFailZone(racer, zone);
                     }
@@ -201,7 +206,7 @@ namespace Gumball
             
             onFailZone?.Invoke(racer, zone);
             
-            GlobalLoggers.GameSessionLogger.Log($"{racer.name} failed zone at {zone.Position}m doing {racer.Speed}kmh.");
+            GlobalLoggers.GameSessionLogger.Log($"{racer.name} failed zone at {zone.Position}m doing {racer.SpeedKmh}kmh.");
         }
 
 #if UNITY_EDITOR

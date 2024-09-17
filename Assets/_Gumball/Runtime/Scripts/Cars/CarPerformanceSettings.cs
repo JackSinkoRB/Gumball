@@ -10,12 +10,13 @@ namespace Gumball
     public class CarPerformanceSettings
     {
 
-        [Header("Drivetrain")]
-        [Tooltip("The amount to contibute to the acceleration performance points for the gearbox.")]
-        [SerializeField, PositiveValueOnly] private int gearboxAccelerationPerformancePoints;
-        [Tooltip("The amount to contibute to the max speed performance points for the gearbox.")]
-        [SerializeField, PositiveValueOnly] private int gearboxMaxSpeedPerformancePoints;
-        
+        [Header("Base performance ratings")]
+        [HelpBox("These are added to the total performance ratings.")]
+        [SerializeField] private int baseMaxSpeed;
+        [SerializeField] private int baseAcceleration;
+        [SerializeField] private int baseHandling;
+        [SerializeField] private int baseNos;
+
         [Header("Torque")]
         [Tooltip("The engine torque output (y axis - value) (in Newton metres) compared to the engine RPM (x axis - time), between the min and max RPM ranges (where x = 0 is minEngineRpm and x = 1 is maxEngineRpm)")]
         [SerializeField] private AnimationCurve minTorqueCurve;
@@ -27,10 +28,7 @@ namespace Gumball
         [Header("RPM range")]
         [SerializeField] private CarPerformanceSettingFloat engineRpmRangeMin = new(600, 1000);
         [SerializeField] private CarPerformanceSettingFloat engineRpmRangeMax = new(6000, 10000);
-
-        [Tooltip("If RPM goes outside this range, it will try upshift/downshift to the desired RPM. For optimal power, the ideal range is where the torque is the highest.")]
-        [SerializeField] private CarPerformanceSettingMinMaxFloat idealRPMRangeForGearChanges = new(new MinMaxFloat(3000, 6000), new MinMaxFloat(3000, 8000));
-
+        
         [Header("Mass")]
         [SerializeField] private CarPerformanceSettingFloat rigidbodyMass = new(1300, 1000);
 
@@ -55,9 +53,12 @@ namespace Gumball
         [Tooltip("How much additional torque added to the car when NOS is activated.")]
         [SerializeField] private CarPerformanceSettingFloat nosTorqueAddition = new(1000f, 2000f);
 
+        public int BaseMaxSpeed => baseMaxSpeed;
+        public int BaseAcceleration => baseAcceleration;
+        public int BaseHandling => baseHandling;
+        public int BaseNos => baseNos;
         public CarPerformanceSettingFloat EngineRpmRangeMin => engineRpmRangeMin;
         public CarPerformanceSettingFloat EngineRpmRangeMax => engineRpmRangeMax;
-        public CarPerformanceSettingMinMaxFloat IdealRPMRangeForGearChanges => idealRPMRangeForGearChanges;
         public CarPerformanceSettingFloat RigidbodyMass => rigidbodyMass;
         public CarPerformanceSettingFloat BrakeTorque => brakeTorque;
         public CarPerformanceSettingFloat HandbrakeEaseOffDuration => handbrakeEaseOffDuration;

@@ -35,6 +35,7 @@ namespace Gumball
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
         [Header("Info")]
+        [SerializeField] private string displayName = "Level";
         [SerializeField] private string description = "Description of session";
         
         [Header("Map setup")]
@@ -76,7 +77,6 @@ namespace Gumball
         [SerializeField] private Rewards rewards;
 
         [Header("Challenges")]
-        [SerializeField] private string mainChallengeDescription = "This is the challenge description";
         [SerializeField] private Challenge[] subObjectives;
         
         [Header("Debugging")]
@@ -90,6 +90,7 @@ namespace Gumball
         
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
 
+        public ProgressStatus LastProgress { get; private set; }
         public ProgressStatus Progress
         {
             get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
@@ -97,15 +98,16 @@ namespace Gumball
         }
 
         public Challenge[] SubObjectives => subObjectives;
-        
+
+        public string DisplayName => displayName;
         public string Description => description;
-        public string MainChallengeDescription => mainChallengeDescription;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
         public GenericDictionary<AICar, RacerSessionData> CurrentRacers => currentRacers;
         public Rewards Rewards => rewards;
+        public bool HasLoaded { get; private set; }
         public bool HasStarted { get; private set; }
         public bool TrafficIsProcedural => trafficIsProcedural;
         public int TrafficDensity => trafficDensity;
@@ -116,12 +118,16 @@ namespace Gumball
         public ChunkMap CurrentChunkMap => currentChunkMapCached;
 
         protected abstract GameSessionPanel GetSessionPanel();
-        protected abstract GameSessionEndPanel GetSessionEndPanel();
+        protected abstract SessionEndPanel GetSessionEndPanel();
 
-        public abstract string GetName();
+        public abstract string GetModeDisplayName();
+        public abstract Sprite GetModeIcon();
+        public abstract ObjectiveUI.FakeChallengeData GetChallengeData();
+        public abstract string GetMainObjectiveGoalValue();
 
         public void StartSession()
         {
+            HasLoaded = false;
             HasStarted = false;
             GameSessionManager.Instance.SetCurrentSession(this);
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
@@ -292,7 +298,8 @@ namespace Gumball
         public void EndSession(ProgressStatus progress)
         {
             inProgress = false;
-
+            LastProgress = progress;
+            
             if (sessionCoroutine != null)
                 CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
             
@@ -308,8 +315,6 @@ namespace Gumball
             }
 
             onSessionEnd?.Invoke(this, progress);
-            
-            StopTrackingObjectives();
         }
 
         public void UnloadSession()
@@ -318,6 +323,8 @@ namespace Gumball
             
             if (chunkMapHandle.IsValid())
                 Addressables.Release(chunkMapHandle);
+            
+            StopTrackingObjectives();
             
             Destroy(currentChunkMapCached);
             trafficPrefabHandles.Clear(); //remove the traffic car references so they can be unloaded 
@@ -332,28 +339,43 @@ namespace Gumball
         {
             HasStarted = false;
 
-            PanelManager.GetPanel<DrivingControlsPanel>().Hide();
-            if (GetSessionPanel() != null)
-                GetSessionPanel().Hide();
-            if (GetSessionEndPanel() != null)
-                GetSessionEndPanel().Show();
-            
-            drivingCameraController.SetState(drivingCameraController.OutroState);
+            if (PanelManager.ExistsRuntime && PanelManager.PanelExists<DrivingControlsPanel>())
+                PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+
+            if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
+                PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
+
+            if (ChunkMapSceneManager.ExistsRuntime)
+                drivingCameraController.SetState(drivingCameraController.OutroState);
             
             //disable NOS
             WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-            
-            //come to a stop
-            WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
 
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
             
             //convert skill points to followers
-            FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
+            if (SkillCheckManager.ExistsRuntime)
+                FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
+
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Hide();
+            CoroutineHelper.StartCoroutineOnCurrentScene(ShowSessionEndPanel());
+        }
+
+        private IEnumerator ShowSessionEndPanel()
+        {
+            yield return new WaitForSeconds(1f);
+            
+            PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            
+            yield return new WaitForSeconds(1f);
+            PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
+            if (GetSessionEndPanel() != null)
+                GetSessionEndPanel().Show();
         }
 
         public virtual void UpdateWhenCurrent()
@@ -393,7 +415,9 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log("Loading session...");
             yield return LoadSession();
 
+            HasLoaded = true;
             PanelManager.GetPanel<LoadingPanel>().Hide();
+            
             InputManager.Instance.CarInput.Enable();
             
             yield return IntroCinematicIE();
@@ -403,7 +427,10 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(true); //auto accelerate
+            
+            //auto accelerate (for non-buttons layout)
+            DrivingControlLayoutManager layoutManager = PanelManager.GetPanel<DrivingControlsPanel>().LayoutManager;
+            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(layoutManager.CurrentLayout.AutoAccelerate);
         }
 
         protected virtual void OnSessionStart()
@@ -497,6 +524,7 @@ namespace Gumball
         private IEnumerator IntroCountdownIE()
         {
             PanelManager.GetPanel<SessionIntroPanel>().Show();
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Show();
             
             int remainingIntroTime = Mathf.CeilToInt(introTime);
             while (remainingIntroTime > 0)
@@ -508,6 +536,7 @@ namespace Gumball
                 remainingIntroTime -= timeBetweenCountdownUpdates;
             }
             
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
             PanelManager.GetPanel<SessionIntroPanel>().Hide();
         }
 
@@ -540,13 +569,13 @@ namespace Gumball
             {
                 RacerSessionData data = racerData[index];
 
-                if (data.AssetReference == null)
+                if (data.CarAssetReference == null)
                 {
                     Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
                     continue;
                 }
                 
-                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
+                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.CarAssetReference);
                 handles[index] = handle;
             }
 
@@ -567,8 +596,8 @@ namespace Gumball
                 AICar racer = Instantiate(handles[index].Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
                 racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[index]);
 
-                racer.SetPerformanceProfile(data.PerformanceProfile);
                 racer.InitialiseAsRacer();
+                data.LoadIntoCar(racer);
 
                 currentRacers[racer] = data;
             }
@@ -639,10 +668,15 @@ namespace Gumball
         private void OnCrossFinishLine()
         {
             ProgressStatus status = ProgressStatus.ATTEMPTED;
-            if (AreAllSubObjectivesComplete())
+            if (AreAllSubObjectivesComplete() && IsCompleteOnCrossFinishLine())
                 status = ProgressStatus.COMPLETE;
             
             EndSession(status);
+        }
+
+        protected virtual bool IsCompleteOnCrossFinishLine()
+        {
+            return true;
         }
 
         private bool AreAllSubObjectivesComplete()

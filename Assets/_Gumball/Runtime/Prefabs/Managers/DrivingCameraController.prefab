@@ -375,7 +375,7 @@ MonoBehaviour:
       m_RotationOrder: 0
   - from: {fileID: 2867138450535570593}
     to: {fileID: 8970949092867848097}
-    transitionTime: 2
+    transitionTime: 1
     blendCurve:
       serializedVersion: 2
       m_Curve:
@@ -402,7 +402,7 @@ MonoBehaviour:
       m_RotationOrder: 0
   - from: {fileID: 1464593099206671265}
     to: {fileID: 8970949092867848097}
-    transitionTime: 2
+    transitionTime: 1
     blendCurve:
       serializedVersion: 2
       m_Curve:
@@ -482,22 +482,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 2770630332642590920}
   fakeRotationPivot: {fileID: 5297060517151192155}
   fakeDepthPivot: {fileID: 7426213242085698767}
   fakeLookAtPivot: {fileID: 1781591465023069107}
+  setFakePositionsAsRealPositionsOnSet: 0
   rotationLerpSpeed: 6
   rotationLerpSpeedToZero: 2
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
-    depth: -0.01
-    depthDuration: 0.4
+    depth: 0
+    depthDuration: 0.8
     depthEase: 4
-    height: -0.01
-    heightDuration: 0.2
+    height: 0
+    heightDuration: 0.8
     heightEase: 4
   accelerationEndMomentum:
     depth: 0
@@ -508,40 +509,50 @@ MonoBehaviour:
     heightEase: 4
   brakingStartMomentum:
     depth: 0.05
-    depthDuration: 1.5
+    depthDuration: 0.8
     depthEase: 6
-    height: 0.005
-    heightDuration: 0.75
+    height: 0.04
+    heightDuration: 0.7
     heightEase: 6
   brakingEndMomentum:
     depth: 0
-    depthDuration: 1
+    depthDuration: 2
     depthEase: 4
     height: 0
-    heightDuration: 0.5
+    heightDuration: 2
     heightEase: 4
   gearChangeStartMomentum:
-    depth: -0.02
-    depthDuration: 0.3
+    depth: 0.04
+    depthDuration: 0.2
     depthEase: 4
-    height: -0.03
-    heightDuration: 0.3
+    height: 0.02
+    heightDuration: 0.25
     heightEase: 4
   gearChangeEndMomentum:
-    depth: -0.01
-    depthDuration: 0.4
-    depthEase: 6
-    height: -0.01
-    heightDuration: 0.4
-    heightEase: 6
+    depth: -0.03
+    depthDuration: 1
+    depthEase: 28
+    height: 0
+    heightDuration: 1
+    heightEase: 28
   offset: {x: 0, y: 0, z: 0}
   offsetIsLocalised: 1
   lookAtOffset: {x: 0, y: 0, z: 1}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
   nosShake:
-    magnitude: 0.75
+    magnitude: 1
+    roughness: 8
+    positionInfluence: {x: 0.05, y: 0.05, z: 0}
+    rotationInfluence: {x: 1, y: 1, z: 0.5}
+    fadeInDuration: 0.1
+    fadeOutDuration: 1
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 20
+    Max: 150
+  speedShake:
+    magnitude: 0.5
     roughness: 10
     positionInfluence: {x: 0.05, y: 0.05, z: 0}
     rotationInfluence: {x: 1, y: 1, z: 0.5}
@@ -549,7 +560,15 @@ MonoBehaviour:
     fadeOutDuration: 1
     fadeOutInstantly: 0
     currentState: 0
-    magnitudeModifier: 1
+    magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 55
+    Max: 70
+  speedForMaxFOVKmh: 250
+  fovSpeedBraking: 0.5
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 4
+  additionalFovWhenUsingNos: 30
   minCollisionMagnitudeForShake: 500
   collisionMagnitudeForMaxShake: 10000
   collisionMaxShake:
@@ -609,16 +628,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 1006243703143211636}
   fakeRotationPivot: {fileID: 206867046030377605}
   fakeDepthPivot: {fileID: 6025358149367630732}
   fakeLookAtPivot: {fileID: 1066367200461969775}
+  setFakePositionsAsRealPositionsOnSet: 0
   rotationLerpSpeed: 6
   rotationLerpSpeedToZero: 2
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
     depth: -0.01
     depthDuration: 0.4
@@ -664,11 +684,21 @@ MonoBehaviour:
   offset: {x: 0, y: 0, z: 0}
   offsetIsLocalised: 1
   lookAtOffset: {x: 0, y: 0, z: -1}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
   nosShake:
-    magnitude: 0.75
+    magnitude: 1
+    roughness: 5
+    positionInfluence: {x: 0.05, y: 0.05, z: 0}
+    rotationInfluence: {x: 1, y: 1, z: 0.5}
+    fadeInDuration: 0.1
+    fadeOutDuration: 1
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 20
+    Max: 150
+  speedShake:
+    magnitude: 0.5
     roughness: 10
     positionInfluence: {x: 0.05, y: 0.05, z: 0}
     rotationInfluence: {x: 1, y: 1, z: 0.5}
@@ -676,7 +706,15 @@ MonoBehaviour:
     fadeOutDuration: 1
     fadeOutInstantly: 0
     currentState: 0
-    magnitudeModifier: 1
+    magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 55
+    Max: 95
+  speedForMaxFOVKmh: 250
+  fovSpeedBraking: 0.5
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 4
+  additionalFovWhenUsingNos: 30
   minCollisionMagnitudeForShake: 500
   collisionMagnitudeForMaxShake: 10000
   collisionMaxShake:
@@ -736,66 +774,77 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 1229020240171631144}
   fakeRotationPivot: {fileID: 961558282498977149}
   fakeDepthPivot: {fileID: 5847629264015361176}
   fakeLookAtPivot: {fileID: 7721195789677832090}
+  setFakePositionsAsRealPositionsOnSet: 0
   rotationLerpSpeed: 6
   rotationLerpSpeedToZero: 2
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
-    depth: -0.2
-    depthDuration: 0.4
+    depth: 0
+    depthDuration: 0.8
     depthEase: 4
-    height: -0.1
-    heightDuration: 0.2
+    height: 0
+    heightDuration: 0.8
     heightEase: 4
   accelerationEndMomentum:
     depth: 0
     depthDuration: 0.75
     depthEase: 4
-    height: 0
+    height: -0.8
     heightDuration: 0.3
     heightEase: 4
   brakingStartMomentum:
-    depth: 0.4
-    depthDuration: 1.5
+    depth: 0.3
+    depthDuration: 0.8
     depthEase: 6
-    height: 0.1
-    heightDuration: 0.75
+    height: 0.25
+    heightDuration: 0.7
     heightEase: 6
   brakingEndMomentum:
     depth: 0
-    depthDuration: 1
+    depthDuration: 2
     depthEase: 4
     height: 0
-    heightDuration: 0.5
+    heightDuration: 2
     heightEase: 4
   gearChangeStartMomentum:
-    depth: -0.15
-    depthDuration: 0.3
+    depth: 0.25
+    depthDuration: 0.2
     depthEase: 4
-    height: -0.2
-    heightDuration: 0.3
+    height: 0.1
+    heightDuration: 0.25
     heightEase: 4
   gearChangeEndMomentum:
-    depth: -0.2
-    depthDuration: 0.4
-    depthEase: 6
-    height: -0.1
-    heightDuration: 0.4
-    heightEase: 6
-  offset: {x: 0, y: 2, z: -5}
+    depth: -0.1
+    depthDuration: 1
+    depthEase: 28
+    height: 0
+    heightDuration: 1
+    heightEase: 28
+  offset: {x: 0, y: 1.8, z: -4}
   offsetIsLocalised: 0
   lookAtOffset: {x: 0, y: 1, z: 0}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
   nosShake:
-    magnitude: 0.75
+    magnitude: 3
+    roughness: 5
+    positionInfluence: {x: 0.05, y: 0.05, z: 0}
+    rotationInfluence: {x: 1, y: 1, z: 0.5}
+    fadeInDuration: 0.1
+    fadeOutDuration: 1
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 50
+    Max: 350
+  speedShake:
+    magnitude: 2
     roughness: 10
     positionInfluence: {x: 0.05, y: 0.05, z: 0}
     rotationInfluence: {x: 1, y: 1, z: 0.5}
@@ -804,6 +853,14 @@ MonoBehaviour:
     fadeOutInstantly: 0
     currentState: 0
     magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 55
+    Max: 95
+  speedForMaxFOVKmh: 250
+  fovSpeedBraking: 0.5
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 4
+  additionalFovWhenUsingNos: 30
   minCollisionMagnitudeForShake: 500
   collisionMagnitudeForMaxShake: 10000
   collisionMaxShake:
@@ -1054,16 +1111,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 4880751071222427762}
   fakeRotationPivot: {fileID: 4880751071222427762}
   fakeDepthPivot: {fileID: 2732334379521578949}
   fakeLookAtPivot: {fileID: 1666526802143909317}
+  setFakePositionsAsRealPositionsOnSet: 0
   rotationLerpSpeed: 0
   rotationLerpSpeedToZero: 0
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
     depth: 1
     depthDuration: 1
@@ -1109,9 +1167,6 @@ MonoBehaviour:
   offset: {x: 6, y: 2, z: -6}
   offsetIsLocalised: 1
   lookAtOffset: {x: 0, y: 1, z: 0}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
   nosShake:
     magnitude: 0
     roughness: 0
@@ -1122,6 +1177,27 @@ MonoBehaviour:
     fadeOutInstantly: 0
     currentState: 0
     magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 1000
+    Max: 1000
+  speedShake:
+    magnitude: 0
+    roughness: 0
+    positionInfluence: {x: 0, y: 0, z: 0}
+    rotationInfluence: {x: 0, y: 0, z: 0}
+    fadeInDuration: 0
+    fadeOutDuration: 0
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 55
+    Max: 95
+  speedForMaxFOVKmh: 100
+  fovSpeedBraking: 0.5
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 4
+  additionalFovWhenUsingNos: 10
   minCollisionMagnitudeForShake: 0
   collisionMagnitudeForMaxShake: 0
   collisionMaxShake:
@@ -1510,64 +1586,62 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 3123130293420109088}
   fakeRotationPivot: {fileID: 8473699086619150081}
   fakeDepthPivot: {fileID: 8189775972105919124}
   fakeLookAtPivot: {fileID: 7088122836268771609}
+  setFakePositionsAsRealPositionsOnSet: 1
   rotationLerpSpeed: 0
   rotationLerpSpeedToZero: 0
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   accelerationEndMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   brakingStartMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   brakingEndMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   gearChangeStartMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   gearChangeEndMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
-  offset: {x: 6, y: 2, z: -6}
-  offsetIsLocalised: 1
-  lookAtOffset: {x: 0, y: 3, z: 0}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
+  offset: {x: 0, y: 2, z: 0}
+  offsetIsLocalised: 0
+  lookAtOffset: {x: 0, y: 1, z: 0}
   nosShake:
     magnitude: 0
     roughness: 0
@@ -1578,6 +1652,27 @@ MonoBehaviour:
     fadeOutInstantly: 0
     currentState: 0
     magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 0
+    Max: 0
+  speedShake:
+    magnitude: 1
+    roughness: 1
+    positionInfluence: {x: 0.05, y: 0.05, z: 0}
+    rotationInfluence: {x: 1, y: 1, z: 0.5}
+    fadeInDuration: 0.1
+    fadeOutDuration: 1
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 60
+    Max: 60
+  speedForMaxFOVKmh: 0
+  fovSpeedBraking: 0.5
+  fovSpeedAccelerating: 0.5
+  fovSpeedNos: 0.5
+  additionalFovWhenUsingNos: 10
   minCollisionMagnitudeForShake: 0
   collisionMagnitudeForMaxShake: 0
   collisionMaxShake:
@@ -1591,3 +1686,29 @@ MonoBehaviour:
     currentState: 0
     magnitudeModifier: 0
   otherTarget: {fileID: 0}
+  lerpDuration: 3
+  lerpCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  timePassed: 0

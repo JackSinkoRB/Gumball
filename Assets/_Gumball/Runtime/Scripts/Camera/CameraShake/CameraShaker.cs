@@ -47,6 +47,11 @@ namespace Gumball
             transform.localPosition = posAddShake;
             transform.localEulerAngles = rotAddShake;
         }
+
+        public bool IsTracked(CameraShakeInstance shake)
+        {
+            return cameraShakeInstances.Contains(shake);
+        }
         
         public void TrackShake(CameraShakeInstance shake)
         {

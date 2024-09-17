@@ -11,11 +11,11 @@ namespace Gumball
     public class RaceGameSession : GameSession
     {
 
-        [SerializeField, ReadOnly] protected AICar[] racersInPositionOrderCached;
+        [SerializeField, ReadOnly] protected List<AICar> racersInPositionOrderCached;
         
         private int frameLastCachedRacerPositionOrder = -1;
 
-        protected AICar[] RacersInPositionOrder
+        protected List<AICar> RacersInPositionOrder
         {
             get
             {
@@ -30,31 +30,55 @@ namespace Gumball
             }
         }
         
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Race";
         }
         
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.RaceIcon;
+        }
+
+        public override ObjectiveUI.FakeChallengeData GetChallengeData()
+        {
+            return GameSessionManager.Instance.RacePositionChallengeData;
+        }
+
         protected override GameSessionPanel GetSessionPanel()
         {
             return PanelManager.GetPanel<RaceSessionPanel>();
         }
-        
-        protected override GameSessionEndPanel GetSessionEndPanel()
+
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<RaceSessionEndPanel>();
         }
-        
+
+        public override string GetMainObjectiveGoalValue()
+        {
+            return "1st";
+        }
+
+        protected override bool IsCompleteOnCrossFinishLine()
+        {
+            int finishingRank = GetRacePosition(WarehouseManager.Instance.CurrentCar);
+            return finishingRank == 1;
+        }
+
         public int GetRacePosition(AICar racer)
         {
-            int rank = Array.IndexOf(RacersInPositionOrder, racer) + 1;
+            int rank = RacersInPositionOrder.IndexOf(racer) + 1;
             return rank;
         }
 
         protected virtual void UpdateRacersPositions()
         {
+            if (!GameSessionManager.Instance.CurrentSession.InProgress)
+                return; //don't keep updating the positions once the session has ended
+            
             //sort the cars based on distanceTraveled (descending order)
-            racersInPositionOrderCached = CurrentRacers.Keys.OrderByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap).ToArray();
+            racersInPositionOrderCached = CurrentRacers.Keys.OrderByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap).ToList();
         }
         
     }

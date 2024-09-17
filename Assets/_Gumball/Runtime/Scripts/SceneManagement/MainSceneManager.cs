@@ -11,6 +11,8 @@ namespace Gumball
     public class MainSceneManager : Singleton<MainSceneManager>
     {
 
+        [SerializeField] private CameraShakeInstance cameraShake;
+        
         [SerializeField] private Vector3 carPosition;
         [SerializeField] private Vector3 carRotationEuler;
         
@@ -36,6 +38,16 @@ namespace Gumball
                 });
         }
         
+        protected override void Initialise()
+        {
+            base.Initialise();
+            
+            cameraShake.DoShake();
+
+            this.PerformAfterTrue(() => WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null, 
+                () => WarehouseManager.Instance.CurrentCar.SetAutoDrive(false));
+        }
+
         public static void LoadMainScene()
         {
             CoroutineHelper.Instance.StartCoroutine(LoadMainSceneIE());

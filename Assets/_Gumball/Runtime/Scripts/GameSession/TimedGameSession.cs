@@ -20,12 +20,18 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private float timeRemainingSeconds;
         [SerializeField, ReadOnly] private bool timerHasStarted;
-        
+
+        public float TimeAllowedSeconds => timeAllowedSeconds;
         public float TimeRemainingSeconds => timeRemainingSeconds;
 
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Timed";
+        }
+
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.TimedIcon;
         }
 
         protected override GameSessionPanel GetSessionPanel()
@@ -33,9 +39,20 @@ namespace Gumball
             return PanelManager.GetPanel<TimedSessionPanel>();
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<TimedSessionEndPanel>();
+        }
+        
+        public override ObjectiveUI.FakeChallengeData GetChallengeData()
+        {
+            return GameSessionManager.Instance.TimeChallengeData;
+        }
+
+        public override string GetMainObjectiveGoalValue()
+        {
+            string timeGoalUserFriendly = TimeSpan.FromSeconds(timeAllowedSeconds).ToPrettyString();
+            return timeGoalUserFriendly;
         }
 
         protected override IEnumerator LoadSession()

@@ -13,6 +13,7 @@ namespace Gumball
     public class SlipStreamSkillCheck : SkillCheck
     {
 
+        [Header("Slip stream")]
         [Tooltip("The minimum speed the player must be going to enable slip stream.")]
         [SerializeField] private float minSpeedKmh = 50;
         [Tooltip("The width around the cars front position for a racer to be in to trigger slipstreaming.")]
@@ -33,7 +34,7 @@ namespace Gumball
                 return;
             }
 
-            if (WarehouseManager.Instance.CurrentCar.Speed < minSpeedKmh)
+            if (WarehouseManager.Instance.CurrentCar.SpeedKmh < minSpeedKmh)
             {
                 OnStopSlipStream();
                 return;

@@ -19,11 +19,27 @@ namespace Gumball
         
         [SerializeField] private CheckpointMarkers knockoutPositionMarkers;
 
+        private List<AICar> remainingRacersInOrder
+        {
+            get
+            {
+                List<AICar> racers = new List<AICar>(RacersInPositionOrder);
+                foreach (AICar eliminatedRacer in EliminatedRacers)
+                    racers.Remove(eliminatedRacer);
+                return racers;
+            }
+        }
+        
         public readonly HashSet<AICar> EliminatedRacers = new();
 
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Knockout";
+        }
+        
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.KnockoutIcon;
         }
         
         protected override GameSessionPanel GetSessionPanel()
@@ -31,7 +47,7 @@ namespace Gumball
             return PanelManager.GetPanel<KnockoutSessionPanel>();
         }
 
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<KnockoutSessionEndPanel>();
         }
@@ -79,14 +95,17 @@ namespace Gumball
 
         private void EliminateLastRacer()
         {
-            AICar lastRacer = RacersInPositionOrder[^(EliminatedRacers.Count + 1)];
+            AICar lastRacer = remainingRacersInOrder[^1];
+            
             GlobalLoggers.GameSessionLogger.Log($"Eliminating {lastRacer.name}");
 
             EliminatedRacers.Add(lastRacer);
+
+            PanelManager.GetPanel<KnockoutSessionPanel>().ProgressBar.RemoveRacerIcon(lastRacer);
             
             lastRacer.SetObeySpeedLimit(true);
 
-            if (lastRacer.IsPlayerCar)
+            if (lastRacer.IsPlayer)
                 OnEliminatePlayer();
         }
 

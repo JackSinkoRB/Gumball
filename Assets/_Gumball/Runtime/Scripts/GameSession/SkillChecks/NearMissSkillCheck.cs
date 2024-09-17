@@ -12,7 +12,8 @@ namespace Gumball
     [Serializable]
     public class NearMissSkillCheck : SkillCheck
     {
-
+        
+        [Header("Near miss")]
         [SerializeField] private float labelDuration = 1;
         [Tooltip("The minimum speed the player must be going for a near miss.")]
         [SerializeField] private float minSpeedKmh = 50;
@@ -40,7 +41,7 @@ namespace Gumball
             if (timeSinceLastCollision < minTimeWithNoCollision)
                 return;
             
-            if (WarehouseManager.Instance.CurrentCar.Speed < minSpeedKmh)
+            if (WarehouseManager.Instance.CurrentCar.SpeedKmh < minSpeedKmh)
                 return;
             
             Vector3 halfExtents = new Vector3(WarehouseManager.Instance.CurrentCar.CarWidth / 2f + maxDistance, 1, WarehouseManager.Instance.CurrentCar.FrontOfCarPosition.z + maxDistance);

@@ -202,12 +202,18 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3
-          bundler-cache: true
+          bundler-cache: false
+
+      # Bundle install
+      - name: bundle install
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: bundle install
 
       - name: Upload to Google Play Internal
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         uses: maierj/fastlane-action@v3.1.0
         with:
+          platform: 'android'
           lane: 'android internal'
 
       # Delete build folder to save space
@@ -284,7 +290,8 @@ jobs:
     needs: [buildAndDeployAndroid, buildAndDeployWindows]
     name: Deploy to Discord
     runs-on: self-hosted
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    if: |
+      always() && github.event_name == 'push' && github.ref == 'refs/heads/develop' && needs.buildAndDeployAndroid.result == 'success' && needs.buildAndDeployWindows.result == 'success'
     steps:
 
       # Get all the commits

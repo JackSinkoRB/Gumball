@@ -8,7 +8,7 @@ namespace Gumball
     public class NosButton : MonoBehaviour
     {
 
-        [SerializeField] private Button button;
+        [SerializeField] private VirtualButton button;
         [SerializeField] private Image fillImage;
 
         private NosManager nosManager => WarehouseManager.Instance.CurrentCar.NosManager;
@@ -17,7 +17,7 @@ namespace Gumball
         {
             fillImage.fillAmount = nosManager.AvailableNosPercent;
 
-            button.interactable = nosManager.AvailableNosPercent > NosManager.MinPercentToActivate;
+            button.SetInteractable(nosManager.AvailableNosPercent > NosManager.MinPercentToActivate);
         }
         
         public void OnPressNosButton()

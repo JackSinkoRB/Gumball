@@ -14,7 +14,7 @@ namespace Gumball
         
         private void Update()
         {
-            float speedPercent = Mathf.Clamp01(WarehouseManager.Instance.CurrentCar.Speed / carSpeedForMaxScaleKmh);
+            float speedPercent = Mathf.Clamp01(WarehouseManager.Instance.CurrentCar.SpeedKmh / carSpeedForMaxScaleKmh);
             transform.localScale = Vector3.one * (scaleRange.Min + (scaleRange.Difference * speedPercent));
         }
         

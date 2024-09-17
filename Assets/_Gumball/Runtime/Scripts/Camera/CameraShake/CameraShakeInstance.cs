@@ -126,18 +126,30 @@ namespace Gumball
             }
         }
 
+        public void Kill()
+        {
+            currentFadeTween?.Kill();
+            currentState = State.Inactive;
+        }
+
+        public void SetMagnitude(float magnitudeModifier = 1)
+        {
+            this.magnitudeModifier = magnitudeModifier;
+        }
+        
         public void DoShake(float magnitudeModifier = 1)
         {
-            if (currentState != State.Inactive)
+            if (currentState != State.Inactive && currentState != State.FadingOut)
             {
                 Debug.LogWarning("Cannot start shake because it is currently in progress.");
                 return;
             }
-            
+
             StartFadeIn();
-            CameraShaker.Instance.TrackShake(this);
+            if (!CameraShaker.Instance.IsTracked(this))
+                CameraShaker.Instance.TrackShake(this);
             
-            this.magnitudeModifier = magnitudeModifier;
+            SetMagnitude(magnitudeModifier);
         }
         
     }

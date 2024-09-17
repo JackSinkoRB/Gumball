@@ -23,7 +23,6 @@ namespace Gumball
         public const float GlobalChunkLoadDistance = Mathf.Infinity;
         private const float timeBetweenLoadingChecks = 0.5f;
 
-        [SerializeField] private PhysicMaterial slipperyPhysicsMaterial;
         [SerializeField] private Material terrainMaterial;
         
         [Header("Debugging")]
@@ -36,6 +35,8 @@ namespace Gumball
         [Tooltip("A list of the current loaded chunks, in order of map index.\nDoes NOT include custom loaded chunks.")]
         [SerializeField] private List<LoadedChunkData> currentChunks = new();
         
+        private readonly Dictionary<Chunk, int> loadedChunkMapIndicies = new();
+        
         /// <summary>
         /// A list of the current loaded chunks, in order of map index.
         /// <remarks>Does NOT include custom loaded chunks.</remarks>
@@ -43,14 +44,13 @@ namespace Gumball
         public ReadOnlyCollection<LoadedChunkData> CurrentChunks => currentChunks.AsReadOnly();
         public ReadOnlyCollection<LoadedChunkData> CurrentCustomLoadedChunks => currentCustomLoadedChunks.AsReadOnly();
         public ReadOnlyCollection<LoadedChunkData> ChunksWaitingToBeAccessible => chunksWaitingToBeAccessible.AsReadOnly();
-
+        
         private float timeSinceLastLoadCheck;
         public readonly TrackedCoroutine distanceLoadingCoroutine = new();
         private readonly List<TrackedCoroutine> customChunkLoading = new();
         private readonly List<TrackedCoroutine> chunksBeforeLoading = new();
         private readonly List<TrackedCoroutine> chunksAfterLoading = new();
 
-        public PhysicMaterial SlipperyPhysicsMaterial => slipperyPhysicsMaterial;
         public Material TerrainMaterial => terrainMaterial;
         
         public bool HasLoaded;
@@ -91,23 +91,13 @@ namespace Gumball
         /// </summary>
         public int GetMapIndexOfLoadedChunk(Chunk chunk)
         {
-            if (chunk == null)
-                throw new NullReferenceException("Cannot get map index because the chunk is null.");
-            
-            foreach (LoadedChunkData data in currentChunks)
+            if (!loadedChunkMapIndicies.ContainsKey(chunk))
             {
-                if (data.Chunk.Equals(chunk))
-                    return data.MapIndex;
+                Debug.LogWarning($"The chunk {chunk.name} is not currently loaded.");
+                return -1;
             }
 
-            foreach (LoadedChunkData data in currentCustomLoadedChunks)
-            {
-                if (data.Chunk.Equals(chunk))
-                    return data.MapIndex;
-            }
-
-            Debug.LogWarning($"The chunk {chunk.name} is not currently loaded.");
-            return -1;
+            return loadedChunkMapIndicies[chunk];
         }
         
         public IEnumerator LoadMap(ChunkMap chunkMap, Vector3 positionToLoadAround)
@@ -116,6 +106,7 @@ namespace Gumball
             HasLoaded = false;
             currentChunkMap = chunkMap;
             currentChunks.Clear();
+            loadedChunkMapIndicies.Clear();
             
             //load the chunks in range
             distanceLoadingCoroutine.SetCoroutine(LoadChunksAroundPosition(positionToLoadAround));
@@ -488,7 +479,13 @@ namespace Gumball
             GameObject instantiatedChunk = Instantiate(handle.Result, Vector3.zero, Quaternion.Euler(Vector3.zero), transform);
             instantiatedChunk.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             Chunk chunkInstance = instantiatedChunk.GetComponent<Chunk>();
-            chunkInstance.ChunkDetector.SetActive(false);
+            loadedChunkMapIndicies[chunkInstance] = mapIndex;
+            
+            if (chunkInstance.ChunkDetector == null)
+                Debug.LogError($"Chunk {chunkInstance} is missing a chunk detector. You may need to update the terrain or rebuild the map '{currentChunkMap.name}'.");
+            else
+                chunkInstance.ChunkDetector.SetActive(false);
+            
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to instantiate.");
             stopwatch.Restart();
             
@@ -526,7 +523,8 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took '{stopwatch.ElapsedMilliseconds}ms' to update components.");
             stopwatch.Restart();
 
-            chunkInstance.ChunkDetector.SetActive(true);
+            if (chunkInstance.ChunkDetector != null)
+                chunkInstance.ChunkDetector.SetActive(true);
             
             if (HasLoaded)
                 yield return null;

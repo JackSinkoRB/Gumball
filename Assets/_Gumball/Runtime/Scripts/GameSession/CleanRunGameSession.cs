@@ -12,9 +12,14 @@ namespace Gumball
         
         [SerializeField] private float maxCollisionImpulseAllowed = 500;
         
-        public override string GetName()
+        public override string GetModeDisplayName()
         {
             return "Clean run";
+        }
+        
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.CleanRunIcon;
         }
 
         protected override GameSessionPanel GetSessionPanel()
@@ -22,7 +27,7 @@ namespace Gumball
             return PanelManager.GetPanel<CleanRunSessionPanel>();
         }
         
-        protected override GameSessionEndPanel GetSessionEndPanel()
+        protected override SessionEndPanel GetSessionEndPanel()
         {
             return PanelManager.GetPanel<CleanRunSessionEndPanel>();
         }

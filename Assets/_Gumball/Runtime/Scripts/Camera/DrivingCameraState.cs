@@ -29,19 +29,14 @@ namespace Gumball
             public float HeightDuration => heightDuration;
             public Ease HeightEase => heightEase;
         }
-        
-        [SerializeField] private Transform fakeController;
-        [SerializeField] private Transform fakeRotationPivot;
-        [SerializeField] private Transform fakeDepthPivot;
-        [SerializeField] private Transform fakeLookAtPivot;
 
+        [Tooltip("Should the 'fake' object positions and rotations copy the 'real' controllers current positions when the state is set as current?")]
+        [SerializeField] private bool setFakePositionsAsRealPositionsOnSet;
+        
         [Header("Rotation")]
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float rotationLerpSpeed = 6;
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float rotationLerpSpeedToZero = 2;
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float heightLerpSpeed = 9;
-        [SerializeField] private Transform rotationPivot;
-        [SerializeField] private Transform depthPivot;
-        [SerializeField] private Transform lookAtPivot;
 
         [Header("Momentum")]
         [SerializeField] private MomentumSettings accelerationStartMomentum;
@@ -58,21 +53,27 @@ namespace Gumball
         
         [Header("Offsets")]
         [Tooltip("X = width - Y = height - Z = depth")]
-        [SerializeField] private Vector3 offset = new(0, 2, -5);
-        [SerializeField] private bool offsetIsLocalised;
+        [SerializeField] protected Vector3 offset = new(0, 2, -5);
+        [SerializeField] protected bool offsetIsLocalised;
         [Tooltip("X = width - Y = height - Z = depth")]
-        [SerializeField] private Vector3 lookAtOffset = new(0, 1, 0);
-        
-        [Header("NOS")]
-        [SerializeField] private float nosFov = 75;
-        [SerializeField] private float nosFovTweenDuration = 1.5f;
-        [SerializeField] private Ease nosFovTweenEase = Ease.OutBack;
-        [Space(5)]
-        [SerializeField] private CameraShakeInstance nosShake;
-        
-        private float initialFov;
-        private Tween fovTween;
+        [SerializeField] protected Vector3 lookAtOffset = new(0, 1, 0);
 
+        public Vector3 Offset => offset;
+        
+        [Header("Shakes")]
+        [SerializeField] private CameraShakeInstance nosShake;
+        [Space(5)]
+        [SerializeField] private MinMaxFloat speedForCameraShakeKmh = new(60, 150);
+        [SerializeField] private CameraShakeInstance speedShake;
+
+        [Header("FOV")]
+        [SerializeField] private MinMaxFloat desiredFOVBasedOnSpeed = new(55, 95);
+        [SerializeField] private float speedForMaxFOVKmh = 100;
+        [SerializeField] private float fovSpeedBraking = 0.7f;
+        [SerializeField] private float fovSpeedAccelerating = 2;
+        [SerializeField] private float fovSpeedNos = 4;
+        [SerializeField] private float additionalFovWhenUsingNos = 20;
+        
         [Header("Collisions")]
         [SerializeField] private float minCollisionMagnitudeForShake;
         [SerializeField] private float collisionMagnitudeForMaxShake;
@@ -80,16 +81,18 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected Transform otherTarget;
-        
+
         private Transform target => otherTarget != null ? otherTarget : WarehouseManager.Instance.CurrentCar.transform;
         private Rigidbody carRigidbody => WarehouseManager.Instance.CurrentCar.Rigidbody;
-        private Vector3 pivotPoint => target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
-
-        protected override void Initialise()
+        
+        public virtual Vector3 GetPivotPoint()
         {
-            base.Initialise();
-            
-            initialFov = Camera.main.fieldOfView;
+            return target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
+        }
+
+        public virtual Vector3 GetLookAtPoint()
+        {
+            return target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
         }
         
         public override void OnSetCurrent(CameraController controller)
@@ -98,6 +101,73 @@ namespace Gumball
             
             WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter += OnCollisionEnter;
+
+            if (setFakePositionsAsRealPositionsOnSet)
+            {
+                fakeController.position = controller.transform.position;
+                fakeController.rotation = controller.transform.rotation;
+                fakeRotationPivot.position = rotationPivot.position;
+                fakeRotationPivot.rotation = rotationPivot.rotation;
+                fakeDepthPivot.position = depthPivot.position;
+                fakeDepthPivot.rotation = depthPivot.rotation;
+                fakeLookAtPivot.position = lookAtPivot.position;
+                fakeLookAtPivot.rotation = lookAtPivot.rotation;
+            }
+
+            Snap();
+        }
+
+        public override void UpdateWhenCurrent()
+        {
+            base.UpdateWhenCurrent();
+
+            Camera.main.fieldOfView = GetDesiredFOV();
+            DoCameraShake();
+        }
+        
+        private void DoCameraShake()
+        {
+            if (WarehouseManager.Instance.CurrentCar.NosManager.IsActivated)
+            {
+                if (nosShake.CurrentState is CameraShakeInstance.State.Inactive or CameraShakeInstance.State.FadingOut)
+                {
+                    speedShake.StartFadeOut();
+                    nosShake.DoShake();
+                }
+
+                return;
+            }
+
+            if (speedShake.CurrentState is CameraShakeInstance.State.Inactive or CameraShakeInstance.State.FadingOut)
+            {
+                nosShake.StartFadeOut();
+                speedShake.DoShake();
+            }
+            
+            float speedPercent = speedForCameraShakeKmh.Max == 0 ? 1 : Mathf.Clamp01((WarehouseManager.Instance.CurrentCar.SpeedKmh - speedForCameraShakeKmh.Min) / speedForCameraShakeKmh.Max);
+            speedShake.SetMagnitude(speedPercent);
+        }
+
+        private float GetDesiredFOV()
+        {
+            if (WarehouseManager.Instance.CurrentCar.IsBraking || WarehouseManager.Instance.CurrentCar.IsHandbrakeEngaged)
+            {
+                return Mathf.Lerp(Camera.main.fieldOfView, desiredFOVBasedOnSpeed.Min, Time.deltaTime * fovSpeedBraking);
+            }
+
+            if (speedForMaxFOVKmh == 0)
+                return Camera.main.fieldOfView;
+            
+            //speed fov
+            float speedPercent = Mathf.Clamp01(WarehouseManager.Instance.CurrentCar.SpeedKmh / speedForMaxFOVKmh);
+            float speedFov = desiredFOVBasedOnSpeed.Min + (desiredFOVBasedOnSpeed.Difference * speedPercent);
+
+            bool isUsingNos = WarehouseManager.Instance.CurrentCar.NosManager.IsActivated;
+            if (isUsingNos)
+                speedFov += additionalFovWhenUsingNos;
+            
+            float lerpSpeed = isUsingNos ? fovSpeedNos : fovSpeedAccelerating;
+            return Mathf.Lerp(Camera.main.fieldOfView, speedFov, Time.deltaTime * lerpSpeed);
         }
 
         public override void OnNoLongerCurrent()
@@ -107,9 +177,8 @@ namespace Gumball
             WarehouseManager.Instance.CurrentCar.onGearChanged -= OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter -= OnCollisionEnter;
 
-            //reset FOV in case it was in progress
-            fovTween?.Kill();
-            Camera.main.fieldOfView = initialFov;
+            nosShake.Kill();
+            speedShake.Kill();
         }
 
         public override void Snap()
@@ -129,19 +198,8 @@ namespace Gumball
             // - should always have the same height above the car centre
             // - interpolate the rotation around the pivot point
             // - y (look) rotation is slightly interpolated
-            
-            //get the position to match the desired offset - but keep height relative to the car (with rotation applied)
-            if (!offsetIsLocalised)
-            {
-                float heightRelativeToCar = target.TransformPoint(offset).y;
-                float heightInterpolated = interpolate ? Mathf.Lerp(controller.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
-                fakeController.transform.position = target.position.SetY(heightInterpolated) + offset.SetY(0);
-            }
-            else
-            {
-                Vector3 offsetLocalised = target.TransformPoint(offset);
-                fakeController.transform.position = offsetLocalised;
-            }
+
+            fakeController.transform.position = GetPosition(interpolate);
 
             const float velocityTolerance = 1f;
             bool isMoving = carRigidbody.velocity.sqrMagnitude > velocityTolerance;
@@ -153,10 +211,10 @@ namespace Gumball
                 // - if velocity is close to 0, use the players forward
                 float speed = isMoving ? rotationLerpSpeed : rotationLerpSpeedToZero;
                 float angleForDesiredRotation = Vector2.SignedAngle(fakeRotationPivot.forward.FlattenAsVector2(), targetDirection.FlattenAsVector2());
-                fakeRotationPivot.RotateAround(pivotPoint, Vector3.up, interpolate ? -angleForDesiredRotation * Time.deltaTime * speed : -angleForDesiredRotation);
+                fakeRotationPivot.RotateAround(GetPivotPoint(), Vector3.up, interpolate ? -angleForDesiredRotation * Time.deltaTime * speed : -angleForDesiredRotation);
             }
             
-            fakeLookAtPivot.LookAt(pivotPoint);
+            fakeLookAtPivot.LookAt(GetLookAtPoint());
 
             //do depth position
             if ((WarehouseManager.Instance.CurrentCar.IsBraking
@@ -187,29 +245,20 @@ namespace Gumball
             return operations;
         }
 
-        public void EnableNos(bool isUsingNos)
+        protected virtual Vector3 GetPosition(bool interpolate)
         {
-            TweenFieldOfView(isUsingNos ? nosFov : initialFov, nosFovTweenDuration, nosFovTweenEase);
-
-            if (isUsingNos)
+            //get the position to match the desired offset - but keep height relative to the car (with rotation applied)
+            if (!offsetIsLocalised)
             {
-                nosShake.DoShake();
-                nosShake.StartFadeIn();
+                float heightRelativeToCar = target.TransformPoint(offset).y;
+                float heightInterpolated = interpolate ? Mathf.Lerp(fakeController.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
+                return target.position.SetY(heightInterpolated) + offset.SetY(0);
             }
-            else
-            {
-                nosShake.StartFadeOut();
-            }
+            
+            Vector3 offsetLocalised = target.TransformPoint(offset);
+            return offsetLocalised;
         }
 
-        private void TweenFieldOfView(float fov, float duration, Ease ease)
-        {
-            fovTween?.Kill();
-            fovTween = DOTween.To(() => Camera.main.fieldOfView, 
-                    x => Camera.main.fieldOfView = x, fov, duration)
-                .SetEase(ease);
-        }
-        
         private void OnGearChange(int previousGear, int currentGear)
         {
             if (currentGear > previousGear && WarehouseManager.Instance.CurrentCar.IsAccelerating)

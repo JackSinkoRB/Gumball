@@ -31,7 +31,7 @@ namespace Gumball
         
         public override void CheckIfPerformed()
         {
-            if (WarehouseManager.Instance.CurrentCar.Speed < minSpeedKmh)
+            if (WarehouseManager.Instance.CurrentCar.SpeedKmh < minSpeedKmh)
             {
                 OnStopAirTime();
                 return;

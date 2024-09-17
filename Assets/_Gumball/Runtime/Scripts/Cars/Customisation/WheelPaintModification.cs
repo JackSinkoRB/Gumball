@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +11,12 @@ namespace Gumball
     public class WheelPaintModification : MonoBehaviour
     {
 
-        //TODO: apply to the actual wheel meshes
-        
         //caching:
         public static readonly int BaseColorShaderID = Shader.PropertyToID("_BaseColor");
         public static readonly int SpecularShaderID = Shader.PropertyToID("_Specular");
         public static readonly int ClearCoatSmoothnessShaderID = Shader.PropertyToID("_ClearCoatSmoothness");
         public static readonly int ClearCoatShaderID = Shader.PropertyToID("_ClearCoat");
         public static readonly int SmoothnessShaderID = Shader.PropertyToID("_Smoothness");
-        public static readonly int MetallicShaderID = Shader.PropertyToID("_Metallic");
         
         public enum PaintMode
         {
@@ -37,20 +35,38 @@ namespace Gumball
         
         private string saveKey => $"{carBelongsTo.SaveKey}.Paint.Wheel.{wheelIndex}";
         
-        public PaintMode CurrentPaintMode => GetCurrentSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
+        public PaintMode CurrentPaintMode => GetSavedSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
         public MeshRenderer[] ColourableParts => colourableParts;
         public int DefaultSwatchIndex => defaultSwatchIndex;
         
-        public ColourSwatchSerialized CurrentSwatch
+        public ColourSwatchSerialized SavedSwatch
         {
-            get => DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
-            set => DataManager.Cars.Set($"{saveKey}.CurrentSwatch", value);
+            get
+            {
+                if (!carBelongsTo.IsPlayer)
+                    throw new InvalidOperationException("Cannot get save value for non-player car.");
+                return DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
+            }
+            set
+            {
+                if (carBelongsTo.IsPlayer)
+                    DataManager.Cars.Set($"{saveKey}.CurrentSwatch", value);
+            }
         }
-        
-        public int CurrentSelectedPresetIndex
+
+        public int SavedSelectedPresetIndex
         {
-            get => DataManager.Cars.Get($"{saveKey}.SelectedPreset", defaultSwatchIndex);
-            set => DataManager.Cars.Set($"{saveKey}.SelectedPreset", value);
+            get
+            {
+                if (!carBelongsTo.IsPlayer)
+                    throw new InvalidOperationException("Cannot get save value for non-player car.");
+                return DataManager.Cars.Get($"{saveKey}.SelectedPreset", defaultSwatchIndex);
+            }
+            set
+            {
+                if (carBelongsTo.IsPlayer)
+                    DataManager.Cars.Set($"{saveKey}.SelectedPreset", value);
+            }
         }
 
 #if UNITY_EDITOR
@@ -74,6 +90,8 @@ namespace Gumball
             foreach (MeshRenderer meshRenderer in colourableParts)
             {
                 meshRenderer.sharedMaterial = GlobalPaintPresets.Instance.DefaultWheelMaterial;
+                ColourSwatch defaultSwatch = GlobalPaintPresets.Instance.WheelSwatchPresets[defaultSwatchIndex];
+                ApplySwatch(defaultSwatch);
             }
         }
 #endif
@@ -85,7 +103,8 @@ namespace Gumball
             wheelIndex = carBelongsTo.AllWheelMeshes.IndexOfItem(wheelMesh);
             FindColourableParts();
 
-            LoadFromSave();
+            if (carBelongsTo.IsPlayer)
+                LoadFromSave();
         }
         
         public void ApplySwatch(ColourSwatch swatch)
@@ -107,7 +126,8 @@ namespace Gumball
                 meshRenderer.sharedMaterial.SetFloat(ClearCoatSmoothnessShaderID, swatch.ClearCoatSmoothness);
             }
 
-            CurrentSwatch = swatch;
+            if (carBelongsTo.IsPlayer)
+                SavedSwatch = swatch;
         }
 
         public void LoadFromSave()
@@ -123,12 +143,12 @@ namespace Gumball
         }
         
         /// <returns>Gets the index of the current swatch if it exists in the presets, else returns -1.</returns>
-        public int GetCurrentSwatchIndexInPresets()
+        public int GetSavedSwatchIndexInPresets()
         {
             for (int index = 0; index < GlobalPaintPresets.Instance.WheelSwatchPresets.Length; index++)
             {
                 ColourSwatch colourSwatch = GlobalPaintPresets.Instance.WheelSwatchPresets[index];
-                if (CurrentSwatch.Equals(colourSwatch))
+                if (SavedSwatch.Equals(colourSwatch))
                     return index;
             }
             

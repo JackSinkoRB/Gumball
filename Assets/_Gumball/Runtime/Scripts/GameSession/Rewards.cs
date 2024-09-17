@@ -41,6 +41,13 @@ namespace Gumball
         
         public IEnumerator GiveRewards()
         {
+            bool startedShowingVignette = false;
+            if (PanelManager.PanelExists<VignetteBackgroundPanel>() && !PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing)
+            {
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+                startedShowingVignette = true;
+            }
+
             //give XP
             if (xp > 0)
             {
@@ -50,7 +57,7 @@ namespace Gumball
                 if (PanelManager.PanelExists<XPGainedPanel>())
                 {
                     PanelManager.GetPanel<XPGainedPanel>().Show();
-                    PanelManager.GetPanel<XPGainedPanel>().TweenExperienceBar(currentXP, newXP);
+                    PanelManager.GetPanel<XPGainedPanel>().Initialise(currentXP, newXP);
                     
                     yield return new WaitUntil(() => !PanelManager.PanelExists<XPGainedPanel>() || (!PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning));
                 }
@@ -105,8 +112,12 @@ namespace Gumball
             if (PanelManager.PanelExists<RewardPanel>() && PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
             {
                 PanelManager.GetPanel<RewardPanel>().Show();
-                yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || (!PanelManager.GetPanel<RewardPanel>().IsShowing && !PanelManager.GetPanel<RewardPanel>().IsTransitioning));
+
+                yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || !PanelManager.GetPanel<RewardPanel>().IsShowing);
             }
+            
+            if (startedShowingVignette && PanelManager.PanelExists<VignetteBackgroundPanel>())
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
         }
         
     }
