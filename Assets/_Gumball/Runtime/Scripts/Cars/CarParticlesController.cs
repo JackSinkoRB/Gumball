@@ -27,8 +27,9 @@ namespace Gumball
         private void UpdateSpeedBasedValues()
         {
             float speedPercent = Mathf.Clamp01((WarehouseManager.Instance.CurrentCar.SpeedKmh - speedRangeForParticles.Min) / speedRangeForParticles.Difference);
-            bool sessionExistsButHasEnded = GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null && !GameSessionManager.Instance.CurrentSession.InProgress;
-            if (sessionExistsButHasEnded)
+            
+            bool sessionHasEnded = !GameSessionManager.ExistsRuntime || GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.InProgress;
+            if (sessionHasEnded)
                 speedPercent = 0; //disable particle spawning if session is over
             
             //do transparency
