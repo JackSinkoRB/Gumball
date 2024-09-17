@@ -385,6 +385,10 @@ namespace Gumball
             if (timeSinceLODCheck < secondsBetweenLODChecks)
                 return;
 
+            bool sessionExistsButHasEnded = GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null && !GameSessionManager.Instance.CurrentSession.InProgress;
+            if (sessionExistsButHasEnded)
+                return; //don't change LODs if session has ended
+
             timeOfLastLODCheck = Time.realtimeSinceStartup;
 
             float shortestDistanceSqr = GetShortestDistanceToChunk();
