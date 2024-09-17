@@ -1926,7 +1926,7 @@ namespace Gumball
         /// <summary>
         /// Gets the spline sample that is 'distance' metres away from the closest sample.
         /// </summary>
-        private (SplineSample, Chunk)? GetSplineSampleAhead(float desiredDistance, bool canUseRacingLine = true)
+        public (SplineSample, Chunk)? GetSplineSampleAhead(float desiredDistance, bool canUseRacingLine = true)
         {
             if (CurrentChunk.TrafficManager == null)
                 return null; //no traffic manager
