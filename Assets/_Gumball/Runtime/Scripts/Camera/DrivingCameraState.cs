@@ -30,6 +30,9 @@ namespace Gumball
             public Ease HeightEase => heightEase;
         }
 
+        [Tooltip("Should the 'fake' object positions and rotations copy the 'real' controllers current positions when the state is set as current?")]
+        [SerializeField] private bool setFakePositionsAsRealPositionsOnSet;
+        
         [Header("Rotation")]
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float rotationLerpSpeed = 6;
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float rotationLerpSpeedToZero = 2;
@@ -89,7 +92,7 @@ namespace Gumball
 
         public virtual Vector3 GetLookAtPoint()
         {
-            return GetPivotPoint();
+            return target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
         }
         
         public override void OnSetCurrent(CameraController controller)
@@ -98,7 +101,19 @@ namespace Gumball
             
             WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter += OnCollisionEnter;
-            
+
+            if (setFakePositionsAsRealPositionsOnSet)
+            {
+                fakeController.position = controller.transform.position;
+                fakeController.rotation = controller.transform.rotation;
+                fakeRotationPivot.position = rotationPivot.position;
+                fakeRotationPivot.rotation = rotationPivot.rotation;
+                fakeDepthPivot.position = depthPivot.position;
+                fakeDepthPivot.rotation = depthPivot.rotation;
+                fakeLookAtPivot.position = lookAtPivot.position;
+                fakeLookAtPivot.rotation = lookAtPivot.rotation;
+            }
+
             Snap();
         }
 

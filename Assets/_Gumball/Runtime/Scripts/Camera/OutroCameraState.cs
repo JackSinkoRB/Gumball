@@ -14,13 +14,13 @@ namespace Gumball
 
         [SerializeField, ReadOnly] private float timePassed;
         
-        private Vector3 startVelocity;
+        private float startVelocityMagnitude;
         
         private float lerpDurationPercent => lerpCurve.Evaluate(Mathf.Clamp01(timePassed / lerpDuration));
         
         public override void OnSetCurrent(CameraController controller)
         {
-            this.PerformAtEndOfFrame(() => startVelocity = WarehouseManager.Instance.CurrentCar.Rigidbody.velocity);
+            this.PerformAtEndOfFrame(() => startVelocityMagnitude = WarehouseManager.Instance.CurrentCar.Rigidbody.velocity.magnitude);
             
             MatchOffsetOfDrivingCamera();
 
@@ -36,12 +36,12 @@ namespace Gumball
 
         public override Vector3 GetPivotPoint()
         {
-            return Vector3.Lerp(base.GetPivotPoint(), fakeRotationPivot.transform.position, lerpDurationPercent);
+            return Vector3.Lerp(base.GetPivotPoint(), rotationPivot.transform.position, lerpDurationPercent);
         }
 
         protected override Vector3 GetPosition(bool interpolate)
         {
-            return controller.transform.position + (startVelocity * (Time.deltaTime * (1 - lerpDurationPercent))); 
+            return controller.transform.position + (WarehouseManager.Instance.CurrentCar.transform.forward * (startVelocityMagnitude * (Time.deltaTime * (1 - lerpDurationPercent)))); 
         }
 
         private void MatchOffsetOfDrivingCamera()
