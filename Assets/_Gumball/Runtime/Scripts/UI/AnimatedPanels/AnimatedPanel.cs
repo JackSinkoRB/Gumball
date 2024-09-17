@@ -145,6 +145,8 @@ public abstract class AnimatedPanel : MonoBehaviour
             return;
         }
 
+        IsShowing = false;
+
         KillCurrentTweens();
 
         Tween longestTween = null;
@@ -195,9 +197,7 @@ public abstract class AnimatedPanel : MonoBehaviour
             foreach (Tween tween in currentTweens)
                 tween.Complete();
         }
-
-        IsShowing = false;
-
+        
         if (!keepInStack && PanelManager.ExistsRuntime && PanelManager.Instance.PanelStack.Contains(this))
             PanelManager.Instance.RemoveFromStack(this);
         

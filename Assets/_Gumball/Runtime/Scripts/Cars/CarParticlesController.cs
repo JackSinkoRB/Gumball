@@ -26,7 +26,7 @@ namespace Gumball
 
         private void UpdateSpeedBasedValues()
         {
-            float speedPercent = Mathf.Clamp01((WarehouseManager.Instance.CurrentCar.Speed - speedRangeForParticles.Min) / speedRangeForParticles.Difference);
+            float speedPercent = Mathf.Clamp01((WarehouseManager.Instance.CurrentCar.SpeedKmh - speedRangeForParticles.Min) / speedRangeForParticles.Difference);
             
             //do transparency
             float transparency = speedPercent * maxTransparency;

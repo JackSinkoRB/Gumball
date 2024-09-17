@@ -24,7 +24,7 @@ namespace Gumball
                 return;
             }
 
-            float currentSpeed = UnitOfSpeedSetting.UseMiles ? SpeedUtils.FromKmToMiles(WarehouseManager.Instance.CurrentCar.Speed) : WarehouseManager.Instance.CurrentCar.Speed;
+            float currentSpeed = UnitOfSpeedSetting.UseMiles ? SpeedUtils.FromKmToMiles(WarehouseManager.Instance.CurrentCar.SpeedKmh) : WarehouseManager.Instance.CurrentCar.SpeedKmh;
             float rpmAsPercent = Mathf.Clamp01(currentSpeed / maxSpeedDisplayed);
             UpdateNeedleAsPercent(rpmAsPercent);
         }

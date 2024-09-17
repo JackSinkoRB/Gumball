@@ -36,7 +36,6 @@ namespace Gumball
 
         [SerializeField] private ChunkTrafficManager trafficManager;
         [SerializeField] private ChunkPowerpoleManager powerpoleManager;
-        [SerializeField] private Collider[] barriers;
         
         [Header("Modify")]
         [HelpBox("For this value to take effect, you must rebuild the map data (for any maps that are using this chunk).", MessageType.Warning, onlyShowWhenDefaultValue: true, inverse: true)]
@@ -134,8 +133,6 @@ namespace Gumball
         {
             splineComputer.updateMode = SplineComputer.UpdateMode.None; //make sure the spline computer doesn't update automatically at runtime
             splineComputer.sampleMode = SplineComputer.SampleMode.Uniform;
-            
-            InitialiseBarriers();
         }
 
         private void LateUpdate()
@@ -271,6 +268,37 @@ namespace Gumball
             return totalDistance;
         }
         
+        public SplineSample? GetClosestSampleOnSpline(float distanceFromMapStart)
+        {
+            if (SplineComputer.sampleMode != SplineComputer.SampleMode.Uniform)
+            {
+                Debug.LogError("Could not get distance travelled along spline because the samples are not in uniform.");
+                return null;
+            }
+            
+            int chunkIndex = ChunkManager.Instance.GetMapIndexOfLoadedChunk(this);
+            float distanceInChunk = chunkIndex == 0 ? distanceFromMapStart : distanceFromMapStart - ChunkManager.Instance.CurrentChunkMap.ChunkLengthsCalculated[chunkIndex - 1];
+
+            if (distanceFromMapStart < 0)
+            {
+                Debug.LogError("Distance from map start is less than 0. The spawn position doesn't belong to this chunk.");
+                return null;
+            }
+            
+            float distanceBetweenSamples = SplineLengthCached / SplineSamples.Length; //assuming the spline sample distance is uniform
+            float totalDistance = 0;
+            foreach (SplineSample splineSample in SplineSamples)
+            {
+                if (totalDistance >= distanceInChunk)
+                    return splineSample;
+                
+                totalDistance += distanceBetweenSamples;
+            }
+
+            Debug.LogError("Distance from map start is greater than the spline length. The spawn position doesn't belong to this chunk.");
+            return null;
+        }
+        
         public (SplineSample, float) GetClosestSampleOnSpline(Vector3 fromPoint)
         {
             UpdateSplineSampleData();
@@ -317,6 +345,9 @@ namespace Gumball
                     continue;
                 
                 if (childMeshRenderer.gameObject.tag.Equals(LayersAndTags.Tag.DontHideMeshWhenFarAway.ToString()))
+                    continue;
+
+                if (!childMeshRenderer.enabled)
                     continue;
                 
                 hashSet.Add(childMeshRenderer);
@@ -392,28 +423,27 @@ namespace Gumball
             float distanceToEndSqr = Vector3.SqrMagnitude(carPosition - LastSample.position);
             return distanceToStartSqr < distanceToEndSqr ? distanceToStartSqr : distanceToEndSqr;
         }
-        
-        private void InitialiseBarriers()
-        {
-            foreach (Collider barrier in barriers)
-            {
-                if (barrier == null)
-                {
-                    Debug.LogWarning($"Chunk {name} has a barrier that is null.");
-                    continue;
-                }
-                
-                barrier.gameObject.layer = (int) LayersAndTags.Layer.Barrier;
-                barrier.sharedMaterial = ChunkManager.Instance.SlipperyPhysicsMaterial;
-            }
-        }
-        
+
         public void CalculateSplineLength()
         {
             splineLengthCached = splineComputer.CalculateLength();
         }
         
 #if UNITY_EDITOR
+        private const string pathToBarrierMaterial = "Slippery";
+        
+        public void EnsureBarriersHaveCorrectPhysicsMaterial()
+        {
+            foreach (Collider childCollider in transform.GetComponentsInAllChildren<Collider>())
+            {
+                if (childCollider.gameObject.layer == (int)LayersAndTags.Layer.Barrier)
+                {
+                    childCollider.sharedMaterial = Resources.Load<PhysicMaterial>(pathToBarrierMaterial);
+                    EditorUtility.SetDirty(childCollider);
+                }
+            }
+        }
+        
         private void OnDrawGizmos()
         {
             //draw the interpolation distance

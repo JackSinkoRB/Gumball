@@ -35,6 +35,7 @@ namespace Gumball
         private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
 
         [Header("Info")]
+        [SerializeField] private string displayName = "Level";
         [SerializeField] private string description = "Description of session";
         
         [Header("Map setup")]
@@ -76,7 +77,6 @@ namespace Gumball
         [SerializeField] private Rewards rewards;
 
         [Header("Challenges")]
-        [SerializeField] private string mainChallengeDescription = "This is the challenge description";
         [SerializeField] private Challenge[] subObjectives;
         
         [Header("Debugging")]
@@ -98,9 +98,9 @@ namespace Gumball
         }
 
         public Challenge[] SubObjectives => subObjectives;
-        
+
+        public string DisplayName => displayName;
         public string Description => description;
-        public string MainChallengeDescription => mainChallengeDescription;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;
@@ -120,8 +120,10 @@ namespace Gumball
         protected abstract GameSessionPanel GetSessionPanel();
         protected abstract SessionEndPanel GetSessionEndPanel();
 
-        public abstract string GetName();
+        public abstract string GetModeDisplayName();
+        public abstract Sprite GetModeIcon();
         public abstract ObjectiveUI.FakeChallengeData GetChallengeData();
+        public abstract string GetMainObjectiveGoalValue();
 
         public void StartSession()
         {
@@ -419,7 +421,10 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(true); //auto accelerate
+            
+            //auto accelerate (for non-buttons layout)
+            DrivingControlLayoutManager layoutManager = PanelManager.GetPanel<DrivingControlsPanel>().LayoutManager;
+            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(layoutManager.CurrentLayout.AutoAccelerate);
         }
 
         protected virtual void OnSessionStart()
@@ -513,6 +518,7 @@ namespace Gumball
         private IEnumerator IntroCountdownIE()
         {
             PanelManager.GetPanel<SessionIntroPanel>().Show();
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Show();
             
             int remainingIntroTime = Mathf.CeilToInt(introTime);
             while (remainingIntroTime > 0)
@@ -524,6 +530,7 @@ namespace Gumball
                 remainingIntroTime -= timeBetweenCountdownUpdates;
             }
             
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
             PanelManager.GetPanel<SessionIntroPanel>().Hide();
         }
 

@@ -34,7 +34,7 @@ namespace Gumball
                 return;
             }
 
-            if (WarehouseManager.Instance.CurrentCar.Speed < minSpeedKmh)
+            if (WarehouseManager.Instance.CurrentCar.SpeedKmh < minSpeedKmh)
             {
                 OnStopSlipStream();
                 return;

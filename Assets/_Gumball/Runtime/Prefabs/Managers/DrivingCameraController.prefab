@@ -493,11 +493,11 @@ MonoBehaviour:
   depthPivot: {fileID: 8226211066247002576}
   lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
-    depth: -0.01
-    depthDuration: 0.4
+    depth: 0
+    depthDuration: 0.8
     depthEase: 4
-    height: -0.01
-    heightDuration: 0.2
+    height: 0
+    heightDuration: 0.8
     heightEase: 4
   accelerationEndMomentum:
     depth: 0
@@ -508,40 +508,50 @@ MonoBehaviour:
     heightEase: 4
   brakingStartMomentum:
     depth: 0.05
-    depthDuration: 1.5
+    depthDuration: 0.8
     depthEase: 6
-    height: 0.005
-    heightDuration: 0.75
+    height: 0.04
+    heightDuration: 0.7
     heightEase: 6
   brakingEndMomentum:
     depth: 0
-    depthDuration: 1
+    depthDuration: 2
     depthEase: 4
     height: 0
-    heightDuration: 0.5
+    heightDuration: 2
     heightEase: 4
   gearChangeStartMomentum:
-    depth: -0.02
-    depthDuration: 0.3
+    depth: 0.04
+    depthDuration: 0.2
     depthEase: 4
-    height: -0.03
-    heightDuration: 0.3
+    height: 0.02
+    heightDuration: 0.25
     heightEase: 4
   gearChangeEndMomentum:
-    depth: -0.01
-    depthDuration: 0.4
-    depthEase: 6
-    height: -0.01
-    heightDuration: 0.4
-    heightEase: 6
+    depth: -0.03
+    depthDuration: 1
+    depthEase: 28
+    height: 0
+    heightDuration: 1
+    heightEase: 28
   offset: {x: 0, y: 0, z: 0}
   offsetIsLocalised: 1
   lookAtOffset: {x: 0, y: 0, z: 1}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
   nosShake:
-    magnitude: 0.75
+    magnitude: 1
+    roughness: 8
+    positionInfluence: {x: 0.05, y: 0.05, z: 0}
+    rotationInfluence: {x: 1, y: 1, z: 0.5}
+    fadeInDuration: 0.1
+    fadeOutDuration: 1
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 20
+    Max: 150
+  speedShake:
+    magnitude: 0.5
     roughness: 10
     positionInfluence: {x: 0.05, y: 0.05, z: 0}
     rotationInfluence: {x: 1, y: 1, z: 0.5}
@@ -549,7 +559,15 @@ MonoBehaviour:
     fadeOutDuration: 1
     fadeOutInstantly: 0
     currentState: 0
-    magnitudeModifier: 1
+    magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 55
+    Max: 70
+  speedForMaxFOVKmh: 250
+  fovSpeedBraking: 0.5
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 4
+  additionalFovWhenUsingNos: 30
   minCollisionMagnitudeForShake: 500
   collisionMagnitudeForMaxShake: 10000
   collisionMaxShake:
@@ -664,11 +682,21 @@ MonoBehaviour:
   offset: {x: 0, y: 0, z: 0}
   offsetIsLocalised: 1
   lookAtOffset: {x: 0, y: 0, z: -1}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
   nosShake:
-    magnitude: 0.75
+    magnitude: 1
+    roughness: 5
+    positionInfluence: {x: 0.05, y: 0.05, z: 0}
+    rotationInfluence: {x: 1, y: 1, z: 0.5}
+    fadeInDuration: 0.1
+    fadeOutDuration: 1
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 20
+    Max: 150
+  speedShake:
+    magnitude: 0.5
     roughness: 10
     positionInfluence: {x: 0.05, y: 0.05, z: 0}
     rotationInfluence: {x: 1, y: 1, z: 0.5}
@@ -676,7 +704,15 @@ MonoBehaviour:
     fadeOutDuration: 1
     fadeOutInstantly: 0
     currentState: 0
-    magnitudeModifier: 1
+    magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 55
+    Max: 95
+  speedForMaxFOVKmh: 250
+  fovSpeedBraking: 0.5
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 4
+  additionalFovWhenUsingNos: 30
   minCollisionMagnitudeForShake: 500
   collisionMagnitudeForMaxShake: 10000
   collisionMaxShake:
@@ -747,55 +783,65 @@ MonoBehaviour:
   depthPivot: {fileID: 8226211066247002576}
   lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
-    depth: -0.2
-    depthDuration: 0.4
+    depth: 0
+    depthDuration: 0.8
     depthEase: 4
-    height: -0.1
-    heightDuration: 0.2
+    height: 0
+    heightDuration: 0.8
     heightEase: 4
   accelerationEndMomentum:
     depth: 0
     depthDuration: 0.75
     depthEase: 4
-    height: 0
+    height: -0.8
     heightDuration: 0.3
     heightEase: 4
   brakingStartMomentum:
-    depth: 0.4
-    depthDuration: 1.5
+    depth: 0.3
+    depthDuration: 0.8
     depthEase: 6
-    height: 0.1
-    heightDuration: 0.75
+    height: 0.25
+    heightDuration: 0.7
     heightEase: 6
   brakingEndMomentum:
     depth: 0
-    depthDuration: 1
+    depthDuration: 2
     depthEase: 4
     height: 0
-    heightDuration: 0.5
+    heightDuration: 2
     heightEase: 4
   gearChangeStartMomentum:
-    depth: -0.15
-    depthDuration: 0.3
+    depth: 0.25
+    depthDuration: 0.2
     depthEase: 4
-    height: -0.2
-    heightDuration: 0.3
+    height: 0.1
+    heightDuration: 0.25
     heightEase: 4
   gearChangeEndMomentum:
-    depth: -0.2
-    depthDuration: 0.4
-    depthEase: 6
-    height: -0.1
-    heightDuration: 0.4
-    heightEase: 6
-  offset: {x: 0, y: 2, z: -5}
+    depth: -0.1
+    depthDuration: 1
+    depthEase: 28
+    height: 0
+    heightDuration: 1
+    heightEase: 28
+  offset: {x: 0, y: 1.8, z: -4}
   offsetIsLocalised: 0
   lookAtOffset: {x: 0, y: 1, z: 0}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
   nosShake:
-    magnitude: 0.75
+    magnitude: 3
+    roughness: 5
+    positionInfluence: {x: 0.05, y: 0.05, z: 0}
+    rotationInfluence: {x: 1, y: 1, z: 0.5}
+    fadeInDuration: 0.1
+    fadeOutDuration: 1
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 50
+    Max: 350
+  speedShake:
+    magnitude: 2
     roughness: 10
     positionInfluence: {x: 0.05, y: 0.05, z: 0}
     rotationInfluence: {x: 1, y: 1, z: 0.5}
@@ -804,6 +850,14 @@ MonoBehaviour:
     fadeOutInstantly: 0
     currentState: 0
     magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 55
+    Max: 95
+  speedForMaxFOVKmh: 250
+  fovSpeedBraking: 0.5
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 4
+  additionalFovWhenUsingNos: 30
   minCollisionMagnitudeForShake: 500
   collisionMagnitudeForMaxShake: 10000
   collisionMaxShake:
@@ -1109,9 +1163,6 @@ MonoBehaviour:
   offset: {x: 6, y: 2, z: -6}
   offsetIsLocalised: 1
   lookAtOffset: {x: 0, y: 1, z: 0}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
   nosShake:
     magnitude: 0
     roughness: 0
@@ -1122,6 +1173,27 @@ MonoBehaviour:
     fadeOutInstantly: 0
     currentState: 0
     magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 1000
+    Max: 1000
+  speedShake:
+    magnitude: 0
+    roughness: 0
+    positionInfluence: {x: 0, y: 0, z: 0}
+    rotationInfluence: {x: 0, y: 0, z: 0}
+    fadeInDuration: 0
+    fadeOutDuration: 0
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 55
+    Max: 95
+  speedForMaxFOVKmh: 100
+  fovSpeedBraking: 0.5
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 4
+  additionalFovWhenUsingNos: 10
   minCollisionMagnitudeForShake: 0
   collisionMagnitudeForMaxShake: 0
   collisionMaxShake:
@@ -1565,9 +1637,6 @@ MonoBehaviour:
   offset: {x: 6, y: 2, z: -6}
   offsetIsLocalised: 1
   lookAtOffset: {x: 0, y: 3, z: 0}
-  nosFov: 75
-  nosFovTweenDuration: 1.5
-  nosFovTweenEase: 27
   nosShake:
     magnitude: 0
     roughness: 0
@@ -1578,6 +1647,27 @@ MonoBehaviour:
     fadeOutInstantly: 0
     currentState: 0
     magnitudeModifier: 0
+  speedForCameraShakeKmh:
+    Min: 1000
+    Max: 1000
+  speedShake:
+    magnitude: 0
+    roughness: 0
+    positionInfluence: {x: 0, y: 0, z: 0}
+    rotationInfluence: {x: 0, y: 0, z: 0}
+    fadeInDuration: 0
+    fadeOutDuration: 0
+    fadeOutInstantly: 0
+    currentState: 0
+    magnitudeModifier: 0
+  desiredFOVBasedOnSpeed:
+    Min: 55
+    Max: 95
+  speedForMaxFOVKmh: 100
+  fovSpeedBraking: 5
+  fovSpeedAccelerating: 5
+  fovSpeedNos: 4
+  additionalFovWhenUsingNos: 10
   minCollisionMagnitudeForShake: 0
   collisionMagnitudeForMaxShake: 0
   collisionMaxShake:

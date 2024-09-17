@@ -54,7 +54,7 @@ namespace Gumball
         private void SaveRideHeight()
         {
             AICar currentCar = WarehouseManager.Instance.CurrentCar;
-            int numberOfHitsDown = Physics.RaycastNonAlloc(currentCar.transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.Ground));
+            int numberOfHitsDown = Physics.RaycastNonAlloc(currentCar.transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayers(new []{LayersAndTags.Layer.Ground, LayersAndTags.Layer.Default}));
 
             if (numberOfHitsDown == 0)
             {

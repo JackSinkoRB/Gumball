@@ -29,6 +29,11 @@ namespace Gumball
             this.controller = controller;
         }
 
+        public virtual void UpdateWhenCurrent()
+        {
+            
+        }
+
         public virtual void OnNoLongerCurrent()
         {
             

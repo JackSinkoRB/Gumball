@@ -9,6 +9,15 @@ namespace Gumball
 {
     public class DrivingControlLayout : MonoBehaviour
     {
+
+        public enum LayoutType
+        {
+            ScreenSpace1,
+            ScreenSpace2,
+            Tilt,
+            Buttons,
+            SteeringWheel
+        }
         
         private enum SteerInputType
         {
@@ -29,6 +38,7 @@ namespace Gumball
         /// </summary>
         private const float slideScreenPercentForFullSteering = 0.2f;
 
+        [SerializeField] private LayoutType type;
         [SerializeField] private bool autoAccelerate;
         [SerializeField] private SteerInputType steerInputType;
 
@@ -40,6 +50,9 @@ namespace Gumball
         private Vector2 horizontalInputChangeSincePress;
         
         protected DrivingControlLayoutManager layoutManager => PanelManager.GetPanel<DrivingControlsPanel>().LayoutManager;
+
+        public LayoutType Type => type;
+        public bool AutoAccelerate => autoAccelerate;
         
         private void OnDisable()
         {
