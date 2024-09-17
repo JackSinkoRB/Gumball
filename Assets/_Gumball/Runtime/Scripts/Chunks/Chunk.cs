@@ -385,6 +385,9 @@ namespace Gumball
             if (timeSinceLODCheck < secondsBetweenLODChecks)
                 return;
 
+            if (!GameSessionManager.Instance.CurrentSession.InProgress)
+                return; //don't change LODs if session has ended
+
             timeOfLastLODCheck = Time.realtimeSinceStartup;
 
             float shortestDistanceSqr = GetShortestDistanceToChunk();
