@@ -345,13 +345,6 @@ namespace Gumball
             if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
                 PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
 
-            PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
-            PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
-            if (GetSessionPanel() != null)
-                GetSessionPanel().Hide();
-            if (GetSessionEndPanel() != null)
-                GetSessionEndPanel().Show();
-
             if (ChunkMapSceneManager.ExistsRuntime)
                 drivingCameraController.SetState(drivingCameraController.OutroState);
             
@@ -359,9 +352,6 @@ namespace Gumball
             WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-            
-            //come to a stop
-            WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
 
             InputManager.Instance.CarInput.Disable();
 
@@ -370,6 +360,22 @@ namespace Gumball
             //convert skill points to followers
             if (SkillCheckManager.ExistsRuntime)
                 FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
+
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Hide();
+            CoroutineHelper.StartCoroutineOnCurrentScene(ShowSessionEndPanel());
+        }
+
+        private IEnumerator ShowSessionEndPanel()
+        {
+            yield return new WaitForSeconds(1f);
+            
+            PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            
+            yield return new WaitForSeconds(1f);
+            PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
+            if (GetSessionEndPanel() != null)
+                GetSessionEndPanel().Show();
         }
 
         public virtual void UpdateWhenCurrent()

@@ -9,7 +9,6 @@ namespace Gumball
     public abstract class SessionEndPanel : AnimatedPanel
     {
 
-        private const float secondsToShowPanel = 2.5f;
         [SerializeField] private AutosizeTextMeshPro levelNameLabel;
         [Space(5)]
         [SerializeField] private TextMeshProUGUI positionLabel;
@@ -23,33 +22,20 @@ namespace Gumball
         [SerializeField] private GlobalColourPalette.ColourCode defeatColourCode;
         [Space(5)]
         [SerializeField] private GameObject confettiParticles;
-
-        private Coroutine showScorePanelCoroutine;
-
+        
         protected override void OnShow()
         {
             base.OnShow();
             
             SetLevelName();
             SetVictory(GameSessionManager.Instance.CurrentSession.LastProgress == GameSession.ProgressStatus.COMPLETE);
-
-            showScorePanelCoroutine = this.PerformAfterDelay(secondsToShowPanel, () =>
-            {
-                if (!IsShowing)
-                    return;
-                
-                Hide();
-                PanelManager.GetPanel<SessionScorePanel>().Show();
-                PanelManager.GetPanel<SessionScorePanel>().Initialise(GameSessionManager.Instance.CurrentSession);
-            });
         }
 
-        protected override void OnHide()
+        public void OnClickNextButton()
         {
-            base.OnHide();
-
-            if (showScorePanelCoroutine != null)
-                StopCoroutine(showScorePanelCoroutine);
+            Hide();
+            PanelManager.GetPanel<SessionScorePanel>().Show();
+            PanelManager.GetPanel<SessionScorePanel>().Initialise(GameSessionManager.Instance.CurrentSession);
         }
         
         private void SetLevelName()
