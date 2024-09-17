@@ -155,6 +155,9 @@ namespace Gumball
                 return Mathf.Lerp(Camera.main.fieldOfView, desiredFOVBasedOnSpeed.Min, Time.deltaTime * fovSpeedBraking);
             }
 
+            if (speedForMaxFOVKmh == 0)
+                return Camera.main.fieldOfView;
+            
             //speed fov
             float speedPercent = Mathf.Clamp01(WarehouseManager.Instance.CurrentCar.SpeedKmh / speedForMaxFOVKmh);
             float speedFov = desiredFOVBasedOnSpeed.Min + (desiredFOVBasedOnSpeed.Difference * speedPercent);
