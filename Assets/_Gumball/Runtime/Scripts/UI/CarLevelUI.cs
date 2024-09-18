@@ -6,8 +6,18 @@ namespace Gumball
 {
     public class CarLevelUI : MonoBehaviour
     {
-        
+
+        [SerializeField] private bool usePlayerCar = true;
         [SerializeField] private AutosizeTextMeshPro label;
+
+        private int carIndex;
+        
+        public void SetCarIndex(int carIndex)
+        {
+            this.carIndex = carIndex;
+            
+            RefreshLabel();
+        }
         
         private void OnEnable()
         {
@@ -23,19 +33,24 @@ namespace Gumball
         
         private void OnLevelChange(int carIndex, int previousAmount, int newAmount)
         {
-            if (WarehouseManager.Instance.CurrentCar != null && carIndex == WarehouseManager.Instance.CurrentCar.CarIndex)
+            if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
+                return;
+            
+            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
+            if (carIndexToUse == carIndex)
                 RefreshLabel();
         }
         
         private void RefreshLabel()
         {
-            if (WarehouseManager.Instance.CurrentCar == null)
+            if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
             {
                 label.text = "";
                 return;
             }
 
-            label.text = $"{BlueprintManager.Instance.GetLevelIndex(WarehouseManager.Instance.CurrentCar.CarIndex) + 1}";
+            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
+            label.text = $"{BlueprintManager.Instance.GetLevelIndex(carIndexToUse) + 1}";
             this.PerformAtEndOfFrame(label.Resize);
         }
 

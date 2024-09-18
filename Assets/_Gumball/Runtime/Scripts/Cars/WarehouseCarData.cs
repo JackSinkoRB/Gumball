@@ -19,6 +19,7 @@ namespace Gumball
         {
             [SerializeField, ReadOnly] private string displayName;
             [SerializeField, ReadOnly] private string makeDisplayName;
+            [SerializeField, ReadOnly] private CarType carType;
             [SerializeField, ReadOnly] private CarPerformanceSettings performanceSettings;
             [SerializeField, ReadOnly] private CorePart defaultEngine;
             [SerializeField, ReadOnly] private CorePart defaultWheels;
@@ -26,6 +27,7 @@ namespace Gumball
 
             public string DisplayName => displayName;
             public string MakeDisplayName => makeDisplayName;
+            public CarType CarType => carType;
             public CarPerformanceSettings PerformanceSettings => performanceSettings;
             public CorePart DefaultEngine => defaultEngine;
             public CorePart DefaultWheels => defaultWheels;
@@ -35,6 +37,7 @@ namespace Gumball
             {
                 displayName = car.DisplayName;
                 makeDisplayName = car.MakeDisplayName;
+                carType = car.CarType;
                 performanceSettings = car.PerformanceSettings;
                 defaultEngine = car.GetDefaultPart(CorePart.PartType.ENGINE);
                 defaultWheels = car.GetDefaultPart(CorePart.PartType.WHEELS);
@@ -56,6 +59,7 @@ namespace Gumball
         public bool IsUnlockedByDefault => isUnlockedByDefault;
         public string DisplayName => cachedData.DisplayName;
         public string MakeDisplayName => cachedData.MakeDisplayName;
+        public CarType CarType => cachedData.CarType;
         public CarPerformanceSettings PerformanceSettings => cachedData.PerformanceSettings;
         
         public CorePart GetDefaultPart(CorePart.PartType type)
