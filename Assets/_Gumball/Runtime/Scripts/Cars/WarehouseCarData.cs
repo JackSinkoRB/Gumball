@@ -18,12 +18,14 @@ namespace Gumball
         private struct CachedData
         {
             [SerializeField, ReadOnly] private string displayName;
+            [SerializeField, ReadOnly] private string makeDisplayName;
             [SerializeField, ReadOnly] private CarPerformanceSettings performanceSettings;
             [SerializeField, ReadOnly] private CorePart defaultEngine;
             [SerializeField, ReadOnly] private CorePart defaultWheels;
             [SerializeField, ReadOnly] private CorePart defaultDrivetrain;
 
             public string DisplayName => displayName;
+            public string MakeDisplayName => makeDisplayName;
             public CarPerformanceSettings PerformanceSettings => performanceSettings;
             public CorePart DefaultEngine => defaultEngine;
             public CorePart DefaultWheels => defaultWheels;
@@ -32,6 +34,7 @@ namespace Gumball
             public void Cache(AICar car)
             {
                 displayName = car.DisplayName;
+                makeDisplayName = car.MakeDisplayName;
                 performanceSettings = car.PerformanceSettings;
                 defaultEngine = car.GetDefaultPart(CorePart.PartType.ENGINE);
                 defaultWheels = car.GetDefaultPart(CorePart.PartType.WHEELS);
@@ -52,6 +55,7 @@ namespace Gumball
         public int StartingLevelIndex => startingLevelIndex;
         public bool IsUnlockedByDefault => isUnlockedByDefault;
         public string DisplayName => cachedData.DisplayName;
+        public string MakeDisplayName => cachedData.MakeDisplayName;
         public CarPerformanceSettings PerformanceSettings => cachedData.PerformanceSettings;
         
         public CorePart GetDefaultPart(CorePart.PartType type)

@@ -45,6 +45,21 @@ namespace Gumball
             });
         }
 
+        protected override void OnShow()
+        {
+            base.OnShow();
+            
+            PanelManager.GetPanel<PaintStripeBackgroundPanel>().Show();
+        }
+
+        protected override void OnHide()
+        {
+            base.OnHide();
+            
+            if (PanelManager.PanelExists<PaintStripeBackgroundPanel>())
+                PanelManager.GetPanel<PaintStripeBackgroundPanel>().Hide();
+        }
+
         public void SelectPartOption(SwapCorePartOptionButton option)
         {
             if (option == null)
