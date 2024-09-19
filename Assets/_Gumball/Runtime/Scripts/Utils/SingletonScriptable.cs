@@ -58,16 +58,7 @@ namespace Gumball
             if (IsLoading)
                 return;
 
-            if (!Application.isBatchMode && !UnityThread.allowsAPI) //don't use editor application in batch mode
-            {
-                //run on the editor thread
-                EditorApplication.update -= LoadInstance;
-                EditorApplication.update += LoadInstance;
-            }
-            else
-            {
-                LoadInstance();
-            }
+            LoadInstance();
 
             void LoadInstance()
             {
