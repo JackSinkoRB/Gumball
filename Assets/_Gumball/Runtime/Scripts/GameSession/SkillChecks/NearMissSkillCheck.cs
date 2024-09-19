@@ -12,9 +12,10 @@ namespace Gumball
     [Serializable]
     public class NearMissSkillCheck : SkillCheck
     {
-        
+
         [Header("Near miss")]
-        [SerializeField] private float labelDuration = 1;
+        [SerializeField] private NearMissSkillCheckUI leftUI;
+        [SerializeField] private NearMissSkillCheckUI rightUI;
         [Tooltip("The minimum speed the player must be going for a near miss.")]
         [SerializeField] private float minSpeedKmh = 50;
         [Tooltip("The max distance around a traffic car to consider a near miss.")]
@@ -26,7 +27,6 @@ namespace Gumball
         
         private readonly Dictionary<AICar, float> timeTrafficCarEnteredRadius = new();
         private readonly Collider[] tempHolder = new Collider[50];
-        private Coroutine labelCoroutine;
 
         public override void CheckIfPerformed()
         {
@@ -88,29 +88,24 @@ namespace Gumball
         {
             float timeSinceEntering = Time.time - timeTrafficCarEnteredRadius[car];
             bool hasBeenInCollisionSinceEntering = timeSinceEntering > timeSinceLastCollision;
+
             
+            bool isLeftSide = WarehouseManager.Instance.CurrentCar.IsPositionOnLeft(car.transform.position); //is the car closer to the left direction, or the right direction?
             if (!hasBeenInCollisionSinceEntering)
+            {
                 OnPerformed();
-            
+                ShowSkillCheckUI(isLeftSide);
+            }
+
             timeTrafficCarEnteredRadius.Remove(car);
         }
-        
-        protected override void OnPerformed()
-        {
-            base.OnPerformed();
-            
-            if (labelCoroutine != null)
-                SkillCheckManager.Instance.StopCoroutine(labelCoroutine);
 
-            labelCoroutine = SkillCheckManager.Instance.StartCoroutine(ShowNearMissLabelIE());
-        }
-        
-        private IEnumerator ShowNearMissLabelIE()
+        private void ShowSkillCheckUI(bool leftSide)
         {
-            label.gameObject.SetActive(true);
-            label.text = $"Near miss +{pointBonus}";
-            yield return new WaitForSeconds(labelDuration);
-            label.gameObject.SetActive(false);
+            if (leftSide)
+                leftUI.Show(pointBonus);
+            else
+                rightUI.Show(pointBonus);
         }
 
     }

@@ -13,7 +13,11 @@ namespace Gumball
         [SerializeField] private NearMissSkillCheck nearMiss;
         [SerializeField] private SlipStreamSkillCheck slipStream;
         [SerializeField] private AirTimeSkillCheck airTime;
-        
+
+        [Header("UI")]
+        [SerializeField] private NearMissSkillCheckUI nearMissLeftUI;
+        [SerializeField] private NearMissSkillCheckUI nearMissRightUI;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private float currentPoints;
         
@@ -32,20 +36,9 @@ namespace Gumball
             DisableUI();
         }
 
-        public void ResetForSession()
+        private void LateUpdate()
         {
-            //start disabled
-            DisableUI();
-
-            currentPoints = 0;
-            slipStream.ResetSessionPoints();
-            nearMiss.ResetSessionPoints();
-            airTime.ResetSessionPoints();
-        }
-
-        public void AddPoints(float points)
-        {
-            currentPoints += points;
+            UpdateUIPosition();
         }
         
         private void Update()
@@ -61,6 +54,32 @@ namespace Gumball
             slipStream.CheckIfPerformed();
             airTime.CheckIfPerformed();
         }
+
+        public void ResetForSession()
+        {
+            //start disabled
+            DisableUI();
+
+            currentPoints = 0;
+            slipStream.ResetSessionPoints();
+            nearMiss.ResetSessionPoints();
+            airTime.ResetSessionPoints();
+        }
+
+        public void AddPoints(float points)
+        {
+            currentPoints += points;
+        }
+
+        private void UpdateUIPosition()
+        {
+            if (!WarehouseManager.HasLoaded || WarehouseManager.Instance.CurrentCar == null)
+                return;
+
+            if (transform.parent != WarehouseManager.Instance.CurrentCar.transform)
+                transform.parent = WarehouseManager.Instance.CurrentCar.transform;
+            transform.localPosition = Vector3.zero;
+        }
         
         private void FindAllChecks()
         {
@@ -75,10 +94,8 @@ namespace Gumball
 
         private void DisableUI()
         {
-            nearMiss.Label.gameObject.SetActive(false);
-            slipStream.Label.gameObject.SetActive(false);
-            airTime.Label.gameObject.SetActive(false);
-            airTime.LandingLabel.gameObject.SetActive(false);
+            nearMissLeftUI.Hide();
+            nearMissRightUI.Hide();
         }
 
     }
