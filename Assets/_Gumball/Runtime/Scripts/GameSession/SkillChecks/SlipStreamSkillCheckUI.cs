@@ -8,9 +8,9 @@ using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class NearMissSkillCheckUI : SkillCheckUI
+    public class SlipStreamSkillCheckUI : SkillCheckUI
     {
-
+        
         
         
     }

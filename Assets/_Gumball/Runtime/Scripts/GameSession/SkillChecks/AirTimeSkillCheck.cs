@@ -57,8 +57,6 @@ namespace Gumball
             
             isInAir = true;
             timeInAir = 0;
-            
-            label.gameObject.SetActive(true);
         }
         
         protected override void OnPerformed()
@@ -68,7 +66,8 @@ namespace Gumball
             timeInAir += Time.deltaTime;
             float pointsGainedSinceStarted = pointBonus * timeInAir;
 
-            label.text = $"Air time +{Mathf.CeilToInt(pointsGainedSinceStarted)}";
+            //TODO:
+            //label.text = $"Air time +{Mathf.CeilToInt(pointsGainedSinceStarted)}";
         }
 
         protected override float GetNosToAddWhenPerformed()
@@ -88,8 +87,6 @@ namespace Gumball
             
             isInAir = false;
             
-            label.gameObject.SetActive(false);
-
             if (timeInAir < minTimeInAirForLandingPoints)
                 return;
 

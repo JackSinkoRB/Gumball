@@ -55,6 +55,9 @@ namespace Gumball
             for (int count = 0; count < hits; count++)
             {
                 AICar trafficCar = tempHolder[count].transform.GetComponentInAllParents<AICar>();
+                if (trafficCar == null)
+                    continue;
+                
                 carsInRadius.Add(trafficCar);
                 
                 if (!timeTrafficCarEnteredRadius.ContainsKey(trafficCar))
@@ -67,6 +70,9 @@ namespace Gumball
             //track the cars that exited
             foreach (AICar trafficCar in previousCarsInRadius)
             {
+                if (trafficCar == null)
+                    continue;
+                
                 if (!carsInRadius.Contains(trafficCar))
                 {
                     //no longer in near miss radius
