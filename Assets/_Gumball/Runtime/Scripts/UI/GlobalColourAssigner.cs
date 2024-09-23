@@ -24,6 +24,8 @@ namespace Gumball
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            if (!GlobalColourPalette.HasLoaded)
+                GlobalColourPalette.LoadInstanceSync();
             UpdateColors();
         }
 #endif

@@ -1185,6 +1185,20 @@ namespace Gumball
         }
 
         /// <summary>
+        /// Checks if the specified position is to the left or right of the player.
+        /// </summary>
+        public bool IsPositionOnLeft(Vector3 position)
+        {
+            Vector3 leftOfCar = transform.position - transform.right;
+            Vector3 rightOfCar = transform.position + transform.right;
+
+            float distanceToLeftSqr = (leftOfCar - position).sqrMagnitude;
+            float distanceToRightSqr = (rightOfCar - position).sqrMagnitude;
+
+            return distanceToLeftSqr < distanceToRightSqr;
+        }
+
+        /// <summary>
         /// Checks if the specified position is ahead of the player (in terms of the direction to the target position).
         /// </summary>
         private bool IsPositionAhead(Vector3 position)
