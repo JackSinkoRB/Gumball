@@ -620,7 +620,6 @@ namespace Gumball
                 wheelCollider.motorTorque = 0;
                 wheelCollider.rotationSpeed = 0;
                 wheelCollider.steerAngle = 0;
-                wheelCollider.ResetSprungMasses();
             }
             
             UpdateWheelMeshes(); //force update
