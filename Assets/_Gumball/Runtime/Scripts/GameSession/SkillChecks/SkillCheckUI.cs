@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
@@ -14,7 +15,17 @@ namespace Gumball
 
         private Coroutine hideCoroutine;
         
-        public virtual void Show(float pointBonus)
+        private void OnEnable()
+        {
+            GameSession.onSessionEnd += OnSessionEnd;
+        }
+
+        private void OnDisable()
+        {
+            GameSession.onSessionEnd -= OnSessionEnd;
+        }
+        
+        public virtual void Show(int pointBonus)
         {
             gameObject.SetActive(true);
             
@@ -29,6 +40,11 @@ namespace Gumball
         public virtual void Hide()
         {
             gameObject.SetActive(false);
+        }
+        
+        private void OnSessionEnd(GameSession session, GameSession.ProgressStatus progress)
+        {
+            Hide();
         }
         
     }
