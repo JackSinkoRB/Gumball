@@ -89,7 +89,6 @@ namespace Gumball
             float timeSinceEntering = Time.time - timeTrafficCarEnteredRadius[car];
             bool hasBeenInCollisionSinceEntering = timeSinceEntering > timeSinceLastCollision;
 
-            
             bool isLeftSide = WarehouseManager.Instance.CurrentCar.IsPositionOnLeft(car.transform.position); //is the car closer to the left direction, or the right direction?
             if (!hasBeenInCollisionSinceEntering)
             {
@@ -103,9 +102,9 @@ namespace Gumball
         private void ShowSkillCheckUI(bool leftSide)
         {
             if (leftSide)
-                leftUI.Show(pointBonus);
+                leftUI.Show(Mathf.RoundToInt(pointBonus));
             else
-                rightUI.Show(pointBonus);
+                rightUI.Show(Mathf.RoundToInt(pointBonus));
         }
 
     }

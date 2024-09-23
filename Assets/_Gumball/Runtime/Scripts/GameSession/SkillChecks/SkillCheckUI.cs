@@ -12,9 +12,6 @@ namespace Gumball
         [SerializeField] private bool autoHide = true;
         [SerializeField, ConditionalField(nameof(autoHide))] private float secondsToShow = 2;
 
-        [Space(5)]
-        [SerializeField] private TextMeshProUGUI pointBonusLabel;
-
         private Coroutine hideCoroutine;
         
         public virtual void Show(float pointBonus)
@@ -27,8 +24,6 @@ namespace Gumball
                     StopCoroutine(hideCoroutine);
                 hideCoroutine = this.PerformAfterDelay(secondsToShow, Hide);
             }
-
-            pointBonusLabel.text = Mathf.RoundToInt(pointBonus).ToString();
         }
 
         public virtual void Hide()
