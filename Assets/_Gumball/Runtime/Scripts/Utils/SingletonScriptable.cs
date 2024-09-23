@@ -58,6 +58,9 @@ namespace Gumball
             if (IsLoading)
                 return;
 
+            if (Application.isBatchMode)
+                return; //cannot load addressables sync in batch mode (causes to hang)
+                
             LoadInstance();
 
             void LoadInstance()
