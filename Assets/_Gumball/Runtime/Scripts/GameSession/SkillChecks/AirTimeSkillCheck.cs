@@ -12,13 +12,12 @@ namespace Gumball
     {
     
         public event Action onPerformLanding;
-        
+
         [Header("Air time")]
+        [SerializeField] private AirTimeSkillCheckUI airTimeUI;
         [SerializeField] private float minSpeedKmh = 50;
 
         [Header("Landing")]
-        [SerializeField] private TextMeshProUGUI landingLabel;
-        [SerializeField] private float landingLabelDuration = 1;
         [SerializeField] private float minTimeInAirForLandingPoints = 0.3f;
         [Tooltip("A nos bonus (measured in percent) to give when the player performs a landing.")]
         [SerializeField, Range(0, 1)] private float landingNosBonus = 0.1f;
@@ -26,8 +25,6 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private bool isInAir;
         [SerializeField, ReadOnly] private float timeInAir;
-        
-        public TextMeshProUGUI LandingLabel => landingLabel;
         
         public override void CheckIfPerformed()
         {
@@ -57,6 +54,8 @@ namespace Gumball
             
             isInAir = true;
             timeInAir = 0;
+            
+            airTimeUI.Show(0);
         }
         
         protected override void OnPerformed()
@@ -66,8 +65,7 @@ namespace Gumball
             timeInAir += Time.deltaTime;
             float pointsGainedSinceStarted = pointBonus * timeInAir;
 
-            //TODO:
-            //label.text = $"Air time +{Mathf.CeilToInt(pointsGainedSinceStarted)}";
+            airTimeUI.PointBonusLabel.text = $"+{Mathf.CeilToInt(pointsGainedSinceStarted)}";
         }
 
         protected override float GetNosToAddWhenPerformed()
@@ -87,15 +85,15 @@ namespace Gumball
             
             isInAir = false;
             
-            if (timeInAir < minTimeInAirForLandingPoints)
-                return;
+            airTimeUI.Hide();
 
-            OnPerformLanding();
+            if (timeInAir >= minTimeInAirForLandingPoints)
+                OnPerformLanding();
         }
 
         private void OnPerformLanding()
         {
-            SkillCheckManager.Instance.StartCoroutine(ShowLandingLabelIE());
+            //TODO: show landing UI
             
             WarehouseManager.Instance.CurrentCar.NosManager.AddNos(landingNosBonus);
 
@@ -104,13 +102,5 @@ namespace Gumball
             onPerformLanding?.Invoke();
         }
 
-        private IEnumerator ShowLandingLabelIE()
-        {
-            landingLabel.gameObject.SetActive(true);
-            landingLabel.text = $"Landing +{landingPointBonus}";
-            yield return new WaitForSeconds(landingLabelDuration);
-            landingLabel.gameObject.SetActive(false);
-        }
-        
     }
 }

@@ -18,6 +18,7 @@ namespace Gumball
         [SerializeField] private NearMissSkillCheckUI nearMissLeftUI;
         [SerializeField] private NearMissSkillCheckUI nearMissRightUI;
         [SerializeField] private SlipStreamSkillCheckUI slipStreamUI;
+        [SerializeField] private AirTimeSkillCheckUI airTimeUI;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private float currentPoints;
@@ -103,6 +104,9 @@ namespace Gumball
             
             if (slipStreamUI.IsShowing)
                 slipStreamUI.Hide();
+            
+            if (airTimeUI.IsShowing)
+                airTimeUI.Hide();
         }
 
     }
