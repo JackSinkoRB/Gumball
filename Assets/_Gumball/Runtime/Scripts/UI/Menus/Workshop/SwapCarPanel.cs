@@ -12,7 +12,6 @@ namespace Gumball
 
         [SerializeField] private CarOptionUI carOptionPrefab;
         [SerializeField] private Transform carOptionHolder;
-        [SerializeField] private Button selectButton;
         
         [SerializeField, ReadOnly] private CarOptionUI selectedOption;
         
@@ -20,7 +19,17 @@ namespace Gumball
         {
             base.OnShow();
 
+            PanelManager.GetPanel<PaintStripeBackgroundPanel>().Show();
+            
             Populate();
+        }
+
+        protected override void OnHide()
+        {
+            base.OnHide();
+            
+            if (PanelManager.PanelExists<PaintStripeBackgroundPanel>())
+                PanelManager.GetPanel<PaintStripeBackgroundPanel>().Hide();
         }
 
         public void OnClickCancelButton()
@@ -30,13 +39,12 @@ namespace Gumball
             PanelManager.GetPanel<PlayerStatsPanel>().Show();
         }
 
-        public void OnClickSelectButton()
+        public void OnClickInfoButton()
         {
             Hide();
-            PanelManager.GetPanel<WarehousePanel>().Show();
-            PanelManager.GetPanel<PlayerStatsPanel>().Show();
-
-            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SwapCurrentCar(selectedOption.CarIndex));
+            
+            PanelManager.GetPanel<CarDetailsPanel>().Show();
+            PanelManager.GetPanel<CarDetailsPanel>().Initialise(selectedOption);
         }
         
         public void SelectCarOption(CarOptionUI option)
@@ -49,9 +57,6 @@ namespace Gumball
             
             selectedOption = option;
             selectedOption.OnSelect();
-
-            //don't show interactable if already selected
-            selectButton.interactable = !option.IsCurrentCar;
         }
 
         private void Populate()

@@ -12,11 +12,21 @@ namespace Gumball
     {
 
         [SerializeField] private PerformanceRatingCalculator.Component ratingComponent;
+        [SerializeField] private bool usePlayerCar = true;
         [SerializeField] private Image fill;
         [SerializeField] private Transform fillLabel;
         [SerializeField] private RectTransform fillEnd;
         [SerializeField] private TextMeshProUGUI valueLabel;
 
+        private PerformanceRatingCalculator ratingCalculator;
+        
+        public void SetRatingCalculator(PerformanceRatingCalculator ratingCalculator)
+        {
+            this.ratingCalculator = ratingCalculator;
+            
+            Refresh();
+        }
+        
         private void OnEnable()
         {
             if (!Application.isPlaying)
@@ -24,7 +34,8 @@ namespace Gumball
             
             Refresh();
 
-            WarehouseManager.Instance.onCurrentCarChanged += OnCarChange;
+            if (usePlayerCar)
+                WarehouseManager.Instance.onCurrentCarChanged += OnCarChange;
         }
 
         private void OnDisable()
@@ -47,14 +58,14 @@ namespace Gumball
         
         private void Refresh()
         {
-            if (WarehouseManager.Instance.CurrentCar == null)
+            if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
             {
                 fill.fillAmount = 0;
                 valueLabel.text = "";
                 return;
             }
             
-            PerformanceRatingCalculator calculator = WarehouseManager.Instance.CurrentCar.CurrentPerformanceRating;
+            PerformanceRatingCalculator calculator = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CurrentPerformanceRating : ratingCalculator;
             float ratingPercentComparedToMax = (float)calculator.GetRating(ratingComponent) / WarehouseManager.Instance.GetMaxRating(ratingComponent);
             fill.fillAmount = ratingPercentComparedToMax;
 
