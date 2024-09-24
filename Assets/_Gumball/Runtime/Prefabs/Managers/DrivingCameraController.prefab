@@ -1793,7 +1793,7 @@ MonoBehaviour:
     heightEase: 4
   offset: {x: 0, y: 2, z: 0}
   offsetIsLocalised: 0
-  lookAtOffset: {x: 0, y: 1, z: 0}
+  lookAtOffset: {x: 0, y: 2, z: 0}
   nosShake:
     magnitude: 0
     roughness: 0
@@ -1820,11 +1820,11 @@ MonoBehaviour:
   desiredFOVBasedOnSpeed:
     Min: 60
     Max: 60
-  speedForMaxFOVKmh: 0
-  fovSpeedBraking: 0.5
-  fovSpeedAccelerating: 0.5
-  fovSpeedNos: 0.5
-  additionalFovWhenUsingNos: 10
+  speedForMaxFOVKmh: 1
+  fovSpeedBraking: 2
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 2
+  additionalFovWhenUsingNos: 0
   minCollisionMagnitudeForShake: 0
   collisionMagnitudeForMaxShake: 0
   collisionMaxShake:
@@ -1838,7 +1838,7 @@ MonoBehaviour:
     currentState: 0
     magnitudeModifier: 0
   otherTarget: {fileID: 0}
-  lerpDuration: 3
+  lerpDuration: 5
   lerpCurve:
     serializedVersion: 2
     m_Curve:
@@ -1863,4 +1863,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+  lookAtDistance: 150
+  lookAtPoint: {x: 0, y: 0, z: 0}
   timePassed: 0
