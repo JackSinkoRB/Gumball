@@ -17,9 +17,13 @@ namespace Gumball
         }
 
         [SerializeField] private LayoutDirection layoutDirection;
+        [SerializeField, ConditionalField(nameof(layoutDirection), true)] private bool fitVertical;
+        [SerializeField, ConditionalField(new[] {nameof(layoutDirection), nameof(fitVertical)}, new[] {true, false})] private float fitVerticalSpacing;
+        [SerializeField, ConditionalField(nameof(layoutDirection))] private bool fitHorizontal;
+        [SerializeField, ConditionalField(new[] {nameof(layoutDirection), nameof(fitHorizontal)}, new[] {false, false})] private float fitHorizontalSpacing;
         [SerializeField, ReadOnly(nameof(layoutDirection))] private int numberOfColumns = 1;
         [SerializeField, ReadOnly(nameof(layoutDirection), true)] private int numberOfRows = 1;
-        
+
         [Space(5)]
         [Tooltip("The size of the elements as a percentage of the rect size.")]
         [SerializeField, Range(0.01f, 1)] private float elementSizeAsPercent;
@@ -58,11 +62,29 @@ namespace Gumball
                 numberOfColumns = Mathf.CeilToInt((float)transform.childCount / numberOfRows);
             }
 
-            float elementSize = numberOfColumns > numberOfRows ? rectWidth * elementSizeAsPercent : rectHeight * elementSizeAsPercent;
+            float elementSize = layoutDirection == LayoutDirection.HORIZONTAL ? rectWidth * elementSizeAsPercent : rectHeight * elementSizeAsPercent;
 
+            //fit vertical/horizontal:
+            if (layoutDirection == LayoutDirection.HORIZONTAL && fitVertical)
+            {
+                rectHeight = elementSize * numberOfRows;
+                rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, rectHeight);
+            }
+            
+            if (layoutDirection == LayoutDirection.VERTICAL && fitHorizontal)
+            {
+                rectWidth = elementSize * numberOfRows;
+                rectTransform.sizeDelta = new Vector2(rectWidth, rectTransform.sizeDelta.y);
+            }
+            
+            //get spacing:
             Vector2 spacing = new Vector2(
-                (rectWidth - (elementSize * numberOfColumns)) / (numberOfColumns - 1), 
+                (rectWidth - (elementSize * numberOfColumns)) / (numberOfColumns - 1),
                 (rectHeight - (elementSize * numberOfRows)) / (numberOfRows - 1));
+            if (layoutDirection == LayoutDirection.HORIZONTAL && fitVertical)
+                spacing = spacing.SetY(fitVerticalSpacing);
+            if (layoutDirection == LayoutDirection.VERTICAL && fitHorizontal)
+                spacing = spacing.SetX(fitHorizontalSpacing);
             
             int count = 0;
             foreach (RectTransform child in transform)

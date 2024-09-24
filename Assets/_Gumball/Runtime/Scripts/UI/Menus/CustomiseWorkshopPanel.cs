@@ -22,7 +22,7 @@ namespace Gumball
         protected override void OnShow()
         {
             base.OnShow();
-            
+
             OpenSubMenu(null);
         }
 
