@@ -58,7 +58,7 @@ namespace Gumball
             if (IsLoading)
                 return;
 
-            if (Application.isBatchMode)
+            if (Application.isBatchMode && !SingletonScriptableHelper.LazyLoadingEnabled)
                 return; //cannot load addressables sync in batch mode (causes to hang)
                 
             LoadInstance();
