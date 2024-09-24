@@ -13,6 +13,7 @@ namespace Gumball
 
         [SerializeField] private PerformanceRatingCalculator.Component ratingComponent;
         [SerializeField] private Image fill;
+        [SerializeField] private Transform fillLabel;
         [SerializeField] private RectTransform fillEnd;
         [SerializeField] private TextMeshProUGUI valueLabel;
 
@@ -65,7 +66,12 @@ namespace Gumball
             if (fillEnd == null || fill == null)
                 return;
             
-            fillEnd.anchoredPosition = fillEnd.anchoredPosition.SetX(fill.fillAmount * (fill.rectTransform.rect.width * fill.rectTransform.localScale.x));
+            float newXPos = fill.fillAmount * (fill.rectTransform.rect.width * fill.rectTransform.localScale.x);
+            fillEnd.anchoredPosition = fillEnd.anchoredPosition.SetX(newXPos);
+            
+            //return children to fill end transform
+            foreach (RectTransform child in fillEnd)
+                child.position = fillLabel.position;
         }
 
     }
