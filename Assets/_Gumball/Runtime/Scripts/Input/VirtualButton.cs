@@ -279,6 +279,9 @@ namespace Gumball
 
         private void DoInteractableColorTween(bool isInteractable)
         {
+            if (disabledTweenDuration == 0)
+                return;
+            
             pressedColorTween?.Kill(); //take priority over press color tween
             interactableColorTween?.Kill();
             interactableColorTween = DOTween.Sequence();
@@ -294,6 +297,9 @@ namespace Gumball
         
         private void DoPressColorTween(bool isPressed)
         {
+            if (pressedTweenDuration == 0)
+                return;
+            
             if (!isInteractable)
                 return; //interactable color tween takes priority
             
