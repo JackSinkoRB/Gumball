@@ -16,14 +16,17 @@ namespace Gumball
             FRONT,
             REAR
         }
-        
-        [SerializeField] private Slider suspensionHeightSlider;
-        [SerializeField] private Slider camberSlider;
-        [SerializeField] private Slider offsetSlider;
-        [SerializeField] private Slider tyreProfileSlider;
-        [SerializeField] private Slider tyreWidthSlider;
-        [SerializeField] private Slider rimDiameterSlider;
-        [SerializeField] private Slider rimWidthSlider;
+
+        [Space(5)]
+        [SerializeField] private Button[] wheelModificationButtons;
+        [Space(5)]
+        [SerializeField] private SliderWithPercent suspensionHeightSlider;
+        [SerializeField] private SliderWithPercent camberSlider;
+        [SerializeField] private SliderWithPercent offsetSlider;
+        [SerializeField] private SliderWithPercent tyreProfileSlider;
+        [SerializeField] private SliderWithPercent tyreWidthSlider;
+        [SerializeField] private SliderWithPercent rimDiameterSlider;
+        [SerializeField] private SliderWithPercent rimWidthSlider;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private WheelsToModifyPosition wheelsToModifyPosition;
@@ -47,6 +50,15 @@ namespace Gumball
             wheelsToModifyPosition = position;
             
             UpdateSliderValues();
+
+            for (int index = 0; index < wheelModificationButtons.Length; index++)
+            {
+                Button button = wheelModificationButtons[index];
+                WheelsToModifyPosition buttonPosition = (WheelsToModifyPosition)index;
+                
+                bool isSelected = buttonPosition == position;
+                //TODO: tween the button color depending on selected or not
+            }
         }
 
         public void SetWheelsToModifyPosition(int index) => SetWheelsToModifyPosition((WheelsToModifyPosition)index);
@@ -61,25 +73,25 @@ namespace Gumball
             StanceModification stanceModification = wheelToUse.GetComponent<StanceModification>();
 
             float suspensionHeightNormalized = stanceModification.SuspensionHeight.NormalizeValue(wheelToUse.suspensionDistance);
-            suspensionHeightSlider.SetValueWithoutNotify(suspensionHeightNormalized);
+            suspensionHeightSlider.UpdateSlider(suspensionHeightNormalized);
             
             float camberNormalized = stanceModification.Camber.NormalizeValue(stanceModification.CurrentCamber);
-            camberSlider.SetValueWithoutNotify(camberNormalized);
+            camberSlider.UpdateSlider(camberNormalized);
             
             float offsetNormalized = stanceModification.Offset.NormalizeValue(wheelToUse.transform.localPosition.x);
-            offsetSlider.SetValueWithoutNotify(offsetNormalized);
+            offsetSlider.UpdateSlider(offsetNormalized);
             
             float tyreProfileNormalized = stanceModification.TyreProfile.NormalizeValue(stanceModification.WheelMesh.Tyre.transform.localScale.x);
-            tyreProfileSlider.SetValueWithoutNotify(tyreProfileNormalized);
+            tyreProfileSlider.UpdateSlider(tyreProfileNormalized);
             
             float tyreWidthNormalized = stanceModification.TyreWidth.NormalizeValue(stanceModification.WheelMesh.Tyre.transform.localScale.z);
-            tyreWidthSlider.SetValueWithoutNotify(tyreWidthNormalized);
+            tyreWidthSlider.UpdateSlider(tyreWidthNormalized);
             
             float rimDiameterNormalized = stanceModification.RimDiameter.NormalizeValue(stanceModification.WheelMesh.transform.localScale.y);
-            rimDiameterSlider.SetValueWithoutNotify(rimDiameterNormalized);
+            rimDiameterSlider.UpdateSlider(rimDiameterNormalized);
             
             float rimWidthNormalized = stanceModification.RimWidth.NormalizeValue(stanceModification.WheelMesh.transform.localScale.x);
-            rimWidthSlider.SetValueWithoutNotify(rimWidthNormalized);
+            rimWidthSlider.UpdateSlider(rimWidthNormalized);
         }
 
         public void OnSuspensionHeightSliderChanged()
@@ -88,7 +100,7 @@ namespace Gumball
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
 
-                float valueDenormalized = stanceModification.SuspensionHeight.DenormalizeValue(suspensionHeightSlider.value);
+                float valueDenormalized = stanceModification.SuspensionHeight.DenormalizeValue(suspensionHeightSlider.Slider.value);
                 stanceModification.ApplySuspensionHeight(valueDenormalized);
             }
         }
@@ -99,7 +111,7 @@ namespace Gumball
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 
-                float valueDenormalized = stanceModification.Camber.DenormalizeValue(camberSlider.value);
+                float valueDenormalized = stanceModification.Camber.DenormalizeValue(camberSlider.Slider.value);
                 stanceModification.ApplyCamber(valueDenormalized);
             }
         }
@@ -110,7 +122,7 @@ namespace Gumball
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 
-                float valueDenormalized = stanceModification.Offset.DenormalizeValue(offsetSlider.value);
+                float valueDenormalized = stanceModification.Offset.DenormalizeValue(offsetSlider.Slider.value);
                 stanceModification.ApplyOffset(valueDenormalized);
             }
         }
@@ -121,7 +133,7 @@ namespace Gumball
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 
-                float valueDenormalized = stanceModification.TyreProfile.DenormalizeValue(tyreProfileSlider.value);
+                float valueDenormalized = stanceModification.TyreProfile.DenormalizeValue(tyreProfileSlider.Slider.value);
                 stanceModification.ApplyTyreProfile(valueDenormalized);
             }
         }
@@ -132,7 +144,7 @@ namespace Gumball
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 
-                float valueDenormalized = stanceModification.TyreWidth.DenormalizeValue(tyreWidthSlider.value);
+                float valueDenormalized = stanceModification.TyreWidth.DenormalizeValue(tyreWidthSlider.Slider.value);
                 stanceModification.ApplyTyreWidth(valueDenormalized);
             }
         }
@@ -143,7 +155,7 @@ namespace Gumball
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 
-                float valueDenormalized = stanceModification.RimDiameter.DenormalizeValue(rimDiameterSlider.value);
+                float valueDenormalized = stanceModification.RimDiameter.DenormalizeValue(rimDiameterSlider.Slider.value);
                 stanceModification.ApplyRimDiameter(valueDenormalized);
             }
         }
@@ -154,7 +166,7 @@ namespace Gumball
             {
                 StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
                 
-                float valueDenormalized = stanceModification.RimWidth.DenormalizeValue(rimWidthSlider.value);
+                float valueDenormalized = stanceModification.RimWidth.DenormalizeValue(rimWidthSlider.Slider.value);
                 stanceModification.ApplyRimWidth(valueDenormalized);
             }
         }
