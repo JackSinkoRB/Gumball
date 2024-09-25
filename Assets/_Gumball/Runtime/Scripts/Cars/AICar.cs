@@ -62,7 +62,8 @@ namespace Gumball
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
         public string SaveKey => GetSaveKeyFromIndex(carIndex);
-        
+
+        public bool CanBeDrivenByPlayer => canBeDrivenByPlayer;
         public Transform CockpitCameraTarget => cockpitCameraTarget;
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
