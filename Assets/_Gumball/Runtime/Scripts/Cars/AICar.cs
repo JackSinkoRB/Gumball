@@ -487,6 +487,10 @@ namespace Gumball
             InitialiseWheelStance();
 
             OnInitialiseTypeComplete();
+
+            //set wheel colliders as player layer
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
+                wheelCollider.gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
         }
 
         public void InitialiseAsRacer()
