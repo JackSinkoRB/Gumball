@@ -12,9 +12,10 @@ namespace Gumball
     [Serializable]
     public class NearMissSkillCheck : SkillCheck
     {
-        
+
         [Header("Near miss")]
-        [SerializeField] private float labelDuration = 1;
+        [SerializeField] private NearMissSkillCheckUI leftUI;
+        [SerializeField] private NearMissSkillCheckUI rightUI;
         [Tooltip("The minimum speed the player must be going for a near miss.")]
         [SerializeField] private float minSpeedKmh = 50;
         [Tooltip("The max distance around a traffic car to consider a near miss.")]
@@ -26,7 +27,6 @@ namespace Gumball
         
         private readonly Dictionary<AICar, float> timeTrafficCarEnteredRadius = new();
         private readonly Collider[] tempHolder = new Collider[50];
-        private Coroutine labelCoroutine;
 
         public override void CheckIfPerformed()
         {
@@ -55,6 +55,9 @@ namespace Gumball
             for (int count = 0; count < hits; count++)
             {
                 AICar trafficCar = tempHolder[count].transform.GetComponentInAllParents<AICar>();
+                if (trafficCar == null)
+                    continue;
+                
                 carsInRadius.Add(trafficCar);
                 
                 if (!timeTrafficCarEnteredRadius.ContainsKey(trafficCar))
@@ -67,6 +70,9 @@ namespace Gumball
             //track the cars that exited
             foreach (AICar trafficCar in previousCarsInRadius)
             {
+                if (trafficCar == null)
+                    continue;
+                
                 if (!carsInRadius.Contains(trafficCar))
                 {
                     //no longer in near miss radius
@@ -88,29 +94,23 @@ namespace Gumball
         {
             float timeSinceEntering = Time.time - timeTrafficCarEnteredRadius[car];
             bool hasBeenInCollisionSinceEntering = timeSinceEntering > timeSinceLastCollision;
-            
+
+            bool isLeftSide = WarehouseManager.Instance.CurrentCar.IsPositionOnLeft(car.transform.position); //is the car closer to the left direction, or the right direction?
             if (!hasBeenInCollisionSinceEntering)
+            {
                 OnPerformed();
-            
+                ShowSkillCheckUI(isLeftSide);
+            }
+
             timeTrafficCarEnteredRadius.Remove(car);
         }
-        
-        protected override void OnPerformed()
-        {
-            base.OnPerformed();
-            
-            if (labelCoroutine != null)
-                SkillCheckManager.Instance.StopCoroutine(labelCoroutine);
 
-            labelCoroutine = SkillCheckManager.Instance.StartCoroutine(ShowNearMissLabelIE());
-        }
-        
-        private IEnumerator ShowNearMissLabelIE()
+        private void ShowSkillCheckUI(bool leftSide)
         {
-            label.gameObject.SetActive(true);
-            label.text = $"Near miss +{pointBonus}";
-            yield return new WaitForSeconds(labelDuration);
-            label.gameObject.SetActive(false);
+            if (leftSide)
+                leftUI.Show(Mathf.RoundToInt(pointBonus));
+            else
+                rightUI.Show(Mathf.RoundToInt(pointBonus));
         }
 
     }

@@ -620,7 +620,6 @@ namespace Gumball
                 wheelCollider.motorTorque = 0;
                 wheelCollider.rotationSpeed = 0;
                 wheelCollider.steerAngle = 0;
-                wheelCollider.ResetSprungMasses();
             }
             
             UpdateWheelMeshes(); //force update
@@ -686,24 +685,31 @@ namespace Gumball
             if (!isInitialised)
                 return;
 
-            if (autoDrive)
-            {
-                if (!IsPlayer && CurrentChunk == null)
-                {
-                    //current chunk may have despawned
-                    const float timeWithNoChunkToDespawn = 1;
-                    timeWithNoChunk += Time.deltaTime;
-                    if (timeWithNoChunk >= timeWithNoChunkToDespawn)
-                        Despawn();
-                    return;
-                }
-                
-                timeWithNoChunk = 0;
-            }
+            CheckIfNoChunk();
 
             if (!isFrozen)
             {
                 Move();
+            }
+        }
+
+        private void CheckIfNoChunk()
+        {
+            if (CurrentChunk != null)
+            {
+                timeWithNoChunk = 0;
+                return;
+            }
+
+            //current chunk may have despawned
+            const float timeWithNoChunkToDespawn = 1;
+            timeWithNoChunk += Time.deltaTime;
+            if (timeWithNoChunk >= timeWithNoChunkToDespawn)
+            {
+                if (IsPlayer && autoDrive)
+                    Freeze(); //freeze if at end of map and session has ended
+                else
+                    Despawn();
             }
         }
         
@@ -760,6 +766,9 @@ namespace Gumball
 
             Rigidbody.velocity = Vector3.zero;
             Rigidbody.isKinematic = true;
+
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
+                wheelCollider.enabled = false;
         }
 
         private void Unfreeze()
@@ -767,6 +776,9 @@ namespace Gumball
             isFrozen = false;
             
             Rigidbody.isKinematic = false;
+            
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
+                wheelCollider.enabled = true;
         }
 
         public void SetRacingLineOffset(float offset)
@@ -1167,6 +1179,20 @@ namespace Gumball
                     return;
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks if the specified position is to the left or right of the player.
+        /// </summary>
+        public bool IsPositionOnLeft(Vector3 position)
+        {
+            Vector3 leftOfCar = transform.position - transform.right;
+            Vector3 rightOfCar = transform.position + transform.right;
+
+            float distanceToLeftSqr = (leftOfCar - position).sqrMagnitude;
+            float distanceToRightSqr = (rightOfCar - position).sqrMagnitude;
+
+            return distanceToLeftSqr < distanceToRightSqr;
         }
 
         /// <summary>
@@ -1926,7 +1952,7 @@ namespace Gumball
         /// <summary>
         /// Gets the spline sample that is 'distance' metres away from the closest sample.
         /// </summary>
-        private (SplineSample, Chunk)? GetSplineSampleAhead(float desiredDistance, bool canUseRacingLine = true)
+        public (SplineSample, Chunk)? GetSplineSampleAhead(float desiredDistance, bool canUseRacingLine = true)
         {
             if (CurrentChunk.TrafficManager == null)
                 return null; //no traffic manager

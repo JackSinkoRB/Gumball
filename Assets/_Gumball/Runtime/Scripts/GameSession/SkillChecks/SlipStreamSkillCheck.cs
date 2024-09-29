@@ -14,6 +14,7 @@ namespace Gumball
     {
 
         [Header("Slip stream")]
+        [SerializeField] private SkillCheckUI slipStreamUI;
         [Tooltip("The minimum speed the player must be going to enable slip stream.")]
         [SerializeField] private float minSpeedKmh = 50;
         [Tooltip("The width around the cars front position for a racer to be in to trigger slipstreaming.")]
@@ -62,9 +63,9 @@ namespace Gumball
             
             isSlipStreaming = true;
             
-            label.gameObject.SetActive(true);
-
             pointsGainedSinceStarted = 0;
+            
+            slipStreamUI.Show(0);
         }
         
         protected override void OnPerformed()
@@ -73,9 +74,9 @@ namespace Gumball
             
             if (!isSlipStreaming)
                 OnStartSlipStream();
-            
+
             pointsGainedSinceStarted += pointBonus * Time.deltaTime;
-            label.text = $"Slipstream +{Mathf.CeilToInt(pointsGainedSinceStarted)}";
+            slipStreamUI.PointBonusLabel.text = $"+{Mathf.CeilToInt(pointsGainedSinceStarted)}";
         }
         
         private void OnStopSlipStream()
@@ -84,7 +85,8 @@ namespace Gumball
                 return; //already stopped
             
             isSlipStreaming = false;
-            label.gameObject.SetActive(false);
+            
+            slipStreamUI.Hide();
         }
 
         protected override float GetPointsToAddWhenPerformed()

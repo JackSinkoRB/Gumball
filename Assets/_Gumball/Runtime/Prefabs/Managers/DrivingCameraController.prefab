@@ -31,6 +31,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3041174817258160888}
+  - {fileID: 8040196559110657229}
   m_Father: {fileID: 8022717951198104956}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6955470588699195823
@@ -375,7 +376,7 @@ MonoBehaviour:
       m_RotationOrder: 0
   - from: {fileID: 2867138450535570593}
     to: {fileID: 8970949092867848097}
-    transitionTime: 2
+    transitionTime: 1
     blendCurve:
       serializedVersion: 2
       m_Curve:
@@ -402,7 +403,7 @@ MonoBehaviour:
       m_RotationOrder: 0
   - from: {fileID: 1464593099206671265}
     to: {fileID: 8970949092867848097}
-    transitionTime: 2
+    transitionTime: 1
     blendCurve:
       serializedVersion: 2
       m_Curve:
@@ -482,16 +483,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 2770630332642590920}
   fakeRotationPivot: {fileID: 5297060517151192155}
   fakeDepthPivot: {fileID: 7426213242085698767}
   fakeLookAtPivot: {fileID: 1781591465023069107}
+  setFakePositionsAsRealPositionsOnSet: 0
   rotationLerpSpeed: 6
   rotationLerpSpeedToZero: 2
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
     depth: 0
     depthDuration: 0.8
@@ -627,16 +629,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 1006243703143211636}
   fakeRotationPivot: {fileID: 206867046030377605}
   fakeDepthPivot: {fileID: 6025358149367630732}
   fakeLookAtPivot: {fileID: 1066367200461969775}
+  setFakePositionsAsRealPositionsOnSet: 0
   rotationLerpSpeed: 6
   rotationLerpSpeedToZero: 2
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
     depth: -0.01
     depthDuration: 0.4
@@ -772,16 +775,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 1229020240171631144}
   fakeRotationPivot: {fileID: 961558282498977149}
   fakeDepthPivot: {fileID: 5847629264015361176}
   fakeLookAtPivot: {fileID: 7721195789677832090}
+  setFakePositionsAsRealPositionsOnSet: 0
   rotationLerpSpeed: 6
   rotationLerpSpeedToZero: 2
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
     depth: 0
     depthDuration: 0.8
@@ -1108,16 +1112,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 4880751071222427762}
   fakeRotationPivot: {fileID: 4880751071222427762}
   fakeDepthPivot: {fileID: 2732334379521578949}
   fakeLookAtPivot: {fileID: 1666526802143909317}
+  setFakePositionsAsRealPositionsOnSet: 0
   rotationLerpSpeed: 0
   rotationLerpSpeedToZero: 0
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
     depth: 1
     depthDuration: 1
@@ -1207,6 +1212,156 @@ MonoBehaviour:
     currentState: 0
     magnitudeModifier: 0
   otherTarget: {fileID: 0}
+--- !u!1 &6301209001185069815
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8040196559110657229}
+  - component: {fileID: 3848037501365559147}
+  - component: {fileID: 3606369282092169093}
+  - component: {fileID: 8648485842388555388}
+  - component: {fileID: 100156448751246260}
+  m_Layer: 0
+  m_Name: Camera NO post processing
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8040196559110657229
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6301209001185069815}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2238982387291630442}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3848037501365559147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6301209001185069815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 243fe1fea3d9880439853cf6c0af5546, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!20 &3606369282092169093
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6301209001185069815}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 10000
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: -1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 32
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!81 &8648485842388555388
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6301209001185069815}
+  m_Enabled: 1
+--- !u!114 &100156448751246260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6301209001185069815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RenderShadows: 0
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 1
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_Version: 2
+  m_TaaSettings:
+    quality: 3
+    frameInfluence: 0.1
+    jitterScale: 1
+    mipBias: 0
+    varianceClampScale: 0.9
+    contrastAdaptiveSharpening: 0
 --- !u!1 &6324179819098458119
 GameObject:
   m_ObjectHideFlags: 0
@@ -1472,7 +1627,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1048543
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1508,7 +1663,8 @@ MonoBehaviour:
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
   m_CameraType: 0
-  m_Cameras: []
+  m_Cameras:
+  - {fileID: 3606369282092169093}
   m_RendererIndex: -1
   m_VolumeLayerMask:
     serializedVersion: 2
@@ -1582,61 +1738,62 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
+  rotationPivot: {fileID: 7674160820353800047}
+  depthPivot: {fileID: 8226211066247002576}
+  lookAtPivot: {fileID: 8022717951198104956}
   fakeController: {fileID: 3123130293420109088}
   fakeRotationPivot: {fileID: 8473699086619150081}
   fakeDepthPivot: {fileID: 8189775972105919124}
   fakeLookAtPivot: {fileID: 7088122836268771609}
+  setFakePositionsAsRealPositionsOnSet: 1
   rotationLerpSpeed: 0
   rotationLerpSpeedToZero: 0
   heightLerpSpeed: 9
-  rotationPivot: {fileID: 7674160820353800047}
-  depthPivot: {fileID: 8226211066247002576}
-  lookAtPivot: {fileID: 8022717951198104956}
   accelerationStartMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   accelerationEndMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   brakingStartMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   brakingEndMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   gearChangeStartMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
   gearChangeEndMomentum:
-    depth: 1
-    depthDuration: 1
-    depthEase: 0
-    height: 1
-    heightDuration: 1
-    heightEase: 0
-  offset: {x: 6, y: 2, z: -6}
-  offsetIsLocalised: 1
-  lookAtOffset: {x: 0, y: 3, z: 0}
+    depth: 0
+    depthDuration: 0.5
+    depthEase: 4
+    height: 0
+    heightDuration: 0.5
+    heightEase: 4
+  offset: {x: 0, y: 2, z: 0}
+  offsetIsLocalised: 0
+  lookAtOffset: {x: 0, y: 2, z: 0}
   nosShake:
     magnitude: 0
     roughness: 0
@@ -1648,26 +1805,26 @@ MonoBehaviour:
     currentState: 0
     magnitudeModifier: 0
   speedForCameraShakeKmh:
-    Min: 1000
-    Max: 1000
+    Min: 0
+    Max: 0
   speedShake:
-    magnitude: 0
-    roughness: 0
-    positionInfluence: {x: 0, y: 0, z: 0}
-    rotationInfluence: {x: 0, y: 0, z: 0}
-    fadeInDuration: 0
-    fadeOutDuration: 0
+    magnitude: 1
+    roughness: 1
+    positionInfluence: {x: 0.05, y: 0.05, z: 0}
+    rotationInfluence: {x: 1, y: 1, z: 0.5}
+    fadeInDuration: 0.1
+    fadeOutDuration: 1
     fadeOutInstantly: 0
     currentState: 0
     magnitudeModifier: 0
   desiredFOVBasedOnSpeed:
-    Min: 55
-    Max: 95
-  speedForMaxFOVKmh: 100
-  fovSpeedBraking: 5
-  fovSpeedAccelerating: 5
-  fovSpeedNos: 4
-  additionalFovWhenUsingNos: 10
+    Min: 60
+    Max: 60
+  speedForMaxFOVKmh: 1
+  fovSpeedBraking: 2
+  fovSpeedAccelerating: 2
+  fovSpeedNos: 2
+  additionalFovWhenUsingNos: 0
   minCollisionMagnitudeForShake: 0
   collisionMagnitudeForMaxShake: 0
   collisionMaxShake:
@@ -1681,3 +1838,31 @@ MonoBehaviour:
     currentState: 0
     magnitudeModifier: 0
   otherTarget: {fileID: 0}
+  lerpDuration: 5
+  lerpCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  lookAtDistance: 150
+  lookAtPoint: {x: 0, y: 0, z: 0}
+  timePassed: 0

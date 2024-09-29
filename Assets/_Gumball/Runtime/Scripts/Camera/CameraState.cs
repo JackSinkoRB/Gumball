@@ -10,6 +10,14 @@ namespace Gumball
     {
 
         [SerializeField, ReadOnly] protected CameraController controller;
+        [SerializeField] protected Transform rotationPivot;
+        [SerializeField] protected Transform depthPivot;
+        [SerializeField] protected Transform lookAtPivot;
+        [Space(5)]
+        [SerializeField] protected Transform fakeController;
+        [SerializeField] protected Transform fakeRotationPivot;
+        [SerializeField] protected Transform fakeDepthPivot;
+        [SerializeField] protected Transform fakeLookAtPivot;
 
         private bool isInitialised;
 

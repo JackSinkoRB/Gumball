@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
-using TMPro;
 using UnityEngine;
 
 namespace Gumball
@@ -12,11 +11,10 @@ namespace Gumball
     {
 
         public event Action onPerformed;
-
+        
         [SerializeField] private string displayName;
         [SerializeField] private Sprite icon;
         [Space(5)]
-        [SerializeField] protected TextMeshProUGUI label;
         [SerializeField] protected float pointBonus;
         [SerializeField, Range(0,1)] protected float nosBonus;
 
@@ -25,7 +23,6 @@ namespace Gumball
 
         public string DisplayName => displayName;
         public Sprite Icon => icon;
-        public TextMeshProUGUI Label => label;
         public float PointsSinceSessionStart => pointsSinceSessionStart;
 
         public abstract void CheckIfPerformed();
