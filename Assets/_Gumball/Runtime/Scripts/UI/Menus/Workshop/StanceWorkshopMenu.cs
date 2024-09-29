@@ -18,7 +18,7 @@ namespace Gumball
         }
 
         [Space(5)]
-        [SerializeField] private Button[] wheelModificationButtons;
+        [SerializeField] private WheelModificationPositionButton[] wheelModificationPositionButtons;
         [Space(5)]
         [SerializeField] private SliderWithPercent suspensionHeightSlider;
         [SerializeField] private SliderWithPercent camberSlider;
@@ -51,13 +51,16 @@ namespace Gumball
             
             UpdateSliderValues();
 
-            for (int index = 0; index < wheelModificationButtons.Length; index++)
+            for (int index = 0; index < wheelModificationPositionButtons.Length; index++)
             {
-                Button button = wheelModificationButtons[index];
+                WheelModificationPositionButton button = wheelModificationPositionButtons[index];
                 WheelsToModifyPosition buttonPosition = (WheelsToModifyPosition)index;
                 
                 bool isSelected = buttonPosition == position;
-                //TODO: tween the button color depending on selected or not
+                if (isSelected)
+                    button.Select();
+                else
+                    button.Deselect();
             }
         }
 
