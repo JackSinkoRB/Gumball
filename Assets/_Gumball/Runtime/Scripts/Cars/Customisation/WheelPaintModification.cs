@@ -174,6 +174,17 @@ namespace Gumball
             colourableParts = parts.ToArray();
         }
 
+        public void SetMaterialType(PaintMaterial.Type type)
+        {
+            //save to file
+            ColourSwatchSerialized swatch = SavedSwatch;
+            swatch.SetMaterialType(type);
+            SavedSwatch = swatch;
+            
+            //update visuals
+            ApplySwatch(SavedSwatch);
+        }
+        
         /// <summary>
         /// Ensure the material isn't the original, and create a clone so it isn't modified.
         /// </summary>
