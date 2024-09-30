@@ -20,10 +20,12 @@ namespace Gumball
         protected override void OnShow()
         {
             base.OnShow();
-            
+
+            PanelManager.GetPanel<CarStatsPanel>().Show();
+
             OpenSubMenu(null);
         }
-        
+
         public void OnClickBackButton()
         {
             Hide();

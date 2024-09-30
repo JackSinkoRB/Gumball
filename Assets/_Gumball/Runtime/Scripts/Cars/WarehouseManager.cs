@@ -39,13 +39,20 @@ namespace Gumball
         private void OnValidate()
         {
 #if UNITY_EDITOR
+            UpdateCachedData();
+#endif
+        }
+
+#if UNITY_EDITOR
+        public void UpdateCachedData()
+        {
             foreach (WarehouseCarData carData in allCarData)
             {
                 carData.CacheCarData();
             }
-#endif
         }
-        
+#endif
+
         public void SetCurrentCar(AICar car)
         {
             //remove DontDestroyOnLoad() for existing cars:

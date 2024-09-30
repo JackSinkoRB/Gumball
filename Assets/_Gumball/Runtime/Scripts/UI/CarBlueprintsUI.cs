@@ -7,35 +7,55 @@ namespace Gumball
     public class CarBlueprintsUI : MonoBehaviour
     {
         
+        [SerializeField] private bool usePlayerCar = true;
         [SerializeField] private AutosizeTextMeshPro label;
+        
+        private int carIndex;
+
+        public void SetCarIndex(int carIndex)
+        {
+            this.carIndex = carIndex;
+            
+            RefreshLabel();
+        }
         
         private void OnEnable()
         {
             RefreshLabel();
 
-            WarehouseManager.Instance.onCurrentCarChanged += OnCarChange;
+            BlueprintManager.onBlueprintsChange += OnBlueprintsChange;
         }
 
         private void OnDisable()
         {
-            WarehouseManager.Instance.onCurrentCarChanged -= OnCarChange;
+            BlueprintManager.onBlueprintsChange -= OnBlueprintsChange;
         }
         
-        private void OnCarChange(AICar newcar)
+        private void OnBlueprintsChange(int carIndex, int previousAmount, int newAmount)
         {
-            RefreshLabel();
+            if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
+                return;
+            
+            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
+            if (carIndexToUse == carIndex)
+                RefreshLabel();
         }
         
         private void RefreshLabel()
         {
-            if (WarehouseManager.Instance.CurrentCar == null)
+            if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
             {
                 label.text = "";
                 return;
             }
 
-            //TODO - display blueprints to next level once blueprints are in
-            label.text = $"NA/NA";
+            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
+            int currentBlueprints = BlueprintManager.Instance.GetBlueprints(carIndexToUse);
+            
+            int nextLevelIndex = BlueprintManager.Instance.GetNextLevel(carIndexToUse);
+            int blueprintsForNextLevel = BlueprintManager.Instance.GetBlueprintsRequiredForLevel(nextLevelIndex);
+            
+            label.text = $"{currentBlueprints}/{blueprintsForNextLevel}";
             this.PerformAtEndOfFrame(label.Resize);
         }
 

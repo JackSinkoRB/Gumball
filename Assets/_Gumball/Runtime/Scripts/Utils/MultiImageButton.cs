@@ -11,6 +11,8 @@ namespace Gumball
 
         [SerializeField, ReadOnly] private List<Graphic> targetGraphics = new();
 
+        public List<Graphic> TargetGraphics => targetGraphics;
+        
         protected override void Start()
         {
             FindTargetGraphics();

@@ -37,8 +37,22 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
         #endregion
-
+        
         [SerializeField] private WarehouseCameraController cameraController;
+        
+#if UNITY_EDITOR
+        [Header("Testing")]
+        [SerializeField] private Rewards blueprintsRewardTesting;
+        
+        [ButtonMethod]
+        public void TestGiveRewards()
+        {
+            if (!Application.isPlaying)
+                throw new InvalidOperationException("Cannot give rewards outside play mode.");
+
+            CoroutineHelper.Instance.StartCoroutine(blueprintsRewardTesting.GiveRewards());
+        }
+#endif
         
         private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
         

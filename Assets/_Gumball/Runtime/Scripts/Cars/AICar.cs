@@ -5,9 +5,9 @@ using DG.Tweening;
 using Dreamteck.Splines;
 #if UNITY_EDITOR
 using Gumball.Editor;
+using UnityEditor.SceneManagement;
 #endif
 using MyBox;
-using Unity.Profiling;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
@@ -42,8 +42,10 @@ namespace Gumball
         
         [Header("Details")]
         [SerializeField] private string displayName;
-
+        [SerializeField] private string makeDisplayName = "Toyota";
+        
         public string DisplayName => displayName.IsNullOrEmpty() ? name.Replace("(Clone)", "").Replace("_", " ") : displayName;
+        public string MakeDisplayName => makeDisplayName;
         
         [Header("Player car")]
         [SerializeField] private bool canBeDrivenByPlayer;
@@ -62,7 +64,8 @@ namespace Gumball
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
         public string SaveKey => GetSaveKeyFromIndex(carIndex);
-        
+
+        public bool CanBeDrivenByPlayer => canBeDrivenByPlayer;
         public Transform CockpitCameraTarget => cockpitCameraTarget;
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
@@ -236,8 +239,10 @@ namespace Gumball
         /// The speed that the wheel mesh is interpolated to the desired steer angle. This is different to the steer speed of the wheel collider.
         /// </summary>
         private const float visualSteerSpeed = 5;
-        
+
         [Header("Braking")]
+        [Tooltip("The minimum distance to check for a corner (if travelling slow).")]
+        [SerializeField] private float minCornerReactionDistance = 2;
         [Tooltip("The time that the autodriving car looks ahead for curves to brake. Lowering the time can make it more aggressive around corners, while increasing can make them safer.")]
         [SerializeField] private float cornerReactionTime = 1.1f;
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
@@ -484,6 +489,10 @@ namespace Gumball
             InitialiseWheelStance();
 
             OnInitialiseTypeComplete();
+
+            //set wheel colliders as player layer
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
+                wheelCollider.gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
         }
 
         public void InitialiseAsRacer()
@@ -591,6 +600,7 @@ namespace Gumball
         public void SimulateMovement()
         {
             Move();
+            CalculateAcceleration();
         }
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -1272,7 +1282,7 @@ namespace Gumball
             if (autoDrive)
             {
                 Vector3 directionToTarget = targetPosition - transform.position;
-                float angle = Mathf.Clamp(-Vector2.SignedAngle(Rigidbody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
+                float angle = Mathf.Clamp(-Vector2.SignedAngle(transform.forward.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
                 desiredSteerAngle = angle;
             }
             else
@@ -1509,9 +1519,8 @@ namespace Gumball
             }
             
             timeSinceLastCornerCheck = 0;
-
-            const float min = 2;
-            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speedKmh));
+            
+            float metresPerSecond = Mathf.Max(minCornerReactionDistance, SpeedUtils.FromKmhToMs(speedKmh));
             float visionDistance = metresPerSecond * cornerReactionTime;
 
             (Chunk, Vector3, Quaternion, SplineSample)? cornerTargetPos = GetPositionAhead(visionDistance, false);
@@ -1647,7 +1656,7 @@ namespace Gumball
                 frontWheelMesh.transform.position = wheelPosition;
 
                 //rotation is the same as the rear wheel, but with interpolated steer speed
-                WheelMesh rearWheelRotation = rearWheelMeshes[count];
+                WheelMesh rearWheelRotation = rearWheelMeshes[count % 2];
                 frontWheelMesh.transform.rotation = rearWheelRotation.transform.rotation;
                 
                 //set the steer amount
@@ -1844,7 +1853,8 @@ namespace Gumball
         private void Despawn()
         {
             gameObject.Pool();
-            GlobalLoggers.AICarLogger.Log($"Despawned {gameObject.name} at {transform.position}");
+            if (gameObject.IsPooled())
+                GlobalLoggers.AICarLogger.Log($"Despawned {gameObject.name} at {transform.position}");
         }
 
         private void CacheAllWheelMeshes()
@@ -2126,6 +2136,9 @@ namespace Gumball
             
             foreach (Collider collider in colliders.GetComponents<Collider>())
             {
+                if (!collider.enabled)
+                    continue;
+                
                 const float reallyFarAway = 1000;
                 
                 Vector3 positionForward = collider.ClosestPoint(transform.position + transform.forward * reallyFarAway);
@@ -2278,6 +2291,10 @@ namespace Gumball
 #if UNITY_EDITOR
             performanceRatingWithMinProfile.Calculate(performanceSettings, new CarPerformanceProfile(0, 0, 0, 0));
             performanceRatingWithMaxProfile.Calculate(performanceSettings, new CarPerformanceProfile(1, 1, 1, 1));
+            
+            bool prefabIsOpen = PrefabStageUtility.GetPrefabStage(gameObject) != null;
+            if (prefabIsOpen)
+                WarehouseManager.Instance.UpdateCachedData();
 #endif
         }
         

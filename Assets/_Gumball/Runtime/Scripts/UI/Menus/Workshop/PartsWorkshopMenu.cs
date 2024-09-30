@@ -3,13 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using MagneticScrollUtils;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Gumball
 {
     public class PartsWorkshopMenu : WorkshopSubMenu
     {
 
-        [SerializeField] private MagneticScroll magneticScroll;
+        [SerializeField] private GridLayoutWithScreenSize gridLayout;
+        [SerializeField] private PartsOption partsOptionPrefab;
 
         protected override void OnShow()
         {
@@ -25,43 +27,39 @@ namespace Gumball
             CarPartManager partManager = WarehouseManager.Instance.CurrentCar.CarPartManager;
             if (partManager == null || partManager.CarPartGroups.Length == 0)
             {
-                PopulateScroll(null);
+                PopulateGrid(null);
                 return;
             }
             
             CarPartGroup bodyKitGroup = partManager.CarPartGroups[0];
-            PopulateScroll(bodyKitGroup);
+            PopulateGrid(bodyKitGroup);
         }
 
-        private void PopulateScroll(CarPartGroup group)
+        private void PopulateGrid(CarPartGroup group)
         {
-            List<ScrollItem> scrollItems = new List<ScrollItem>();
-
+            foreach (Transform child in gridLayout.transform)
+                child.gameObject.Pool();
+            
             if (group != null)
             {
+                PartsOption currentPart = null;
                 for (int index = 0; index < group.CarParts.Length; index++)
                 {
-                    int finalIndex = index;
-
                     CarPart part = group.CarParts[index];
-                    ScrollItem scrollItem = new ScrollItem();
-                    scrollItem.onLoad += () =>
-                    {
-                        PartsScrollIcon partsScrollIcon = (PartsScrollIcon)scrollItem.CurrentIcon;
-                        partsScrollIcon.ImageComponent.sprite = part.Icon;
-                        partsScrollIcon.DisplayNameLabel.text = part.DisplayName;
-                    };
+                    
+                    PartsOption instance = partsOptionPrefab.gameObject.GetSpareOrCreate<PartsOption>(gridLayout.transform);
+                    instance.Initialise(part, group);
+                    instance.transform.SetAsLastSibling();
 
-                    scrollItem.onSelect += () =>
-                    {
-                        group.SetPartActive(finalIndex);
-                    };
-
-                    scrollItems.Add(scrollItem);
+                    if (group.CurrentPartIndex == index)
+                        currentPart = instance;
                 }
+                
+                if (currentPart != null)
+                    currentPart.OnSelect();
             }
 
-            magneticScroll.SetItems(scrollItems, group == null ? 0 : group.CurrentPartIndex);
+            this.PerformAtEndOfFrame(() => gridLayout.Resize());
         }
 
     }
