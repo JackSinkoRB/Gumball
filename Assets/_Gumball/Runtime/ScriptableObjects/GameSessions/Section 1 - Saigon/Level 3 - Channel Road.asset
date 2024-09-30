@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: 93ff92af2bb3d9a449cff4ea53e96d15
   lastKnownName: Level 3 - Channel Road
+  displayName: Level
   description: Race along Saigon's Channel
   scene:
     scene:
@@ -40,43 +41,126 @@ MonoBehaviour:
       type: 3}
     distanceFromSpline: 5
   racerData:
-  - assetReference:
+  - carAssetReference:
       m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 5
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
     startingPosition:
       position: {x: 10, y: 0.1, z: 125}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 5
     performanceProfile:
       maxSpeed: 0.121
       acceleration: 0.047
       handling: 0.057
       nos: 0
     currentPerformanceRating:
-      totalRating: 235
-      maxSpeedRating: 100
+      totalRating: 184
+      maxSpeedRating: 49
       accelerationSpeedRating: 63
       handlingRating: 41
       nosRating: 31
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
   racersStartingSpeed: 70
-  trafficIsProcedural: 1
+  trafficIsProcedural: 0
   trafficDensity: 100
   trafficBikes: []
-  trafficCars:
-  - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
+  trafficCars: []
+  trafficTrucks:
+  - m_AssetGUID: f81bfb69dc8428742b705f8a705b99a9
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  - m_AssetGUID: 81825441c04ee5c468680e955e2bb0b3
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
-  trafficTrucks: []
   trafficSpawnPositions:
-    Value: []
+    Value:
+    - distanceFromMapStart: 0.67551136
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 188.53247
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 275.09653
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 325.34253
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 469.53693
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 515.2673
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 664.84064
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 706.52545
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 857.3406
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 988.49475
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1029.9984
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1163.2888
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1334.5021
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1447.2559
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1523.8516
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1677.2522
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1850.0105
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1975.4163
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 2093.042
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 2150.4395
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 2237.4634
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 2352.21
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 2499.3904
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 2594.418
+      laneDirection: 1
+      laneIndex: 3
   rewards:
     xp: 500
     standardCurrency: 1000
@@ -86,23 +170,25 @@ MonoBehaviour:
     subParts:
     - {fileID: 11400000, guid: 7394944cb85a36c4d98509d1e594ab09, type: 2}
     unlockables: []
-  mainChallengeDescription: This is the challenge description
   subObjectives: []
   inProgress: 1
   currentRacers:
     list:
     - Key: {fileID: 0}
       Value:
-        assetReference:
+        carAssetReference:
           m_AssetGUID: 
           m_SubObjectName: 
           m_SubObjectType: 
           m_EditorAssetChanged: 0
-        canCrossMiddle: 1
-        racingLineImprecisionMaxDistance: 3
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
         startingPosition:
           position: {x: 0, y: 0, z: 0}
           rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 1
+        racingLineImprecisionMaxDistance: 3
         performanceProfile:
           maxSpeed: 0
           acceleration: 0
@@ -114,29 +200,56 @@ MonoBehaviour:
           accelerationSpeedRating: 0
           handlingRating: 0
           nosRating: 0
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
     - Key: {fileID: 0}
       Value:
-        assetReference:
+        carAssetReference:
           m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
           m_SubObjectName: 
           m_SubObjectType: 
           m_EditorAssetChanged: 0
-        canCrossMiddle: 0
-        racingLineImprecisionMaxDistance: 5
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
         startingPosition:
           position: {x: 10, y: 0.1, z: 125}
           rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 5
         performanceProfile:
           maxSpeed: 0.121
           acceleration: 0.047
           handling: 0.057
           nos: 0
         currentPerformanceRating:
-          totalRating: 235
-          maxSpeedRating: 100
+          totalRating: 184
+          maxSpeedRating: 49
           accelerationSpeedRating: 63
           handlingRating: 41
           nosRating: 31
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
     keyCollision: 0
   previousCorePartRewards: []
   previousSubPartRewards:
