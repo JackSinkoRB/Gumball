@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -10,33 +11,48 @@ namespace Gumball
     public class PaintMaterialButton : MonoBehaviour
     {
 
-        [SerializeField] private Color selectedColor;
-        [SerializeField] private Color deselectedColor;
-        [SerializeField] private float selectionTweenDuration = 0.3f;
-
+        private bool isInitialised;
         private bool isSelected;
-        private Sequence selectionTween;
+        private readonly Dictionary<Graphic, Color> defaultGraphicColors = new();
         
         public MultiImageButton Button => GetComponent<MultiImageButton>();
         
+        private void Initialise()
+        {
+            isInitialised = true;
+
+            foreach (Graphic graphic in Button.TargetGraphics)
+                defaultGraphicColors[graphic] = graphic.color;
+        }
+
         public void Select()
         {
+            if (!isInitialised)
+                Initialise();
+            
             isSelected = true;
             
-            selectionTween?.Kill();
-            selectionTween = DOTween.Sequence();
             foreach (Graphic graphic in Button.TargetGraphics)
-                selectionTween.Join(graphic.DOColor(selectedColor, selectionTweenDuration));
+            {
+                Color selectedColor = defaultGraphicColors[graphic];
+                graphic.color = selectedColor;
+            }
         }
 
         public void Deselect()
         {
+            if (!isInitialised)
+                Initialise();
+            
             isSelected = false;
             
-            selectionTween?.Kill();
-            selectionTween = DOTween.Sequence();
             foreach (Graphic graphic in Button.TargetGraphics)
-                selectionTween.Join(graphic.DOColor(deselectedColor, selectionTweenDuration));
+            {
+                const float deselectedDarkeningPercent = 0.5f;
+                Color selectedColor = defaultGraphicColors[graphic];
+                Color deselectedColor = new Color(selectedColor.r - deselectedDarkeningPercent, selectedColor.g - deselectedDarkeningPercent, selectedColor.b - deselectedDarkeningPercent);
+                graphic.color = deselectedColor;
+            }
         }
         
     }

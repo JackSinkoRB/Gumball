@@ -14,6 +14,7 @@ namespace Gumball
 
         [SerializeField] private GameObject simpleMenu;
         [SerializeField] private GameObject advancedMenu;
+        [SerializeField] private SwitchButton switchButton;
 
         [Header("Advanced")]
         [SerializeField] private ColorPicker primaryColorPicker;
@@ -36,6 +37,13 @@ namespace Gumball
             base.OnShow();
 
             SelectTab(paintModification.CurrentPaintMode);
+        }
+
+        protected override void OnHide()
+        {
+            base.OnHide();
+
+            currentMode = null;
         }
 
         /// <summary>
@@ -63,14 +71,17 @@ namespace Gumball
             }
         }
 
-        public void SetPaintMaterialType(PaintMaterial.Type type)
+        public void SetPaintMaterialType(int materialTypeIndex)
         {
+            //functionality:
+            paintModification.SetMaterialType((PaintMaterial.Type)materialTypeIndex);
+            
+            //UI selection:
             for (int index = 0; index < paintMaterialButtons.Length; index++)
             {
                 PaintMaterialButton button = paintMaterialButtons[index];
-                PaintMaterial.Type buttonPosition = (PaintMaterial.Type)index;
                 
-                bool isSelected = buttonPosition == type;
+                bool isSelected = (index+1) == materialTypeIndex; //add 1 to account for NONE
                 if (isSelected)
                     button.Select();
                 else
@@ -104,8 +115,11 @@ namespace Gumball
         
         private void OnSelectSimpleTab()
         {
+            switchButton.OnClickLeftSwitch();
+            
             bool isCustomSwatch = paintModification.GetCurrentSwatchIndexInPresets() == -1;
             PopulateSwatchScroll(isCustomSwatch);
+            SetPaintMaterialType((int)paintModification.SavedSwatch.MaterialType);
             
             simpleMenu.gameObject.SetActive(true);
             advancedMenu.gameObject.SetActive(false);
@@ -113,6 +127,8 @@ namespace Gumball
         
         private void OnSelectAdvancedTab()
         {
+            switchButton.OnClickRightSwitch();
+
             advancedSwatch.SetColor(paintModification.SavedSwatch.Color.ToColor());
             advancedSwatch.SetSpecular(paintModification.SavedSwatch.Specular.ToColor());
             advancedSwatch.SetSmoothness(paintModification.SavedSwatch.Smoothness);
@@ -142,10 +158,12 @@ namespace Gumball
                 ColourOption instance = colourOptionPrefab.gameObject.GetSpareOrCreate<ColourOption>(colourOptionHolder.transform);
                 instance.Initialise(colourSwatch);
                 instance.onSelect += OnSelectInstance;
+                instance.transform.SetAsLastSibling();
 
                 void OnSelectInstance()
                 {
                     paintModification.ApplySwatch(colourSwatch);
+                    SetPaintMaterialType((int)colourSwatch.MaterialType);
                 }
             }
 
@@ -156,11 +174,13 @@ namespace Gumball
                 ColourOption instance = colourOptionPrefab.gameObject.GetSpareOrCreate<ColourOption>(colourOptionHolder.transform);
                 instance.Initialise(colourSwatch);
                 instance.onSelect += OnSelectInstance;
+                instance.transform.SetAsLastSibling();
 
                 void OnSelectInstance()
                 {
                     paintModification.ApplySwatch(colourSwatch);
                     paintModification.SavedSelectedPresetIndex = finalIndex;
+                    SetPaintMaterialType((int)colourSwatch.MaterialType);
                 }
             }
             

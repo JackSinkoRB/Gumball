@@ -19,6 +19,7 @@ namespace Gumball
 
         public SerializableColor Color => color;
         public SerializableColor Specular => specular;
+        public PaintMaterial.Type MaterialType => type;
         public float Smoothness => type == PaintMaterial.Type.NONE ? smoothness : GlobalPaintPresets.Instance.GetMaterialFromType(type).Smoothness;
         public float ClearCoat => type == PaintMaterial.Type.NONE ? clearCoat : GlobalPaintPresets.Instance.GetMaterialFromType(type).ClearCoat;
         public float ClearCoatSmoothness => type == PaintMaterial.Type.NONE ? clearCoatSmoothness : GlobalPaintPresets.Instance.GetMaterialFromType(type).ClearCoatSmoothness;
