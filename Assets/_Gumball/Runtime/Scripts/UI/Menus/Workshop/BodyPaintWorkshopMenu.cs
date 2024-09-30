@@ -22,8 +22,10 @@ namespace Gumball
         [SerializeField] private Slider clearcoatSlider;
         
         [Header("Simple")]
-        [SerializeField] private MagneticScroll swatchMagneticScroll;
-
+        [SerializeField] private ColourOption colourOptionPrefab;
+        [SerializeField] private GridLayoutWithScreenSize colourOptionHolder;
+        [SerializeField] private PaintMaterialButton[] paintMaterialButtons;
+        
         private readonly ColourSwatch advancedSwatch = new();
         private BodyPaintModification.PaintMode? currentMode;
         
@@ -61,6 +63,21 @@ namespace Gumball
             }
         }
 
+        public void SetPaintMaterialType(PaintMaterial.Type type)
+        {
+            for (int index = 0; index < paintMaterialButtons.Length; index++)
+            {
+                PaintMaterialButton button = paintMaterialButtons[index];
+                PaintMaterial.Type buttonPosition = (PaintMaterial.Type)index;
+                
+                bool isSelected = buttonPosition == type;
+                if (isSelected)
+                    button.Select();
+                else
+                    button.Deselect();
+            }
+        }
+
         public void OnPrimaryColourChange()
         {
             advancedSwatch.SetColor(primaryColorPicker.CurrentColor);
@@ -88,7 +105,7 @@ namespace Gumball
         private void OnSelectSimpleTab()
         {
             bool isCustomSwatch = paintModification.GetCurrentSwatchIndexInPresets() == -1;
-            PopulateSwatchScroll(paintModification, isCustomSwatch);
+            PopulateSwatchScroll(isCustomSwatch);
             
             simpleMenu.gameObject.SetActive(true);
             advancedMenu.gameObject.SetActive(false);
@@ -111,55 +128,43 @@ namespace Gumball
             advancedMenu.gameObject.SetActive(true);
         }
         
-        private void PopulateSwatchScroll(BodyPaintModification bodyPaintModification, bool showCustomSwatchOption)
+        private void PopulateSwatchScroll(bool showCustomSwatchOption)
         {
-            List<ScrollItem> scrollItems = new List<ScrollItem>();
+            foreach (Transform child in colourOptionHolder.transform)
+                child.gameObject.Pool();
             
             if (showCustomSwatchOption)
             {
                 //add an additional ScrollItem at the beginning with the advanced colour settings
-                ColourSwatchSerialized colourSwatch = bodyPaintModification.SavedSwatch;
-                ScrollItem customSwatchItem = new ScrollItem();
                 
-                customSwatchItem.onLoad += () =>
-                {
-                    ColourScrollIcon partsScrollIcon = (ColourScrollIcon)customSwatchItem.CurrentIcon;
-                    partsScrollIcon.ImageComponent.color = colourSwatch.Color.ToColor().WithAlphaSetTo(1);
-                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular.ToColor().WithAlphaSetTo(1);
-                };
+                ColourSwatchSerialized colourSwatch = paintModification.SavedSwatch;
+                
+                ColourOption instance = colourOptionPrefab.gameObject.GetSpareOrCreate<ColourOption>(colourOptionHolder.transform);
+                instance.Initialise(colourSwatch);
+                instance.onSelect += OnSelectInstance;
 
-                customSwatchItem.onSelect += () =>
+                void OnSelectInstance()
                 {
-                    bodyPaintModification.ApplySwatch(colourSwatch);
-                };
-                
-                scrollItems.Add(customSwatchItem);
+                    paintModification.ApplySwatch(colourSwatch);
+                }
             }
 
             for (int index = 0; index < GlobalPaintPresets.Instance.BodySwatchPresets.Length; index++)
             {
-                ColourSwatch colourSwatch = GlobalPaintPresets.Instance.BodySwatchPresets[index];
-                ScrollItem scrollItem = new ScrollItem();
                 int finalIndex = index;
-                
-                scrollItem.onLoad += () =>
-                {
-                    ColourScrollIcon partsScrollIcon = (ColourScrollIcon)scrollItem.CurrentIcon;
-                    partsScrollIcon.ImageComponent.color = colourSwatch.Color.WithAlphaSetTo(1);
-                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular.WithAlphaSetTo(1);
-                };
+                ColourSwatch colourSwatch = GlobalPaintPresets.Instance.BodySwatchPresets[index];
+                ColourOption instance = colourOptionPrefab.gameObject.GetSpareOrCreate<ColourOption>(colourOptionHolder.transform);
+                instance.Initialise(colourSwatch);
+                instance.onSelect += OnSelectInstance;
 
-                scrollItem.onSelect += () =>
+                void OnSelectInstance()
                 {
-                    bodyPaintModification.ApplySwatch(colourSwatch);
-                    bodyPaintModification.SavedSelectedPresetIndex = finalIndex;
-                };
-
-                scrollItems.Add(scrollItem);
+                    paintModification.ApplySwatch(colourSwatch);
+                    paintModification.SavedSelectedPresetIndex = finalIndex;
+                }
             }
-
-            int indexToShow = showCustomSwatchOption ? 0 : bodyPaintModification.SavedSelectedPresetIndex;
-            swatchMagneticScroll.SetItems(scrollItems, indexToShow);
+            
+            this.PerformAtEndOfFrame(() => colourOptionHolder.Resize());
         }
         
     }

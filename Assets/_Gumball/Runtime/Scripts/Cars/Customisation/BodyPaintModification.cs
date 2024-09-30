@@ -46,6 +46,21 @@ namespace Gumball
                     DataManager.Cars.Set($"{saveKey}.CurrentSwatch", value);
             }
         }
+        
+        public PaintMaterial.Type SavedSelectedMaterialType
+        {
+            get
+            {
+                if (!carBelongsTo.IsPlayer)
+                    throw new InvalidOperationException("Cannot get save value for non-player car.");
+                return DataManager.Cars.Get<PaintMaterial.Type>($"{saveKey}.SelectedMaterialType");
+            }
+            set
+            {
+                if (carBelongsTo.IsPlayer)
+                    DataManager.Cars.Set($"{saveKey}.SelectedMaterialType", value);
+            }
+        }
 
         public int SavedSelectedPresetIndex
         {
@@ -121,13 +136,8 @@ namespace Gumball
 
         public void LoadFromSave()
         {
-            if (!DataManager.Cars.HasKey($"{saveKey}.CurrentSwatch"))
-            {
-                ApplySwatch(GlobalPaintPresets.Instance.BodySwatchPresets[0]); //apply the default
-                return;
-            }
-
-            ColourSwatchSerialized saveData = DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
+            ColourSwatchSerialized saveData = DataManager.Cars.Get($"{saveKey}.CurrentSwatch", GlobalPaintPresets.Instance.BodySwatchPresets[0].Serialize());
+            saveData.SetMaterialType(SavedSelectedMaterialType);
             ApplySwatch(saveData);
         }
 
