@@ -598,6 +598,7 @@ namespace Gumball
         public void SimulateMovement()
         {
             Move();
+            CalculateAcceleration();
         }
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -1850,7 +1851,8 @@ namespace Gumball
         private void Despawn()
         {
             gameObject.Pool();
-            GlobalLoggers.AICarLogger.Log($"Despawned {gameObject.name} at {transform.position}");
+            if (gameObject.IsPooled())
+                GlobalLoggers.AICarLogger.Log($"Despawned {gameObject.name} at {transform.position}");
         }
 
         private void CacheAllWheelMeshes()
