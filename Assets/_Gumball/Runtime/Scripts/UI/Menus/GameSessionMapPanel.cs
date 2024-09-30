@@ -19,6 +19,16 @@ namespace Gumball
         {
             MainSceneManager.LoadMainScene();
         }
+
+        public void OnClickLeftArrow()
+        {
+            MapSceneManager.Instance.SelectPreviousMap();
+        }
+        
+        public void OnClickRightArrow()
+        {
+            MapSceneManager.Instance.SelectNextMap();
+        }
         
     }
 }
