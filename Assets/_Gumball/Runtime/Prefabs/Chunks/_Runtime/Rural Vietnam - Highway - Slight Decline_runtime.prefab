@@ -2123,7 +2123,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3259604920746901509}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: b6317daee06db1045bb781f5400ffb64, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -2350,14 +2350,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trafficManager: {fileID: 5670692654239303254}
   powerpoleManager: {fileID: 9016216999829908486}
-  barriers:
-  - {fileID: 0}
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 50
   nextRacingLineInterpolateDistance: 65
   terrainHighLODDistance: 500
-  currentLOD: 1
+  currentTerrainLOD: 0
+  currentChildMeshLOD: 0
   terrainHighLOD: {fileID: 6775613807236085378}
   terrainLowLOD: {fileID: 1232797772581699771}
   isFullyLoaded: 0
@@ -5708,6 +5707,7 @@ MonoBehaviour:
     vertexColors: []
   chunkDetector: {fileID: 709847261595364964}
   splineLengthCached: 100.021675
+  childMeshRenderers: []
   splineSampleCollection:
     samples:
     - position: {x: 0, y: 0, z: 0}
@@ -6424,6 +6424,8 @@ MonoBehaviour:
   verticesCombined: []
   chunkToConnectWith: {fileID: 0}
   showDebugLines: 0
+  eventsToSearchIn: []
+  mapsUsingChunk: []
 --- !u!114 &3728916877665805578
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11308,7 +11310,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5836388517094533772}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: b6317daee06db1045bb781f5400ffb64, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

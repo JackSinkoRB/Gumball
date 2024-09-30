@@ -28,7 +28,7 @@ namespace Gumball
         /// The minimum distance around a position required to not have an obstacle in order to spawn a car.
         /// </summary>
         private const float minDistanceRequiredToSpawn = 10f;
-        private const float maxRandomLaneOffset = 2.1f;
+        private const float maxRandomLaneOffset = 1.7f;
         
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
