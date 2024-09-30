@@ -62,9 +62,6 @@ namespace Gumball
         
         public void SelectTab(WheelPaintModification.PaintMode paintMode)
         {
-            if (currentMode == paintMode)
-                return; //already selected
-
             currentMode = paintMode;
 
             switch (paintMode)
