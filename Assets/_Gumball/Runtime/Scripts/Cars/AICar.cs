@@ -5,9 +5,9 @@ using DG.Tweening;
 using Dreamteck.Splines;
 #if UNITY_EDITOR
 using Gumball.Editor;
+using UnityEditor.SceneManagement;
 #endif
 using MyBox;
-using Unity.Profiling;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
@@ -42,8 +42,10 @@ namespace Gumball
         
         [Header("Details")]
         [SerializeField] private string displayName;
-
+        [SerializeField] private string makeDisplayName = "Toyota";
+        
         public string DisplayName => displayName.IsNullOrEmpty() ? name.Replace("(Clone)", "").Replace("_", " ") : displayName;
+        public string MakeDisplayName => makeDisplayName;
         
         [Header("Player car")]
         [SerializeField] private bool canBeDrivenByPlayer;
@@ -2289,6 +2291,10 @@ namespace Gumball
 #if UNITY_EDITOR
             performanceRatingWithMinProfile.Calculate(performanceSettings, new CarPerformanceProfile(0, 0, 0, 0));
             performanceRatingWithMaxProfile.Calculate(performanceSettings, new CarPerformanceProfile(1, 1, 1, 1));
+            
+            bool prefabIsOpen = PrefabStageUtility.GetPrefabStage(gameObject) != null;
+            if (prefabIsOpen)
+                WarehouseManager.Instance.UpdateCachedData();
 #endif
         }
         

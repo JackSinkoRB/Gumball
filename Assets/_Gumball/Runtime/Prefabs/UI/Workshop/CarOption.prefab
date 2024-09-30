@@ -70,11 +70,15 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 0}
+    startingLevelIndex: -1
+    isUnlockedByDefault: 0
     cachedData:
       displayName: 
       performanceSettings:
-        gearboxAccelerationPerformancePoints: 0
-        gearboxMaxSpeedPerformancePoints: 0
+        baseMaxSpeed: 0
+        baseAcceleration: 0
+        baseHandling: 0
+        baseNos: 0
         minTorqueCurve:
           serializedVersion: 2
           m_Curve: []
@@ -107,17 +111,6 @@ MonoBehaviour:
           nosWeight: 0
           min: 6000
           max: 10000
-        idealRPMRangeForGearChanges:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 0
-          min:
-            Min: 3000
-            Max: 6000
-          max:
-            Min: 3000
-            Max: 8000
         rigidbodyMass:
           maxSpeedWeight: 0
           accelerationWeight: 0
@@ -482,8 +475,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -24}
-  m_SizeDelta: {x: 400, y: 250}
+  m_AnchoredPosition: {x: 0, y: -4}
+  m_SizeDelta: {x: 350, y: 350}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8466586817297423198
 CanvasRenderer:
@@ -1010,7 +1003,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 13}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8298706981840855347
