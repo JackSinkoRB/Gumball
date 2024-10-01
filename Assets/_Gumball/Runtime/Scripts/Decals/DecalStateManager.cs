@@ -19,15 +19,15 @@ namespace Gumball
         public abstract class SingleDecalStateChange : StateChange
         {
             [SerializeField] protected LiveDecal liveDecal;
-            [SerializeField] protected LiveDecal.LiveDecalData data;
+            [SerializeField] protected LiveDecalData data;
 
             public LiveDecal LiveDecal => liveDecal;
-            public LiveDecal.LiveDecalData Data => data;
+            public LiveDecalData Data => data;
 
             protected SingleDecalStateChange(LiveDecal liveDecal)
             {
                 this.liveDecal = liveDecal;
-                data = new LiveDecal.LiveDecalData(liveDecal);
+                data = new LiveDecalData(liveDecal);
             }
         }
         
@@ -98,7 +98,7 @@ namespace Gumball
         
         public class ModifyStateChange : SingleDecalStateChange
         {
-            private LiveDecal.LiveDecalData dataBeforeUndo;
+            private LiveDecalData dataBeforeUndo;
             
             public ModifyStateChange(LiveDecal liveDecal) : base(liveDecal)
             {
@@ -106,7 +106,7 @@ namespace Gumball
             
             public override void Undo()
             {
-                dataBeforeUndo = new LiveDecal.LiveDecalData(liveDecal);
+                dataBeforeUndo = new LiveDecalData(liveDecal);
                 
                 //apply it's original data
                 liveDecal.PopulateWithData(data);

@@ -114,7 +114,7 @@ namespace Gumball.Runtime.Tests
             //create a live decal at a certain position
             Vector3 decalPositionOffset = new Vector3(1, 1, 1);
             Vector3 decalRotationOffsetEuler = new Vector3(0, 45, 0);
-            LiveDecal newLiveDecal = DecalEditor.Instance.CreateLiveDecalFromData(new LiveDecal.LiveDecalData(0, 0, 1, decalPositionOffset, decalRotationOffsetEuler, Vector3.zero, Vector3.one, 0, 0));
+            LiveDecal newLiveDecal = DecalEditor.Instance.CreateLiveDecalFromData(new LiveDecalData(0, 0, 1, decalPositionOffset, decalRotationOffsetEuler, Vector3.zero, Vector3.one, 0, 0));
         
             Vector3 desiredPosition = DecalEditor.Instance.CurrentCar.transform.TransformPoint(decalPositionOffset);
             Assert.IsTrue(desiredPosition.Approximately(newLiveDecal.transform.position), $"Expected {desiredPosition} but got {newLiveDecal.transform.position}");
@@ -154,7 +154,7 @@ namespace Gumball.Runtime.Tests
             yield return DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
             yield return DecalEditor.Instance.EndSession();
         
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecalData>());
             Assert.AreEqual(0, liveDecalData.Length);
         }
         
@@ -172,7 +172,7 @@ namespace Gumball.Runtime.Tests
             
             yield return DecalEditor.Instance.EndSession();
         
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
         }
         
@@ -193,7 +193,7 @@ namespace Gumball.Runtime.Tests
             
             yield return DecalEditor.Instance.EndSession();
         
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(categoryToUse, liveDecalData[0].CategoryIndex);
             Assert.AreEqual(textureToUse, liveDecalData[0].TextureIndex);
@@ -218,7 +218,7 @@ namespace Gumball.Runtime.Tests
             
             yield return DecalEditor.Instance.EndSession();
         
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(scaleToUse, liveDecalData[0].Scale.ToVector3());
         }
@@ -243,7 +243,7 @@ namespace Gumball.Runtime.Tests
             
             yield return DecalEditor.Instance.EndSession();
         
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(angleToUse, liveDecalData[0].Angle);
         }
@@ -269,7 +269,7 @@ namespace Gumball.Runtime.Tests
             
             yield return DecalEditor.Instance.EndSession();
         
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(positionToUse, liveDecalData[0].LocalPositionToCar.ToVector3());
             Assert.AreEqual(rotationToUse.eulerAngles, liveDecalData[0].LocalRotationToCar.ToVector3());
@@ -299,7 +299,7 @@ namespace Gumball.Runtime.Tests
             
             yield return DecalEditor.Instance.EndSession();
         
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecal.LiveDecalData>());
+            LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(colorIndexToUse, liveDecalData[0].ColorIndex);
         }
