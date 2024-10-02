@@ -92,7 +92,7 @@ namespace Gumball
 
             AICar car = WarehouseManager.Instance.CurrentCar;
 
-            yield return Instance.StartSession(car);
+            Instance.StartSession(car);
             
             AvatarManager.Instance.HideAvatars(true);
 
@@ -111,19 +111,18 @@ namespace Gumball
         
         private void OnPrimaryContactReleased()
         {
-            if (!PanelManager.PanelExists<DecalEditorPanel>())
+            if (!PanelManager.PanelExists<LiveryWorkshopMenu>())
                 return; //editor panel isn't open
 
             CheckToMoveDecalUnderPointer();
         }
 
-        public IEnumerator StartSession(AICar car)
+        public void StartSession(AICar car)
         {
-            int sessionTicketNumber = ++maxWaitingSessionTicketNumber;
-            while (currentSessionTicketNumber != sessionTicketNumber)
+            if (isSessionActive)
             {
-                GlobalLoggers.DecalsLogger.Log($"Cannot start decal session, because one has already been started. Waiting for its turn... ({currentSessionTicketNumber} / {sessionTicketNumber})");
-                yield return null;
+                GlobalLoggers.DecalsLogger.Log($"Cannot start decal session, because one has already been started.");
+                return;
             }
 
             GlobalLoggers.DecalsLogger.Log($"Started session {currentSessionTicketNumber}.");
@@ -154,12 +153,11 @@ namespace Gumball
             //disable the car's collider temporarily
             car.Colliders.SetActive(false);
 
-            ApplyBaseDecals();
+            ApplyBaseDecals(car);
             
             onSessionStart?.Invoke();
-            
-            yield return null;
-            DeselectLiveDecal(); //perform at end of frame as magnetic scroll will select it in LateUpdate()
+
+            DeselectLiveDecal();
         }
 
         public IEnumerator EndSession()
@@ -361,10 +359,9 @@ namespace Gumball
             }
         }
 
-        private void ApplyBaseDecals()
+        private void ApplyBaseDecals(AICar car)
         {
-            int carIndex = WarehouseManager.Instance.CurrentCar.CarIndex;
-            WarehouseCarData carData = WarehouseManager.Instance.AllCarData[carIndex];
+            WarehouseCarData carData = WarehouseManager.Instance.AllCarData[car.CarIndex];
             List<LiveDecal> baseDecals = DecalManager.CreateLiveDecalsFromData(carData.BaseDecalData);
             
             foreach (LiveDecal liveDecal in baseDecals)
@@ -396,10 +393,10 @@ namespace Gumball
             if (!pointerWasPressed)
                 return;
 
-            if (PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
-                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().ColourButton.image)
-                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().SendForwardButton.image)
-                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().SendBackwardButton.image)
+            if (PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<LiveryWorkshopMenu>().TrashButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<LiveryWorkshopMenu>().ColourButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<LiveryWorkshopMenu>().SendForwardButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<LiveryWorkshopMenu>().SendBackwardButton.image)
                 || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalColourSelectorPanel>().MagneticScroll.GetComponent<Image>()))
                 return;
 

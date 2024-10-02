@@ -51,7 +51,7 @@ namespace Gumball
                 yield break;
             }
 
-            yield return DecalEditor.Instance.StartSession(car);
+            DecalEditor.Instance.StartSession(car);
             yield return DecalEditor.Instance.EndSession();
         }
 
