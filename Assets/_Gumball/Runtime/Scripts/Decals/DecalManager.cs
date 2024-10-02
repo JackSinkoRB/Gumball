@@ -47,7 +47,7 @@ namespace Gumball
         {
             if (!DecalEditor.ExistsRuntime)
             {
-                Debug.LogWarning("Could not apply decals as the decal editor doesn't exist.");
+                Debug.LogError("Could not apply decals as the decal editor doesn't exist.");
                 yield break;
             }
 

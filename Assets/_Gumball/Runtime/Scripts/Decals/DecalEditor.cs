@@ -154,7 +154,7 @@ namespace Gumball
             //disable the car's collider temporarily
             car.Colliders.SetActive(false);
 
-            ApplyBaseDecals();
+            ApplyBaseDecals(car);
             
             onSessionStart?.Invoke();
             
@@ -361,10 +361,9 @@ namespace Gumball
             }
         }
 
-        private void ApplyBaseDecals()
+        private void ApplyBaseDecals(AICar car)
         {
-            int carIndex = WarehouseManager.Instance.CurrentCar.CarIndex;
-            WarehouseCarData carData = WarehouseManager.Instance.AllCarData[carIndex];
+            WarehouseCarData carData = WarehouseManager.Instance.AllCarData[car.CarIndex];
             List<LiveDecal> baseDecals = DecalManager.CreateLiveDecalsFromData(carData.BaseDecalData);
             
             foreach (LiveDecal liveDecal in baseDecals)
