@@ -1028,11 +1028,14 @@ namespace Gumball
                     continue;
                 }
                 
+                if (racingLine.SplineSamples.Length == 0)
+                    continue;
+                
                 UpdateAutoDriveTargetPosition();
                 
                 if (targetPos == null)
                     continue;
-                
+
                 Vector3 endOfRacingLine = racingLine.SplineSamples[^1].position;
                 int endOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(endOfRacingLine).Item1;
                 int targetPositionSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(targetPosition).Item1;
@@ -1053,11 +1056,14 @@ namespace Gumball
             //all directions were blocked, try again but this time without cars blocking
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
+                if (racingLine.SplineSamples == null || racingLine.SplineSamples.Length == 0)
+                    continue;
+                
                 UpdateAutoDriveTargetPosition();
                 
                 if (targetPos == null)
                     continue;
-                
+
                 Vector3 endOfRacingLine = racingLine.SplineSamples[^1].position;
                 int endOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(endOfRacingLine).Item1;
                 int targetPositionSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(targetPosition).Item1;
