@@ -112,5 +112,85 @@ namespace Gumball
             }
         }
         
+        public void OnClickTrashButton()
+        {
+            DecalStateManager.LogStateChange(new DecalStateManager.DestroyStateChange(DecalEditor.Instance.CurrentSelected));
+            DecalEditor.Instance.DisableLiveDecal(DecalEditor.Instance.CurrentSelected);
+        }
+
+        public void OnClickSendForwardButton()
+        {
+            SendBackwardOrForward(true, DecalEditor.Instance.CurrentSelected);
+        }
+        
+        public void OnClickSendBackwardButton()
+        {
+            SendBackwardOrForward(false, DecalEditor.Instance.CurrentSelected);
+        }
+        
+        public void OnClickColourButton()
+        {
+            //TODO:
+            // if (colourPickerEnabled)
+            //     DisableColourPicker();
+            // else
+            // {
+            //     EnableColourPicker();
+            //     ColourSelectorPanel.Populate(DecalEditor.Instance.CurrentSelected);
+            // }
+        }
+        
+        public void OnClickUndoButton()
+        {
+            DecalStateManager.UndoLatestChange();
+        }
+
+        public void OnClickRedoButton()
+        {
+            DecalStateManager.RedoLatestUndo();
+        }
+        
+        private void SendBackwardOrForward(bool isForward, LiveDecal liveDecal)
+        {
+            List<LiveDecal> overlappingDecals = liveDecal.GetOverlappingLiveDecals();
+                
+            liveDecal.SendBackwardOrForward(isForward, overlappingDecals);
+   
+            UpdateSendForwardBackwardButtons(liveDecal, overlappingDecals);
+
+            //TODO:
+            //layerSelector.PopulateScroll(); //order has changed, so need to repopulate
+            //layerSelector.SnapToLiveDecal(liveDecal);
+        }
+        
+        private void UpdateSendForwardBackwardButtons(LiveDecal liveDecal, List<LiveDecal> overlappingDecals = null)
+        {
+            bool hasDecalWithHigherPriority = false;
+            bool hasDecalWithLowerPriority = false;
+
+            overlappingDecals ??= liveDecal.GetOverlappingLiveDecals();
+            
+            foreach (LiveDecal decal in overlappingDecals)
+            {
+                if (hasDecalWithHigherPriority && hasDecalWithLowerPriority)
+                    break; //no need to continue
+                
+                if (decal.Priority > liveDecal.Priority)
+                {
+                    hasDecalWithHigherPriority = true;
+                    continue;
+                }
+                
+                if (decal.Priority < liveDecal.Priority)
+                {
+                    hasDecalWithLowerPriority = true;
+                    continue;
+                }
+            }
+
+            sendForwardButton.interactable = hasDecalWithHigherPriority;
+            sendBackwardButton.interactable = hasDecalWithLowerPriority;
+        }
+        
     }
 }
