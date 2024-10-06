@@ -66,8 +66,6 @@ namespace Gumball
         
         public void EnablePainting()
         {
-            return; //TODO: reenable when not using temporary livery
-            
             //before resetting the textures, clear the previous texture it has made
             meshRenderer.sharedMaterial.SetTexture(textureID, null);
 
@@ -100,8 +98,6 @@ namespace Gumball
 
         public void DisablePainting()
         {
-            return; //TODO: reenable when not using temporary livery
-            
             meshFilter.gameObject.layer = initialLayer;
             
             Destroy(materialCloner);

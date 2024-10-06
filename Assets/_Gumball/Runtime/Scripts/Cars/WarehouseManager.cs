@@ -105,8 +105,7 @@ namespace Gumball
             car.InitialiseAsPlayer(index);
             car.SetGrounded();
             
-            //TODO: reenable for decals to work
-            //yield return DecalManager.ApplyDecalDataToCar(car);
+            yield return DecalManager.ApplyDecalDataToCar(car);
             
             onComplete?.Invoke(car);
             

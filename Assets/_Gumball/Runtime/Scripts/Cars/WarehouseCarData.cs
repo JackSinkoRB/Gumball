@@ -24,7 +24,7 @@ namespace Gumball
             [SerializeField, ReadOnly] private CorePart defaultEngine;
             [SerializeField, ReadOnly] private CorePart defaultWheels;
             [SerializeField, ReadOnly] private CorePart defaultDrivetrain;
-
+            
             public string DisplayName => displayName;
             public string MakeDisplayName => makeDisplayName;
             public CarType CarType => carType;
@@ -51,12 +51,17 @@ namespace Gumball
         [SerializeField] private int startingLevelIndex = -1;
         [Tooltip("If enabled, the car will be unlocked at the start of the game (eg. a starting car).")]
         [SerializeField] private bool isUnlockedByDefault;
+        [Tooltip("Copy the live decal data from a car to set it as the base livery here.")]
+        [SerializeField] private LiveDecalData[] baseDecalData;
         [SerializeField, ReadOnly] private CachedData cachedData;
 
         public AssetReferenceGameObject CarPrefabReference => carPrefabReference;
         public Sprite Icon => icon;
         public int StartingLevelIndex => startingLevelIndex;
         public bool IsUnlockedByDefault => isUnlockedByDefault;
+        public LiveDecalData[] BaseDecalData => baseDecalData;
+        
+        //cached data access:
         public string DisplayName => cachedData.DisplayName;
         public string MakeDisplayName => cachedData.MakeDisplayName;
         public CarType CarType => cachedData.CarType;
