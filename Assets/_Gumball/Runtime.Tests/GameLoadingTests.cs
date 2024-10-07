@@ -9,36 +9,25 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class GameLoadingTests : IPrebuildSetup, IPostBuildCleanup
+    public class GameLoadingTests : BaseRuntimeTests
     {
         
         private bool isInitialised;
-        
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-        }
 
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-        }
-        
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
-            DecalEditor.IsRunningTests = true;
-            IAPManager.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-
+            base.OneTimeSetUp();
+            
             AsyncOperation loadBootScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.BootScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadBootScene.completed += OnSceneLoadComplete;
         }
 
         [OneTimeTearDown]
-        public void OneTimeTearDown()
+        public override void OneTimeTearDown()
         {
-            DataManager.EnableTestProviders(false);
+            base.OneTimeTearDown();
+            
             if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null)
                 Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
         }
@@ -58,9 +47,6 @@ namespace Gumball.Runtime.Tests
         [Order(1)]
         public IEnumerator GameLoadsSuccessfully()
         {
-            if (Application.isBatchMode)
-                LogAssert.Expect(LogType.Error, "Trying to set 2 renderTargets, which is more than the maximum supported:1"); //continue with this error - it's related to headless mode only
-            
             yield return new WaitUntil(() => isInitialised);
             
             const float maxLoadTimeAllowed = 180; //in seconds
