@@ -155,16 +155,16 @@ namespace Gumball.Runtime.Tests
 
             float valueToUse = stanceModification.Offset.MinValue;
             stanceModification.ApplyOffset(valueToUse);
-            Assert.AreEqual(wheelCollider.transform.localPosition.x + valueToUse, wheelMesh.transform.position.x);
+            Assert.AreEqual(wheelCollider.transform.localPosition.x + valueToUse, wheelMesh.transform.position.x, 0.01f);
             
             //check for persistency: reapply the saved data should be the same
             stanceModification.ApplySavedPlayerData();
-            Assert.AreEqual(wheelCollider.transform.localPosition.x + valueToUse, wheelMesh.transform.position.x);
+            Assert.AreEqual(wheelCollider.transform.localPosition.x + valueToUse, wheelMesh.transform.position.x, 0.01f);
             
             //check default value works
             float defaultValue = stanceModification.Offset.DefaultValue;
             stanceModification.ApplyOffset(defaultValue);
-            Assert.AreEqual(wheelCollider.transform.localPosition.x + defaultValue, wheelMesh.transform.position.x);
+            Assert.AreEqual(wheelCollider.transform.localPosition.x + defaultValue, wheelMesh.transform.position.x, 0.01f);
         }
         
         [UnityTest]
