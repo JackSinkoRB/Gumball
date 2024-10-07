@@ -131,6 +131,40 @@ namespace Gumball.Runtime.Tests
         }
         
         [Test]
+        [Order(5)]
+        public void AllCarsHaveBrakesSetup()
+        {
+            string carsWithoutBrakesSetup = "";
+            for (int index = 0; index < WarehouseManager.Instance.AllCarData.Count; index++)
+            {
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCarData[index].CarPrefabReference;
+                AICar car = carAsset.editorAsset.GetComponent<AICar>();
+                if (car == null)
+                    continue;
+
+                if (car.FrontWheelBrakes.IsNullOrEmpty() || car.RearWheelBrakes.IsNullOrEmpty())
+                {
+                    carsWithoutBrakesSetup += $"\n - {car.name} (index {index})";
+                    continue;
+                }
+
+                foreach (Transform brake in car.FrontWheelBrakes)
+                {
+                    if (brake.childCount == 0)
+                        carsWithoutBrakesSetup += $"\n - {car.name} (index {index}) ({brake.name})";
+                }
+                
+                foreach (Transform brake in car.RearWheelBrakes)
+                {
+                    if (brake.childCount == 0)
+                        carsWithoutBrakesSetup += $"\n - {car.name} (index {index}) ({brake.name})";
+                }
+            }
+            
+            Assert.IsTrue(carsWithoutBrakesSetup.IsNullOrEmpty(), $"Cars without brakes/calipers setup: {carsWithoutBrakesSetup}");
+        }
+        
+        [Test]
         [Order(6)]
         public void NoAvatarsExistInCars()
         {

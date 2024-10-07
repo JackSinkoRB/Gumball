@@ -128,7 +128,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isStuck;
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
         [SerializeField, InitializationField] private WheelMesh[] frontWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] frontWheelBrakes;
         [SerializeField, InitializationField] private WheelMesh[] rearWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] rearWheelBrakes;
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
         
@@ -143,7 +145,9 @@ namespace Gumball
         public WheelMesh[] RearWheelMeshes => rearWheelMeshes;
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
         public WheelCollider[] RearWheelColliders => rearWheelColliders;
-
+        public Transform[] FrontWheelBrakes => frontWheelBrakes;
+        public Transform[] RearWheelBrakes => rearWheelBrakes;
+        
         public WheelMesh[] AllWheelMeshes
         {
             get
@@ -1678,8 +1682,26 @@ namespace Gumball
                 if (stanceModification != null)
                     stanceModification.AddCamberRotation();
             }
+            
+            UpdateBrakeMeshes();
         }
 
+        private void UpdateBrakeMeshes()
+        {
+            for (int index = 0; index < frontWheelBrakes.Length; index++)
+            {
+                Transform brake = frontWheelBrakes[index];
+                brake.transform.position = frontWheelMeshes[index].transform.position;
+            }
+            
+            for (int index = 0; index < rearWheelBrakes.Length; index++)
+            {
+                Transform brake = rearWheelBrakes[index];
+                
+                brake.transform.position = rearWheelMeshes[index].transform.position;
+            }
+        }
+        
         private void TryAvoidObstacles(bool includeCars = true)
         {
             if (!autoDrive)
