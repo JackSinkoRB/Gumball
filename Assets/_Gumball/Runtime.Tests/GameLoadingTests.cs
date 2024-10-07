@@ -57,6 +57,8 @@ namespace Gumball.Runtime.Tests
         [Order(1)]
         public IEnumerator GameLoadsSuccessfully()
         {
+            LogAssert.Expect(LogType.Error, "Trying to set 2 renderTargets, which is more than the maximum supported:1");
+            
             yield return new WaitUntil(() => isInitialised);
             
             const float maxLoadTimeAllowed = 180; //in seconds
