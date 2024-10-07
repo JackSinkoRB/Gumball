@@ -55,15 +55,25 @@ public class PanelManager : PersistentSingleton<PanelManager>
     
     public static bool PanelExists(Type panelType)
     {
-        return Instance.panelLookup.ContainsKey(panelType);
+        return Instance.panelLookup.ContainsKey(panelType) && Instance.panelLookup[panelType] != null;
     }
 
+    public void AddToStack<T>() where T : AnimatedPanel
+    {
+        AddToStack(GetPanel<T>());
+    }
+    
     public void AddToStack(AnimatedPanel animatedPanel)
     {
         panelStack.Add(animatedPanel);
         
         animatedPanel.OnAddToStack();
         GlobalLoggers.PanelLogger.Log($"Added {animatedPanel.gameObject.name} to stack.");
+    }
+
+    public void RemoveFromStack<T>() where T : AnimatedPanel
+    {
+        RemoveFromStack(GetPanel<T>());
     }
     
     public void RemoveFromStack(AnimatedPanel animatedPanel)

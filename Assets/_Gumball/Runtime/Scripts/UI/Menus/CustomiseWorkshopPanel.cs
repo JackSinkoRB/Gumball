@@ -9,6 +9,7 @@ namespace Gumball
         
         [SerializeField] private PartsWorkshopMenu bodyKitMenu;
         [SerializeField] private BodyPaintWorkshopMenu bodyPaintMenu;
+        [SerializeField] private LiveryWorkshopMenu liveryMenu;
         [SerializeField] private WheelPaintWorkshopMenu wheelPaintMenu;
         [SerializeField] private StanceWorkshopMenu stanceMenu;
         
@@ -21,7 +22,7 @@ namespace Gumball
         protected override void OnShow()
         {
             base.OnShow();
-            
+
             OpenSubMenu(null);
         }
 
@@ -33,6 +34,7 @@ namespace Gumball
             //hide all other menus
             bodyKitMenu.Hide();
             bodyPaintMenu.Hide();
+            liveryMenu.Hide();
             wheelPaintMenu.Hide();
             stanceMenu.Hide();
             

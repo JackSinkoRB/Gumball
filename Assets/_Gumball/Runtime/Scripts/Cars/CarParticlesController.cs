@@ -28,6 +28,10 @@ namespace Gumball
         {
             float speedPercent = Mathf.Clamp01((WarehouseManager.Instance.CurrentCar.SpeedKmh - speedRangeForParticles.Min) / speedRangeForParticles.Difference);
             
+            bool sessionHasEnded = !GameSessionManager.ExistsRuntime || GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.InProgress;
+            if (sessionHasEnded)
+                speedPercent = 0; //disable particle spawning if session is over
+            
             //do transparency
             float transparency = speedPercent * maxTransparency;
             foreach (ParticleSystem particles in speedBasedParticles)

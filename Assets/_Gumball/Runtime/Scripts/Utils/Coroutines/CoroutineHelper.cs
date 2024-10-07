@@ -27,13 +27,13 @@ namespace Gumball
         /// <summary>
         /// Starts the coroutine on the current scene only. If the scene is unloaded, the coroutine will stop.
         /// </summary>
-        public static void StartCoroutineOnCurrentScene(IEnumerator routine)
+        public static Coroutine StartCoroutineOnCurrentScene(IEnumerator routine)
         {
             string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             if (!sceneCoroutineInstances.ContainsKey(sceneName) || sceneCoroutineInstances[sceneName] == null)
                 sceneCoroutineInstances[sceneName] = new GameObject($"CoroutineHelper-{sceneName}").AddComponent<CoroutineHelperInstance>();
             
-            sceneCoroutineInstances[sceneName].StartCoroutine(routine);
+            return sceneCoroutineInstances[sceneName].StartCoroutine(routine);
         }
         
         private void Update()
@@ -59,6 +59,14 @@ namespace Gumball
             if (monoToRunOn == null)
                 monoToRunOn = Instance;
             return monoToRunOn.StartCoroutine(PerformNextFrameIE(action));
+        }
+        
+        public static Coroutine PerformNextFrameOnCurrentScene(Action action, MonoBehaviour monoToRunOn = null)
+        {
+            if (action == null)
+                return null;
+            
+            return StartCoroutineOnCurrentScene(PerformNextFrameIE(action));
         }
 
         public static Coroutine PerformAfterFixedUpdate(Action action, MonoBehaviour monoToRunOn = null)

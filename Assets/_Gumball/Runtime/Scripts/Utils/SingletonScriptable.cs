@@ -58,16 +58,10 @@ namespace Gumball
             if (IsLoading)
                 return;
 
-            if (!Application.isBatchMode && !UnityThread.allowsAPI) //don't use editor application in batch mode
-            {
-                //run on the editor thread
-                EditorApplication.update -= LoadInstance;
-                EditorApplication.update += LoadInstance;
-            }
-            else
-            {
-                LoadInstance();
-            }
+            if (Application.isBatchMode && !SingletonScriptableHelper.LazyLoadingEnabled)
+                return; //cannot load addressables sync in batch mode (causes to hang)
+                
+            LoadInstance();
 
             void LoadInstance()
             {

@@ -29,19 +29,14 @@ namespace Gumball
             public float HeightDuration => heightDuration;
             public Ease HeightEase => heightEase;
         }
-        
-        [SerializeField] private Transform fakeController;
-        [SerializeField] private Transform fakeRotationPivot;
-        [SerializeField] private Transform fakeDepthPivot;
-        [SerializeField] private Transform fakeLookAtPivot;
 
+        [Tooltip("Should the 'fake' object positions and rotations copy the 'real' controllers current positions when the state is set as current?")]
+        [SerializeField] private bool setFakePositionsAsRealPositionsOnSet;
+        
         [Header("Rotation")]
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float rotationLerpSpeed = 6;
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float rotationLerpSpeedToZero = 2;
         [SerializeField, ConditionalField(nameof(offsetIsLocalised), true)] private float heightLerpSpeed = 9;
-        [SerializeField] private Transform rotationPivot;
-        [SerializeField] private Transform depthPivot;
-        [SerializeField] private Transform lookAtPivot;
 
         [Header("Momentum")]
         [SerializeField] private MomentumSettings accelerationStartMomentum;
@@ -58,10 +53,12 @@ namespace Gumball
         
         [Header("Offsets")]
         [Tooltip("X = width - Y = height - Z = depth")]
-        [SerializeField] private Vector3 offset = new(0, 2, -5);
-        [SerializeField] private bool offsetIsLocalised;
+        [SerializeField] protected Vector3 offset = new(0, 2, -5);
+        [SerializeField] protected bool offsetIsLocalised;
         [Tooltip("X = width - Y = height - Z = depth")]
-        [SerializeField] private Vector3 lookAtOffset = new(0, 1, 0);
+        [SerializeField] protected Vector3 lookAtOffset = new(0, 1, 0);
+
+        public Vector3 Offset => offset;
         
         [Header("Shakes")]
         [SerializeField] private CameraShakeInstance nosShake;
@@ -87,7 +84,16 @@ namespace Gumball
 
         private Transform target => otherTarget != null ? otherTarget : WarehouseManager.Instance.CurrentCar.transform;
         private Rigidbody carRigidbody => WarehouseManager.Instance.CurrentCar.Rigidbody;
-        private Vector3 pivotPoint => target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
+        
+        public virtual Vector3 GetPivotPoint()
+        {
+            return target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
+        }
+
+        public virtual Vector3 GetLookAtPoint()
+        {
+            return target.position + (offsetIsLocalised ? target.right * lookAtOffset.x + target.up * lookAtOffset.y + target.forward * lookAtOffset.z : lookAtOffset);
+        }
         
         public override void OnSetCurrent(CameraController controller)
         {
@@ -95,7 +101,19 @@ namespace Gumball
             
             WarehouseManager.Instance.CurrentCar.onGearChanged += OnGearChange;
             WarehouseManager.Instance.CurrentCar.onCollisionEnter += OnCollisionEnter;
-            
+
+            if (setFakePositionsAsRealPositionsOnSet)
+            {
+                fakeController.position = controller.transform.position;
+                fakeController.rotation = controller.transform.rotation;
+                fakeRotationPivot.position = rotationPivot.position;
+                fakeRotationPivot.rotation = rotationPivot.rotation;
+                fakeDepthPivot.position = depthPivot.position;
+                fakeDepthPivot.rotation = depthPivot.rotation;
+                fakeLookAtPivot.position = lookAtPivot.position;
+                fakeLookAtPivot.rotation = lookAtPivot.rotation;
+            }
+
             Snap();
         }
 
@@ -125,8 +143,8 @@ namespace Gumball
                 nosShake.StartFadeOut();
                 speedShake.DoShake();
             }
-
-            float speedPercent = Mathf.Clamp01((WarehouseManager.Instance.CurrentCar.SpeedKmh - speedForCameraShakeKmh.Min) / speedForCameraShakeKmh.Max);
+            
+            float speedPercent = speedForCameraShakeKmh.Max == 0 ? 1 : Mathf.Clamp01((WarehouseManager.Instance.CurrentCar.SpeedKmh - speedForCameraShakeKmh.Min) / speedForCameraShakeKmh.Max);
             speedShake.SetMagnitude(speedPercent);
         }
 
@@ -137,6 +155,9 @@ namespace Gumball
                 return Mathf.Lerp(Camera.main.fieldOfView, desiredFOVBasedOnSpeed.Min, Time.deltaTime * fovSpeedBraking);
             }
 
+            if (speedForMaxFOVKmh == 0)
+                return Camera.main.fieldOfView;
+            
             //speed fov
             float speedPercent = Mathf.Clamp01(WarehouseManager.Instance.CurrentCar.SpeedKmh / speedForMaxFOVKmh);
             float speedFov = desiredFOVBasedOnSpeed.Min + (desiredFOVBasedOnSpeed.Difference * speedPercent);
@@ -177,19 +198,8 @@ namespace Gumball
             // - should always have the same height above the car centre
             // - interpolate the rotation around the pivot point
             // - y (look) rotation is slightly interpolated
-            
-            //get the position to match the desired offset - but keep height relative to the car (with rotation applied)
-            if (!offsetIsLocalised)
-            {
-                float heightRelativeToCar = target.TransformPoint(offset).y;
-                float heightInterpolated = interpolate ? Mathf.Lerp(fakeController.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
-                fakeController.transform.position = target.position.SetY(heightInterpolated) + offset.SetY(0);
-            }
-            else
-            {
-                Vector3 offsetLocalised = target.TransformPoint(offset);
-                fakeController.transform.position = offsetLocalised;
-            }
+
+            fakeController.transform.position = GetPosition(interpolate);
 
             const float velocityTolerance = 1f;
             bool isMoving = carRigidbody.velocity.sqrMagnitude > velocityTolerance;
@@ -201,10 +211,10 @@ namespace Gumball
                 // - if velocity is close to 0, use the players forward
                 float speed = isMoving ? rotationLerpSpeed : rotationLerpSpeedToZero;
                 float angleForDesiredRotation = Vector2.SignedAngle(fakeRotationPivot.forward.FlattenAsVector2(), targetDirection.FlattenAsVector2());
-                fakeRotationPivot.RotateAround(pivotPoint, Vector3.up, interpolate ? -angleForDesiredRotation * Time.deltaTime * speed : -angleForDesiredRotation);
+                fakeRotationPivot.RotateAround(GetPivotPoint(), Vector3.up, interpolate ? -angleForDesiredRotation * Time.deltaTime * speed : -angleForDesiredRotation);
             }
             
-            fakeLookAtPivot.LookAt(pivotPoint);
+            fakeLookAtPivot.LookAt(GetLookAtPoint());
 
             //do depth position
             if ((WarehouseManager.Instance.CurrentCar.IsBraking
@@ -233,6 +243,20 @@ namespace Gumball
             operations[3] = new TransformOperation(lookAtPivot, fakeLookAtPivot.position, fakeLookAtPivot.rotation);
 
             return operations;
+        }
+
+        protected virtual Vector3 GetPosition(bool interpolate)
+        {
+            //get the position to match the desired offset - but keep height relative to the car (with rotation applied)
+            if (!offsetIsLocalised)
+            {
+                float heightRelativeToCar = target.TransformPoint(offset).y;
+                float heightInterpolated = interpolate ? Mathf.Lerp(fakeController.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
+                return target.position.SetY(heightInterpolated) + offset.SetY(0);
+            }
+            
+            Vector3 offsetLocalised = target.TransformPoint(offset);
+            return offsetLocalised;
         }
 
         private void OnGearChange(int previousGear, int currentGear)

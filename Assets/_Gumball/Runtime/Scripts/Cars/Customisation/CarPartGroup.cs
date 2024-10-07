@@ -50,6 +50,11 @@ namespace Gumball
             //load the saved part, or set the first part active
             SetPartActive(SavedPartIndex);
         }
+
+        public void SetPartActive(CarPart part)
+        {
+            SetPartActive(CarParts.IndexOfItem(part));    
+        }
         
         public void SetPartActive(int index)
         {

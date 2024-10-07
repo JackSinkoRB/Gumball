@@ -7,6 +7,22 @@ namespace Gumball
 {
     public class WarehousePanel : AnimatedPanel
     {
+        
+        protected override void OnShow()
+        {
+            base.OnShow();
+            
+            if (PanelManager.PanelExists<CarStatsPanel>())
+                PanelManager.GetPanel<CarStatsPanel>().Show();
+        }
+
+        protected override void OnHide()
+        {
+            base.OnHide();
+            
+            if (PanelManager.PanelExists<CarStatsPanel>())
+                PanelManager.GetPanel<CarStatsPanel>().Hide();
+        }
 
         public void OnClickBackButton()
         {

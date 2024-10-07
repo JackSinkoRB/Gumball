@@ -5,9 +5,9 @@ using DG.Tweening;
 using Dreamteck.Splines;
 #if UNITY_EDITOR
 using Gumball.Editor;
+using UnityEditor.SceneManagement;
 #endif
 using MyBox;
-using Unity.Profiling;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using Quaternion = UnityEngine.Quaternion;
@@ -42,8 +42,10 @@ namespace Gumball
         
         [Header("Details")]
         [SerializeField] private string displayName;
-
+        [SerializeField] private string makeDisplayName = "Toyota";
+        
         public string DisplayName => displayName.IsNullOrEmpty() ? name.Replace("(Clone)", "").Replace("_", " ") : displayName;
+        public string MakeDisplayName => makeDisplayName;
         
         [Header("Player car")]
         [SerializeField] private bool canBeDrivenByPlayer;
@@ -62,7 +64,8 @@ namespace Gumball
         public SteeringWheel SteeringWheel => steeringWheel;
         public int CarIndex => carIndex;
         public string SaveKey => GetSaveKeyFromIndex(carIndex);
-        
+
+        public bool CanBeDrivenByPlayer => canBeDrivenByPlayer;
         public Transform CockpitCameraTarget => cockpitCameraTarget;
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
@@ -125,7 +128,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isStuck;
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
         [SerializeField, InitializationField] private WheelMesh[] frontWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] frontWheelBrakes;
         [SerializeField, InitializationField] private WheelMesh[] rearWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] rearWheelBrakes;
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
         
@@ -140,7 +145,9 @@ namespace Gumball
         public WheelMesh[] RearWheelMeshes => rearWheelMeshes;
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
         public WheelCollider[] RearWheelColliders => rearWheelColliders;
-
+        public Transform[] FrontWheelBrakes => frontWheelBrakes;
+        public Transform[] RearWheelBrakes => rearWheelBrakes;
+        
         public WheelMesh[] AllWheelMeshes
         {
             get
@@ -236,8 +243,10 @@ namespace Gumball
         /// The speed that the wheel mesh is interpolated to the desired steer angle. This is different to the steer speed of the wheel collider.
         /// </summary>
         private const float visualSteerSpeed = 5;
-        
+
         [Header("Braking")]
+        [Tooltip("The minimum distance to check for a corner (if travelling slow).")]
+        [SerializeField] private float minCornerReactionDistance = 2;
         [Tooltip("The time that the autodriving car looks ahead for curves to brake. Lowering the time can make it more aggressive around corners, while increasing can make them safer.")]
         [SerializeField] private float cornerReactionTime = 1.1f;
         [Tooltip("When the angle is supplied (x axis), the y axis represents the desired speed.")]
@@ -484,6 +493,10 @@ namespace Gumball
             InitialiseWheelStance();
 
             OnInitialiseTypeComplete();
+
+            //set wheel colliders as player layer
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
+                wheelCollider.gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
         }
 
         public void InitialiseAsRacer()
@@ -591,6 +604,7 @@ namespace Gumball
         public void SimulateMovement()
         {
             Move();
+            CalculateAcceleration();
         }
 
         public void Teleport(Vector3 position, Quaternion rotation)
@@ -620,7 +634,6 @@ namespace Gumball
                 wheelCollider.motorTorque = 0;
                 wheelCollider.rotationSpeed = 0;
                 wheelCollider.steerAngle = 0;
-                wheelCollider.ResetSprungMasses();
             }
             
             UpdateWheelMeshes(); //force update
@@ -686,24 +699,31 @@ namespace Gumball
             if (!isInitialised)
                 return;
 
-            if (autoDrive)
-            {
-                if (!IsPlayer && CurrentChunk == null)
-                {
-                    //current chunk may have despawned
-                    const float timeWithNoChunkToDespawn = 1;
-                    timeWithNoChunk += Time.deltaTime;
-                    if (timeWithNoChunk >= timeWithNoChunkToDespawn)
-                        Despawn();
-                    return;
-                }
-                
-                timeWithNoChunk = 0;
-            }
+            CheckIfNoChunk();
 
             if (!isFrozen)
             {
                 Move();
+            }
+        }
+
+        private void CheckIfNoChunk()
+        {
+            if (CurrentChunk != null)
+            {
+                timeWithNoChunk = 0;
+                return;
+            }
+
+            //current chunk may have despawned
+            const float timeWithNoChunkToDespawn = 1;
+            timeWithNoChunk += Time.deltaTime;
+            if (timeWithNoChunk >= timeWithNoChunkToDespawn)
+            {
+                if (IsPlayer && autoDrive)
+                    Freeze(); //freeze if at end of map and session has ended
+                else
+                    Despawn();
             }
         }
         
@@ -760,6 +780,9 @@ namespace Gumball
 
             Rigidbody.velocity = Vector3.zero;
             Rigidbody.isKinematic = true;
+
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
+                wheelCollider.enabled = false;
         }
 
         private void Unfreeze()
@@ -767,6 +790,9 @@ namespace Gumball
             isFrozen = false;
             
             Rigidbody.isKinematic = false;
+            
+            foreach (WheelCollider wheelCollider in AllWheelColliders)
+                wheelCollider.enabled = true;
         }
 
         public void SetRacingLineOffset(float offset)
@@ -1006,11 +1032,14 @@ namespace Gumball
                     continue;
                 }
                 
+                if (racingLine.SplineSamples.Length == 0)
+                    continue;
+                
                 UpdateAutoDriveTargetPosition();
                 
                 if (targetPos == null)
                     continue;
-                
+
                 Vector3 endOfRacingLine = racingLine.SplineSamples[^1].position;
                 int endOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(endOfRacingLine).Item1;
                 int targetPositionSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(targetPosition).Item1;
@@ -1031,11 +1060,14 @@ namespace Gumball
             //all directions were blocked, try again but this time without cars blocking
             foreach (CustomDrivingPath racingLine in CurrentChunk.TrafficManager.RacingLines)
             {
+                if (racingLine.SplineSamples == null || racingLine.SplineSamples.Length == 0)
+                    continue;
+                
                 UpdateAutoDriveTargetPosition();
                 
                 if (targetPos == null)
                     continue;
-                
+
                 Vector3 endOfRacingLine = racingLine.SplineSamples[^1].position;
                 int endOfRacingLineSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(endOfRacingLine).Item1;
                 int targetPositionSampleIndex = CurrentChunk.GetClosestSampleIndexOnSpline(targetPosition).Item1;
@@ -1170,6 +1202,20 @@ namespace Gumball
         }
 
         /// <summary>
+        /// Checks if the specified position is to the left or right of the player.
+        /// </summary>
+        public bool IsPositionOnLeft(Vector3 position)
+        {
+            Vector3 leftOfCar = transform.position - transform.right;
+            Vector3 rightOfCar = transform.position + transform.right;
+
+            float distanceToLeftSqr = (leftOfCar - position).sqrMagnitude;
+            float distanceToRightSqr = (rightOfCar - position).sqrMagnitude;
+
+            return distanceToLeftSqr < distanceToRightSqr;
+        }
+
+        /// <summary>
         /// Checks if the specified position is ahead of the player (in terms of the direction to the target position).
         /// </summary>
         private bool IsPositionAhead(Vector3 position)
@@ -1246,7 +1292,7 @@ namespace Gumball
             if (autoDrive)
             {
                 Vector3 directionToTarget = targetPosition - transform.position;
-                float angle = Mathf.Clamp(-Vector2.SignedAngle(Rigidbody.velocity.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
+                float angle = Mathf.Clamp(-Vector2.SignedAngle(transform.forward.FlattenAsVector2(), directionToTarget.FlattenAsVector2()), -maxSteerAngle, maxSteerAngle);
                 desiredSteerAngle = angle;
             }
             else
@@ -1483,9 +1529,8 @@ namespace Gumball
             }
             
             timeSinceLastCornerCheck = 0;
-
-            const float min = 2;
-            float metresPerSecond = Mathf.Max(min, SpeedUtils.FromKmhToMs(speedKmh));
+            
+            float metresPerSecond = Mathf.Max(minCornerReactionDistance, SpeedUtils.FromKmhToMs(speedKmh));
             float visionDistance = metresPerSecond * cornerReactionTime;
 
             (Chunk, Vector3, Quaternion, SplineSample)? cornerTargetPos = GetPositionAhead(visionDistance, false);
@@ -1621,7 +1666,7 @@ namespace Gumball
                 frontWheelMesh.transform.position = wheelPosition;
 
                 //rotation is the same as the rear wheel, but with interpolated steer speed
-                WheelMesh rearWheelRotation = rearWheelMeshes[count];
+                WheelMesh rearWheelRotation = rearWheelMeshes[count % 2];
                 frontWheelMesh.transform.rotation = rearWheelRotation.transform.rotation;
                 
                 //set the steer amount
@@ -1637,8 +1682,26 @@ namespace Gumball
                 if (stanceModification != null)
                     stanceModification.AddCamberRotation();
             }
+            
+            UpdateBrakeMeshes();
         }
 
+        private void UpdateBrakeMeshes()
+        {
+            for (int index = 0; index < frontWheelBrakes.Length; index++)
+            {
+                Transform brake = frontWheelBrakes[index];
+                brake.transform.position = frontWheelMeshes[index].transform.position;
+            }
+            
+            for (int index = 0; index < rearWheelBrakes.Length; index++)
+            {
+                Transform brake = rearWheelBrakes[index];
+                
+                brake.transform.position = rearWheelMeshes[index].transform.position;
+            }
+        }
+        
         private void TryAvoidObstacles(bool includeCars = true)
         {
             if (!autoDrive)
@@ -1818,7 +1881,8 @@ namespace Gumball
         private void Despawn()
         {
             gameObject.Pool();
-            GlobalLoggers.AICarLogger.Log($"Despawned {gameObject.name} at {transform.position}");
+            if (gameObject.IsPooled())
+                GlobalLoggers.AICarLogger.Log($"Despawned {gameObject.name} at {transform.position}");
         }
 
         private void CacheAllWheelMeshes()
@@ -1926,7 +1990,7 @@ namespace Gumball
         /// <summary>
         /// Gets the spline sample that is 'distance' metres away from the closest sample.
         /// </summary>
-        private (SplineSample, Chunk)? GetSplineSampleAhead(float desiredDistance, bool canUseRacingLine = true)
+        public (SplineSample, Chunk)? GetSplineSampleAhead(float desiredDistance, bool canUseRacingLine = true)
         {
             if (CurrentChunk.TrafficManager == null)
                 return null; //no traffic manager
@@ -2100,6 +2164,9 @@ namespace Gumball
             
             foreach (Collider collider in colliders.GetComponents<Collider>())
             {
+                if (!collider.enabled)
+                    continue;
+                
                 const float reallyFarAway = 1000;
                 
                 Vector3 positionForward = collider.ClosestPoint(transform.position + transform.forward * reallyFarAway);
@@ -2252,6 +2319,10 @@ namespace Gumball
 #if UNITY_EDITOR
             performanceRatingWithMinProfile.Calculate(performanceSettings, new CarPerformanceProfile(0, 0, 0, 0));
             performanceRatingWithMaxProfile.Calculate(performanceSettings, new CarPerformanceProfile(1, 1, 1, 1));
+            
+            bool prefabIsOpen = PrefabStageUtility.GetPrefabStage(gameObject) != null;
+            if (prefabIsOpen)
+                WarehouseManager.Instance.UpdateCachedData();
 #endif
         }
         

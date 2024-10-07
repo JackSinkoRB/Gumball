@@ -47,6 +47,17 @@ namespace Gumball
             }
         }
 
+        public void SetMaterialType(PaintMaterial.Type type)
+        {
+            //save to file
+            ColourSwatchSerialized swatch = SavedSwatch;
+            swatch.SetMaterialType(type);
+            SavedSwatch = swatch;
+            
+            //update visuals
+            ApplySwatch(SavedSwatch);
+        }
+
         public int SavedSelectedPresetIndex
         {
             get
@@ -121,13 +132,7 @@ namespace Gumball
 
         public void LoadFromSave()
         {
-            if (!DataManager.Cars.HasKey($"{saveKey}.CurrentSwatch"))
-            {
-                ApplySwatch(GlobalPaintPresets.Instance.BodySwatchPresets[0]); //apply the default
-                return;
-            }
-
-            ColourSwatchSerialized saveData = DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
+            ColourSwatchSerialized saveData = DataManager.Cars.Get($"{saveKey}.CurrentSwatch", GlobalPaintPresets.Instance.BodySwatchPresets[0].Serialize());
             ApplySwatch(saveData);
         }
 
