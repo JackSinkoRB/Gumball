@@ -36,6 +36,7 @@ namespace Gumball
         public RangedFloatValue RimWidth => rimWidth;
 
         public float CurrentCamber { get; private set; }
+        public float CurrentOffset { get; private set; }
 
         public void Initialise(AICar carBelongsTo)
         {
@@ -131,7 +132,7 @@ namespace Gumball
 
         public void ApplyOffset(float offsetValue)
         {
-            wheelCollider.transform.localPosition = wheelCollider.transform.localPosition.SetX(offsetValue);
+            CurrentOffset = offsetValue;
             
             //save to file
             if (carBelongsTo.IsPlayer)
