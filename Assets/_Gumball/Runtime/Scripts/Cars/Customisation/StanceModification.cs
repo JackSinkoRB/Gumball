@@ -213,6 +213,10 @@ namespace Gumball
             
             //tyre is circular, so add the height and width and divide by 2. This is because we're working with world position and the tyre might be rotated in world space.
             wheelCollider.radius = (Mathf.Abs(tyreSize.y) + Mathf.Abs(tyreSize.z)) / 2f;
+            
+            //set the force app distance relative to the wheel size
+            const float additional = 0.01f;
+            wheelCollider.forceAppPointDistance = (wheelCollider.radius * 2) + additional; //set to the top of the car plus offset
         }
 
         private MeshFilter GetWheelMesh()
