@@ -1651,19 +1651,31 @@ namespace Gumball
             {
                 WheelMesh rearWheelMesh = rearWheelMeshes[count];
                 WheelCollider rearWheelCollider = rearWheelColliders[count];
-                
+                StanceModification stanceModification = rearWheelCollider.GetComponent<StanceModification>();
+
+                //apply position and rotation
                 rearWheelCollider.GetWorldPose(out Vector3 wheelPosition, out Quaternion wheelRotation);
                 rearWheelMesh.transform.position = wheelPosition;
                 rearWheelMesh.transform.rotation = wheelRotation;
+                
+                //set offset
+                if (stanceModification != null)
+                    rearWheelMesh.transform.localPosition = rearWheelMesh.transform.localPosition.SetX(wheelPosition.x + stanceModification.CurrentOffset);
             }
 
             for (int count = 0; count < frontWheelMeshes.Length; count++)
             {
                 WheelMesh frontWheelMesh = frontWheelMeshes[count];
                 WheelCollider frontWheelCollider = frontWheelColliders[count];
+                StanceModification stanceModification = frontWheelCollider.GetComponent<StanceModification>();
                 
+                //apply position
                 frontWheelCollider.GetWorldPose(out Vector3 wheelPosition, out _);
                 frontWheelMesh.transform.position = wheelPosition;
+                
+                //set offset
+                if (stanceModification != null)
+                    frontWheelMesh.transform.localPosition = frontWheelMesh.transform.localPosition.SetX(stanceModification.CurrentOffset);
 
                 //rotation is the same as the rear wheel, but with interpolated steer speed
                 WheelMesh rearWheelRotation = rearWheelMeshes[count % 2];

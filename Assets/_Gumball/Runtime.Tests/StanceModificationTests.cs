@@ -150,20 +150,21 @@ namespace Gumball.Runtime.Tests
 
             const int indexToUse = 0;
             WheelCollider wheelCollider = WarehouseManager.Instance.CurrentCar.AllWheelColliders[indexToUse];
+            WheelMesh wheelMesh = WarehouseManager.Instance.CurrentCar.AllWheelMeshes[indexToUse];
             StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
 
             float valueToUse = stanceModification.Offset.MinValue;
             stanceModification.ApplyOffset(valueToUse);
-            Assert.AreEqual(valueToUse, wheelCollider.transform.localPosition.x);
+            Assert.AreEqual(wheelCollider.transform.localPosition.x + valueToUse, wheelMesh.transform.position.x, 0.01f);
             
             //check for persistency: reapply the saved data should be the same
             stanceModification.ApplySavedPlayerData();
-            Assert.AreEqual(valueToUse, wheelCollider.transform.localPosition.x);
+            Assert.AreEqual(wheelCollider.transform.localPosition.x + valueToUse, wheelMesh.transform.position.x, 0.01f);
             
             //check default value works
             float defaultValue = stanceModification.Offset.DefaultValue;
             stanceModification.ApplyOffset(defaultValue);
-            Assert.AreEqual(defaultValue, wheelCollider.transform.localPosition.x);
+            Assert.AreEqual(wheelCollider.transform.localPosition.x + defaultValue, wheelMesh.transform.position.x, 0.01f);
         }
         
         [UnityTest]
