@@ -16,38 +16,18 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Gumball.Runtime.Tests
 {
-    public class AvatarEditorTests : IPrebuildSetup, IPostBuildCleanup
+    public class AvatarEditorTests : BaseRuntimeTests
     {
 
         private bool isInitialised;
 
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
-            DataManager.EnableTestProviders(true);
-
+            base.OneTimeSetUp();
+            
             AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.AvatarEditorScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadMainScene.completed += OnSceneLoadComplete;
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            DataManager.EnableTestProviders(false);
         }
 
         [SetUp]

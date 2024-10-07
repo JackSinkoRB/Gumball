@@ -8,41 +8,26 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class ChallengeTrackerTests : IPrebuildSetup, IPostBuildCleanup
+    public class ChallengeTrackerTests : BaseRuntimeTests
     {
 
         private bool isInitialised;
         
         private GameSession GameSession => TestManager.Instance.ChunkTestingSession;
-        
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
 
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
+            base.OneTimeSetUp();
             
             AsyncOperation loadMapScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.ChunkMapScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadMapScene.completed += OnSceneLoadComplete;
         }
 
         [OneTimeTearDown]
-        public void OneTimeTearDown()
+        public override void OneTimeTearDown()
         {
-            DataManager.EnableTestProviders(false);
+            base.OneTimeTearDown();
             
             GameSession.EndSession(GameSession.ProgressStatus.NOT_ATTEMPTED);
         }

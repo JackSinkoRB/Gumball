@@ -8,43 +8,21 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class ChunkManagerTests : IPrebuildSetup, IPostBuildCleanup
+    public class ChunkManagerTests : BaseRuntimeTests
     {
 
         private const float chunkSplineLengths = 100;
 
         private bool isInitialised;
         private GameSession GameSession => TestManager.Instance.ChunkTestingSession;
-        
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
 
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
-            ChunkManager.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
+            base.OneTimeSetUp();
             
             AsyncOperation loadChunkMapScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.ChunkMapScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadChunkMapScene.completed += OnSceneLoadComplete;
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            ChunkManager.IsRunningTests = false;
-            DataManager.EnableTestProviders(false);
         }
 
         [SetUp]

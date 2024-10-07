@@ -11,41 +11,27 @@ using Object = UnityEngine.Object;
 
 namespace Gumball.Runtime.Tests
 {
-    public class DecalEditorTests : IPrebuildSetup, IPostBuildCleanup
+    public class DecalEditorTests : BaseRuntimeTests
     {
 
         private const int carIndexToUse = 0; //test with the XJ
         
         private bool isInitialised;
 
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-
+            base.OneTimeSetUp();
+            
             AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.DecalEditorScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadMainScene.completed += OnSceneLoadComplete;
         }
 
         [OneTimeTearDown]
-        public void OneTimeTearDown()
+        public override void OneTimeTearDown()
         {
-            DataManager.EnableTestProviders(false);
+            base.OneTimeTearDown();
+
             if (WarehouseManager.Instance.CurrentCar != null)
                 Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
         }

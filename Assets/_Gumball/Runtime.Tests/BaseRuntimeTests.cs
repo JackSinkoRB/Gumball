@@ -15,6 +15,8 @@ namespace Gumball.Runtime.Tests
         public void Setup()
         {
             BootSceneClear.TrySetup();
+            
+            SingletonScriptableHelper.LazyLoadingEnabled = true;
 
             //switch the render pipeline asset to the one that is supported in batch mode (decals removed etc.)
             RenderPipelineAsset lightweightAsset = Resources.Load<RenderPipelineAsset>("URP_Renderer UNIT TESTS"); 
@@ -27,6 +29,8 @@ namespace Gumball.Runtime.Tests
             
             //change back to the previous render pipeline asset
             GraphicsSettings.renderPipelineAsset = previousRenderPipelineAsset;
+            
+            SingletonScriptableHelper.LazyLoadingEnabled = false;
         }
 
         [OneTimeSetUp]
@@ -34,6 +38,9 @@ namespace Gumball.Runtime.Tests
         {
             DecalEditor.IsRunningTests = true;
             IAPManager.IsRunningTests = true;
+            ChunkManager.IsRunningTests = true;
+            PersistentCooldown.IsRunningTests = true;
+
             DataManager.EnableTestProviders(true);
         }
 

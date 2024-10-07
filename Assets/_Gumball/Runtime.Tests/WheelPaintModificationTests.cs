@@ -8,41 +8,27 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class WheelPaintModificationTests : IPrebuildSetup, IPostBuildCleanup
+    public class WheelPaintModificationTests : BaseRuntimeTests
     {
         
         private const int carIndexToUse = 0; //test with the XJ
         
         private bool isInitialised;
         
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-
+            base.OneTimeSetUp();
+            
             AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WarehouseScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadWorkshopScene.completed += OnSceneLoadComplete;
         }
 
         [OneTimeTearDown]
-        public void OneTimeTearDown()
+        public override void OneTimeTearDown()
         {
-            DataManager.EnableTestProviders(false);
+            base.OneTimeTearDown();
+            
             if (WarehouseManager.Instance.CurrentCar != null)
                 Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
         }
