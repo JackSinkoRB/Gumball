@@ -128,7 +128,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isStuck;
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
         [SerializeField, InitializationField] private WheelMesh[] frontWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] frontWheelBrakes;
         [SerializeField, InitializationField] private WheelMesh[] rearWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] rearWheelBrakes;
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
         
@@ -143,7 +145,9 @@ namespace Gumball
         public WheelMesh[] RearWheelMeshes => rearWheelMeshes;
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
         public WheelCollider[] RearWheelColliders => rearWheelColliders;
-
+        public Transform[] FrontWheelBrakes => frontWheelBrakes;
+        public Transform[] RearWheelBrakes => rearWheelBrakes;
+        
         public WheelMesh[] AllWheelMeshes
         {
             get
@@ -1647,19 +1651,31 @@ namespace Gumball
             {
                 WheelMesh rearWheelMesh = rearWheelMeshes[count];
                 WheelCollider rearWheelCollider = rearWheelColliders[count];
-                
+                StanceModification stanceModification = rearWheelCollider.GetComponent<StanceModification>();
+
+                //apply position and rotation
                 rearWheelCollider.GetWorldPose(out Vector3 wheelPosition, out Quaternion wheelRotation);
                 rearWheelMesh.transform.position = wheelPosition;
                 rearWheelMesh.transform.rotation = wheelRotation;
+                
+                //set offset
+                if (stanceModification != null)
+                    rearWheelMesh.transform.localPosition = rearWheelMesh.transform.localPosition.SetX(wheelPosition.x + stanceModification.CurrentOffset);
             }
 
             for (int count = 0; count < frontWheelMeshes.Length; count++)
             {
                 WheelMesh frontWheelMesh = frontWheelMeshes[count];
                 WheelCollider frontWheelCollider = frontWheelColliders[count];
+                StanceModification stanceModification = frontWheelCollider.GetComponent<StanceModification>();
                 
+                //apply position
                 frontWheelCollider.GetWorldPose(out Vector3 wheelPosition, out _);
                 frontWheelMesh.transform.position = wheelPosition;
+                
+                //set offset
+                if (stanceModification != null)
+                    frontWheelMesh.transform.localPosition = frontWheelMesh.transform.localPosition.SetX(stanceModification.CurrentOffset);
 
                 //rotation is the same as the rear wheel, but with interpolated steer speed
                 WheelMesh rearWheelRotation = rearWheelMeshes[count % 2];
@@ -1678,8 +1694,26 @@ namespace Gumball
                 if (stanceModification != null)
                     stanceModification.AddCamberRotation();
             }
+            
+            UpdateBrakeMeshes();
         }
 
+        private void UpdateBrakeMeshes()
+        {
+            for (int index = 0; index < frontWheelBrakes.Length; index++)
+            {
+                Transform brake = frontWheelBrakes[index];
+                brake.transform.position = frontWheelMeshes[index].transform.position;
+            }
+            
+            for (int index = 0; index < rearWheelBrakes.Length; index++)
+            {
+                Transform brake = rearWheelBrakes[index];
+                
+                brake.transform.position = rearWheelMeshes[index].transform.position;
+            }
+        }
+        
         private void TryAvoidObstacles(bool includeCars = true)
         {
             if (!autoDrive)

@@ -255,6 +255,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8494832424906352189}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1429115499433113897
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 459983502910918513}
+  m_Layer: 8
+  m_Name: Brakes_RL
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &459983502910918513
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1429115499433113897}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3073659464286045935}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1482107984580158594
 GameObject:
   m_ObjectHideFlags: 0
@@ -318,6 +349,37 @@ Transform:
   - {fileID: 9214566522391282641}
   m_Father: {fileID: 1909353466429399051}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1 &1642939355639427146
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1562941136850204159}
+  m_Layer: 8
+  m_Name: Brakes_FR
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1562941136850204159
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642939355639427146}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3073659464286045935}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1825357278669774304
 GameObject:
   m_ObjectHideFlags: 0
@@ -388,6 +450,7 @@ MonoBehaviour:
   testSwatch:
     color: {r: 0.8117647, g: 0.68235296, b: 0.16078432, a: 1}
     specular: {r: 0, g: 0, b: 0, a: 1}
+    type: 0
     smoothness: 0.6
     clearCoat: 0.2
     clearCoatSmoothness: 1
@@ -458,6 +521,7 @@ MonoBehaviour:
   testSwatch:
     color: {r: 1, g: 1, b: 1, a: 1}
     specular: {r: 0, g: 0, b: 0, a: 1}
+    type: 0
     smoothness: 0.5
     clearCoat: 1
     clearCoatSmoothness: 1
@@ -522,6 +586,41 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 856950390645539804}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2872747359856628144
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3073659464286045935}
+  m_Layer: 8
+  m_Name: BrakeMeshes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3073659464286045935
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2872747359856628144}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4048941725120570212}
+  - {fileID: 1562941136850204159}
+  - {fileID: 459983502910918513}
+  - {fileID: 1090975811357514282}
+  m_Father: {fileID: 6836390663536110284}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3149207193560806252
 GameObject:
@@ -672,9 +771,41 @@ MonoBehaviour:
   testSwatch:
     color: {r: 1, g: 1, b: 1, a: 1}
     specular: {r: 0, g: 0, b: 0, a: 1}
+    type: 0
     smoothness: 0.5
     clearCoat: 1
     clearCoatSmoothness: 1
+--- !u!1 &3964092144877195637
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1090975811357514282}
+  m_Layer: 8
+  m_Name: Brakes_RR
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1090975811357514282
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3964092144877195637}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3073659464286045935}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4064567463401748526
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,6 +836,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6836049736760305256}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4105745111417674209
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4048941725120570212}
+  m_Layer: 8
+  m_Name: Brakes_FL
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4048941725120570212
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4105745111417674209}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3073659464286045935}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4380399536267035405
 GameObject:
@@ -761,9 +923,9 @@ MonoBehaviour:
     maxValue: -15
     defaultValue: 0
   offset:
-    minValue: -0.6
-    maxValue: -0.8
-    defaultValue: -0.7
+    minValue: 0.1
+    maxValue: -0.1
+    defaultValue: 0
   tyreProfile:
     minValue: 1
     maxValue: 1.3
@@ -795,7 +957,7 @@ WheelCollider:
     damper: 1500
     targetPosition: 0.5
   m_SuspensionDistance: 0.15
-  m_ForceAppPointDistance: 0.65
+  m_ForceAppPointDistance: 0.68917596
   m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -1052,9 +1214,9 @@ MonoBehaviour:
     maxValue: 15
     defaultValue: 0
   offset:
-    minValue: 0.675
-    maxValue: 0.875
-    defaultValue: 0.775
+    minValue: -0.1
+    maxValue: 0.1
+    defaultValue: 0
   tyreProfile:
     minValue: 1
     maxValue: 1.3
@@ -1086,7 +1248,7 @@ WheelCollider:
     damper: 1500
     targetPosition: 0.5
   m_SuspensionDistance: 0.15
-  m_ForceAppPointDistance: 0.65
+  m_ForceAppPointDistance: 0.68917596
   m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -1187,9 +1349,9 @@ MonoBehaviour:
     maxValue: -15
     defaultValue: 0
   offset:
-    minValue: -0.675
-    maxValue: -0.875
-    defaultValue: -0.775
+    minValue: 0.1
+    maxValue: -0.1
+    defaultValue: 0
   tyreProfile:
     minValue: 1
     maxValue: 1.3
@@ -1221,7 +1383,7 @@ WheelCollider:
     damper: 1500
     targetPosition: 0.5
   m_SuspensionDistance: 0.15
-  m_ForceAppPointDistance: 0.65
+  m_ForceAppPointDistance: 0.68917596
   m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -1379,6 +1541,7 @@ MonoBehaviour:
   testSwatch:
     color: {r: 1, g: 0.7986406, b: 0, a: 1}
     specular: {r: 0, g: 0, b: 0, a: 1}
+    type: 0
     smoothness: 0.5
     clearCoat: 1
     clearCoatSmoothness: 1
@@ -1702,9 +1865,9 @@ MonoBehaviour:
     maxValue: 15
     defaultValue: 0
   offset:
-    minValue: 0.6
-    maxValue: 0.8
-    defaultValue: 0.7
+    minValue: -0.1
+    maxValue: 0.1
+    defaultValue: 0
   tyreProfile:
     minValue: 1
     maxValue: 1.3
@@ -1736,7 +1899,7 @@ WheelCollider:
     damper: 1500
     targetPosition: 0.5
   m_SuspensionDistance: 0.15
-  m_ForceAppPointDistance: 0.65
+  m_ForceAppPointDistance: 0.68917596
   m_Mass: 400
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
@@ -1849,6 +2012,7 @@ MonoBehaviour:
   testSwatch:
     color: {r: 1, g: 1, b: 1, a: 1}
     specular: {r: 0, g: 0, b: 0, a: 1}
+    type: 0
     smoothness: 0.5
     clearCoat: 1
     clearCoatSmoothness: 1
@@ -2109,9 +2273,10 @@ Transform:
   - {fileID: 2131609871474109795}
   - {fileID: 3522902415297503478}
   - {fileID: 3598331306860555585}
+  - {fileID: 5945073372695044159}
   - {fileID: 1909353466429399051}
   - {fileID: 3053855281547784238}
-  - {fileID: 5945073372695044159}
+  - {fileID: 3073659464286045935}
   - {fileID: 6836049736760305256}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2155,6 +2320,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   displayName: 
+  makeDisplayName: Toyota
   canBeDrivenByPlayer: 1
   avatarIKManager: {fileID: 2543841123063907618}
   steeringWheel: {fileID: 7747513796075811436}
@@ -2432,9 +2598,15 @@ MonoBehaviour:
   frontWheelMeshes:
   - {fileID: 314294427718096920}
   - {fileID: 4498774488625204892}
+  frontWheelBrakes:
+  - {fileID: 4048941725120570212}
+  - {fileID: 1562941136850204159}
   rearWheelMeshes:
   - {fileID: 4029790463847447214}
   - {fileID: 3789818800415830207}
+  rearWheelBrakes:
+  - {fileID: 459983502910918513}
+  - {fileID: 1090975811357514282}
   frontWheelColliders:
   - {fileID: 4553345485300180120}
   - {fileID: 5004421595254217820}
@@ -2458,7 +2630,8 @@ MonoBehaviour:
   dragWhenBraking: 1
   dragWhenHandbraking: 0.5
   angularDragWhenHandbraking: 7
-  speed: 0
+  speedKmh: 0
+  accelerationKmh: 0
   gearRatios:
   - -1.5
   - 2.66
@@ -2479,6 +2652,7 @@ MonoBehaviour:
   autoDriveMaxSteerAngle: 65
   desiredSteerAngle: 0
   visualSteerAngle: 0
+  minCornerReactionDistance: 2
   cornerReactionTime: 1.1
   cornerBrakingCurve:
     serializedVersion: 2

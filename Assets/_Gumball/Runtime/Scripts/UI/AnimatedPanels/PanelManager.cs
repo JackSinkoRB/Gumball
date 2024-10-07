@@ -55,7 +55,7 @@ public class PanelManager : PersistentSingleton<PanelManager>
     
     public static bool PanelExists(Type panelType)
     {
-        return Instance.panelLookup.ContainsKey(panelType);
+        return Instance.panelLookup.ContainsKey(panelType) && Instance.panelLookup[panelType] != null;
     }
 
     public void AddToStack<T>() where T : AnimatedPanel
