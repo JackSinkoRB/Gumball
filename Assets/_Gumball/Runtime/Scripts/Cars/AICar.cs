@@ -145,7 +145,9 @@ namespace Gumball
         public WheelMesh[] RearWheelMeshes => rearWheelMeshes;
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
         public WheelCollider[] RearWheelColliders => rearWheelColliders;
-
+        public Transform[] FrontWheelBrakes => frontWheelBrakes;
+        public Transform[] RearWheelBrakes => rearWheelBrakes;
+        
         public WheelMesh[] AllWheelMeshes
         {
             get
