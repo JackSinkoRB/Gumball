@@ -26,13 +26,6 @@ namespace Gumball.Runtime.Tests
         public IEnumerator GameLoadsSuccessfully()
         {
             Debug.Log("Starting GameLoadsSuccessfully");
-            if (Application.isBatchMode)
-            {
-                //ignore these as there's no graphics when running batch mode in CI/CD
-                LogAssert.Expect(LogType.Exception, new Regex(@".*colors\.Length is 2 and exceeds the maximum number of supported render targets \(1\).*"));
-                LogAssert.Expect(LogType.Error, new Regex(@".*Trying to set 2 renderTargets, which is more than the maximum supported:1.*"));
-            }
-            
             yield return new WaitUntil(() => sceneHasLoaded);
             
             const float maxLoadTimeAllowed = 180; //in seconds

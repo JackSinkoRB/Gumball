@@ -57,6 +57,7 @@ namespace Gumball.Runtime.Tests
         [OneTimeTearDown]
         public virtual void OneTimeTearDown()
         {
+            Debug.Log("Tear down");
             UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= OnSceneChange;
             
             DataManager.EnableTestProviders(false);
@@ -72,15 +73,22 @@ namespace Gumball.Runtime.Tests
 
         private void OnSceneChange(Scene previousScene, Scene newScene)
         {
-            //switch the render pipeline asset to the one that is supported in batch mode (decals removed etc.)
-            const int indexOfRenderer = 2;
-            Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(indexOfRenderer);
-            Debug.Log("Renderer switched to unit test renderer");
+            UpdateRendererOnMainCamera();
         }
 
         protected virtual void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
             sceneHasLoaded = true;
+
+            UpdateRendererOnMainCamera();
+        }
+        
+        protected void UpdateRendererOnMainCamera()
+        {
+            //switch the render pipeline asset to the one that is supported in batch mode (decals removed etc.)
+            const int indexOfRenderer = 2;
+            Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(indexOfRenderer);
+            Debug.Log($"Renderer switched to unit test renderer (from {previousScene.name} to {newScene.name})");
         }
         
     }
