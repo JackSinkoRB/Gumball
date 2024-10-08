@@ -8,44 +8,14 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class StanceModificationTests : IPrebuildSetup, IPostBuildCleanup
+    public class StanceModificationTests : BaseRuntimeTests
     {
         
         private const int carIndexToUse = 1; //test with the 911
         
         private bool isInitialised;
-
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
         
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-
-            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WarehouseScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadWorkshopScene.completed += OnSceneLoadComplete;
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            DataManager.EnableTestProviders(false);
-            if (WarehouseManager.Instance.CurrentCar != null)
-                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
-        }
+        protected override string sceneToLoadPath => TestManager.Instance.WarehouseScenePath;
 
         [SetUp]
         public void SetUp()
@@ -53,8 +23,10 @@ namespace Gumball.Runtime.Tests
             DataManager.RemoveAllData();
         }
 
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
+        protected override void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
+            base.OnSceneLoadComplete(asyncOperation);
+            
             CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
         

@@ -11,44 +11,14 @@ using Object = UnityEngine.Object;
 
 namespace Gumball.Runtime.Tests
 {
-    public class DecalEditorTests : IPrebuildSetup, IPostBuildCleanup
+    public class DecalEditorTests : BaseRuntimeTests
     {
 
         private const int carIndexToUse = 0; //test with the XJ
         
         private bool isInitialised;
 
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-
-            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.DecalEditorScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadMainScene.completed += OnSceneLoadComplete;
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            DataManager.EnableTestProviders(false);
-            if (WarehouseManager.Instance.CurrentCar != null)
-                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
-        }
+        protected override string sceneToLoadPath => TestManager.Instance.DecalEditorScenePath;
 
         [SetUp]
         public void SetUp()
@@ -62,8 +32,10 @@ namespace Gumball.Runtime.Tests
             yield return DecalEditor.Instance.EndSession();
         }
 
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
+        protected override void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
+            base.OnSceneLoadComplete(asyncOperation);
+            
             CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
         

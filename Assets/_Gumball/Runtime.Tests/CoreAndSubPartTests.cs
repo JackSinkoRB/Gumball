@@ -8,48 +8,19 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class CoreAndSubPartTests : IPrebuildSetup, IPostBuildCleanup
+    public class CoreAndSubPartTests : BaseRuntimeTests
     {
         
         private const int carIndexToUse = 0; //test with the XJ
         
         private bool isInitialised;
         
-        public void Setup()
+        protected override string sceneToLoadPath => TestManager.Instance.WarehouseScenePath;
+
+        protected override void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            BootSceneClear.TrySetup();
+            base.OnSceneLoadComplete(asyncOperation);
             
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-            DataManager.RemoveAllData();
-
-            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WarehouseScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadWorkshopScene.completed += OnSceneLoadComplete;
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            DataManager.EnableTestProviders(false);
-            if (WarehouseManager.Instance.CurrentCar != null)
-                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
-        }
-
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
-        {
             CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
         
