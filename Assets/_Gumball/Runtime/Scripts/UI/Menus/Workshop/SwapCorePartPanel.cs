@@ -139,11 +139,12 @@ namespace Gumball
             allParts[selectedOption.CorePart.Type] = selectedOption.CorePart;
 
             CarPerformanceProfile profileWithPart = new CarPerformanceProfile(allParts.Values);
-            
-            maxSpeedSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
-            accelerationSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
-            handlingSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
-            nosSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
+
+            CarPerformanceProfile currentProfile = new CarPerformanceProfile(currentCar.CarIndex);
+            maxSpeedSlider.Initialise(currentCar.PerformanceSettings, profileWithPart, currentProfile);
+            accelerationSlider.Initialise(currentCar.PerformanceSettings, profileWithPart, currentProfile);
+            handlingSlider.Initialise(currentCar.PerformanceSettings, profileWithPart, currentProfile);
+            nosSlider.Initialise(currentCar.PerformanceSettings, profileWithPart, currentProfile);
         }
 
         private void CreatePartButtonInstance(CorePart part)

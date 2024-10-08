@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
@@ -8,6 +9,7 @@ using UnityEngine.UI;
 namespace Gumball
 {
     [ExecuteAlways]
+    [Obsolete("Use PerformanceRatingSlider")]
     public class CarRatingUI : MonoBehaviour
     {
 
