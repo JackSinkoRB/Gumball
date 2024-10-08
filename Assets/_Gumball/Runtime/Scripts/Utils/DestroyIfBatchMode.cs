@@ -15,6 +15,7 @@ namespace Gumball
             {
                 gameObject.SetActive(false);
                 Destroy(gameObject);
+                Debug.Log($"Destroying {gameObject.name} ({nameof(DestroyIfBatchMode)})");
             }
         }
 #endif

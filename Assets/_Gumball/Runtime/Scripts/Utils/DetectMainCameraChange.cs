@@ -12,7 +12,7 @@ namespace Gumball
 
         private Camera current;
 
-        private void OnEnable()
+        private void Awake()
         {
             DontDestroyOnLoad(gameObject);
         }
@@ -21,6 +21,7 @@ namespace Gumball
         {
             if (Camera.main != null && Camera.main != current)
             {
+                Debug.Log("Main camera changed");
                 current = Camera.main;
                 onMainCameraChange?.Invoke(current);
             }

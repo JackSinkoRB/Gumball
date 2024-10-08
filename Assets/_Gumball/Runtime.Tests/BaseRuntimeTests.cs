@@ -27,6 +27,7 @@ namespace Gumball.Runtime.Tests
             
             SingletonScriptableHelper.LazyLoadingEnabled = true;
 
+            Debug.Log("Start listening for main camera change");
             //detect when main camera changes
             detectMainCameraChange = new GameObject(nameof(DetectMainCameraChange)).AddComponent<DetectMainCameraChange>();
             detectMainCameraChange.onMainCameraChange += OnMainCameraChange;
