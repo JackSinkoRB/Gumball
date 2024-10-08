@@ -29,7 +29,6 @@ namespace Gumball.Runtime.Tests
 
             //detect when main camera changes
             detectMainCameraChange = new GameObject(nameof(DetectMainCameraChange)).AddComponent<DetectMainCameraChange>();
-            Object.DontDestroyOnLoad(detectMainCameraChange.gameObject);
             detectMainCameraChange.onMainCameraChange += OnMainCameraChange;
         }
 

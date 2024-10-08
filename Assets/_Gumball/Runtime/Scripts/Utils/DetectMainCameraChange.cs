@@ -12,6 +12,11 @@ namespace Gumball
 
         private Camera current;
 
+        private void OnEnable()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
         private void Update()
         {
             if (Camera.main != null && Camera.main != current)
