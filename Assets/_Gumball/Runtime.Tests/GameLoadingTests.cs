@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -27,8 +28,8 @@ namespace Gumball.Runtime.Tests
             if (Application.isBatchMode)
             {
                 //ignore these as there's no graphics when running batch mode in CI/CD
-                LogAssert.Expect(LogType.Exception, "ArgumentException: colors.Length is 2 and exceeds the maximum number of supported render targets (1)");
-                LogAssert.Expect(LogType.Error, "Trying to set 2 renderTargets, which is more than the maximum supported:1");
+                LogAssert.Expect(LogType.Exception, new Regex(@".*colors\.Length is 2 and exceeds the maximum number of supported render targets \(1\).*"));
+                LogAssert.Expect(LogType.Error, new Regex(@".*Trying to set 2 renderTargets, which is more than the maximum supported:1.*"));
             }
             
             yield return new WaitUntil(() => sceneHasLoaded);
