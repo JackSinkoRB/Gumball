@@ -84,6 +84,9 @@ namespace Gumball.Runtime.Tests
         
         private void OnMainCameraChange(Camera camera)
         {
+            if (camera == null)
+                return;
+            
             Debug.Log($"Main camera changed in scene {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
             
             //switch the render pipeline asset to the one that is supported in batch mode (decals removed etc.)

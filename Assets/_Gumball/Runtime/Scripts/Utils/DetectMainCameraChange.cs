@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Gumball
 {
@@ -15,11 +16,19 @@ namespace Gumball
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
+
+            UnityEngine.SceneManagement.SceneManager.activeSceneChanged += OnActiveSceneChanged;
+        }
+
+        private void OnActiveSceneChanged(Scene previousScene, Scene newScene)
+        {
+            current = Camera.main;
+            onMainCameraChange?.Invoke(current);
         }
 
         private void Update()
         {
-            if (Camera.main != null && Camera.main != current)
+            if (Camera.main != current)
             {
                 Debug.Log("Main camera changed");
                 current = Camera.main;
