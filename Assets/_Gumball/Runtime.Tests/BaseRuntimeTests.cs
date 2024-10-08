@@ -26,11 +26,6 @@ namespace Gumball.Runtime.Tests
             BootSceneClear.TrySetup();
             
             SingletonScriptableHelper.LazyLoadingEnabled = true;
-
-            Debug.Log("Start listening for main camera change");
-            //detect when main camera changes
-            detectMainCameraChange = new GameObject(nameof(DetectMainCameraChange)).AddComponent<DetectMainCameraChange>();
-            detectMainCameraChange.onMainCameraChange += OnMainCameraChange;
         }
 
         public void Cleanup()
@@ -54,6 +49,11 @@ namespace Gumball.Runtime.Tests
 
             DataManager.EnableTestProviders(true);
 
+            Debug.Log("Start listening for main camera change");
+            //detect when main camera changes
+            detectMainCameraChange = new GameObject(nameof(DetectMainCameraChange)).AddComponent<DetectMainCameraChange>();
+            detectMainCameraChange.onMainCameraChange += OnMainCameraChange;
+            
             if (sceneToLoadPath != null)
             {
                 AsyncOperation loadScene = EditorSceneManager.LoadSceneAsyncInPlayMode(sceneToLoadPath, new LoadSceneParameters(LoadSceneMode.Single));

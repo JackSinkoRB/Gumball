@@ -9,7 +9,7 @@ namespace Gumball
     {
         
 #if UNITY_EDITOR
-        private void OnEnable()
+        private void Awake()
         {
             if (Application.isBatchMode)
             {
