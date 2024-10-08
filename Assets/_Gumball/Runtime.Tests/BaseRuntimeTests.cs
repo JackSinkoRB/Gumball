@@ -16,6 +16,8 @@ namespace Gumball.Runtime.Tests
         protected bool sceneHasLoaded;
         
         protected virtual string sceneToLoadPath => null;
+
+        private DetectMainCameraChange detectMainCameraChange;
         
         public void Setup()
         {
@@ -24,6 +26,11 @@ namespace Gumball.Runtime.Tests
             BootSceneClear.TrySetup();
             
             SingletonScriptableHelper.LazyLoadingEnabled = true;
+
+            //detect when main camera changes
+            detectMainCameraChange = new GameObject(nameof(DetectMainCameraChange)).AddComponent<DetectMainCameraChange>();
+            Object.DontDestroyOnLoad(detectMainCameraChange.gameObject);
+            detectMainCameraChange.onMainCameraChange += OnMainCameraChange;
         }
 
         public void Cleanup()
@@ -33,13 +40,13 @@ namespace Gumball.Runtime.Tests
             BootSceneClear.TryCleanup();
 
             SingletonScriptableHelper.LazyLoadingEnabled = false;
+
+            Object.Destroy(detectMainCameraChange.gameObject);
         }
 
         [OneTimeSetUp]
         public virtual void OneTimeSetUp()
         {
-            UnityEngine.SceneManagement.SceneManager.activeSceneChanged += OnSceneChange;
-
             DecalEditor.IsRunningTests = true;
             IAPManager.IsRunningTests = true;
             ChunkManager.IsRunningTests = true;
@@ -58,7 +65,6 @@ namespace Gumball.Runtime.Tests
         public virtual void OneTimeTearDown()
         {
             Debug.Log("Tear down");
-            UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= OnSceneChange;
             
             DataManager.EnableTestProviders(false);
             
@@ -71,25 +77,20 @@ namespace Gumball.Runtime.Tests
                 Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(0);
         }
 
-        private void OnSceneChange(Scene previousScene, Scene newScene)
-        {
-            UpdateRendererOnMainCamera();
-        }
-
         protected virtual void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
             sceneHasLoaded = true;
-
-            UpdateRendererOnMainCamera();
         }
         
-        protected void UpdateRendererOnMainCamera()
+        private void OnMainCameraChange(Camera camera)
         {
+            Debug.Log($"Main camera changed in scene {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
+            
             //switch the render pipeline asset to the one that is supported in batch mode (decals removed etc.)
             const int indexOfRenderer = 2;
-            Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(indexOfRenderer);
+            camera.GetComponent<UniversalAdditionalCameraData>().SetRenderer(indexOfRenderer);
             Debug.Log($"Renderer switched to unit test renderer");
         }
-        
+
     }
 }
