@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
@@ -42,7 +43,8 @@ namespace Gumball.Runtime.Tests
             IAPManager.IsRunningTests = true;
             ChunkManager.IsRunningTests = true;
             PersistentCooldown.IsRunningTests = true;
-            UnitTestCamera.IsRunningTests = true;
+            
+            UniversalRenderPipelineUtils.SetRendererFeatureActive("Decal", false);
             
             DataManager.EnableTestProviders(true);
 
@@ -60,13 +62,11 @@ namespace Gumball.Runtime.Tests
             
             DataManager.EnableTestProviders(false);
             
+            UniversalRenderPipelineUtils.SetRendererFeatureActive("Decal", true); //reenable
+
             //destroy the car instance
             if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null)
                 Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
-            
-            // //change back to the default renderer
-            // if (Camera.main != null)
-            //     Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(0);
         }
 
         protected virtual void OnSceneLoadComplete(AsyncOperation asyncOperation)
