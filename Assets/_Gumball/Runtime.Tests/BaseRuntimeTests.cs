@@ -17,8 +17,6 @@ namespace Gumball.Runtime.Tests
         
         protected virtual string sceneToLoadPath => null;
 
-        private DetectMainCameraChange detectMainCameraChange;
-        
         public void Setup()
         {
             sceneHasLoaded = false;
@@ -35,8 +33,6 @@ namespace Gumball.Runtime.Tests
             BootSceneClear.TryCleanup();
 
             SingletonScriptableHelper.LazyLoadingEnabled = false;
-
-            Object.Destroy(detectMainCameraChange.gameObject);
         }
 
         [OneTimeSetUp]
@@ -46,14 +42,10 @@ namespace Gumball.Runtime.Tests
             IAPManager.IsRunningTests = true;
             ChunkManager.IsRunningTests = true;
             PersistentCooldown.IsRunningTests = true;
-
+            UnitTestCamera.IsRunningTests = true;
+            
             DataManager.EnableTestProviders(true);
 
-            Debug.Log("Start listening for main camera change");
-            //detect when main camera changes
-            detectMainCameraChange = new GameObject(nameof(DetectMainCameraChange)).AddComponent<DetectMainCameraChange>();
-            detectMainCameraChange.onMainCameraChange += OnMainCameraChange;
-            
             if (sceneToLoadPath != null)
             {
                 AsyncOperation loadScene = EditorSceneManager.LoadSceneAsyncInPlayMode(sceneToLoadPath, new LoadSceneParameters(LoadSceneMode.Single));
@@ -80,19 +72,6 @@ namespace Gumball.Runtime.Tests
         protected virtual void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
             sceneHasLoaded = true;
-        }
-        
-        private void OnMainCameraChange(Camera camera)
-        {
-            if (camera == null)
-                return;
-            
-            Debug.Log($"Main camera changed in scene {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
-            
-            //switch the render pipeline asset to the one that is supported in batch mode (decals removed etc.)
-            const int indexOfRenderer = 2;
-            camera.GetComponent<UniversalAdditionalCameraData>().SetRenderer(indexOfRenderer);
-            Debug.Log($"Renderer switched to unit test renderer");
         }
 
     }

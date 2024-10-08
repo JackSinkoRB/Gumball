@@ -1,11 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using NUnit.Framework;
-using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
@@ -25,7 +21,7 @@ namespace Gumball.Runtime.Tests
         [Order(1)]
         public IEnumerator GameLoadsSuccessfully()
         {
-            Debug.Log("Starting GameLoadsSuccessfully");
+            Debug.Log($"Starting GameLoadsSuccessfully");
             yield return new WaitUntil(() => sceneHasLoaded);
             
             const float maxLoadTimeAllowed = 180; //in seconds
