@@ -11,11 +11,10 @@ namespace Gumball
 #if UNITY_EDITOR
         private void Awake()
         {
-            if (Application.isBatchMode)
+            //if (Application.isBatchMode)
             {
-                gameObject.SetActive(false);
-                Destroy(gameObject);
                 Debug.Log($"Destroying {gameObject.name} ({nameof(DestroyIfBatchMode)})");
+                DestroyImmediate(gameObject);
             }
         }
 #endif
