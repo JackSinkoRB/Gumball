@@ -28,7 +28,7 @@ namespace Gumball.Runtime.Tests
             {
                 //ignore these as there's no graphics when running batch mode in CI/CD
                 LogAssert.Expect(LogType.Exception, "ArgumentException: colors.Length is 2 and exceeds the maximum number of supported render targets (1)");
-                LogAssert.Expect(LogType.Exception, "Trying to set 2 renderTargets, which is more than the maximum supported:1");
+                LogAssert.Expect(LogType.Error, "Trying to set 2 renderTargets, which is more than the maximum supported:1");
             }
             
             yield return new WaitUntil(() => sceneHasLoaded);
