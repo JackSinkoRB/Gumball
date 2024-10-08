@@ -8,43 +8,13 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class ChallengeManagerTests : IPrebuildSetup, IPostBuildCleanup
+    public class ChallengeManagerTests : BaseRuntimeTests
     {
 
         private bool isInitialised;
 
         private Challenges dailyChallenges => ChallengeManager.Instance.Daily;
         private Challenges weeklyChallenges => ChallengeManager.Instance.Weekly;
-
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            DecalEditor.IsRunningTests = true;
-            PersistentCooldown.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            isInitialised = false;
-            PersistentCooldown.IsRunningTests = false;
-            DataManager.EnableTestProviders(false);
-        }
 
         [SetUp]
         public void SetUp()

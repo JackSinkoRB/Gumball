@@ -11,25 +11,17 @@ using Object = UnityEngine.Object;
 
 namespace MagneticScrollUtils.Tests.Runtime
 {
-    public class MagneticScrollRuntimeTests : IPrebuildSetup, IPostBuildCleanup
+    public class MagneticScrollRuntimeTests : BaseRuntimeTests
     {
 
         private bool isInitialised;
         private MagneticScrollTestSceneManager sceneManager;
-
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-        }
         
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
+            base.OneTimeSetUp();
+            
             AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(MagneticScrollTestManager.Instance.TestScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             loadMainScene.completed += OnSceneLoadComplete;
         }

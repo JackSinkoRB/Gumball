@@ -9,35 +9,15 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class WarehouseManagerTests : IPrebuildSetup, IPostBuildCleanup
+    public class WarehouseManagerTests : BaseRuntimeTests
     {
-        
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
 
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
+            base.OneTimeSetUp();
+            
             DataManager.RemoveAllData();
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            DataManager.EnableTestProviders(false);
         }
 
         [Test]

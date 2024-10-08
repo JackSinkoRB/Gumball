@@ -6,42 +6,19 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class FuelManagerTests : IPrebuildSetup, IPostBuildCleanup
+    public class FuelManagerTests : BaseRuntimeTests
     {
 
         private bool isInitialised;
-        
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
 
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
-            PersistentCooldown.IsRunningTests = true;
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-
+            base.OneTimeSetUp();
+            
             CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
 
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            PersistentCooldown.IsRunningTests = false;
-            DataManager.EnableTestProviders(false);
-        }
-        
         [SetUp]
         public void SetUp()
         {

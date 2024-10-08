@@ -370,10 +370,14 @@ namespace Gumball
         {
             yield return new WaitForSeconds(1f);
             
-            PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            if (PanelManager.PanelExists<VignetteBackgroundPanel>())
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
             
             yield return new WaitForSeconds(1f);
-            PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
+            
+            if (PanelManager.PanelExists<RetrySessionButtonPanel>())
+                PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
+            
             if (GetSessionEndPanel() != null)
                 GetSessionEndPanel().Show();
         }
