@@ -58,8 +58,14 @@ namespace MyBox.Internal
 		{
 			if (property == null) return true;
 
-			string asString = property.AsStringValue().ToUpper();
+			if (property.isArray)
+			{
+				bool hasValue = property.arraySize > 0;
+				return inverse ? !hasValue : hasValue;
+			}
 
+			string asString = property.AsStringValue().ToUpper();
+			
 			if (compareAgainst != null && compareAgainst.Length > 0)
 			{
 				var matchAny = CompareAgainstValues(asString, compareAgainst, IsFlagsEnum());
