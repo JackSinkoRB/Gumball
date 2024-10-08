@@ -88,7 +88,7 @@ namespace Gumball.Runtime.Tests
             //switch the render pipeline asset to the one that is supported in batch mode (decals removed etc.)
             const int indexOfRenderer = 2;
             Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(indexOfRenderer);
-            Debug.Log($"Renderer switched to unit test renderer (from {previousScene.name} to {newScene.name})");
+            Debug.Log($"Renderer switched to unit test renderer");
         }
         
     }
