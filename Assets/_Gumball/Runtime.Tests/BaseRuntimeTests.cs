@@ -1,12 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 
 namespace Gumball.Runtime.Tests
 {
@@ -64,9 +64,9 @@ namespace Gumball.Runtime.Tests
             if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null)
                 Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
             
-            //change back to the default renderer
-            if (Camera.main != null)
-                Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(0);
+            // //change back to the default renderer
+            // if (Camera.main != null)
+            //     Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(0);
         }
 
         protected virtual void OnSceneLoadComplete(AsyncOperation asyncOperation)
