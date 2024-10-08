@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
@@ -10,8 +11,6 @@ namespace Gumball.Runtime.Tests
     public class BaseRuntimeTests : IPrebuildSetup, IPostBuildCleanup
     {
 
-        private RenderPipelineAsset previousRenderPipelineAsset;
-        
         public void Setup()
         {
             BootSceneClear.TrySetup();
@@ -19,17 +18,17 @@ namespace Gumball.Runtime.Tests
             SingletonScriptableHelper.LazyLoadingEnabled = true;
 
             //switch the render pipeline asset to the one that is supported in batch mode (decals removed etc.)
-            RenderPipelineAsset lightweightAsset = Resources.Load<RenderPipelineAsset>("URP_Renderer UNIT TESTS"); 
-            GraphicsSettings.renderPipelineAsset = lightweightAsset;
+            const int indexOfRenderer = 2;
+            Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(indexOfRenderer);
         }
 
         public void Cleanup()
         {
             BootSceneClear.TryCleanup();
             
-            //change back to the previous render pipeline asset
-            GraphicsSettings.renderPipelineAsset = previousRenderPipelineAsset;
-            
+            //change back to the default renderer
+            Camera.main.GetComponent<UniversalAdditionalCameraData>().SetRenderer(0);
+
             SingletonScriptableHelper.LazyLoadingEnabled = false;
         }
 
