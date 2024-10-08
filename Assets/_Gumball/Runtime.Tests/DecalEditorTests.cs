@@ -18,23 +18,7 @@ namespace Gumball.Runtime.Tests
         
         private bool isInitialised;
 
-        [OneTimeSetUp]
-        public override void OneTimeSetUp()
-        {
-            base.OneTimeSetUp();
-            
-            AsyncOperation loadMainScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.DecalEditorScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadMainScene.completed += OnSceneLoadComplete;
-        }
-
-        [OneTimeTearDown]
-        public override void OneTimeTearDown()
-        {
-            base.OneTimeTearDown();
-
-            if (WarehouseManager.Instance.CurrentCar != null)
-                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
-        }
+        protected override string sceneToLoadPath => TestManager.Instance.DecalEditorScenePath;
 
         [SetUp]
         public void SetUp()
@@ -48,8 +32,10 @@ namespace Gumball.Runtime.Tests
             yield return DecalEditor.Instance.EndSession();
         }
 
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
+        protected override void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
+            base.OnSceneLoadComplete(asyncOperation);
+            
             CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
         

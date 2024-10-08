@@ -15,26 +15,12 @@ namespace Gumball.Runtime.Tests
         
         private bool isInitialised;
         
-        [OneTimeSetUp]
-        public override void OneTimeSetUp()
-        {
-            base.OneTimeSetUp();
-            
-            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WarehouseScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadWorkshopScene.completed += OnSceneLoadComplete;
-        }
+        protected override string sceneToLoadPath => TestManager.Instance.WarehouseScenePath;
 
-        [OneTimeTearDown]
-        public override void OneTimeTearDown()
+        protected override void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            base.OneTimeTearDown();
+            base.OnSceneLoadComplete(asyncOperation);
             
-            if (WarehouseManager.Instance.CurrentCar != null)
-                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
-        }
-
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
-        {
             CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
         

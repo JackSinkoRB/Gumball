@@ -12,25 +12,7 @@ namespace Gumball.Runtime.Tests
     public class GameLoadingTests : BaseRuntimeTests
     {
         
-        private bool isInitialised;
-
-        [OneTimeSetUp]
-        public override void OneTimeSetUp()
-        {
-            base.OneTimeSetUp();
-            
-            AsyncOperation loadBootScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.BootScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadBootScene.completed += OnSceneLoadComplete;
-        }
-
-        [OneTimeTearDown]
-        public override void OneTimeTearDown()
-        {
-            base.OneTimeTearDown();
-            
-            if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null)
-                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
-        }
+        protected override string sceneToLoadPath => TestManager.Instance.BootScenePath;
 
         [SetUp]
         public void SetUp()
@@ -38,16 +20,11 @@ namespace Gumball.Runtime.Tests
             DataManager.RemoveAllData();
         }
 
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
-        {
-            isInitialised = true;
-        }
-        
         [UnityTest]
         [Order(1)]
         public IEnumerator GameLoadsSuccessfully()
         {
-            yield return new WaitUntil(() => isInitialised);
+            yield return new WaitUntil(() => sceneHasLoaded);
             
             const float maxLoadTimeAllowed = 180; //in seconds
             
@@ -71,7 +48,7 @@ namespace Gumball.Runtime.Tests
         [Order(2)]
         public IEnumerator FoundCoreParts()
         {
-            yield return new WaitUntil(() => isInitialised);
+            yield return new WaitUntil(() => sceneHasLoaded);
             Assert.IsTrue(GameLoaderSceneManager.HasLoaded);
             
             Assert.IsTrue(CorePartManager.AllParts.Count > 0);
@@ -81,7 +58,7 @@ namespace Gumball.Runtime.Tests
         [Order(3)]
         public IEnumerator FoundSubParts()
         {
-            yield return new WaitUntil(() => isInitialised);
+            yield return new WaitUntil(() => sceneHasLoaded);
             Assert.IsTrue(GameLoaderSceneManager.HasLoaded);
             
             Assert.IsTrue(SubPartManager.AllParts.Count > 0);

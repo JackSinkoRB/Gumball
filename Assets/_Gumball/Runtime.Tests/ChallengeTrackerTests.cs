@@ -10,20 +10,9 @@ namespace Gumball.Runtime.Tests
 {
     public class ChallengeTrackerTests : BaseRuntimeTests
     {
-
-        private bool isInitialised;
         
         private GameSession GameSession => TestManager.Instance.ChunkTestingSession;
-
-        [OneTimeSetUp]
-        public override void OneTimeSetUp()
-        {
-            base.OneTimeSetUp();
-            
-            AsyncOperation loadMapScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.ChunkMapScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadMapScene.completed += OnSceneLoadComplete;
-        }
-
+        
         [OneTimeTearDown]
         public override void OneTimeTearDown()
         {
@@ -36,11 +25,6 @@ namespace Gumball.Runtime.Tests
         public void SetUp()
         {
             DataManager.RemoveAllData();
-        }
-
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
-        {
-            isInitialised = true;
         }
 
         [Test]

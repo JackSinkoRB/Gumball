@@ -16,14 +16,7 @@ namespace Gumball.Runtime.Tests
         private bool isInitialised;
         private GameSession GameSession => TestManager.Instance.ChunkTestingSession;
 
-        [OneTimeSetUp]
-        public override void OneTimeSetUp()
-        {
-            base.OneTimeSetUp();
-            
-            AsyncOperation loadChunkMapScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.ChunkMapScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadChunkMapScene.completed += OnSceneLoadComplete;
-        }
+        protected override string sceneToLoadPath => TestManager.Instance.ChunkMapScenePath;
 
         [SetUp]
         public void SetUp()
@@ -31,8 +24,10 @@ namespace Gumball.Runtime.Tests
             DataManager.RemoveAllData();
         }
         
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
+        protected override void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
+            base.OnSceneLoadComplete(asyncOperation);
+            
             CoroutineHelper.Instance.StartCoroutine(Initialise());
         }
         
