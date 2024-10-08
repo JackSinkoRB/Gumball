@@ -25,6 +25,7 @@ namespace Gumball.Runtime.Tests
         [Order(1)]
         public IEnumerator GameLoadsSuccessfully()
         {
+            Debug.Log("Starting GameLoadsSuccessfully");
             if (Application.isBatchMode)
             {
                 //ignore these as there's no graphics when running batch mode in CI/CD
