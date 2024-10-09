@@ -72,6 +72,7 @@ namespace Gumball
             }
 
             Initialise(slot);
+            PanelManager.GetPanel<SwapSubPartPanel>().UpdatePerformanceRatingSliders();
         }
         
     }

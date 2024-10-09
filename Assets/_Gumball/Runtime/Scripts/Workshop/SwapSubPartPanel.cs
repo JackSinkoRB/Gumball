@@ -57,7 +57,7 @@ namespace Gumball
                 PanelManager.GetPanel<PaintStripeBackgroundPanel>().Hide();
         }
         
-        private void UpdatePerformanceRatingSliders()
+        public void UpdatePerformanceRatingSliders()
         {
             CarPerformanceProfile profileWithPart;
             if (slot.CurrentSubPart == null)
@@ -86,10 +86,10 @@ namespace Gumball
             }
             
             CarPerformanceProfile currentProfile = new CarPerformanceProfile(currentCar.CarIndex);
-            maxSpeedSlider.Initialise(currentCar.PerformanceSettings, profileWithPart, currentProfile);
-            accelerationSlider.Initialise(currentCar.PerformanceSettings, profileWithPart, currentProfile);
-            handlingSlider.Initialise(currentCar.PerformanceSettings, profileWithPart, currentProfile);
-            nosSlider.Initialise(currentCar.PerformanceSettings, profileWithPart, currentProfile);
+            maxSpeedSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
+            accelerationSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
+            handlingSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
+            nosSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
         }
 
         private void UpdateIcon()

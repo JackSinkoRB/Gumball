@@ -21,9 +21,9 @@ namespace Gumball
         [SerializeField] private Image fillEnd;
         [SerializeField] private TextMeshProUGUI valueLabel;
         [Space(5)]
-        [SerializeField] private Image fillComparison;
-        [SerializeField] private Transform fillLabelComparison;
-        [SerializeField] private Image fillEndComparison;
+        [SerializeField] private Image fillBottom;
+        [SerializeField] private Transform fillBottomLabel;
+        [SerializeField] private Image fillBottomEnd;
         [SerializeField] private GlobalColourPalette.ColourCode comparisonIncreaseColourCode;
         [SerializeField] private GlobalColourPalette.ColourCode comparisonDecreaseColourCode;
         
@@ -38,8 +38,8 @@ namespace Gumball
             this.comparisonProfile = comparisonProfile;
 
             //not comparing
-            fillComparison.gameObject.SetActive(comparisonProfile != null);
-            fillEndComparison.gameObject.SetActive(comparisonProfile != null);
+            fillBottom.gameObject.SetActive(comparisonProfile != null);
+            fillBottomEnd.gameObject.SetActive(comparisonProfile != null);
 
             Refresh();
         }
@@ -50,10 +50,7 @@ namespace Gumball
                 return;
 
             if (usePlayerCar)
-            {
-                Initialise(WarehouseManager.Instance.CurrentCar.PerformanceSettings, new CarPerformanceProfile(WarehouseManager.Instance.CurrentCar.CarIndex));
-                WarehouseManager.Instance.onCurrentCarChanged += OnCarChange;
-            }
+                InitialiseForPlayer();
         }
 
         private void OnDisable()
@@ -62,17 +59,35 @@ namespace Gumball
                 return;
             
             WarehouseManager.Instance.onCurrentCarChanged -= OnCarChange;
+            AICar.onPerformanceProfileUpdated -= OnCarPerformanceProfileUpdated;
         }
         
-        private void OnCarChange(AICar newcar)
-        {
-            Refresh();
-        }
-
         private void LateUpdate()
         {
             UpdateBarEnd();
             UpdateBarEndComparison();
+        }
+
+        private void InitialiseForPlayer()
+        {
+            Initialise(WarehouseManager.Instance.CurrentCar.PerformanceSettings, new CarPerformanceProfile(WarehouseManager.Instance.CurrentCar.CarIndex));
+
+            WarehouseManager.Instance.onCurrentCarChanged -= OnCarChange;
+            WarehouseManager.Instance.onCurrentCarChanged += OnCarChange;
+            
+            AICar.onPerformanceProfileUpdated -= OnCarPerformanceProfileUpdated;
+            AICar.onPerformanceProfileUpdated += OnCarPerformanceProfileUpdated;
+        }
+        
+        private void OnCarPerformanceProfileUpdated(AICar car)
+        {
+            if (car == WarehouseManager.Instance.CurrentCar)
+                InitialiseForPlayer();
+        }
+        
+        private void OnCarChange(AICar newcar)
+        {
+            InitialiseForPlayer();
         }
 
         private void Refresh()
@@ -84,26 +99,29 @@ namespace Gumball
                 return;
             }
             
-            PerformanceRatingCalculator calculator = PerformanceRatingCalculator.GetCalculator(settings, profile);
-            float ratingPercentComparedToMax = (float)calculator.GetRating(ratingComponent) / WarehouseManager.Instance.GetMaxRating(ratingComponent);
-            fill.fillAmount = ratingPercentComparedToMax;
+            PerformanceRatingCalculator calculatorMain = PerformanceRatingCalculator.GetCalculator(settings, profile);
+            float ratingPercentMain = (float)calculatorMain.GetRating(ratingComponent) / WarehouseManager.Instance.GetMaxRating(ratingComponent);
 
             if (comparisonProfile != null)
             {
                 PerformanceRatingCalculator calculatorComparison = PerformanceRatingCalculator.GetCalculator(settings, comparisonProfile.Value);
-                float ratingPercentComparedToMaxComparison = (float)calculatorComparison.GetRating(ratingComponent) / WarehouseManager.Instance.GetMaxRating(ratingComponent);
-                fillComparison.fillAmount = ratingPercentComparedToMaxComparison;
+                float ratingPercentComparison = (float)calculatorComparison.GetRating(ratingComponent) / WarehouseManager.Instance.GetMaxRating(ratingComponent);
+
+                bool increasing = ratingPercentComparison > ratingPercentMain;
+                Color comparisonColor = increasing ? GlobalColourPalette.Instance.GetGlobalColor(comparisonIncreaseColourCode) : GlobalColourPalette.Instance.GetGlobalColor(comparisonDecreaseColourCode);
+                fillBottom.color = comparisonColor;
+                fillBottomEnd.color = comparisonColor;
                 
-                Color comparisonColor = fillComparison.fillAmount > fill.fillAmount ? GlobalColourPalette.Instance.GetGlobalColor(comparisonIncreaseColourCode) : GlobalColourPalette.Instance.GetGlobalColor(comparisonDecreaseColourCode);
-                fillComparison.color = comparisonColor;
-                fillEndComparison.color = comparisonColor;
+                fill.fillAmount = increasing ? ratingPercentMain : ratingPercentComparison;
+                fillBottom.fillAmount = increasing ? ratingPercentComparison : ratingPercentMain;
                 
-                //TODO: if the  
+                valueLabel.text = $"{calculatorComparison.GetRating(ratingComponent)}";
             }
-
-
-            
-            valueLabel.text = $"{calculator.GetRating(ratingComponent)}";
+            else
+            {
+                fill.fillAmount = ratingPercentMain;
+                valueLabel.text = $"{calculatorMain.GetRating(ratingComponent)}";
+            }
         }
 
         private void UpdateBarEnd()
@@ -120,14 +138,14 @@ namespace Gumball
         
         private void UpdateBarEndComparison()
         {
-            if (fillEndComparison == null || fillComparison == null)
+            if (fillBottomEnd == null || fillBottom == null)
                 return;
             
-            fillEndComparison.rectTransform.anchoredPosition = fillEndComparison.rectTransform.anchoredPosition.SetX(fillComparison.fillAmount * (fillComparison.rectTransform.rect.width * fillComparison.rectTransform.localScale.x));
+            fillBottomEnd.rectTransform.anchoredPosition = fillBottomEnd.rectTransform.anchoredPosition.SetX(fillBottom.fillAmount * (fillBottom.rectTransform.rect.width * fillBottom.rectTransform.localScale.x));
             
             //return children to fill end transform
-            foreach (RectTransform child in fillEndComparison.transform)
-                child.position = fillLabelComparison.position;
+            foreach (RectTransform child in fillBottomEnd.transform)
+                child.position = fillBottomLabel.position;
         }
         
     }
