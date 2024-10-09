@@ -1664,7 +1664,7 @@ namespace Gumball
                 
                 //set offset
                 if (stanceModification != null)
-                    rearWheelMesh.transform.localPosition = rearWheelMesh.transform.localPosition.SetX(wheelPosition.x + stanceModification.CurrentOffset);
+                    rearWheelMesh.transform.localPosition = rearWheelMesh.transform.localPosition.OffsetX(stanceModification.CurrentOffset);
             }
 
             for (int count = 0; count < frontWheelMeshes.Length; count++)
@@ -1676,10 +1676,6 @@ namespace Gumball
                 //apply position
                 frontWheelCollider.GetWorldPose(out Vector3 wheelPosition, out _);
                 frontWheelMesh.transform.position = wheelPosition;
-                
-                //set offset
-                if (stanceModification != null)
-                    frontWheelMesh.transform.localPosition = frontWheelMesh.transform.localPosition.SetX(stanceModification.CurrentOffset);
 
                 //rotation is the same as the rear wheel, but with interpolated steer speed
                 WheelMesh rearWheelRotation = rearWheelMeshes[count % 2];
@@ -1689,6 +1685,10 @@ namespace Gumball
                 Transform steerPivot = frontWheelMesh.transform.parent;
                 steerPivot.transform.position = wheelPosition;
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
+                
+                //set offset
+                if (stanceModification != null)
+                    frontWheelMesh.transform.position = frontWheelMesh.transform.TransformPoint(new Vector3(stanceModification.CurrentOffset,0,0));
             }
 
             //add camber
