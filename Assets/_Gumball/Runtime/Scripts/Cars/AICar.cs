@@ -30,6 +30,8 @@ namespace Gumball
         public delegate void TeleportDelegate(Vector3 previousPosition, Vector3 newPosition); 
         public static event TeleportDelegate onPlayerTeleport;
 
+        public static event Action<AICar> onPerformanceProfileUpdated;
+
         private enum WheelConfiguration
         {
             REAR_WHEEL_DRIVE,
@@ -567,6 +569,8 @@ namespace Gumball
             UpdateTorqueCurve();
 
             currentPerformanceRating.Calculate(performanceSettings, performanceProfile);
+
+            onPerformanceProfileUpdated?.Invoke(this);
         }
 
         public void UpdateTorqueCurve(float additionalTorque = 0)
