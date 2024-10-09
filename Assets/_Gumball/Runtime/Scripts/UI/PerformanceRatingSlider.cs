@@ -50,7 +50,7 @@ namespace Gumball
                 return;
 
             if (usePlayerCar)
-                InitialiseForPlayer();
+                this.PerformAfterTrue(() => WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null, InitialiseForPlayer);
         }
 
         private void OnDisable()
