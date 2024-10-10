@@ -72,10 +72,8 @@ namespace Gumball
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
         [Header("Lighting")]
-        [SerializeField] private Light headlightL;
-        [SerializeField] private Light headlightR;
-        [SerializeField] private Light brakelightL;
-        [SerializeField] private Light brakelightR;
+        [SerializeField] private Light[] headlights;
+        [SerializeField] private Light[] brakelights;
         
         [Header("Performance settings")]
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
@@ -613,12 +611,12 @@ namespace Gumball
             bool enable = GameSessionManager.ExistsRuntime
                                && GameSessionManager.Instance.CurrentSession != null
                                && GameSessionManager.Instance.CurrentSession.EnableCarHeadlights;
-            
-            if (headlightL != null)
-                headlightL.gameObject.SetActive(enable);
 
-            if (headlightR != null)
-                headlightR.gameObject.SetActive(enable);
+            foreach (Light headlight in headlights)
+            {
+                if (headlight != null)
+                    headlight.gameObject.SetActive(enable);
+            }
         }
 
         private void CheckToEnableBrakelights()
@@ -639,11 +637,11 @@ namespace Gumball
                     intensity = intensityWhenBrakingWithHeadlightsOff;
             }
 
-            if (brakelightL != null)
-                brakelightL.intensity = intensity;
-
-            if (brakelightR != null)
-                brakelightR.intensity = intensity;
+            foreach (Light brakelight in brakelights)
+            {
+                if (brakelight != null)
+                    brakelight.intensity = intensity;
+            }
         }
 
         /// <summary>
