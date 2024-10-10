@@ -74,6 +74,8 @@ namespace Gumball
         [Header("Lighting")]
         [SerializeField] private Light headlightL;
         [SerializeField] private Light headlightR;
+        [SerializeField] private Light brakelightL;
+        [SerializeField] private Light brakelightR;
         
         [Header("Performance settings")]
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
@@ -606,7 +608,7 @@ namespace Gumball
             obeySpeedLimit = obey;
         }
 
-        public void CheckToEnableHeadlights()
+        private void CheckToEnableHeadlights()
         {
             bool enable = GameSessionManager.ExistsRuntime
                                && GameSessionManager.Instance.CurrentSession != null
@@ -617,6 +619,31 @@ namespace Gumball
 
             if (headlightR != null)
                 headlightR.gameObject.SetActive(enable);
+        }
+
+        private void CheckToEnableBrakelights()
+        {
+            bool sessionActive = GameSessionManager.ExistsRuntime
+                          && GameSessionManager.Instance.CurrentSession != null;
+
+            const float intensityWithHeadlightsOn = 0.015f;
+            const float intensityWhenBrakingWithHeadlightsOn = 0.2f;
+            const float intensityWhenBrakingWithHeadlightsOff = 0.1f;
+            
+            float intensity = 0;
+            if (sessionActive)
+            {
+                if (GameSessionManager.Instance.CurrentSession.EnableCarHeadlights)
+                    intensity = isBraking ? intensityWhenBrakingWithHeadlightsOn : intensityWithHeadlightsOn;
+                else if (isBraking)
+                    intensity = intensityWhenBrakingWithHeadlightsOff;
+            }
+
+            if (brakelightL != null)
+                brakelightL.intensity = intensity;
+
+            if (brakelightR != null)
+                brakelightR.intensity = intensity;
         }
 
         /// <summary>
@@ -715,6 +742,7 @@ namespace Gumball
             CalculateAcceleration();
 
             CheckToEnableHeadlights();
+            CheckToEnableBrakelights();
         }
 
         private void FixedUpdate()
