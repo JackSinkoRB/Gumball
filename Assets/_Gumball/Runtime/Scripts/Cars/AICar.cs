@@ -71,6 +71,10 @@ namespace Gumball
         public Transform CockpitCameraTarget => cockpitCameraTarget;
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
+        [Header("Lighting")]
+        [SerializeField] private Light headlightL;
+        [SerializeField] private Light headlightR;
+        
         [Header("Performance settings")]
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultWheels;
@@ -602,6 +606,19 @@ namespace Gumball
             obeySpeedLimit = obey;
         }
 
+        public void CheckToEnableHeadlights()
+        {
+            bool enable = GameSessionManager.ExistsRuntime
+                               && GameSessionManager.Instance.CurrentSession != null
+                               && GameSessionManager.Instance.CurrentSession.EnableCarHeadlights;
+            
+            if (headlightL != null)
+                headlightL.gameObject.SetActive(enable);
+
+            if (headlightR != null)
+                headlightR.gameObject.SetActive(enable);
+        }
+
         /// <summary>
         /// Movement should only be called in FixedUpdate, but this can be called manually if simulating.
         /// </summary>
@@ -696,6 +713,8 @@ namespace Gumball
                 CheckIfStuck();
 
             CalculateAcceleration();
+
+            CheckToEnableHeadlights();
         }
 
         private void FixedUpdate()
