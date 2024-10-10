@@ -73,7 +73,11 @@ namespace Gumball
 
         [Header("Lighting")]
         [SerializeField] private Light[] headlights;
-        [SerializeField] private Light[] brakelights;
+        [SerializeField] private BrakeLights brakelights;
+        
+        private Tween brakeLightIntensityTween;
+        private float desiredBrakeLightIntensity = -1;
+        private float currentBrakeLightIntensity;
         
         [Header("Performance settings")]
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
@@ -618,32 +622,7 @@ namespace Gumball
                     headlight.gameObject.SetActive(enable);
             }
         }
-
-        private void CheckToEnableBrakelights()
-        {
-            bool sessionActive = GameSessionManager.ExistsRuntime
-                          && GameSessionManager.Instance.CurrentSession != null;
-
-            const float intensityWithHeadlightsOn = 0.015f;
-            const float intensityWhenBrakingWithHeadlightsOn = 0.2f;
-            const float intensityWhenBrakingWithHeadlightsOff = 0.1f;
-            
-            float intensity = 0;
-            if (sessionActive)
-            {
-                if (GameSessionManager.Instance.CurrentSession.EnableCarHeadlights)
-                    intensity = isBraking ? intensityWhenBrakingWithHeadlightsOn : intensityWithHeadlightsOn;
-                else if (isBraking)
-                    intensity = intensityWhenBrakingWithHeadlightsOff;
-            }
-
-            foreach (Light brakelight in brakelights)
-            {
-                if (brakelight != null)
-                    brakelight.intensity = intensity;
-            }
-        }
-
+        
         /// <summary>
         /// Movement should only be called in FixedUpdate, but this can be called manually if simulating.
         /// </summary>
@@ -740,7 +719,8 @@ namespace Gumball
             CalculateAcceleration();
 
             CheckToEnableHeadlights();
-            CheckToEnableBrakelights();
+            if (brakelights != null)
+                brakelights.CheckToEnable(this);
         }
 
         private void FixedUpdate()
