@@ -586,7 +586,7 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				float3 lerpResult301 = lerp( lerpResult293 , tex2DNode292 , temp_output_279_0);
 				
 				float4 color303 = IsGammaSpace() ? float4(0.7989943,0.984996,0.990566,0) : float4(0.6021242,0.966207,0.9786729,0);
-				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 0.0 );
+				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.0 );
 				float4 lerpResult310 = lerp( ( temp_output_306_0 * lerpResult293.y ) , temp_output_306_0 , 0.2);
 				float4 lerpResult313 = lerp( temp_output_355_0 , lerpResult310 , 0.25);
 				float4 break331 = lerpResult310;
@@ -599,7 +599,7 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 				float3 BaseColor = temp_output_355_0.rgb;
 				float3 Normal = lerpResult301;
-				float3 Emission = saturate( ( lerpResult313 * ( break331.r + break331.g + break331.b ) ) ).rgb;
+				float3 Emission = ( 70.0 * saturate( ( lerpResult313 * ( break331.r + break331.g + break331.b ) ) ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = _Metal;
 				float Smoothness = lerpResult295;
@@ -1748,7 +1748,7 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				float4 temp_output_355_0 = ( _Color * lerpResult282 );
 				
 				float4 color303 = IsGammaSpace() ? float4(0.7989943,0.984996,0.990566,0) : float4(0.6021242,0.966207,0.9786729,0);
-				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 0.0 );
+				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.0 );
 				float2 uv_BumpMap = IN.ase_texcoord4.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
 				float3 unpack235 = UnpackNormalScale( tex2D( _BumpMap, uv_BumpMap ), _Normal_Str );
 				unpack235.z = lerp( 1, unpack235.z, saturate(_Normal_Str) );
@@ -1763,7 +1763,7 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				
 
 				float3 BaseColor = temp_output_355_0.rgb;
-				float3 Emission = saturate( ( lerpResult313 * ( break331.r + break331.g + break331.b ) ) ).rgb;
+				float3 Emission = ( 70.0 * saturate( ( lerpResult313 * ( break331.r + break331.g + break331.b ) ) ) ).rgb;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
 
@@ -2845,7 +2845,7 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				float3 lerpResult301 = lerp( lerpResult293 , tex2DNode292 , temp_output_279_0);
 				
 				float4 color303 = IsGammaSpace() ? float4(0.7989943,0.984996,0.990566,0) : float4(0.6021242,0.966207,0.9786729,0);
-				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 0.0 );
+				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.0 );
 				float4 lerpResult310 = lerp( ( temp_output_306_0 * lerpResult293.y ) , temp_output_306_0 , 0.2);
 				float4 lerpResult313 = lerp( temp_output_355_0 , lerpResult310 , 0.25);
 				float4 break331 = lerpResult310;
@@ -2858,7 +2858,7 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 				float3 BaseColor = temp_output_355_0.rgb;
 				float3 Normal = lerpResult301;
-				float3 Emission = saturate( ( lerpResult313 * ( break331.r + break331.g + break331.b ) ) ).rgb;
+				float3 Emission = ( 70.0 * saturate( ( lerpResult313 * ( break331.r + break331.g + break331.b ) ) ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = _Metal;
 				float Smoothness = lerpResult295;
@@ -3515,13 +3515,10 @@ Node;AmplifyShaderEditor.RangedFloatNode;314;4453.982,-858.787;Inherit;True;Cons
 Node;AmplifyShaderEditor.SimpleAddOpNode;332;5113.739,-502.6657;Inherit;False;3;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.BreakToComponentsNode;331;4847.164,-475.0363;Inherit;True;COLOR;1;0;COLOR;0,0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
 Node;AmplifyShaderEditor.RangedFloatNode;311;4204.9,-275.4268;Inherit;False;Constant;_Normal_Mask_Str;Normal_Mask_Str;15;0;Create;True;0;0;0;False;0;False;0.2;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;275;5642.516,-1517.424;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;239;2784.991,-1326.916;Inherit;False;Property;_Gloss;Gloss;2;0;Create;True;0;0;0;False;0;False;0.8293218;1.36;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;295;3915.685,-1451.008;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;246;5643.786,-1688.89;Inherit;False;Property;_Metal;Metal;3;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.BreakToComponentsNode;316;3946.27,-801.1931;Inherit;False;FLOAT3;1;0;FLOAT3;0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;309;4049.922,-611.3698;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SaturateNode;333;5510.542,-795.5469;Inherit;False;1;0;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.LerpOp;310;4538.888,-498.3466;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.RangedFloatNode;236;3275.979,-1685.466;Inherit;False;Property;_Normal_Str;Normal_Str;5;0;Create;True;0;0;0;False;0;False;1;3;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;294;3266.547,-1924.211;Inherit;False;Property;_R_Normal_Str;R_Normal_Str;10;0;Create;True;0;0;0;False;0;False;1;2.71;0;3;0;1;FLOAT;0
@@ -3544,7 +3541,12 @@ Node;AmplifyShaderEditor.OneMinusNode;270;3511.768,-991.0393;Inherit;False;1;0;F
 Node;AmplifyShaderEditor.LerpOp;266;3524.971,-1407.078;Inherit;True;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ColorNode;356;4799.466,-2518.123;Inherit;False;Property;_Color;Color;0;0;Create;True;0;0;0;False;0;False;1,1,1,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;355;5230.049,-2182.021;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.RangedFloatNode;304;3240.451,-130.7971;Inherit;False;Constant;_Light_Str;Light_Str;13;0;Create;True;0;0;0;False;0;False;0;0;0;38;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;304;3240.451,-130.7971;Inherit;False;Constant;_Light_Str;Light_Str;13;0;Create;True;0;0;0;False;0;False;38;0;0;38;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SaturateNode;333;5510.542,-795.5469;Inherit;False;1;0;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;275;5555.516,-1361.424;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;246;5494.786,-1519.89;Inherit;False;Property;_Metal;Metal;3;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;358;5830.95,-1721.392;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;359;5615.713,-1714.96;Inherit;False;Constant;_Float0;Float 0;16;0;Create;True;0;0;0;False;0;False;70;0;0;0;0;1;FLOAT;0
 WireConnection;274;0;213;0
 WireConnection;274;1;219;1
 WireConnection;282;0;253;0
@@ -3552,7 +3554,7 @@ WireConnection;282;1;280;0
 WireConnection;282;2;279;0
 WireConnection;201;0;355;0
 WireConnection;201;1;301;0
-WireConnection;201;2;333;0
+WireConnection;201;2;358;0
 WireConnection;201;3;246;0
 WireConnection;201;4;295;0
 WireConnection;201;5;275;0
@@ -3571,15 +3573,12 @@ WireConnection;332;0;331;0
 WireConnection;332;1;331;1
 WireConnection;332;2;331;2
 WireConnection;331;0;310;0
-WireConnection;275;0;270;0
-WireConnection;275;1;270;0
 WireConnection;295;0;266;0
 WireConnection;295;1;296;0
 WireConnection;295;2;279;0
 WireConnection;316;0;293;0
 WireConnection;309;0;306;0
 WireConnection;309;1;316;1
-WireConnection;333;0;330;0
 WireConnection;310;0;309;0
 WireConnection;310;1;306;0
 WireConnection;310;2;311;0
@@ -3610,5 +3609,10 @@ WireConnection;266;1;265;0
 WireConnection;266;2;261;0
 WireConnection;355;0;356;0
 WireConnection;355;1;282;0
+WireConnection;333;0;330;0
+WireConnection;275;0;270;0
+WireConnection;275;1;270;0
+WireConnection;358;0;359;0
+WireConnection;358;1;333;0
 ASEEND*/
-//CHKSM=E5CDB329D266201ED1830DAA9461A335D3C1A9B8
+//CHKSM=95BBD1BAFBE49947F294216C0B760988E37BEF2C
