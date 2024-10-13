@@ -43,10 +43,17 @@ namespace Gumball
 
         private void BillboardToCamera()
         {
-            brakelightL.transform.LookAt(brakelightL.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
-            brakelightR.transform.LookAt(brakelightR.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
-            nightlightL.transform.LookAt(nightlightL.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up); 
-            nightlightR.transform.LookAt(nightlightR.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
+            if (Camera.main == null)
+                return;
+            
+            if (brakelightL != null)
+                brakelightL.transform.LookAt(brakelightL.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
+            if (brakelightR != null)
+                brakelightR.transform.LookAt(brakelightR.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
+            if (nightlightL != null)
+                nightlightL.transform.LookAt(nightlightL.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up); 
+            if (nightlightR != null)
+                nightlightR.transform.LookAt(nightlightR.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
         }
         
         public void CheckToEnable(AICar car)
