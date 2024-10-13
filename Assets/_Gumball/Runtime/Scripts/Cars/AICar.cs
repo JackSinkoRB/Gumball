@@ -72,8 +72,12 @@ namespace Gumball
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
         [Header("Lighting")]
-        [SerializeField] private Light headlightL;
-        [SerializeField] private Light headlightR;
+        [SerializeField] private Light[] headlights;
+        [SerializeField] private BrakeLights brakelights;
+        
+        private Tween brakeLightIntensityTween;
+        private float desiredBrakeLightIntensity = -1;
+        private float currentBrakeLightIntensity;
         
         [Header("Performance settings")]
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
@@ -606,19 +610,19 @@ namespace Gumball
             obeySpeedLimit = obey;
         }
 
-        public void CheckToEnableHeadlights()
+        private void CheckToEnableHeadlights()
         {
             bool enable = GameSessionManager.ExistsRuntime
                                && GameSessionManager.Instance.CurrentSession != null
                                && GameSessionManager.Instance.CurrentSession.EnableCarHeadlights;
-            
-            if (headlightL != null)
-                headlightL.gameObject.SetActive(enable);
 
-            if (headlightR != null)
-                headlightR.gameObject.SetActive(enable);
+            foreach (Light headlight in headlights)
+            {
+                if (headlight != null)
+                    headlight.gameObject.SetActive(enable);
+            }
         }
-
+        
         /// <summary>
         /// Movement should only be called in FixedUpdate, but this can be called manually if simulating.
         /// </summary>
@@ -715,6 +719,8 @@ namespace Gumball
             CalculateAcceleration();
 
             CheckToEnableHeadlights();
+            if (brakelights != null)
+                brakelights.CheckToEnable(this);
         }
 
         private void FixedUpdate()
