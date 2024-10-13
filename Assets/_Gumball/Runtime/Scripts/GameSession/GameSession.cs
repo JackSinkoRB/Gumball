@@ -45,12 +45,15 @@ namespace Gumball
         [SerializeField] private Vector3 vehicleStartingRotation;
         
         [Header("Lighting")]
+        [SerializeField] private bool enableCarHeadlights;
         [Tooltip("This is directional light intensity value.")]
         [SerializeField] private float globalLightIntensity = 1;
         [Tooltip("This is environment reflections intensity multiplier value that is passed to the environment rendering settings.")]
         [Range(0, 1), SerializeField] private float reflectionIntensity = 1;
         [Tooltip("This is the value that is passed to the shader for fake lighting using the alpha channel.")]
         [Range(0, 30), SerializeField] private float fakeLightingIntensity;
+
+        public bool EnableCarHeadlights => enableCarHeadlights;
 
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
@@ -370,10 +373,14 @@ namespace Gumball
         {
             yield return new WaitForSeconds(1f);
             
-            PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            if (PanelManager.PanelExists<VignetteBackgroundPanel>())
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
             
             yield return new WaitForSeconds(1f);
-            PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
+            
+            if (PanelManager.PanelExists<RetrySessionButtonPanel>())
+                PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
+            
             if (GetSessionEndPanel() != null)
                 GetSessionEndPanel().Show();
         }

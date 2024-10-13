@@ -8,35 +8,8 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class CurrencyTests : IPrebuildSetup, IPostBuildCleanup
+    public class CurrencyTests : BaseRuntimeTests
     {
-        
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            DataManager.EnableTestProviders(false);
-        }
 
         [SetUp]
         public void SetUp()

@@ -30,6 +30,8 @@ namespace Gumball
         public delegate void TeleportDelegate(Vector3 previousPosition, Vector3 newPosition); 
         public static event TeleportDelegate onPlayerTeleport;
 
+        public static event Action<AICar> onPerformanceProfileUpdated;
+
         private enum WheelConfiguration
         {
             REAR_WHEEL_DRIVE,
@@ -69,6 +71,10 @@ namespace Gumball
         public Transform CockpitCameraTarget => cockpitCameraTarget;
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
+        [Header("Lighting")]
+        [SerializeField] private Light headlightL;
+        [SerializeField] private Light headlightR;
+        
         [Header("Performance settings")]
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultWheels;
@@ -563,6 +569,8 @@ namespace Gumball
             UpdateTorqueCurve();
 
             currentPerformanceRating.Calculate(performanceSettings, performanceProfile);
+
+            onPerformanceProfileUpdated?.Invoke(this);
         }
 
         public void UpdateTorqueCurve(float additionalTorque = 0)
@@ -596,6 +604,19 @@ namespace Gumball
         public void SetObeySpeedLimit(bool obey)
         {
             obeySpeedLimit = obey;
+        }
+
+        public void CheckToEnableHeadlights()
+        {
+            bool enable = GameSessionManager.ExistsRuntime
+                               && GameSessionManager.Instance.CurrentSession != null
+                               && GameSessionManager.Instance.CurrentSession.EnableCarHeadlights;
+            
+            if (headlightL != null)
+                headlightL.gameObject.SetActive(enable);
+
+            if (headlightR != null)
+                headlightR.gameObject.SetActive(enable);
         }
 
         /// <summary>
@@ -692,6 +713,8 @@ namespace Gumball
                 CheckIfStuck();
 
             CalculateAcceleration();
+
+            CheckToEnableHeadlights();
         }
 
         private void FixedUpdate()
@@ -1651,17 +1674,25 @@ namespace Gumball
             {
                 WheelMesh rearWheelMesh = rearWheelMeshes[count];
                 WheelCollider rearWheelCollider = rearWheelColliders[count];
-                
+                StanceModification stanceModification = rearWheelCollider.GetComponent<StanceModification>();
+
+                //apply position and rotation
                 rearWheelCollider.GetWorldPose(out Vector3 wheelPosition, out Quaternion wheelRotation);
                 rearWheelMesh.transform.position = wheelPosition;
                 rearWheelMesh.transform.rotation = wheelRotation;
+                
+                //set offset
+                if (stanceModification != null)
+                    rearWheelMesh.transform.localPosition = rearWheelMesh.transform.localPosition.OffsetX(stanceModification.CurrentOffset);
             }
 
             for (int count = 0; count < frontWheelMeshes.Length; count++)
             {
                 WheelMesh frontWheelMesh = frontWheelMeshes[count];
                 WheelCollider frontWheelCollider = frontWheelColliders[count];
+                StanceModification stanceModification = frontWheelCollider.GetComponent<StanceModification>();
                 
+                //apply position
                 frontWheelCollider.GetWorldPose(out Vector3 wheelPosition, out _);
                 frontWheelMesh.transform.position = wheelPosition;
 
@@ -1673,6 +1704,10 @@ namespace Gumball
                 Transform steerPivot = frontWheelMesh.transform.parent;
                 steerPivot.transform.position = wheelPosition;
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
+                
+                //set offset
+                if (stanceModification != null)
+                    frontWheelMesh.transform.position = frontWheelMesh.transform.TransformPoint(new Vector3(stanceModification.CurrentOffset,0,0));
             }
 
             //add camber

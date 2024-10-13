@@ -101,6 +101,8 @@ namespace Gumball
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().OpenSubMenu(null);
             else
                 PanelManager.GetPanel<UpgradeWorkshopPanel>().ModifySubMenu.OpenSubMenu(partType);
+            
+            UpdatePerformanceRatingSliders();
         }
 
         public void PopulateParts()
@@ -139,11 +141,12 @@ namespace Gumball
             allParts[selectedOption.CorePart.Type] = selectedOption.CorePart;
 
             CarPerformanceProfile profileWithPart = new CarPerformanceProfile(allParts.Values);
-            
-            maxSpeedSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
-            accelerationSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
-            handlingSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
-            nosSlider.UpdateProfile(currentCar.PerformanceSettings, profileWithPart);
+
+            CarPerformanceProfile currentProfile = new CarPerformanceProfile(currentCar.CarIndex);
+            maxSpeedSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
+            accelerationSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
+            handlingSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
+            nosSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
         }
 
         private void CreatePartButtonInstance(CorePart part)

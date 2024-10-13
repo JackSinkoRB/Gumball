@@ -27,6 +27,12 @@ namespace Gumball
             RacerObstacle = 19
         }
 
+        public enum RenderingLayer
+        {
+            Default = 0,
+            Ground = 1
+        }
+
         public enum Tag
         {
             Terrain,
