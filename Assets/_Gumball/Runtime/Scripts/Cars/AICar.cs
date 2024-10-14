@@ -203,7 +203,9 @@ namespace Gumball
         private float racingLineDesiredOffset;
         
         [Header("Drag")]
-        [SerializeField] private float dragWhenAccelerating;
+        [SerializeField] private MinMaxFloat speedForAccelerationDrag = new(250,350);
+        [SerializeField] private float dragAtMaxSpeed = 1f;
+        [SerializeField] private AnimationCurve dragCurve;
         [SerializeField] private float dragWhenIdle = 0.15f;
         [SerializeField] private float dragWhenBraking = 1;
         [SerializeField] private float dragWhenHandbraking = 0.5f;
@@ -1157,7 +1159,7 @@ namespace Gumball
             else if (isBraking)
                 Rigidbody.drag = dragWhenBraking;
             else if (isAccelerating)
-                Rigidbody.drag = dragWhenAccelerating;
+                Rigidbody.drag = speedKmh == 0 ? 0 : dragCurve.Evaluate(Mathf.Clamp01((speedKmh - speedForAccelerationDrag.Min) / speedForAccelerationDrag.Difference)) * dragAtMaxSpeed;
             else
                 Rigidbody.drag = dragWhenIdle;
         }
