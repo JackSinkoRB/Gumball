@@ -74,6 +74,8 @@ namespace Gumball
         [Header("Lighting")]
         [SerializeField] private Light[] headlights;
         [SerializeField] private BrakeLights brakelights;
+        [SerializeField] private ParticleSystem exhaustFlameL;
+        [SerializeField] private ParticleSystem exhaustFlameR;
         
         private Tween brakeLightIntensityTween;
         private float desiredBrakeLightIntensity = -1;
@@ -2240,6 +2242,9 @@ namespace Gumball
             currentGear++;
 
             onGearChanged?.Invoke(currentGear - 1, currentGear);
+            
+            exhaustFlameL.Play();
+            exhaustFlameR.Play();
         }
 
         private void ShiftDown()
