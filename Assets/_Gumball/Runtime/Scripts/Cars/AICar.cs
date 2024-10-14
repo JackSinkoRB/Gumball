@@ -2243,8 +2243,10 @@ namespace Gumball
 
             onGearChanged?.Invoke(currentGear - 1, currentGear);
             
-            exhaustFlameL.Play();
-            exhaustFlameR.Play();
+            if (exhaustFlameL != null)
+                exhaustFlameL.Play();
+            if (exhaustFlameR != null)
+                exhaustFlameR.Play();
         }
 
         private void ShiftDown()
