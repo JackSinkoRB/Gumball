@@ -45,7 +45,7 @@ namespace Gumball
         [SerializeField] private Vector3 vehicleStartingRotation;
         
         [Header("Lighting")]
-        [SerializeField] private bool enableCarHeadlights;
+        [SerializeField] private bool isNightTime;
         [Tooltip("This is directional light intensity value.")]
         [SerializeField] private float globalLightIntensity = 1;
         [Tooltip("This is environment reflections intensity multiplier value that is passed to the environment rendering settings.")]
@@ -53,7 +53,7 @@ namespace Gumball
         [Tooltip("This is the value that is passed to the shader for fake lighting using the alpha channel.")]
         [Range(0, 30), SerializeField] private float fakeLightingIntensity;
 
-        public bool EnableCarHeadlights => enableCarHeadlights;
+        public bool IsNightTime => isNightTime;
 
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;

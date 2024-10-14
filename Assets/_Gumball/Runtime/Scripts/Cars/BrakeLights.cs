@@ -68,7 +68,7 @@ namespace Gumball
             float intensity = 0;
             if (sessionActive)
             {
-                if (GameSessionManager.Instance.CurrentSession.EnableCarHeadlights)
+                if (GameSessionManager.Instance.CurrentSession.IsNightTime)
                     intensity = car.IsBraking ? intensityWhenBrakingWithHeadlightsOn : intensityWithHeadlightsOn;
                 else if (car.IsBraking)
                     intensity = intensityWhenBrakingWithHeadlightsOff;
@@ -99,8 +99,8 @@ namespace Gumball
             showBrakes = shouldShowBrakes;
             
             //do night lights
-            nightlightL.gameObject.SetActive(sessionActive && GameSessionManager.Instance.CurrentSession.EnableCarHeadlights);
-            nightlightR.gameObject.SetActive(sessionActive && GameSessionManager.Instance.CurrentSession.EnableCarHeadlights);
+            nightlightL.gameObject.SetActive(sessionActive && GameSessionManager.Instance.CurrentSession.IsNightTime);
+            nightlightR.gameObject.SetActive(sessionActive && GameSessionManager.Instance.CurrentSession.IsNightTime);
         }
 
         private void SetIntensity(float intensity)

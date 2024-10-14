@@ -74,6 +74,8 @@ namespace Gumball
         [Header("Lighting")]
         [SerializeField] private Light[] headlights;
         [SerializeField] private BrakeLights brakelights;
+        [SerializeField] private ParticleSystem exhaustFlameL;
+        [SerializeField] private ParticleSystem exhaustFlameR;
         
         private Tween brakeLightIntensityTween;
         private float desiredBrakeLightIntensity = -1;
@@ -614,7 +616,7 @@ namespace Gumball
         {
             bool enable = GameSessionManager.ExistsRuntime
                                && GameSessionManager.Instance.CurrentSession != null
-                               && GameSessionManager.Instance.CurrentSession.EnableCarHeadlights;
+                               && GameSessionManager.Instance.CurrentSession.IsNightTime;
 
             foreach (Light headlight in headlights)
             {
@@ -2240,6 +2242,9 @@ namespace Gumball
             currentGear++;
 
             onGearChanged?.Invoke(currentGear - 1, currentGear);
+            
+            exhaustFlameL.Play();
+            exhaustFlameR.Play();
         }
 
         private void ShiftDown()
