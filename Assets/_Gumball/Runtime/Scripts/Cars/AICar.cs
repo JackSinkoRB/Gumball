@@ -616,7 +616,7 @@ namespace Gumball
         {
             bool enable = GameSessionManager.ExistsRuntime
                                && GameSessionManager.Instance.CurrentSession != null
-                               && GameSessionManager.Instance.CurrentSession.EnableCarHeadlights;
+                               && GameSessionManager.Instance.CurrentSession.IsNightTime;
 
             foreach (Light headlight in headlights)
             {
