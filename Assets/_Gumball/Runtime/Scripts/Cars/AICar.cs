@@ -922,10 +922,7 @@ namespace Gumball
         {
             targetPos = GetPositionAhead(GetMovementTargetDistance());
             if (targetPos == null)
-            {
-                Despawn();
                 return;
-            }
 
             targetPosition = targetPos.Value.Item2;
 
