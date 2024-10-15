@@ -1838,6 +1838,12 @@ namespace Gumball
             {
                 RaycastHit hit = blockagesTemp[index];
 
+                bool isPlayersMovementPath = hit.collider.gameObject.layer == (int)LayersAndTags.Layer.MovementPath
+                                             && hit.collider.transform.parent.GetComponent<AICar>() != null
+                                             && hit.collider.transform.parent.GetComponent<AICar>().IsPlayer;
+                if (isPlayersMovementPath)
+                    continue;
+                
                 if (hit.rigidbody != null)
                 {
                     bool hitSelf = ReferenceEquals(hit.rigidbody.gameObject, gameObject);
