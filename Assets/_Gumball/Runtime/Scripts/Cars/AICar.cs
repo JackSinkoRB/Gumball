@@ -336,7 +336,7 @@ namespace Gumball
         /// <summary>
         /// The time that the autodriving car looks ahead for curves.
         /// </summary>
-        private const float predictedPositionReactionTime = 0.65f;
+        private const float predictedPositionReactionTime = 0.85f;
         
         private Chunk lastKnownChunkForRacingLineOffset;
         private CustomDrivingPath lastKnownRacingLineForRacingLineOffset;
