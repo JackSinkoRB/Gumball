@@ -1,46 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class GameLoadingTests : IPrebuildSetup, IPostBuildCleanup
+    public class GameLoadingTests : BaseRuntimeTests
     {
         
-        private bool isInitialised;
-        
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-        }
-        
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            DecalEditor.IsRunningTests = true;
-            IAPManager.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-
-            AsyncOperation loadBootScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.BootScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadBootScene.completed += OnSceneLoadComplete;
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            DataManager.EnableTestProviders(false);
-            if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null)
-                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
-        }
+        protected override string sceneToLoadPath => TestManager.Instance.BootScenePath;
 
         [SetUp]
         public void SetUp()
@@ -48,16 +17,12 @@ namespace Gumball.Runtime.Tests
             DataManager.RemoveAllData();
         }
 
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
-        {
-            isInitialised = true;
-        }
-        
         [UnityTest]
         [Order(1)]
         public IEnumerator GameLoadsSuccessfully()
         {
-            yield return new WaitUntil(() => isInitialised);
+            Debug.Log($"Starting GameLoadsSuccessfully");
+            yield return new WaitUntil(() => sceneHasLoaded);
             
             const float maxLoadTimeAllowed = 180; //in seconds
             
@@ -81,7 +46,7 @@ namespace Gumball.Runtime.Tests
         [Order(2)]
         public IEnumerator FoundCoreParts()
         {
-            yield return new WaitUntil(() => isInitialised);
+            yield return new WaitUntil(() => sceneHasLoaded);
             Assert.IsTrue(GameLoaderSceneManager.HasLoaded);
             
             Assert.IsTrue(CorePartManager.AllParts.Count > 0);
@@ -91,7 +56,7 @@ namespace Gumball.Runtime.Tests
         [Order(3)]
         public IEnumerator FoundSubParts()
         {
-            yield return new WaitUntil(() => isInitialised);
+            yield return new WaitUntil(() => sceneHasLoaded);
             Assert.IsTrue(GameLoaderSceneManager.HasLoaded);
             
             Assert.IsTrue(SubPartManager.AllParts.Count > 0);

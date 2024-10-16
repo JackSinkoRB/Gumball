@@ -30,6 +30,8 @@ namespace Gumball
         public delegate void TeleportDelegate(Vector3 previousPosition, Vector3 newPosition); 
         public static event TeleportDelegate onPlayerTeleport;
 
+        public static event Action<AICar> onPerformanceProfileUpdated;
+
         private enum WheelConfiguration
         {
             REAR_WHEEL_DRIVE,
@@ -69,6 +71,16 @@ namespace Gumball
         public Transform CockpitCameraTarget => cockpitCameraTarget;
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
+        [Header("Lighting")]
+        [SerializeField] private Light[] headlights;
+        [SerializeField] private BrakeLights brakelights;
+        [SerializeField] private ParticleSystem exhaustFlameL;
+        [SerializeField] private ParticleSystem exhaustFlameR;
+        
+        private Tween brakeLightIntensityTween;
+        private float desiredBrakeLightIntensity = -1;
+        private float currentBrakeLightIntensity;
+        
         [Header("Performance settings")]
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultWheels;
@@ -128,7 +140,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isStuck;
         [SerializeField, InitializationField] private WheelConfiguration wheelConfiguration;
         [SerializeField, InitializationField] private WheelMesh[] frontWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] frontWheelBrakes;
         [SerializeField, InitializationField] private WheelMesh[] rearWheelMeshes;
+        [SerializeField, InitializationField] private Transform[] rearWheelBrakes;
         [SerializeField, InitializationField] private WheelCollider[] frontWheelColliders;
         [SerializeField, InitializationField] private WheelCollider[] rearWheelColliders;
         
@@ -143,7 +157,9 @@ namespace Gumball
         public WheelMesh[] RearWheelMeshes => rearWheelMeshes;
         public WheelCollider[] FrontWheelColliders => frontWheelColliders;
         public WheelCollider[] RearWheelColliders => rearWheelColliders;
-
+        public Transform[] FrontWheelBrakes => frontWheelBrakes;
+        public Transform[] RearWheelBrakes => rearWheelBrakes;
+        
         public WheelMesh[] AllWheelMeshes
         {
             get
@@ -187,7 +203,9 @@ namespace Gumball
         private float racingLineDesiredOffset;
         
         [Header("Drag")]
-        [SerializeField] private float dragWhenAccelerating;
+        [SerializeField] private MinMaxFloat speedForAccelerationDrag = new(250,350);
+        [SerializeField] private float dragAtMaxSpeed = 1f;
+        [SerializeField] private AnimationCurve dragCurve;
         [SerializeField] private float dragWhenIdle = 0.15f;
         [SerializeField] private float dragWhenBraking = 1;
         [SerializeField] private float dragWhenHandbraking = 0.5f;
@@ -559,6 +577,8 @@ namespace Gumball
             UpdateTorqueCurve();
 
             currentPerformanceRating.Calculate(performanceSettings, performanceProfile);
+
+            onPerformanceProfileUpdated?.Invoke(this);
         }
 
         public void UpdateTorqueCurve(float additionalTorque = 0)
@@ -594,6 +614,19 @@ namespace Gumball
             obeySpeedLimit = obey;
         }
 
+        private void CheckToEnableHeadlights()
+        {
+            bool enable = GameSessionManager.ExistsRuntime
+                               && GameSessionManager.Instance.CurrentSession != null
+                               && GameSessionManager.Instance.CurrentSession.IsNightTime;
+
+            foreach (Light headlight in headlights)
+            {
+                if (headlight != null)
+                    headlight.gameObject.SetActive(enable);
+            }
+        }
+        
         /// <summary>
         /// Movement should only be called in FixedUpdate, but this can be called manually if simulating.
         /// </summary>
@@ -688,6 +721,10 @@ namespace Gumball
                 CheckIfStuck();
 
             CalculateAcceleration();
+
+            CheckToEnableHeadlights();
+            if (brakelights != null)
+                brakelights.CheckToEnable(this);
         }
 
         private void FixedUpdate()
@@ -1122,7 +1159,7 @@ namespace Gumball
             else if (isBraking)
                 Rigidbody.drag = dragWhenBraking;
             else if (isAccelerating)
-                Rigidbody.drag = dragWhenAccelerating;
+                Rigidbody.drag = speedKmh == 0 ? 0 : dragCurve.Evaluate(Mathf.Clamp01((speedKmh - speedForAccelerationDrag.Min) / speedForAccelerationDrag.Difference)) * dragAtMaxSpeed;
             else
                 Rigidbody.drag = dragWhenIdle;
         }
@@ -1647,17 +1684,25 @@ namespace Gumball
             {
                 WheelMesh rearWheelMesh = rearWheelMeshes[count];
                 WheelCollider rearWheelCollider = rearWheelColliders[count];
-                
+                StanceModification stanceModification = rearWheelCollider.GetComponent<StanceModification>();
+
+                //apply position and rotation
                 rearWheelCollider.GetWorldPose(out Vector3 wheelPosition, out Quaternion wheelRotation);
                 rearWheelMesh.transform.position = wheelPosition;
                 rearWheelMesh.transform.rotation = wheelRotation;
+                
+                //set offset
+                if (stanceModification != null)
+                    rearWheelMesh.transform.localPosition = rearWheelMesh.transform.localPosition.OffsetX(stanceModification.CurrentOffset);
             }
 
             for (int count = 0; count < frontWheelMeshes.Length; count++)
             {
                 WheelMesh frontWheelMesh = frontWheelMeshes[count];
                 WheelCollider frontWheelCollider = frontWheelColliders[count];
+                StanceModification stanceModification = frontWheelCollider.GetComponent<StanceModification>();
                 
+                //apply position
                 frontWheelCollider.GetWorldPose(out Vector3 wheelPosition, out _);
                 frontWheelMesh.transform.position = wheelPosition;
 
@@ -1669,6 +1714,10 @@ namespace Gumball
                 Transform steerPivot = frontWheelMesh.transform.parent;
                 steerPivot.transform.position = wheelPosition;
                 steerPivot.Rotate(Vector3.up, visualSteerAngle);
+                
+                //set offset
+                if (stanceModification != null)
+                    frontWheelMesh.transform.position = frontWheelMesh.transform.TransformPoint(new Vector3(stanceModification.CurrentOffset,0,0));
             }
 
             //add camber
@@ -1678,8 +1727,26 @@ namespace Gumball
                 if (stanceModification != null)
                     stanceModification.AddCamberRotation();
             }
+            
+            UpdateBrakeMeshes();
         }
 
+        private void UpdateBrakeMeshes()
+        {
+            for (int index = 0; index < frontWheelBrakes.Length; index++)
+            {
+                Transform brake = frontWheelBrakes[index];
+                brake.transform.position = frontWheelMeshes[index].transform.position;
+            }
+            
+            for (int index = 0; index < rearWheelBrakes.Length; index++)
+            {
+                Transform brake = rearWheelBrakes[index];
+                
+                brake.transform.position = rearWheelMeshes[index].transform.position;
+            }
+        }
+        
         private void TryAvoidObstacles(bool includeCars = true)
         {
             if (!autoDrive)
@@ -2177,6 +2244,11 @@ namespace Gumball
             currentGear++;
 
             onGearChanged?.Invoke(currentGear - 1, currentGear);
+            
+            if (exhaustFlameL != null)
+                exhaustFlameL.Play();
+            if (exhaustFlameR != null)
+                exhaustFlameR.Play();
         }
 
         private void ShiftDown()

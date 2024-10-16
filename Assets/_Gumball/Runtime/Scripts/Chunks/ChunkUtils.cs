@@ -346,6 +346,7 @@ namespace Gumball
             runtimeInstanceChunk.CalculateSplineLength();
 
             runtimeInstanceChunk.EnsureBarriersHaveCorrectPhysicsMaterial();
+            runtimeInstanceChunk.EnsureGroundHasCorrectRenderLayer();
             
             //save the runtime chunk asset
             string runtimeChunkPath = GetRuntimeChunkPath(prefab);

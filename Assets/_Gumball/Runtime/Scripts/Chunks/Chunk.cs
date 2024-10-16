@@ -447,6 +447,19 @@ namespace Gumball
                 }
             }
         }
+
+        public void EnsureGroundHasCorrectRenderLayer()
+        {
+            foreach (MeshRenderer meshRenderer in transform.GetComponentsInAllChildren<MeshRenderer>())
+            {
+                if (meshRenderer.gameObject.layer == (int)LayersAndTags.Layer.Ground
+                    || meshRenderer.gameObject.layer == (int)LayersAndTags.Layer.Terrain)
+                {
+                    meshRenderer.renderingLayerMask = 1 << (int)LayersAndTags.RenderingLayer.Ground;
+                    EditorUtility.SetDirty(meshRenderer);
+                }
+            }
+        }
         
         private void OnDrawGizmos()
         {
