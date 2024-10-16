@@ -296,6 +296,8 @@ namespace Gumball
         
         public event Action<Collision> onCollisionEnter;
         
+        private const float speedToCancelAccelerationIfPushingAnotherRacer = 50;
+
         private float timeOfLastCollision = -Mathf.Infinity;
         private BoxCollider movementPathCollider;
         
@@ -1269,7 +1271,7 @@ namespace Gumball
                 isAccelerating = false;
             else if (DesiredSpeed == 0)
                 isAccelerating = false;
-            else if (isPushingAnotherRacer)
+            else if (isPushingAnotherRacer && speedKmh > speedToCancelAccelerationIfPushingAnotherRacer)
                 isAccelerating = false;
 
             //check to accelerate
