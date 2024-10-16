@@ -296,6 +296,8 @@ namespace Gumball
         
         public event Action<Collision> onCollisionEnter;
         
+        private const float speedToCancelAccelerationIfPushingAnotherRacer = 50;
+
         private float timeOfLastCollision = -Mathf.Infinity;
         private BoxCollider movementPathCollider;
         
@@ -336,7 +338,7 @@ namespace Gumball
         /// <summary>
         /// The time that the autodriving car looks ahead for curves.
         /// </summary>
-        private const float predictedPositionReactionTime = 0.65f;
+        private const float predictedPositionReactionTime = 0.85f;
         
         private Chunk lastKnownChunkForRacingLineOffset;
         private CustomDrivingPath lastKnownRacingLineForRacingLineOffset;
@@ -922,10 +924,7 @@ namespace Gumball
         {
             targetPos = GetPositionAhead(GetMovementTargetDistance());
             if (targetPos == null)
-            {
-                Despawn();
                 return;
-            }
 
             targetPosition = targetPos.Value.Item2;
 
@@ -1272,7 +1271,7 @@ namespace Gumball
                 isAccelerating = false;
             else if (DesiredSpeed == 0)
                 isAccelerating = false;
-            else if (isPushingAnotherRacer)
+            else if (isPushingAnotherRacer && speedKmh > speedToCancelAccelerationIfPushingAnotherRacer)
                 isAccelerating = false;
 
             //check to accelerate
@@ -1841,6 +1840,12 @@ namespace Gumball
             {
                 RaycastHit hit = blockagesTemp[index];
 
+                bool isPlayersMovementPath = hit.collider.gameObject.layer == (int)LayersAndTags.Layer.MovementPath
+                                             && hit.collider.transform.parent.GetComponent<AICar>() != null
+                                             && hit.collider.transform.parent.GetComponent<AICar>().IsPlayer;
+                if (isPlayersMovementPath)
+                    continue;
+                
                 if (hit.rigidbody != null)
                 {
                     bool hitSelf = ReferenceEquals(hit.rigidbody.gameObject, gameObject);
