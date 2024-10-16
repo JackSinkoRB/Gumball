@@ -8,9 +8,10 @@ using UnityEngine;
 namespace Gumball
 {
     [CreateAssetMenu(menuName = "Gumball/GameSession/Race")]
-    public class RaceGameSession : GameSession
+    public class RaceGameSession : TimedGameSession
     {
 
+        [Header("Debugging")]
         [SerializeField, ReadOnly] protected List<AICar> racersInPositionOrderCached;
         
         private int frameLastCachedRacerPositionOrder = -1;
