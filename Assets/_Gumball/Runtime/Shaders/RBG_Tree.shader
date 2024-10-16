@@ -188,7 +188,6 @@ Shader "RBG/Tree"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
-			#define _EMISSION
 			#define _ALPHATEST_ON 1
 			#define ASE_SRP_VERSION 140008
 
@@ -536,13 +535,10 @@ Shader "RBG/Tree"
 				float4 tex2DNode1 = tex2D( _MainTex, uv_MainTex );
 				float4 temp_output_38_0 = ( _ColorTint * tex2DNode1 );
 				
-				float ase_lightIntensity = max( max( _MainLightColor.r, _MainLightColor.g ), _MainLightColor.b );
-				float4 ase_lightColor = float4( _MainLightColor.rgb / ase_lightIntensity, ase_lightIntensity );
-				
 
 				float3 BaseColor = temp_output_38_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = ( temp_output_38_0 * ( 0.3 * ase_lightColor.a ) ).rgb;
+				float3 Emission = 0;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -797,7 +793,6 @@ Shader "RBG/Tree"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
-			#define _EMISSION
 			#define _ALPHATEST_ON 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1112,7 +1107,6 @@ Shader "RBG/Tree"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
-			#define _EMISSION
 			#define _ALPHATEST_ON 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1397,7 +1391,6 @@ Shader "RBG/Tree"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
-			#define _EMISSION
 			#define _ALPHATEST_ON 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1653,12 +1646,9 @@ Shader "RBG/Tree"
 				float4 tex2DNode1 = tex2D( _MainTex, uv_MainTex );
 				float4 temp_output_38_0 = ( _ColorTint * tex2DNode1 );
 				
-				float ase_lightIntensity = max( max( _MainLightColor.r, _MainLightColor.g ), _MainLightColor.b );
-				float4 ase_lightColor = float4( _MainLightColor.rgb / ase_lightIntensity, ase_lightIntensity );
-				
 
 				float3 BaseColor = temp_output_38_0.rgb;
-				float3 Emission = ( temp_output_38_0 * ( 0.3 * ase_lightColor.a ) ).rgb;
+				float3 Emission = 0;
 				float Alpha = tex2DNode1.a;
 				float AlphaClipThreshold = _Clip;
 
@@ -1696,7 +1686,6 @@ Shader "RBG/Tree"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
-			#define _EMISSION
 			#define _ALPHATEST_ON 1
 			#define ASE_SRP_VERSION 140008
 
@@ -1961,7 +1950,6 @@ Shader "RBG/Tree"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
-			#define _EMISSION
 			#define _ALPHATEST_ON 1
 			#define ASE_SRP_VERSION 140008
 
@@ -2300,7 +2288,6 @@ Shader "RBG/Tree"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
-			#define _EMISSION
 			#define _ALPHATEST_ON 1
 			#define ASE_SRP_VERSION 140008
 
@@ -2638,13 +2625,10 @@ Shader "RBG/Tree"
 				float4 tex2DNode1 = tex2D( _MainTex, uv_MainTex );
 				float4 temp_output_38_0 = ( _ColorTint * tex2DNode1 );
 				
-				float ase_lightIntensity = max( max( _MainLightColor.r, _MainLightColor.g ), _MainLightColor.b );
-				float4 ase_lightColor = float4( _MainLightColor.rgb / ase_lightIntensity, ase_lightIntensity );
-				
 
 				float3 BaseColor = temp_output_38_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = ( temp_output_38_0 * ( 0.3 * ase_lightColor.a ) ).rgb;
+				float3 Emission = 0;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -2766,7 +2750,6 @@ Shader "RBG/Tree"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
-			#define _EMISSION
 			#define _ALPHATEST_ON 1
 			#define ASE_SRP_VERSION 140008
 
@@ -3014,7 +2997,6 @@ Shader "RBG/Tree"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
-			#define _EMISSION
 			#define _ALPHATEST_ON 1
 			#define ASE_SRP_VERSION 140008
 
@@ -3279,7 +3261,6 @@ Node;AmplifyShaderEditor.RangedFloatNode;185;1285.279,397.5935;Inherit;False;Con
 WireConnection;38;0;37;0
 WireConnection;38;1;1;0
 WireConnection;169;0;38;0
-WireConnection;169;2;191;0
 WireConnection;169;3;185;0
 WireConnection;169;4;185;0
 WireConnection;169;5;185;0
@@ -3290,4 +3271,4 @@ WireConnection;192;1;187;2
 WireConnection;191;0;38;0
 WireConnection;191;1;192;0
 ASEEND*/
-//CHKSM=E2EB0F2D9329C2660F54EED6C8CD36DFAE05A377
+//CHKSM=F3D0404E770E1BE6D355E9EC6743DCDFAA0D3E96

@@ -685,7 +685,7 @@ Shader "RBG/VC_Terrain_Projection"
 				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal207 , IN.ase_color.b);
 				
 				float4 color169 = IsGammaSpace() ? float4(0.9529412,0.8823529,0.7333333,0) : float4(0.8962694,0.7529422,0.496933,0);
-				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 10.0 );
+				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 0.0 );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
@@ -1949,7 +1949,7 @@ Shader "RBG/VC_Terrain_Projection"
 				float3 tanTriplanarNormal207 = mul( ase_worldToTangent, triplanar207 );
 				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal207 , IN.ase_color.b);
 				float4 color169 = IsGammaSpace() ? float4(0.9529412,0.8823529,0.7333333,0) : float4(0.8962694,0.7529422,0.496933,0);
-				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 10.0 );
+				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 0.0 );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
@@ -3215,7 +3215,7 @@ Shader "RBG/VC_Terrain_Projection"
 				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal207 , IN.ase_color.b);
 				
 				float4 color169 = IsGammaSpace() ? float4(0.9529412,0.8823529,0.7333333,0) : float4(0.8962694,0.7529422,0.496933,0);
-				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 10.0 );
+				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 0.0 );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
@@ -3904,7 +3904,7 @@ Node;AmplifyShaderEditor.RangedFloatNode;53;-323.8188,808.7853;Float;False;Prope
 Node;AmplifyShaderEditor.RangedFloatNode;21;-97.96638,1063.809;Float;False;Property;_Gloss_Noise_Str;Gloss_Noise_Str;14;0;Create;True;0;0;0;False;0;False;0.3;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;123;233.8444,-980.9817;Float;False;Property;_Skids_Str;Skids_Str;16;0;Create;True;0;0;0;False;0;False;0.5;0.8091814;0;2;0;1;FLOAT;0
 Node;AmplifyShaderEditor.ColorNode;169;1030.927,1121.744;Inherit;False;Constant;_Light_Color;Light_Color;17;0;Create;True;0;0;0;False;0;False;0.9529412,0.8823529,0.7333333,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;239;1358.325,1205.913;Inherit;False;Constant;_Lioght_Str;Lioght_Str;17;0;Create;True;0;0;0;False;0;False;10;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;239;1358.325,1205.913;Inherit;False;Constant;_Lioght_Str;Lioght_Str;17;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 WireConnection;168;0;102;4
 WireConnection;168;1;169;0
 WireConnection;170;0;168;0
@@ -3982,4 +3982,4 @@ WireConnection;202;8;235;0
 WireConnection;202;3;198;0
 WireConnection;236;3;237;0
 ASEEND*/
-//CHKSM=486254E7FA7C7E47919F18B9221E917A5F5AB451
+//CHKSM=D20BFD24C7D97825EAA34601CFA4E930334125BF
