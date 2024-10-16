@@ -843,8 +843,10 @@ MonoBehaviour:
   rearViewCameraTarget: {fileID: 0}
   isPlayerDrivingEnabled: 0
   carIndex: 0
-  headlightL: {fileID: 4954990809170965420}
-  headlightR: {fileID: 8240641542900386146}
+  headlights: []
+  brakelights: {fileID: 0}
+  exhaustFlameL: {fileID: 0}
+  exhaustFlameR: {fileID: 0}
   defaultEngine: {fileID: 0}
   defaultWheels: {fileID: 0}
   defaultDrivetrain: {fileID: 0}
@@ -1057,7 +1059,34 @@ MonoBehaviour:
   additionalLaneOffset: 0
   currentLaneDirection: 0
   racingLineOffset: 0
-  dragWhenAccelerating: 0
+  speedForAccelerationDrag:
+    Min: 250
+    Max: 350
+  dragAtMaxSpeed: 0
+  dragCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   dragWhenIdle: 0.15
   dragWhenBraking: 1
   dragWhenHandbraking: 0.5

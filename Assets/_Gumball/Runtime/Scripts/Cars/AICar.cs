@@ -72,8 +72,14 @@ namespace Gumball
         public Transform RearViewCameraTarget => rearViewCameraTarget;
 
         [Header("Lighting")]
-        [SerializeField] private Light headlightL;
-        [SerializeField] private Light headlightR;
+        [SerializeField] private Light[] headlights;
+        [SerializeField] private BrakeLights brakelights;
+        [SerializeField] private ParticleSystem exhaustFlameL;
+        [SerializeField] private ParticleSystem exhaustFlameR;
+        
+        private Tween brakeLightIntensityTween;
+        private float desiredBrakeLightIntensity = -1;
+        private float currentBrakeLightIntensity;
         
         [Header("Performance settings")]
         [SerializeField, ConditionalField(nameof(canBeDrivenByPlayer))] private CorePart defaultEngine;
@@ -197,7 +203,9 @@ namespace Gumball
         private float racingLineDesiredOffset;
         
         [Header("Drag")]
-        [SerializeField] private float dragWhenAccelerating;
+        [SerializeField] private MinMaxFloat speedForAccelerationDrag = new(250,350);
+        [SerializeField] private float dragAtMaxSpeed = 1f;
+        [SerializeField] private AnimationCurve dragCurve;
         [SerializeField] private float dragWhenIdle = 0.15f;
         [SerializeField] private float dragWhenBraking = 1;
         [SerializeField] private float dragWhenHandbraking = 0.5f;
@@ -606,19 +614,19 @@ namespace Gumball
             obeySpeedLimit = obey;
         }
 
-        public void CheckToEnableHeadlights()
+        private void CheckToEnableHeadlights()
         {
             bool enable = GameSessionManager.ExistsRuntime
                                && GameSessionManager.Instance.CurrentSession != null
-                               && GameSessionManager.Instance.CurrentSession.EnableCarHeadlights;
-            
-            if (headlightL != null)
-                headlightL.gameObject.SetActive(enable);
+                               && GameSessionManager.Instance.CurrentSession.IsNightTime;
 
-            if (headlightR != null)
-                headlightR.gameObject.SetActive(enable);
+            foreach (Light headlight in headlights)
+            {
+                if (headlight != null)
+                    headlight.gameObject.SetActive(enable);
+            }
         }
-
+        
         /// <summary>
         /// Movement should only be called in FixedUpdate, but this can be called manually if simulating.
         /// </summary>
@@ -715,6 +723,8 @@ namespace Gumball
             CalculateAcceleration();
 
             CheckToEnableHeadlights();
+            if (brakelights != null)
+                brakelights.CheckToEnable(this);
         }
 
         private void FixedUpdate()
@@ -1149,7 +1159,7 @@ namespace Gumball
             else if (isBraking)
                 Rigidbody.drag = dragWhenBraking;
             else if (isAccelerating)
-                Rigidbody.drag = dragWhenAccelerating;
+                Rigidbody.drag = speedKmh == 0 ? 0 : dragCurve.Evaluate(Mathf.Clamp01((speedKmh - speedForAccelerationDrag.Min) / speedForAccelerationDrag.Difference)) * dragAtMaxSpeed;
             else
                 Rigidbody.drag = dragWhenIdle;
         }
@@ -2234,6 +2244,11 @@ namespace Gumball
             currentGear++;
 
             onGearChanged?.Invoke(currentGear - 1, currentGear);
+            
+            if (exhaustFlameL != null)
+                exhaustFlameL.Play();
+            if (exhaustFlameR != null)
+                exhaustFlameR.Play();
         }
 
         private void ShiftDown()
