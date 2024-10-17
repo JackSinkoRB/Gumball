@@ -65,6 +65,8 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Edit Mode Test Results
           customParameters: -nographics
+          unityVersion: 2022.3.42f1
+          dockerCpuLimit: 3.5
 
   testPlayMode:
     needs: setup
@@ -102,6 +104,8 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Play Mode Test Results
           customParameters: -nographics
+          unityVersion: 2022.3.42f1
+          dockerCpuLimit: 3.5
 
       # Delay for 10 seconds if the first attempt fails and the test mode is playmode
       - name: Wait before retrying playmode test
@@ -125,6 +129,7 @@ jobs:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Play Mode Retry Test Results
           customParameters: -nographics
+          unityVersion: 2022.3.42f1
 
       - name: Generate output
         id: test_output
@@ -192,6 +197,9 @@ jobs:
           androidTargetSdkVersion: 34
           buildName: 'Gumball'
           versioning: Semantic
+          customParameters: -nographics
+          unityVersion: 2022.3.42f1
+          dockerCpuLimit: 3.5
 
       - name: Add Authentication
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -269,6 +277,8 @@ jobs:
           targetPlatform: StandaloneWindows
           buildName: 'Gumball'
           versioning: Semantic
+          customParameters: -nographics
+          unityVersion: 2022.3.42f1
 
       # Zip Build Files
       - name: Zip Build Files

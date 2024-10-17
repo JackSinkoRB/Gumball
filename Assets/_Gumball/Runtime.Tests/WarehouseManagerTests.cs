@@ -9,35 +9,15 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class WarehouseManagerTests : IPrebuildSetup, IPostBuildCleanup
+    public class WarehouseManagerTests : BaseRuntimeTests
     {
-        
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
 
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
         [OneTimeSetUp]
-        public void OneTimeSetUp()
+        public override void OneTimeSetUp()
         {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
+            base.OneTimeSetUp();
+            
             DataManager.RemoveAllData();
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            DataManager.EnableTestProviders(false);
         }
 
         [Test]
@@ -129,6 +109,41 @@ namespace Gumball.Runtime.Tests
             
             Assert.IsTrue(carsMissingSteeringWheelReferences.IsNullOrEmpty(), $"Cars missing steering wheel references: {carsMissingSteeringWheelReferences}");
         }
+        
+        //TODO: add back
+        // [Test]
+        // [Order(5)]
+        // public void AllCarsHaveBrakesSetup()
+        // {
+        //     string carsWithoutBrakesSetup = "";
+        //     for (int index = 0; index < WarehouseManager.Instance.AllCarData.Count; index++)
+        //     {
+        //         AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCarData[index].CarPrefabReference;
+        //         AICar car = carAsset.editorAsset.GetComponent<AICar>();
+        //         if (car == null)
+        //             continue;
+        //
+        //         if (car.FrontWheelBrakes.IsNullOrEmpty() || car.RearWheelBrakes.IsNullOrEmpty())
+        //         {
+        //             carsWithoutBrakesSetup += $"\n - {car.name} (index {index})";
+        //             continue;
+        //         }
+        //
+        //         foreach (Transform brake in car.FrontWheelBrakes)
+        //         {
+        //             if (brake.childCount == 0)
+        //                 carsWithoutBrakesSetup += $"\n - {car.name} (index {index}) ({brake.name})";
+        //         }
+        //         
+        //         foreach (Transform brake in car.RearWheelBrakes)
+        //         {
+        //             if (brake.childCount == 0)
+        //                 carsWithoutBrakesSetup += $"\n - {car.name} (index {index}) ({brake.name})";
+        //         }
+        //     }
+        //     
+        //     Assert.IsTrue(carsWithoutBrakesSetup.IsNullOrEmpty(), $"Cars without brakes/calipers setup: {carsWithoutBrakesSetup}");
+        // }
         
         [Test]
         [Order(6)]

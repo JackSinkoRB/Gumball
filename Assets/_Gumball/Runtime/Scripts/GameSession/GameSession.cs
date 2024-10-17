@@ -32,8 +32,6 @@ namespace Gumball
             COMPLETE
         }
 
-        private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
-
         [Header("Info")]
         [SerializeField] private string displayName = "Level";
         [SerializeField] private string description = "Description of session";
@@ -45,12 +43,16 @@ namespace Gumball
         [SerializeField] private Vector3 vehicleStartingRotation;
         
         [Header("Lighting")]
+        [Tooltip("Whether or not car night lights, and night-time objects are shown.")]
+        [SerializeField] private bool isNightTime;
         [Tooltip("This is directional light intensity value.")]
         [SerializeField] private float globalLightIntensity = 1;
         [Tooltip("This is environment reflections intensity multiplier value that is passed to the environment rendering settings.")]
         [Range(0, 1), SerializeField] private float reflectionIntensity = 1;
-        [Tooltip("This is the value that is passed to the shader for fake lighting using the alpha channel.")]
-        [Range(0, 30), SerializeField] private float fakeLightingIntensity;
+        [Tooltip("Adjust material/shader property values when the game session is loaded.")]
+        [SerializeField] private GameSessionMaterialAdjustment[] materialAdjustments = Array.Empty<GameSessionMaterialAdjustment>();
+
+        public bool IsNightTime => isNightTime;
 
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
@@ -342,7 +344,7 @@ namespace Gumball
             if (PanelManager.ExistsRuntime && PanelManager.PanelExists<DrivingControlsPanel>())
                 PanelManager.GetPanel<DrivingControlsPanel>().Hide();
 
-            if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
+            if (PanelManager.PanelExists<DrivingResetButtonPanel>() && PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
                 PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
 
             if (ChunkMapSceneManager.ExistsRuntime)
@@ -370,10 +372,14 @@ namespace Gumball
         {
             yield return new WaitForSeconds(1f);
             
-            PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            if (PanelManager.PanelExists<VignetteBackgroundPanel>())
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
             
             yield return new WaitForSeconds(1f);
-            PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
+            
+            if (PanelManager.PanelExists<RetrySessionButtonPanel>())
+                PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
+            
             if (GetSessionEndPanel() != null)
                 GetSessionEndPanel().Show();
         }
@@ -497,9 +503,10 @@ namespace Gumball
             
             //set reflection intensity
             RenderSettings.reflectionIntensity = reflectionIntensity;
-            
-            //set the fake lighting
-            ChunkManager.Instance.TerrainMaterial.SetFloat(LightStrShaderID, fakeLightingIntensity);
+
+            //shader adjustments
+            foreach (GameSessionMaterialAdjustment materialAdjustment in materialAdjustments)
+                materialAdjustment.UpdateMaterial();
             
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} lighting setup complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");

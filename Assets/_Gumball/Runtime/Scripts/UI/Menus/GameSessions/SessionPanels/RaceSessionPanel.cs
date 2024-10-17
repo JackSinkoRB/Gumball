@@ -6,15 +6,17 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class RaceSessionPanel : GameSessionPanel
+    public class RaceSessionPanel : TimedSessionPanel
     {
         
         [SerializeField] private TextMeshProUGUI positionLabel;
 
         protected virtual int numberOfRacers => GameSessionManager.Instance.CurrentSession.CurrentRacers.Count;
         
-        private void LateUpdate()
+        protected override void LateUpdate()
         {
+            base.LateUpdate();
+            
             UpdatePositionLabel();
         }
 

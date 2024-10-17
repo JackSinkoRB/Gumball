@@ -27,7 +27,7 @@ namespace Gumball
             defaultTimerLabelColor = timerLabel.color;
         }
 
-        private void LateUpdate()
+        protected virtual void LateUpdate()
         {
             UpdateTimerLabel();
         }

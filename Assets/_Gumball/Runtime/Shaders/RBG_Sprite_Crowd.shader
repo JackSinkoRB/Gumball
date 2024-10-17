@@ -11,6 +11,7 @@ Shader "RBG/Sprite_Crowd"
 		_Speed("Speed", Float) = 1
 		_X("X", Float) = 1
 		_Clip("Clip", Float) = 0
+		_Brightness("Brightness", Float) = 1
 
 
 		//_TransmissionShadow( "Transmission Shadow", Range( 0, 1 ) ) = 0.5
@@ -191,7 +192,7 @@ Shader "RBG/Sprite_Crowd"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -285,6 +286,7 @@ Shader "RBG/Sprite_Crowd"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
+			float _Brightness;
 			float _X;
 			int _ColumnSize;
 			float _Speed;
@@ -541,7 +543,7 @@ Shader "RBG/Sprite_Crowd"
 				float4 tex2DNode2 = tex2D( _TextureSample0, (texCoord7*1.0 + appendResult12) );
 				
 
-				float3 BaseColor = tex2DNode2.rgb;
+				float3 BaseColor = ( _Brightness * tex2DNode2 ).rgb;
 				float3 Normal = float3(0, 0, 1);
 				float3 Emission = 0;
 				float3 Specular = 0.5;
@@ -800,7 +802,7 @@ Shader "RBG/Sprite_Crowd"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -857,6 +859,7 @@ Shader "RBG/Sprite_Crowd"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
+			float _Brightness;
 			float _X;
 			int _ColumnSize;
 			float _Speed;
@@ -1119,7 +1122,7 @@ Shader "RBG/Sprite_Crowd"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1174,6 +1177,7 @@ Shader "RBG/Sprite_Crowd"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
+			float _Brightness;
 			float _X;
 			int _ColumnSize;
 			float _Speed;
@@ -1408,7 +1412,7 @@ Shader "RBG/Sprite_Crowd"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1460,6 +1464,7 @@ Shader "RBG/Sprite_Crowd"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
+			float _Brightness;
 			float _X;
 			int _ColumnSize;
 			float _Speed;
@@ -1666,7 +1671,7 @@ Shader "RBG/Sprite_Crowd"
 				float4 tex2DNode2 = tex2D( _TextureSample0, (texCoord7*1.0 + appendResult12) );
 				
 
-				float3 BaseColor = tex2DNode2.rgb;
+				float3 BaseColor = ( _Brightness * tex2DNode2 ).rgb;
 				float3 Emission = 0;
 				float Alpha = tex2DNode2.a;
 				float AlphaClipThreshold = _Clip;
@@ -1707,7 +1712,7 @@ Shader "RBG/Sprite_Crowd"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1749,6 +1754,7 @@ Shader "RBG/Sprite_Crowd"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
+			float _Brightness;
 			float _X;
 			int _ColumnSize;
 			float _Speed;
@@ -1940,7 +1946,7 @@ Shader "RBG/Sprite_Crowd"
 				float4 tex2DNode2 = tex2D( _TextureSample0, (texCoord7*1.0 + appendResult12) );
 				
 
-				float3 BaseColor = tex2DNode2.rgb;
+				float3 BaseColor = ( _Brightness * tex2DNode2 ).rgb;
 				float Alpha = tex2DNode2.a;
 				float AlphaClipThreshold = _Clip;
 
@@ -1975,7 +1981,7 @@ Shader "RBG/Sprite_Crowd"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2035,6 +2041,7 @@ Shader "RBG/Sprite_Crowd"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
+			float _Brightness;
 			float _X;
 			int _ColumnSize;
 			float _Speed;
@@ -2318,7 +2325,7 @@ Shader "RBG/Sprite_Crowd"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -2407,6 +2414,7 @@ Shader "RBG/Sprite_Crowd"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
+			float _Brightness;
 			float _X;
 			int _ColumnSize;
 			float _Speed;
@@ -2658,7 +2666,7 @@ Shader "RBG/Sprite_Crowd"
 				float4 tex2DNode2 = tex2D( _TextureSample0, (texCoord7*1.0 + appendResult12) );
 				
 
-				float3 BaseColor = tex2DNode2.rgb;
+				float3 BaseColor = ( _Brightness * tex2DNode2 ).rgb;
 				float3 Normal = float3(0, 0, 1);
 				float3 Emission = 0;
 				float3 Specular = 0.5;
@@ -2784,7 +2792,7 @@ Shader "RBG/Sprite_Crowd"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2824,6 +2832,7 @@ Shader "RBG/Sprite_Crowd"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
+			float _Brightness;
 			float _X;
 			int _ColumnSize;
 			float _Speed;
@@ -3036,7 +3045,7 @@ Shader "RBG/Sprite_Crowd"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3076,6 +3085,7 @@ Shader "RBG/Sprite_Crowd"
 			};
 
 			CBUFFER_START(UnityPerMaterial)
+			float _Brightness;
 			float _X;
 			int _ColumnSize;
 			float _Speed;
@@ -3306,6 +3316,8 @@ Node;AmplifyShaderEditor.SamplerNode;2;110.7694,-568.7815;Inherit;True;Property;
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;56;598.6558,-458.5106;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/Sprite_Crowd;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;1;638553165620785311;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
 Node;AmplifyShaderEditor.RangedFloatNode;54;214.6881,-172.3954;Inherit;False;Property;_Clip;Clip;4;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;65;208.2241,-266.5365;Inherit;False;Constant;_Metal_Gloss;Metal_Gloss;6;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;66;211.595,-690.6906;Inherit;False;Property;_Brightness;Brightness;5;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;67;454.9565,-677.0187;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 WireConnection;37;0;33;0
 WireConnection;37;1;17;0
 WireConnection;12;0;37;0
@@ -3319,10 +3331,12 @@ WireConnection;8;0;7;0
 WireConnection;8;2;12;0
 WireConnection;6;0;9;0
 WireConnection;2;1;8;0
-WireConnection;56;0;2;0
+WireConnection;56;0;67;0
 WireConnection;56;3;65;0
 WireConnection;56;4;65;0
 WireConnection;56;6;2;4
 WireConnection;56;7;54;0
+WireConnection;67;0;66;0
+WireConnection;67;1;2;0
 ASEEND*/
-//CHKSM=519AF40348F9D27E8E9C3CBD66FC17B9821BAFCD
+//CHKSM=04E1FDF062E76A498B452E1C443773F50D99F329

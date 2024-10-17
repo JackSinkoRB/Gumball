@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class DataProviderTests : IPrebuildSetup, IPostBuildCleanup
+    public class DataProviderTests : BaseRuntimeTests
     {
         
         private static readonly DataProvider[] providers = { new JsonDataProvider("JsonDataProviderTests") };
@@ -26,37 +26,15 @@ namespace Gumball.Runtime.Tests
             }
         }
         
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
-        
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            DecalEditor.IsRunningTests = true;
-            IAPManager.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-        }
-
         [OneTimeTearDown]
-        public void OneTimeTearDown()
+        public override void OneTimeTearDown()
         {
             foreach (DataProvider provider in providers)
             {
                 provider.RemoveFromSource();
             }
-            
-            DataManager.EnableTestProviders(false);
+
+            base.OneTimeTearDown();
         }
 
         [SetUp]

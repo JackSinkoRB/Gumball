@@ -48,6 +48,7 @@ namespace Gumball
         [SerializeField] private float disabledTweenDuration = 0.2f;
         [Space(5)]
         [SerializeField] private float transformsToMoveFadeTweenDuration = 0.15f;
+        [SerializeField, ConditionalField(nameof(transformsToMoveUnderPointer))] private Vector2 transformsToMoveOffset = new(0, 100);
         [Tooltip("This will move the listed transforms under the pointer when holding the button.")]
         [SerializeField] private RectTransform[] transformsToMoveUnderPointer;
 
@@ -253,7 +254,7 @@ namespace Gumball
             {
                 //convert screen position to local position within the canvas
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRectTransform, PrimaryContactInput.Position, null, out Vector2 localPoint);
-                rectTransformToMove.localPosition = localPoint;
+                rectTransformToMove.localPosition = localPoint + transformsToMoveOffset;
             }
         }
         

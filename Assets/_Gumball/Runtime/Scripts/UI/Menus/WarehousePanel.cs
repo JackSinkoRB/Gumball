@@ -20,7 +20,8 @@ namespace Gumball
         {
             base.OnHide();
             
-            PanelManager.GetPanel<CarStatsPanel>().Hide();
+            if (PanelManager.PanelExists<CarStatsPanel>())
+                PanelManager.GetPanel<CarStatsPanel>().Hide();
         }
 
         public void OnClickBackButton()

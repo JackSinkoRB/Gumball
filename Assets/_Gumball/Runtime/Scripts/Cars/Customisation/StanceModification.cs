@@ -36,6 +36,7 @@ namespace Gumball
         public RangedFloatValue RimWidth => rimWidth;
 
         public float CurrentCamber { get; private set; }
+        public float CurrentOffset { get; private set; }
 
         public void Initialise(AICar carBelongsTo)
         {
@@ -131,7 +132,7 @@ namespace Gumball
 
         public void ApplyOffset(float offsetValue)
         {
-            wheelCollider.transform.localPosition = wheelCollider.transform.localPosition.SetX(offsetValue);
+            CurrentOffset = offsetValue;
             
             //save to file
             if (carBelongsTo.IsPlayer)
@@ -208,11 +209,11 @@ namespace Gumball
             if (wheelMesh == null)
                 return;
 
-            //the tyre is always larger than the wheel, so get the tyre extents (accounting for transform scales)
-            Vector3 tyreSize = wheelMesh.transform.TransformPoint(wheelMesh.sharedMesh.bounds.extents) - wheelMesh.transform.position;
+            wheelCollider.radius = wheelMesh.sharedMesh.bounds.extents.x * wheelMesh.transform.lossyScale.x;
             
-            //tyre is circular, so add the height and width and divide by 2. This is because we're working with world position and the tyre might be rotated in world space.
-            wheelCollider.radius = (Mathf.Abs(tyreSize.y) + Mathf.Abs(tyreSize.z)) / 2f;
+            //set the force app distance relative to the wheel size
+            const float additional = 0.01f;
+            wheelCollider.forceAppPointDistance = (wheelCollider.radius * 2) + additional; //set to the top of the car plus offset
         }
 
         private MeshFilter GetWheelMesh()
