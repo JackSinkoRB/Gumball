@@ -12,7 +12,7 @@ namespace Gumball
             [SerializeField] private int textureIndex;
             [SerializeField] private int priority;
             [SerializeField] private SerializedVector3 localPositionToCar;
-            [SerializeField] private SerializedVector3 localRotationToCar;
+            [SerializeField] private SerializedVector3 rotation;
             [SerializeField] private SerializedVector3 lastKnownHitNormal;
             [SerializeField] private SerializedVector3 scale;
             [SerializeField] private float angle;
@@ -22,7 +22,7 @@ namespace Gumball
             public int TextureIndex => textureIndex;
             public int Priority => priority;
             public SerializedVector3 LocalPositionToCar => localPositionToCar;
-            public SerializedVector3 LocalRotationToCar => localRotationToCar;
+            public SerializedVector3 Rotation => rotation;
             public SerializedVector3 LastKnownHitNormal => lastKnownHitNormal;
             
             public SerializedVector3 Scale => scale;
@@ -37,7 +37,7 @@ namespace Gumball
                 
                 //save relative to car:
                 localPositionToCar = liveDecal.LastKnownLocalPosition.ToSerializedVector();
-                localRotationToCar = liveDecal.LastKnownRotation.eulerAngles.ToSerializedVector();
+                rotation = liveDecal.LastKnownRotation.eulerAngles.ToSerializedVector();
                 lastKnownHitNormal = liveDecal.LastKnownHitNormal.ToSerializedVector();
                 
                 scale = liveDecal.Scale.ToSerializedVector();
@@ -45,13 +45,13 @@ namespace Gumball
                 colorIndex = liveDecal.ColorIndex;
             }
 
-            public LiveDecalData(int categoryIndex, int textureIndex, int priority, Vector3 positionOffsetFromCar, Vector3 rotationOffsetFromCar, Vector3 hitNormal, Vector3 scale, float angle, int colorIndex)
+            public LiveDecalData(int categoryIndex, int textureIndex, int priority, Vector3 positionOffsetFromCar, Vector3 rotation, Vector3 hitNormal, Vector3 scale, float angle, int colorIndex)
             {
                 this.categoryIndex = categoryIndex;
                 this.textureIndex = textureIndex;
                 this.priority = priority;
                 this.localPositionToCar = positionOffsetFromCar.ToSerializedVector();
-                this.localRotationToCar = rotationOffsetFromCar.ToSerializedVector();
+                this.rotation = rotation.ToSerializedVector();
                 this.lastKnownHitNormal = hitNormal.ToSerializedVector();
                 this.scale = scale.ToSerializedVector();
                 this.angle = angle;

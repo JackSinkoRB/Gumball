@@ -37,6 +37,7 @@ namespace Gumball
         {
             LiveDecalData[] liveDecalData = CreateLiveDecalData(liveDecals);
             DataManager.Cars.Set(GetDecalsSaveKey(car), liveDecalData);
+            DataManager.Cars.Set($"{GetDecalsSaveKey(car)}.RotationOfCar", car.transform.rotation.eulerAngles.ToSerializedVector());
             GlobalLoggers.DecalsLogger.Log($"Saving {liveDecals.Count} live decals for {car.gameObject.name}.");
         }
 
@@ -51,8 +52,13 @@ namespace Gumball
                 yield break;
             }
 
+            Quaternion previousRotation = car.transform.rotation;
+            Quaternion rotationOfCarWhenDataWasSaved = Quaternion.Euler(DataManager.Cars.Get<SerializedVector3>($"{GetDecalsSaveKey(car)}.RotationOfCar").ToVector3());
+            car.transform.rotation = rotationOfCarWhenDataWasSaved;
             DecalEditor.Instance.StartSession(car);
             yield return DecalEditor.Instance.EndSession();
+            car.transform.rotation = previousRotation;
+            car.Rigidbody.rotation = previousRotation;
         }
 
         public static LiveDecalData[] GetSavedDecalData(AICar car)

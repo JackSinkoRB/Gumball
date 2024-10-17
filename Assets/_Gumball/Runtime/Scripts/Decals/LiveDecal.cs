@@ -68,11 +68,11 @@ namespace Gumball
         /// <summary>
         /// Force the decal to be valid.
         /// </summary>
-        public void SetValid()
+        public void SetValid(bool isValid = true)
         {
-            IsValidPosition = true;
+            IsValidPosition = isValid;
         }
-        
+
         public void UpdatePosition(Vector3 localPosition, Vector3 hitNormal, Quaternion rotation)
         {
             bool hasMoved = !lastKnownLocalPosition.Approximately(localPosition, PrimaryContactInput.DragThreshold);
@@ -151,7 +151,7 @@ namespace Gumball
             
             UpdatePosition(data.LocalPositionToCar.ToVector3(), 
                 data.LastKnownHitNormal.ToVector3(), 
-                Quaternion.Euler(data.LocalRotationToCar.ToVector3()));
+                Quaternion.Euler(data.Rotation.ToVector3()));
             
             SetScale(data.Scale.ToVector3());
             SetAngle(data.Angle);

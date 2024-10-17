@@ -244,7 +244,7 @@ namespace Gumball.Runtime.Tests
             LiveDecalData[] liveDecalData = DataManager.Cars.Get(DecalManager.GetDecalsSaveKey(WarehouseManager.Instance.CurrentCar), Array.Empty<LiveDecalData>());
             Assert.AreEqual(1, liveDecalData.Length);
             Assert.AreEqual(positionToUse, liveDecalData[0].LocalPositionToCar.ToVector3());
-            Assert.AreEqual(rotationToUse.eulerAngles, liveDecalData[0].LocalRotationToCar.ToVector3());
+            Assert.AreEqual(rotationToUse.eulerAngles, liveDecalData[0].Rotation.ToVector3());
         }
         
         [UnityTest]
