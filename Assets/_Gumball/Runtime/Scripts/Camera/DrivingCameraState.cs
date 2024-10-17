@@ -250,7 +250,10 @@ namespace Gumball
             //get the position to match the desired offset - but keep height relative to the car (with rotation applied)
             if (!offsetIsLocalised)
             {
-                float heightRelativeToCar = target.TransformPoint(offset).y;
+                float heightRelativeToCar = target.TransformPoint(offset).y; //height is always localised
+                if (heightRelativeToCar < target.transform.position.y)
+                    heightRelativeToCar = target.transform.position.y; //don't let camera go below target
+                
                 float heightInterpolated = interpolate ? Mathf.Lerp(fakeController.transform.position.y, heightRelativeToCar, Time.deltaTime * heightLerpSpeed) : heightRelativeToCar;
                 return target.position.SetY(heightInterpolated) + offset.SetY(0);
             }
