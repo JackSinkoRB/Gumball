@@ -134,8 +134,6 @@ namespace Gumball
             
             InputManager.Instance.GeneralInput.Enable();
             
-            currentCar.SetGrounded();
-            
             //set the vehicle kinematic
             currentCar.Rigidbody.isKinematic = true;
             
