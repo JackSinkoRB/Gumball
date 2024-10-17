@@ -13,15 +13,20 @@ namespace Gumball
         private const float maxResolutionScale = 0.9f;
         private const float minResolutionScale = 0.5f;
 
-        private const float targetFPS = 30;
+        private const float targetFPS = 25;
         private const float timeBetweenChecks = 0.25f;
+        private const int numberOfFramesToCollect = 10;
         private const int numberOfFrameTimingsToCollect = 1;
-        private const float scaleStep = 0.05f; //how much to decrease/increase the resolution each check - eg. 0.05 is 5% each check
+        private const float scaleStep = 0.025f; //how much to decrease/increase the resolution each check - eg. 0.05 is 5% each check
         
         public static float CurrentScale { get; private set; } = 1;
+        public static float CurrentFPS { get; private set; }
         
+        private static float[] frames = new float[numberOfFramesToCollect];
         private static readonly FrameTiming[] frameTimings = new FrameTiming[numberOfFrameTimingsToCollect];
+        private static int currentFrameIndex;
         private static float timeSinceLastCheck;
+        private static bool filled;
         
         [RuntimeInitializeOnLoadMethod]
         private static void Initialise()
@@ -31,26 +36,48 @@ namespace Gumball
 
             //reset
             CurrentScale = 1;
+            CurrentFPS = 0;
             timeSinceLastCheck = 0;
+            currentFrameIndex = 0;
+            frames = new float[numberOfFramesToCollect];
+            filled = false;
         }
         
         private static void Update()
         {
+            CalculateFPS();
             CalculateResolution();
         }
-
-        public static float GetCurrentFPS()
+        
+        private static void CalculateFPS()
         {
-            //calculate FPS:
+            //try with FrameTimingManager first as it's more accurate
             FrameTimingManager.CaptureFrameTimings();
             FrameTimingManager.GetLatestTimings(numberOfFrameTimingsToCollect, frameTimings);
             
             double gpuFrameTime = frameTimings[0].gpuFrameTime; //in ms
             double cpuFrameTime = frameTimings[0].cpuFrameTime; //in ms
             double frameTime = Mathf.Max((float)gpuFrameTime, (float)cpuFrameTime); //use the one that's taking longer
-            float currentFPS = (float)(TimeUtils.MillisecondsInSecond / frameTime);
+            CurrentFPS = (float)(TimeUtils.MillisecondsInSecond / frameTime);
 
-            return currentFPS;
+            if (CurrentFPS is > 0 and < 10000)
+                return; //is valid
+            
+            //calculate using average
+            frames[currentFrameIndex] = Time.deltaTime;
+            currentFrameIndex = (currentFrameIndex + 1) % numberOfFramesToCollect;
+            if (currentFrameIndex == 0)
+                filled = true;
+
+            int numberOfFramesToUse = filled ? numberOfFramesToCollect : currentFrameIndex;
+            float totalFrameTime = 0f;
+            for (int index = 0; index < numberOfFramesToUse; index++)
+                totalFrameTime += frames[index];
+
+            if (totalFrameTime == 0) //no division by 0
+                return;
+
+            CurrentFPS = numberOfFramesToUse / totalFrameTime;
         }
 
         private static void CalculateResolution()
@@ -61,10 +88,7 @@ namespace Gumball
             
             timeSinceLastCheck = 0;
             
-            //calculate FPS:
-            float currentFPS = GetCurrentFPS();
-
-            CurrentScale = currentFPS < targetFPS ? Mathf.Max(minResolutionScale, CurrentScale - scaleStep) : Mathf.Min(maxResolutionScale, CurrentScale + scaleStep);
+            CurrentScale = CurrentFPS < targetFPS ? Mathf.Max(minResolutionScale, CurrentScale - scaleStep) : Mathf.Min(maxResolutionScale, CurrentScale + scaleStep);
 
 #if UNITY_EDITOR || UNITY_STANDALONE_WIN
             UniversalRenderPipelineAsset urp = (UniversalRenderPipelineAsset)GraphicsSettings.currentRenderPipeline;
