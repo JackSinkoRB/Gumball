@@ -37,7 +37,7 @@ namespace Gumball
                 
                 //save relative to car:
                 localPositionToCar = liveDecal.LastKnownLocalPosition.ToSerializedVector();
-                localRotationToCar = liveDecal.LastKnownLocalRotation.eulerAngles.ToSerializedVector();
+                localRotationToCar = liveDecal.LastKnownRotation.eulerAngles.ToSerializedVector();
                 lastKnownHitNormal = liveDecal.LastKnownHitNormal.ToSerializedVector();
                 
                 scale = liveDecal.Scale.ToSerializedVector();

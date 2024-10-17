@@ -40,7 +40,7 @@ namespace Gumball
         private DecalTexture textureData;
         private Vector2 clickOffset;
         private Vector3 lastKnownLocalPosition;
-        private Quaternion lastKnownLocalRotation = Quaternion.Euler(Vector3.zero);
+        private Quaternion lastKnownRotation = Quaternion.Euler(Vector3.zero);
         private Vector3 lastKnownHitNormal;
         private bool wasClickableUnderPointerOnPress;
         private DecalStateManager.ModifyStateChange stateBeforeMoving;
@@ -55,7 +55,7 @@ namespace Gumball
         public int CategoryIndex => categoryIndex;
         public int TextureIndex => textureIndex;
         public Vector3 LastKnownLocalPosition => lastKnownLocalPosition;
-        public Quaternion LastKnownLocalRotation => lastKnownLocalRotation;
+        public Quaternion LastKnownRotation => lastKnownRotation;
         public Vector3 LastKnownHitNormal => lastKnownHitNormal;
         public int Priority => priority;
         public Vector3 Scale => paintDecal.Scale;
@@ -73,16 +73,16 @@ namespace Gumball
             IsValidPosition = true;
         }
         
-        public void UpdatePosition(Vector3 localPosition, Vector3 hitNormal, Quaternion localRotation)
+        public void UpdatePosition(Vector3 localPosition, Vector3 hitNormal, Quaternion rotation)
         {
             bool hasMoved = !lastKnownLocalPosition.Approximately(localPosition, PrimaryContactInput.DragThreshold);
 
             lastKnownLocalPosition = localPosition;
-            lastKnownLocalRotation = localRotation;
+            lastKnownRotation = rotation;
             lastKnownHitNormal = hitNormal;
             
             transform.localPosition = lastKnownLocalPosition;
-            transform.localRotation = lastKnownLocalRotation;
+            transform.rotation = lastKnownRotation;
             
             if (hasMoved)
                 onMoved?.Invoke();
