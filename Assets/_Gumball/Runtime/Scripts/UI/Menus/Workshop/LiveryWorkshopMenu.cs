@@ -35,14 +35,7 @@ namespace Gumball
             
             DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
         }
-
-        protected override void OnHide()
-        {
-            base.OnHide();
-            
-            CoroutineHelper.Instance.StartCoroutine(DecalEditor.Instance.EndSession());
-        }
-
+        
         private void OnEnable()
         {
             DecalEditor.onCreateLiveDecal += OnCreateLiveDecal;
@@ -55,6 +48,8 @@ namespace Gumball
 
         private void OnDisable()
         {
+            CoroutineHelper.Instance.StartCoroutine(DecalEditor.Instance.EndSession());
+            
             DecalEditor.onCreateLiveDecal -= OnCreateLiveDecal;
             DecalEditor.onDestroyLiveDecal -= OnDestroyLiveDecal;
             DecalEditor.onSelectLiveDecal -= OnSelectLiveDecal;
@@ -118,6 +113,11 @@ namespace Gumball
             DecalEditor.Instance.DisableLiveDecal(DecalEditor.Instance.CurrentSelected);
         }
 
+        public void OnClickAddLayerButton()
+        {
+            PanelManager.GetPanel<CreateLiveryTexturePanel>().Show();
+        }
+        
         public void OnClickSendForwardButton()
         {
             SendBackwardOrForward(true, DecalEditor.Instance.CurrentSelected);

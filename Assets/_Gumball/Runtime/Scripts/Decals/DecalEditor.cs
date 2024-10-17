@@ -57,8 +57,6 @@ namespace Gumball
         public Color[] ColorPalette => colorPalette;
 
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
-        private int currentSessionTicketNumber;
-        private int maxWaitingSessionTicketNumber = -1;
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RuntimeInitialise()
@@ -125,7 +123,7 @@ namespace Gumball
                 return;
             }
 
-            GlobalLoggers.DecalsLogger.Log($"Started session {currentSessionTicketNumber}.");
+            GlobalLoggers.DecalsLogger.Log($"Started session.");
             isSessionActive = true;
             currentCar = car;
 
@@ -163,7 +161,7 @@ namespace Gumball
             if (!isSessionActive)
                 yield break;
             
-            GlobalLoggers.DecalsLogger.Log($"Ending session {currentSessionTicketNumber}.");
+            GlobalLoggers.DecalsLogger.Log($"Ending session.");
 
             PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
             DataProvider.onBeforeSaveAllDataOnAppExit -= OnBeforeSaveAllDataOnAppExit;
@@ -188,9 +186,8 @@ namespace Gumball
             yield return null;
             SessionCleanup();
             
-            GlobalLoggers.DecalsLogger.Log($"Ended session {currentSessionTicketNumber}.");
+            GlobalLoggers.DecalsLogger.Log($"Ended session.");
             isSessionActive = false;
-            currentSessionTicketNumber++;
 
             onSessionEnd?.Invoke();
         }
