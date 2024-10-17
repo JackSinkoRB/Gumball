@@ -209,11 +209,7 @@ namespace Gumball
             if (wheelMesh == null)
                 return;
 
-            //the tyre is always larger than the wheel, so get the tyre extents (accounting for transform scales)
-            Vector3 tyreSize = wheelMesh.transform.TransformPoint(wheelMesh.sharedMesh.bounds.extents) - wheelMesh.transform.position;
-            
-            //tyre is circular, so add the height and width and divide by 2. This is because we're working with world position and the tyre might be rotated in world space.
-            wheelCollider.radius = (Mathf.Abs(tyreSize.y) + Mathf.Abs(tyreSize.z)) / 2f;
+            wheelCollider.radius = wheelMesh.sharedMesh.bounds.extents.x * wheelMesh.transform.lossyScale.x;
             
             //set the force app distance relative to the wheel size
             const float additional = 0.01f;

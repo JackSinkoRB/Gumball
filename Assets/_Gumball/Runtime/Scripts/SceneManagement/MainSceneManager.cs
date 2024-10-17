@@ -64,6 +64,7 @@ namespace Gumball
             
             //ensure car is showing
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
+            WarehouseManager.Instance.CurrentCar.ResetState();
             
             //ensure avatars are showing
             AvatarManager.Instance.HideAvatars(false);
