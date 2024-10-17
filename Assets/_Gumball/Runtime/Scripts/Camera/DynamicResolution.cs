@@ -13,18 +13,18 @@ namespace Gumball
         private const float maxResolutionScale = 0.9f;
         private const float minResolutionScale = 0.5f;
 
-        private const float targetFPS = 30;
+        private const float targetFPS = 25;
         private const float timeBetweenChecks = 0.25f;
         private const int numberOfFramesToCollect = 10;
         private const int numberOfFrameTimingsToCollect = 1;
-        private const float scaleStep = 0.05f; //how much to decrease/increase the resolution each check - eg. 0.05 is 5% each check
+        private const float scaleStep = 0.025f; //how much to decrease/increase the resolution each check - eg. 0.05 is 5% each check
         
         public static float CurrentScale { get; private set; } = 1;
         public static float CurrentFPS { get; private set; }
         
         private static float[] frames = new float[numberOfFramesToCollect];
         private static readonly FrameTiming[] frameTimings = new FrameTiming[numberOfFrameTimingsToCollect];
-        private static int currentFrameIndex = 0;
+        private static int currentFrameIndex;
         private static float timeSinceLastCheck;
         private static bool filled;
         
