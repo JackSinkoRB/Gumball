@@ -24,6 +24,8 @@ namespace Gumball
         [SerializeField] private MultiImageButton undoButton;
         [SerializeField] private MultiImageButton redoButton;
         
+        private DecalColourSelectorPanel colourSelectorPanel => PanelManager.GetPanel<DecalColourSelectorPanel>();
+        
         public MultiImageButton TrashButton => trashButton;
         public MultiImageButton ColourButton => colourButton;
         public MultiImageButton SendForwardButton => sendForwardButton;
@@ -102,6 +104,9 @@ namespace Gumball
             
             trashButton.interactable = true;
             
+            if (liveDecal.TextureData.CanColour)
+                colourButton.interactable = true;
+
             liveDecal.onColorChanged += OnSelectedDecalColourChanged;
         }
 
@@ -114,7 +119,8 @@ namespace Gumball
             sendBackwardButton.interactable = false;
                     
             colourButton.interactable = false;
-                    
+            colourSelectorPanel.Hide();
+            
             liveDecal.onColorChanged -= OnSelectedDecalColourChanged;
         }
         
@@ -178,14 +184,13 @@ namespace Gumball
         
         public void OnClickColourButton()
         {
-            //TODO:
-            // if (colourPickerEnabled)
-            //     DisableColourPicker();
-            // else
-            // {
-            //     EnableColourPicker();
-            //     ColourSelectorPanel.Populate(DecalEditor.Instance.CurrentSelected);
-            // }
+            if (colourSelectorPanel.IsShowing)
+                DisableColourPicker();
+            else
+            {
+                EnableColourPicker();
+                colourSelectorPanel.Populate(DecalEditor.Instance.CurrentSelected);
+            }
         }
         
         public void OnClickUndoButton()
@@ -198,6 +203,16 @@ namespace Gumball
             DecalStateManager.RedoLatestUndo();
         }
         
+        private void EnableColourPicker()
+        {
+            colourSelectorPanel.Show();
+        }
+
+        private void DisableColourPicker()
+        {
+            colourSelectorPanel.Hide();
+        }
+        
         private void SendBackwardOrForward(bool isForward, LiveDecal liveDecal)
         {
             List<LiveDecal> overlappingDecals = liveDecal.GetOverlappingLiveDecals();
@@ -207,9 +222,6 @@ namespace Gumball
             UpdateSendForwardBackwardButtons(liveDecal, overlappingDecals);
 
             UpdateLayers();
-            
-            //TODO:
-            //layerSelector.SnapToLiveDecal(liveDecal);
         }
         
         private void UpdateSendForwardBackwardButtons(LiveDecal liveDecal, List<LiveDecal> overlappingDecals = null)
