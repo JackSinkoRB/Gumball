@@ -49,8 +49,6 @@ namespace Gumball
         [SerializeField] private float globalLightIntensity = 1;
         [Tooltip("This is environment reflections intensity multiplier value that is passed to the environment rendering settings.")]
         [Range(0, 1), SerializeField] private float reflectionIntensity = 1;
-        [Tooltip("Adjust material/shader property values when the game session is loaded.")]
-        [SerializeField] private GameSessionMaterialAdjustment[] materialAdjustments = Array.Empty<GameSessionMaterialAdjustment>();
 
         public bool IsNightTime => isNightTime;
 
@@ -503,11 +501,11 @@ namespace Gumball
             
             //set reflection intensity
             RenderSettings.reflectionIntensity = reflectionIntensity;
-
-            //shader adjustments
-            foreach (GameSessionMaterialAdjustment materialAdjustment in materialAdjustments)
-                materialAdjustment.UpdateMaterial();
-            
+            //
+            // //shader adjustments
+            // foreach (GameSessionMaterialAdjustment materialAdjustment in materialAdjustments)
+            //     materialAdjustment.UpdateMaterial();
+            //
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} lighting setup complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
         }

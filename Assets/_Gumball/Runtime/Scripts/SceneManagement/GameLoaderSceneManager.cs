@@ -156,7 +156,8 @@ namespace Gumball
                 new(ChallengeManager.LoadInstanceAsync()),
                 new(FuelManager.LoadInstanceAsync()),
                 new(GlobalColourPalette.LoadInstanceAsync()),
-                new(BlueprintManager.LoadInstanceAsync())
+                new(BlueprintManager.LoadInstanceAsync()),
+                new(NightTimeMaterialAdjustment.LoadInstanceAsync())
             };
             
             return trackedCoroutines;
