@@ -16,6 +16,17 @@ namespace Gumball
         
         [SerializeField, ReadOnly] private DecalOptionButton selectedOption;
 
+        protected override void OnShow()
+        {
+            base.OnShow();
+            
+            this.PerformAtEndOfFrame(() =>
+            {
+                headerFilter.Select(0);
+                SelectDecalButton(null);
+            });
+        }
+
         public void PopulateDecals()
         {
             foreach (Transform child in optionButtonHolder)
