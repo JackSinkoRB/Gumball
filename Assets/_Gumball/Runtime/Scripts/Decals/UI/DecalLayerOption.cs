@@ -12,7 +12,8 @@ namespace Gumball
 
         [SerializeField] private Image textureIcon;
         [SerializeField] private TextMeshProUGUI priorityLabel;
-
+        [SerializeField] private FrameUI frame;
+        
         private LiveDecal liveDecal;
         
         public Image TextureIcon => textureIcon;
@@ -24,11 +25,24 @@ namespace Gumball
             textureIcon.sprite = liveDecal.Sprite;
             textureIcon.color = liveDecal.Color;
             priorityLabel.text = liveDecal.Priority.ToString();
+            
+            frame.gameObject.SetActive(false);
         }
         
-        public void OnClickButton()
+        public void OnSelect()
         {
             DecalEditor.Instance.SelectLiveDecal(liveDecal);
+            
+            frame.gameObject.SetActive(true);
+
+            DecalEditor.onDeselectLiveDecal += OnDeselect;
+        }
+
+        private void OnDeselect(LiveDecal liveDecal)
+        {
+            DecalEditor.onDeselectLiveDecal -= OnDeselect;
+            
+            frame.gameObject.SetActive(false);
         }
         
     }

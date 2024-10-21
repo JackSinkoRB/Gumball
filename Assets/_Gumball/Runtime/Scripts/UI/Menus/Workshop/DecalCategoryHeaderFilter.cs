@@ -31,6 +31,12 @@ namespace Gumball
         public void Select(DecalUICategory category)
         {
             int categoryIndex = DecalManager.Instance.DecalUICategories.IndexOfItem(category);
+            Select(categoryIndex);
+        }
+
+        public void Select(int categoryIndex)
+        {
+            DecalUICategory category = DecalManager.Instance.DecalUICategories[categoryIndex];
             DecalCategoryFilterButton selectedOption = options[categoryIndex];
             RectTransform rectTransform = selectedOption.GetComponent<RectTransform>();
             selector.rectTransform.anchoredPosition = rectTransform.anchoredPosition;
@@ -67,7 +73,6 @@ namespace Gumball
                 
                 options.Add(instance);
             }
-            
         }
         
     }

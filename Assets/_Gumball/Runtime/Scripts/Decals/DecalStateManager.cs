@@ -180,6 +180,9 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod]
         private static void Initialise()
         {
+            onUndoStackChange = null;
+            onRedoStackChange = null;
+            
             undoStack.Clear();
             redoStack.Clear();
         }

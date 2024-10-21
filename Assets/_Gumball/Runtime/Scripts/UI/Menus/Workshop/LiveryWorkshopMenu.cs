@@ -34,6 +34,16 @@ namespace Gumball
             base.OnShow();
             
             DecalEditor.Instance.StartSession(WarehouseManager.Instance.CurrentCar);
+            
+            //nothing will be selected, so disable the buttons
+            trashButton.interactable = false;
+            sendForwardButton.interactable = false;
+            sendBackwardButton.interactable = false;
+            colourButton.interactable = false;
+            
+            //starting a new session, so the stacks will have changed
+            OnUndoStackChange();
+            OnRedoStackChange();
         }
         
         private void OnEnable()
@@ -44,11 +54,15 @@ namespace Gumball
             DecalEditor.onDeselectLiveDecal += OnDeselectLiveDecal;
             
             DecalEditor.onSessionStart += OnStartSession;
+            
+            DecalStateManager.onUndoStackChange += OnUndoStackChange;
+            DecalStateManager.onRedoStackChange += OnRedoStackChange;
         }
 
         private void OnDisable()
         {
-            CoroutineHelper.Instance.StartCoroutine(DecalEditor.Instance.EndSession());
+            if (DecalEditor.ExistsRuntime)
+                CoroutineHelper.Instance.StartCoroutine(DecalEditor.Instance.EndSession());
             
             DecalEditor.onCreateLiveDecal -= OnCreateLiveDecal;
             DecalEditor.onDestroyLiveDecal -= OnDestroyLiveDecal;
@@ -56,6 +70,9 @@ namespace Gumball
             DecalEditor.onDeselectLiveDecal -= OnDeselectLiveDecal;
                 
             DecalEditor.onSessionStart -= OnStartSession;
+            
+            DecalStateManager.onUndoStackChange -= OnUndoStackChange;
+            DecalStateManager.onRedoStackChange -= OnRedoStackChange;
         }
         
         private void OnStartSession()
@@ -66,6 +83,8 @@ namespace Gumball
         private void OnCreateLiveDecal(LiveDecal liveDecal)
         {
             UpdateLayers();
+            
+            UpdateSendForwardBackwardButtons(liveDecal);
         }
         
         private void OnDestroyLiveDecal(LiveDecal liveDecal)
@@ -75,21 +94,49 @@ namespace Gumball
         
         private void OnSelectLiveDecal(LiveDecal liveDecal)
         {
-            //TODO:
-            //SnapToLiveDecal(liveDecal);
+            liveDecal.onMoved += OnSelectedDecalMoved;
+            
+            UpdateSendForwardBackwardButtons(liveDecal);
+
+            layerOptionHolder.GetChild(DecalEditor.Instance.CurrentSelected.Priority - 1).GetComponent<DecalLayerOption>().OnSelect();
+            
+            trashButton.interactable = true;
             
             liveDecal.onColorChanged += OnSelectedDecalColourChanged;
         }
 
         private void OnDeselectLiveDecal(LiveDecal liveDecal)
         {
+            liveDecal.onMoved -= OnSelectedDecalMoved;
+            
+            trashButton.interactable = false;
+            sendForwardButton.interactable = false;
+            sendBackwardButton.interactable = false;
+                    
+            colourButton.interactable = false;
+                    
             liveDecal.onColorChanged -= OnSelectedDecalColourChanged;
+        }
+        
+        private void OnSelectedDecalMoved()
+        {
+            UpdateSendForwardBackwardButtons(DecalEditor.Instance.CurrentSelected);   
         }
 
         private void OnSelectedDecalColourChanged(Color oldColor, Color newColor)
         {
             //update the color of the layer option
             layerOptionHolder.GetChild(DecalEditor.Instance.CurrentSelected.Priority - 1).GetComponent<DecalLayerOption>().TextureIcon.color = newColor;
+        }
+        
+        private void OnUndoStackChange()
+        {
+            undoButton.interactable = DecalStateManager.CanUndo;
+        }
+        
+        private void OnRedoStackChange()
+        {
+            redoButton.interactable = DecalStateManager.CanRedo;
         }
         
         private void UpdateLayers()
@@ -104,6 +151,7 @@ namespace Gumball
             {
                 DecalLayerOption instance = layerOptionPrefab.gameObject.GetSpareOrCreate<DecalLayerOption>(layerOptionHolder);
                 instance.Initialise(liveDecal);
+                instance.transform.SetAsLastSibling();
             }
         }
         
@@ -158,8 +206,9 @@ namespace Gumball
    
             UpdateSendForwardBackwardButtons(liveDecal, overlappingDecals);
 
+            UpdateLayers();
+            
             //TODO:
-            //layerSelector.PopulateScroll(); //order has changed, so need to repopulate
             //layerSelector.SnapToLiveDecal(liveDecal);
         }
         
