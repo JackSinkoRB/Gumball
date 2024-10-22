@@ -43,6 +43,7 @@ namespace Gumball
 
         private static void OnDialogueComplete()
         {
+            currentData.OnComplete();
             currentData = null;
             
             PrimaryContactInput.onPress -= OnPrimaryContactPress;

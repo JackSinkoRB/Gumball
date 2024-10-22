@@ -411,7 +411,7 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
-            if (preSessionDialogue != null)
+            if (preSessionDialogue != null && !preSessionDialogue.HasBeenCompleted)
             {
                 preSessionDialogue.Play();
                 yield return new WaitUntil(() => !DialogueManager.IsPlaying);
