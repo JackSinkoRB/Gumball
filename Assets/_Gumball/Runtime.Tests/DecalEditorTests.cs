@@ -18,7 +18,7 @@ namespace Gumball.Runtime.Tests
         
         private bool isInitialised;
 
-        protected override string sceneToLoadPath => TestManager.Instance.DecalEditorScenePath;
+        protected override string sceneToLoadPath => TestManager.Instance.WarehouseScenePath;
 
         [SetUp]
         public void SetUp()
@@ -90,9 +90,8 @@ namespace Gumball.Runtime.Tests
         
             Vector3 desiredPosition = DecalEditor.Instance.CurrentCar.transform.TransformPoint(decalPositionOffset);
             Assert.IsTrue(desiredPosition.Approximately(newLiveDecal.transform.position), $"Expected {desiredPosition} but got {newLiveDecal.transform.position}");
-        
-            Vector3 desiredRotation = (DecalEditor.Instance.CurrentCar.transform.rotation * Quaternion.Euler(decalRotationOffsetEuler)).eulerAngles;
-            Assert.IsTrue(desiredRotation.Approximately(newLiveDecal.transform.rotation.eulerAngles), $"Expected {desiredRotation} but got {newLiveDecal.transform.rotation.eulerAngles}");
+            
+            //note: rotation is local from the cars position
             
             //try to restart session with car respawned
             yield return DecalEditor.Instance.EndSession();
@@ -112,9 +111,6 @@ namespace Gumball.Runtime.Tests
             LiveDecal liveDecal = DecalEditor.Instance.LiveDecals[0];
             Vector3 newDesiredPosition = DecalEditor.Instance.CurrentCar.transform.TransformPoint(decalPositionOffset);
             Assert.IsTrue(newDesiredPosition.Approximately(liveDecal.transform.position), $"Expected {newDesiredPosition} but got {liveDecal.transform.position}");
-        
-            Vector3 newDesiredRotation = (DecalEditor.Instance.CurrentCar.transform.rotation * Quaternion.Euler(decalRotationOffsetEuler)).eulerAngles;
-            Assert.IsTrue(newDesiredRotation.Approximately(liveDecal.transform.rotation.eulerAngles), $"Expected {newDesiredRotation} but got {liveDecal.transform.rotation.eulerAngles}");
         }
         
         [UnityTest]

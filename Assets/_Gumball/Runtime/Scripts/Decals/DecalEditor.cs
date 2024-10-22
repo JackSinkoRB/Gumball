@@ -73,29 +73,6 @@ namespace Gumball
             currentCar = null;
             liveDecals.Clear();
         }
-        
-        public static void LoadEditor()
-        {
-            CoroutineHelper.Instance.StartCoroutine(LoadEditorIE());
-        }
-        
-        private static IEnumerator LoadEditorIE()
-        {
-            PanelManager.GetPanel<LoadingPanel>().Show();
-
-            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(SceneManager.DecalEditorSceneAddress, LoadSceneMode.Single, true);
-            sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
-
-            AICar car = WarehouseManager.Instance.CurrentCar;
-
-            Instance.StartSession(car);
-            
-            AvatarManager.Instance.HideAvatars(true);
-
-            PanelManager.GetPanel<LoadingPanel>().Hide();
-        }
 
         private void Update()
         {
