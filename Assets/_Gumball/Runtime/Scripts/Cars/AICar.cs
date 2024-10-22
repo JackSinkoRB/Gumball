@@ -744,7 +744,7 @@ namespace Gumball
 
         private void CheckIfNoChunk()
         {
-            if (!GameSessionManager.Instance.CurrentSession.HasLoaded)
+            if (!GameSessionManager.ExistsRuntime || GameSessionManager.Instance.CurrentSession == null || !GameSessionManager.Instance.CurrentSession.HasLoaded)
                 return;
             
             if (CurrentChunk != null)
