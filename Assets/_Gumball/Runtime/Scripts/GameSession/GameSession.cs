@@ -80,7 +80,11 @@ namespace Gumball
 
         [Header("Challenges")]
         [SerializeField] private Challenge[] subObjectives;
-        
+
+        [Header("Dialogue")]
+        [SerializeField] private DialogueData preSessionDialogue;
+        [SerializeField] private DialogueData postSessionDialogue;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
         [SerializeField, ReadOnly] private GenericDictionary<AICar, RacerSessionData> currentRacers = new();
@@ -409,6 +413,12 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            if (preSessionDialogue != null)
+            {
+                preSessionDialogue.Play();
+                yield return new WaitUntil(() => !DialogueManager.IsPlaying);
+            }
+
             inProgress = false;
             
             PanelManager.GetPanel<LoadingPanel>().Show();
