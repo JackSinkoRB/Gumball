@@ -12,6 +12,8 @@ namespace Gumball
         [SerializeField] private AutosizeTextMeshPro levelNameLabel;
         [Space(5)]
         [SerializeField] private TextMeshProUGUI positionLabel;
+        [SerializeField] private GameObject positionLabelHolder;
+        [SerializeField] private bool showPositionOnFail;
         [Space(5)]
         [SerializeField] private AutosizeTextMeshPro victoryDefeatLabel;
         [SerializeField] private string victoryText = "Victory!";
@@ -51,6 +53,8 @@ namespace Gumball
             foreach (GlobalColourAssigner colourAssigner in colourAssignersVictoryDefeat)
                 colourAssigner.SetColour(isVictory ? victoryColourCode : defeatColourCode);
 
+            positionLabelHolder.SetActive(showPositionOnFail);
+            
             victoryDefeatLabel.text = isVictory ? victoryText : defeatText;
             victoryDefeatLabel.Resize();
         }
