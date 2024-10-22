@@ -711,6 +711,13 @@ namespace Gumball
         private void OnCompleteSessionForFirstTime()
         {
             Progress = ProgressStatus.COMPLETE;
+
+            if (!postSessionDialogue.HasBeenCompleted)
+            {
+                CoroutineHelper.PerformAfterTrue(
+                    () => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MapSceneName) && !PanelManager.GetPanel<LoadingPanel>().IsShowing,
+                    () => postSessionDialogue.Play());
+            }
         }
         
         private void OnFailMission()
