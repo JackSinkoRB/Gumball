@@ -329,11 +329,10 @@ namespace Gumball
             chunkDetector.gameObject.layer = (int) LayersAndTags.Layer.ChunkDetector;
             chunkDetector.transform.SetParent(transform);
             
-            chunkDetector.transform.position = terrainHighLOD.transform.position;
+            chunkDetector.transform.position = terrainLowLOD.transform.position;
 
             MeshCollider meshCollider = chunkDetector.AddComponent<MeshCollider>();
-            meshCollider.convex = true;
-            meshCollider.sharedMesh = terrainHighLOD.GetComponent<MeshFilter>().sharedMesh;
+            meshCollider.sharedMesh = terrainLowLOD.GetComponent<MeshFilter>().sharedMesh;
         }
         
         private void CacheChildMeshRenderers()
