@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: b20f7f1b3bb27ba4fa5cf22d7e5430a9
   lastKnownName: Level 4 - D Cong Hoa
+  displayName: D Cong Hoa
   description: Description of session
   scene:
     scene:
@@ -30,32 +31,764 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   vehicleStartingPosition: {x: 10, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
+  isNightTime: 0
   globalLightIntensity: 1
   reflectionIntensity: 1
-  fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 1600
   finishLineMarkers:
     checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
       type: 3}
-    distanceFromSpline: 5
+    distanceFromSpline: 20
   racerData: []
   racersStartingSpeed: 60
-  trafficIsProcedural: 1
-  trafficDensity: 100
-  trafficBikes: []
+  trafficIsProcedural: 0
+  trafficDensity: 8
+  trafficBikes:
+  - m_AssetGUID: ad5d6e674d828354bae351ed392af887
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 7571d49649fd70547992a89a6320bf27
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: de0e97f38965fcd40b5a95aec4cf99a4
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c261adf1023fc5140a97bba6895a6a32
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficCars:
   - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  - m_AssetGUID: 81825441c04ee5c468680e955e2bb0b3
+  - m_AssetGUID: 854009bd5128bca4eb9970aaaa55e47e
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  trafficTrucks: []
+  - m_AssetGUID: 583f4d2f825774941a7709d7a3188ab7
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: dc61ee74d9b3f304995a46cf982f41fb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 583f4d2f825774941a7709d7a3188ab7
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: dc61ee74d9b3f304995a46cf982f41fb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 583f4d2f825774941a7709d7a3188ab7
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  trafficTrucks:
+  - m_AssetGUID: 31f43c0006dc22c44bf7e659902a0be2
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 9df3aaea5c1ac4b4299ff7ed1c186d5f
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c6391c593f9e2b544a2852ddfdd327d9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficSpawnPositions:
-    Value: []
+    Value:
+    - distanceFromMapStart: 2.3854136
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 22.411049
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 71.44457
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 90.056465
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 79.422485
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 31.414503
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 21.522068
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 29.460186
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 13.814378
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 16.216898
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 63.824963
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 47.99903
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 122.73456
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 134.96649
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 186.5005
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 107.53852
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 154.86656
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 111.89259
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 184.01256
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 109.91498
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 178.41397
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 137.99895
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 163.05933
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 196.84866
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 247.22864
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 249.97064
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 299.43665
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 206.75967
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 252.74832
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 239.38239
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 220.53639
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 235.13104
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 289.13022
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 213.3241
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 244.63074
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 219.11823
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 343.21448
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 386.01703
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 366.75452
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 319.8651
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 362.85364
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 334.75214
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 316.5315
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 340.5598
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 347.17456
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 362.07712
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 343.8766
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 395.17078
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 410.2647
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 436.4357
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 480.0351
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 474.57507
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 498.4827
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 463.52853
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 465.5813
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 484.50214
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 440.54236
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 428.98788
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 404.968
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 478.49057
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 507.31708
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 515.4298
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 576.2395
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 501.49966
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 598.41473
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 536.05194
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 565.5942
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 558.97107
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 527.4458
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 551.0595
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 506.30154
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 510.45944
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 612.7954
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 694.8673
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 689.5846
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 663.0212
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 677.04333
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 679.7705
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 674.5149
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 697.723
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 664.8428
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 697.6332
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 657.7364
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 672.7155
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 710.1774
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 794.39526
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 736.473
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 785.4535
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 747.6141
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 794.2436
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 771.0431
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 790.14984
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 726.631
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 743.60144
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 729.0798
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 792.5589
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 842.6899
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 870.78094
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 805.613
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 885.749
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 887.63995
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 895.71716
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 852.92426
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 869.2614
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 889.5181
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 891.63837
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 847.84827
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 824.1206
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 963.9406
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 903.76483
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 924.76416
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 939.96924
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 924.9836
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 987.2426
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 917.6627
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 976.7205
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 985.9923
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 978.85535
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 929.2428
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 942.53577
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1094.0823
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1097.1516
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1001.9087
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1036.8215
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1068.0408
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1007.11743
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1062.9442
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1012.7736
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1058.5045
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1079.9995
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1040.7585
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1050.2592
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1173.071
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1193.7565
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1115.0662
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1132.6401
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1170.501
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1170.6616
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1154.7368
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1191.1189
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1159.419
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1108.4327
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1112.7358
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1111.4313
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1297.4865
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1232.592
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1279.0242
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1268.389
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1253.4678
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1253.0226
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1208.5663
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1244.8671
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1235.2144
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1287.8203
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1251.6816
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1222.4287
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1334.755
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1325.6261
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1301.0308
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1333.1315
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1370.0178
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1373.2512
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1309.427
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1386.2302
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1329.1655
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1364.0051
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1345.3057
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1317.5098
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1406.774
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1436.6025
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1489.4309
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1416.5769
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1405.4907
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1488.3818
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1485.1119
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1442.8956
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1426.8838
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1499.2742
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1439.644
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1443.8392
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1504.0084
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1569.1375
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1509.5895
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1547.8267
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1595.443
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1573.0225
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1532.0806
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1523.9192
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1525.8721
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1538.046
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1559
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1591.1389
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1679.2008
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1697.288
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1661.8909
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1682.6672
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1644.4521
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1692.0597
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1652.1935
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1653.4479
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1696.0996
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1636.8867
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1670.9119
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1671.4725
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1700.3505
+      laneDirection: 2
+      laneIndex: 0
+    - distanceFromMapStart: 1725.0537
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1727.7827
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1736.9875
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1715.4346
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1768.7949
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1740.0674
+      laneDirection: 1
+      laneIndex: 0
+    - distanceFromMapStart: 1707.3152
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1736.4305
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1744.4099
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1732.9438
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1712.4623
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1814.8083
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1849.5266
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1803.2849
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1874.8654
+      laneDirection: 2
+      laneIndex: 3
+    - distanceFromMapStart: 1830.5598
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1859.4243
+      laneDirection: 1
+      laneIndex: 1
+    - distanceFromMapStart: 1820.7944
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1810.9828
+      laneDirection: 2
+      laneIndex: 2
+    - distanceFromMapStart: 1809.507
+      laneDirection: 1
+      laneIndex: 3
+    - distanceFromMapStart: 1810.572
+      laneDirection: 1
+      laneIndex: 2
+    - distanceFromMapStart: 1826.1006
+      laneDirection: 2
+      laneIndex: 1
+    - distanceFromMapStart: 1898.281
+      laneDirection: 2
+      laneIndex: 1
   rewards:
     xp: 500
     standardCurrency: 1000
@@ -65,15 +798,55 @@ MonoBehaviour:
     subParts:
     - {fileID: 11400000, guid: 08b408e88df593142aff1a7267959869, type: 2}
     unlockables: []
-  mainChallengeDescription: This is the challenge description
+    blueprints: []
   subObjectives: []
-  inProgress: 0
+  inProgress: 1
   currentRacers:
-    list: []
+    list:
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: 
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 0, y: 0, z: 0}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 1
+        racingLineImprecisionMaxDistance: 3
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0
+          handling: 0
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 0
+          maxSpeedRating: 0
+          accelerationSpeedRating: 0
+          handlingRating: 0
+          nosRating: 0
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
     keyCollision: 0
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 08b408e88df593142aff1a7267959869, type: 2}
   timeAllowedSeconds: 60
-  timeRemainingSeconds: 0
-  timerHasStarted: 0
+  timeRemainingSeconds: 36.351475
+  timerHasStarted: 1

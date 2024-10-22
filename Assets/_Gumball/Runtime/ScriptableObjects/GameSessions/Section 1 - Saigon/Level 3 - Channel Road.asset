@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: 93ff92af2bb3d9a449cff4ea53e96d15
   lastKnownName: Level 3 - Channel Road
-  displayName: Level
+  displayName: Channel Run
   description: Race along Saigon's Channel
   scene:
     scene:
@@ -31,15 +31,15 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   vehicleStartingPosition: {x: 5, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
+  isNightTime: 0
   globalLightIntensity: 1
   reflectionIntensity: 1
-  fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 2100
   finishLineMarkers:
     checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
       type: 3}
-    distanceFromSpline: 5
+    distanceFromSpline: 12
   racerData:
   - carAssetReference:
       m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
@@ -68,12 +68,90 @@ MonoBehaviour:
     bodyPaintSwatch:
       color: {r: 1, g: 1, b: 1, a: 1}
       specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
       smoothness: 0.5
       clearCoat: 1
       clearCoatSmoothness: 1
     wheelPaintSwatch:
       color: {r: 1, g: 1, b: 1, a: 1}
       specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+  - carAssetReference:
+      m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
+    startingPosition:
+      position: {x: 15, y: 0.1, z: 140}
+      rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 5
+    performanceProfile:
+      maxSpeed: 0.121
+      acceleration: 0.047
+      handling: 0.057
+      nos: 0
+    currentPerformanceRating:
+      totalRating: 184
+      maxSpeedRating: 49
+      accelerationSpeedRating: 63
+      handlingRating: 41
+      nosRating: 31
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+  - carAssetReference:
+      m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
+    startingPosition:
+      position: {x: 5, y: 0.1, z: 170}
+      rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 5
+    performanceProfile:
+      maxSpeed: 0.121
+      acceleration: 0.047
+      handling: 0.057
+      nos: 0
+    currentPerformanceRating:
+      totalRating: 184
+      maxSpeedRating: 49
+      accelerationSpeedRating: 63
+      handlingRating: 41
+      nosRating: 31
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
       smoothness: 0.5
       clearCoat: 1
       clearCoatSmoothness: 1
@@ -170,8 +248,9 @@ MonoBehaviour:
     subParts:
     - {fileID: 11400000, guid: 7394944cb85a36c4d98509d1e594ab09, type: 2}
     unlockables: []
+    blueprints: []
   subObjectives: []
-  inProgress: 1
+  inProgress: 0
   currentRacers:
     list:
     - Key: {fileID: 0}
@@ -203,12 +282,14 @@ MonoBehaviour:
         bodyPaintSwatch:
           color: {r: 1, g: 1, b: 1, a: 1}
           specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
         wheelPaintSwatch:
           color: {r: 1, g: 1, b: 1, a: 1}
           specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
@@ -241,12 +322,94 @@ MonoBehaviour:
         bodyPaintSwatch:
           color: {r: 1, g: 1, b: 1, a: 1}
           specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
         wheelPaintSwatch:
           color: {r: 1, g: 1, b: 1, a: 1}
           specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 15, y: 0.1, z: 140}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 5
+        performanceProfile:
+          maxSpeed: 0.121
+          acceleration: 0.047
+          handling: 0.057
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 184
+          maxSpeedRating: 49
+          accelerationSpeedRating: 63
+          handlingRating: 41
+          nosRating: 31
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 5, y: 0.1, z: 170}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 5
+        performanceProfile:
+          maxSpeed: 0.121
+          acceleration: 0.047
+          handling: 0.057
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 184
+          maxSpeedRating: 49
+          accelerationSpeedRating: 63
+          handlingRating: 41
+          nosRating: 31
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
@@ -254,6 +417,11 @@ MonoBehaviour:
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 7394944cb85a36c4d98509d1e594ab09, type: 2}
+  timeAllowedSeconds: 60
+  timeRemainingSeconds: 8.151495
+  timerHasStarted: 1
   racersInPositionOrderCached:
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
