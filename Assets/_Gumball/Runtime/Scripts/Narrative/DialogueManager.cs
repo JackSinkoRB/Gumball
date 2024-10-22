@@ -23,7 +23,7 @@ namespace Gumball
         {
             if (data.Dialogue.Length == 0)
             {
-                Debug.LogError("Dialogue data doesn't contain any dialogue.");
+                Debug.LogWarning("Dialogue data doesn't contain any dialogue.");
                 return;
             }
             
