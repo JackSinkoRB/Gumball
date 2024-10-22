@@ -181,7 +181,7 @@ namespace Gumball
             return null;
         }
 
-        private bool TrySpawnCarInLane(TrafficLane lane, LaneDirection direction, SplineSample? splineSampleToSpawnAt = null)
+        private bool TrySpawnCarInLane(TrafficLane lane, LaneDirection direction, SplineSample? splineSampleToSpawnAt = null, AICar carPrefabVariant = null)
         {
             //get a random lane
             float additionalOffset = Random.Range(-maxRandomLaneOffset, maxRandomLaneOffset);
@@ -202,14 +202,21 @@ namespace Gumball
                 ? GetLanePosition(splineSampleToSpawnAt.Value, additionalOffset, direction)
                 : GetLanePosition(splineSampleToSpawnAt.Value, lane.DistanceFromCenter + additionalOffset, direction);
 
-            GameObject randomVariantPrefab = lane.GetVehicleToSpawn();
-            if (randomVariantPrefab == null)
-                return false;
+            GameObject carPrefabVariantObject = carPrefabVariant == null ? lane.GetVehicleToSpawn() : carPrefabVariant.gameObject;
 
-            AICar carToSpawn = randomVariantPrefab.GetComponent<AICar>();
-            if (!CanSpawnCarAtPosition(carToSpawn, lanePosition.Position, lanePosition.Rotation))
+            if (carPrefabVariantObject == null)
+            {
+                Debug.LogError($"Could not spawn car at {lanePosition.Position} because there is no available prefab variant.");
                 return false;
-            
+            }
+
+            AICar carToSpawn = carPrefabVariantObject.GetComponent<AICar>();
+            if (!CanSpawnCarAtPosition(carToSpawn, lanePosition.Position, lanePosition.Rotation))
+            {
+                GlobalLoggers.AICarLogger.Log($"Could not spawn traffic car at {lanePosition.Position} because there was no room.");
+                return false;
+            }
+
             //spawn an instance of the car and intialise
             AICar car = TrafficCarSpawner.Instance.SpawnCar(lanePosition.Position, lanePosition.Rotation, carToSpawn);
             
@@ -255,8 +262,7 @@ namespace Gumball
 
                 TrafficLane lane = lanes[finalLaneIndex];
 
-                if (!TrySpawnCarInLane(lane, spawnPosition.LaneDirection, chunk.GetClosestSampleOnSpline(spawnPosition.DistanceFromMapStart)))
-                    GlobalLoggers.AICarLogger.Log($"Could not spawn traffic car at index {index} because there was no room.");
+                TrySpawnCarInLane(lane, spawnPosition.LaneDirection, chunk.GetClosestSampleOnSpline(spawnPosition.DistanceFromMapStart), spawnPosition.CarPrefab);
             }
         }
 
