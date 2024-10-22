@@ -13,11 +13,9 @@ namespace Gumball
         public const string BootSceneAddress = "Scenes/Loading/" + BootSceneName + ".unity";
         public const string GameLoaderSceneAddress = "Scenes/Loading/GameLoaderScene.unity";
         public const string MainSceneAddress = "Scenes/MainScene.unity";
-        public const string DecalEditorSceneAddress = "Scenes/DecalEditor.unity";
         public const string AvatarEditorSceneAddress = "Scenes/AvatarEditor.unity";
         public const string MapSceneAddress = "Scenes/MapScene.unity";
         public const string WarehouseSceneAddress = "Scenes/Hanger.unity";
-        public const string WorkshopSceneAddress = "Scenes/Workshop.unity";
 
     }
 }
