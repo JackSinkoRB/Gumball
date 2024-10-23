@@ -20,11 +20,15 @@ namespace Gumball
         [SerializeField] private Transform levelHolder;
         [SerializeField] private CarLevelUI carLevelUI;
         [SerializeField] private CarBlueprintsUI blueprintUI;
+        [SerializeField] private Transform openBlueprints;
 
         [SerializeField] private PerformanceRatingSlider maxSpeedSlider;
         [SerializeField] private PerformanceRatingSlider accelerationSlider;
         [SerializeField] private PerformanceRatingSlider handlingSlider;
         [SerializeField] private PerformanceRatingSlider nosSlider;
+        
+        [SerializeField] private OpenBlueprintOption openBlueprintOptionPrefab;
+        [SerializeField] private Transform openBlueprintOptionHolder;
         
         [SerializeField, ReadOnly] private CarOptionUI selectedOption;
 
@@ -64,6 +68,8 @@ namespace Gumball
             carLevelUI.SetCarIndex(selectedOption.CarIndex);
             
             blueprintUI.SetCarIndex(selectedOption.CarIndex);
+
+            openBlueprints.gameObject.SetActive(!selectedOption.CarData.IsUnlocked);
             
             //check if enough blueprints
             if (!selectedOption.CarData.IsUnlocked)
@@ -71,6 +77,8 @@ namespace Gumball
                 int blueprints = BlueprintManager.Instance.GetBlueprints(selectedOption.CarIndex);
                 int requiredBlueprints = BlueprintManager.Instance.GetBlueprintsRequiredForLevel(selectedOption.CarData.StartingLevelIndex + 1);
                 purchaseButton.GetComponent<MultiImageButton>().interactable = blueprints > requiredBlueprints;
+                
+                PopulateOpenBlueprints();
             }
         }
 
@@ -128,6 +136,20 @@ namespace Gumball
                     materials[index] = blackUnlitMaterial;
                 meshRenderer.materials = materials;
             }
+        }
+
+        private void PopulateOpenBlueprints()
+        {
+            foreach (Transform child in openBlueprintOptionHolder)
+                child.gameObject.Pool();
+            
+            //TODO: get the sessions that give the CarIndex blueprint as a reward
+            // for ()
+            // {
+            //     OpenBlueprintOption instance = openBlueprintOptionPrefab.gameObject.GetSpareOrCreate<OpenBlueprintOption>(openBlueprintOptionHolder);
+            //     instance.transform.SetAsLastSibling();
+            //     instance.Initialise(slot);
+            // }
         }
 
     }
