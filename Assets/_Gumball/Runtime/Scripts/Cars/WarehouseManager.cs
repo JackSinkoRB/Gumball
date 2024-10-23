@@ -86,6 +86,16 @@ namespace Gumball
             onComplete?.Invoke();
         }
         
+        public void SwapCurrentCar(AICar car)
+        {
+            if (SavedCarIndex == car.CarIndex)
+                return; //already selected
+                
+            Destroy(CurrentCar.gameObject);
+            
+            SetCurrentCar(car);
+        }
+        
         public IEnumerator SpawnSavedCar(Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
         {
             yield return SpawnCar(SavedCarIndex, position, rotation, onComplete);
@@ -114,7 +124,7 @@ namespace Gumball
             car.gameObject.SetActive(true);
 
 #if ENABLE_LOGS
-            Debug.Log($"Vehicle loading for {CurrentCar.name} took {stopwatch.Elapsed.ToPrettyString(true)}");
+            Debug.Log($"Vehicle loading for {car.name} took {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
         }
 

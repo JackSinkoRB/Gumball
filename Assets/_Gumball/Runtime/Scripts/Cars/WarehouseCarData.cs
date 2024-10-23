@@ -51,6 +51,7 @@ namespace Gumball
         [SerializeField] private int startingLevelIndex = -1;
         [Tooltip("If enabled, the car will be unlocked at the start of the game (eg. a starting car).")]
         [SerializeField] private bool isUnlockedByDefault;
+        [SerializeField] private PurchaseData costToUnlock;
         [Tooltip("Copy the live decal data from a car to set it as the base livery here.")]
         [SerializeField] private LiveDecalData[] baseDecalData;
         [SerializeField, ReadOnly] private CachedData cachedData;
@@ -66,14 +67,15 @@ namespace Gumball
             }
         }
 
+        public PurchaseData CostToUnlock => costToUnlock;
         public AssetReferenceGameObject CarPrefabReference => carPrefabReference;
         public Sprite Icon => icon;
         public int StartingLevelIndex => startingLevelIndex;
-
+        
         public bool IsUnlocked
         {
             get => DataManager.Warehouse.Get($"CarIsUnlocked.{CarIndex}", isUnlockedByDefault);
-            set => DataManager.Settings.Set($"CarIsUnlocked.{CarIndex}", value);
+            set => DataManager.Warehouse.Set($"CarIsUnlocked.{CarIndex}", value);
         }
 
         public LiveDecalData[] BaseDecalData => baseDecalData;

@@ -13,7 +13,17 @@ namespace Gumball
         [SerializeField] private Material blackUnlitMaterial;
         [SerializeField] private TextMeshProUGUI makeLabel;
         [SerializeField] private TextMeshProUGUI modelLabel;
+        [SerializeField] private MultiImageButton selectButton;
+        [SerializeField] private StorePurchaseButton purchaseButton;
+        
+        [SerializeField] private AutosizeTextMeshPro ratingLabel;
+        [SerializeField] private Transform levelHolder;
 
+        [SerializeField] private PerformanceRatingSlider maxSpeedSlider;
+        [SerializeField] private PerformanceRatingSlider accelerationSlider;
+        [SerializeField] private PerformanceRatingSlider handlingSlider;
+        [SerializeField] private PerformanceRatingSlider nosSlider;
+        
         [SerializeField, ReadOnly] private CarOptionUI selectedOption;
 
         private AICar carInstance;
@@ -42,6 +52,13 @@ namespace Gumball
             modelLabel.text = selectedOption.CarData.DisplayName;
 
             //typeLabel.text = selectedOption.CarData.CarType.ToString();
+            
+            purchaseButton.gameObject.SetActive(!selectedOption.CarData.IsUnlocked);
+            selectButton.gameObject.SetActive(selectedOption.CarData.IsUnlocked);
+
+            purchaseButton.SetPurchaseData(selectedOption.CarData.CostToUnlock);
+
+            levelHolder.gameObject.SetActive(selectedOption.CarData.IsUnlocked);
         }
 
         public void OnClickBackButton()
@@ -57,7 +74,15 @@ namespace Gumball
             PanelManager.GetPanel<WarehousePanel>().Show();
             PanelManager.GetPanel<PlayerStatsPanel>().Show();
 
-            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SwapCurrentCar(selectedOption.CarIndex));
+            WarehouseManager.Instance.SwapCurrentCar(carInstance);
+        }
+
+        public void OnSuccessfulPurchase()
+        {
+            selectedOption.CarData.Unlock();
+
+            //refresh
+            Initialise(selectedOption);
         }
         
         private void OnCarSpawned(AICar instance)
@@ -68,6 +93,16 @@ namespace Gumball
                 SetCarBlack();
                 
             WarehouseSceneManager.Instance.LockedCarIcon.gameObject.SetActive(!selectedOption.CarData.IsUnlocked);
+            
+            //update rating label
+            ratingLabel.text = $"{carInstance.CurrentPerformanceRating.TotalRating}";
+            this.PerformAtEndOfFrame(ratingLabel.Resize);
+            
+            CarPerformanceProfile currentProfile = new CarPerformanceProfile(instance.CarIndex);
+            maxSpeedSlider.Initialise(selectedOption.CarData.PerformanceSettings, currentProfile);
+            accelerationSlider.Initialise(selectedOption.CarData.PerformanceSettings, currentProfile);
+            handlingSlider.Initialise(selectedOption.CarData.PerformanceSettings, currentProfile);
+            nosSlider.Initialise(selectedOption.CarData.PerformanceSettings, currentProfile);
         }
 
         private void SetCarBlack()
