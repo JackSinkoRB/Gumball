@@ -469,6 +469,11 @@ namespace Gumball
             //set the wheel mesh positions to match the colliders
             for (int wheelIndex = 0; wheelIndex < AllWheelColliders.Length; wheelIndex++)
                 AllWheelMeshes[wheelIndex].transform.position = AllWheelColliders[wheelIndex].transform.position;
+            
+            //start with lights disabled
+            brakelights.DisableInstantly();
+            foreach (Light headlight in headlights)
+                headlight.gameObject.SetActive(false);
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
@@ -54,6 +55,15 @@ namespace Gumball
                 nightlightL.transform.LookAt(nightlightL.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up); 
             if (nightlightR != null)
                 nightlightR.transform.LookAt(nightlightR.transform.position + Camera.main.transform.rotation * Vector3.forward, Camera.main.transform.rotation * Vector3.up);
+        }
+        
+        public void DisableInstantly()
+        {
+            showBrakes = false;
+            nightlightL.gameObject.SetActive(false);
+            nightlightR.gameObject.SetActive(false);
+            brakelightL.SetAlpha(0);
+            brakelightR.SetAlpha(0);
         }
         
         public void CheckToEnable(AICar car)

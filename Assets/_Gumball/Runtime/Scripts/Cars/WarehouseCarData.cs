@@ -55,17 +55,26 @@ namespace Gumball
         [SerializeField] private LiveDecalData[] baseDecalData;
         [SerializeField, ReadOnly] private CachedData cachedData;
 
+        private int carIndexCached = -1;
+        public int CarIndex
+        {
+            get
+            {
+                if (carIndexCached == -1)
+                    carIndexCached = WarehouseManager.Instance.AllCarData.IndexOf(this);
+                return carIndexCached;
+            }
+        }
+
         public AssetReferenceGameObject CarPrefabReference => carPrefabReference;
         public Sprite Icon => icon;
         public int StartingLevelIndex => startingLevelIndex;
-        public bool IsUnlockedByDefault => isUnlockedByDefault;
 
-        //TODO:
-        // public bool IsUnlocked
-        // {
-        //     get => DataManager.Warehouse.Get($"CarIsUnlocked.{}", 0);
-        //     set => DataManager.Settings.Set($"Camera.CurrentDrivingState", drivingStates.IndexOfItem(value));
-        // }
+        public bool IsUnlocked
+        {
+            get => DataManager.Warehouse.Get($"CarIsUnlocked.{CarIndex}", isUnlockedByDefault);
+            set => DataManager.Settings.Set($"CarIsUnlocked.{CarIndex}", value);
+        }
 
         public LiveDecalData[] BaseDecalData => baseDecalData;
         

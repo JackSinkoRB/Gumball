@@ -102,6 +102,8 @@ namespace Gumball
             AICar car = Instantiate(handle.Result, position, rotation).GetComponent<AICar>();
             car.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             
+            car.gameObject.SetActive(false); //disable until complete
+            
             car.InitialiseAsPlayer(index);
             car.SetGrounded();
             
@@ -109,6 +111,8 @@ namespace Gumball
             
             onComplete?.Invoke(car);
             
+            car.gameObject.SetActive(true);
+
 #if ENABLE_LOGS
             Debug.Log($"Vehicle loading for {CurrentCar.name} took {stopwatch.Elapsed.ToPrettyString(true)}");
 #endif
