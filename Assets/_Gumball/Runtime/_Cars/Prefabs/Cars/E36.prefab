@@ -313,7 +313,7 @@ PrefabInstance:
     - target: {fileID: 1184338390066223944, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: m_Radius
-      value: 0.33958802
+      value: 0.33958796
       objectReference: {fileID: 0}
     - target: {fileID: 1184338390066223944, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -323,7 +323,7 @@ PrefabInstance:
     - target: {fileID: 1184338390066223944, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: m_ForceAppPointDistance
-      value: 0.689176
+      value: 0.6891759
       objectReference: {fileID: 0}
     - target: {fileID: 1184338390066223944, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -533,7 +533,7 @@ PrefabInstance:
     - target: {fileID: 4553345485300180120, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: m_Radius
-      value: 0.33958796
+      value: 0.33958805
       objectReference: {fileID: 0}
     - target: {fileID: 4553345485300180120, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -543,7 +543,7 @@ PrefabInstance:
     - target: {fileID: 4553345485300180120, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: m_ForceAppPointDistance
-      value: 0.6891759
+      value: 0.6891761
       objectReference: {fileID: 0}
     - target: {fileID: 4553345485300180120, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -563,7 +563,7 @@ PrefabInstance:
     - target: {fileID: 4774586260213020911, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: m_Radius
-      value: 0.33958796
+      value: 0.33958805
       objectReference: {fileID: 0}
     - target: {fileID: 4774586260213020911, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -573,7 +573,7 @@ PrefabInstance:
     - target: {fileID: 4774586260213020911, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: m_ForceAppPointDistance
-      value: 0.6891759
+      value: 0.6891761
       objectReference: {fileID: 0}
     - target: {fileID: 4774586260213020911, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -583,7 +583,7 @@ PrefabInstance:
     - target: {fileID: 5004421595254217820, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: m_Radius
-      value: 0.33958802
+      value: 0.33958796
       objectReference: {fileID: 0}
     - target: {fileID: 5004421595254217820, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -593,7 +593,7 @@ PrefabInstance:
     - target: {fileID: 5004421595254217820, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: m_ForceAppPointDistance
-      value: 0.689176
+      value: 0.6891759
       objectReference: {fileID: 0}
     - target: {fileID: 5004421595254217820, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -607,8 +607,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
+      propertyPath: engineRpm
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
       propertyPath: isBraking
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -627,6 +632,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
+      propertyPath: dragAtMaxSpeed
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
       propertyPath: finalGearRatio
       value: 3.23
       objectReference: {fileID: 0}
@@ -634,6 +644,11 @@ PrefabInstance:
         type: 3}
       propertyPath: isAccelerating
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: speedToBrakeTo
+      value: Infinity
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -672,8 +687,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
+      propertyPath: speedForAccelerationDrag.Max
+      value: 750
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: speedForAccelerationDrag.Min
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
       propertyPath: idealRPMPercentForGearChanges.Min
-      value: 0.3
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -753,7 +778,7 @@ PrefabInstance:
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.engineRpmRangeMax.min
-      value: 7500
+      value: 6200
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -763,7 +788,7 @@ PrefabInstance:
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.engineRpmRangeMin.min
-      value: 600
+      value: 800
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -813,17 +838,17 @@ PrefabInstance:
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMaxProfile.totalRating
-      value: 419
+      value: 1389
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMinProfile.totalRating
-      value: 216
+      value: 218
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.additionalPeakTorque.max
-      value: 700
+      value: 10000
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -848,7 +873,7 @@ PrefabInstance:
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMinProfile.maxSpeedRating
-      value: 56
+      value: 49
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -923,17 +948,17 @@ PrefabInstance:
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.minTorquePercentToPeak.maxPercent
-      value: 0.14
+      value: 0.636
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMaxProfile.accelerationSpeedRating
-      value: 140
+      value: 1110
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMinProfile.accelerationSpeedRating
-      value: 62
+      value: 71
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -1008,17 +1033,17 @@ PrefabInstance:
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[1].value
-      value: 400
+      value: 480
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[2].value
-      value: 382
+      value: 462
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[0].inSlope
-      value: 955.1348
+      value: 590.8019
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -1048,7 +1073,7 @@ PrefabInstance:
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[0].outSlope
-      value: 955.1348
+      value: 590.8019
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -1088,7 +1113,7 @@ PrefabInstance:
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[0].outWeight
-      value: 0.1010101
+      value: 0.2020202
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}

@@ -224,7 +224,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3688091035945767069}
-  m_Mesh: {fileID: 8124389950916780923, guid: e69e5a833a82e45438ee3036ae1f3148, type: 3}
+  m_Mesh: {fileID: 0}
 --- !u!23 &3798978256240378383
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -751,6 +751,11 @@ PrefabInstance:
       propertyPath: currentRim
       value: 
       objectReference: {fileID: 6970490914246805946}
+    - target: {fileID: 652324860030219298, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 1105666816679582017, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: currentRim
@@ -760,6 +765,21 @@ PrefabInstance:
         type: 3}
       propertyPath: suspensionHeight.defaultValue
       value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 1433182339714683769, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1433182339714683769, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1433182339714683769, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.75
       objectReference: {fileID: 0}
     - target: {fileID: 2418639460179168940, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
@@ -776,11 +796,6 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2532674319522288979, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
-        type: 3}
-      propertyPath: offset.defaultValue
-      value: -0.67
-      objectReference: {fileID: 0}
     - target: {fileID: 3101842630956470692, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -789,7 +804,7 @@ PrefabInstance:
     - target: {fileID: 3101842630956470692, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 3101842630956470692, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
@@ -899,17 +914,17 @@ PrefabInstance:
     - target: {fileID: 4092913797718754227, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_Radius
-      value: 0.34679395
+      value: 0.34679404
       objectReference: {fileID: 0}
     - target: {fileID: 4092913797718754227, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_SuspensionDistance
       value: 0.05
       objectReference: {fileID: 0}
-    - target: {fileID: 5003783673566615929, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+    - target: {fileID: 4092913797718754227, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
-      propertyPath: offset.defaultValue
-      value: -0.67
+      propertyPath: m_ForceAppPointDistance
+      value: 0.70358807
       objectReference: {fileID: 0}
     - target: {fileID: 5003783673566615929, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
@@ -924,7 +939,7 @@ PrefabInstance:
     - target: {fileID: 5623625030429979820, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.75
       objectReference: {fileID: 0}
     - target: {fileID: 5623625030429979820, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
@@ -1079,12 +1094,17 @@ PrefabInstance:
     - target: {fileID: 7799509976271006927, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_Radius
-      value: 0.34679395
+      value: 0.34679404
       objectReference: {fileID: 0}
     - target: {fileID: 7799509976271006927, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_SuspensionDistance
       value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 7799509976271006927, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: m_ForceAppPointDistance
+      value: 0.70358807
       objectReference: {fileID: 0}
     - target: {fileID: 8001686030286725959, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
@@ -1134,12 +1154,22 @@ PrefabInstance:
     - target: {fileID: 8572414990509320796, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_Radius
-      value: 0.34679395
+      value: 0.34679404
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572414990509320796, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: m_ForceAppPointDistance
+      value: 0.70358807
       objectReference: {fileID: 0}
     - target: {fileID: 8740142090009083934, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
       propertyPath: m_Radius
-      value: 0.34679395
+      value: 0.34679404
+      objectReference: {fileID: 0}
+    - target: {fileID: 8740142090009083934, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
+        type: 3}
+      propertyPath: m_ForceAppPointDistance
+      value: 0.70358807
       objectReference: {fileID: 0}
     - target: {fileID: 9043339163879661521, guid: 4b3374a17dbc5b440ab459d25f69ea0c,
         type: 3}
