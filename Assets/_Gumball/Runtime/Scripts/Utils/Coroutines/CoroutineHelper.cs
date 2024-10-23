@@ -36,6 +36,27 @@ namespace Gumball
             return sceneCoroutineInstances[sceneName].StartCoroutine(routine);
         }
         
+        /// <summary>
+        /// Starts the coroutine on the current scene only. If the scene is unloaded, the coroutine will stop.
+        /// </summary>
+        public static void StopCoroutineOnCurrentScene(Coroutine coroutine)
+        {
+            if (coroutine == null)
+            {
+                Debug.LogError("Could not stop coroutine on current scene, because the coroutine is invalid.");
+                return;
+            }
+            
+            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (!sceneCoroutineInstances.ContainsKey(sceneName) || sceneCoroutineInstances[sceneName] == null)
+            {
+                Debug.LogError("Could not stop coroutine on current scene, because the scene coroutine instance doesn't exist.");
+                return;
+            }
+            
+            sceneCoroutineInstances[sceneName].StopCoroutine(coroutine);
+        }
+        
         private void Update()
         {
             onUnityUpdate?.Invoke();

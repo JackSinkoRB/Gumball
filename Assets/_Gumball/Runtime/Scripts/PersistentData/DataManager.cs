@@ -15,6 +15,7 @@ namespace Gumball
         public static JsonDataProvider GameSessions { get; private set; } = new("GameSessions");
         public static JsonDataProvider Warehouse { get; private set; } = new("Warehouse");
         public static JsonDataProvider Player { get; private set; } = new("Player");
+        public static JsonDataProvider Dialogue { get; private set; } = new("Dialogue");
 
 #if UNITY_EDITOR
         public static bool IsUsingTestProviders;
@@ -35,6 +36,7 @@ namespace Gumball
             GameSessions = new JsonDataProvider(enableTestProviders ? "GameSessions_Tests" : "GameSessions");
             Warehouse = new JsonDataProvider(enableTestProviders ? "Warehouse_Tests" : "Warehouse");
             Player = new JsonDataProvider(enableTestProviders ? "Player_Tests" : "Player");
+            Dialogue = new JsonDataProvider(enableTestProviders ? "Dialogue_Tests" : "Dialogue");
         }
         
         /// <summary>
@@ -51,12 +53,14 @@ namespace Gumball
             GameSessions.LoadFromSourceAsync();
             Warehouse.LoadFromSourceAsync();
             Player.LoadFromSourceAsync();
+            Dialogue.LoadFromSourceAsync();
             yield return new WaitUntil(() => Settings.IsLoaded
                                              && Cars.IsLoaded
                                              && Avatar.IsLoaded
                                              && GameSessions.IsLoaded
                                              && Warehouse.IsLoaded
-                                             && Player.IsLoaded);
+                                             && Player.IsLoaded
+                                             && Dialogue.IsLoaded);
             onComplete?.Invoke();
         }
 
@@ -72,6 +76,7 @@ namespace Gumball
             GameSessions.LoadFromSourceSync();
             Warehouse.LoadFromSourceSync();
             Player.LoadFromSourceSync();
+            Dialogue.LoadFromSourceSync();
         }
 
         public static void RemoveAllData()
@@ -82,6 +87,7 @@ namespace Gumball
             GameSessions.RemoveFromSource();
             Warehouse.RemoveFromSource();
             Player.RemoveFromSource();
+            Dialogue.RemoveFromSource();
         }
         
     }

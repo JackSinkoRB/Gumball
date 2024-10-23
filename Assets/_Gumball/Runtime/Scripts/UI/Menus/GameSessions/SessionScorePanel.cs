@@ -51,7 +51,7 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             GameSessionManager.Instance.CurrentSession.UnloadSession();
-            MainSceneManager.LoadMainScene();
+            MapSceneManager.LoadMapScene();
         }
 
         private void SetLevelName()

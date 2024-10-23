@@ -41,7 +41,7 @@ namespace Gumball
                 GameSessionManager.Instance.CurrentSession.UnloadSession();
             }
 
-            MainSceneManager.LoadMainScene();
+            MapSceneManager.LoadMapScene();
         }
 
         public override void OnAddToStack()
