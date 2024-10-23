@@ -59,6 +59,14 @@ namespace Gumball
             purchaseButton.SetPurchaseData(selectedOption.CarData.CostToUnlock);
 
             levelHolder.gameObject.SetActive(selectedOption.CarData.IsUnlocked);
+
+            //check if enough blueprints
+            if (!selectedOption.CarData.IsUnlocked)
+            {
+                int blueprints = BlueprintManager.Instance.GetBlueprints(selectedOption.CarIndex);
+                int requiredBlueprints = BlueprintManager.Instance.GetBlueprintsRequiredForLevel(selectedOption.CarData.StartingLevelIndex + 1);
+                purchaseButton.GetComponent<MultiImageButton>().interactable = blueprints > requiredBlueprints;
+            }
         }
 
         public void OnClickBackButton()

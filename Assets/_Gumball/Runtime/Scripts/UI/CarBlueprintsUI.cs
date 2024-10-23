@@ -55,7 +55,7 @@ namespace Gumball
             int nextLevelIndex = BlueprintManager.Instance.GetNextLevel(carIndexToUse);
             int blueprintsForNextLevel = BlueprintManager.Instance.GetBlueprintsRequiredForLevel(nextLevelIndex);
             
-            label.text = $"{currentBlueprints}/{blueprintsForNextLevel}";
+            label.text = $"<color=white>{currentBlueprints}/</color>{blueprintsForNextLevel}";
             this.PerformAtEndOfFrame(label.Resize);
         }
 
