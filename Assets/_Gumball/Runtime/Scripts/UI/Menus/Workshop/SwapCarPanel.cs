@@ -43,6 +43,7 @@ namespace Gumball
         {
             Hide();
             
+            PanelManager.GetPanel<CarStatsPanel>().Show();
             PanelManager.GetPanel<CarDetailsPanel>().Show();
             PanelManager.GetPanel<CarDetailsPanel>().Initialise(selectedOption);
         }

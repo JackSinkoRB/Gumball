@@ -44,7 +44,7 @@ namespace Gumball
                 defaultDrivetrain = car.GetDefaultPart(CorePart.PartType.DRIVETRAIN);
             }
         }
-            
+        
         [SerializeField] private AssetReferenceGameObject carPrefabReference;
         [SerializeField] private Sprite icon;
         [Tooltip("The index (starting at index 0) that the car needs to be unlocked. Setting to -1 means it will be unlocked by default.")]
@@ -59,6 +59,14 @@ namespace Gumball
         public Sprite Icon => icon;
         public int StartingLevelIndex => startingLevelIndex;
         public bool IsUnlockedByDefault => isUnlockedByDefault;
+
+        //TODO:
+        // public bool IsUnlocked
+        // {
+        //     get => DataManager.Warehouse.Get($"CarIsUnlocked.{}", 0);
+        //     set => DataManager.Settings.Set($"Camera.CurrentDrivingState", drivingStates.IndexOfItem(value));
+        // }
+
         public LiveDecalData[] BaseDecalData => baseDecalData;
         
         //cached data access:
@@ -76,6 +84,11 @@ namespace Gumball
                 CorePart.PartType.DRIVETRAIN => cachedData.DefaultDrivetrain,
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
             };
+        }
+
+        public void Unlock()
+        {
+            IsUnlocked = true;
         }
         
 #if UNITY_EDITOR
