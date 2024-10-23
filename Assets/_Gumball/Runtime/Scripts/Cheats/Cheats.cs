@@ -42,6 +42,14 @@ namespace Gumball
             foreach (SubPart subPart in SubPartManager.AllParts)
                 subPart.SetUnlocked(true);
         }
+
+        public void GiveAllBlueprints()
+        {
+            for (int carIndex = 0; carIndex < WarehouseManager.Instance.AllCarData.Count; carIndex++)
+            {
+                BlueprintManager.Instance.AddBlueprints(carIndex, BlueprintManager.Instance.BlueprintsRequiredForEachLevel[^1]);
+            }
+        }
         
         public void CompleteCurrentChallenges()
         {

@@ -21,6 +21,8 @@ namespace Gumball
         
         [SerializeField] private List<int> blueprintsRequiredForEachLevel = new();
 
+        public List<int> BlueprintsRequiredForEachLevel => blueprintsRequiredForEachLevel;
+
         public int GetBlueprints(int carIndex)
         {
             return DataManager.Cars.Get($"{GetSaveKey(carIndex)}.Amount", 0);

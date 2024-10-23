@@ -18,6 +18,7 @@ namespace Gumball
         
         [SerializeField] private AutosizeTextMeshPro ratingLabel;
         [SerializeField] private Transform levelHolder;
+        [SerializeField] private CarBlueprintsUI blueprintUI;
 
         [SerializeField] private PerformanceRatingSlider maxSpeedSlider;
         [SerializeField] private PerformanceRatingSlider accelerationSlider;
@@ -60,6 +61,8 @@ namespace Gumball
 
             levelHolder.gameObject.SetActive(selectedOption.CarData.IsUnlocked);
 
+            blueprintUI.SetCarIndex(selectedOption.CarIndex);
+            
             //check if enough blueprints
             if (!selectedOption.CarData.IsUnlocked)
             {
