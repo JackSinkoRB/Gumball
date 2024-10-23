@@ -188,8 +188,9 @@ Shader "RBG/Tree"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -535,10 +536,13 @@ Shader "RBG/Tree"
 				float4 tex2DNode1 = tex2D( _MainTex, uv_MainTex );
 				float4 temp_output_38_0 = ( _ColorTint * tex2DNode1 );
 				
+				float ase_lightIntensity = max( max( _MainLightColor.r, _MainLightColor.g ), _MainLightColor.b );
+				float4 ase_lightColor = float4( _MainLightColor.rgb / ase_lightIntensity, ase_lightIntensity );
+				
 
 				float3 BaseColor = temp_output_38_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = 0;
+				float3 Emission = ( temp_output_38_0 * ( 0.3 * ase_lightColor.a ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -793,8 +797,9 @@ Shader "RBG/Tree"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1107,8 +1112,9 @@ Shader "RBG/Tree"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1391,8 +1397,9 @@ Shader "RBG/Tree"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1646,9 +1653,12 @@ Shader "RBG/Tree"
 				float4 tex2DNode1 = tex2D( _MainTex, uv_MainTex );
 				float4 temp_output_38_0 = ( _ColorTint * tex2DNode1 );
 				
+				float ase_lightIntensity = max( max( _MainLightColor.r, _MainLightColor.g ), _MainLightColor.b );
+				float4 ase_lightColor = float4( _MainLightColor.rgb / ase_lightIntensity, ase_lightIntensity );
+				
 
 				float3 BaseColor = temp_output_38_0.rgb;
-				float3 Emission = 0;
+				float3 Emission = ( temp_output_38_0 * ( 0.3 * ase_lightColor.a ) ).rgb;
 				float Alpha = tex2DNode1.a;
 				float AlphaClipThreshold = _Clip;
 
@@ -1686,8 +1696,9 @@ Shader "RBG/Tree"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1950,8 +1961,9 @@ Shader "RBG/Tree"
 			#pragma multi_compile_instancing
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2288,8 +2300,9 @@ Shader "RBG/Tree"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -2625,10 +2638,13 @@ Shader "RBG/Tree"
 				float4 tex2DNode1 = tex2D( _MainTex, uv_MainTex );
 				float4 temp_output_38_0 = ( _ColorTint * tex2DNode1 );
 				
+				float ase_lightIntensity = max( max( _MainLightColor.r, _MainLightColor.g ), _MainLightColor.b );
+				float4 ase_lightColor = float4( _MainLightColor.rgb / ase_lightIntensity, ase_lightIntensity );
+				
 
 				float3 BaseColor = temp_output_38_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = 0;
+				float3 Emission = ( temp_output_38_0 * ( 0.3 * ase_lightColor.a ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -2750,8 +2766,9 @@ Shader "RBG/Tree"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2997,8 +3014,9 @@ Shader "RBG/Tree"
 
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
+			#define _EMISSION
 			#define _ALPHATEST_ON 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3257,10 +3275,11 @@ Node;AmplifyShaderEditor.LightColorNode;187;826.91,376.5799;Inherit;False;0;3;CO
 Node;AmplifyShaderEditor.RangedFloatNode;189;840.9844,205.5287;Inherit;False;Constant;_Float1;Float 1;3;0;Create;True;0;0;0;False;0;False;0.3;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;192;1059.326,315.731;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;191;1203.326,147.731;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.RangedFloatNode;185;1285.279,397.5935;Inherit;False;Constant;_Float0;Float 0;5;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;185;1460.279,272.5935;Inherit;False;Constant;_Float0;Float 0;5;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 WireConnection;38;0;37;0
 WireConnection;38;1;1;0
 WireConnection;169;0;38;0
+WireConnection;169;2;191;0
 WireConnection;169;3;185;0
 WireConnection;169;4;185;0
 WireConnection;169;5;185;0
@@ -3271,4 +3290,4 @@ WireConnection;192;1;187;2
 WireConnection;191;0;38;0
 WireConnection;191;1;192;0
 ASEEND*/
-//CHKSM=F3D0404E770E1BE6D355E9EC6743DCDFAA0D3E96
+//CHKSM=A86A4BFF0BB9C468DB5F052287D823AFF9B4E2ED
