@@ -12,12 +12,6 @@ namespace Gumball
         {
             PanelManager.GetPanel<ChallengesPanel>().Show();
         }
-        
-        [Obsolete("move to garage")]
-        public void LoadDecalEditor()
-        {
-            DecalEditor.LoadEditor();
-        }
 
         public void OnClickWardrobeButton()
         {

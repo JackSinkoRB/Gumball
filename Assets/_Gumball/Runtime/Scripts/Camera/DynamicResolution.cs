@@ -90,12 +90,8 @@ namespace Gumball
             
             CurrentScale = CurrentFPS < targetFPS ? Mathf.Max(minResolutionScale, CurrentScale - scaleStep) : Mathf.Min(maxResolutionScale, CurrentScale + scaleStep);
 
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
             UniversalRenderPipelineAsset urp = (UniversalRenderPipelineAsset)GraphicsSettings.currentRenderPipeline;
             urp.renderScale = CurrentScale;
-#else
-            ScalableBufferManager.ResizeBuffers(CurrentScale, CurrentScale);
-#endif
         }
         
     }
