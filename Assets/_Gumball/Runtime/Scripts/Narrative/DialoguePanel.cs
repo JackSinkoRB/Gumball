@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
@@ -10,7 +11,8 @@ namespace Gumball
     public class DialoguePanel : AnimatedPanel
     {
 
-        [SerializeField] private Image characterIconImage;
+        [SerializeField] private Image characterIconImageLeft;
+        [SerializeField] private Image characterIconImageRight;
         [SerializeField] private TextMeshProUGUI characterNameLabel;
         [SerializeField] private TextMeshProUGUI dialogueLabel;
 
@@ -23,7 +25,11 @@ namespace Gumball
             
             dialogueLabel.text = dialogue.Message;
             characterNameLabel.text = dialogue.Character.DisplayName;
-            characterIconImage.sprite = dialogue.Character.Icon;
+
+            characterIconImageLeft.sprite = dialogue.Character.Icon;
+            characterIconImageRight.sprite = dialogue.Character.Icon;
+            characterIconImageLeft.gameObject.SetActive(dialogue.CharacterPosition == Dialogue.ScreenPosition.LEFT);
+            characterIconImageRight.gameObject.SetActive(dialogue.CharacterPosition == Dialogue.ScreenPosition.RIGHT);
         }
 
     }
