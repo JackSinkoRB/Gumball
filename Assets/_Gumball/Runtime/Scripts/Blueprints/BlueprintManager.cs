@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Build.Reporting;
 #if UNITY_EDITOR
+using UnityEditor.Build.Reporting;
 using UnityEditor;
 using UnityEditor.Build;
 #endif
@@ -12,13 +12,16 @@ using UnityEngine.AddressableAssets;
 namespace Gumball
 {
     [CreateAssetMenu(menuName = "Gumball/Singletons/Blueprint Manager")]
-    public class BlueprintManager : SingletonScriptable<BlueprintManager>, IPreprocessBuildWithReport
+    public class BlueprintManager : SingletonScriptable<BlueprintManager>
+#if UNITY_EDITOR
+        , IPreprocessBuildWithReport
+#endif
     {
 
         public delegate void OnValueChangeDelegate(int carIndex, int previousAmount, int newAmount);
         public static event OnValueChangeDelegate onBlueprintsChange;
         public static event OnValueChangeDelegate onLevelChange;
-
+        
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
         {
@@ -27,6 +30,8 @@ namespace Gumball
         
         [SerializeField] private List<int> blueprintsRequiredForEachLevel = new();
 
+        private readonly GenericDictionary<int, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car index, collection of sessions
+        
         public List<int> BlueprintsRequiredForEachLevel => blueprintsRequiredForEachLevel;
 
         protected override void OnInstanceLoaded()
@@ -115,8 +120,6 @@ namespace Gumball
         }
         
 #if UNITY_EDITOR
-        private readonly GenericDictionary<int, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car index, collection of sessions
-
         public int callbackOrder => 0;
 
         public void OnPreprocessBuild(BuildReport report)
