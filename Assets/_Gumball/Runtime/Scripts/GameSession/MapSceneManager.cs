@@ -39,8 +39,6 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
         #endregion
-
-        [SerializeField, DisplayInspector] private GumballEvent currentEvent;
         
         [Header("Nodes")]
         [SerializeField] private float nodeFadeAmountWhenNotFocused = 0.2f;
@@ -75,13 +73,13 @@ namespace Gumball
 
         private IEnumerator LoadMaps()
         {
-            mapInstances = new GameSessionMap[currentEvent.Maps.Length];
-            AsyncOperationHandle<GameObject>[] handles = new AsyncOperationHandle<GameObject>[currentEvent.Maps.Length];
+            mapInstances = new GameSessionMap[GumballEventManager.Instance.CurrentEvent.Maps.Length];
+            AsyncOperationHandle<GameObject>[] handles = new AsyncOperationHandle<GameObject>[GumballEventManager.Instance.CurrentEvent.Maps.Length];
             
             Stopwatch stopwatch = Stopwatch.StartNew();
-            for (int index = 0; index < currentEvent.Maps.Length; index++)
+            for (int index = 0; index < GumballEventManager.Instance.CurrentEvent.Maps.Length; index++)
             {
-                AssetReferenceGameObject mapReference = currentEvent.Maps[index];
+                AssetReferenceGameObject mapReference = GumballEventManager.Instance.CurrentEvent.Maps[index];
                 handles[index] = Addressables.LoadAssetAsync<GameObject>(mapReference);
             }
 
@@ -89,7 +87,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Took {stopwatch.Elapsed.ToPrettyString(true)} to load all maps.");
 
             stopwatch.Restart();
-            for (int index = 0; index < currentEvent.Maps.Length; index++)
+            for (int index = 0; index < GumballEventManager.Instance.CurrentEvent.Maps.Length; index++)
             {
                 GameSessionMap map = Instantiate(handles[index].Result).GetComponent<GameSessionMap>();
                 map.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[index]);

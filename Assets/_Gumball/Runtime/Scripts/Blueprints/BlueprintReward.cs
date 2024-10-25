@@ -12,6 +12,9 @@ namespace Gumball
         [SerializeField] private int carIndex;
         [SerializeField] private int blueprints;
 
+        public int CarIndex => carIndex;
+        public int Blueprints => blueprints;
+        
         public void GiveReward()
         {
             BlueprintManager.Instance.AddBlueprints(carIndex, blueprints);

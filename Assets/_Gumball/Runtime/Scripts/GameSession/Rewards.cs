@@ -26,6 +26,7 @@ namespace Gumball
         public bool FuelRefill => fuelRefill;
         public int PremiumCurrency => premiumCurrency;
         public Unlockable[] Unlockables => unlockables;
+        public BlueprintReward[] Blueprints => blueprints;
         
 #if UNITY_EDITOR
         public void SetPremiumCurrencyReward(int amount)

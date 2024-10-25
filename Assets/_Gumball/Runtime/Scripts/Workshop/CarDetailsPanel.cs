@@ -143,13 +143,13 @@ namespace Gumball
             foreach (Transform child in openBlueprintOptionHolder)
                 child.gameObject.Pool();
             
-            //TODO: get the sessions that give the CarIndex blueprint as a reward
-            // for ()
-            // {
-            //     OpenBlueprintOption instance = openBlueprintOptionPrefab.gameObject.GetSpareOrCreate<OpenBlueprintOption>(openBlueprintOptionHolder);
-            //     instance.transform.SetAsLastSibling();
-            //     instance.Initialise(slot);
-            // }
+            //get the sessions that give the CarIndex blueprint as a reward
+            foreach (GameSession session in BlueprintManager.Instance.GetSessionsThatGiveBlueprint(selectedOption.CarIndex))
+            {
+                OpenBlueprintOption instance = openBlueprintOptionPrefab.gameObject.GetSpareOrCreate<OpenBlueprintOption>(openBlueprintOptionHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(session.GetModeIcon(), session.DisplayName);
+            }
         }
 
     }
