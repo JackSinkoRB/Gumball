@@ -32,10 +32,6 @@ namespace Gumball
         }
         #endregion
 
-#if UNITY_EDITOR
-        private int trafficCarID; //a unique identifier for debugging
-#endif
-        
         private const float timeBetweenSpawnChecks = 1;
 
         private float lastSpawnCheckTime;
@@ -50,11 +46,6 @@ namespace Gumball
             TrackCar(randomCarVariant);
             randomCarVariant.onDisable += () => UntrackCar(randomCarVariant);
 
-#if UNITY_EDITOR
-            randomCarVariant.name = $"TrafficCar-{randomCarVariant.gameObject.name}-{trafficCarID}";
-            trafficCarID++;
-#endif
-            
             return randomCarVariant;
         }
 
