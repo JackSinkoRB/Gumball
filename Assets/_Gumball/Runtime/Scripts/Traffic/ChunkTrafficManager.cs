@@ -23,12 +23,16 @@ namespace Gumball
             FORWARD,
             BACKWARD
         }
-        
+
         /// <summary>
         /// The minimum distance around a position required to not have an obstacle in order to spawn a car.
         /// </summary>
         private const float minDistanceRequiredToSpawn = 10f;
         private const float maxRandomLaneOffset = 1.7f;
+        
+        #if UNITY_EDITOR
+        private int proceduralSpawnCount;        
+        #endif
         
         [Tooltip("If true, the cars will drive on the left hand side (like Australia). If false, they will drive on the right hand side (like the US).")]
         [SerializeField] private bool driveOnLeft = true;
@@ -125,9 +129,16 @@ namespace Gumball
                 }
                 
                 TrafficLane randomLane = direction == LaneDirection.FORWARD ? lanesForward.GetRandom() : lanesBackward.GetRandom();
-                if (TrySpawnCarInLane(randomLane, direction))
+                AICar car = TrySpawnCarInLane(randomLane, direction);
+                if (car != null)
+                {
+#if UNITY_EDITOR
+                    car.name = $"TrafficCar-{car.name} (procedural {proceduralSpawnCount})";
+                    proceduralSpawnCount++;
+#endif
                     return;
-                
+                }
+
 #if UNITY_EDITOR
                 bool isLastAttempt = attempt == maxAttempts - 1;
                 if (isLastAttempt)
@@ -181,7 +192,7 @@ namespace Gumball
             return null;
         }
 
-        private bool TrySpawnCarInLane(TrafficLane lane, LaneDirection direction, SplineSample? splineSampleToSpawnAt = null)
+        private AICar TrySpawnCarInLane(TrafficLane lane, LaneDirection direction, SplineSample? splineSampleToSpawnAt = null, AICar carPrefabVariant = null)
         {
             //get a random lane
             float additionalOffset = Random.Range(-maxRandomLaneOffset, maxRandomLaneOffset);
@@ -189,7 +200,7 @@ namespace Gumball
             if (lane.Type == TrafficLane.LaneType.CUSTOM_SPLINE && lane.Path == null)
             {
                 Debug.LogError($"Could not spawn car in a custom path lane in {chunk.name.Replace("(Clone)", "")} because there is no path assigned.");
-                return false;
+                return null;
             }
 
             if (splineSampleToSpawnAt == null)
@@ -202,20 +213,27 @@ namespace Gumball
                 ? GetLanePosition(splineSampleToSpawnAt.Value, additionalOffset, direction)
                 : GetLanePosition(splineSampleToSpawnAt.Value, lane.DistanceFromCenter + additionalOffset, direction);
 
-            GameObject randomVariantPrefab = lane.GetVehicleToSpawn();
-            if (randomVariantPrefab == null)
-                return false;
+            GameObject carPrefabVariantObject = carPrefabVariant == null ? lane.GetVehicleToSpawn() : carPrefabVariant.gameObject;
 
-            AICar carToSpawn = randomVariantPrefab.GetComponent<AICar>();
+            if (carPrefabVariantObject == null)
+            {
+                Debug.LogError($"Could not spawn car at {lanePosition.Position} because there is no car prefab assigned and the game session has no cars of the specified types in the chunk lane (types = {string.Join(", ", lane.SelectedVehicleTypes)}).");
+                return null;
+            }
+
+            AICar carToSpawn = carPrefabVariantObject.GetComponent<AICar>();
             if (!CanSpawnCarAtPosition(carToSpawn, lanePosition.Position, lanePosition.Rotation))
-                return false;
-            
+            {
+                GlobalLoggers.AICarLogger.Log($"Could not spawn traffic car at {lanePosition.Position} because there was no room.");
+                return null;
+            }
+
             //spawn an instance of the car and intialise
             AICar car = TrafficCarSpawner.Instance.SpawnCar(lanePosition.Position, lanePosition.Rotation, carToSpawn);
             
             car.SetCurrentLane(lane, direction, additionalOffset);
             car.SetSpeed(car.DesiredSpeed);
-            return true;
+            return car;
         }
         
         private void SpawnNonProceduralCars()
@@ -255,8 +273,11 @@ namespace Gumball
 
                 TrafficLane lane = lanes[finalLaneIndex];
 
-                if (!TrySpawnCarInLane(lane, spawnPosition.LaneDirection, chunk.GetClosestSampleOnSpline(spawnPosition.DistanceFromMapStart)))
-                    GlobalLoggers.AICarLogger.Log($"Could not spawn traffic car at index {index} because there was no room.");
+                AICar car = TrySpawnCarInLane(lane, spawnPosition.LaneDirection, chunk.GetClosestSampleOnSpline(spawnPosition.DistanceFromMapStart), spawnPosition.CarPrefab);
+#if UNITY_EDITOR
+                if (car != null)
+                    car.name = $"TrafficCar-{car.name} (spawn position {GameSessionManager.Instance.CurrentSession.TrafficSpawnPositions.IndexOfItem(spawnPosition)})";
+#endif
             }
         }
 

@@ -49,8 +49,6 @@ namespace Gumball
         [SerializeField] private float globalLightIntensity = 1;
         [Tooltip("This is environment reflections intensity multiplier value that is passed to the environment rendering settings.")]
         [Range(0, 1), SerializeField] private float reflectionIntensity = 1;
-        [Tooltip("Adjust material/shader property values when the game session is loaded.")]
-        [SerializeField] private GameSessionMaterialAdjustment[] materialAdjustments = Array.Empty<GameSessionMaterialAdjustment>();
 
         public bool IsNightTime => isNightTime;
 
@@ -65,7 +63,7 @@ namespace Gumball
         [SerializeField] private float racersStartingSpeed = 70;
 
         [Header("Traffic")]
-        [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the list below.", MessageType.Info, onlyShowWhenDefaultValue: true)]
+        [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the 'Traffic Spawn Positions' collection below.", MessageType.Info, onlyShowWhenDefaultValue: true)]
         [Tooltip("If enabled, each frame it will check to spawn traffic to keep the desired traffic density designated in the chunks.")]
         [SerializeField] private bool trafficIsProcedural = true;
         [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
@@ -80,7 +78,11 @@ namespace Gumball
 
         [Header("Challenges")]
         [SerializeField] private Challenge[] subObjectives;
-        
+
+        [Header("Dialogue")]
+        [SerializeField] private DialogueData preSessionDialogue;
+        [SerializeField] private DialogueData postSessionDialogue;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
         [SerializeField, ReadOnly] private GenericDictionary<AICar, RacerSessionData> currentRacers = new();
@@ -96,7 +98,7 @@ namespace Gumball
         public ProgressStatus Progress
         {
             get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
-            private set => DataManager.Player.Set($"SessionStatus.{ID}", value);
+            private set => DataManager.GameSessions.Set($"SessionStatus.{ID}", value);
         }
 
         public Challenge[] SubObjectives => subObjectives;
@@ -307,6 +309,8 @@ namespace Gumball
             
             OnSessionEnd();
             
+            GlobalLoggers.GameSessionLogger.Log($"Ended {name} ({displayName}).");
+
             if (Progress != ProgressStatus.COMPLETE && progress == ProgressStatus.COMPLETE)
             {
                 OnCompleteSessionForFirstTime();
@@ -409,6 +413,12 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            if (preSessionDialogue != null && !preSessionDialogue.HasBeenCompleted)
+            {
+                preSessionDialogue.Play();
+                yield return new WaitUntil(() => !DialogueManager.IsPlaying);
+            }
+
             inProgress = false;
             
             PanelManager.GetPanel<LoadingPanel>().Show();
@@ -503,11 +513,11 @@ namespace Gumball
             
             //set reflection intensity
             RenderSettings.reflectionIntensity = reflectionIntensity;
-
-            //shader adjustments
-            foreach (GameSessionMaterialAdjustment materialAdjustment in materialAdjustments)
-                materialAdjustment.UpdateMaterial();
-            
+            //
+            // //shader adjustments
+            // foreach (GameSessionMaterialAdjustment materialAdjustment in materialAdjustments)
+            //     materialAdjustment.UpdateMaterial();
+            //
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} lighting setup complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
         }
@@ -702,7 +712,15 @@ namespace Gumball
 
         private void OnCompleteSessionForFirstTime()
         {
+            GlobalLoggers.GameSessionLogger.Log($"Completed {name} ({displayName}) for the first time.");
             Progress = ProgressStatus.COMPLETE;
+
+            if (!postSessionDialogue.HasBeenCompleted)
+            {
+                CoroutineHelper.PerformAfterTrue(
+                    () => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MapSceneName) && !PanelManager.GetPanel<LoadingPanel>().IsShowing,
+                    () => postSessionDialogue.Play());
+            }
         }
         
         private void OnFailMission()

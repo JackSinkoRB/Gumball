@@ -527,6 +527,9 @@ namespace PaintIn3D
 
 		public static void Draw(Material material, int pass, Mesh mesh, Matrix4x4 matrix, int subMesh, P3dCoord coord)
 		{
+			if (material == null || mesh == null)
+				return;
+			
 			material.SetVector(_Coord, IndexToVector((int)coord));
 
 			if (material.SetPass(pass) == true)

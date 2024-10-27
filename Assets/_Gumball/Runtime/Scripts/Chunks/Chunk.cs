@@ -332,7 +332,6 @@ namespace Gumball
             chunkDetector.transform.position = terrainLowLOD.transform.position;
 
             MeshCollider meshCollider = chunkDetector.AddComponent<MeshCollider>();
-            meshCollider.convex = true;
             meshCollider.sharedMesh = terrainLowLOD.GetComponent<MeshFilter>().sharedMesh;
         }
         

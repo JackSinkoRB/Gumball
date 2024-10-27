@@ -204,6 +204,9 @@ namespace Gumball
         
         private void OnClickNode(GameSessionNode clickedNode)
         {
+            if (!clickedNode.IsUnlocked)
+                return;
+            
             clickedNode.OnClicked();
 
             currentNodesTween?.Kill();
