@@ -20,6 +20,11 @@ namespace Gumball
         {
             BlueprintManager.Instance.AddBlueprints(carIndex, blueprints);
         }
+        
+        public override string ToString()
+        {
+            return $"{carIndex}-{blueprints}";
+        }
             
     }
 }

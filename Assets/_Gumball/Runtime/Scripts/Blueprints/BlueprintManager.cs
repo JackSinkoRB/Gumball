@@ -1,10 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 #if UNITY_EDITOR
-using UnityEditor.Build.Reporting;
 using UnityEditor;
-using UnityEditor.Build;
 #endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -13,9 +12,6 @@ namespace Gumball
 {
     [CreateAssetMenu(menuName = "Gumball/Singletons/Blueprint Manager")]
     public class BlueprintManager : SingletonScriptable<BlueprintManager>
-#if UNITY_EDITOR
-        , IPreprocessBuildWithReport
-#endif
     {
 
         public delegate void OnValueChangeDelegate(int carIndex, int previousAmount, int newAmount);
@@ -30,7 +26,7 @@ namespace Gumball
         
         [SerializeField] private List<int> blueprintsRequiredForEachLevel = new();
 
-        private readonly GenericDictionary<int, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car index, collection of sessions
+        [SerializeField] private GenericDictionary<int, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car index, collection of sessions
         
         public List<int> BlueprintsRequiredForEachLevel => blueprintsRequiredForEachLevel;
 
@@ -120,13 +116,6 @@ namespace Gumball
         }
         
 #if UNITY_EDITOR
-        public int callbackOrder => 0;
-
-        public void OnPreprocessBuild(BuildReport report)
-        {
-            CacheSessionsThatGiveBlueprints();
-        }
-        
         public void CacheSessionsThatGiveBlueprints()
         {
             int sessionsFoundWithBlueprints = 0;
@@ -156,11 +145,10 @@ namespace Gumball
                 }
             }
             
-            Debug.Log($"Found {sessionsFoundWithBlueprints} sessions with blueprints.");
+            Debug.Log($"Caching sessions with blueprints: found {sessionsFoundWithBlueprints} sessions");
             
             //ensure values are saved
             EditorUtility.SetDirty(this);
-            AssetDatabase.SaveAssets();
         }
 #endif
         
