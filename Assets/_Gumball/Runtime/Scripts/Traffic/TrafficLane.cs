@@ -51,6 +51,7 @@ namespace Gumball
             }
         }
 
+        public List<VehicleType> SelectedVehicleTypes => selectedVehicleTypes;
         public LaneType Type => type;
         public float DistanceFromCenter => distanceFromCenter;
         public CustomDrivingPath Path => path;

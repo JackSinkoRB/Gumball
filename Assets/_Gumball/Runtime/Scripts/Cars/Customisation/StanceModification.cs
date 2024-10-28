@@ -212,7 +212,13 @@ namespace Gumball
             if (wheelMesh == null)
                 return;
 
-            wheelCollider.radius = wheelMesh.sharedMesh.bounds.extents.x * wheelMesh.transform.lossyScale.x;
+            float biggestExtent = wheelMesh.sharedMesh.bounds.extents.x * wheelMesh.transform.lossyScale.x;
+            if (wheelMesh.sharedMesh.bounds.extents.y * wheelMesh.transform.lossyScale.y > biggestExtent)
+                biggestExtent = wheelMesh.sharedMesh.bounds.extents.y;
+            if (wheelMesh.sharedMesh.bounds.extents.z * wheelMesh.transform.lossyScale.z > biggestExtent)
+                biggestExtent = wheelMesh.sharedMesh.bounds.extents.z * wheelMesh.transform.lossyScale.z;
+            
+            wheelCollider.radius = biggestExtent;
             
             //set the force app distance relative to the wheel size
             const float additional = 0.01f;

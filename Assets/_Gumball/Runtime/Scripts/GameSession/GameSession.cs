@@ -80,7 +80,11 @@ namespace Gumball
 
         [Header("Challenges")]
         [SerializeField] private Challenge[] subObjectives;
-        
+
+        [Header("Dialogue")]
+        [SerializeField] private DialogueData preSessionDialogue;
+        [SerializeField] private DialogueData postSessionDialogue;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
         [SerializeField, ReadOnly] private GenericDictionary<AICar, RacerSessionData> currentRacers = new();
@@ -96,7 +100,7 @@ namespace Gumball
         public ProgressStatus Progress
         {
             get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
-            private set => DataManager.Player.Set($"SessionStatus.{ID}", value);
+            private set => DataManager.GameSessions.Set($"SessionStatus.{ID}", value);
         }
 
         public Challenge[] SubObjectives => subObjectives;
@@ -306,6 +310,8 @@ namespace Gumball
             
             OnSessionEnd();
             
+            GlobalLoggers.GameSessionLogger.Log($"Ended {name} ({displayName}).");
+
             if (Progress != ProgressStatus.COMPLETE && progress == ProgressStatus.COMPLETE)
             {
                 OnCompleteSessionForFirstTime();
@@ -408,6 +414,12 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            if (preSessionDialogue != null && !preSessionDialogue.HasBeenCompleted)
+            {
+                preSessionDialogue.Play();
+                yield return new WaitUntil(() => !DialogueManager.IsPlaying);
+            }
+
             inProgress = false;
             
             PanelManager.GetPanel<LoadingPanel>().Show();
@@ -701,7 +713,15 @@ namespace Gumball
 
         private void OnCompleteSessionForFirstTime()
         {
+            GlobalLoggers.GameSessionLogger.Log($"Completed {name} ({displayName}) for the first time.");
             Progress = ProgressStatus.COMPLETE;
+
+            if (!postSessionDialogue.HasBeenCompleted)
+            {
+                CoroutineHelper.PerformAfterTrue(
+                    () => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MapSceneName) && !PanelManager.GetPanel<LoadingPanel>().IsShowing,
+                    () => postSessionDialogue.Play());
+            }
         }
         
         private void OnFailMission()
