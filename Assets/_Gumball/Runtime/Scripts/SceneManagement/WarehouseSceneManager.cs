@@ -29,8 +29,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.WarehouseSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             WarehouseManager.Instance.CurrentCar.Teleport(Instance.carPosition.Position, Instance.carPosition.Rotation);
-            WarehouseManager.Instance.CurrentCar.SetGrounded();
-
+            
             Instance.SetupCamera();
             
             AvatarManager.Instance.HideAvatars(true);
