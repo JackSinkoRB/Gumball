@@ -471,9 +471,13 @@ namespace Gumball
                 AllWheelMeshes[wheelIndex].transform.position = AllWheelColliders[wheelIndex].transform.position;
             
             //start with lights disabled
-            brakelights.DisableInstantly();
-            foreach (Light headlight in headlights)
-                headlight.gameObject.SetActive(false);
+            if (brakelights != null)
+                brakelights.DisableInstantly();
+            if (headlights != null)
+            {
+                foreach (Light headlight in headlights)
+                    headlight.gameObject.SetActive(false);
+            }
         }
 
         /// <summary>
@@ -627,6 +631,9 @@ namespace Gumball
                                && GameSessionManager.Instance.CurrentSession != null
                                && GameSessionManager.Instance.CurrentSession.IsNightTime;
 
+            if (headlights == null)
+                return;
+            
             foreach (Light headlight in headlights)
             {
                 if (headlight != null)
