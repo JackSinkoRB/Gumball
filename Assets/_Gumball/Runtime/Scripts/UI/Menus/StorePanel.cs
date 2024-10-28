@@ -52,8 +52,8 @@ namespace Gumball
             List<IAPProduct> storeProducts = new();
             foreach (StorePurchaseButton purchaseButton in transform.GetComponentsInAllChildren<StorePurchaseButton>())
             {
-                if (purchaseButton.CurrencyType == CurrencyType.REAL)
-                    storeProducts.Add(purchaseButton.Product);
+                if (purchaseButton.PurchaseData.CurrencyType == CurrencyType.REAL)
+                    storeProducts.Add(purchaseButton.PurchaseData.Product);
             }
             
             IAPManager.Instance.SetStoreProducts(storeProducts);

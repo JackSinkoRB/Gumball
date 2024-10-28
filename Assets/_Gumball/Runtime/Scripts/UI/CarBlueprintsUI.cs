@@ -24,14 +24,26 @@ namespace Gumball
             RefreshLabel();
 
             BlueprintManager.onBlueprintsChange += OnBlueprintsChange;
+            BlueprintManager.onLevelChange += OnLevelChange;
         }
 
         private void OnDisable()
         {
             BlueprintManager.onBlueprintsChange -= OnBlueprintsChange;
+            BlueprintManager.onLevelChange -= OnLevelChange;
         }
         
         private void OnBlueprintsChange(int carIndex, int previousAmount, int newAmount)
+        {
+            if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
+                return;
+            
+            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
+            if (carIndexToUse == carIndex)
+                RefreshLabel();
+        }
+        
+        private void OnLevelChange(int carIndex, int previousAmount, int newAmount)
         {
             if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
                 return;
@@ -52,10 +64,18 @@ namespace Gumball
             int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
             int currentBlueprints = BlueprintManager.Instance.GetBlueprints(carIndexToUse);
             
-            int nextLevelIndex = BlueprintManager.Instance.GetNextLevel(carIndexToUse);
-            int blueprintsForNextLevel = BlueprintManager.Instance.GetBlueprintsRequiredForLevel(nextLevelIndex);
+            int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carIndexToUse);
+            if (nextLevelIndex < 0)
+            {
+                //is max level
+                gameObject.SetActive(false);
+                return;
+            }
             
-            label.text = $"{currentBlueprints}/{blueprintsForNextLevel}";
+            gameObject.SetActive(true);
+            int blueprintsForNextLevel = BlueprintManager.Instance.Levels[nextLevelIndex].BlueprintsRequired;
+            
+            label.text = $"<color=white>{currentBlueprints}/</color>{blueprintsForNextLevel}";
             this.PerformAtEndOfFrame(label.Resize);
         }
 

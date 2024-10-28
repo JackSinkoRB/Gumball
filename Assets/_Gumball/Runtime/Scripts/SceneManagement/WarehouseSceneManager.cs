@@ -41,6 +41,9 @@ namespace Gumball
         
         [SerializeField] private WarehouseCameraController cameraController;
         [SerializeField] private PositionAndRotation carPosition;
+        [SerializeField] private Transform lockedCarIcon;
+
+        public Transform LockedCarIcon => lockedCarIcon;
         
 #if UNITY_EDITOR
         [Header("Testing")]

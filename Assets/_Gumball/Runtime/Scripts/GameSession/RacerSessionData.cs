@@ -55,7 +55,7 @@ namespace Gumball
         }
 
 #if UNITY_EDITOR
-        public void OnValidate()
+        public void CachePerformanceRatings()
         {
             if (carAssetReference != null && carAssetReference.editorAsset != null && carAssetReference.editorAsset.GetComponent<AICar>() != null)
                 currentPerformanceRating.Calculate(carAssetReference.editorAsset.GetComponent<AICar>().PerformanceSettings, performanceProfile);
