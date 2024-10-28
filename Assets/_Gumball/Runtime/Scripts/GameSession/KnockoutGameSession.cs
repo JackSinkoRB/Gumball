@@ -19,6 +19,8 @@ namespace Gumball
         
         [SerializeField] private CheckpointMarkers knockoutPositionMarkers;
 
+        public float[] KnockoutPositions => knockoutPositions;
+        
         private List<AICar> remainingRacersInOrder
         {
             get
@@ -101,7 +103,11 @@ namespace Gumball
 
             EliminatedRacers.Add(lastRacer);
 
-            PanelManager.GetPanel<KnockoutSessionPanel>().ProgressBar.RemoveRacerIcon(lastRacer);
+            //grey out the racer icon
+            PanelManager.GetPanel<KnockoutSessionPanel>().ProgressBar.DisableRacerIcon(lastRacer);
+            
+            //set the knockout position icon filled
+            PanelManager.GetPanel<KnockoutSessionPanel>().KnockoutPositionIconInstances[EliminatedRacers.Count - 1].SetPassed();
             
             lastRacer.SetObeySpeedLimit(true);
 
