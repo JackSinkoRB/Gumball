@@ -471,9 +471,13 @@ namespace Gumball
                 AllWheelMeshes[wheelIndex].transform.position = AllWheelColliders[wheelIndex].transform.position;
             
             //start with lights disabled
-            brakelights.DisableInstantly();
-            foreach (Light headlight in headlights)
-                headlight.gameObject.SetActive(false);
+            if (brakelights != null)
+                brakelights.DisableInstantly();
+            if (headlights != null)
+            {
+                foreach (Light headlight in headlights)
+                    headlight.gameObject.SetActive(false);
+            }
         }
 
         /// <summary>
@@ -627,6 +631,9 @@ namespace Gumball
                                && GameSessionManager.Instance.CurrentSession != null
                                && GameSessionManager.Instance.CurrentSession.IsNightTime;
 
+            if (headlights == null)
+                return;
+            
             foreach (Light headlight in headlights)
             {
                 if (headlight != null)
@@ -698,14 +705,14 @@ namespace Gumball
 
             transform.position += offset;
             Rigidbody.position += offset;
-            GlobalLoggers.AICarLogger.Log($"Grounded {gameObject.name} - moved {offset}");
+            GlobalLoggers.AICarLogger.Log($"Grounded {gameObject.name} - moved {offset} (hit {groundedHitsCached[0].collider.gameObject.name})");
             
             //check to apply ride height - currently only for player cars
             if (IsPlayer)
             {
                 float rideHeight = DataManager.Cars.Get<float>($"{SaveKey}.RideHeight");
-                transform.position = transform.position.OffsetY(rideHeight);
-                Rigidbody.position = Rigidbody.position.OffsetY(rideHeight);
+                // transform.position = transform.position.OffsetY(rideHeight);
+                // Rigidbody.position = Rigidbody.position.OffsetY(rideHeight);
 
                 GlobalLoggers.AICarLogger.Log($"Applied {rideHeight} ride height to {gameObject.name}");
             }
