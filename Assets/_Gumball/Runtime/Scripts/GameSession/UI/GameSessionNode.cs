@@ -36,6 +36,9 @@ namespace Gumball
         public bool IsUnlocked {
             get
             {
+                if (Cheats.AllSessionsAreUnlocked)
+                    return true;
+                
                 if (requiredSessionNode != null && requiredSessionNode.gameSession.Progress != GameSession.ProgressStatus.COMPLETE)
                     return false;
                 
