@@ -14,6 +14,16 @@ namespace Gumball
     public class BlueprintManager : SingletonScriptable<BlueprintManager>
     {
 
+        [Serializable]
+        public struct Level
+        {
+            [SerializeField] private int blueprintsRequired;
+            [SerializeField] private int standardCurrencyCostToUpgrade;
+
+            public int BlueprintsRequired => blueprintsRequired;
+            public int StandardCurrencyCostToUpgrade => standardCurrencyCostToUpgrade;
+        }
+
         public delegate void OnValueChangeDelegate(int carIndex, int previousAmount, int newAmount);
         public static event OnValueChangeDelegate onBlueprintsChange;
         public static event OnValueChangeDelegate onLevelChange;
@@ -24,12 +34,15 @@ namespace Gumball
             onBlueprintsChange = null;
         }
         
-        [SerializeField] private List<int> blueprintsRequiredForEachLevel = new();
+        [SerializeField] private List<Level> levels = new();
 
-        [SerializeField] private GenericDictionary<int, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car index, collection of sessions
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private GenericDictionary<int, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car index, collection of sessions
         
-        public List<int> BlueprintsRequiredForEachLevel => blueprintsRequiredForEachLevel;
+        public List<Level> Levels => levels;
 
+        public int MaxLevelIndex => levels.Count - 1;
+        
         protected override void OnInstanceLoaded()
         {
             base.OnInstanceLoaded();
@@ -68,6 +81,18 @@ namespace Gumball
             SetBlueprints(carIndex, GetBlueprints(carIndex) + amount);
         }
         
+        public void TakeBlueprints(int carIndex, int amount)
+        {
+            int newAmount = GetBlueprints(carIndex) - amount;
+            if (newAmount < 0)
+            {
+                newAmount = 0;
+                Debug.LogError("Tried setting blueprints below 0 - this shouldn't happen.");
+            }
+
+            SetBlueprints(carIndex, newAmount);
+        }
+        
         public int GetLevelIndex(int carIndex)
         {
             bool isUnlocked = WarehouseManager.Instance.AllCarData[carIndex].IsUnlocked;
@@ -102,17 +127,12 @@ namespace Gumball
             return WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
         }
 
-        public int GetNextLevel(int carIndex)
+        public int GetNextLevelIndex(int carIndex)
         {
             int unlockLevelIndex = WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
             int currentLevelIndex = GetLevelIndex(carIndex);
             int nextLevelIndex = IsUnlocked(carIndex) ? currentLevelIndex + 1 : unlockLevelIndex;
-            return nextLevelIndex;
-        }
-
-        public int GetBlueprintsRequiredForLevel(int levelIndex)
-        {
-            return blueprintsRequiredForEachLevel[levelIndex];
+            return nextLevelIndex > MaxLevelIndex ? -1 : nextLevelIndex;
         }
         
 #if UNITY_EDITOR

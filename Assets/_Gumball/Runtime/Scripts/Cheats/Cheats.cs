@@ -47,7 +47,7 @@ namespace Gumball
         {
             for (int carIndex = 0; carIndex < WarehouseManager.Instance.AllCarData.Count; carIndex++)
             {
-                BlueprintManager.Instance.AddBlueprints(carIndex, BlueprintManager.Instance.BlueprintsRequiredForEachLevel[^1]);
+                BlueprintManager.Instance.AddBlueprints(carIndex, BlueprintManager.Instance.Levels[^1].BlueprintsRequired);
             }
         }
         
