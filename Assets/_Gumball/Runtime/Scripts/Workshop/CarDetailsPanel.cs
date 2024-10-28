@@ -56,8 +56,6 @@ namespace Gumball
             
             makeLabel.text = selectedOption.CarData.MakeDisplayName;
             modelLabel.text = selectedOption.CarData.DisplayName;
-
-            //typeLabel.text = selectedOption.CarData.CarType.ToString();
             
             purchaseButton.gameObject.SetActive(!selectedOption.CarData.IsUnlocked);
             selectButton.gameObject.SetActive(selectedOption.CarData.IsUnlocked);
@@ -84,6 +82,17 @@ namespace Gumball
 
         public void OnClickBackButton()
         {
+            //reenable the current car
+            if (WarehouseManager.Instance.CurrentCar != null)
+                WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
+
+            //destroy instance
+            if (carInstance != null)
+                Destroy(carInstance.gameObject);
+            
+            //disable the lock
+            WarehouseSceneManager.Instance.LockedCarIcon.gameObject.SetActive(false);
+
             Hide();
             PanelManager.GetPanel<SwapCarPanel>().Show();
         }
