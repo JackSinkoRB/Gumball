@@ -8,6 +8,8 @@ namespace Gumball
     public class BrakingCarAudio : CarAudio
     {
 
+        private Coroutine stopBrakingCoroutine;
+        
         public override void Initialise(CarAudioManager managerBelongsTo)
         {
             base.Initialise(managerBelongsTo);
@@ -60,13 +62,18 @@ namespace Gumball
 
         private void OnStartBraking()
         {
+            if (stopBrakingCoroutine != null)
+                StopCoroutine(stopBrakingCoroutine);
+            
             if (!managerBelongsTo.CarBelongsTo.IsStationary)
                 FadeIn();
         }
         
         private void OnStopBraking()
         {
-            FadeOut();
+            if (stopBrakingCoroutine != null)
+                StopCoroutine(stopBrakingCoroutine);
+            stopBrakingCoroutine = this.PerformAfterTrue(() => !managerBelongsTo.CarBelongsTo.IsHandbrakeEasingOff, FadeOut);
         }
         
     }

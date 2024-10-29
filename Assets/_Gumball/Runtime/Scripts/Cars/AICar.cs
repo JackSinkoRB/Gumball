@@ -290,6 +290,7 @@ namespace Gumball
         private readonly Sequence[] handbrakeEaseOffTweens = new Sequence[2];
 
         public bool IsHandbrakeEngaged => isHandbrakeEngaged;
+        public bool IsHandbrakeEasingOff => handbrakeEaseOffTweens[0] != null && handbrakeEaseOffTweens[0].IsPlaying();
         
         [Header("Collisions")]
         [SerializeField] private GameObject colliders;
