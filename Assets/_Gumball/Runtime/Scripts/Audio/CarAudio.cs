@@ -22,6 +22,9 @@ namespace Gumball
 
         private bool hasFadedInBefore;
         private Tween currentFadeTween;
+        private bool isFadingOut;
+
+        protected bool isActive => gameObject.activeInHierarchy && !isFadingOut;
         
         public virtual void Initialise(CarAudioManager managerBelongsTo)
         {
@@ -35,6 +38,11 @@ namespace Gumball
                 InitialiseAsPlayer();
                 
             defaultVolume = source.volume;
+        }
+
+        public virtual void UpdateWhileManagerActive()
+        {
+            
         }
 
         public void SetVolumeDistance(MinMaxFloat volumeDistance)
@@ -60,9 +68,11 @@ namespace Gumball
         
         protected void FadeIn()
         {
+            isFadingOut = false;
+
             gameObject.SetActive(true);
 
-            if (hasFadedInBefore)
+            if (!hasFadedInBefore)
             {
                 hasFadedInBefore = true;
                 source.volume = 0; //start at 0 volume
@@ -74,9 +84,15 @@ namespace Gumball
         
         protected void FadeOut()
         {
+            isFadingOut = true;
+            
             currentFadeTween?.Kill();
             currentFadeTween = source.DOFade(0, fadeOutDuration);
-            currentFadeTween.OnComplete(() => gameObject.SetActive(false));
+            currentFadeTween.OnComplete(() =>
+            {
+                gameObject.SetActive(false);
+                isFadingOut = false;
+            });
         }
 
     }
