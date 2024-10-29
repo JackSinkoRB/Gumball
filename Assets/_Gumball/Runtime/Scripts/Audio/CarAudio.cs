@@ -11,10 +11,18 @@ namespace Gumball
     {
 
         [SerializeField] protected AudioSource source;
+
+        [Header("Fade")]
+        [SerializeField] private float fadeInDuration = 0.15f;
+        [SerializeField] private float fadeOutDuration = 0.1f;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected CarAudioManager managerBelongsTo;
+        [SerializeField, ReadOnly] private float defaultVolume;
 
+        private bool hasFadedInBefore;
+        private Tween currentFadeTween;
+        
         public virtual void Initialise(CarAudioManager managerBelongsTo)
         {
             this.managerBelongsTo = managerBelongsTo;
@@ -25,6 +33,8 @@ namespace Gumball
                 InitialiseAsRacer();
             else if (managerBelongsTo.CarBelongsTo.IsPlayer)
                 InitialiseAsPlayer();
+                
+            defaultVolume = source.volume;
         }
 
         public void SetVolumeDistance(MinMaxFloat volumeDistance)
@@ -46,6 +56,27 @@ namespace Gumball
         protected virtual void InitialiseAsPlayer()
         {
             
+        }
+        
+        protected void FadeIn()
+        {
+            gameObject.SetActive(true);
+
+            if (hasFadedInBefore)
+            {
+                hasFadedInBefore = true;
+                source.volume = 0; //start at 0 volume
+            }
+
+            currentFadeTween?.Kill();
+            currentFadeTween = source.DOFade(defaultVolume, fadeInDuration);
+        }
+        
+        protected void FadeOut()
+        {
+            currentFadeTween?.Kill();
+            currentFadeTween = source.DOFade(0, fadeOutDuration);
+            currentFadeTween.OnComplete(() => gameObject.SetActive(false));
         }
 
     }

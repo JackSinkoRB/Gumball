@@ -234,6 +234,9 @@ namespace Gumball
         public delegate void OnGearChangedDelegate(int previousGear, int currentGear);
         public event OnGearChangedDelegate onGearChanged;
         
+        public event Action onStartBraking;
+        public event Action onStopBraking;
+        
         private bool wasAcceleratingLastFrame;
         public bool IsAutomaticTransmission => autoDrive || GearboxSetting.Setting == GearboxSetting.GearboxOption.AUTOMATIC;
         public int CurrentGear => currentGear;
@@ -1547,6 +1550,8 @@ namespace Gumball
             {
                 wheelCollider.brakeTorque = BrakeTorque;
             }
+
+            onStartBraking?.Invoke();
         }
         
         private void OnBrake()
@@ -1563,6 +1568,8 @@ namespace Gumball
             {
                 wheelCollider.brakeTorque = 0;
             }
+
+            onStopBraking?.Invoke();
         }
 
         private void CheckForCorner()

@@ -13,6 +13,7 @@ namespace Gumball
         [SerializeField, DisplayInspector] private CarAudio revving;
         [SerializeField, DisplayInspector] private CarAudio nos;
         [SerializeField, DisplayInspector] private CarAudio gearChange;
+        [SerializeField, DisplayInspector] private CarAudio braking;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
@@ -24,10 +25,13 @@ namespace Gumball
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
-            
-            revving.Initialise(this);
-            nos.Initialise(this);
-            gearChange.Initialise(this);
+
+            foreach (Transform child in transform)
+            {
+                CarAudio carAudio = child.GetComponent<CarAudio>();
+                if (carAudio != null)
+                    carAudio.Initialise(this);
+            }
         }
 
         private void LateUpdate()
