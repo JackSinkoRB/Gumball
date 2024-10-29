@@ -28,6 +28,9 @@ namespace Gumball
         [Tooltip("Relative to the order of the session racer data.")]
         [SerializeField] private SpeedCameraSprintRacerData[] racerSpeedCameraSprintData;
 
+        [Header("Audio")]
+        [SerializeField] private AudioClip playerFailSound;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private GenericDictionary<AICar, GenericDictionary<SpeedCameraZone, MinMaxFloat>> preCalculatedSpeedLimitPositions = new();
         [SerializeField, ReadOnly] private GenericDictionary<AICar, HashSet<SpeedCameraZone>> zonesPassed = new();
@@ -203,6 +206,9 @@ namespace Gumball
             HashSet<SpeedCameraZone> existingZones = zonesFailed.ContainsKey(racer) ? zonesFailed[racer] : new HashSet<SpeedCameraZone>();
             existingZones.Add(zone);
             zonesFailed[racer] = existingZones;
+
+            if (racer.IsPlayer)
+                GameSessionAudioManager.Instance.PlayerFailSpeedCameraSprintZone.Play();
             
             onFailZone?.Invoke(racer, zone);
             
