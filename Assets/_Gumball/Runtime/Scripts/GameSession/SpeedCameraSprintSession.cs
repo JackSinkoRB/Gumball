@@ -19,17 +19,13 @@ namespace Gumball
         public event Action<AICar, SpeedCameraZone> onFailZone;
 
         [Header("Speed camera sprint")]
-        [SerializeField] private SpeedCameraZoneMarker zoneStartMarkerPrefab; 
-        [SerializeField] private SpeedCameraZoneMarker zoneEndMarkerPrefab;
+        [SerializeField] private SpeedCameraZoneMarker zoneMarkerPrefab;
         [Tooltip("How many kmh past the speed limit can the racer be travelling without failing?")]
         [SerializeField] private float speedLimitLeniencyKmh = 5;
         [SerializeField] private SpeedCameraZone[] speedCameraZones;
         [HelpBox("There is 1 value per racer.", MessageType.Info, HelpBoxAttribute.Position.ABOVE)]
         [Tooltip("Relative to the order of the session racer data.")]
         [SerializeField] private SpeedCameraSprintRacerData[] racerSpeedCameraSprintData;
-
-        [Header("Audio")]
-        [SerializeField] private AudioClip playerFailSound;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private GenericDictionary<AICar, GenericDictionary<SpeedCameraZone, MinMaxFloat>> preCalculatedSpeedLimitPositions = new();
@@ -76,17 +72,14 @@ namespace Gumball
 
             foreach (SpeedCameraZone zone in speedCameraZones)
             {
-                float start = zone.Position - zone.Length;
-                float end = zone.Position;
-                
                 int racerIndex = 0;
                 foreach (AICar racer in CurrentRacers.Keys)
                 {
                     if (racer.IsPlayer)
                         continue;
 
-                    float brakingPosition = start - racerSpeedCameraSprintData[racerIndex].BrakingDistanceRange.RandomInRange();
-                    float accelerationPosition = end + racerSpeedCameraSprintData[racerIndex].AccelerationDistanceRange.RandomInRange();
+                    float brakingPosition = zone.Position - racerSpeedCameraSprintData[racerIndex].BrakingDistanceRange.RandomInRange();
+                    float accelerationPosition = zone.Position + racerSpeedCameraSprintData[racerIndex].AccelerationDistanceRange.RandomInRange();
                     
                     if (!preCalculatedSpeedLimitPositions.ContainsKey(racer))
                         preCalculatedSpeedLimitPositions[racer] = new GenericDictionary<SpeedCameraZone, MinMaxFloat>();
@@ -122,24 +115,18 @@ namespace Gumball
                 .ThenByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap)
                 .ToList();
         }
-
+        
         private void SpawnZoneMarkers()
         {
+            if (zoneMarkerPrefab == null)
+                return;
+            
             foreach (SpeedCameraZone zone in speedCameraZones)
             {
-                SpawnZoneMarker(zoneStartMarkerPrefab, zone.Position - zone.Length, zone.SpeedLimitKmh);
-                SpawnZoneMarker(zoneEndMarkerPrefab, zone.Position, zone.SpeedLimitKmh);
+                SplineSample splineSample = ChunkManager.Instance.GetSampleAlongSplines(zone.Position);
+                SpeedCameraZoneMarker instance = zoneMarkerPrefab.gameObject.GetSpareOrCreate<SpeedCameraZoneMarker>(position: splineSample.position.OffsetY(zoneMarkerPrefab.HeightAboveRoad), rotation: splineSample.rotation);
+                instance.Initialise(zone);
             }
-        }
-
-        private void SpawnZoneMarker(SpeedCameraZoneMarker prefab, float distanceAlongSpline, float speedLimitKmh)
-        {
-            if (prefab == null)
-                return;
-
-            SplineSample start = ChunkManager.Instance.GetSampleAlongSplines(distanceAlongSpline);
-            SpeedCameraZoneMarker instance = prefab.gameObject.GetSpareOrCreate<SpeedCameraZoneMarker>(position: start.position.OffsetY(prefab.HeightAboveRoad), rotation: start.rotation);
-            instance.Initialise(distanceAlongSpline, speedLimitKmh);
         }
 
         private void CheckIfRacerShouldBrakeForZone()
@@ -177,14 +164,13 @@ namespace Gumball
 
                     if (hasPassedZone || hasFailedZone)
                         continue;
-                    
-                    if (zone.IsRacerInZone(racer) && racer.SpeedKmh >= zone.SpeedLimitKmh + speedLimitLeniencyKmh)
+
+                    if (zone.HasRacerPassedZone(racer))
                     {
-                        OnFailZone(racer, zone);
-                    }
-                    else if (zone.HasRacerPassedZone(racer))
-                    {
-                        OnPassZone(racer, zone);
+                        if (racer.SpeedKmh >= zone.SpeedLimitKmh + speedLimitLeniencyKmh)
+                            OnFailZone(racer, zone);
+                        else
+                            OnPassZone(racer, zone);
                     }
                 }
             }
