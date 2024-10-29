@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: 48fbad0faf7477e4abd9a4d4c07a1e95
   lastKnownName: Level 6 - Open Road
+  displayName: Level
   description: Description of session
   scene:
     scene:
@@ -30,9 +31,9 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   vehicleStartingPosition: {x: 3, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
+  isNightTime: 0
   globalLightIntensity: 1
   reflectionIntensity: 1
-  fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 2100
   finishLineMarkers:
@@ -64,14 +65,61 @@ MonoBehaviour:
     coreParts: []
     subParts: []
     unlockables: []
-  mainChallengeDescription: This is the challenge description
+    blueprints: []
   subObjectives: []
-  inProgress: 0
+  preSessionDialogue:
+    dialogue: []
+    uniqueID: ca0d8700-1be3-417a-88a1-016cd572606d
+  postSessionDialogue:
+    dialogue: []
+    uniqueID: 8d86c8d3-5170-4ae0-a05b-01875aa2f156
+  inProgress: 1
   currentRacers:
-    list: []
+    list:
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: 
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 0, y: 0, z: 0}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 1
+        racingLineImprecisionMaxDistance: 3
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0
+          handling: 0
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 0
+          maxSpeedRating: 0
+          accelerationSpeedRating: 0
+          handlingRating: 0
+          nosRating: 0
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
     keyCollision: 0
   previousCorePartRewards: []
   previousSubPartRewards: []
+  PreviousBlueprintRewards: 
   timeAllowedSeconds: 60
-  timeRemainingSeconds: 0
-  timerHasStarted: 0
+  timeRemainingSeconds: 56.749496
+  timerHasStarted: 1
