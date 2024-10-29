@@ -113,15 +113,5 @@ namespace Gumball
             return $"{car.SaveKey}.Decals";
         }
 
-        public static void ApplyBaseDecals()
-        {
-            //TODO
-        }
-
-        public static void RemoveBaseDecals()
-        {
-            //TODO
-        }
-
     }
 }
