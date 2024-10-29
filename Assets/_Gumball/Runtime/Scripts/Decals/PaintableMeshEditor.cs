@@ -13,14 +13,14 @@ namespace Gumball
 
         private PaintableMesh paintableMesh => (PaintableMesh)target;
 
-        public override void OnInspectorGUI()
+        protected override void OnEnable()
         {
-            base.OnInspectorGUI();
+            base.OnEnable();
             
             if (paintableMesh.MeshFilter != null && paintableMesh.MeshFilter.sharedMesh != null)
                 paintableMesh.MeshFilter.sharedMesh.SetReadable();
         }
-        
+
     }
 }
 #endif
