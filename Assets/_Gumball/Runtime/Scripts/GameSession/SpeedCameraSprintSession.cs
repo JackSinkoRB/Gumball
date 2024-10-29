@@ -133,6 +133,9 @@ namespace Gumball
         {
             foreach (AICar racer in CurrentRacers.Keys)
             {
+                if (racer == null)
+                    continue;
+                
                 if (racer.IsPlayer)
                     continue;
                 
@@ -159,6 +162,9 @@ namespace Gumball
             {
                 foreach (AICar racer in CurrentRacers.Keys)
                 {
+                    if (racer == null)
+                        continue;
+                    
                     bool hasPassedZone = zonesPassed.ContainsKey(racer) && zonesPassed[racer].Contains(zone);
                     bool hasFailedZone = zonesFailed.ContainsKey(racer) && zonesFailed[racer].Contains(zone);
 
