@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: eb2582edcfece8c4c9d62e5b0cbbd749
   lastKnownName: Level 37 - Avoiding Tickets
+  displayName: Level
   description: Description of session
   scene:
     scene:
@@ -30,9 +31,9 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   vehicleStartingPosition: {x: 10, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
+  isNightTime: 0
   globalLightIntensity: 1
   reflectionIntensity: 1
-  fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 1800
   finishLineMarkers:
@@ -40,16 +41,19 @@ MonoBehaviour:
       type: 3}
     distanceFromSpline: 5
   racerData:
-  - assetReference:
+  - carAssetReference:
       m_AssetGUID: 731da51f959bc554aaa0545c94562d25
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 2.6
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
     startingPosition:
       position: {x: 5, y: 0.1, z: 125}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     performanceProfile:
       maxSpeed: 0.314
       acceleration: 0.291
@@ -61,16 +65,33 @@ MonoBehaviour:
       accelerationSpeedRating: 73
       handlingRating: 58
       nosRating: 66
-  - assetReference:
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+  - carAssetReference:
       m_AssetGUID: 9e6cb95863f6d6a4bbd5c83903375a7a
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 2.6
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
     startingPosition:
       position: {x: 15, y: 0.1, z: 150}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     performanceProfile:
       maxSpeed: 0.314
       acceleration: 0.31
@@ -82,16 +103,33 @@ MonoBehaviour:
       accelerationSpeedRating: 83
       handlingRating: 54
       nosRating: 44
-  - assetReference:
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+  - carAssetReference:
       m_AssetGUID: e88edf073eda248429d699a6081a669f
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 2.6
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
     startingPosition:
       position: {x: 10, y: 0.1, z: 175}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.6
     performanceProfile:
       maxSpeed: 0.316
       acceleration: 0.33
@@ -103,6 +141,20 @@ MonoBehaviour:
       accelerationSpeedRating: 109
       handlingRating: 48
       nosRating: 53
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
   racersStartingSpeed: 100
   trafficIsProcedural: 1
   trafficDensity: 100
@@ -128,8 +180,14 @@ MonoBehaviour:
     subParts:
     - {fileID: 11400000, guid: 342ad10445d979e47af339be4081975a, type: 2}
     unlockables: []
-  mainChallengeDescription: This is the challenge description
+    blueprints: []
   subObjectives: []
+  preSessionDialogue:
+    dialogue: []
+    uniqueID: 90cc32ec-cc7c-44f7-955f-301d8c36370a
+  postSessionDialogue:
+    dialogue: []
+    uniqueID: 10b7310f-5504-4b0b-badf-e18441b05325
   inProgress: 0
   currentRacers:
     list: []
@@ -137,24 +195,24 @@ MonoBehaviour:
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 342ad10445d979e47af339be4081975a, type: 2}
+  PreviousBlueprintRewards: 
+  timeAllowedSeconds: 60
+  timeRemainingSeconds: 0
+  timerHasStarted: 0
   racersInPositionOrderCached: []
-  zoneStartMarkerPrefab: {fileID: 1079706687065447843, guid: e56b88bb75a02b94586ec9113368521e,
+  zoneMarkerPrefab: {fileID: 1079706687065447843, guid: e56b88bb75a02b94586ec9113368521e,
     type: 3}
-  zoneEndMarkerPrefab: {fileID: 2195277277451159918, guid: 1394cc36189042b49abb0e54c0d9bc46,
+  zoneStartMarkerPrefab: {fileID: 1079706687065447843, guid: e56b88bb75a02b94586ec9113368521e,
     type: 3}
   speedLimitLeniencyKmh: 5
   speedCameraZones:
   - position: 350
-    length: 50
     speedLimitKmh: 60
   - position: 650
-    length: 50
     speedLimitKmh: 60
   - position: 1000
-    length: 50
     speedLimitKmh: 60
   - position: 1500
-    length: 50
     speedLimitKmh: 60
   racerSpeedCameraSprintData:
   - brakingDistanceRange:

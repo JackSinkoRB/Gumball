@@ -15,15 +15,13 @@ namespace Gumball
         [SerializeField] private float heightAboveRoad = 3;
 
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private float distanceAlongSpline;
-        [SerializeField, ReadOnly] private float speedLimitKmh;
-
+        [SerializeField, ReadOnly] private SpeedCameraZone zone;
+        
         public float HeightAboveRoad => heightAboveRoad;
 
-        public void Initialise(float distanceAlongSpline, float speedLimitKmh)
+        public void Initialise(SpeedCameraZone zone)
         {
-            this.distanceAlongSpline = distanceAlongSpline;
-            this.speedLimitKmh = speedLimitKmh;
+            this.zone = zone;
         }
 
         private void LateUpdate()
@@ -40,14 +38,14 @@ namespace Gumball
             
             float playersDistanceAlongSpline = travelCalculator.DistanceInMap;
             
-            float distance = Mathf.Max(0, distanceAlongSpline - playersDistanceAlongSpline);
+            float distance = Mathf.Max(0, zone.Position - playersDistanceAlongSpline);
             float distanceRounded = Mathf.RoundToInt(distance);
             distanceLabel.text = $"{distanceRounded}m";
         }
         
         private void UpdateSpeedLabel()
         {
-            float speedLimitLocalised = UnitOfSpeedSetting.UseMiles ? SpeedUtils.FromKmToMiles(speedLimitKmh) : speedLimitKmh;
+            float speedLimitLocalised = UnitOfSpeedSetting.UseMiles ? SpeedUtils.FromKmToMiles(zone.SpeedLimitKmh) : zone.SpeedLimitKmh;
             speedLabel.text = $"{Mathf.RoundToInt(speedLimitLocalised)}";
         }
         
