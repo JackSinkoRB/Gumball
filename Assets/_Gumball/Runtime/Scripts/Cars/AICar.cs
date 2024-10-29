@@ -234,6 +234,11 @@ namespace Gumball
         public delegate void OnGearChangedDelegate(int previousGear, int currentGear);
         public event OnGearChangedDelegate onGearChanged;
         
+        public event Action onStartBraking;
+        public event Action onStopBraking;
+        public event Action onEngageHandbrake;
+        public event Action onDisengageHandbrake;
+        
         private bool wasAcceleratingLastFrame;
         public bool IsAutomaticTransmission => autoDrive || GearboxSetting.Setting == GearboxSetting.GearboxOption.AUTOMATIC;
         public int CurrentGear => currentGear;
@@ -285,6 +290,7 @@ namespace Gumball
         private readonly Sequence[] handbrakeEaseOffTweens = new Sequence[2];
 
         public bool IsHandbrakeEngaged => isHandbrakeEngaged;
+        public bool IsHandbrakeEasingOff => handbrakeEaseOffTweens[0] != null && handbrakeEaseOffTweens[0].IsPlaying();
         
         [Header("Collisions")]
         [SerializeField] private GameObject colliders;
@@ -1505,6 +1511,8 @@ namespace Gumball
 
                 wheelCollider.brakeTorque = HandbrakeTorque;
             }
+
+            onEngageHandbrake?.Invoke();
         }
 
         private void OnHandbrakeDisengage()
@@ -1526,6 +1534,8 @@ namespace Gumball
                         x => sidewaysFriction.stiffness = x, defaultRearWheelStiffness, HandbrakeEaseOffDuration)
                     .OnUpdate(() => wheelCollider.sidewaysFriction = sidewaysFriction));
             }
+            
+            onDisengageHandbrake?.Invoke();
         }
         
         private void OnStartReversing()
@@ -1547,6 +1557,8 @@ namespace Gumball
             {
                 wheelCollider.brakeTorque = BrakeTorque;
             }
+
+            onStartBraking?.Invoke();
         }
         
         private void OnBrake()
@@ -1563,6 +1575,8 @@ namespace Gumball
             {
                 wheelCollider.brakeTorque = 0;
             }
+
+            onStopBraking?.Invoke();
         }
 
         private void CheckForCorner()
