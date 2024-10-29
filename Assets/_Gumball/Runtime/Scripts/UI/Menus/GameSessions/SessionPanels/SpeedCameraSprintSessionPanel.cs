@@ -34,8 +34,8 @@ namespace Gumball
         {
             base.OnHide();
 
-            if (session != null)
-                session.onFailZone -= OnFailZone;
+            if (GameSessionManager.Instance.CurrentSession != null && GameSessionManager.Instance.CurrentSession is SpeedCameraSprintSession speedCameraSprintSession)
+                speedCameraSprintSession.onFailZone -= OnFailZone;
         }
 
         private void OnFailZone(AICar car, SpeedCameraZone zone)
