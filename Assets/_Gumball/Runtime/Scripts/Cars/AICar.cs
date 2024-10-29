@@ -236,6 +236,8 @@ namespace Gumball
         
         public event Action onStartBraking;
         public event Action onStopBraking;
+        public event Action onEngageHandbrake;
+        public event Action onDisengageHandbrake;
         
         private bool wasAcceleratingLastFrame;
         public bool IsAutomaticTransmission => autoDrive || GearboxSetting.Setting == GearboxSetting.GearboxOption.AUTOMATIC;
@@ -1508,6 +1510,8 @@ namespace Gumball
 
                 wheelCollider.brakeTorque = HandbrakeTorque;
             }
+
+            onEngageHandbrake?.Invoke();
         }
 
         private void OnHandbrakeDisengage()
@@ -1529,6 +1533,8 @@ namespace Gumball
                         x => sidewaysFriction.stiffness = x, defaultRearWheelStiffness, HandbrakeEaseOffDuration)
                     .OnUpdate(() => wheelCollider.sidewaysFriction = sidewaysFriction));
             }
+            
+            onDisengageHandbrake?.Invoke();
         }
         
         private void OnStartReversing()

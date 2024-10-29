@@ -37,20 +37,31 @@ namespace Gumball
         {
             managerBelongsTo.CarBelongsTo.onStartBraking += OnStartBraking;
             managerBelongsTo.CarBelongsTo.onStopBraking += OnStopBraking;
+            managerBelongsTo.CarBelongsTo.onEngageHandbrake += OnStartBraking;
+            managerBelongsTo.CarBelongsTo.onDisengageHandbrake += OnStopBraking;
         }
 
         private void OnSessionEnd(GameSession session, GameSession.ProgressStatus progress)
         {
             managerBelongsTo.CarBelongsTo.onStartBraking -= OnStartBraking;
             managerBelongsTo.CarBelongsTo.onStopBraking -= OnStopBraking;
+            managerBelongsTo.CarBelongsTo.onEngageHandbrake -= OnStartBraking;
+            managerBelongsTo.CarBelongsTo.onDisengageHandbrake -= OnStopBraking;
         }
-        
+
+        public override void UpdateWhileManagerActive()
+        {
+            base.UpdateWhileManagerActive();
+
+            const float minSpeedKmh = 10;
+            if (managerBelongsTo.CarBelongsTo.SpeedKmh < minSpeedKmh)
+                FadeOut();
+        }
+
         private void OnStartBraking()
         {
-            if (managerBelongsTo.CarBelongsTo.IsStationary)
-                return;
-            
-            FadeIn();
+            if (!managerBelongsTo.CarBelongsTo.IsStationary)
+                FadeIn();
         }
         
         private void OnStopBraking()
