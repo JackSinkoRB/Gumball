@@ -99,8 +99,8 @@ namespace Gumball
             liveDecal.onMoved += OnSelectedDecalMoved;
             
             UpdateSendForwardBackwardButtons(liveDecal);
-
-            layerOptionHolder.GetChild(DecalEditor.Instance.CurrentSelected.Priority - 1).GetComponent<DecalLayerOption>().OnSelect();
+            
+            layerOptionHolder.GetActiveChild(liveDecal.Priority - 1).GetComponent<DecalLayerOption>().OnSelect();
             
             trashButton.interactable = true;
             
@@ -132,7 +132,7 @@ namespace Gumball
         private void OnSelectedDecalColourChanged(Color oldColor, Color newColor)
         {
             //update the color of the layer option
-            layerOptionHolder.GetChild(DecalEditor.Instance.CurrentSelected.Priority - 1).GetComponent<DecalLayerOption>().TextureIcon.color = newColor;
+            layerOptionHolder.GetActiveChild(DecalEditor.Instance.CurrentSelected.Priority - 1).GetComponent<DecalLayerOption>().TextureIcon.color = newColor;
         }
         
         private void OnUndoStackChange()

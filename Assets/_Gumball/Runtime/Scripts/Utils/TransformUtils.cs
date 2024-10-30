@@ -8,6 +8,23 @@ namespace Gumball
     public static class TransformUtils
     {
 
+        public static Transform GetActiveChild(this Transform transform, int index)
+        {
+            int count = 0;
+            foreach (Transform child in transform)
+            {
+                if (!child.gameObject.activeSelf)
+                    continue;
+                
+                if (count == index)
+                    return child;
+                
+                count++;
+            }
+
+            return null;
+        }
+        
         public static List<T> GetComponentsInAllChildren<T>(this Transform transform, List<T> existingComponents = null)
         {
             existingComponents ??= new List<T>();

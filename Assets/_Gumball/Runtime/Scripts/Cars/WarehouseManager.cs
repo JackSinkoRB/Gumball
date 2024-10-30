@@ -91,7 +91,8 @@ namespace Gumball
             if (SavedCarIndex == car.CarIndex)
                 return; //already selected
                 
-            Destroy(CurrentCar.gameObject);
+            if (CurrentCar != null)
+                Destroy(CurrentCar.gameObject);
             
             SetCurrentCar(car);
         }

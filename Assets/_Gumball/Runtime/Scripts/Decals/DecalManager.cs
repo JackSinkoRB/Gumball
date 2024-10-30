@@ -17,7 +17,7 @@ namespace Gumball
 
         public static LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture, int priority = -1)
         {
-            LiveDecal liveDecal = Instance.liveDecalPrefab.gameObject.GetSpareOrCreate<LiveDecal>();
+            LiveDecal liveDecal = Instance.liveDecalPrefab.gameObject.GetSpareOrCreate<LiveDecal>(poolOnDisable: false);
             DontDestroyOnLoad(liveDecal);
 
             liveDecal.transform.SetParent(DecalEditor.Instance.CurrentCar.transform);
