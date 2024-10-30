@@ -106,6 +106,8 @@ namespace Gumball
             PanelManager.GetPanel<PlayerStatsPanel>().Show();
 
             WarehouseManager.Instance.SwapCurrentCar(carInstance);
+            
+            carInstance = null; //remove the instance reference since it is now the current car
         }
 
         public void OnSuccessfulPurchase()
