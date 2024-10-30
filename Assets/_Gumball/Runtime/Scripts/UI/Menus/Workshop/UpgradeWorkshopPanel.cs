@@ -24,7 +24,7 @@ namespace Gumball
 
             PanelManager.GetPanel<CarStatsPanel>().Show();
 
-            //hide all menus
+            //disable all the sub menus instantly in case they were left open to prevent popping
             modifySubMenu.Hide(instant: true);
             levelUpSubMenu.Hide(instant: true);
         }
