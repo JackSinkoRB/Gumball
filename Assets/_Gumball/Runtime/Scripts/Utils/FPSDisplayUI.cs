@@ -29,7 +29,7 @@ namespace Gumball
 
             timeSinceLastUpdate = 0;
             
-            label.text = $"{Mathf.RoundToInt(DynamicResolution.CurrentFPS)} | {Mathf.RoundToInt(DynamicResolution.CurrentScale * 100f)}%";
+            label.text = $"{Mathf.RoundToInt(QualityUtils.CurrentFPS)} | {Mathf.RoundToInt(DynamicResolution.CurrentScale * 100f)}% | {Mathf.RoundToInt(DynamicChunkCullDistance.CurrentDistance)}m";
         }
         
     }
