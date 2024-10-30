@@ -147,6 +147,11 @@ namespace Gumball
             
             DecalManager.SaveLiveDecalData(currentCar, liveDecals);
 
+            //ensure car is active before applying
+            bool wasActiveBefore = currentCar.gameObject.activeSelf;
+            currentCar.gameObject.SetActive(true);
+            
+            //apply
             foreach (LiveDecal liveDecal in liveDecals)
             {
                 liveDecal.Apply();
@@ -161,8 +166,12 @@ namespace Gumball
 
             //need to wait for the texture to fully apply before removing paintable components
             yield return null;
-            SessionCleanup();
             
+            //restore
+            currentCar.gameObject.SetActive(wasActiveBefore);
+            
+            SessionCleanup();
+
             GlobalLoggers.DecalsLogger.Log($"Ended session.");
             isSessionActive = false;
 

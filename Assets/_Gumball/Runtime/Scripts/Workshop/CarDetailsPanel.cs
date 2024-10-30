@@ -41,7 +41,8 @@ namespace Gumball
             if (carInstance == null)
             {
                 //disable the current car
-                WarehouseManager.Instance.CurrentCar.gameObject.SetActive(false);
+                if (WarehouseManager.Instance.CurrentCar != null)
+                    WarehouseManager.Instance.CurrentCar.gameObject.SetActive(false);
             }
             else
             {
@@ -105,6 +106,8 @@ namespace Gumball
             PanelManager.GetPanel<PlayerStatsPanel>().Show();
 
             WarehouseManager.Instance.SwapCurrentCar(carInstance);
+            
+            carInstance = null; //remove the instance reference since it is now the current car
         }
 
         public void OnSuccessfulPurchase()
