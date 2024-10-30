@@ -59,7 +59,8 @@ namespace Gumball
             
             //move to the car position
             RaycastHit[] results = new RaycastHit[1];
-            int hits = Physics.BoxCastNonAlloc(Camera.main.transform.position, new Vector3(0.1f, 10, 1), (WarehouseManager.Instance.CurrentCar.transform.position - Camera.main.transform.position).normalized,  results, Quaternion.LookRotation((WarehouseManager.Instance.CurrentCar.transform.position - Camera.main.transform.position).normalized), 1000, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.PaintableMesh));
+            const float maxDistance = 1000;
+            int hits = Physics.BoxCastNonAlloc(Camera.main.transform.position, new Vector3(0.1f, 10, 1), (WarehouseManager.Instance.CurrentCar.transform.position - Camera.main.transform.position).normalized,  results, Quaternion.LookRotation((WarehouseManager.Instance.CurrentCar.transform.position - Camera.main.transform.position).normalized), maxDistance, LayersAndTags.GetLayerMaskFromLayer(LayersAndTags.Layer.PaintableMesh));
             if (hits > 0)
             {
                 RaycastHit hit = results[0];
@@ -68,6 +69,8 @@ namespace Gumball
             }
             
             decal.SetValid(hits > 0);
+            
+            GlobalLoggers.DecalsLogger.Log($"Hit {(results.Length > 0 ? results[0] : "nothing")} ({hits} total) paintable meshes looking from {Camera.main.transform.position} to {((WarehouseManager.Instance.CurrentCar.transform.position - Camera.main.transform.position).normalized) * maxDistance}");
             
             DecalStateManager.LogStateChange(new DecalStateManager.CreateStateChange(decal));
             DecalEditor.Instance.SelectLiveDecal(decal);

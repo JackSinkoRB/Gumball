@@ -94,7 +94,6 @@ namespace Gumball
         private void OnEnable()
         {
             SetScale(paintDecal.Scale);
-            SetDefaultPosition();
         }
 
         private void OnDisable()
@@ -309,11 +308,6 @@ namespace Gumball
             }
 
             return overlappingDecals;
-        }
-
-        private void SetDefaultPosition()
-        {
-            OnMoveScreenPosition(new Vector2(Screen.width / 2f, Screen.height / 2f));
         }
 
         private void CalculateClickOffset()

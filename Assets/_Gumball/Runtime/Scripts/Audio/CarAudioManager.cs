@@ -8,14 +8,11 @@ namespace Gumball
 {
     public class CarAudioManager : MonoBehaviour
     {
-
-        [Header("Engine")]
-        [SerializeField, DisplayInspector] private CarAudio revving;
-        [SerializeField, DisplayInspector] private CarAudio nos;
-
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
-
+        [SerializeField, ReadOnly] private CarAudio[] audioInstances;
+        
         private Coroutine checkToEnableCoroutine;
         
         public AICar CarBelongsTo => carBelongsTo;
@@ -23,13 +20,18 @@ namespace Gumball
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
+
+            audioInstances = transform.GetComponentsInAllChildren<CarAudio>().ToArray();
             
-            revving.Initialise(this);
-            nos.Initialise(this);
+            foreach (CarAudio carAudio in audioInstances)
+                carAudio.Initialise(this);
         }
 
         private void LateUpdate()
         {
+            foreach (CarAudio carAudio in audioInstances)
+                carAudio.UpdateWhileManagerActive();
+            
             CheckToDisable();
         }
 
