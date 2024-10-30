@@ -41,7 +41,8 @@ namespace Gumball
             if (carInstance == null)
             {
                 //disable the current car
-                WarehouseManager.Instance.CurrentCar.gameObject.SetActive(false);
+                if (WarehouseManager.Instance.CurrentCar != null)
+                    WarehouseManager.Instance.CurrentCar.gameObject.SetActive(false);
             }
             else
             {
