@@ -21,7 +21,7 @@ namespace Gumball
         {
             get
             {
-                int currentIndex = Mathf.FloorToInt((float)TimeUtils.CurrentEpochSeconds / SecondsPerMonth) % monthProfiles.Length;
+                int currentIndex = Mathf.FloorToInt((float)PlayFabManager.CurrentEpochSecondsSynced / SecondsPerMonth) % monthProfiles.Length;
                 return monthProfiles[currentIndex];
             }
         }

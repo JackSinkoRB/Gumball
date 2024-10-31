@@ -19,12 +19,39 @@ namespace Gumball
         }
 
         private static Dictionary<string, string> titleDataCached;
-        
+
+        private static long serverTimeOnInitialise;
+        private static long gameTimeOnInitialise;
+
         public static ConnectionStatusType ConnectionStatus { get; private set; }
+        public static ConnectionStatusType ServerTimeInitialisationStatus { get; private set; }
+
+        /// <summary>
+        /// Returns the current time (in epoch seconds) after being synced with the PlayFab server.
+        /// </summary>
+        public static long CurrentEpochSecondsSynced {
+
+            get {
+                if (ServerTimeInitialisationStatus != ConnectionStatusType.SUCCESS)
+                    throw new InvalidOperationException("Cannot get server time because it hasn't been retrieved.");
+
+                return serverTimeOnInitialise + Mathf.RoundToInt(Time.realtimeSinceStartup)
+                       - gameTimeOnInitialise; //account for the time taken to initialise
+            }
+        }
         
-        public static void Initialise()
+        [RuntimeInitializeOnLoadMethod]
+        private static void RuntimeInitialise()
+        {
+            ConnectionStatus = ConnectionStatusType.LOADING;
+            ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
+        }
+
+        public static IEnumerator Initialise()
         {
             Login();
+            RetrieveServerTime();
+            yield return new WaitUntil(() => ConnectionStatus != ConnectionStatusType.LOADING && ServerTimeInitialisationStatus != ConnectionStatusType.LOADING);
         }
 
         public static T Get<T>(string key, T defaultValue = default)
@@ -104,6 +131,24 @@ namespace Gumball
                     
                     Debug.LogError($"Error getting PlayFab title data:\n{error.GenerateErrorReport()}");
                 });
+        }
+        
+        private static void RetrieveServerTime()
+        {
+            PlayFabClientAPI.GetTime(new GetTimeRequest(), OnRetrieveServerTimeSuccess, OnRetrieveServerTimeFailure);
+        }
+
+        private static void OnRetrieveServerTimeSuccess(GetTimeResult result)
+        {
+            serverTimeOnInitialise = new DateTimeOffset(result.Time).ToUnixTimeSeconds();;
+            gameTimeOnInitialise = Mathf.RoundToInt(Time.realtimeSinceStartup);
+        }
+        
+        private static void OnRetrieveServerTimeFailure(PlayFabError error)
+        {
+            ServerTimeInitialisationStatus = ConnectionStatusType.ERROR;
+            
+            Debug.LogWarning($"Failed to get server time: {error.GenerateErrorReport()}");
         }
     }
 }
