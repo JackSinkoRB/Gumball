@@ -12,10 +12,15 @@ namespace Gumball
         public const int WeeksInMonth = 4;
         public const int DaysInMonth = DaysInWeek * WeeksInMonth;
         public const long SecondsPerMonth = DaysInMonth * TimeUtils.SecondsInADay;
-
+        
         [SerializeField] private DailyLoginMonthProfile[] monthProfiles;
 
         public DailyLoginMonthProfile[] MonthProfiles => monthProfiles;
+
+        public long SecondsPassedInCurrentMonth => PlayFabManager.CurrentEpochSecondsSynced % SecondsPerMonth;
+        public int DaysPassedInCurrentMonth => Mathf.FloorToInt((float)SecondsPassedInCurrentMonth / TimeUtils.SecondsInADay);
+        public int DaysRemainingInCurrentMonth => DaysInMonth - DaysPassedInCurrentMonth;
+        public long SecondsLeftInCurrentDay => ((DaysPassedInCurrentMonth + 1) * TimeUtils.SecondsInADay) - SecondsPassedInCurrentMonth;
         
         public DailyLoginMonthProfile CurrentMonth
         {
