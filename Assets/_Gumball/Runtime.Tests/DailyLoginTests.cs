@@ -41,7 +41,9 @@ namespace Gumball.Runtime.Tests
             TimeUtils.SetTime(0);
             
             const int iterations = 2;
-            for (int count = 0; count < DailyLoginManager.Instance.MonthProfiles.Length * iterations; count++) {
+            for (int count = 0; count < DailyLoginManager.Instance.MonthProfiles.Length * iterations; count++)
+            {
+                LogAssert.Expect(LogType.Error, "Cannot get server time because it hasn't been retrieved.");
                 Assert.AreEqual(DailyLoginManager.Instance.MonthProfiles[count % DailyLoginManager.Instance.MonthProfiles.Length], DailyLoginManager.Instance.CurrentMonth);
                 TimeUtils.AddTimeOffset(new TimeSpan(DailyLoginManager.DaysInMonth, 0, 0, 0));
             }

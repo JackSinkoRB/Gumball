@@ -33,10 +33,14 @@ namespace Gumball
 
             get {
                 if (ServerTimeInitialisationStatus != ConnectionStatusType.SUCCESS)
-                    throw new InvalidOperationException("Cannot get server time because it hasn't been retrieved.");
+                {
+                    Debug.LogError("Cannot get server time because it hasn't been retrieved. Using local time.");
+                    return TimeUtils.CurrentEpochSeconds;
+                }
 
                 return serverTimeOnInitialise + Mathf.RoundToInt(Time.realtimeSinceStartup)
-                       - gameTimeOnInitialise; //account for the time taken to initialise
+                       - gameTimeOnInitialise //account for the time taken to initialise
+                       + TimeUtils.TimeOffsetSeconds; //account for debug offset
             }
         }
         
