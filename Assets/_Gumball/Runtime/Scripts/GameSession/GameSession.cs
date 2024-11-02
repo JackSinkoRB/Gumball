@@ -31,6 +31,8 @@ namespace Gumball
             ATTEMPTED,
             COMPLETE
         }
+        
+        private const string trafficCarsAddressableLabel = "TrafficCars";
 
         [Header("Info")]
         [SerializeField] private string displayName = "Level";
@@ -199,8 +201,12 @@ namespace Gumball
                     
                     TrafficLane[] lanes = randomDirection == ChunkTrafficManager.LaneDirection.FORWARD ? chunk.TrafficManager.LanesForward : chunk.TrafficManager.LanesBackward;
                     int randomLaneIndex = Random.Range(0, lanes.Length);
+
+                    //get random car prefab
+                    List<GameObject> allCars = AddressableUtils.LoadAssetsSync<GameObject>(trafficCarsAddressableLabel);
+                    AICar randomCar = allCars.GetRandom().GetComponent<AICar>();
                     
-                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex));
+                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex, randomCar));
                 }
 
                 chunkStartDistance += chunk.SplineLengthCached;
