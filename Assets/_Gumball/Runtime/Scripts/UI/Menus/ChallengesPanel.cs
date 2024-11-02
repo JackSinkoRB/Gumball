@@ -1,17 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Gumball
 {
     public class ChallengesPanel : AnimatedPanel
     {
 
+        [SerializeField] private ChallengesHeaderFilter header;
         [SerializeField] private ChallengesSubMenu dailyMenu;
         [SerializeField] private ChallengesSubMenu weeklyMenu;
         [SerializeField] private ChallengesSubMenu dailyLoginMenu;
 
         private ChallengesSubMenu defaultMenu => dailyLoginMenu;
+
+        public ChallengesHeaderFilter Header => header;
         
         protected override void OnShow()
         {
