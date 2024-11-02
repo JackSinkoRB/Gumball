@@ -54,8 +54,10 @@ namespace Gumball
         public static IEnumerator Initialise()
         {
             Login();
+            yield return new WaitUntil(() => ConnectionStatus != ConnectionStatusType.LOADING);
+            
             RetrieveServerTime();
-            yield return new WaitUntil(() => ConnectionStatus != ConnectionStatusType.LOADING && ServerTimeInitialisationStatus != ConnectionStatusType.LOADING);
+            yield return new WaitUntil(() => ServerTimeInitialisationStatus != ConnectionStatusType.LOADING);
         }
 
         public static T Get<T>(string key, T defaultValue = default)
@@ -139,6 +141,12 @@ namespace Gumball
         
         private static void RetrieveServerTime()
         {
+            if (ConnectionStatus != ConnectionStatusType.SUCCESS)
+            {
+                ServerTimeInitialisationStatus = ConnectionStatusType.ERROR;
+                return;
+            }
+
             PlayFabClientAPI.GetTime(new GetTimeRequest(), OnRetrieveServerTimeSuccess, OnRetrieveServerTimeFailure);
         }
 
@@ -146,6 +154,10 @@ namespace Gumball
         {
             serverTimeOnInitialise = new DateTimeOffset(result.Time).ToUnixTimeSeconds();;
             gameTimeOnInitialise = Mathf.RoundToInt(Time.realtimeSinceStartup);
+            
+            ServerTimeInitialisationStatus = ConnectionStatusType.SUCCESS;
+            
+            GlobalLoggers.PlayFabLogger.Log($"Successfully retrieved server time.");
         }
         
         private static void OnRetrieveServerTimeFailure(PlayFabError error)
