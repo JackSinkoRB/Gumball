@@ -143,7 +143,7 @@ namespace Gumball
         {
             allParts.Clear();
             
-            yield return AddressableUtils.LoadAssetsAsync(CorePartsAssetLabel, allParts, typeof(CorePart));
+            yield return AddressableUtils.LoadAssetsAsync(CorePartsAssetLabel, allParts);
 
             InitialiseSubPartSlots();
             GroupParts();

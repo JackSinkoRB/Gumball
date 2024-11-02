@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
+using Object = UnityEngine.Object;
 
 namespace Gumball
 {
@@ -20,9 +22,9 @@ namespace Gumball
         }
         
         /// <remarks>Does not release the handles. This is typically for loading things that will stay in memory (like for ScriptableObject catalogues).</remarks>
-        public static IEnumerator LoadAssetsAsync<T>(string label, List<T> list, Type type, Action onComplete = null)
+        public static IEnumerator LoadAssetsAsync<T>(string label, List<T> list, Action onComplete = null)
         {
-            AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync(label, type);
+            AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync(label, typeof(T));
             yield return handle;
 
             AsyncOperationHandle<T>[] handles = new AsyncOperationHandle<T>[handle.Result.Count];
@@ -41,11 +43,11 @@ namespace Gumball
         }
 
         /// <remarks>Does not release the handles. This is typically for loading things that will stay in memory (like for ScriptableObject catalogues).</remarks>
-        public static List<T> LoadAssetsSync<T>(string label, Type type)
+        public static List<T> LoadAssetsSync<T>(string label)
         {
             List<T> assets = new List<T>();
         
-            AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync(label, type);
+            AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync(label, typeof(T));
             handle.WaitForCompletion();
 
             foreach (IResourceLocation resourceLocation in handle.Result)
@@ -58,6 +60,6 @@ namespace Gumball
             Addressables.Release(handle);
             return assets;
         }
-        
+
     }
 }
