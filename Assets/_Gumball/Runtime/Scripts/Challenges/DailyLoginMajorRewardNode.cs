@@ -28,11 +28,17 @@ namespace Gumball
         [SerializeField] private Transform rewardUIHolder;
         [Space(5)]
         [SerializeField] private DailyLoginNodeColourCodes backgroundColourCodes;
+        [SerializeField] private DailyLoginNodeColourCodes topBackgroundColourCodes;
+        [SerializeField] private DailyLoginNodeColourCodes bottomBackgroundColourCodes;
         [SerializeField] private DailyLoginNodeColourCodes dayCircleColourCodes;
         [SerializeField] private DailyLoginNodeColourCodes standardCurrencyLabelColourCodes;
         [SerializeField] private DailyLoginNodeColourCodes standardCurrencyBackgroundColourCodes;
         [SerializeField] private DailyLoginNodeColourCodes standardCurrencyIconColourCodes;
-
+        [Space(5)]
+        [SerializeField] private Sprite premiumCurrencyIcon;
+        [SerializeField] private Sprite xpIcon;
+        [SerializeField] private Sprite fuelRefillIcon;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private MajorDailyLoginReward reward;
 
@@ -116,30 +122,51 @@ namespace Gumball
             foreach (Transform child in rewardUIHolder)
                 child.gameObject.Pool();
 
+            if (reward.Rewards.PremiumCurrency > 0)
+            {
+                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(reward, premiumCurrencyIcon, reward.Rewards.PremiumCurrency);
+            }
+            
+            if (reward.Rewards.XP > 0)
+            {
+                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(reward, xpIcon, reward.Rewards.XP);
+            }
+            
+            if (reward.Rewards.FuelRefill)
+            {
+                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(reward, fuelRefillIcon, 1);
+            }
+            
             foreach (CorePart corePart in reward.Rewards.CoreParts)
             {
-                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>();
+                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
                 instance.transform.SetAsLastSibling();
                 instance.Initialise(reward, corePart.Icon, 1);
             }
             
             foreach (SubPart subPart in reward.Rewards.SubParts)
             {
-                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>();
+                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
                 instance.transform.SetAsLastSibling();
                 instance.Initialise(reward, subPart.Icon, 1);
             }
             
             foreach (BlueprintReward blueprintReward in reward.Rewards.Blueprints)
             {
-                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>();
+                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
                 instance.transform.SetAsLastSibling();
                 instance.Initialise(reward, WarehouseManager.Instance.AllCarData[blueprintReward.CarIndex].Icon, blueprintReward.Blueprints);
             }
             
             foreach (Unlockable unlockableReward in reward.Rewards.Unlockables)
             {
-                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>();
+                DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
                 instance.transform.SetAsLastSibling();
                 instance.Initialise(reward, unlockableReward.Icon, 1);
             }
