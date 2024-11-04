@@ -67,13 +67,15 @@ namespace Gumball
             //fit vertical/horizontal:
             if (layoutDirection == LayoutDirection.HORIZONTAL && fitVertical)
             {
-                rectHeight = elementSize * numberOfRows;
+                float extraSpacing = fitVerticalSpacing * (numberOfRows - 1);
+                rectHeight = (elementSize * numberOfRows) + extraSpacing;
                 rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, rectHeight);
             }
             
             if (layoutDirection == LayoutDirection.VERTICAL && fitHorizontal)
             {
-                rectWidth = elementSize * numberOfRows;
+                float extraSpacing = fitHorizontalSpacing * (numberOfColumns - 1);
+                rectWidth = (elementSize * numberOfColumns) + extraSpacing;
                 rectTransform.sizeDelta = new Vector2(rectWidth, rectTransform.sizeDelta.y);
             }
             
@@ -81,11 +83,7 @@ namespace Gumball
             Vector2 spacing = new Vector2(
                 numberOfColumns == 1 ? 0 : (rectWidth - (elementSize * numberOfColumns)) / (numberOfColumns - 1),
                 numberOfRows == 1 ? 0 : (rectHeight - (elementSize * numberOfRows)) / (numberOfRows - 1));
-            if (layoutDirection == LayoutDirection.HORIZONTAL && fitVertical)
-                spacing = spacing.SetY(fitVerticalSpacing);
-            if (layoutDirection == LayoutDirection.VERTICAL && fitHorizontal)
-                spacing = spacing.SetX(fitHorizontalSpacing);
-            
+
             int count = 0;
             foreach (RectTransform child in transform)
             {
