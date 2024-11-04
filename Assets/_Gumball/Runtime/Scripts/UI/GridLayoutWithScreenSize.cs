@@ -79,8 +79,8 @@ namespace Gumball
             
             //get spacing:
             Vector2 spacing = new Vector2(
-                (rectWidth - (elementSize * numberOfColumns)) / (numberOfColumns - 1),
-                (rectHeight - (elementSize * numberOfRows)) / (numberOfRows - 1));
+                numberOfColumns == 1 ? 0 : (rectWidth - (elementSize * numberOfColumns)) / (numberOfColumns - 1),
+                numberOfRows == 1 ? 0 : (rectHeight - (elementSize * numberOfRows)) / (numberOfRows - 1));
             if (layoutDirection == LayoutDirection.HORIZONTAL && fitVertical)
                 spacing = spacing.SetY(fitVerticalSpacing);
             if (layoutDirection == LayoutDirection.VERTICAL && fitHorizontal)
