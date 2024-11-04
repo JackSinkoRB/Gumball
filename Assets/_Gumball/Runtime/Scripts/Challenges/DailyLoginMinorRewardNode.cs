@@ -9,19 +9,19 @@ using UnityEngine.UI;
 namespace Gumball
 {
     [RequireComponent(typeof(MultiImageButton))]
-    public class DailyLoginDayNode : MonoBehaviour
+    public class DailyLoginMinorRewardNode : MonoBehaviour
     {
 
         [Serializable]
         public struct ColourCodes
         {
             [SerializeField] private GlobalColourPalette.ColourCode locked;
-            [SerializeField] private GlobalColourPalette.ColourCode Unlocked;
-            [SerializeField] private GlobalColourPalette.ColourCode Claimed;
-
+            [SerializeField] private GlobalColourPalette.ColourCode unlocked;
+            [SerializeField] private GlobalColourPalette.ColourCode claimed;
+            
             public Color LockedColor => GlobalColourPalette.Instance.GetGlobalColor(locked);
-            public Color UnlockedColor => GlobalColourPalette.Instance.GetGlobalColor(Unlocked);
-            public Color ClaimedColor => GlobalColourPalette.Instance.GetGlobalColor(Claimed);
+            public Color UnlockedColor => GlobalColourPalette.Instance.GetGlobalColor(unlocked);
+            public Color ClaimedColor => GlobalColourPalette.Instance.GetGlobalColor(claimed);
         }
         
         [SerializeField] private Image topBackground;
@@ -35,9 +35,9 @@ namespace Gumball
         [SerializeField] private Sprite lockedIcon;
         [SerializeField] private Sprite unlockedIcon;
         [Space(5)]
-        [SerializeField] private ColourCodes backgroundColourCodes;
-        [SerializeField] private ColourCodes circleColourCodes;
-        [SerializeField] private ColourCodes iconColourCodes;
+        [SerializeField] private DailyLoginNodeColourCodes backgroundColourCodes;
+        [SerializeField] private DailyLoginNodeColourCodes circleColourCodes;
+        [SerializeField] private DailyLoginNodeColourCodes iconColourCodes;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private MinorDailyLoginReward reward;
