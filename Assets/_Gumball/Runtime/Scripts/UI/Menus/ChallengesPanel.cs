@@ -21,9 +21,17 @@ namespace Gumball
         {
             base.OnShow();
 
+            PanelManager.GetPanel<MainMenuPanel>().Hide();
             OpenSubMenu(defaultMenu);
         }
-        
+
+        protected override void OnHide()
+        {
+            base.OnHide();
+            
+            PanelManager.GetPanel<MainMenuPanel>().Show();
+        }
+
         public void OpenSubMenu(ChallengesSubMenu subMenu)
         {
             if (subMenu != null && subMenu.IsShowing)
