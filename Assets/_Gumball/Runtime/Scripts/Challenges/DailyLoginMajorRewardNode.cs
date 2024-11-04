@@ -13,6 +13,8 @@ namespace Gumball
     {
 
         [SerializeField] private Image background;
+        [SerializeField] private Image topBackground;
+        [SerializeField] private Image bottomBackground;
         [SerializeField] private Image dayCircle;
         [SerializeField] private Image standardCurrencyBackground;
         [SerializeField] private Image standardCurrencyIcon;
@@ -56,7 +58,12 @@ namespace Gumball
                 //locked
                 button.interactable = false;
                 
+                topBackground.gameObject.SetActive(false);
+                bottomBackground.gameObject.SetActive(false);
+
                 background.color = backgroundColourCodes.LockedColor;
+                topBackground.color = topBackgroundColourCodes.LockedColor;
+                bottomBackground.color = bottomBackgroundColourCodes.LockedColor;
                 dayCircle.color = dayCircleColourCodes.LockedColor;
                 standardCurrencyBackground.color = standardCurrencyBackgroundColourCodes.LockedColor;
                 standardCurrencyIcon.color = standardCurrencyIconColourCodes.LockedColor;
@@ -70,7 +77,12 @@ namespace Gumball
                 //unlocked
                 button.interactable = true;
                 
+                topBackground.gameObject.SetActive(true);
+                bottomBackground.gameObject.SetActive(true);
+
                 background.color = backgroundColourCodes.UnlockedColor;
+                topBackground.color = topBackgroundColourCodes.UnlockedColor;
+                bottomBackground.color = bottomBackgroundColourCodes.UnlockedColor;
                 dayCircle.color = dayCircleColourCodes.UnlockedColor;
                 standardCurrencyBackground.color = standardCurrencyBackgroundColourCodes.UnlockedColor;
                 standardCurrencyIcon.color = standardCurrencyIconColourCodes.UnlockedColor;
@@ -84,7 +96,12 @@ namespace Gumball
                 //claimed
                 button.interactable = false;
                 
+                topBackground.gameObject.SetActive(true);
+                bottomBackground.gameObject.SetActive(true);
+
                 background.color = backgroundColourCodes.ClaimedColor;
+                topBackground.color = topBackgroundColourCodes.ClaimedColor;
+                bottomBackground.color = bottomBackgroundColourCodes.ClaimedColor;
                 dayCircle.color = dayCircleColourCodes.ClaimedColor;
                 standardCurrencyBackground.color = standardCurrencyBackgroundColourCodes.ClaimedColor;
                 standardCurrencyIcon.color = standardCurrencyIconColourCodes.ClaimedColor;
