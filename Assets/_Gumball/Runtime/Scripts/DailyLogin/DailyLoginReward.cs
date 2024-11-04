@@ -9,9 +9,8 @@ namespace Gumball
     public class DailyLoginReward
     {
 
-        [SerializeField] private Rewards rewards;
-
         public bool IsReady; //TODO
+        public bool IsClaimed; //TODO
 
     }
 }

@@ -8,14 +8,17 @@ namespace Gumball
     [Serializable]
     public class DailyLoginWeekProfile
     {
-        
-        [SerializeField] private DailyLoginReward day1;
-        [SerializeField] private DailyLoginReward day2;
-        [SerializeField] private DailyLoginReward day3;
-        [SerializeField] private DailyLoginReward day4;
-        [SerializeField] private DailyLoginReward day5;
-        [SerializeField] private DailyLoginReward day6;
-        [SerializeField] private DailyLoginReward day7;
+
+        [SerializeField] private MinorDailyLoginReward day1Reward;
+        [SerializeField] private MinorDailyLoginReward day2Reward;
+        [SerializeField] private MinorDailyLoginReward day3Reward;
+        [SerializeField] private MinorDailyLoginReward day4Reward;
+        [SerializeField] private MinorDailyLoginReward day5Reward;
+        [SerializeField] private MinorDailyLoginReward day6Reward;
+        [SerializeField] private MajorDailyLoginReward day7Reward;
+
+        public MinorDailyLoginReward[] MinorRewards => new[] { day1Reward, day2Reward, day3Reward, day4Reward, day5Reward, day6Reward };
+        public MajorDailyLoginReward MajorReward => day7Reward;
 
     }
 }
