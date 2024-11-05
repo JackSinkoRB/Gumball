@@ -43,11 +43,50 @@ namespace Gumball.Runtime.Tests
             const int iterations = 2;
             for (int count = 0; count < DailyLoginManager.Instance.MonthProfiles.Length * iterations; count++)
             {
-                LogAssert.Expect(LogType.Error, "Cannot get server time because it hasn't been retrieved.");
                 Assert.AreEqual(DailyLoginManager.Instance.MonthProfiles[count % DailyLoginManager.Instance.MonthProfiles.Length], DailyLoginManager.Instance.CurrentMonth);
                 TimeUtils.AddTimeOffset(new TimeSpan(DailyLoginManager.DaysInMonth, 0, 0, 0));
             }
         }
+
+        [UnityTest]
+        [Order(1)]
+        public IEnumerator SecondsPassedInCurrentMonth()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            TimeUtils.SetTime(0);
+            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            
+            TimeUtils.AddTimeOffset(TimeSpan.FromSeconds(100));
+            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            
+            TimeUtils.SetTime(0);
+            TimeUtils.AddTimeOffset(new TimeSpan(DailyLoginManager.DaysInMonth, 0, 0, 0));
+            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            
+            TimeUtils.AddTimeOffset(TimeSpan.FromSeconds(100));
+            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+        }
         
+        [UnityTest]
+        [Order(1)]
+        public IEnumerator DaysPassedInCurrentMonth()
+        {
+            yield return new WaitUntil(() => isInitialised);
+
+            TimeUtils.SetTime(0);
+            Assert.AreEqual(0, DailyLoginManager.Instance.DaysPassedInCurrentMonth);
+
+            TimeUtils.AddTimeOffset(new TimeSpan(1, 1, 0, 0));
+            Assert.AreEqual(1, DailyLoginManager.Instance.DaysPassedInCurrentMonth);
+            
+            TimeUtils.SetTime(0);
+            TimeUtils.AddTimeOffset(new TimeSpan(DailyLoginManager.DaysInMonth, 0, 0, 0));
+            Assert.AreEqual(0, DailyLoginManager.Instance.DaysPassedInCurrentMonth);
+            
+            TimeUtils.AddTimeOffset(new TimeSpan(1, 1, 0, 0));
+            Assert.AreEqual(1, DailyLoginManager.Instance.DaysPassedInCurrentMonth);
+        }
+
     }
 }
