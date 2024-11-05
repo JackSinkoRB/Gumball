@@ -28,5 +28,12 @@ namespace Gumball
                 PanelManager.GetPanel<RewardPanel>().QueueStandardCurrencyReward(amount);
         }
         
+        public static void GivePremiumCurrency(int amount)
+        {
+            Currency.Premium.AddFunds(amount);
+            if (PanelManager.PanelExists<RewardPanel>())
+                PanelManager.GetPanel<RewardPanel>().QueuePremiumCurrencyReward(amount);
+        }
+        
     }
 }
