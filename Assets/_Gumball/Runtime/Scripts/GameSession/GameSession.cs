@@ -534,6 +534,13 @@ namespace Gumball
             if (introTime <= 0)
                 yield break;
             
+            //set temporary speed limit
+            foreach (AICar racer in currentRacers.Keys)
+            {
+                if (racer != null)
+                    racer.SetTemporarySpeedLimit(racersStartingSpeed);
+            }
+
             drivingCameraController.SetState(drivingCameraController.IntroState);
             drivingCameraController.SkipTransition();
                 
@@ -543,6 +550,16 @@ namespace Gumball
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
 
             yield return IntroCountdownIE();
+            
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
+            PanelManager.GetPanel<SessionIntroPanel>().Hide();
+            
+            //remove temporary speed limit
+            foreach (AICar racer in currentRacers.Keys)
+            {
+                if (racer != null)
+                    racer.RemoveTemporarySpeedLimit();
+            }
         }
         
         private IEnumerator IntroCountdownIE()
@@ -559,9 +576,6 @@ namespace Gumball
                     
                 remainingIntroTime -= timeBetweenCountdownUpdates;
             }
-            
-            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
-            PanelManager.GetPanel<SessionIntroPanel>().Hide();
         }
 
         private void SetupPlayerCar()
