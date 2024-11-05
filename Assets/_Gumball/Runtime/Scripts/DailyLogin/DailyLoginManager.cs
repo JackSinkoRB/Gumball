@@ -54,15 +54,72 @@ namespace Gumball
         
         [SerializeField] private DailyLoginMonthProfile[] monthProfiles;
 
+        private int CurrentMonthIndexTracker
+        {
+            get => DataManager.Player.Get("Challenges.CurrentMonthIndexTracker", -1);
+            set => DataManager.Player.Set("Challenges.CurrentMonthIndexTracker", value);
+        }
+        
+        private int CurrentDayNumberTracker
+        {
+            get => DataManager.Player.Get("Challenges.CurrentDayNumberTracker", 1);
+            set => DataManager.Player.Set("Challenges.CurrentDayNumberTracker", value);
+        }
+        
+        private long TimeWhenCurrentDayIsReady
+        {
+            get => DataManager.Player.Get("Challenges.TimeWhenCurrentDayIsReady", 0);
+            set => DataManager.Player.Set("Challenges.TimeWhenCurrentDayIsReady", value);
+        }
+        
         public DailyLoginMonthProfile[] MonthProfiles => monthProfiles;
 
         public long SecondsPassedInCurrentMonth => PlayFabManager.CurrentEpochSecondsSynced % SecondsPerMonth;
         public int DaysPassedInCurrentMonth => Mathf.FloorToInt((float)SecondsPassedInCurrentMonth / TimeUtils.SecondsInADay);
         public int DaysRemainingInCurrentMonth => DaysInMonth - DaysPassedInCurrentMonth;
         public long SecondsLeftInCurrentDay => ((DaysPassedInCurrentMonth + 1) * TimeUtils.SecondsInADay) - SecondsPassedInCurrentMonth;
-
+        
         public int CurrentMonthIndex => Mathf.FloorToInt((float)PlayFabManager.CurrentEpochSecondsSynced / SecondsPerMonth) % monthProfiles.Length;
         public DailyLoginMonthProfile CurrentMonth => monthProfiles[CurrentMonthIndex];
+
+        public bool IsDayReady(int dayNumber)
+        {
+            CheckToResetDataIfMonthChanged();
+
+            if (dayNumber != CurrentDayNumberTracker)
+                return false;
+            
+            return PlayFabManager.CurrentEpochSecondsSynced >= TimeWhenCurrentDayIsReady;
+        }
+
+        public bool IsDayClaimed(int dayNumber)
+        {
+            CheckToResetDataIfMonthChanged();
+
+            //the day has been claimed if the current day is greater than it
+            return dayNumber > CurrentDayNumberTracker;
+        }
+        
+        //TODO: call this when clicking claim
+        public void IncreaseCurrentDayNumber()
+        {
+            CurrentDayNumberTracker++;
+            TimeWhenCurrentDayIsReady = PlayFabManager.CurrentEpochSecondsSynced + SecondsLeftInCurrentDay;
+        }
+
+        private void CheckToResetDataIfMonthChanged()
+        {
+            //save the current month index to save data, if it is different, reset the days save data
+            if (CurrentMonthIndexTracker == CurrentMonthIndex)
+                return;
+            
+            //reset the data
+            CurrentMonthIndexTracker = CurrentMonthIndex;
+            CurrentDayNumberTracker = 1;
+            TimeWhenCurrentDayIsReady = 0;
+            
+            GlobalLoggers.DailyLoginLogger.Log($"Detected month change - Current month index is {CurrentMonthIndex}");
+        }
         
     }
 }

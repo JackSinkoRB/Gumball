@@ -12,18 +12,6 @@ namespace Gumball
     public class DailyLoginMinorRewardNode : MonoBehaviour
     {
 
-        [Serializable]
-        public struct ColourCodes
-        {
-            [SerializeField] private GlobalColourPalette.ColourCode locked;
-            [SerializeField] private GlobalColourPalette.ColourCode unlocked;
-            [SerializeField] private GlobalColourPalette.ColourCode claimed;
-            
-            public Color LockedColor => GlobalColourPalette.Instance.GetGlobalColor(locked);
-            public Color UnlockedColor => GlobalColourPalette.Instance.GetGlobalColor(unlocked);
-            public Color ClaimedColor => GlobalColourPalette.Instance.GetGlobalColor(claimed);
-        }
-        
         [SerializeField] private Image topBackground;
         [SerializeField] private Image bottomBackground;
         [SerializeField] private Image circle;
@@ -41,23 +29,25 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private MinorDailyLoginReward reward;
+        [SerializeField, ReadOnly] private int dayNumber;
 
         private MultiImageButton button => GetComponent<MultiImageButton>();
         
         public void Initialise(int dayNumber, MinorDailyLoginReward reward)
         {
-            dayLabel.text = $"Day {dayNumber}";
-            
-            SetReward(reward);
-        }
-
-        private void SetReward(MinorDailyLoginReward reward)
-        {
+            this.dayNumber = dayNumber;
             this.reward = reward;
             
+            dayLabel.text = $"Day {dayNumber}";
+            
+            SetReward();
+        }
+
+        private void SetReward()
+        {
             standardCurrencyLabel.text = $"+{reward.StandardCurrencyReward}";
             
-            if (!reward.IsReady)
+            if (!DailyLoginManager.Instance.IsDayReady(dayNumber))
             {
                 //locked
                 button.interactable = false;
@@ -70,7 +60,7 @@ namespace Gumball
                 icon.sprite = lockedIcon;
             }
             else
-            if (reward.IsReady && !reward.IsClaimed)
+            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && !DailyLoginManager.Instance.IsDayClaimed(dayNumber))
             {
                 //unlocked
                 button.interactable = true;
@@ -83,7 +73,7 @@ namespace Gumball
                 icon.sprite = unlockedIcon;
             }
             else
-            if (reward.IsReady && reward.IsClaimed)
+            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && DailyLoginManager.Instance.IsDayClaimed(dayNumber))
             {
                 //claimed
                 button.interactable = false;

@@ -9,8 +9,7 @@ namespace Gumball
     public class DailyLoginReward
     {
 
-        public bool IsReady; //TODO
-        public bool IsClaimed; //TODO
+
 
     }
 }

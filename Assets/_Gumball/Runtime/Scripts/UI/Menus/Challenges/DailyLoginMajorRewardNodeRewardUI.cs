@@ -17,7 +17,7 @@ namespace Gumball
         [SerializeField] private DailyLoginNodeColourCodes iconColourCodes;
         [SerializeField] private DailyLoginNodeColourCodes labelColourCodes;
 
-        public void Initialise(MajorDailyLoginReward reward, Sprite iconSprite, int amountValue)
+        public void Initialise(int dayNumber, Sprite iconSprite, int amountValue)
         {
             if (amountValue == 0)
             {
@@ -30,20 +30,20 @@ namespace Gumball
             icon.sprite = iconSprite;
             amountLabel.text = $"{amountValue}";
             
-            if (!reward.IsReady)
+            if (!DailyLoginManager.Instance.IsDayReady(dayNumber))
             {
                 amountCircle.color = circleColourCodes.LockedColor;
                 icon.color = iconColourCodes.LockedColor;
                 amountLabel.color = labelColourCodes.LockedColor;
             }
             else 
-            if (reward.IsReady && !reward.IsClaimed)
+            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && !DailyLoginManager.Instance.IsDayClaimed(dayNumber))
             {
                 amountCircle.color = circleColourCodes.UnlockedColor;
                 icon.color = iconColourCodes.UnlockedColor;
                 amountLabel.color = labelColourCodes.UnlockedColor;
             }
-            else if (reward.IsReady && reward.IsClaimed)
+            else if (DailyLoginManager.Instance.IsDayReady(dayNumber) && DailyLoginManager.Instance.IsDayClaimed(dayNumber))
             {
                 amountCircle.color = circleColourCodes.ClaimedColor;
                 icon.color = iconColourCodes.ClaimedColor;
