@@ -46,14 +46,18 @@ namespace Gumball
         private void PopulateMinorRewards()
         {
             int dayNodeCount = 0;
+            int dayNumber = 1;
             foreach (DailyLoginWeekProfile week in DailyLoginManager.Instance.CurrentMonth.Weeks)
             {
                 foreach (MinorDailyLoginReward day in week.MinorRewards)
                 {
                     DailyLoginMinorRewardNode minorRewardNode = minorRewardNodes[dayNodeCount];
-                    minorRewardNode.Initialise(dayNodeCount + 1, day);
+                    minorRewardNode.Initialise(dayNumber, day);
                     dayNodeCount++;
+                    dayNumber++;
                 }
+
+                dayNumber++; //add 1 at end of week for the major rewards
             }
 
             Canvas.ForceUpdateCanvases();
