@@ -16,7 +16,13 @@ namespace Gumball
         [SerializeField] private Color deselectedFilterButtonColor = Color.grey;
         [SerializeField] private Image selector;
         [SerializeField] private Vector2 selectorPadding;
+        [SerializeField] private Transform dailyLoginNotification;
 
+        private void OnEnable()
+        {
+            UpdateDailyLoginNotification();
+        }
+        
         public void Select(Button categoryButton)
         {
             selector.rectTransform.anchoredPosition = categoryButton.GetComponent<RectTransform>().anchoredPosition;
@@ -27,6 +33,13 @@ namespace Gumball
                 foreach (Graphic graphic in button.transform.GetComponentsInAllChildren<Graphic>())
                     graphic.color = button == categoryButton  ? selectedFilterButtonColor : deselectedFilterButtonColor;
             }
+        }
+
+        public void UpdateDailyLoginNotification()
+        {
+            int currentDayNumber = DailyLoginManager.Instance.GetCurrentDayNumber();
+            bool isDayWaiting = DailyLoginManager.Instance.IsDayReady(currentDayNumber) && !DailyLoginManager.Instance.IsDayClaimed(currentDayNumber);
+            dailyLoginNotification.gameObject.SetActive(isDayWaiting);
         }
         
     }

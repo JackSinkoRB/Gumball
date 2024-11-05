@@ -12,6 +12,7 @@ namespace Gumball
             GiveRewards();
             
             DailyLoginManager.Instance.IncreaseCurrentDayNumber();
+            PanelManager.GetPanel<ChallengesPanel>().Header.UpdateDailyLoginNotification();
             PanelManager.GetPanel<DailyLoginChallengesSubMenu>().RefreshNodes();
         }
 

@@ -82,6 +82,12 @@ namespace Gumball
         public int CurrentMonthIndex => Mathf.FloorToInt((float)PlayFabManager.CurrentEpochSecondsSynced / SecondsPerMonth) % monthProfiles.Length;
         public DailyLoginMonthProfile CurrentMonth => monthProfiles[CurrentMonthIndex];
 
+        public int GetCurrentDayNumber()
+        {
+            CheckToResetDataIfMonthChanged();
+            return CurrentDayNumberTracker;
+        }
+        
         public bool IsDayReady(int dayNumber)
         {
             CheckToResetDataIfMonthChanged();
