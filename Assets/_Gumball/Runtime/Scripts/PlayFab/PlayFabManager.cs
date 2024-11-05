@@ -34,7 +34,7 @@ namespace Gumball
             get {
                 if (ServerTimeInitialisationStatus != ConnectionStatusType.SUCCESS)
                 {
-                    Debug.LogError("Cannot get server time because it hasn't been retrieved. Using local time.");
+                    Debug.LogWarning("Cannot get server time because it hasn't been retrieved. Using local time.");
                     return TimeUtils.CurrentEpochSeconds;
                 }
 
