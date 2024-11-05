@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading.Tasks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -189,7 +190,7 @@ namespace Gumball
 
             if (!currentValues.ContainsKey(key))
                 return defaultValue;
-            return (T)currentValues[key];
+            return (T)Convert.ChangeType(currentValues[key], typeof(T), CultureInfo.InvariantCulture);
         }
 
         public void RemoveKey(string key)
