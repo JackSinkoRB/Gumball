@@ -1,15 +1,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Gumball.Runtime.Tests;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 using Random = UnityEngine.Random;
 
 namespace Gumball.Editor.Tests
 {
     public class TimeUtilsTests
     {
-
+        
+        [SetUp]
+        public void SetUp()
+        {
+            DataManager.RemoveAllData();
+        }
+        
         [Test]
         public void SetTime()
         {
