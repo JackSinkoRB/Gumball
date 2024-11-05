@@ -22,19 +22,28 @@ namespace Gumball
         {
             base.OnShow();
 
-            StartCoroutine(PopulateNodes());
+            DailyLoginManager.onCurrentMonthChange += OnCurrentMonthChange;
+            
+            UpdateNodes();
         }
 
-        private IEnumerator PopulateNodes()
+        protected override void OnHide()
         {
-            yield return PopulateMinorRewards();
+            base.OnHide();
+            
+            DailyLoginManager.onCurrentMonthChange -= OnCurrentMonthChange;
+        }
+
+        private void UpdateNodes()
+        {
+            PopulateMinorRewards();
             PopulateMajorRewards();
             
             //set content size to the grid size for scrolling
             contentHolder.sizeDelta = contentHolder.sizeDelta.SetY(minorRewardsGrid.GetComponent<RectTransform>().sizeDelta.y + contentHolderExtraHeight);
         }
 
-        private IEnumerator PopulateMinorRewards()
+        private void PopulateMinorRewards()
         {
             int dayNodeCount = 0;
             foreach (DailyLoginWeekProfile week in DailyLoginManager.Instance.CurrentMonth.Weeks)
@@ -47,8 +56,7 @@ namespace Gumball
                 }
             }
 
-            //wait for ui layout to update
-            yield return null;
+            Canvas.ForceUpdateCanvases();
 
             minorRewardsGrid.Resize();
         }
@@ -76,6 +84,11 @@ namespace Gumball
             majorReward2.Initialise(14, DailyLoginManager.Instance.CurrentMonth.Weeks[1].MajorReward);
             majorReward3.Initialise(21, DailyLoginManager.Instance.CurrentMonth.Weeks[2].MajorReward);
             majorReward4.Initialise(28, DailyLoginManager.Instance.CurrentMonth.Weeks[3].MajorReward);
+        }
+        
+        private void OnCurrentMonthChange(int previousMonthIndex, int newMonthIndex)
+        {
+            UpdateNodes();
         }
         
     }
