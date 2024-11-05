@@ -69,25 +69,6 @@ namespace Gumball
             if (DailyLoginManager.Instance.IsDayClaimed(dayNumber))
             {
                 //claimed
-                button.interactable = true;
-                
-                topBackground.gameObject.SetActive(true);
-                bottomBackground.gameObject.SetActive(true);
-
-                background.color = backgroundColourCodes.UnlockedColor;
-                topBackground.color = topBackgroundColourCodes.UnlockedColor;
-                bottomBackground.color = bottomBackgroundColourCodes.UnlockedColor;
-                dayCircle.color = dayCircleColourCodes.UnlockedColor;
-                standardCurrencyBackground.color = standardCurrencyBackgroundColourCodes.UnlockedColor;
-                standardCurrencyIcon.color = standardCurrencyIconColourCodes.UnlockedColor;
-                standardCurrencyLabel.color = standardCurrencyLabelColourCodes.UnlockedColor;
-                
-                standardCurrencyIcon.sprite = standardCurrencySprite;
-            }
-            else
-            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && DailyLoginManager.Instance.IsDayClaimed(dayNumber))
-            {
-                //ready but not claimed
                 button.interactable = false;
                 
                 topBackground.gameObject.SetActive(true);
@@ -100,6 +81,25 @@ namespace Gumball
                 standardCurrencyBackground.color = standardCurrencyBackgroundColourCodes.ClaimedColor;
                 standardCurrencyIcon.color = standardCurrencyIconColourCodes.ClaimedColor;
                 standardCurrencyLabel.color = standardCurrencyLabelColourCodes.ClaimedColor;
+                
+                standardCurrencyIcon.sprite = standardCurrencySprite;
+            }
+            else
+            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && DailyLoginManager.Instance.IsDayClaimed(dayNumber))
+            {
+                //ready but not claimed
+                button.interactable = true;
+                
+                topBackground.gameObject.SetActive(true);
+                bottomBackground.gameObject.SetActive(true);
+
+                background.color = backgroundColourCodes.UnlockedColor;
+                topBackground.color = topBackgroundColourCodes.UnlockedColor;
+                bottomBackground.color = bottomBackgroundColourCodes.UnlockedColor;
+                dayCircle.color = dayCircleColourCodes.UnlockedColor;
+                standardCurrencyBackground.color = standardCurrencyBackgroundColourCodes.UnlockedColor;
+                standardCurrencyIcon.color = standardCurrencyIconColourCodes.UnlockedColor;
+                standardCurrencyLabel.color = standardCurrencyLabelColourCodes.UnlockedColor;
                 
                 standardCurrencyIcon.sprite = standardCurrencySprite;
             }
