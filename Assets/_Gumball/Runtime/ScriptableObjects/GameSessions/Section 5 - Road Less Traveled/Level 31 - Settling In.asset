@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: ea30d15ad083b5147b56ebfdec961f1f
   lastKnownName: Level 31 - Settling In
+  displayName: Level
   description: Description of session
   scene:
     scene:
@@ -30,9 +31,9 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   vehicleStartingPosition: {x: 10, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
+  isNightTime: 0
   globalLightIntensity: 1
   reflectionIntensity: 1
-  fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 2100
   finishLineMarkers:
@@ -65,8 +66,14 @@ MonoBehaviour:
     subParts:
     - {fileID: 11400000, guid: 13885b6d7cb66f64bba6cdcd19814f78, type: 2}
     unlockables: []
-  mainChallengeDescription: This is the challenge description
+    blueprints: []
   subObjectives: []
+  preSessionDialogue:
+    dialogue: []
+    uniqueID: f59c2bfb-3f3b-41be-910b-e376e4bb0995
+  postSessionDialogue:
+    dialogue: []
+    uniqueID: 84a74ce3-dbd3-4337-9f07-7b0290663232
   inProgress: 0
   currentRacers:
     list: []
@@ -74,6 +81,7 @@ MonoBehaviour:
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 13885b6d7cb66f64bba6cdcd19814f78, type: 2}
+  PreviousBlueprintRewards: 
   timeAllowedSeconds: 60
   timeRemainingSeconds: 0
   timerHasStarted: 0
