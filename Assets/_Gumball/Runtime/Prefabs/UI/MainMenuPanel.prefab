@@ -37,7 +37,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 246.16, y: 65.01}
+  m_SizeDelta: {x: 295.9, y: 65.01}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &770471670167005923
 MonoBehaviour:
@@ -81,7 +81,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: <size=65>W</size>ardrobe
+  m_text: <size=65>C</size>hallenges
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5431f98377c576246a31dfc5da2fdcab, type: 2}
   m_sharedMaterial: {fileID: -7580827099571785161, guid: 5431f98377c576246a31dfc5da2fdcab,
@@ -181,7 +181,7 @@ GameObject:
   - component: {fileID: 4131824495400297917}
   - component: {fileID: 7520985913709460038}
   m_Layer: 5
-  m_Name: WardrobeButton
+  m_Name: ChallengesButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -201,12 +201,13 @@ RectTransform:
   m_Children:
   - {fileID: 3694485129050585452}
   - {fileID: 9064063944009787523}
+  - {fileID: 1670911718756204971}
   m_Father: {fileID: 2967343746632775975}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 480, y: 50}
-  m_SizeDelta: {x: 461.16, y: 110}
+  m_SizeDelta: {x: 530.9, y: 110}
   m_Pivot: {x: 0, y: 0}
 --- !u!222 &7508173966821284126
 CanvasRenderer:
@@ -350,7 +351,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4840208259691018718}
         m_TargetAssemblyTypeName: Gumball.MainMenuPanel, Gumball
-        m_MethodName: OnClickWardrobeButton
+        m_MethodName: OnClickChallengesButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -364,6 +365,7 @@ MonoBehaviour:
   - {fileID: 160592403644068197}
   - {fileID: 8367562517366332315}
   - {fileID: 8173492792973455839}
+  - {fileID: 3815063706032231958}
   - {fileID: 4217827765527703410}
 --- !u!114 &7520985913709460038
 MonoBehaviour:
@@ -453,7 +455,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 2113e8dba96ee5449aa07f238007dced, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 93b5c8827f2b5ef428d0a002d1648f10, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -722,6 +724,7 @@ MonoBehaviour:
   disableWhenHidden: 1
   fadeElements: []
   slideElements: []
+  challengesNotification: {fileID: 1670911718756204971}
 --- !u!1 &2991764986105946251
 GameObject:
   m_ObjectHideFlags: 0
@@ -1264,7 +1267,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Challenges
+  m_text: Wardrobe
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1333,6 +1336,132 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &4070285141576680195
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1670911718756204971}
+  - component: {fileID: 3122950816189534154}
+  - component: {fileID: 3815063706032231958}
+  - component: {fileID: 6762896102695446082}
+  - component: {fileID: 3774970579276376769}
+  m_Layer: 5
+  m_Name: Notification
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1670911718756204971
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070285141576680195}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6980798424060854450}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.93, y: 0.45}
+  m_AnchorMax: {x: 1.1, y: 1.15}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0, y: 1}
+--- !u!222 &3122950816189534154
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070285141576680195}
+  m_CullTransparentMesh: 1
+--- !u!114 &3815063706032231958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070285141576680195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 0
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 99ab218bd48287a4fa584199ed37a4c2, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6762896102695446082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070285141576680195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c41b71ffa474b54598d1385ff514f66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  doPosition: 1
+  positionDuration: 1
+  positionDelay: 0.25
+  positionRandomisedDurationPercent: 0.1
+  xMovement: 0
+  yMovement: 15
+  zMovement: 0
+  positionEase: 28
+  defaultPosition: {x: 0, y: 0, z: 0}
+  finalPositionDuration: 0
+  doScale: 0
+  scaleDuration: 0
+  scaleRandomisedDurationPercent: 0.1
+  scaleAmount: {x: 0, y: 0, z: 0}
+  scaleEase: 0
+  defaultScale: {x: 0, y: 0, z: 0}
+  finalScaleDuration: 0
+--- !u!114 &3774970579276376769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4070285141576680195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &4157966699481659501
 GameObject:
   m_ObjectHideFlags: 0
@@ -1659,7 +1788,7 @@ GameObject:
   - component: {fileID: 3527994715181920773}
   - component: {fileID: 3531325117950890422}
   m_Layer: 5
-  m_Name: Challenges
+  m_Name: Wardrobe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1769,7 +1898,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4840208259691018718}
         m_TargetAssemblyTypeName: Gumball.MainMenuPanel, Gumball
-        m_MethodName: OnClickChallengesButton
+        m_MethodName: OnClickWardrobeButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -9,21 +9,17 @@ namespace Gumball
     {
 
         [SerializeField] private Button categoryButton;
-        [SerializeField] private Color selectedCategoryButtonColor = Color.white;
-        [SerializeField] private Color deselectedCategoryButtonColor = Color.white;
 
+        private ChallengesPanel challengesPanel => PanelManager.GetPanel<ChallengesPanel>();
+        
         protected override void OnShow()
         {
             base.OnShow();
-            
-            categoryButton.image.color = selectedCategoryButtonColor;
-        }
 
-        protected override void OnHide()
-        {
-            base.OnHide();
-            
-            categoryButton.image.color = deselectedCategoryButtonColor;
+            this.PerformAtEndOfFrame(() =>
+            {
+                challengesPanel.Header.Select(categoryButton);
+            });
         }
         
     }

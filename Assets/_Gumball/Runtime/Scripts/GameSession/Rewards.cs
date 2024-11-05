@@ -75,8 +75,8 @@ namespace Gumball
 
             //give premium currency
             if (premiumCurrency > 0)
-                Currency.Premium.AddFunds(premiumCurrency);
-            
+                RewardManager.GivePremiumCurrency(premiumCurrency);
+
             //replenish fuel
             if (fuelRefill)
                 FuelManager.Instance.ReplenishFuel();
