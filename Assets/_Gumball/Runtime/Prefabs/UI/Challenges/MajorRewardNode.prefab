@@ -193,9 +193,8 @@ MonoBehaviour:
     type: 3}
   xpIcon: {fileID: 21300000, guid: 381da379dd256ad448b93a3911a08e10, type: 3}
   fuelRefillIcon: {fileID: 21300000, guid: b2bc6c46aa11c2040b188bde21241c5e, type: 3}
+  dayNumber: 0
   reward:
-    IsReady: 0
-    IsClaimed: 0
     rewards:
       xp: 0
       standardCurrency: 0
@@ -286,7 +285,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1891015503614463834}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1005978809843498171}
+        m_TargetAssemblyTypeName: Gumball.DailyLoginRewardNode, Gumball
+        m_MethodName: OnClickButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   targetGraphics:
   - {fileID: 2944493745764841501}
   - {fileID: 766618912619246792}
@@ -549,7 +560,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 47.65
+  m_fontSize: 72
   m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -714,7 +725,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.000022888184, y: 0}
+  m_AnchoredPosition: {x: -0.000030517578, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8038874530214524097
@@ -773,7 +784,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 43.45
+  m_fontSize: 49.25
   m_fontSizeBase: 23.88
   m_fontWeight: 400
   m_enableAutoSizing: 1

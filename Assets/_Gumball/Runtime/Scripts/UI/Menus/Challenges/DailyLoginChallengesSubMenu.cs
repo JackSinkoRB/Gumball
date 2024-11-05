@@ -24,7 +24,7 @@ namespace Gumball
 
             DailyLoginManager.onCurrentMonthChange += OnCurrentMonthChange;
             
-            UpdateNodes();
+            RefreshNodes();
         }
 
         protected override void OnHide()
@@ -34,7 +34,7 @@ namespace Gumball
             DailyLoginManager.onCurrentMonthChange -= OnCurrentMonthChange;
         }
 
-        private void UpdateNodes()
+        public void RefreshNodes()
         {
             PopulateMinorRewards();
             PopulateMajorRewards();
@@ -88,7 +88,7 @@ namespace Gumball
         
         private void OnCurrentMonthChange(int previousMonthIndex, int newMonthIndex)
         {
-            UpdateNodes();
+            RefreshNodes();
         }
         
     }

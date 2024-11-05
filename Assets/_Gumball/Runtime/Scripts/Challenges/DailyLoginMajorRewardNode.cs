@@ -9,7 +9,7 @@ using UnityEngine.UI;
 namespace Gumball
 {
     [RequireComponent(typeof(MultiImageButton))]
-    public class DailyLoginMajorRewardNode : MonoBehaviour
+    public class DailyLoginMajorRewardNode : DailyLoginRewardNode
     {
 
         [SerializeField] private Image background;
@@ -55,34 +55,20 @@ namespace Gumball
             SetReward();
         }
         
+        protected override void GiveRewards()
+        {
+            CoroutineHelper.StartCoroutineOnCurrentScene(reward.Rewards.GiveRewards());
+        }
+
         private void SetReward()
         {
             standardCurrencyLabel.text = $"+{reward.Rewards.StandardCurrency}";
 
             PopulateRewards();
             
-            if (!DailyLoginManager.Instance.IsDayReady(dayNumber))
+            if (DailyLoginManager.Instance.IsDayClaimed(dayNumber))
             {
-                //locked
-                button.interactable = false;
-                
-                topBackground.gameObject.SetActive(false);
-                bottomBackground.gameObject.SetActive(false);
-
-                background.color = backgroundColourCodes.LockedColor;
-                topBackground.color = topBackgroundColourCodes.LockedColor;
-                bottomBackground.color = bottomBackgroundColourCodes.LockedColor;
-                dayCircle.color = dayCircleColourCodes.LockedColor;
-                standardCurrencyBackground.color = standardCurrencyBackgroundColourCodes.LockedColor;
-                standardCurrencyIcon.color = standardCurrencyIconColourCodes.LockedColor;
-                standardCurrencyLabel.color = standardCurrencyLabelColourCodes.LockedColor;
-
-                standardCurrencyIcon.sprite = standardCurrencyLockedSprite;
-            }
-            else
-            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && !DailyLoginManager.Instance.IsDayClaimed(dayNumber))
-            {
-                //unlocked
+                //claimed
                 button.interactable = true;
                 
                 topBackground.gameObject.SetActive(true);
@@ -101,7 +87,7 @@ namespace Gumball
             else
             if (DailyLoginManager.Instance.IsDayReady(dayNumber) && DailyLoginManager.Instance.IsDayClaimed(dayNumber))
             {
-                //claimed
+                //ready but not claimed
                 button.interactable = false;
                 
                 topBackground.gameObject.SetActive(true);
@@ -116,6 +102,25 @@ namespace Gumball
                 standardCurrencyLabel.color = standardCurrencyLabelColourCodes.ClaimedColor;
                 
                 standardCurrencyIcon.sprite = standardCurrencySprite;
+            }
+            else
+            if (!DailyLoginManager.Instance.IsDayReady(dayNumber))
+            {
+                //locked
+                button.interactable = false;
+                
+                topBackground.gameObject.SetActive(false);
+                bottomBackground.gameObject.SetActive(false);
+
+                background.color = backgroundColourCodes.LockedColor;
+                topBackground.color = topBackgroundColourCodes.LockedColor;
+                bottomBackground.color = bottomBackgroundColourCodes.LockedColor;
+                dayCircle.color = dayCircleColourCodes.LockedColor;
+                standardCurrencyBackground.color = standardCurrencyBackgroundColourCodes.LockedColor;
+                standardCurrencyIcon.color = standardCurrencyIconColourCodes.LockedColor;
+                standardCurrencyLabel.color = standardCurrencyLabelColourCodes.LockedColor;
+
+                standardCurrencyIcon.sprite = standardCurrencyLockedSprite;
             }
         }
 

@@ -97,10 +97,9 @@ namespace Gumball
             CheckToResetDataIfMonthChanged();
 
             //the day has been claimed if the current day is greater than it
-            return dayNumber > CurrentDayNumberTracker;
+            return CurrentDayNumberTracker > dayNumber;
         }
         
-        //TODO: call this when clicking claim
         public void IncreaseCurrentDayNumber()
         {
             CurrentDayNumberTracker++;
