@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: 25c5106582eb29244932e58b6b5ed9c9
   lastKnownName: Level 41 - Siem Reap Province
+  displayName: Level
   description: Description of session
   scene:
     scene:
@@ -30,9 +31,9 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   vehicleStartingPosition: {x: 3, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
+  isNightTime: 0
   globalLightIntensity: 1
   reflectionIntensity: 1
-  fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 2100
   finishLineMarkers:
@@ -40,125 +41,270 @@ MonoBehaviour:
       type: 3}
     distanceFromSpline: 5
   racerData:
-  - assetReference:
+  - carAssetReference:
       m_AssetGUID: 007b6760012e172418eb7e49956334ab
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 2.5
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
     startingPosition:
       position: {x: 3, y: 0.1, z: 125}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.5
     performanceProfile:
       maxSpeed: 0.124
       acceleration: 0.102
       handling: 0.07
       nos: 0
     currentPerformanceRating:
-      totalRating: 335
-      maxSpeedRating: 127
-      accelerationSpeedRating: 88
+      totalRating: 245
+      maxSpeedRating: 72
+      accelerationSpeedRating: 98
       handlingRating: 41
-      nosRating: 79
-  - assetReference:
+      nosRating: 34
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+  - carAssetReference:
       m_AssetGUID: b5028991c62dbc64a99eb0b82d8b0745
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 2.5
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
     startingPosition:
       position: {x: 3, y: 0.1, z: 150}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.5
     performanceProfile:
       maxSpeed: 0.189
       acceleration: 0.202
       handling: 0.183
       nos: 0.116
     currentPerformanceRating:
-      totalRating: 335
-      maxSpeedRating: 110
-      accelerationSpeedRating: 103
-      handlingRating: 46
-      nosRating: 76
-  - assetReference:
+      totalRating: 281
+      maxSpeedRating: 64
+      accelerationSpeedRating: 132
+      handlingRating: 52
+      nosRating: 33
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+  - carAssetReference:
       m_AssetGUID: 99c974c8da4d7ca4f9489658e6adb107
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 2.5
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
     startingPosition:
       position: {x: 3, y: 0.1, z: 175}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.5
     performanceProfile:
       maxSpeed: 0.055
       acceleration: 0.043
       handling: 0.035
       nos: 0
     currentPerformanceRating:
-      totalRating: 335
-      maxSpeedRating: 97
-      accelerationSpeedRating: 140
-      handlingRating: 46
-      nosRating: 52
-  - assetReference:
+      totalRating: 411
+      maxSpeedRating: 62
+      accelerationSpeedRating: 222
+      handlingRating: 62
+      nosRating: 65
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+  - carAssetReference:
       m_AssetGUID: 9e6cb95863f6d6a4bbd5c83903375a7a
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 2.5
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
     startingPosition:
       position: {x: 3, y: 0.1, z: 200}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.5
     performanceProfile:
       maxSpeed: 0.357
       acceleration: 0.335
       handling: 0.345
       nos: 0.258
     currentPerformanceRating:
-      totalRating: 335
-      maxSpeedRating: 149
-      accelerationSpeedRating: 85
+      totalRating: 273
+      maxSpeedRating: 75
+      accelerationSpeedRating: 97
       handlingRating: 57
       nosRating: 44
-  - assetReference:
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+  - carAssetReference:
       m_AssetGUID: e88edf073eda248429d699a6081a669f
       m_SubObjectName: 
       m_SubObjectType: 
       m_EditorAssetChanged: 0
-    canCrossMiddle: 0
-    racingLineImprecisionMaxDistance: 2.5
+    infoProfile:
+      displayName: Racer
+      icon: {fileID: 0}
     startingPosition:
       position: {x: 3, y: 0.1, z: 225}
       rotation: {x: 0, y: 0, z: 0, w: 0}
+    canCrossMiddle: 0
+    racingLineImprecisionMaxDistance: 2.5
     performanceProfile:
       maxSpeed: 0.328
       acceleration: 0.339
       handling: 0.297
       nos: 0.25
     currentPerformanceRating:
-      totalRating: 335
-      maxSpeedRating: 117
-      accelerationSpeedRating: 110
+      totalRating: 287
+      maxSpeedRating: 59
+      accelerationSpeedRating: 120
       handlingRating: 49
       nosRating: 59
+    bodyPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
+    wheelPaintSwatch:
+      color: {r: 1, g: 1, b: 1, a: 1}
+      specular: {r: 0, g: 0, b: 0, a: 1}
+      type: 0
+      smoothness: 0.5
+      clearCoat: 1
+      clearCoatSmoothness: 1
   racersStartingSpeed: 100
   trafficIsProcedural: 1
   trafficDensity: 100
-  trafficBikes: []
+  trafficBikes:
+  - m_AssetGUID: ad5d6e674d828354bae351ed392af887
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 7571d49649fd70547992a89a6320bf27
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: de0e97f38965fcd40b5a95aec4cf99a4
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c261adf1023fc5140a97bba6895a6a32
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficCars:
   - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  - m_AssetGUID: 81825441c04ee5c468680e955e2bb0b3
+  - m_AssetGUID: 854009bd5128bca4eb9970aaaa55e47e
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  trafficTrucks: []
+  - m_AssetGUID: dc61ee74d9b3f304995a46cf982f41fb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 583f4d2f825774941a7709d7a3188ab7
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 854009bd5128bca4eb9970aaaa55e47e
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: dc61ee74d9b3f304995a46cf982f41fb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 583f4d2f825774941a7709d7a3188ab7
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  trafficTrucks:
+  - m_AssetGUID: 9df3aaea5c1ac4b4299ff7ed1c186d5f
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 31f43c0006dc22c44bf7e659902a0be2
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c6391c593f9e2b544a2852ddfdd327d9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: f81bfb69dc8428742b705f8a705b99a9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 60332573bd046ef4eb65a4df6278f795
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficSpawnPositions:
     Value: []
   rewards:
@@ -170,9 +316,10 @@ MonoBehaviour:
     subParts:
     - {fileID: 11400000, guid: 6f1c21c24065fe043952144a66ad9a5b, type: 2}
     unlockables: []
-  mainChallengeDescription: This is the challenge description
+    blueprints: []
   subObjectives:
   - description: Slipstream for 10 meters
+    icon: {fileID: 0}
     tracker: {fileID: 11400000, guid: e46f156a197b2cf49a23ea72b06f03e1, type: 2}
     goal: 10
     rewards:
@@ -183,7 +330,14 @@ MonoBehaviour:
       coreParts: []
       subParts: []
       unlockables: []
+      blueprints: []
     uniqueID: 28bfca20-1010-400e-89d8-f2ff9e692850
+  preSessionDialogue:
+    dialogue: []
+    uniqueID: 8bbeb031-8c4d-4089-9f9c-5b85005f8831
+  postSessionDialogue:
+    dialogue: []
+    uniqueID: e904f7c8-4e0a-46a7-8fca-15d60485f0fc
   inProgress: 0
   currentRacers:
     list: []
@@ -191,4 +345,8 @@ MonoBehaviour:
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 6f1c21c24065fe043952144a66ad9a5b, type: 2}
+  PreviousBlueprintRewards: 
+  timeAllowedSeconds: 60
+  timeRemainingSeconds: 0
+  timerHasStarted: 0
   racersInPositionOrderCached: []
