@@ -31,6 +31,9 @@ namespace Gumball
         {
             if (!HasLoaded)
                 return;
+
+            if (PlayFabManager.ServerTimeInitialisationStatus != PlayFabManager.ConnectionStatusType.SUCCESS) //requires internet
+                return;
             
             bool isFirstCall = lastTrackedMonthIndex == -1;
             if (isFirstCall)
@@ -84,12 +87,15 @@ namespace Gumball
 
         public int GetCurrentDayNumber()
         {
+            EnsureServerTimeIsSynced();
             CheckToResetDataIfMonthChanged();
+            
             return CurrentDayNumberTracker;
         }
         
         public bool IsDayReady(int dayNumber)
         {
+            EnsureServerTimeIsSynced();
             CheckToResetDataIfMonthChanged();
 
             if (dayNumber != CurrentDayNumberTracker)
@@ -100,6 +106,7 @@ namespace Gumball
 
         public bool IsDayClaimed(int dayNumber)
         {
+            EnsureServerTimeIsSynced();
             CheckToResetDataIfMonthChanged();
 
             //the day has been claimed if the current day is greater than it
@@ -108,10 +115,18 @@ namespace Gumball
         
         public void IncreaseCurrentDayNumber()
         {
+            EnsureServerTimeIsSynced();
+            
             CurrentDayNumberTracker++;
             TimeWhenCurrentDayIsReady = PlayFabManager.CurrentEpochSecondsSynced + SecondsLeftInCurrentDay;
         }
 
+        private void EnsureServerTimeIsSynced()
+        {
+            if (PlayFabManager.ServerTimeInitialisationStatus != PlayFabManager.ConnectionStatusType.SUCCESS)
+                throw new InvalidOperationException("Trying to access daily login, although the server time hasn't been synced.");
+        }
+        
         private void CheckToResetDataIfMonthChanged()
         {
             //save the current month index to save data, if it is different, reset the days save data

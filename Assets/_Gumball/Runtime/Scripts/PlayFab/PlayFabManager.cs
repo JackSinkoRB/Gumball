@@ -53,11 +53,22 @@ namespace Gumball
 
         public static IEnumerator Initialise()
         {
+            ConnectionStatus = ConnectionStatusType.LOADING;
+            ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
+            
             Login();
             yield return new WaitUntil(() => ConnectionStatus != ConnectionStatusType.LOADING);
             
             RetrieveServerTime();
             yield return new WaitUntil(() => ServerTimeInitialisationStatus != ConnectionStatusType.LOADING);
+        }
+        
+        /// <summary>
+        /// Attempt to initialise again.
+        /// </summary>
+        public static void AttemptReconnection(Action onSuccess, Action onFailure)
+        {
+            CoroutineHelper.Instance.StartCoroutine(AttemptReconnectionIE(onSuccess, onFailure));
         }
 
         public static T Get<T>(string key, T defaultValue = default)
@@ -166,5 +177,20 @@ namespace Gumball
             
             Debug.LogWarning($"Failed to get server time: {error.GenerateErrorReport()}");
         }
+
+        private static IEnumerator AttemptReconnectionIE(Action onSuccess, Action onFailure)
+        {
+            PanelManager.GetPanel<PlayFabReconnectionPanel>().Show();
+            
+            yield return Initialise();
+            
+            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+                onSuccess?.Invoke();
+            else
+                onFailure?.Invoke();
+            
+            PanelManager.GetPanel<PlayFabReconnectionPanel>().Hide();
+        }
+        
     }
 }
