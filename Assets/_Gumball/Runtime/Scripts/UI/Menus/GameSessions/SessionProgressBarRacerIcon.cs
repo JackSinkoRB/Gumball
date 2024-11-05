@@ -11,9 +11,18 @@ namespace Gumball
     {
 
         [SerializeField] private Image icon;
+        [SerializeField] private Image circle;
+        
+        [Header("Disabled")]
+        [SerializeField] private GlobalColourPalette.ColourCode circleColorDisabled;
+        [SerializeField] private float disabledAlpha = 0.5f;
 
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private bool isDisabled;
+        
         private AICar racer;
 
+        private CanvasGroup canvasGroup => gameObject.GetOrAddComponent<CanvasGroup>();
         public RectTransform RectTransform => transform as RectTransform;
         public AICar Racer => racer;
         
@@ -26,5 +35,14 @@ namespace Gumball
             RectTransform.anchoredPosition = RectTransform.anchoredPosition.SetX(0);
         }
 
+        public void Disable()
+        {
+            isDisabled = true;
+
+            circle.color = GlobalColourPalette.Instance.GetGlobalColor(circleColorDisabled);
+
+            canvasGroup.alpha = disabledAlpha;
+        }
+        
     }
 }

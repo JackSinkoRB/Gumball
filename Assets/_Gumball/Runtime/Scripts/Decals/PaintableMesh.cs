@@ -63,7 +63,9 @@ namespace Gumball
         private int initialLayer;
         private MeshRenderer meshRenderer => GetComponent<MeshRenderer>();
         private MeshFilter meshFilter => GetComponent<MeshFilter>();
-        
+
+        public MeshFilter MeshFilter => meshFilter;
+
         public void EnablePainting()
         {
             //before resetting the textures, clear the previous texture it has made

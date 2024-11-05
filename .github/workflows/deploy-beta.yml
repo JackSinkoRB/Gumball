@@ -12,15 +12,13 @@ concurrency:
 
 jobs:
 
-  build:
-    name: Build for ${{ matrix.targetPlatform }}
-    runs-on: self-hosted
+  buildAndroid:
+    name: Build Android
+    runs-on:
+      labels: runner-1
     strategy:
       fail-fast: false
-      matrix:
-        targetPlatform:
-          - Android
-          - iOS
+
     steps:
 
       # Checkout
@@ -36,7 +34,7 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
+          key: Library-Android
 
       # Ensure Split Application Binary is enabled
       - name: Ensure Split Application Binary enabled
@@ -56,7 +54,7 @@ jobs:
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
+          targetPlatform: Android
           androidExportType: androidAppBundle
           androidTargetSdkVersion: 34
           buildName: 'Gumball'
@@ -67,11 +65,55 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
+          name: build-Android
+          path: build/Android
+
+  buildIOS:
+    name: Build iOS
+    runs-on:
+      labels: runner-2
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
+
+      # Cache
+      - uses: JackSinkoRB/local-cache@main
+        with:
+          path: Library
+          key: Library-iOS
+
+      # Build
+      - uses: game-ci/unity-builder@v4
+        id: buildStep
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: iOS
+          buildName: 'Gumball'
+          versioning: Semantic
+          customParameters: -nographics
+          unityVersion: 2022.3.42f1
+          dockerCpuLimit: 3.5
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-iOS
+          path: build/iOS
 
   deployToApple:
-    needs: build
+    needs: buildIOS
     name: Deploy to TestFlight
     runs-on: macos-latest
     steps:
@@ -342,7 +384,7 @@ jobs:
           name: build-iOS
 
   deployToGoogle:
-    needs: build
+    needs: buildAndroid
     name: Deploy to Google Play internal track
     runs-on: self-hosted
     env:

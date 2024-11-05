@@ -10,7 +10,13 @@ namespace Gumball
 {
     public class Cheats : MonoBehaviour
     {
-        
+
+        public static bool AllSessionsAreUnlocked
+        {
+            get => DataManager.Settings.Get("Cheats.AllSessionsAreUnlocked", false);
+            set => DataManager.Settings.Set("Cheats.AllSessionsAreUnlocked", value);
+        }
+
         public void ResetGame()
         {
             DataManager.RemoveAllData();
@@ -41,6 +47,19 @@ namespace Gumball
             
             foreach (SubPart subPart in SubPartManager.AllParts)
                 subPart.SetUnlocked(true);
+        }
+
+        public void GiveAllBlueprints()
+        {
+            for (int carIndex = 0; carIndex < WarehouseManager.Instance.AllCarData.Count; carIndex++)
+            {
+                BlueprintManager.Instance.AddBlueprints(carIndex, BlueprintManager.Instance.Levels[^1].BlueprintsRequired);
+            }
+        }
+        
+        public void UnlockAllSessions()
+        {
+            AllSessionsAreUnlocked = true;
         }
         
         public void CompleteCurrentChallenges()

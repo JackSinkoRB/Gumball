@@ -24,7 +24,9 @@ namespace Gumball
             Grass = 16,
             Trees = 17,
             PlayerResetTrigger = 18,
-            RacerObstacle = 19
+            RacerObstacle = 19,
+            PlayerOnly = 20,
+            DestructibleObjectTrigger = 21
         }
 
         public enum RenderingLayer

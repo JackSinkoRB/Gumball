@@ -32,8 +32,11 @@ namespace Gumball
         public event Action onTerrainChanged;
         public event Action onChunkUnload;
         
-        private const float childMeshRendererDistance = 800;
-
+        /// <summary>
+        /// The distance for the player to be within to use the high LOD.
+        /// </summary>
+        private const float terrainHighLODDistance = 350;
+        
         [SerializeField] private ChunkTrafficManager trafficManager;
         [SerializeField] private ChunkPowerpoleManager powerpoleManager;
         
@@ -48,8 +51,6 @@ namespace Gumball
         [SerializeField] private float nextRacingLineInterpolateDistance = 65;
         
         [Header("Terrains")]
-        [Tooltip("The distance for the player to be within to use the high LOD.")]
-        [SerializeField] private float terrainHighLODDistance = 500;
         [SerializeField, ReadOnly] private ChunkLOD currentTerrainLOD;
         [SerializeField, ReadOnly] private ChunkLOD currentChildMeshLOD;
         [SerializeField, ReadOnly] private GameObject terrainHighLOD;
@@ -399,7 +400,7 @@ namespace Gumball
                 SwitchTerrainLOD(desiredTerrainLOD);
 
             //child mesh LOD:
-            const float childMeshRendererDistanceSqr = childMeshRendererDistance * childMeshRendererDistance;
+            float childMeshRendererDistanceSqr = DynamicChunkCullDistance.CurrentDistance * DynamicChunkCullDistance.CurrentDistance;
             ChunkLOD desiredChildMeshLOD = shortestDistanceSqr <= childMeshRendererDistanceSqr ? ChunkLOD.HIGH : ChunkLOD.LOW;
             if (currentChildMeshLOD != desiredChildMeshLOD || !hasInitialisedLODs)
             {

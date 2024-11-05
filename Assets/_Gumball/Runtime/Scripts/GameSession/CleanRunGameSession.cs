@@ -48,6 +48,11 @@ namespace Gumball
         
         private void OnCollision(Collision collision)
         {
+            //check to fail the session
+            
+            if (collision.gameObject != null && collision.gameObject.GetComponent<DestructibleObject>() != null)
+                return; //don't fail if it's a destructible object
+            
             float magnitudeSqr = collision.impulse.sqrMagnitude;
             float maxMagnitudeSqrRequired = maxCollisionImpulseAllowed * maxCollisionImpulseAllowed;
 

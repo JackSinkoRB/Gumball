@@ -11,6 +11,7 @@ namespace Gumball
         
         [SerializeField] private VirtualButton cancelButton;
         [SerializeField] private ModifyWorkshopSubMenu modifySubMenu;
+        [SerializeField] private LevelUpWorkshopSubMenu levelUpSubMenu;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private WorkshopSubMenu currentSubMenu;
@@ -23,7 +24,9 @@ namespace Gumball
 
             PanelManager.GetPanel<CarStatsPanel>().Show();
 
-            OpenSubMenu(null);
+            //disable all the sub menus instantly in case they were left open to prevent popping
+            modifySubMenu.Hide(instant: true);
+            levelUpSubMenu.Hide(instant: true);
         }
 
         public void OnClickBackButton()
@@ -50,6 +53,7 @@ namespace Gumball
             
             //hide all other menus
             modifySubMenu.Hide();
+            levelUpSubMenu.Hide();
             
             //just show this menu
             if (subMenu != null)

@@ -24,11 +24,12 @@ namespace Gumball
         public int LaneIndex => laneIndex;
         public AICar CarPrefab => carPrefab;
 
-        public TrafficSpawnPosition(float distanceFromMapStart, ChunkTrafficManager.LaneDirection laneDirection, int laneIndex)
+        public TrafficSpawnPosition(float distanceFromMapStart, ChunkTrafficManager.LaneDirection laneDirection, int laneIndex, AICar carPrefab)
         {
             this.distanceFromMapStart = distanceFromMapStart;
             this.laneDirection = laneDirection;
             this.laneIndex = laneIndex;
+            this.carPrefab = carPrefab;
         }
 
     }

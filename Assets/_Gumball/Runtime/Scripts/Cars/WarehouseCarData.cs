@@ -44,21 +44,40 @@ namespace Gumball
                 defaultDrivetrain = car.GetDefaultPart(CorePart.PartType.DRIVETRAIN);
             }
         }
-            
+        
         [SerializeField] private AssetReferenceGameObject carPrefabReference;
         [SerializeField] private Sprite icon;
         [Tooltip("The index (starting at index 0) that the car needs to be unlocked. Setting to -1 means it will be unlocked by default.")]
         [SerializeField] private int startingLevelIndex = -1;
         [Tooltip("If enabled, the car will be unlocked at the start of the game (eg. a starting car).")]
         [SerializeField] private bool isUnlockedByDefault;
+        [SerializeField] private PurchaseData costToUnlock;
         [Tooltip("Copy the live decal data from a car to set it as the base livery here.")]
         [SerializeField] private LiveDecalData[] baseDecalData;
         [SerializeField, ReadOnly] private CachedData cachedData;
 
+        private int carIndexCached = -1;
+        public int CarIndex
+        {
+            get
+            {
+                if (carIndexCached == -1)
+                    carIndexCached = WarehouseManager.Instance.AllCarData.IndexOf(this);
+                return carIndexCached;
+            }
+        }
+
+        public PurchaseData CostToUnlock => costToUnlock;
         public AssetReferenceGameObject CarPrefabReference => carPrefabReference;
         public Sprite Icon => icon;
         public int StartingLevelIndex => startingLevelIndex;
-        public bool IsUnlockedByDefault => isUnlockedByDefault;
+        
+        public bool IsUnlocked
+        {
+            get => DataManager.Warehouse.Get($"CarIsUnlocked.{CarIndex}", isUnlockedByDefault);
+            set => DataManager.Warehouse.Set($"CarIsUnlocked.{CarIndex}", value);
+        }
+
         public LiveDecalData[] BaseDecalData => baseDecalData;
         
         //cached data access:
@@ -76,6 +95,11 @@ namespace Gumball
                 CorePart.PartType.DRIVETRAIN => cachedData.DefaultDrivetrain,
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
             };
+        }
+
+        public void Unlock()
+        {
+            IsUnlocked = true;
         }
         
 #if UNITY_EDITOR

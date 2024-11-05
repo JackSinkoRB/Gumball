@@ -56,7 +56,7 @@ namespace Gumball
         
         private void OnDisable()
         {
-            if (layoutManager.CurrentLayout == this)
+            if (layoutManager != null && layoutManager.CurrentLayout == this)
                 SetInactive();
         }
 

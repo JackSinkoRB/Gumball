@@ -31,6 +31,8 @@ namespace Gumball
             ATTEMPTED,
             COMPLETE
         }
+        
+        private const string trafficCarsAddressableLabel = "TrafficCars";
 
         [Header("Info")]
         [SerializeField] private string displayName = "Level";
@@ -62,6 +64,8 @@ namespace Gumball
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] private float racersStartingSpeed = 70;
 
+        public RacerSessionData[] RacerData => racerData;
+        
         [Header("Traffic")]
         [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the 'Traffic Spawn Positions' collection below.", MessageType.Info, onlyShowWhenDefaultValue: true)]
         [Tooltip("If enabled, each frame it will check to spawn traffic to keep the desired traffic density designated in the chunks.")]
@@ -157,15 +161,14 @@ namespace Gumball
         [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
         [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
 
+        [SerializeField, HideInInspector] public string PreviousBlueprintRewards;
+        
         protected override void OnValidate()
         {
             base.OnValidate();
             
             TrackCorePartRewards();
             TrackSubPartRewards();
-
-            foreach (RacerSessionData data in racerData)
-                data.OnValidate();
         }
 
         [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
@@ -198,8 +201,12 @@ namespace Gumball
                     
                     TrafficLane[] lanes = randomDirection == ChunkTrafficManager.LaneDirection.FORWARD ? chunk.TrafficManager.LanesForward : chunk.TrafficManager.LanesBackward;
                     int randomLaneIndex = Random.Range(0, lanes.Length);
+
+                    //get random car prefab
+                    List<GameObject> allCars = AddressableUtils.LoadAssetsSync<GameObject>(trafficCarsAddressableLabel);
+                    AICar randomCar = allCars.GetRandom().GetComponent<AICar>();
                     
-                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex));
+                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex, randomCar));
                 }
 
                 chunkStartDistance += chunk.SplineLengthCached;

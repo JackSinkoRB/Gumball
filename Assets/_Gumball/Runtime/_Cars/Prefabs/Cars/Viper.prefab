@@ -3529,13 +3529,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
+      propertyPath: displayName
+      value: Viper
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
       propertyPath: dragAtMaxSpeed
-      value: 0.1
+      value: 0.18
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: isAccelerating
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: makeDisplayName
+      value: Dodge
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -3546,6 +3556,11 @@ PrefabInstance:
         type: 3}
       propertyPath: speedForAccelerationDrag.Min
       value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.brakeTorque.min
+      value: 2500
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -3590,7 +3605,7 @@ PrefabInstance:
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.engineRpmRangeMax.min
-      value: 4700
+      value: 6000
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
@@ -3599,48 +3614,148 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
+      propertyPath: performanceSettings.steerReleaseSpeed.min
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
       propertyPath: performanceRatingWithMaxProfile.totalRating
-      value: 249
+      value: 259
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMinProfile.totalRating
-      value: 249
+      value: 259
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceRatingWithMaxProfile.handlingRating
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMaxProfile.maxSpeedRating
-      value: 42
+      value: 48
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceRatingWithMinProfile.handlingRating
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMinProfile.maxSpeedRating
-      value: 42
+      value: 48
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.handbrakeEaseOffDuration.min
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMaxProfile.accelerationSpeedRating
-      value: 123
+      value: 108
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceRatingWithMinProfile.accelerationSpeedRating
-      value: 123
+      value: 108
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[1].time
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[2].time
+      value: 0.65
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[0].value
-      value: 500
+      value: 548
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[1].value
-      value: 970
+      value: 723
       objectReference: {fileID: 0}
     - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}
       propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[2].value
-      value: 970
+      value: 823
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[3].value
+      value: 708
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[0].inSlope
+      value: 1516.667
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[1].inSlope
+      value: 475.34027
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[3].inSlope
+      value: -864.0296
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.maxSteerAngle.min.m_Curve.Array.data[1].value
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[0].outSlope
+      value: 1516.667
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[1].outSlope
+      value: 475.34027
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[3].inWeight
+      value: 0.36904758
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[3].outSlope
+      value: -864.0296
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[0].outWeight
+      value: 0.375
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.minTorqueCurve.m_Curve.Array.data[1].outWeight
+      value: 0.39814815
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.maxSteerAngle.min.m_Curve.Array.data[0].inSlope
+      value: -82.859215
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.maxSteerAngle.min.m_Curve.Array.data[0].outSlope
+      value: -82.859215
+      objectReference: {fileID: 0}
+    - target: {fileID: 6333412833798203086, guid: b392da46421c1b346a3adab59c87cf59,
+        type: 3}
+      propertyPath: performanceSettings.maxSteerAngle.min.m_Curve.Array.data[0].outWeight
+      value: 0.045833334
       objectReference: {fileID: 0}
     - target: {fileID: 6476613463242980866, guid: b392da46421c1b346a3adab59c87cf59,
         type: 3}

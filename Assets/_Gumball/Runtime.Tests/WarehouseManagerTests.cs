@@ -165,5 +165,27 @@ namespace Gumball.Runtime.Tests
             Assert.IsTrue(carsWithAvatars.IsNullOrEmpty(), $"Cars with avatars: {carsWithAvatars}");
         }
         
+        [Test]
+        [Order(7)]
+        public void PaintableMeshesAreReadable()
+        {
+            string invalidPaintableMeshes = "";
+            for (int index = 0; index < WarehouseManager.Instance.AllCarData.Count; index++)
+            {
+                AssetReferenceGameObject carAsset = WarehouseManager.Instance.AllCarData[index].CarPrefabReference;
+                AICar car = carAsset.editorAsset.GetComponent<AICar>();
+                if (car == null)
+                    continue;
+
+                foreach (PaintableMesh paintableMesh in car.transform.GetComponentsInAllChildren<PaintableMesh>())
+                {
+                    if (paintableMesh.MeshFilter.sharedMesh == null || !paintableMesh.MeshFilter.sharedMesh.isReadable)
+                        invalidPaintableMeshes += $"\n - {car.name}-{paintableMesh.gameObject.name} (index {index})";
+                }
+            }
+
+            Assert.IsTrue(invalidPaintableMeshes.IsNullOrEmpty(), $"PaintableMesh with missing mesh or non-readable: {invalidPaintableMeshes}");
+        }
+        
     }
 }
