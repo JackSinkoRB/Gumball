@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: 580e9ef820daebc42b325b8bde0d9a86
   lastKnownName: Level 26 - Elimination
-  displayName: Level
+  displayName: Elimination
   description: Description of session
   scene:
     scene:
@@ -35,11 +35,11 @@ MonoBehaviour:
   globalLightIntensity: 1
   reflectionIntensity: 1
   introTime: 3
-  raceDistanceMetres: 2000
+  raceDistanceMetres: 3000
   finishLineMarkers:
     checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
       type: 3}
-    distanceFromSpline: 5
+    distanceFromSpline: 20
   racerData:
   - carAssetReference:
       m_AssetGUID: 6f46e795bac33904aa0828a7953feaf1
@@ -88,7 +88,7 @@ MonoBehaviour:
       displayName: Racer
       icon: {fileID: 0}
     startingPosition:
-      position: {x: 3, y: 0.1, z: 150}
+      position: {x: 3, y: 0.1, z: 160}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     canCrossMiddle: 0
     racingLineImprecisionMaxDistance: 2.7
@@ -126,7 +126,7 @@ MonoBehaviour:
       displayName: Racer
       icon: {fileID: 0}
     startingPosition:
-      position: {x: 3, y: 0.1, z: 175}
+      position: {x: 3, y: 0.1, z: 195}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     canCrossMiddle: 0
     racingLineImprecisionMaxDistance: 2.7
@@ -164,7 +164,7 @@ MonoBehaviour:
       displayName: Racer
       icon: {fileID: 0}
     startingPosition:
-      position: {x: 3, y: 0.1, z: 200}
+      position: {x: 3, y: 0.1, z: 230}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     canCrossMiddle: 0
     racingLineImprecisionMaxDistance: 2.7
@@ -202,7 +202,7 @@ MonoBehaviour:
       displayName: Racer
       icon: {fileID: 0}
     startingPosition:
-      position: {x: 3, y: 0.1, z: 225}
+      position: {x: 3, y: 0.1, z: 265}
       rotation: {x: 0, y: 0, z: 0, w: 0}
     canCrossMiddle: 0
     racingLineImprecisionMaxDistance: 2
@@ -232,8 +232,8 @@ MonoBehaviour:
       clearCoat: 1
       clearCoatSmoothness: 1
   racersStartingSpeed: 100
-  trafficIsProcedural: 1
-  trafficDensity: 100
+  trafficIsProcedural: 0
+  trafficDensity: 45
   trafficBikes:
   - m_AssetGUID: ad5d6e674d828354bae351ed392af887
     m_SubObjectName: 
@@ -306,7 +306,212 @@ MonoBehaviour:
     m_SubObjectType: 
     m_EditorAssetChanged: 0
   trafficSpawnPositions:
-    Value: []
+    Value:
+    - distanceFromMapStart: 473.20532
+      laneDirection: 1
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 9df3aaea5c1ac4b4299ff7ed1c186d5f,
+        type: 3}
+    - distanceFromMapStart: 444.50775
+      laneDirection: 2
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: dc61ee74d9b3f304995a46cf982f41fb,
+        type: 3}
+    - distanceFromMapStart: 593.6422
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 579.4472
+      laneDirection: 1
+      laneIndex: 3
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 674.248
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 60332573bd046ef4eb65a4df6278f795,
+        type: 3}
+    - distanceFromMapStart: 721.633
+      laneDirection: 2
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: dc61ee74d9b3f304995a46cf982f41fb,
+        type: 3}
+    - distanceFromMapStart: 746.59534
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 1006.8232
+      laneDirection: 1
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 1044.4268
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 7571d49649fd70547992a89a6320bf27,
+        type: 3}
+    - distanceFromMapStart: 1132.6295
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 1288.556
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 4754604035742112849, guid: 991d7ee70f56d8b4883a10ba83170b51,
+        type: 3}
+    - distanceFromMapStart: 1229.9021
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 9df3aaea5c1ac4b4299ff7ed1c186d5f,
+        type: 3}
+    - distanceFromMapStart: 1320.8379
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 1360.6481
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 854009bd5128bca4eb9970aaaa55e47e,
+        type: 3}
+    - distanceFromMapStart: 1472.1138
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: 60332573bd046ef4eb65a4df6278f795,
+        type: 3}
+    - distanceFromMapStart: 1498.7365
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 1518.2676
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 1537.4673
+      laneDirection: 1
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: dc61ee74d9b3f304995a46cf982f41fb,
+        type: 3}
+    - distanceFromMapStart: 1655.5574
+      laneDirection: 2
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 1662.1025
+      laneDirection: 1
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 7571d49649fd70547992a89a6320bf27,
+        type: 3}
+    - distanceFromMapStart: 1720.5951
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: 60332573bd046ef4eb65a4df6278f795,
+        type: 3}
+    - distanceFromMapStart: 1774.1633
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 9df3aaea5c1ac4b4299ff7ed1c186d5f,
+        type: 3}
+    - distanceFromMapStart: 1798.808
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 60332573bd046ef4eb65a4df6278f795,
+        type: 3}
+    - distanceFromMapStart: 1841.0687
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 1864.0546
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 9df3aaea5c1ac4b4299ff7ed1c186d5f,
+        type: 3}
+    - distanceFromMapStart: 2010.6376
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 854009bd5128bca4eb9970aaaa55e47e,
+        type: 3}
+    - distanceFromMapStart: 1937.5011
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 2110.808
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 2018.7645
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 2146.9778
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 2154.681
+      laneDirection: 2
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: 854009bd5128bca4eb9970aaaa55e47e,
+        type: 3}
+    - distanceFromMapStart: 2247.9204
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 2241.7722
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 2337.609
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: f81bfb69dc8428742b705f8a705b99a9,
+        type: 3}
+    - distanceFromMapStart: 2391.581
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 2460.2095
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 2463.7817
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 2553.3345
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: dc61ee74d9b3f304995a46cf982f41fb,
+        type: 3}
+    - distanceFromMapStart: 2550.156
+      laneDirection: 2
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: dc61ee74d9b3f304995a46cf982f41fb,
+        type: 3}
+    - distanceFromMapStart: 2634.468
+      laneDirection: 1
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 60332573bd046ef4eb65a4df6278f795,
+        type: 3}
+    - distanceFromMapStart: 2666.9995
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
   rewards:
     xp: 650
     standardCurrency: 1750
@@ -324,25 +529,271 @@ MonoBehaviour:
   postSessionDialogue:
     dialogue: []
     uniqueID: eab924d9-4182-4e55-ad1e-d92cfe120665
-  inProgress: 0
+  inProgress: 1
   currentRacers:
-    list: []
+    list:
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: 
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 0, y: 0, z: 0}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 1
+        racingLineImprecisionMaxDistance: 3
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0
+          handling: 0
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 0
+          maxSpeedRating: 0
+          accelerationSpeedRating: 0
+          handlingRating: 0
+          nosRating: 0
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: 6f46e795bac33904aa0828a7953feaf1
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 3, y: 0.1, z: 125}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 2.7
+        performanceProfile:
+          maxSpeed: 0.116
+          acceleration: 0.294
+          handling: 0.215
+          nos: 0.254
+        currentPerformanceRating:
+          totalRating: 281
+          maxSpeedRating: 54
+          accelerationSpeedRating: 111
+          handlingRating: 60
+          nosRating: 56
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 3, y: 0.1, z: 150}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 2.7
+        performanceProfile:
+          maxSpeed: 0.303
+          acceleration: 0.277
+          handling: 0.293
+          nos: 0.306
+        currentPerformanceRating:
+          totalRating: 262
+          maxSpeedRating: 65
+          accelerationSpeedRating: 102
+          handlingRating: 57
+          nosRating: 38
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: b5028991c62dbc64a99eb0b82d8b0745
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 3, y: 0.1, z: 175}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 2.7
+        performanceProfile:
+          maxSpeed: 0
+          acceleration: 0.081
+          handling: 0.103
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 253
+          maxSpeedRating: 59
+          accelerationSpeedRating: 115
+          handlingRating: 48
+          nosRating: 31
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: 9e6cb95863f6d6a4bbd5c83903375a7a
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 3, y: 0.1, z: 200}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 2.7
+        performanceProfile:
+          maxSpeed: 0.186
+          acceleration: 0.184
+          handling: 0.238
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 247
+          maxSpeedRating: 68
+          accelerationSpeedRating: 84
+          handlingRating: 51
+          nosRating: 44
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+    - Key: {fileID: 0}
+      Value:
+        carAssetReference:
+          m_AssetGUID: b5028991c62dbc64a99eb0b82d8b0745
+          m_SubObjectName: 
+          m_SubObjectType: 
+          m_EditorAssetChanged: 0
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
+        startingPosition:
+          position: {x: 3, y: 0.1, z: 225}
+          rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 0
+        racingLineImprecisionMaxDistance: 2
+        performanceProfile:
+          maxSpeed: 0.105
+          acceleration: 0.039
+          handling: 0
+          nos: 0
+        currentPerformanceRating:
+          totalRating: 247
+          maxSpeedRating: 62
+          accelerationSpeedRating: 110
+          handlingRating: 44
+          nosRating: 31
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
     keyCollision: 0
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 626e772ed2f5b4340a74b8ccdef384f0, type: 2}
   PreviousBlueprintRewards: 
   timeAllowedSeconds: 60
-  timeRemainingSeconds: 0
-  timerHasStarted: 0
-  racersInPositionOrderCached: []
+  timeRemainingSeconds: 45.924465
+  timerHasStarted: 1
+  racersInPositionOrderCached:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   knockoutPositions:
-  - 500
-  - 850
+  - 600
   - 1200
-  - 1600
-  - 2000
+  - 1800
+  - 2400
+  - 3000
   knockoutPositionMarkers:
     checkpointMarkerPrefab: {fileID: 3010599808033180399, guid: f6043440563242844ad204030d907ff3,
       type: 3}
-    distanceFromSpline: 30
+    distanceFromSpline: 20
