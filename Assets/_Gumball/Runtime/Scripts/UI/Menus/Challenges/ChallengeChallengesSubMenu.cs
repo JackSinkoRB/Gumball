@@ -61,7 +61,7 @@ namespace Gumball
                 ChallengeUI challengeUI = challengeUIPrefab.gameObject.GetSpareOrCreate<ChallengeUI>(challengeUIHolder);
                 
                 //put unclaimed challenges on top
-                ChallengeTracker.Listener tracker = currentChallenge.Tracker.GetListener(currentChallenge.ChallengeID);
+                ChallengeTracker.Listener tracker = currentChallenge.Tracker.GetListener(currentChallenge.UniqueID);
                 if (tracker.IsComplete
                     && !currentChallenge.IsClaimed)
                     challengeUI.transform.SetAsFirstSibling();

@@ -159,7 +159,7 @@ namespace Gumball.Runtime.Tests
             for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
             {
                 Challenge challenge = dailyChallenges.GetCurrentChallenge(slotIndex);
-                Assert.IsNotNull(challenge.Tracker.GetListener(challenge.ChallengeID));
+                Assert.IsNotNull(challenge.Tracker.GetListener(challenge.UniqueID));
             }
         }
         
@@ -176,7 +176,7 @@ namespace Gumball.Runtime.Tests
             for (int slotIndex = 0; slotIndex < dailyChallenges.NumberOfChallenges; slotIndex++)
             {
                 Challenge challenge = dailyChallenges.GetCurrentChallenge(slotIndex);
-                Assert.IsNotNull(challenge.Tracker.GetListener(challenge.ChallengeID));
+                Assert.IsNotNull(challenge.Tracker.GetListener(challenge.UniqueID));
             }
         }
         
@@ -190,7 +190,7 @@ namespace Gumball.Runtime.Tests
             Assert.IsFalse(challengeToTrack.IsClaimed);
 
             challengeToTrack.Tracker.Track(challengeToTrack.Goal);
-            Assert.IsTrue(challengeToTrack.Tracker.GetListener(challengeToTrack.ChallengeID).IsComplete);
+            Assert.IsTrue(challengeToTrack.Tracker.GetListener(challengeToTrack.UniqueID).IsComplete);
             
             TimeUtils.SetTimeOffset(dailyChallenges.TimeBetweenReset.ToSeconds());
             yield return null; //wait for events to trigger

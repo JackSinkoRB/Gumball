@@ -89,7 +89,7 @@ namespace Gumball
             for (int slotIndex = 0; slotIndex < NumberOfChallenges; slotIndex++)
             {
                 Challenge challenge = GetCurrentChallenge(slotIndex);
-                float progressPercent = challenge.Tracker.GetListener(challenge.ChallengeID).Progress;
+                float progressPercent = challenge.Tracker.GetListener(challenge.UniqueID).Progress;
                 currentPercent += progressPercent;
             }
 
@@ -200,14 +200,14 @@ namespace Gumball
             Challenge previousChallenge = GetCurrentChallenge(slotIndex);
             if (previousChallenge != null)
             {
-                if (!previousChallenge.IsClaimed && previousChallenge.Tracker.GetListener(previousChallenge.ChallengeID).IsComplete)
+                if (!previousChallenge.IsClaimed && previousChallenge.Tracker.GetListener(previousChallenge.UniqueID).IsComplete)
                 {
                     //add to unclaimed challenges
                     AddUnclaimedChallenge(previousChallenge);
                 }
                 
                 previousChallenge.SetClaimed(false); //reset
-                previousChallenge.Tracker.StopListening(previousChallenge.ChallengeID);
+                previousChallenge.Tracker.StopListening(previousChallenge.UniqueID);
             }
 
             DataManager.Player.Set($"Challenges.{id}.Current.{slotIndex}", challengeIndex);
@@ -221,7 +221,7 @@ namespace Gumball
 
             //start tracker
             Challenge currentChallenge = challengePool[challengeIndex];
-            currentChallenge.Tracker.StartListening(currentChallenge.ChallengeID, currentChallenge.Goal);
+            currentChallenge.Tracker.StartListening(currentChallenge.UniqueID, currentChallenge.Goal);
         }
 
         private void AddUnclaimedChallenge(Challenge challenge)
@@ -243,7 +243,7 @@ namespace Gumball
             for (int slotIndex = 0; slotIndex < numberOfChallenges; slotIndex++)
             {
                 Challenge currentChallenge = GetCurrentChallenge(slotIndex);
-                currentChallenge.Tracker.StartListening(currentChallenge.ChallengeID, currentChallenge.Goal);
+                currentChallenge.Tracker.StartListening(currentChallenge.UniqueID, currentChallenge.Goal);
             }
         }
 

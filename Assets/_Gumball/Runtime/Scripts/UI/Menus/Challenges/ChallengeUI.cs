@@ -63,7 +63,7 @@ namespace Gumball
                 return;
             }
             
-            ChallengeTracker.Listener listener = challenge.Tracker.GetListener(challenge.ChallengeID);
+            ChallengeTracker.Listener listener = challenge.Tracker.GetListener(challenge.UniqueID);
             int progressAsPercent = Mathf.RoundToInt(listener.Progress * 100);
             progressLabel.text = $"{progressAsPercent}%";
             this.PerformAtEndOfFrame(progressLabel.Resize);
@@ -89,7 +89,7 @@ namespace Gumball
             }
             else
             {
-                ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.ChallengeID);
+                ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.UniqueID);
                 claimButton.interactable = challengeListener.IsComplete;
             }
         }
