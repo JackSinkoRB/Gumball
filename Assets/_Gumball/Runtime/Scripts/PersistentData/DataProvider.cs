@@ -189,7 +189,8 @@ namespace Gumball
             CheckIfLoaded();
 
             if (!currentValues.ContainsKey(key))
-                return defaultValue;
+                Set(key, defaultValue);
+            
             return (T)Convert.ChangeType(currentValues[key], typeof(T), CultureInfo.InvariantCulture);
         }
 
