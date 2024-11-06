@@ -138,7 +138,7 @@ namespace Gumball
             CurrentDayNumberTracker = 1;
             TimeWhenCurrentDayIsReady = 0;
             
-            GlobalLoggers.DailyLoginLogger.Log($"Detected month change - Current month index is {CurrentMonthIndex}");
+            GlobalLoggers.ChallengesLogger.Log($"Detected month change - Current month index is {CurrentMonthIndex}");
         }
         
     }

@@ -31,25 +31,26 @@ namespace Gumball
             set => DataManager.Player.Set($"Challenges.{id}.PreviouslyAssigned", value);
         }
         
-        public bool HasClaimedMinorReward
+        private bool HasClaimedMinorReward
         {
             get => DataManager.Player.Get($"Challenges.{id}.HasClaimedMinorReward", false);
-            private set => DataManager.Player.Set($"Challenges.{id}.HasClaimedMinorReward", value);
+            set => DataManager.Player.Set($"Challenges.{id}.HasClaimedMinorReward", value);
         }
 
-        public bool HasClaimedMajorReward
+        private bool HasClaimedMajorReward
         {
             get => DataManager.Player.Get($"Challenges.{id}.HasClaimedMajorReward", false);
-            private set => DataManager.Player.Set($"Challenges.{id}.HasClaimedMajorReward", value);
+            set => DataManager.Player.Set($"Challenges.{id}.HasClaimedMajorReward", value);
         }
         
+        public bool IsInitialised { get; private set; }
         public int NumberOfChallenges => numberOfChallenges;
         public Challenge[] ChallengePool => challengePool;
         public SerializedTimeSpan TimeBetweenReset => timeBetweenReset;
         public int ChallengesBetweenRepeats => challengesBetweenRepeats;
         public PersistentCooldown ResetCycle { get; private set; }
-        public float MinorRewardPercent => minorRewardPercent;
-        public float MajorRewardPercent => majorRewardPercent;
+        public bool IsMinorRewardReadyToBeClaimed => !HasClaimedMinorReward && GetTotalProgressPercent() >= minorRewardPercent; 
+        public bool IsMajorRewardReadyToBeClaimed => !HasClaimedMajorReward && GetTotalProgressPercent() >= majorRewardPercent; 
 
         public List<int> UnclaimedChallengeIndices
         {
@@ -59,12 +60,6 @@ namespace Gumball
 
         public void Initialise()
         {
-            //require internet connection
-            PlayFabManager.onSuccessfulConnection += OnConnectToPlayFab;
-        }
-
-        private void OnConnectToPlayFab()
-        {
             ResetCycle = new PersistentCooldown($"Challenges.{id}.ResetCycle", timeBetweenReset.ToSeconds(), true);
             ResetCycle.onCycleComplete += ResetChallenges;
             ResetCycle.Play();
@@ -72,6 +67,9 @@ namespace Gumball
             EnsureChallengesAreAssigned();
             
             StartTrackers();
+
+            IsInitialised = true;
+            GlobalLoggers.ChallengesLogger.Log($"Initialised {id} challenges.");
         }
         
         public Challenge GetCurrentChallenge(int slotIndex)
@@ -95,11 +93,42 @@ namespace Gumball
             for (int slotIndex = 0; slotIndex < NumberOfChallenges; slotIndex++)
             {
                 Challenge challenge = GetCurrentChallenge(slotIndex);
+                if (challenge == null)
+                {
+                    maxPercent--;
+                    continue;
+                }
+
                 float progressPercent = challenge.Tracker.GetListener(challenge.ChallengeID).Progress;
                 currentPercent += progressPercent;
             }
 
             return Mathf.Clamp01(currentPercent / maxPercent);
+        }
+
+        public bool AreRewardsReadyToBeClaimed()
+        {
+            //check unclaimed challenges
+            if (UnclaimedChallengeIndices.Count > 0)
+                return true;
+            
+            //check minor/major rewards
+            if (IsMinorRewardReadyToBeClaimed || IsMajorRewardReadyToBeClaimed)
+                return true;
+            
+            //check current slots
+            for (int slotIndex = 0; slotIndex < numberOfChallenges; slotIndex++)
+            {
+                Challenge currentChallenge = GetCurrentChallenge(slotIndex);
+                if (currentChallenge == null)
+                    continue;
+
+                ChallengeTracker.Listener tracker = currentChallenge.Tracker.GetListener(currentChallenge.ChallengeID);
+                if (tracker.IsComplete && !currentChallenge.IsClaimed)
+                    return true;
+            }
+
+            return false;
         }
         
         public int[] GetChallengesWithoutRepeats()
@@ -145,6 +174,8 @@ namespace Gumball
 
         private void ResetChallenges()
         {
+            GlobalLoggers.ChallengesLogger.Log($"Resetting {id} challenges.");
+            
             //give unclaimed intermittent rewards before resetting
             CoroutineHelper.Instance.StartCoroutine(GiveUnclaimedIntermittentRewards());
 
@@ -160,10 +191,7 @@ namespace Gumball
 
         private IEnumerator GiveUnclaimedIntermittentRewards()
         {
-            bool isMinorRewardUnclaimed = !HasClaimedMinorReward && GetTotalProgressPercent() >= MinorRewardPercent;
-            bool isMajorRewardUnclaimed = !HasClaimedMajorReward && GetTotalProgressPercent() >= MajorRewardPercent;
-
-            if (!isMinorRewardUnclaimed && !isMajorRewardUnclaimed)
+            if (!IsMinorRewardReadyToBeClaimed && !IsMajorRewardReadyToBeClaimed)
                 yield break;
             
             yield return new WaitUntil(() => PanelManager.PanelExists<MainMenuPanel>()
@@ -178,13 +206,13 @@ namespace Gumball
                 yield return new WaitUntil(() => !PanelManager.PanelExists<GenericMessagePanel>() || !PanelManager.GetPanel<GenericMessagePanel>().IsShowing);
             }
             
-            if (isMinorRewardUnclaimed)
+            if (IsMinorRewardReadyToBeClaimed)
             {
                 //give the reward
                 yield return minorRewardsPool.GetRandom().GiveRewards();
             }
             
-            if (isMajorRewardUnclaimed)
+            if (IsMajorRewardReadyToBeClaimed)
             {
                 //give the reward
                 yield return majorRewardsPool.GetRandom().GiveRewards();

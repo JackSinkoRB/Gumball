@@ -58,11 +58,26 @@ namespace Gumball
                 challengesNotification.gameObject.SetActive(false);
                 return;
             }
+            
+            challengesNotification.gameObject.SetActive(CanShowChallengesNotification());
+        }
 
+        private bool CanShowChallengesNotification()
+        {
+            //if daily login is ready
             int currentDayNumber = DailyLoginManager.Instance.GetCurrentDayNumber();
             bool isDayWaiting = DailyLoginManager.Instance.IsDayReady(currentDayNumber) && !DailyLoginManager.Instance.IsDayClaimed(currentDayNumber);
-            challengesNotification.gameObject.SetActive(isDayWaiting);
+            if (isDayWaiting)
+                return true;
+
+            if (ChallengeManager.Instance.Daily.AreRewardsReadyToBeClaimed())
+                return true;
+            
+            if (ChallengeManager.Instance.Weekly.AreRewardsReadyToBeClaimed())
+                return true;
+            
+            return false;
         }
-        
+
     }
 }

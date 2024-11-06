@@ -110,6 +110,9 @@ namespace Gumball
                 OnClaimUnclaimedChallenge();
 
             UpdateClaimButton();
+            
+            PanelManager.GetPanel<ChallengesPanel>().Header.UpdateDailyChallengeNotification();
+            PanelManager.GetPanel<ChallengesPanel>().Header.UpdateWeeklyChallengeNotification();
         }
         
         private void OnClaimUnclaimedChallenge()
