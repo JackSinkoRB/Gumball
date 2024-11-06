@@ -23,6 +23,8 @@ namespace Gumball
 
             PanelManager.GetPanel<MainMenuPanel>().Hide();
             OpenSubMenu(defaultMenu);
+
+            this.PerformAtEndOfFrame(Canvas.ForceUpdateCanvases);
         }
 
         protected override void OnHide()
