@@ -62,13 +62,13 @@ namespace Gumball
             HorizontalLayoutGroup horizontalLayoutGroup = gameObject.GetComponent<HorizontalLayoutGroup>();
             if (horizontalLayoutGroup != null && isHorizontal && horizontalLayoutGroup.isActiveAndEnabled)
             {
-                totalWidth += horizontalLayoutGroup.spacing * ((transform.childCount - 1) + additionalRects.Length);
+                totalWidth += transform.childCount == 0 ? 0 : horizontalLayoutGroup.spacing * ((transform.childCount - 1) + additionalRects.Length);
                 totalWidth += horizontalLayoutGroup.padding.left + horizontalLayoutGroup.padding.right;
             }
             VerticalLayoutGroup verticalLayoutGroup = gameObject.GetComponent<VerticalLayoutGroup>();
             if (verticalLayoutGroup != null && isVertical && verticalLayoutGroup.isActiveAndEnabled)
             {
-                totalHeight += verticalLayoutGroup.spacing * ((transform.childCount - 1) + additionalRects.Length);
+                totalHeight += transform.childCount == 0 ? 0 : verticalLayoutGroup.spacing * ((transform.childCount - 1) + additionalRects.Length);
                 totalHeight += verticalLayoutGroup.padding.bottom + verticalLayoutGroup.padding.top;
             }
 
