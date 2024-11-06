@@ -57,6 +57,12 @@ namespace Gumball
 
         public static IEnumerator Initialise()
         {
+            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+            {
+                Debug.LogWarning("Trying to initialise PlayFab, but it is already connected.");
+                yield break;
+            }
+
             ConnectionStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
             
