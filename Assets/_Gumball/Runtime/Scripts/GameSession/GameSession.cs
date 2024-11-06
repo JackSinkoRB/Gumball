@@ -420,13 +420,13 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            inProgress = false;
+            
             if (preSessionDialogue != null && !preSessionDialogue.HasBeenCompleted)
             {
                 preSessionDialogue.Play();
                 yield return new WaitUntil(() => !DialogueManager.IsPlaying);
             }
-
-            inProgress = false;
             
             PanelManager.GetPanel<LoadingPanel>().Show();
 
