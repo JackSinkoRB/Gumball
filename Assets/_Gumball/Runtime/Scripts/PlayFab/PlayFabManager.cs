@@ -40,7 +40,7 @@ namespace Gumball
                     return TimeUtils.CurrentEpochSeconds;
                 }
 
-                return serverTimeOnInitialise + Mathf.RoundToInt(Time.realtimeSinceStartup)
+                return serverTimeOnInitialise + Mathf.FloorToInt(Time.realtimeSinceStartup)
                        - gameTimeOnInitialise //account for the time taken to initialise
                        + TimeUtils.TimeOffsetSeconds; //account for debug offset
             }
@@ -177,7 +177,7 @@ namespace Gumball
         private static void OnRetrieveServerTimeSuccess(GetTimeResult result)
         {
             serverTimeOnInitialise = new DateTimeOffset(result.Time).ToUnixTimeSeconds();;
-            gameTimeOnInitialise = Mathf.RoundToInt(Time.realtimeSinceStartup);
+            gameTimeOnInitialise = Mathf.FloorToInt(Time.realtimeSinceStartup);
             
             ServerTimeInitialisationStatus = ConnectionStatusType.SUCCESS;
             
