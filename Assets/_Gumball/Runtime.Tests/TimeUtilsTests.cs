@@ -1,15 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Gumball.Runtime.Tests;
+using System.Diagnostics;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Random = UnityEngine.Random;
 
-namespace Gumball.Editor.Tests
+namespace Gumball.Runtime.Tests
 {
-    public class TimeUtilsTests
+    public class TimeUtilsTests : BaseRuntimeTests
     {
         
         [SetUp]
@@ -28,9 +28,10 @@ namespace Gumball.Editor.Tests
                 const int randomAmount = 10000;
                 int randomOffset = Random.Range(-randomAmount, randomAmount);
                 long desiredTime = timeAtStart + randomOffset;
+                Stopwatch stopwatch = Stopwatch.StartNew();
                 TimeUtils.SetTime(desiredTime);
                 long actualTime = TimeUtils.CurrentEpochSeconds;
-                Assert.AreEqual(desiredTime, actualTime);
+                Assert.AreEqual(desiredTime, actualTime, Mathf.CeilToInt((float)stopwatch.Elapsed.TotalSeconds));
             }
         }
         

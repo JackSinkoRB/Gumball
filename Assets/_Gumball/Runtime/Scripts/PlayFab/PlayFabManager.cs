@@ -18,6 +18,8 @@ namespace Gumball
             ERROR,
         }
 
+        public static event Action onSuccessfulConnection;
+        
         private static Dictionary<string, string> titleDataCached;
 
         private static long serverTimeOnInitialise;
@@ -38,7 +40,7 @@ namespace Gumball
                     return TimeUtils.CurrentEpochSeconds;
                 }
 
-                return serverTimeOnInitialise + Mathf.RoundToInt(Time.realtimeSinceStartup)
+                return serverTimeOnInitialise + Mathf.FloorToInt(Time.realtimeSinceStartup)
                        - gameTimeOnInitialise //account for the time taken to initialise
                        + TimeUtils.TimeOffsetSeconds; //account for debug offset
             }
@@ -47,12 +49,20 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
         {
+            onSuccessfulConnection = null;
+            
             ConnectionStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
         }
 
         public static IEnumerator Initialise()
         {
+            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+            {
+                Debug.LogWarning("Trying to initialise PlayFab, but it is already connected.");
+                yield break;
+            }
+
             ConnectionStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
             
@@ -61,6 +71,9 @@ namespace Gumball
             
             RetrieveServerTime();
             yield return new WaitUntil(() => ServerTimeInitialisationStatus != ConnectionStatusType.LOADING);
+
+            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+                onSuccessfulConnection?.Invoke();
         }
         
         /// <summary>
@@ -164,7 +177,7 @@ namespace Gumball
         private static void OnRetrieveServerTimeSuccess(GetTimeResult result)
         {
             serverTimeOnInitialise = new DateTimeOffset(result.Time).ToUnixTimeSeconds();;
-            gameTimeOnInitialise = Mathf.RoundToInt(Time.realtimeSinceStartup);
+            gameTimeOnInitialise = Mathf.FloorToInt(Time.realtimeSinceStartup);
             
             ServerTimeInitialisationStatus = ConnectionStatusType.SUCCESS;
             

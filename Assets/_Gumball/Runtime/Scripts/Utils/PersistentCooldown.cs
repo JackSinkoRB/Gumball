@@ -24,22 +24,26 @@ namespace Gumball
         
         public readonly long CycleDurationSeconds;
         private readonly string id;
+        private readonly bool useServerTime;
+
+        private long currentEpochSeconds => useServerTime ? PlayFabManager.CurrentEpochSecondsSynced : TimeUtils.CurrentEpochSeconds;
         
         private long timeLastStarted
         {
-            get => DataManager.Player.Get($"PersistentCooldown.{id}", TimeUtils.CurrentEpochSeconds);
+            get => DataManager.Player.Get($"PersistentCooldown.{id}", currentEpochSeconds);
             set => DataManager.Player.Set($"PersistentCooldown.{id}", value);
         }
-        public long SecondsSinceStarted => TimeUtils.CurrentEpochSeconds - timeLastStarted;
+        public long SecondsSinceStarted => currentEpochSeconds - timeLastStarted;
         public int CyclesCompleted => Mathf.FloorToInt((float)SecondsSinceStarted / CycleDurationSeconds);
         public long SecondsPassedInCurrentCycle => SecondsSinceStarted % CycleDurationSeconds;
         public long SecondsRemainingInCurrentCycle => CycleDurationSeconds - SecondsPassedInCurrentCycle;
         public bool IsPlaying { get; private set; }
         
-        public PersistentCooldown(string id, long cycleDurationSeconds)
+        public PersistentCooldown(string id, long cycleDurationSeconds, bool useServerTime)
         {
             this.id = id;
             CycleDurationSeconds = cycleDurationSeconds;
+            this.useServerTime = useServerTime;
         }
 
         public void Pause()
@@ -51,7 +55,7 @@ namespace Gumball
         public void Play()
         {
             if (!DataManager.Player.HasKey($"PersistentCooldown.{id}"))
-                timeLastStarted = TimeUtils.CurrentEpochSeconds;
+                timeLastStarted = currentEpochSeconds;
             
             CoroutineHelper.onUnityLateUpdate -= CheckIfCyclesCompleted;
             CoroutineHelper.onUnityLateUpdate += CheckIfCyclesCompleted;
@@ -61,7 +65,7 @@ namespace Gumball
         
         public void Restart(bool keepRemainingCycle = false)
         {
-            timeLastStarted = TimeUtils.CurrentEpochSeconds;
+            timeLastStarted = currentEpochSeconds;
             if (keepRemainingCycle)
                 timeLastStarted -= SecondsPassedInCurrentCycle;
                 
