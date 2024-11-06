@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -54,18 +55,22 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
             TimeUtils.SetTime(0);
-            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth, Mathf.CeilToInt((float)stopwatch.Elapsed.TotalSeconds));
             
+            stopwatch.Restart();
             TimeUtils.AddTimeOffset(TimeSpan.FromSeconds(100));
-            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth, Mathf.CeilToInt((float)stopwatch.Elapsed.TotalSeconds));
             
+            stopwatch.Restart();
             TimeUtils.SetTime(0);
             TimeUtils.AddTimeOffset(new TimeSpan(DailyLoginManager.DaysInMonth, 0, 0, 0));
-            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth, Mathf.CeilToInt((float)stopwatch.Elapsed.TotalSeconds));
             
+            stopwatch.Restart();
             TimeUtils.AddTimeOffset(TimeSpan.FromSeconds(100));
-            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth, Mathf.CeilToInt((float)stopwatch.Elapsed.TotalSeconds));
         }
         
         [UnityTest]

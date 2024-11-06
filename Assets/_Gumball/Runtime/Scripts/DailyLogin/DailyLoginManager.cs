@@ -78,7 +78,7 @@ namespace Gumball
         public DailyLoginMonthProfile[] MonthProfiles => monthProfiles;
 
         public long SecondsPassedInCurrentMonth => PlayFabManager.CurrentEpochSecondsSynced % SecondsPerMonth;
-        public int DaysPassedInCurrentMonth => Mathf.FloorToInt((float)SecondsPassedInCurrentMonth / TimeUtils.SecondsInADay);
+        public int DaysPassedInCurrentMonth => Mathf.FloorToInt((float)(SecondsPassedInCurrentMonth < 0 ? 0 : SecondsPassedInCurrentMonth) / TimeUtils.SecondsInADay);
         public int DaysRemainingInCurrentMonth => DaysInMonth - DaysPassedInCurrentMonth;
         public long SecondsLeftInCurrentDay => ((DaysPassedInCurrentMonth + 1) * TimeUtils.SecondsInADay) - SecondsPassedInCurrentMonth;
         
