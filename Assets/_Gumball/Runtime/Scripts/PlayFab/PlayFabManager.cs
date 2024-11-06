@@ -19,12 +19,56 @@ namespace Gumball
         }
 
         private static Dictionary<string, string> titleDataCached;
-        
+
+        private static long serverTimeOnInitialise;
+        private static long gameTimeOnInitialise;
+
         public static ConnectionStatusType ConnectionStatus { get; private set; }
+        public static ConnectionStatusType ServerTimeInitialisationStatus { get; private set; }
+
+        /// <summary>
+        /// Returns the current time (in epoch seconds) after being synced with the PlayFab server.
+        /// </summary>
+        public static long CurrentEpochSecondsSynced {
+
+            get {
+                if (ServerTimeInitialisationStatus != ConnectionStatusType.SUCCESS)
+                {
+                    Debug.LogWarning("Cannot get server time because it hasn't been retrieved. Using local time.");
+                    return TimeUtils.CurrentEpochSeconds;
+                }
+
+                return serverTimeOnInitialise + Mathf.RoundToInt(Time.realtimeSinceStartup)
+                       - gameTimeOnInitialise //account for the time taken to initialise
+                       + TimeUtils.TimeOffsetSeconds; //account for debug offset
+            }
+        }
         
-        public static void Initialise()
+        [RuntimeInitializeOnLoadMethod]
+        private static void RuntimeInitialise()
         {
+            ConnectionStatus = ConnectionStatusType.LOADING;
+            ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
+        }
+
+        public static IEnumerator Initialise()
+        {
+            ConnectionStatus = ConnectionStatusType.LOADING;
+            ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
+            
             Login();
+            yield return new WaitUntil(() => ConnectionStatus != ConnectionStatusType.LOADING);
+            
+            RetrieveServerTime();
+            yield return new WaitUntil(() => ServerTimeInitialisationStatus != ConnectionStatusType.LOADING);
+        }
+        
+        /// <summary>
+        /// Attempt to initialise again.
+        /// </summary>
+        public static void AttemptReconnection(Action onSuccess, Action onFailure)
+        {
+            CoroutineHelper.Instance.StartCoroutine(AttemptReconnectionIE(onSuccess, onFailure));
         }
 
         public static T Get<T>(string key, T defaultValue = default)
@@ -105,5 +149,48 @@ namespace Gumball
                     Debug.LogError($"Error getting PlayFab title data:\n{error.GenerateErrorReport()}");
                 });
         }
+        
+        private static void RetrieveServerTime()
+        {
+            if (ConnectionStatus != ConnectionStatusType.SUCCESS)
+            {
+                ServerTimeInitialisationStatus = ConnectionStatusType.ERROR;
+                return;
+            }
+
+            PlayFabClientAPI.GetTime(new GetTimeRequest(), OnRetrieveServerTimeSuccess, OnRetrieveServerTimeFailure);
+        }
+
+        private static void OnRetrieveServerTimeSuccess(GetTimeResult result)
+        {
+            serverTimeOnInitialise = new DateTimeOffset(result.Time).ToUnixTimeSeconds();;
+            gameTimeOnInitialise = Mathf.RoundToInt(Time.realtimeSinceStartup);
+            
+            ServerTimeInitialisationStatus = ConnectionStatusType.SUCCESS;
+            
+            GlobalLoggers.PlayFabLogger.Log($"Successfully retrieved server time.");
+        }
+        
+        private static void OnRetrieveServerTimeFailure(PlayFabError error)
+        {
+            ServerTimeInitialisationStatus = ConnectionStatusType.ERROR;
+            
+            Debug.LogWarning($"Failed to get server time: {error.GenerateErrorReport()}");
+        }
+
+        private static IEnumerator AttemptReconnectionIE(Action onSuccess, Action onFailure)
+        {
+            PanelManager.GetPanel<PlayFabReconnectionPanel>().Show();
+            
+            yield return Initialise();
+            
+            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+                onSuccess?.Invoke();
+            else
+                onFailure?.Invoke();
+            
+            PanelManager.GetPanel<PlayFabReconnectionPanel>().Hide();
+        }
+        
     }
 }
