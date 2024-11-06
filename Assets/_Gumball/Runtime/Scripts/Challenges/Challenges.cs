@@ -59,7 +59,13 @@ namespace Gumball
 
         public void Initialise()
         {
-            ResetCycle = new PersistentCooldown($"Challenges.{id}.ResetCycle", timeBetweenReset.ToSeconds());
+            //require internet connection
+            PlayFabManager.onSuccessfulConnection += OnConnectToPlayFab;
+        }
+
+        private void OnConnectToPlayFab()
+        {
+            ResetCycle = new PersistentCooldown($"Challenges.{id}.ResetCycle", timeBetweenReset.ToSeconds(), true);
             ResetCycle.onCycleComplete += ResetChallenges;
             ResetCycle.Play();
 

@@ -18,6 +18,8 @@ namespace Gumball
             ERROR,
         }
 
+        public static event Action onSuccessfulConnection;
+        
         private static Dictionary<string, string> titleDataCached;
 
         private static long serverTimeOnInitialise;
@@ -47,6 +49,8 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
         {
+            onSuccessfulConnection = null;
+            
             ConnectionStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
         }
@@ -61,6 +65,9 @@ namespace Gumball
             
             RetrieveServerTime();
             yield return new WaitUntil(() => ServerTimeInitialisationStatus != ConnectionStatusType.LOADING);
+
+            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+                onSuccessfulConnection?.Invoke();
         }
         
         /// <summary>
