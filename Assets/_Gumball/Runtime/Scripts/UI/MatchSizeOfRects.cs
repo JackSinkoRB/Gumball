@@ -13,6 +13,7 @@ namespace Gumball
 
         [HelpBox("It will match the size of all the children, but you can assign additional objects here.", position: HelpBoxAttribute.Position.ABOVE)]
         [SerializeField] private RectTransform[] additionalRects = Array.Empty<RectTransform>();
+        [SerializeField] private bool useChildren;
         [Space(5)]
         [SerializeField] private bool isHorizontal;
         [SerializeField] private bool isVertical;
@@ -34,6 +35,17 @@ namespace Gumball
             
             float totalWidth = 0;
             float totalHeight = 0;
+            if (useChildren)
+            {
+                foreach (RectTransform child in transform)
+                {
+                    if (!child.gameObject.activeSelf)
+                        continue;
+                
+                    totalWidth += child.rect.width;
+                    totalHeight += child.rect.height;
+                }
+            }
             foreach (RectTransform additionalObject in additionalRects)
             {
                 if (!additionalObject.gameObject.activeSelf)
