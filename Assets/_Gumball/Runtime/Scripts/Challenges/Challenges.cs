@@ -123,7 +123,7 @@ namespace Gumball
                 if (currentChallenge == null)
                     continue;
 
-                ChallengeTracker.Listener tracker = currentChallenge.Tracker.GetListener(currentChallenge.ChallengeID);
+                ChallengeTracker.Listener tracker = currentChallenge.Tracker.GetListener(currentChallenge.UniqueID);
                 if (tracker.IsComplete && !currentChallenge.IsClaimed)
                     return true;
             }
