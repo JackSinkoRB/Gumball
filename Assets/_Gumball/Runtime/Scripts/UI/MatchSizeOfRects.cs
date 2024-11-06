@@ -25,10 +25,10 @@ namespace Gumball
 
         private void LateUpdate()
         {
-            UpdateSize();
+            Resize();
         }
 
-        private void UpdateSize()
+        public void Resize()
         {
             if (!isHorizontal && !isVertical)
                 return;
