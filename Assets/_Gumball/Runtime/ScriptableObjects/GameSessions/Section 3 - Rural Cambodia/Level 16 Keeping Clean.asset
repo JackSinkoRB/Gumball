@@ -9,11 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff023cbf706d2f64dace4263ec5fe7ef, type: 3}
+  m_Script: {fileID: 11500000, guid: bdcd4b11f6709a84995f29b33b65a7b7, type: 3}
   m_Name: Level 16 Keeping Clean
   m_EditorClassIdentifier: 
-  uniqueID: 5f8832134c07f7a479b39f721ecd7adf
+  uniqueID: e13c91b4e97f1284490c465c20113807
   lastKnownName: Level 16 Keeping Clean
+  displayName: Keeping Clean
   description: Description of session
   scene:
     scene:
@@ -30,9 +31,9 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   vehicleStartingPosition: {x: 10, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
+  isNightTime: 0
   globalLightIntensity: 1
   reflectionIntensity: 1
-  fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 1700
   finishLineMarkers:
@@ -42,10 +43,38 @@ MonoBehaviour:
   racerData: []
   racersStartingSpeed: 100
   trafficIsProcedural: 0
-  trafficDensity: 65
-  trafficBikes: []
+  trafficDensity: 50
+  trafficBikes:
+  - m_AssetGUID: ad5d6e674d828354bae351ed392af887
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 7571d49649fd70547992a89a6320bf27
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: de0e97f38965fcd40b5a95aec4cf99a4
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c261adf1023fc5140a97bba6895a6a32
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficCars:
-  - m_AssetGUID: 81825441c04ee5c468680e955e2bb0b3
+  - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 854009bd5128bca4eb9970aaaa55e47e
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: dc61ee74d9b3f304995a46cf982f41fb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 583f4d2f825774941a7709d7a3188ab7
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
@@ -53,165 +82,297 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  trafficTrucks: []
+  - m_AssetGUID: 854009bd5128bca4eb9970aaaa55e47e
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: dc61ee74d9b3f304995a46cf982f41fb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 583f4d2f825774941a7709d7a3188ab7
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  trafficTrucks:
+  - m_AssetGUID: 9df3aaea5c1ac4b4299ff7ed1c186d5f
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 31f43c0006dc22c44bf7e659902a0be2
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c6391c593f9e2b544a2852ddfdd327d9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: f81bfb69dc8428742b705f8a705b99a9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficSpawnPositions:
     Value:
-    - distanceFromMapStart: 63.13429
-      laneDirection: 1
-      laneIndex: 0
-    - distanceFromMapStart: 4.983151
-      laneDirection: 2
-      laneIndex: 1
-    - distanceFromMapStart: 160.60892
-      laneDirection: 1
-      laneIndex: 2
-    - distanceFromMapStart: 145.56516
+    - distanceFromMapStart: 93.703285
       laneDirection: 1
       laneIndex: 1
-    - distanceFromMapStart: 214.6249
-      laneDirection: 1
-      laneIndex: 2
-    - distanceFromMapStart: 221.30084
-      laneDirection: 1
-      laneIndex: 2
-    - distanceFromMapStart: 330.0854
-      laneDirection: 1
-      laneIndex: 2
-    - distanceFromMapStart: 350.7344
+      carPrefab: {fileID: 5947658333454557433, guid: 9df3aaea5c1ac4b4299ff7ed1c186d5f,
+        type: 3}
+    - distanceFromMapStart: 37.776154
       laneDirection: 1
       laneIndex: 0
-    - distanceFromMapStart: 410.2469
-      laneDirection: 2
-      laneIndex: 0
-    - distanceFromMapStart: 416.3793
-      laneDirection: 1
-      laneIndex: 2
-    - distanceFromMapStart: 583.47406
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 193.04825
       laneDirection: 2
       laneIndex: 1
-    - distanceFromMapStart: 505.013
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 106.922935
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 277.94342
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: dc61ee74d9b3f304995a46cf982f41fb,
+        type: 3}
+    - distanceFromMapStart: 296.23044
       laneDirection: 2
       laneIndex: 2
-    - distanceFromMapStart: 614.14545
-      laneDirection: 1
-      laneIndex: 0
-    - distanceFromMapStart: 625.966
-      laneDirection: 1
-      laneIndex: 1
-    - distanceFromMapStart: 799.54736
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 347.75476
+      laneDirection: 2
+      laneIndex: 2
+      carPrefab: {fileID: 4754604035742112849, guid: 991d7ee70f56d8b4883a10ba83170b51,
+        type: 3}
+    - distanceFromMapStart: 317.91913
       laneDirection: 2
       laneIndex: 1
-    - distanceFromMapStart: 755.59503
+      carPrefab: {fileID: 5947658333454557433, guid: dc61ee74d9b3f304995a46cf982f41fb,
+        type: 3}
+    - distanceFromMapStart: 425.6173
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 421.4568
+      laneDirection: 1
+      laneIndex: 1
+      carPrefab: {fileID: 4754604035742112849, guid: 991d7ee70f56d8b4883a10ba83170b51,
+        type: 3}
+    - distanceFromMapStart: 547.6244
       laneDirection: 1
       laneIndex: 0
-    - distanceFromMapStart: 842.2442
+      carPrefab: {fileID: 5947658333454557433, guid: 7571d49649fd70547992a89a6320bf27,
+        type: 3}
+    - distanceFromMapStart: 546.1864
       laneDirection: 1
       laneIndex: 2
-    - distanceFromMapStart: 807.00745
-      laneDirection: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 677.7089
+      laneDirection: 2
       laneIndex: 2
-    - distanceFromMapStart: 900.48047
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 707.5374
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: de0e97f38965fcd40b5a95aec4cf99a4,
+        type: 3}
+    - distanceFromMapStart: 747.88196
       laneDirection: 1
       laneIndex: 3
-    - distanceFromMapStart: 909.7173
+      carPrefab: {fileID: 4754604035742112849, guid: 991d7ee70f56d8b4883a10ba83170b51,
+        type: 3}
+    - distanceFromMapStart: 727.78687
+      laneDirection: 1
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 857.17017
+      laneDirection: 2
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 866.5514
+      laneDirection: 1
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: c261adf1023fc5140a97bba6895a6a32,
+        type: 3}
+    - distanceFromMapStart: 938.8308
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 7571d49649fd70547992a89a6320bf27,
+        type: 3}
+    - distanceFromMapStart: 952.6835
       laneDirection: 1
       laneIndex: 2
-    - distanceFromMapStart: 1091.6469
+      carPrefab: {fileID: 5947658333454557433, guid: dc61ee74d9b3f304995a46cf982f41fb,
+        type: 3}
+    - distanceFromMapStart: 1048.291
       laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 1063.0969
+      laneDirection: 1
       laneIndex: 0
-    - distanceFromMapStart: 1034.6884
-      laneDirection: 2
-      laneIndex: 1
-    - distanceFromMapStart: 1106.8765
-      laneDirection: 2
-      laneIndex: 1
-    - distanceFromMapStart: 1114.8785
-      laneDirection: 2
-      laneIndex: 2
-    - distanceFromMapStart: 1200.7196
-      laneDirection: 2
-      laneIndex: 2
-    - distanceFromMapStart: 1291.4702
-      laneDirection: 2
-      laneIndex: 1
-    - distanceFromMapStart: 1380.9155
-      laneDirection: 2
-      laneIndex: 2
-    - distanceFromMapStart: 1352.1642
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 1179.8387
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 9df3aaea5c1ac4b4299ff7ed1c186d5f,
+        type: 3}
+    - distanceFromMapStart: 1130.5437
       laneDirection: 2
       laneIndex: 3
-    - distanceFromMapStart: 1491.1915
-      laneDirection: 2
-      laneIndex: 0
-    - distanceFromMapStart: 1401.6127
-      laneDirection: 2
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 1244.3931
+      laneDirection: 1
       laneIndex: 2
-    - distanceFromMapStart: 1583.489
-      laneDirection: 1
-      laneIndex: 3
-    - distanceFromMapStart: 1564.569
-      laneDirection: 1
-      laneIndex: 0
-    - distanceFromMapStart: 1637.4778
-      laneDirection: 1
-      laneIndex: 0
-    - distanceFromMapStart: 1675.9435
-      laneDirection: 1
-      laneIndex: 0
-    - distanceFromMapStart: 1787.6447
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 1287.7566
       laneDirection: 2
       laneIndex: 0
-    - distanceFromMapStart: 1708.0961
+      carPrefab: {fileID: 5947658333454557433, guid: 854009bd5128bca4eb9970aaaa55e47e,
+        type: 3}
+    - distanceFromMapStart: 1374.3125
       laneDirection: 2
       laneIndex: 0
-    - distanceFromMapStart: 1817.2615
+      carPrefab: {fileID: 5947658333454557433, guid: 9df3aaea5c1ac4b4299ff7ed1c186d5f,
+        type: 3}
+    - distanceFromMapStart: 1364.6497
       laneDirection: 1
       laneIndex: 0
-    - distanceFromMapStart: 1828.3718
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 1440.839
       laneDirection: 1
-      laneIndex: 0
-    - distanceFromMapStart: 1975.7257
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 854009bd5128bca4eb9970aaaa55e47e,
+        type: 3}
+    - distanceFromMapStart: 1513.5415
       laneDirection: 1
-      laneIndex: 0
-    - distanceFromMapStart: 1932.3888
+      laneIndex: 1
+      carPrefab: {fileID: 4754604035742112849, guid: 991d7ee70f56d8b4883a10ba83170b51,
+        type: 3}
+    - distanceFromMapStart: 1548.2452
+      laneDirection: 1
+      laneIndex: 2
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 1574.6501
+      laneDirection: 2
+      laneIndex: 1
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 1669.2809
       laneDirection: 2
       laneIndex: 0
-    - distanceFromMapStart: 2040.1704
-      laneDirection: 1
-      laneIndex: 0
-    - distanceFromMapStart: 2019.219
+      carPrefab: {fileID: 5947658333454557433, guid: 31f43c0006dc22c44bf7e659902a0be2,
+        type: 3}
+    - distanceFromMapStart: 1678.4331
       laneDirection: 2
       laneIndex: 0
-    - distanceFromMapStart: 2183.9683
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 1784.2324
       laneDirection: 1
       laneIndex: 0
-    - distanceFromMapStart: 2170.644
-      laneDirection: 2
-      laneIndex: 0
-    - distanceFromMapStart: 2207.7544
-      laneDirection: 2
-      laneIndex: 0
-    - distanceFromMapStart: 2278.3328
-      laneDirection: 2
-      laneIndex: 0
-    - distanceFromMapStart: 2393.049
-      laneDirection: 2
-      laneIndex: 0
-    - distanceFromMapStart: 2385.7817
-      laneDirection: 2
-      laneIndex: 0
-    - distanceFromMapStart: 2477.7942
+      carPrefab: {fileID: 5947658333454557433, guid: 9df3aaea5c1ac4b4299ff7ed1c186d5f,
+        type: 3}
+    - distanceFromMapStart: 1794.9792
       laneDirection: 1
       laneIndex: 0
-    - distanceFromMapStart: 2498.5283
+      carPrefab: {fileID: 5947658333454557433, guid: 583f4d2f825774941a7709d7a3188ab7,
+        type: 3}
+    - distanceFromMapStart: 1893.4098
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 7571d49649fd70547992a89a6320bf27,
+        type: 3}
+    - distanceFromMapStart: 1834.7646
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: de0e97f38965fcd40b5a95aec4cf99a4,
+        type: 3}
+    - distanceFromMapStart: 1939.4974
       laneDirection: 1
       laneIndex: 0
-    - distanceFromMapStart: 2590.7058
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 2005.1707
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 7571d49649fd70547992a89a6320bf27,
+        type: 3}
+    - distanceFromMapStart: 2030.8109
       laneDirection: 1
       laneIndex: 0
-    - distanceFromMapStart: 2564.1318
+      carPrefab: {fileID: 5947658333454557433, guid: 7571d49649fd70547992a89a6320bf27,
+        type: 3}
+    - distanceFromMapStart: 2026.5547
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: de0e97f38965fcd40b5a95aec4cf99a4,
+        type: 3}
+    - distanceFromMapStart: 2205.4355
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 2213.7356
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 2331.525
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: de0e97f38965fcd40b5a95aec4cf99a4,
+        type: 3}
+    - distanceFromMapStart: 2259.171
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 9df3aaea5c1ac4b4299ff7ed1c186d5f,
+        type: 3}
+    - distanceFromMapStart: 2381.4177
       laneDirection: 1
       laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: de0e97f38965fcd40b5a95aec4cf99a4,
+        type: 3}
+    - distanceFromMapStart: 2396.9043
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: dc61ee74d9b3f304995a46cf982f41fb,
+        type: 3}
+    - distanceFromMapStart: 2462.8694
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: c6391c593f9e2b544a2852ddfdd327d9,
+        type: 3}
+    - distanceFromMapStart: 2514.4648
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: ad5d6e674d828354bae351ed392af887,
+        type: 3}
+    - distanceFromMapStart: 2584.7144
+      laneDirection: 1
+      laneIndex: 0
+      carPrefab: {fileID: 4754604035742112849, guid: 991d7ee70f56d8b4883a10ba83170b51,
+        type: 3}
+    - distanceFromMapStart: 2643.711
+      laneDirection: 2
+      laneIndex: 0
+      carPrefab: {fileID: 5947658333454557433, guid: 854009bd5128bca4eb9970aaaa55e47e,
+        type: 3}
   rewards:
     xp: 600
     standardCurrency: 1500
@@ -221,33 +382,63 @@ MonoBehaviour:
     subParts:
     - {fileID: 11400000, guid: a2dbf9c15adbf0e4d97e48507fc6d6a8, type: 2}
     unlockables: []
-  mainChallengeDescription: This is the challenge description
+    blueprints: []
   subObjectives: []
-  inProgress: 1
+  preSessionDialogue:
+    dialogue: []
+    uniqueID: b60776a3-1a5e-484f-a116-84fe4b1d81e8
+  postSessionDialogue:
+    dialogue: []
+    uniqueID: 23bc379d-26dd-4122-95ab-db686dd9a3e8
+  inProgress: 0
   currentRacers:
     list:
     - Key: {fileID: 0}
       Value:
-        assetReference:
+        carAssetReference:
           m_AssetGUID: 
           m_SubObjectName: 
           m_SubObjectType: 
           m_EditorAssetChanged: 0
-        canCrossMiddle: 1
-        racingLineImprecisionMaxDistance: 3
+        infoProfile:
+          displayName: Racer
+          icon: {fileID: 0}
         startingPosition:
           position: {x: 0, y: 0, z: 0}
           rotation: {x: 0, y: 0, z: 0, w: 0}
+        canCrossMiddle: 1
+        racingLineImprecisionMaxDistance: 3
         performanceProfile:
           maxSpeed: 0
           acceleration: 0
           handling: 0
           nos: 0
-        currentPerformanceRating: 0
-    keyCollision: 1
+        currentPerformanceRating:
+          totalRating: 0
+          maxSpeedRating: 0
+          accelerationSpeedRating: 0
+          handlingRating: 0
+          nosRating: 0
+        bodyPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+        wheelPaintSwatch:
+          color: {r: 1, g: 1, b: 1, a: 1}
+          specular: {r: 0, g: 0, b: 0, a: 1}
+          type: 0
+          smoothness: 0.5
+          clearCoat: 1
+          clearCoatSmoothness: 1
+    keyCollision: 0
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: a2dbf9c15adbf0e4d97e48507fc6d6a8, type: 2}
+  PreviousBlueprintRewards: 
   timeAllowedSeconds: 50
-  timeRemainingSeconds: 1.5858757
+  timeRemainingSeconds: 31.846035
   timerHasStarted: 1
+  maxCollisionImpulseAllowed: 500

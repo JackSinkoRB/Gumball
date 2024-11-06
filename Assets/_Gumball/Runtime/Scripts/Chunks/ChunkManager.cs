@@ -655,7 +655,9 @@ namespace Gumball
                     return chunk.SplineSamples[splineSampleIndex];
             }
 
-            throw new InvalidOperationException($"Could not get the spline sample {distanceFromStart}m along the map spline.");
+            //return the last sample if none left (may be in the radius of the last sample and next chunk)
+            SplineSample lastSample = chunk.SplineSamples[^1];
+            return lastSample;
         }
         
     }
