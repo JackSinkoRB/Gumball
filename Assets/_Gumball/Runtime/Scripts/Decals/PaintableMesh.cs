@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Gumball
 {
+    [ExecuteAlways]
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(MeshFilter))]
     public class PaintableMesh : MonoBehaviour
@@ -65,6 +66,16 @@ namespace Gumball
         private MeshFilter meshFilter => GetComponent<MeshFilter>();
 
         public MeshFilter MeshFilter => meshFilter;
+
+#if UNITY_EDITOR
+        private void Update()
+        {
+            if (!Application.isPlaying) {
+                if (meshFilter != null && meshFilter.sharedMesh != null && !meshFilter.sharedMesh.isReadable)
+                    meshFilter.sharedMesh.SetReadable();
+            }
+        }
+#endif
 
         public void EnablePainting()
         {
