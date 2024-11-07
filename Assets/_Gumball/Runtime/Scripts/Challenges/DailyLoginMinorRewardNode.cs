@@ -15,6 +15,7 @@ namespace Gumball
         [SerializeField] private Image topBackground;
         [SerializeField] private Image bottomBackground;
         [SerializeField] private Image circle;
+        [SerializeField] private Transform notificationIcon;
         [Space(5)]
         [SerializeField] private TextMeshProUGUI dayLabel;
         [SerializeField] private TextMeshProUGUI standardCurrencyLabel;
@@ -64,6 +65,7 @@ namespace Gumball
             {
                 //claimed
                 button.interactable = false;
+                notificationIcon.gameObject.SetActive(false);
                 
                 bottomBackground.color = backgroundColourCodes.ClaimedColor;
                 topBackground.color = backgroundColourCodes.ClaimedColor;
@@ -77,7 +79,8 @@ namespace Gumball
             {
                 //ready but not claimed
                 button.interactable = true;
-                
+                notificationIcon.gameObject.SetActive(true);
+
                 bottomBackground.color = backgroundColourCodes.UnlockedColor;
                 topBackground.color = backgroundColourCodes.UnlockedColor;
                 circle.color = circleColourCodes.UnlockedColor;
@@ -90,7 +93,8 @@ namespace Gumball
             {
                 //locked
                 button.interactable = false;
-                
+                notificationIcon.gameObject.SetActive(false);
+
                 bottomBackground.color = backgroundColourCodes.LockedColor;
                 topBackground.color = backgroundColourCodes.LockedColor;
                 circle.color = circleColourCodes.LockedColor;
