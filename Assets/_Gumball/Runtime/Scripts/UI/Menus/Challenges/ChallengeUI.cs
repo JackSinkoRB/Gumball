@@ -16,6 +16,7 @@ namespace Gumball
         [SerializeField] private Image icon;
         [SerializeField] private Transform rewardHolder;
         [SerializeField] private Transform rewardPrefab;
+        [SerializeField] private Transform notificationIcon;
         [Space(5)]
         [SerializeField] private Sprite standardCurrencyIcon;
         [SerializeField] private Sprite premiumCurrencyIcon;
@@ -152,6 +153,7 @@ namespace Gumball
             {
                 descriptionLabel.fontStyle = FontStyles.Strikethrough;
                 claimButton.gameObject.SetActive(false);
+                notificationIcon.gameObject.SetActive(false);
                 return;
             }
 
@@ -161,11 +163,13 @@ namespace Gumball
             if (isUnclaimedChallenge)
             {
                 claimButton.interactable = true;
+                notificationIcon.gameObject.SetActive(true);
             }
             else
             {
                 ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.UniqueID);
                 claimButton.interactable = challengeListener.IsComplete;
+                notificationIcon.gameObject.SetActive(challengeListener.IsComplete);
             }
         }
 

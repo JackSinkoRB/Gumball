@@ -23,6 +23,7 @@ namespace Gumball
             base.OnShow();
 
             DailyLoginManager.onCurrentMonthChange += OnCurrentMonthChange;
+            DailyLoginManager.onCurrentDayChange += OnCurrentDayChange;
             
             RefreshNodes();
         }
@@ -32,6 +33,7 @@ namespace Gumball
             base.OnHide();
             
             DailyLoginManager.onCurrentMonthChange -= OnCurrentMonthChange;
+            DailyLoginManager.onCurrentDayChange -= OnCurrentDayChange;
         }
 
         public void RefreshNodes()
@@ -90,7 +92,12 @@ namespace Gumball
             majorReward4.Initialise(28, DailyLoginManager.Instance.CurrentMonth.Weeks[3].MajorReward);
         }
         
-        private void OnCurrentMonthChange(int previousMonthIndex, int newMonthIndex)
+        private void OnCurrentMonthChange(int previousIndex, int newIndex)
+        {
+            RefreshNodes();
+        }
+        
+        private void OnCurrentDayChange(int previousIndex, int newIndex)
         {
             RefreshNodes();
         }
