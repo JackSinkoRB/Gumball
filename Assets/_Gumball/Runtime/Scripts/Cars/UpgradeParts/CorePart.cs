@@ -34,7 +34,7 @@ namespace Gumball
         [SerializeField] private int standardCurrencyInstallCost = 500;
         
         [Header("SubParts")]
-        [SerializeField] private SubPartSlot[] subPartSlots;
+        [SerializeField] private SubPartSlot[] subPartSlots = Array.Empty<SubPartSlot>();
         [SerializeField] private CorePartLevel[] levels;
 
         [Header("Modifiers")]
