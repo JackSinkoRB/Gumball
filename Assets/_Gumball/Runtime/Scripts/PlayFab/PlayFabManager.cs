@@ -11,6 +11,10 @@ namespace Gumball
     public static class PlayFabManager
     {
 
+#if UNITY_EDITOR
+        public static bool DisableServerTime;
+#endif
+        
         public enum ConnectionStatusType
         {
             LOADING,
@@ -34,6 +38,9 @@ namespace Gumball
         public static long CurrentEpochSecondsSynced {
 
             get {
+                if (DisableServerTime)
+                    return TimeUtils.CurrentEpochSeconds;
+                
                 if (ServerTimeInitialisationStatus != ConnectionStatusType.SUCCESS)
                 {
                     Debug.LogWarning("Cannot get server time because it hasn't been retrieved. Using local time.");
@@ -50,6 +57,7 @@ namespace Gumball
         private static void RuntimeInitialise()
         {
             onSuccessfulConnection = null;
+            DisableServerTime = false;
             
             ConnectionStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
