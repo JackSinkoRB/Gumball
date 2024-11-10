@@ -53,7 +53,8 @@ namespace Gumball
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public SubPartSlot[] SubPartSlots => subPartSlots;
         public ReadOnlyCollection<GameSession> SessionsThatGiveReward => sessionsThatGiveReward.AsReadOnly();
-
+        public CorePartLevel[] Levels => levels;
+        
         public bool IsUnlocked
         {
             get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.IsUnlocked", false);
@@ -64,6 +65,12 @@ namespace Gumball
         {
             get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.CarBelongsToIndex", -1);
             private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.CarBelongsToIndex", value);
+        }
+
+        public int CurrentLevelIndex
+        {
+            get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.LevelIndex", 0);
+            private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.LevelIndex", value);
         }
 
         public bool IsAppliedToCar => CarBelongsToIndex != -1;
@@ -122,6 +129,14 @@ namespace Gumball
         {
             IsUnlocked = unlocked;
         }
+        
+        public void Upgrade()
+        {
+            //TODO
+            //consume all sub parts
+
+            CurrentLevelIndex++;
+        }
 
         public void ApplyToCar(int carIndex)
         {
@@ -179,6 +194,20 @@ namespace Gumball
                 
                 slot.Initialise(this, saveKeyID);
             }
+        }
+
+        public bool AreAllSubPartsInstalled()
+        {
+            if (subPartSlots.Length == 0)
+                return false; //no sub part slots, so no sub parts installed
+            
+            foreach (SubPartSlot slot in subPartSlots)
+            {
+                if (slot.CurrentSubPart == null)
+                    return false;
+            }
+
+            return true;
         }
         
     }

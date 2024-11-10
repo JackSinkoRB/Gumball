@@ -11,6 +11,10 @@ namespace Gumball
     public class CorePartLevel
     {
 
+        [Header("Details")]
+        [SerializeField] private int standardCurrencyCost;
+        
+        [Header("Slots")]
         [ConditionalField(nameof(hasSlot_ECU))]
         [SerializeField] private SubPart.SubPartRarity requiredRarity_ECU;
         [ConditionalField(nameof(hasSlot_Intake))]
@@ -48,6 +52,8 @@ namespace Gumball
         [SerializeField, HideInInspector] private bool hasSlot_Gearbox;
         [SerializeField, HideInInspector] private bool hasSlot_Clutch;
         [SerializeField, HideInInspector] private bool hasSlot_Differential;
+
+        public int StandardCurrencyCost => standardCurrencyCost;
 
 #if UNITY_EDITOR
         public void SetupInspector(CorePart corePartBelongsTo)

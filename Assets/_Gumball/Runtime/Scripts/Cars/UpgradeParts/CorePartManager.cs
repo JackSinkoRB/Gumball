@@ -40,11 +40,17 @@ namespace Gumball
             yield return FindParts();
         }
         
+        /// <summary>
+        /// Sets the currently installed part on the car.
+        /// </summary>
         public static void SetCorePart(int carIndex, CorePart.PartType type, CorePart corePart)
         {
             DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}", corePart == null ? null : corePart.ID);
         }
         
+        /// <summary>
+        /// Gets the currently installed part on the car, or returns the default part if none.
+        /// </summary>
         public static CorePart GetCorePart(int carIndex, CorePart.PartType type)
         {
             string saveKey = $"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}";
