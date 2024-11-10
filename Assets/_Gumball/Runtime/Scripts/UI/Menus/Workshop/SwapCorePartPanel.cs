@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MagneticScrollUtils;
 using MyBox;
 using TMPro;
 using UnityEngine;
@@ -58,6 +57,8 @@ namespace Gumball
             
             if (PanelManager.PanelExists<PaintStripeBackgroundPanel>())
                 PanelManager.GetPanel<PaintStripeBackgroundPanel>().Hide();
+
+            PanelManager.GetPanel<ModifyWorkshopSubMenu>().Show();
         }
 
         public void SelectPartOption(SwapCorePartOptionButton option)
@@ -80,6 +81,15 @@ namespace Gumball
         
         public void OnClickInstallButton()
         {
+            int partLevel = selectedOption.CorePart.CurrentLevelIndex + 1;
+            int carLevel = BlueprintManager.Instance.GetLevelIndex(WarehouseManager.Instance.CurrentCar.CarIndex) + 1;
+            if (partLevel > carLevel)
+            {
+                PanelManager.GetPanel<GenericMessagePanel>().Show();
+                PanelManager.GetPanel<GenericMessagePanel>().Initialise($"Cannot install part as the level ({partLevel}) is higher than the cars level ({carLevel}).\n\nYou can upgrade the car level in the <b>level up</b> menu.");
+                return;
+            }
+
             bool isStockPart = selectedOption.CorePart == null;
             if (!isStockPart)
             {

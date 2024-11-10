@@ -99,6 +99,12 @@ namespace Gumball
             get => CorePartManager.GetPartByID(DataManager.Cars.Get<string>($"Parts.Sub.{saveKey}.CorePartBelongsTo", null));
             private set => DataManager.Cars.Set($"Parts.Sub.{saveKey}.CorePartBelongsTo", value == null ? null : value.ID);
         }
+        
+        public bool IsConsumed
+        {
+            get => DataManager.Cars.Get($"Parts.Sub.{saveKey}.IsConsumed", false);
+            private set => DataManager.Cars.Set($"Parts.Sub.{saveKey}.IsConsumed", value);
+        }
 
         public bool IsAppliedToCorePart => CorePartBelongsTo != null;
             
@@ -147,6 +153,11 @@ namespace Gumball
         public void SetUnlocked(bool unlocked)
         {
             IsUnlocked = unlocked;
+        }
+
+        public void SetConsumed(bool consumed)
+        {
+            IsConsumed = consumed;
         }
         
         public void ApplyToCorePart(CorePart corePart)

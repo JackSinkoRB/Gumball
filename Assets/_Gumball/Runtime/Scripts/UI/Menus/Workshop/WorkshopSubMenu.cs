@@ -15,27 +15,37 @@ namespace Gumball
         [SerializeField] private float buttonLabelColorTweenDuration = 0.2f;
 
         private Tween buttonLabelColorTween;
-        
+
+        public override void OnAddToPanelLookup()
+        {
+            base.OnAddToPanelLookup();
+
+            if (buttonLabel != null)
+                buttonLabel.color = buttonLabelColorDeselected;
+        }
+
         protected override void OnShow()
         {
             base.OnShow();
 
-            if (buttonLabel != null)
-            {
-                buttonLabelColorTween?.Kill();        
-                buttonLabelColorTween = buttonLabel.DOColor(GlobalColourPalette.Instance.GetGlobalColor(buttonLabelColorSelected), buttonLabelColorTweenDuration);
-            }
+            TweenButtonLabelColor(true);
         }
 
         protected override void OnHide()
         {
             base.OnHide();
 
-            if (buttonLabel != null)
-            {
-                buttonLabelColorTween?.Kill();
-                buttonLabelColorTween = buttonLabel.DOColor(buttonLabelColorDeselected, buttonLabelColorTweenDuration);
-            }
+            TweenButtonLabelColor(false);
+        }
+
+        private void TweenButtonLabelColor(bool selected)
+        {
+            if (buttonLabel == null)
+                return;
+            
+            buttonLabelColorTween?.Kill();
+            buttonLabelColorTween = buttonLabel.DOColor(selected ? GlobalColourPalette.Instance.GetGlobalColor(buttonLabelColorSelected) : buttonLabelColorDeselected, 
+                buttonLabelColorTweenDuration);
         }
         
     }

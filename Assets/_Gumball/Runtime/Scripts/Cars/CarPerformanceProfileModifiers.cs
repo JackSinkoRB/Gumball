@@ -30,6 +30,17 @@ namespace Gumball
             };
         }
         
+        public static CarPerformanceProfileModifiers operator -(CarPerformanceProfileModifiers a, CarPerformanceProfileModifiers b)
+        {
+            return new CarPerformanceProfileModifiers
+            {
+                maxSpeed = a.maxSpeed - b.maxSpeed,
+                acceleration = a.acceleration - b.acceleration,
+                handling = a.handling - b.handling,
+                nos = a.nos - b.nos
+            };
+        }
+        
         public static CarPerformanceProfileModifiers operator *(CarPerformanceProfileModifiers a, CarPerformanceProfileModifiers b)
         {
             return new CarPerformanceProfileModifiers
@@ -38,6 +49,17 @@ namespace Gumball
                 acceleration = a.acceleration * b.acceleration,
                 handling = a.handling * b.handling,
                 nos = a.nos * b.nos
+            };
+        }
+        
+        public static CarPerformanceProfileModifiers operator *(CarPerformanceProfileModifiers a, float b)
+        {
+            return new CarPerformanceProfileModifiers
+            {
+                maxSpeed = a.maxSpeed * b,
+                acceleration = a.acceleration * b,
+                handling = a.handling * b,
+                nos = a.nos * b
             };
         }
         

@@ -54,12 +54,22 @@ namespace Gumball
                 if (numberOfColumns == 0)
                     return;
                 numberOfRows = Mathf.CeilToInt((float)transform.childCount / numberOfColumns);
+
+                //don't let it overlap
+                float maxElementSizePercent = 1f / numberOfRows;
+                if (elementSizeAsPercent > maxElementSizePercent)
+                    elementSizeAsPercent = maxElementSizePercent;
             }
             else
             {
                 if (numberOfRows == 0)
                     return;
                 numberOfColumns = Mathf.CeilToInt((float)transform.childCount / numberOfRows);
+                
+                //don't let it overlap
+                float maxElementSizePercent = 1f / numberOfColumns;
+                if (elementSizeAsPercent > maxElementSizePercent)
+                    elementSizeAsPercent = maxElementSizePercent;
             }
 
             float elementSize = layoutDirection == LayoutDirection.HORIZONTAL ? rectWidth * elementSizeAsPercent : rectHeight * elementSizeAsPercent;
