@@ -44,6 +44,8 @@ namespace Gumball.Runtime.Tests
             ChunkManager.IsRunningTests = true;
             PersistentCooldown.IsRunningTests = true;
             
+            PlayFabManager.DisableServerTime = true;
+
             UniversalRenderPipelineUtils.SetRendererFeatureActive("Decal", false);
             
             DataManager.EnableTestProviders(true);
@@ -58,8 +60,6 @@ namespace Gumball.Runtime.Tests
         [OneTimeTearDown]
         public virtual void OneTimeTearDown()
         {
-            Debug.Log("Tear down");
-            
             DataManager.EnableTestProviders(false);
             
             UniversalRenderPipelineUtils.SetRendererFeatureActive("Decal", true); //reenable
