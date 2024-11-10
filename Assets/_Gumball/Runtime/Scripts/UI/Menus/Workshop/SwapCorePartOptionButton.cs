@@ -13,6 +13,7 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI title;
         [SerializeField] private Image icon;
         [SerializeField] private GameObject frame;
+        [SerializeField] private TextMeshProUGUI levelLabel;
         [Space(5)]
         [SerializeField] private Image glow;
         [SerializeField] private GlobalColourPalette.ColourCode glowCurrentCarColor;
@@ -36,6 +37,9 @@ namespace Gumball
             icon.sprite = corePart == null ? null : corePart.Icon;
 
             button.interactable = corePart != null && corePart.CarType == WarehouseManager.Instance.CurrentCar.CarType;
+
+            int currentLevel = corePart.CurrentLevelIndex + 1;
+            levelLabel.text = currentLevel.ToString();
                 
             OnDeselect();
         }
