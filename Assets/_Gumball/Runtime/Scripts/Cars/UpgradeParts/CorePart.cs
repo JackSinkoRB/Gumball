@@ -180,7 +180,13 @@ namespace Gumball
                 subPartModifiers += subPart.CorePartModifiers;
             }
             
-            return subPartModifiers * performanceModifiers;
+            //sub part modifiers goes between performanceModifiers * min and performanceModifiers * max
+            float minPercent = levels[CurrentLevelIndex].MinPerformanceModifierPercent;
+            float maxPercent = levels[CurrentLevelIndex].MaxPerformanceModifierPercent;
+            CarPerformanceProfileModifiers min = performanceModifiers * minPercent;
+            CarPerformanceProfileModifiers max = performanceModifiers * maxPercent;
+            CarPerformanceProfileModifiers difference = max - min;
+            return min + (subPartModifiers * difference);
         }
 
         public void InitialiseSubPartSlots()

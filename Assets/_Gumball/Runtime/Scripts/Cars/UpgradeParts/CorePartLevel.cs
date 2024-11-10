@@ -13,6 +13,10 @@ namespace Gumball
 
         [Header("Details")]
         [SerializeField] private int standardCurrencyCost;
+
+        [Header("Stats")]
+        [SerializeField, Range(0, 1)] private float minPerformanceModifierPercent;
+        [SerializeField, Range(0, 1)] private float maxPerformanceModifierPercent;
         
         [Header("Slots")]
         [ConditionalField(nameof(hasSlot_ECU))]
@@ -54,6 +58,8 @@ namespace Gumball
         [SerializeField, HideInInspector] private bool hasSlot_Differential;
 
         public int StandardCurrencyCost => standardCurrencyCost;
+        public float MinPerformanceModifierPercent => minPerformanceModifierPercent;
+        public float MaxPerformanceModifierPercent => maxPerformanceModifierPercent;
 
 #if UNITY_EDITOR
         public void SetupInspector(CorePart corePartBelongsTo)
