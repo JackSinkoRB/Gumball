@@ -12,6 +12,9 @@ namespace Gumball
         [SerializeField] private TextMeshProUGUI label;
         [SerializeField] private Image icon;
 
+        [SerializeField] private Color partInstalledIconColor;
+        [SerializeField] private Color noPartInstalledIconColor;
+        
         private SubPartSlot slot;
 
         public void Initialise(SubPartSlot slot)
@@ -20,6 +23,8 @@ namespace Gumball
             
             label.text = slot.Type.ToFriendlyString();
             icon.sprite = slot.Icon;
+
+            icon.color = slot.CurrentSubPart == null ? noPartInstalledIconColor : partInstalledIconColor;
         }
 
         public void OnClick()
