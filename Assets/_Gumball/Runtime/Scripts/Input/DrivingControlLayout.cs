@@ -119,6 +119,14 @@ namespace Gumball
             
             InputManager.Instance.CarInput.Accelerate.SetPressedOverride(isPressed);
         }
+        
+        public void OnHoldAccelerateButton()
+        {
+            if (!InputManager.Instance.CarInput.IsEnabled)
+                return;
+            
+            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(true);
+        }
 
         public void OnPressBrakeButton(bool isPressed)
         {

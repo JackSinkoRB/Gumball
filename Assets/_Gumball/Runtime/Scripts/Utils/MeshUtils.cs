@@ -15,6 +15,9 @@ namespace Gumball
         {
             if (mesh == null)
                 return;
+
+            if (mesh.isReadable)
+                return; //is already readable
             
             string assetPath = AssetDatabase.GetAssetPath(mesh);
             if (assetPath.IsNullOrEmpty())

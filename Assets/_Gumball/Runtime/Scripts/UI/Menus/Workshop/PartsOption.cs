@@ -58,6 +58,8 @@ namespace Gumball
             keyIcon.gameObject.SetActive(true);
             
             onSelectOption?.Invoke(this);
+
+            CoroutineHelper.Instance.StartCoroutine(DecalManager.ApplyDecalDataToCar(group.CarBelongsTo));
         }
 
         private void OnSelectPartsOption(PartsOption partsOption)

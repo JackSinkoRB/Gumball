@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -37,7 +38,7 @@ namespace Gumball.Runtime.Tests
         public IEnumerator CurrentMonthLoops()
         {
             yield return new WaitUntil(() => isInitialised);
-
+        
             TimeUtils.SetTime(0);
             
             const int iterations = 2;
@@ -47,36 +48,40 @@ namespace Gumball.Runtime.Tests
                 TimeUtils.AddTimeOffset(new TimeSpan(DailyLoginManager.DaysInMonth, 0, 0, 0));
             }
         }
-
+        
         [UnityTest]
-        [Order(1)]
+        [Order(2)]
         public IEnumerator SecondsPassedInCurrentMonth()
         {
             yield return new WaitUntil(() => isInitialised);
-
+        
+            Stopwatch stopwatch = Stopwatch.StartNew();
             TimeUtils.SetTime(0);
-            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth, Mathf.CeilToInt((float)stopwatch.Elapsed.TotalSeconds));
             
+            stopwatch.Restart();
             TimeUtils.AddTimeOffset(TimeSpan.FromSeconds(100));
-            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth, Mathf.CeilToInt((float)stopwatch.Elapsed.TotalSeconds));
             
+            stopwatch.Restart();
             TimeUtils.SetTime(0);
             TimeUtils.AddTimeOffset(new TimeSpan(DailyLoginManager.DaysInMonth, 0, 0, 0));
-            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            Assert.AreEqual(0, DailyLoginManager.Instance.SecondsPassedInCurrentMonth, Mathf.CeilToInt((float)stopwatch.Elapsed.TotalSeconds));
             
+            stopwatch.Restart();
             TimeUtils.AddTimeOffset(TimeSpan.FromSeconds(100));
-            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth);
+            Assert.AreEqual(100, DailyLoginManager.Instance.SecondsPassedInCurrentMonth, Mathf.CeilToInt((float)stopwatch.Elapsed.TotalSeconds));
         }
         
         [UnityTest]
-        [Order(1)]
+        [Order(3)]
         public IEnumerator DaysPassedInCurrentMonth()
         {
             yield return new WaitUntil(() => isInitialised);
-
+        
             TimeUtils.SetTime(0);
             Assert.AreEqual(0, DailyLoginManager.Instance.DaysPassedInCurrentMonth);
-
+        
             TimeUtils.AddTimeOffset(new TimeSpan(1, 1, 0, 0));
             Assert.AreEqual(1, DailyLoginManager.Instance.DaysPassedInCurrentMonth);
             

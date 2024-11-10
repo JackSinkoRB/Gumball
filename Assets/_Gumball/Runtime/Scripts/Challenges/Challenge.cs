@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Gumball
 {
     [Serializable]
-    public class Challenge : ISerializationCallbackReceiver
+    public class Challenge
     {
         
         [SerializeField] private string description = "Description of challenge";
@@ -23,30 +23,25 @@ namespace Gumball
         public int Goal => goal;
         public Rewards Rewards => rewards;
 
-        [SerializeField, ReadOnly] private string uniqueID;
-        
-        public string ChallengeID => $"{description}-{tracker.GetType()}-{uniqueID}-{goal}";
+        [SerializeField, ReadOnly] private string uniqueID = Guid.NewGuid().ToString();
 
+        public string UniqueID => uniqueID;
+        
         public bool IsClaimed
         {
-            get => DataManager.GameSessions.Get($"Challenges.Listeners.{ChallengeID}.Claimed", false);
-            private set => DataManager.GameSessions.Set($"Challenges.Listeners.{ChallengeID}.Claimed", value);
+            get => DataManager.GameSessions.Get($"Challenges.Listeners.{uniqueID}.Claimed", false);
+            private set => DataManager.GameSessions.Set($"Challenges.Listeners.{uniqueID}.Claimed", value);
         }
-
-        public void OnBeforeSerialize()
-        {
-            if (uniqueID.IsNullOrEmpty())
-                uniqueID = Guid.NewGuid().ToString();
-        }
-
-        public void OnAfterDeserialize()
-        {
-            
-        }
-
+        
         public void SetClaimed(bool isClaimed)
         {
             IsClaimed = isClaimed;
+        }
+
+        public void AssignNewID()
+        {
+            uniqueID = Guid.NewGuid().ToString();
+            Debug.Log($"Assigned new ID for {description}");
         }
         
     }

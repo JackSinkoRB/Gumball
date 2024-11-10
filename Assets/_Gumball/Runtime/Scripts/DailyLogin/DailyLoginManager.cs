@@ -10,14 +10,19 @@ namespace Gumball
     {
         
 #region STATIC
-        public delegate void CurrentMonthChangeDelegate(int previousMonthIndex, int newMonthIndex);
-        public static event CurrentMonthChangeDelegate onCurrentMonthChange;
+        public delegate void IndexChangeDelegate(int previousIndex, int newIndex);
+        public static event IndexChangeDelegate onCurrentMonthChange;
+        public static event IndexChangeDelegate onCurrentDayChange;
 
         private static int lastTrackedMonthIndex = -1;
+        private static int lastTrackedDay = -1;
         
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
         {
+            lastTrackedMonthIndex = -1;
+            lastTrackedDay = -1;
+            
             CoroutineHelper.onUnityLateUpdate -= Update;
             CoroutineHelper.onUnityLateUpdate += Update;
         }
@@ -25,6 +30,7 @@ namespace Gumball
         private static void Update()
         {
             CheckForMonthChange();
+            CheckForDayChange();
         }
 
         private static void CheckForMonthChange()
@@ -46,6 +52,28 @@ namespace Gumball
             {
                 onCurrentMonthChange?.Invoke(lastTrackedMonthIndex, Instance.CurrentMonthIndex);
                 lastTrackedMonthIndex = Instance.CurrentMonthIndex;
+            }
+        }
+        
+        private static void CheckForDayChange()
+        {
+            if (!HasLoaded)
+                return;
+
+            if (PlayFabManager.ServerTimeInitialisationStatus != PlayFabManager.ConnectionStatusType.SUCCESS) //requires internet
+                return;
+            
+            bool isFirstCall = lastTrackedDay == -1;
+            if (isFirstCall)
+            {
+                lastTrackedDay = Instance.DaysPassedInCurrentMonth;
+                return;
+            }
+
+            if (lastTrackedDay != Instance.DaysPassedInCurrentMonth)
+            {
+                onCurrentDayChange?.Invoke(lastTrackedDay, Instance.DaysPassedInCurrentMonth);
+                lastTrackedDay = Instance.DaysPassedInCurrentMonth;
             }
         }
 #endregion
@@ -78,7 +106,7 @@ namespace Gumball
         public DailyLoginMonthProfile[] MonthProfiles => monthProfiles;
 
         public long SecondsPassedInCurrentMonth => PlayFabManager.CurrentEpochSecondsSynced % SecondsPerMonth;
-        public int DaysPassedInCurrentMonth => Mathf.FloorToInt((float)SecondsPassedInCurrentMonth / TimeUtils.SecondsInADay);
+        public int DaysPassedInCurrentMonth => Mathf.FloorToInt((float)(SecondsPassedInCurrentMonth < 0 ? 0 : SecondsPassedInCurrentMonth) / TimeUtils.SecondsInADay);
         public int DaysRemainingInCurrentMonth => DaysInMonth - DaysPassedInCurrentMonth;
         public long SecondsLeftInCurrentDay => ((DaysPassedInCurrentMonth + 1) * TimeUtils.SecondsInADay) - SecondsPassedInCurrentMonth;
         
@@ -138,7 +166,7 @@ namespace Gumball
             CurrentDayNumberTracker = 1;
             TimeWhenCurrentDayIsReady = 0;
             
-            GlobalLoggers.DailyLoginLogger.Log($"Detected month change - Current month index is {CurrentMonthIndex}");
+            GlobalLoggers.ChallengesLogger.Log($"Detected month change - Current month index is {CurrentMonthIndex}");
         }
         
     }

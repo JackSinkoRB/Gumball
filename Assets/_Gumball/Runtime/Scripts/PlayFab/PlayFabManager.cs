@@ -11,6 +11,10 @@ namespace Gumball
     public static class PlayFabManager
     {
 
+#if UNITY_EDITOR
+        public static bool DisableServerTime;
+#endif
+        
         public enum ConnectionStatusType
         {
             LOADING,
@@ -18,6 +22,8 @@ namespace Gumball
             ERROR,
         }
 
+        public static event Action onSuccessfulConnection;
+        
         private static Dictionary<string, string> titleDataCached;
 
         private static long serverTimeOnInitialise;
@@ -32,13 +38,18 @@ namespace Gumball
         public static long CurrentEpochSecondsSynced {
 
             get {
+#if UNITY_EDITOR
+                if (DisableServerTime)
+                    return TimeUtils.CurrentEpochSeconds;
+#endif
+                
                 if (ServerTimeInitialisationStatus != ConnectionStatusType.SUCCESS)
                 {
                     Debug.LogWarning("Cannot get server time because it hasn't been retrieved. Using local time.");
                     return TimeUtils.CurrentEpochSeconds;
                 }
 
-                return serverTimeOnInitialise + Mathf.RoundToInt(Time.realtimeSinceStartup)
+                return serverTimeOnInitialise + Mathf.CeilToInt(Time.realtimeSinceStartup)
                        - gameTimeOnInitialise //account for the time taken to initialise
                        + TimeUtils.TimeOffsetSeconds; //account for debug offset
             }
@@ -47,12 +58,23 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
         {
+            onSuccessfulConnection = null;
+#if UNITY_EDITOR
+            DisableServerTime = false;
+#endif
+            
             ConnectionStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
         }
 
         public static IEnumerator Initialise()
         {
+            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+            {
+                Debug.LogWarning("Trying to initialise PlayFab, but it is already connected.");
+                yield break;
+            }
+
             ConnectionStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
             
@@ -61,6 +83,9 @@ namespace Gumball
             
             RetrieveServerTime();
             yield return new WaitUntil(() => ServerTimeInitialisationStatus != ConnectionStatusType.LOADING);
+
+            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+                onSuccessfulConnection?.Invoke();
         }
         
         /// <summary>
@@ -164,7 +189,7 @@ namespace Gumball
         private static void OnRetrieveServerTimeSuccess(GetTimeResult result)
         {
             serverTimeOnInitialise = new DateTimeOffset(result.Time).ToUnixTimeSeconds();;
-            gameTimeOnInitialise = Mathf.RoundToInt(Time.realtimeSinceStartup);
+            gameTimeOnInitialise = Mathf.CeilToInt(Time.realtimeSinceStartup);
             
             ServerTimeInitialisationStatus = ConnectionStatusType.SUCCESS;
             

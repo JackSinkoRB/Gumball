@@ -85,6 +85,7 @@ namespace Gumball
 
         [Header("Dialogue")]
         [SerializeField] private DialogueData preSessionDialogue;
+        [SerializeField] private DialogueData preCountdownDialogue;
         [SerializeField] private DialogueData postSessionDialogue;
 
         [Header("Debugging")]
@@ -478,7 +479,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StartListening(subObjective.ChallengeID, subObjective.Goal);
+                subObjective.Tracker.StartListening(subObjective.UniqueID, subObjective.Goal);
             }
         }
 
@@ -489,7 +490,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StopListening(subObjective.ChallengeID);
+                subObjective.Tracker.StopListening(subObjective.UniqueID);
             }
         }
 
@@ -548,6 +549,16 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
                 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
+            
+            if (preCountdownDialogue != null && !preCountdownDialogue.HasBeenCompleted)
+            {
+                yield return new WaitUntil(() => drivingCameraController.GetCurrentTransition() == null);
+                
+                Time.timeScale = 0;
+                preCountdownDialogue.Play();
+                yield return new WaitUntil(() => !DialogueManager.IsPlaying);
+                Time.timeScale = 1;
+            }
 
             yield return IntroCountdownIE();
             
@@ -724,7 +735,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                if (subObjective.Tracker.GetListener(subObjective.ChallengeID).Progress < 1)
+                if (subObjective.Tracker.GetListener(subObjective.UniqueID).Progress < 1)
                     return false;
             }
 

@@ -30,7 +30,7 @@ namespace Gumball
         {
             base.OnInstanceLoaded();
             
-            RegenerateCycle = new PersistentCooldown("FuelRegenerateCycle", timeBetweenFuelRegenerate.ToSeconds());
+            RegenerateCycle = new PersistentCooldown("FuelRegenerateCycle", timeBetweenFuelRegenerate.ToSeconds(), false);
             RegenerateCycle.onCycleComplete += RegenerateFuel;
             RegenerateCycle.Play();
         }
