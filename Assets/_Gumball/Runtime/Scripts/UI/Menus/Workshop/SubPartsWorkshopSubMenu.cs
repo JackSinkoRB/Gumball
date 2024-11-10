@@ -76,25 +76,22 @@ namespace Gumball
 
         private void SetupSubPartSlots()
         {
-            if (corePart == null || corePart.SubPartSlots.Length == 0)
-            {
-                Hide();
-                return;
-            }
-
             foreach (Transform child in slotButtonsGrid.transform)
                 child.gameObject.Pool();
 
-            foreach (SubPartSlot slot in corePart.SubPartSlots)
+            if (corePart != null)
             {
-                if (slot.Type.GetCoreType() != corePartType)
-                    continue;
-                
-                SubPartSlotButton button = slotButtonPrefab.GetSpareOrCreate<SubPartSlotButton>(slotButtonsGrid.transform);
-                button.transform.SetAsLastSibling();
-                button.Initialise(slot);
+                foreach (SubPartSlot slot in corePart.SubPartSlots)
+                {
+                    if (slot.Type.GetCoreType() != corePartType)
+                        continue;
+
+                    SubPartSlotButton button = slotButtonPrefab.GetSpareOrCreate<SubPartSlotButton>(slotButtonsGrid.transform);
+                    button.transform.SetAsLastSibling();
+                    button.Initialise(slot);
+                }
             }
-            
+
             slotButtonsGrid.Resize();
         }
 
