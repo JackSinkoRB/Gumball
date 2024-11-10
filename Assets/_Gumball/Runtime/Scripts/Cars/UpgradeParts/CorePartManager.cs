@@ -130,20 +130,11 @@ namespace Gumball
             if (isAttachedToCurrentCar)
                 WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(carIndex));
         }
-        
-        
-        //TODO: sub parts
-        
-        // public static void SetSubPart(int carIndex, SubPart.SubPartType type, CorePart corePart)
-        // {
-        //     DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}", corePart == null ? null : corePart.ID);
-        // }
-        //
-        // public static SubPart GetSubPart(int carIndex, SubPart.SubPartType type)
-        // {
-        //     string partID = DataManager.Cars.Get<string>($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}");
-        //     return SubPartManager.GetPartByID(partID);
-        // }
+
+        public static void RemovePartOnCar(CorePart.PartType type, int carIndex)
+        {
+            InstallPartOnCar(type, null, carIndex);
+        }
 
         private static IEnumerator FindParts()
         {

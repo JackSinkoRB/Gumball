@@ -140,6 +140,10 @@ namespace Gumball
             }
 
             CurrentLevelIndex++;
+            
+            //remove if it is now higher than the car level
+            if (CurrentLevelIndex > BlueprintManager.Instance.GetLevelIndex(CarBelongsToIndex))
+                CorePartManager.RemovePartOnCar(type, CarBelongsToIndex);
         }
 
         public void ApplyToCar(int carIndex)
@@ -161,12 +165,12 @@ namespace Gumball
                 return;
             }
 
+            CarBelongsToIndex = -1;
+            
             //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CarBelongsToIndex;
             if (isAttachedToCurrentCar)
                 WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CarBelongsToIndex));
-            
-            CarBelongsToIndex = -1;
         }
         
         public CarPerformanceProfileModifiers GetTotalModifiers()
