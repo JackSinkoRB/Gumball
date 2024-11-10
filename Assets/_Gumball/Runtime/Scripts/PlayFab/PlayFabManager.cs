@@ -38,8 +38,10 @@ namespace Gumball
         public static long CurrentEpochSecondsSynced {
 
             get {
+#if UNITY_EDITOR
                 if (DisableServerTime)
                     return TimeUtils.CurrentEpochSeconds;
+#endif
                 
                 if (ServerTimeInitialisationStatus != ConnectionStatusType.SUCCESS)
                 {
@@ -57,7 +59,9 @@ namespace Gumball
         private static void RuntimeInitialise()
         {
             onSuccessfulConnection = null;
+#if UNITY_EDITOR
             DisableServerTime = false;
+#endif
             
             ConnectionStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
