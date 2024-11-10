@@ -15,16 +15,8 @@ namespace Gumball
 
         [SerializeField] private List<ModifyCorePartButton> corePartButtons = new();
         
-        [Header("Debugging")]
-        [SerializeField, ReadOnly] private int selectedCorePartIndex = -1;
-
-        public override void OnAddToPanelLookup()
-        {
-            base.OnAddToPanelLookup();
-            
-            OpenSubMenu(0);
-        }
-
+        private int selectedCorePartIndex;
+        
         protected override void OnShow()
         {
             base.OnShow();
