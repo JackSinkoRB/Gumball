@@ -257,5 +257,10 @@ public abstract class AnimatedPanel : MonoBehaviour
             tween?.Kill();
         currentTweens.Clear();
     }
+
+    public virtual void OnAddToPanelLookup()
+    {
+        
+    }
     
 }
