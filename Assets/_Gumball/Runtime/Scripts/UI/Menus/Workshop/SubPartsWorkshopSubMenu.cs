@@ -99,7 +99,7 @@ namespace Gumball
         private void SetLevelLabel()
         {
             int level = corePart == null ? 1 : corePart.CurrentLevelIndex + 1;
-            int maxLevel = corePart == null ? 1 : corePart.Levels.Length;
+            int maxLevel = corePart == null || corePart.Levels.Length == 0 ? 1 : corePart.Levels.Length;
             levelLabel.text = $"Level {level} / {maxLevel}";
         }
 

@@ -35,7 +35,7 @@ namespace Gumball
         
         [Header("SubParts")]
         [SerializeField] private SubPartSlot[] subPartSlots = Array.Empty<SubPartSlot>();
-        [SerializeField] private CorePartLevel[] levels;
+        [SerializeField] private CorePartLevel[] levels = Array.Empty<CorePartLevel>();
 
         [Header("Modifiers")]
         [SerializeField] private CarPerformanceProfileModifiers performanceModifiers;
@@ -185,8 +185,8 @@ namespace Gumball
             }
             
             //sub part modifiers goes between performanceModifiers * min and performanceModifiers * max
-            float minPercent = levels[CurrentLevelIndex].MinPerformanceModifierPercent;
-            float maxPercent = levels[CurrentLevelIndex].MaxPerformanceModifierPercent;
+            float minPercent = levels.Length == 0 ? 0 : levels[CurrentLevelIndex].MinPerformanceModifierPercent;
+            float maxPercent = levels.Length == 0 ? 1 : levels[CurrentLevelIndex].MaxPerformanceModifierPercent;
             CarPerformanceProfileModifiers min = performanceModifiers * minPercent;
             CarPerformanceProfileModifiers max = performanceModifiers * maxPercent;
             CarPerformanceProfileModifiers difference = max - min;
