@@ -39,6 +39,8 @@ namespace Gumball
         
         public void OnClickSwapButton()
         {
+            PanelManager.GetPanel<ModifyWorkshopSubMenu>().Hide();
+            
             PanelManager.GetPanel<SwapCorePartPanel>().Show();
             PanelManager.GetPanel<SwapCorePartPanel>().Initialise(corePartType);
         }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MagneticScrollUtils;
 using MyBox;
 using TMPro;
 using UnityEngine;
@@ -58,6 +57,8 @@ namespace Gumball
             
             if (PanelManager.PanelExists<PaintStripeBackgroundPanel>())
                 PanelManager.GetPanel<PaintStripeBackgroundPanel>().Hide();
+
+            PanelManager.GetPanel<ModifyWorkshopSubMenu>().Show();
         }
 
         public void SelectPartOption(SwapCorePartOptionButton option)

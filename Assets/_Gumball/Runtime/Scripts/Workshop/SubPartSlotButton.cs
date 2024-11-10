@@ -24,6 +24,8 @@ namespace Gumball
 
         public void OnClick()
         {
+            PanelManager.GetPanel<ModifyWorkshopSubMenu>().Hide();
+            
             PanelManager.GetPanel<SwapSubPartPanel>().Show();
             PanelManager.GetPanel<SwapSubPartPanel>().Initialise(slot);
         }
