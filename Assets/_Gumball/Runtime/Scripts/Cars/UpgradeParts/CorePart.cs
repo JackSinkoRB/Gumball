@@ -132,8 +132,12 @@ namespace Gumball
         
         public void Upgrade()
         {
-            //TODO
             //consume all sub parts
+            foreach (SubPartSlot slot in subPartSlots)
+            {
+                slot.CurrentSubPart.SetConsumed(true);
+                slot.UninstallSubPart();
+            }
 
             CurrentLevelIndex++;
         }
