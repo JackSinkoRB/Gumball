@@ -18,13 +18,18 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private int selectedCorePartIndex = -1;
 
-        public int SelectedCorePartIndex => selectedCorePartIndex;
-        
+        public override void OnAddToPanelLookup()
+        {
+            base.OnAddToPanelLookup();
+            
+            OpenSubMenu(0);
+        }
+
         protected override void OnShow()
         {
             base.OnShow();
             
-            OpenSubMenu(0);
+            OpenSubMenu(selectedCorePartIndex);
         }
 
         public void OpenSubMenu(int partIndex)
