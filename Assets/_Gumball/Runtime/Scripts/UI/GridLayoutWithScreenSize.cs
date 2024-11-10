@@ -54,12 +54,22 @@ namespace Gumball
                 if (numberOfColumns == 0)
                     return;
                 numberOfRows = Mathf.CeilToInt((float)transform.childCount / numberOfColumns);
+
+                //don't let it overlap
+                float maxElementSizePercent = 1f / numberOfRows;
+                if (elementSizeAsPercent > maxElementSizePercent)
+                    elementSizeAsPercent = maxElementSizePercent;
             }
             else
             {
                 if (numberOfRows == 0)
                     return;
                 numberOfColumns = Mathf.CeilToInt((float)transform.childCount / numberOfRows);
+                
+                //don't let it overlap
+                float maxElementSizePercent = 1f / numberOfColumns;
+                if (elementSizeAsPercent > maxElementSizePercent)
+                    elementSizeAsPercent = maxElementSizePercent;
             }
 
             float elementSize = layoutDirection == LayoutDirection.HORIZONTAL ? rectWidth * elementSizeAsPercent : rectHeight * elementSizeAsPercent;
@@ -67,25 +77,23 @@ namespace Gumball
             //fit vertical/horizontal:
             if (layoutDirection == LayoutDirection.HORIZONTAL && fitVertical)
             {
-                rectHeight = elementSize * numberOfRows;
+                float extraSpacing = fitVerticalSpacing * (numberOfRows - 1);
+                rectHeight = (elementSize * numberOfRows) + extraSpacing;
                 rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, rectHeight);
             }
             
             if (layoutDirection == LayoutDirection.VERTICAL && fitHorizontal)
             {
-                rectWidth = elementSize * numberOfRows;
+                float extraSpacing = fitHorizontalSpacing * (numberOfColumns - 1);
+                rectWidth = (elementSize * numberOfColumns) + extraSpacing;
                 rectTransform.sizeDelta = new Vector2(rectWidth, rectTransform.sizeDelta.y);
             }
             
             //get spacing:
             Vector2 spacing = new Vector2(
-                (rectWidth - (elementSize * numberOfColumns)) / (numberOfColumns - 1),
-                (rectHeight - (elementSize * numberOfRows)) / (numberOfRows - 1));
-            if (layoutDirection == LayoutDirection.HORIZONTAL && fitVertical)
-                spacing = spacing.SetY(fitVerticalSpacing);
-            if (layoutDirection == LayoutDirection.VERTICAL && fitHorizontal)
-                spacing = spacing.SetX(fitHorizontalSpacing);
-            
+                numberOfColumns == 1 ? 0 : (rectWidth - (elementSize * numberOfColumns)) / (numberOfColumns - 1),
+                numberOfRows == 1 ? 0 : (rectHeight - (elementSize * numberOfRows)) / (numberOfRows - 1));
+
             int count = 0;
             foreach (RectTransform child in transform)
             {

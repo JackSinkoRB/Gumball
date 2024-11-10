@@ -29,8 +29,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"{SceneManager.WarehouseSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             WarehouseManager.Instance.CurrentCar.Teleport(Instance.carPosition.Position, Instance.carPosition.Rotation);
-            WarehouseManager.Instance.CurrentCar.SetGrounded();
-
+            
             Instance.SetupCamera();
             
             AvatarManager.Instance.HideAvatars(true);
@@ -41,6 +40,9 @@ namespace Gumball
         
         [SerializeField] private WarehouseCameraController cameraController;
         [SerializeField] private PositionAndRotation carPosition;
+        [SerializeField] private Transform lockedCarIcon;
+
+        public Transform LockedCarIcon => lockedCarIcon;
         
 #if UNITY_EDITOR
         [Header("Testing")]

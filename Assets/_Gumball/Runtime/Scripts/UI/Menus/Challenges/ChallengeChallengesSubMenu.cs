@@ -20,8 +20,10 @@ namespace Gumball
         [Header("Intermittent rewards")]
         [SerializeField] private Image totalProgressFill;
         [SerializeField] private Button minorRewardButton;
+        [SerializeField] private Transform minorRewardNotification;
         [SerializeField] private Button majorRewardButton;
-        
+        [SerializeField] private Transform majorRewardNotification;
+
         protected abstract Challenges GetChallengeManager();
 
         protected override void OnShow()
@@ -37,12 +39,16 @@ namespace Gumball
         {
             GetChallengeManager().ClaimMinorReward();
             UpdateIntermittentRewards();
+            PanelManager.GetPanel<ChallengesPanel>().Header.UpdateDailyChallengeNotification();
+            PanelManager.GetPanel<ChallengesPanel>().Header.UpdateWeeklyChallengeNotification();
         }
 
         public void OnClickMajorReward()
         {
             GetChallengeManager().ClaimMajorReward();
             UpdateIntermittentRewards();
+            PanelManager.GetPanel<ChallengesPanel>().Header.UpdateDailyChallengeNotification();
+            PanelManager.GetPanel<ChallengesPanel>().Header.UpdateWeeklyChallengeNotification();
         }
 
         private void SetupChallengeItems()
@@ -61,7 +67,7 @@ namespace Gumball
                 ChallengeUI challengeUI = challengeUIPrefab.gameObject.GetSpareOrCreate<ChallengeUI>(challengeUIHolder);
                 
                 //put unclaimed challenges on top
-                ChallengeTracker.Listener tracker = currentChallenge.Tracker.GetListener(currentChallenge.ChallengeID);
+                ChallengeTracker.Listener tracker = currentChallenge.Tracker.GetListener(currentChallenge.UniqueID);
                 if (tracker.IsComplete
                     && !currentChallenge.IsClaimed)
                     challengeUI.transform.SetAsFirstSibling();
@@ -93,8 +99,11 @@ namespace Gumball
             float totalProgressPercent = GetChallengeManager().GetTotalProgressPercent();
             totalProgressFill.fillAmount = totalProgressPercent;
 
-            minorRewardButton.interactable = !GetChallengeManager().HasClaimedMinorReward && totalProgressPercent >= GetChallengeManager().MinorRewardPercent;
-            majorRewardButton.interactable = !GetChallengeManager().HasClaimedMajorReward && totalProgressPercent >= GetChallengeManager().MajorRewardPercent;
+            minorRewardButton.interactable = GetChallengeManager().IsMinorRewardReadyToBeClaimed;
+            majorRewardButton.interactable = GetChallengeManager().IsMajorRewardReadyToBeClaimed;
+            
+            minorRewardNotification.gameObject.SetActive(GetChallengeManager().IsMinorRewardReadyToBeClaimed);
+            majorRewardNotification.gameObject.SetActive(GetChallengeManager().IsMajorRewardReadyToBeClaimed);
         }
 
     }

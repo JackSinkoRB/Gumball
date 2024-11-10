@@ -34,8 +34,8 @@ namespace Gumball
         [SerializeField] private int standardCurrencyInstallCost = 500;
         
         [Header("SubParts")]
-        [SerializeField] private SubPartSlot[] subPartSlots;
-        [SerializeField] private CorePartLevel[] levels;
+        [SerializeField] private SubPartSlot[] subPartSlots = Array.Empty<SubPartSlot>();
+        [SerializeField] private CorePartLevel[] levels = Array.Empty<CorePartLevel>();
 
         [Header("Modifiers")]
         [SerializeField] private CarPerformanceProfileModifiers performanceModifiers;
@@ -53,7 +53,8 @@ namespace Gumball
         public int StandardCurrencyInstallCost => standardCurrencyInstallCost;
         public SubPartSlot[] SubPartSlots => subPartSlots;
         public ReadOnlyCollection<GameSession> SessionsThatGiveReward => sessionsThatGiveReward.AsReadOnly();
-
+        public CorePartLevel[] Levels => levels;
+        
         public bool IsUnlocked
         {
             get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.IsUnlocked", false);
@@ -64,6 +65,12 @@ namespace Gumball
         {
             get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.CarBelongsToIndex", -1);
             private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.CarBelongsToIndex", value);
+        }
+
+        public int CurrentLevelIndex
+        {
+            get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.LevelIndex", 0);
+            private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.LevelIndex", value);
         }
 
         public bool IsAppliedToCar => CarBelongsToIndex != -1;
@@ -122,6 +129,22 @@ namespace Gumball
         {
             IsUnlocked = unlocked;
         }
+        
+        public void Upgrade()
+        {
+            //consume all sub parts
+            foreach (SubPartSlot slot in subPartSlots)
+            {
+                slot.CurrentSubPart.SetConsumed(true);
+                slot.UninstallSubPart();
+            }
+
+            CurrentLevelIndex++;
+            
+            //remove if it is now higher than the car level
+            if (CurrentLevelIndex > BlueprintManager.Instance.GetLevelIndex(CarBelongsToIndex))
+                CorePartManager.RemovePartOnCar(type, CarBelongsToIndex);
+        }
 
         public void ApplyToCar(int carIndex)
         {
@@ -142,12 +165,12 @@ namespace Gumball
                 return;
             }
 
+            CarBelongsToIndex = -1;
+            
             //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CarBelongsToIndex;
             if (isAttachedToCurrentCar)
                 WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CarBelongsToIndex));
-            
-            CarBelongsToIndex = -1;
         }
         
         public CarPerformanceProfileModifiers GetTotalModifiers()
@@ -165,7 +188,13 @@ namespace Gumball
                 subPartModifiers += subPart.CorePartModifiers;
             }
             
-            return subPartModifiers * performanceModifiers;
+            //sub part modifiers goes between performanceModifiers * min and performanceModifiers * max
+            float minPercent = levels.Length == 0 ? 0 : levels[CurrentLevelIndex].MinPerformanceModifierPercent;
+            float maxPercent = levels.Length == 0 ? 1 : levels[CurrentLevelIndex].MaxPerformanceModifierPercent;
+            CarPerformanceProfileModifiers min = performanceModifiers * minPercent;
+            CarPerformanceProfileModifiers max = performanceModifiers * maxPercent;
+            CarPerformanceProfileModifiers difference = max - min;
+            return min + (subPartModifiers * difference);
         }
 
         public void InitialiseSubPartSlots()
@@ -179,6 +208,20 @@ namespace Gumball
                 
                 slot.Initialise(this, saveKeyID);
             }
+        }
+
+        public bool AreAllSubPartsInstalled()
+        {
+            if (subPartSlots.Length == 0)
+                return false; //no sub part slots, so no sub parts installed
+            
+            foreach (SubPartSlot slot in subPartSlots)
+            {
+                if (slot.CurrentSubPart == null)
+                    return false;
+            }
+
+            return true;
         }
         
     }

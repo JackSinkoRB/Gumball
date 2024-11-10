@@ -7,11 +7,9 @@ using UnityEngine;
 
 namespace Gumball
 {
-    public class CarAudio : MonoBehaviour
+    public class CarAudio : Audio
     {
 
-        [SerializeField] protected AudioSource source;
-        
         [Header("Debugging")]
         [SerializeField, ReadOnly] protected CarAudioManager managerBelongsTo;
 
@@ -27,10 +25,9 @@ namespace Gumball
                 InitialiseAsPlayer();
         }
 
-        public void SetVolumeDistance(MinMaxFloat volumeDistance)
+        public virtual void UpdateWhileManagerActive()
         {
-            source.minDistance = volumeDistance.Min;
-            source.maxDistance = volumeDistance.Max;
+            
         }
         
         protected virtual void InitialiseAsTraffic()

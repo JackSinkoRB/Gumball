@@ -145,6 +145,7 @@ public abstract class AnimatedPanel : MonoBehaviour
             return;
         }
 
+        bool wasShowing = IsShowing;
         IsShowing = false;
 
         KillCurrentTweens();
@@ -170,8 +171,11 @@ public abstract class AnimatedPanel : MonoBehaviour
             if (disableWhenHidden)
                 gameObject.SetActive(false);
 
-            onComplete?.Invoke();
-            OnHideComplete();
+            if (wasShowing)
+            {
+                onComplete?.Invoke();
+                OnHideComplete();
+            }
         }
         else
         {
@@ -181,8 +185,11 @@ public abstract class AnimatedPanel : MonoBehaviour
                 if (disableWhenHidden)
                     gameObject.SetActive(false);
 
-                onComplete?.Invoke();
-                OnHideComplete();
+                if (wasShowing)
+                {
+                    onComplete?.Invoke();
+                    OnHideComplete();
+                }
             });
         }
 
@@ -201,7 +208,8 @@ public abstract class AnimatedPanel : MonoBehaviour
         if (!keepInStack && PanelManager.ExistsRuntime && PanelManager.Instance.PanelStack.Contains(this))
             PanelManager.Instance.RemoveFromStack(this);
         
-        OnHide();
+        if (wasShowing)
+            OnHide();
         
         GlobalLoggers.PanelLogger.Log($"Hiding {gameObject.name}.");
     }
@@ -248,6 +256,11 @@ public abstract class AnimatedPanel : MonoBehaviour
         foreach (Tween tween in currentTweens)
             tween?.Kill();
         currentTweens.Clear();
+    }
+
+    public virtual void OnAddToPanelLookup()
+    {
+        
     }
     
 }

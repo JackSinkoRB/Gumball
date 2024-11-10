@@ -11,9 +11,17 @@ namespace Gumball
     {
 
         [SerializeField] private Button claimButton;
-        [SerializeField] private TextMeshProUGUI claimButtonLabel;
-        [SerializeField] private AutosizeTextMeshPro progressLabel;
-        [SerializeField] private AutosizeTextMeshPro descriptionLabel;
+        [SerializeField] private TextMeshProUGUI progressLabel;
+        [SerializeField] private TextMeshProUGUI descriptionLabel;
+        [SerializeField] private Image icon;
+        [SerializeField] private Transform rewardHolder;
+        [SerializeField] private Transform rewardPrefab;
+        [SerializeField] private Transform notificationIcon;
+        [Space(5)]
+        [SerializeField] private Sprite standardCurrencyIcon;
+        [SerializeField] private Sprite premiumCurrencyIcon;
+        [SerializeField] private Sprite xpIcon;
+        [SerializeField] private Sprite fuelRefillIcon;
 
         private Challenge challenge;
         private Challenges challengeManager;
@@ -26,8 +34,72 @@ namespace Gumball
             this.isUnclaimedChallenge = isUnclaimedChallenge;
 
             UpdateDescriptionLabel();
+            UpdateDescriptionIcon();
             UpdateProgressLabel();
             UpdateClaimButton();
+            UpdateRewards();
+        }
+
+        private void UpdateRewards()
+        {
+            foreach (Transform child in rewardHolder)
+                child.gameObject.Pool();
+            
+            if (challenge.Rewards.StandardCurrency > 0)
+            {
+                ChallengeRewardUI instance = rewardPrefab.gameObject.GetSpareOrCreate<ChallengeRewardUI>(rewardHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(standardCurrencyIcon, challenge.Rewards.StandardCurrency.ToString());
+            }
+            
+            if (challenge.Rewards.PremiumCurrency > 0)
+            {
+                ChallengeRewardUI instance = rewardPrefab.gameObject.GetSpareOrCreate<ChallengeRewardUI>(rewardHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(premiumCurrencyIcon, challenge.Rewards.PremiumCurrency.ToString());
+            }
+            
+            if (challenge.Rewards.XP > 0)
+            {
+                ChallengeRewardUI instance = rewardPrefab.gameObject.GetSpareOrCreate<ChallengeRewardUI>(rewardHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(xpIcon, challenge.Rewards.XP.ToString());
+            }
+            
+            if (challenge.Rewards.FuelRefill)
+            {
+                ChallengeRewardUI instance = rewardPrefab.gameObject.GetSpareOrCreate<ChallengeRewardUI>(rewardHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(fuelRefillIcon, "1");
+            }
+            
+            foreach (CorePart corePart in challenge.Rewards.CoreParts)
+            {
+                ChallengeRewardUI instance = rewardPrefab.gameObject.GetSpareOrCreate<ChallengeRewardUI>(rewardHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(corePart.Icon, "1");
+            }
+            
+            foreach (SubPart subPart in challenge.Rewards.SubParts)
+            {
+                ChallengeRewardUI instance = rewardPrefab.gameObject.GetSpareOrCreate<ChallengeRewardUI>(rewardHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(subPart.Icon, "1");
+            }
+            
+            foreach (BlueprintReward blueprintReward in challenge.Rewards.Blueprints)
+            {
+                ChallengeRewardUI instance = rewardPrefab.gameObject.GetSpareOrCreate<ChallengeRewardUI>(rewardHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(WarehouseManager.Instance.AllCarData[blueprintReward.CarIndex].Icon, blueprintReward.Blueprints.ToString());
+            }
+            
+            foreach (Unlockable unlockableReward in challenge.Rewards.Unlockables)
+            {
+                ChallengeRewardUI instance = rewardPrefab.gameObject.GetSpareOrCreate<ChallengeRewardUI>(rewardHolder);
+                instance.transform.SetAsLastSibling();
+                instance.Initialise(unlockableReward.Icon, "1");
+            }
         }
 
         public void OnClickClaimButton()
@@ -39,6 +111,9 @@ namespace Gumball
                 OnClaimUnclaimedChallenge();
 
             UpdateClaimButton();
+            
+            PanelManager.GetPanel<ChallengesPanel>().Header.UpdateDailyChallengeNotification();
+            PanelManager.GetPanel<ChallengesPanel>().Header.UpdateWeeklyChallengeNotification();
         }
         
         private void OnClaimUnclaimedChallenge()
@@ -52,7 +127,11 @@ namespace Gumball
         private void UpdateDescriptionLabel()
         {
             descriptionLabel.text = challenge.Description;
-            this.PerformAtEndOfFrame(descriptionLabel.Resize);
+        }
+
+        private void UpdateDescriptionIcon()
+        {
+            icon.sprite = challenge.Icon;
         }
 
         private void UpdateProgressLabel()
@@ -63,10 +142,9 @@ namespace Gumball
                 return;
             }
             
-            ChallengeTracker.Listener listener = challenge.Tracker.GetListener(challenge.ChallengeID);
+            ChallengeTracker.Listener listener = challenge.Tracker.GetListener(challenge.UniqueID);
             int progressAsPercent = Mathf.RoundToInt(listener.Progress * 100);
             progressLabel.text = $"{progressAsPercent}%";
-            this.PerformAtEndOfFrame(progressLabel.Resize);
         }
         
         private void UpdateClaimButton()
@@ -74,23 +152,24 @@ namespace Gumball
             if (challenge.IsClaimed)
             {
                 descriptionLabel.fontStyle = FontStyles.Strikethrough;
-                claimButtonLabel.text = "Claimed";
-                
-                claimButton.interactable = false;
+                claimButton.gameObject.SetActive(false);
+                notificationIcon.gameObject.SetActive(false);
                 return;
             }
 
+            claimButton.gameObject.SetActive(true);
             descriptionLabel.fontStyle = FontStyles.Normal;
-            claimButtonLabel.text = "Claim";
 
             if (isUnclaimedChallenge)
             {
                 claimButton.interactable = true;
+                notificationIcon.gameObject.SetActive(true);
             }
             else
             {
-                ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.ChallengeID);
+                ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.UniqueID);
                 claimButton.interactable = challengeListener.IsComplete;
+                notificationIcon.gameObject.SetActive(challengeListener.IsComplete);
             }
         }
 

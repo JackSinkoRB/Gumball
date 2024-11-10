@@ -31,6 +31,8 @@ namespace Gumball
             ATTEMPTED,
             COMPLETE
         }
+        
+        private const string trafficCarsAddressableLabel = "TrafficCars";
 
         [Header("Info")]
         [SerializeField] private string displayName = "Level";
@@ -62,6 +64,8 @@ namespace Gumball
         [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] private float racersStartingSpeed = 70;
 
+        public RacerSessionData[] RacerData => racerData;
+        
         [Header("Traffic")]
         [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the 'Traffic Spawn Positions' collection below.", MessageType.Info, onlyShowWhenDefaultValue: true)]
         [Tooltip("If enabled, each frame it will check to spawn traffic to keep the desired traffic density designated in the chunks.")]
@@ -81,6 +85,7 @@ namespace Gumball
 
         [Header("Dialogue")]
         [SerializeField] private DialogueData preSessionDialogue;
+        [SerializeField] private DialogueData preCountdownDialogue;
         [SerializeField] private DialogueData postSessionDialogue;
 
         [Header("Debugging")]
@@ -157,15 +162,14 @@ namespace Gumball
         [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
         [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
 
+        [SerializeField, HideInInspector] public string PreviousBlueprintRewards;
+        
         protected override void OnValidate()
         {
             base.OnValidate();
             
             TrackCorePartRewards();
             TrackSubPartRewards();
-
-            foreach (RacerSessionData data in racerData)
-                data.OnValidate();
         }
 
         [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
@@ -198,8 +202,12 @@ namespace Gumball
                     
                     TrafficLane[] lanes = randomDirection == ChunkTrafficManager.LaneDirection.FORWARD ? chunk.TrafficManager.LanesForward : chunk.TrafficManager.LanesBackward;
                     int randomLaneIndex = Random.Range(0, lanes.Length);
+
+                    //get random car prefab
+                    List<GameObject> allCars = AddressableUtils.LoadAssetsSync<GameObject>(trafficCarsAddressableLabel);
+                    AICar randomCar = allCars.GetRandom().GetComponent<AICar>();
                     
-                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex));
+                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex, randomCar));
                 }
 
                 chunkStartDistance += chunk.SplineLengthCached;
@@ -413,13 +421,13 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            inProgress = false;
+            
             if (preSessionDialogue != null && !preSessionDialogue.HasBeenCompleted)
             {
                 preSessionDialogue.Play();
                 yield return new WaitUntil(() => !DialogueManager.IsPlaying);
             }
-
-            inProgress = false;
             
             PanelManager.GetPanel<LoadingPanel>().Show();
 
@@ -471,7 +479,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StartListening(subObjective.ChallengeID, subObjective.Goal);
+                subObjective.Tracker.StartListening(subObjective.UniqueID, subObjective.Goal);
             }
         }
 
@@ -482,7 +490,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StopListening(subObjective.ChallengeID);
+                subObjective.Tracker.StopListening(subObjective.UniqueID);
             }
         }
 
@@ -527,6 +535,13 @@ namespace Gumball
             if (introTime <= 0)
                 yield break;
             
+            //set temporary speed limit
+            foreach (AICar racer in currentRacers.Keys)
+            {
+                if (racer != null)
+                    racer.SetTemporarySpeedLimit(racersStartingSpeed);
+            }
+
             drivingCameraController.SetState(drivingCameraController.IntroState);
             drivingCameraController.SkipTransition();
                 
@@ -534,8 +549,28 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
                 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
+            
+            if (preCountdownDialogue != null && !preCountdownDialogue.HasBeenCompleted)
+            {
+                yield return new WaitUntil(() => drivingCameraController.GetCurrentTransition() == null);
+                
+                Time.timeScale = 0;
+                preCountdownDialogue.Play();
+                yield return new WaitUntil(() => !DialogueManager.IsPlaying);
+                Time.timeScale = 1;
+            }
 
             yield return IntroCountdownIE();
+            
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
+            PanelManager.GetPanel<SessionIntroPanel>().Hide();
+            
+            //remove temporary speed limit
+            foreach (AICar racer in currentRacers.Keys)
+            {
+                if (racer != null)
+                    racer.RemoveTemporarySpeedLimit();
+            }
         }
         
         private IEnumerator IntroCountdownIE()
@@ -552,9 +587,6 @@ namespace Gumball
                     
                 remainingIntroTime -= timeBetweenCountdownUpdates;
             }
-            
-            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
-            PanelManager.GetPanel<SessionIntroPanel>().Hide();
         }
 
         private void SetupPlayerCar()
@@ -703,7 +735,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                if (subObjective.Tracker.GetListener(subObjective.ChallengeID).Progress < 1)
+                if (subObjective.Tracker.GetListener(subObjective.UniqueID).Progress < 1)
                     return false;
             }
 

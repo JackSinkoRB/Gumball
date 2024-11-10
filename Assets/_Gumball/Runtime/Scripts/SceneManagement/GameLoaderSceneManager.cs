@@ -32,7 +32,7 @@ namespace Gumball
             Loading_mainscene,
             Loading_vehicle,
             Setup_vehicle_and_drivers,
-            Connecting_to_PlayFab,
+            Initialising_PlayFab,
             Initialising_Unity_services,
         }
 
@@ -86,7 +86,7 @@ namespace Gumball
 
             currentStage = Stage.Starting_async_loading;
             //start loading playfab (async)
-            PlayFabManager.Initialise();
+            TrackedCoroutine playfabInitialisationCoroutine = new TrackedCoroutine(PlayFabManager.Initialise());
             //start loading unity services (async)
             TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
             //start loading avatars
@@ -120,8 +120,8 @@ namespace Gumball
             AvatarManager.Instance.CoDriverAvatar.Teleport(MainSceneManager.Instance.CoDriverStandingPosition, MainSceneManager.Instance.CoDriverStandingRotation);
             GlobalLoggers.LoadingLogger.Log($"Vehicle and driver setup complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             
-            currentStage = Stage.Connecting_to_PlayFab;
-            yield return new WaitUntil(() => PlayFabManager.ConnectionStatus != PlayFabManager.ConnectionStatusType.LOADING);
+            currentStage = Stage.Initialising_PlayFab;
+            yield return new WaitUntil(() => !playfabInitialisationCoroutine.IsPlaying);
             
             currentStage = Stage.Initialising_Unity_services;
             yield return new WaitUntil(() => !loadUnityServicesAsync.IsPlaying);
@@ -157,7 +157,9 @@ namespace Gumball
                 new(FuelManager.LoadInstanceAsync()),
                 new(GlobalColourPalette.LoadInstanceAsync()),
                 new(BlueprintManager.LoadInstanceAsync()),
-                new(NightTimeMaterialAdjustment.LoadInstanceAsync())
+                new(NightTimeMaterialAdjustment.LoadInstanceAsync()),
+                new(GumballEventManager.LoadInstanceAsync()),
+                new(DailyLoginManager.LoadInstanceAsync())
             };
             
             return trackedCoroutines;

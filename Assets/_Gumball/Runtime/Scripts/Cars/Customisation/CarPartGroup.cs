@@ -20,7 +20,7 @@ namespace Gumball
         private string savedPartIndexKey => $"{carBelongsTo.SaveKey}.{groupID}";
 
         public int CurrentPartIndex => currentPartIndex;
-
+        public AICar CarBelongsTo => carBelongsTo;
         public int SavedPartIndex => DataManager.Cars.Get(savedPartIndexKey, 0);
         
         public CarPart[] CarParts

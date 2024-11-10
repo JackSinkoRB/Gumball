@@ -16,8 +16,9 @@ namespace Gumball
         private void LateUpdate()
         {
             fillImage.fillAmount = nosManager.AvailableNosPercent;
-
-            button.SetInteractable(nosManager.AvailableNosPercent > NosManager.MinPercentToActivate);
+            
+            bool sessionIsActive = GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null && GameSessionManager.Instance.CurrentSession.InProgress && GameSessionManager.Instance.CurrentSession.HasStarted;
+            button.SetInteractable(sessionIsActive && nosManager.AvailableNosPercent > NosManager.MinPercentToActivate);
         }
         
         public void OnPressNosButton()

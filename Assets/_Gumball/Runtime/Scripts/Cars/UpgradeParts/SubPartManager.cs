@@ -49,7 +49,7 @@ namespace Gumball
             
             foreach (SubPart subPart in allPartsGrouped[type])
             {
-                if (subPart.Rarity == rarity && subPart.IsUnlocked && !subPart.IsAppliedToCorePart)
+                if (subPart.Rarity == rarity && subPart.IsUnlocked && !subPart.IsConsumed && !subPart.IsAppliedToCorePart)
                     return subPart;
             }
 
@@ -65,7 +65,7 @@ namespace Gumball
             
             foreach (SubPart subPart in allPartsGrouped[type])
             {
-                if (subPart.Rarity == rarity && subPart.IsUnlocked && !subPart.IsAppliedToCorePart)
+                if (subPart.Rarity == rarity && subPart.IsUnlocked && !subPart.IsConsumed && !subPart.IsAppliedToCorePart)
                     spares.Add(subPart);
             }
 
@@ -103,7 +103,7 @@ namespace Gumball
         {
             allParts.Clear();
             
-            yield return AddressableUtils.LoadAssetsAsync(SubPartsAssetLabel, allParts, typeof(SubPart));
+            yield return AddressableUtils.LoadAssetsAsync(SubPartsAssetLabel, allParts);
         }
         
         private static void GroupParts()

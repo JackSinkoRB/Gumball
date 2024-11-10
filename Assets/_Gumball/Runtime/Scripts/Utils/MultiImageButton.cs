@@ -31,7 +31,13 @@ namespace Gumball
 
         private void FindTargetGraphics()
         {
-            targetGraphics = transform.GetComponentsInAllChildren<Graphic>();
+            targetGraphics.Clear();
+            
+            foreach (Graphic childGraphic in transform.GetComponentsInAllChildren<Graphic>())
+            {
+                if (childGraphic.GetComponent<ExcludeFromMultiImageButton>() == null)
+                    targetGraphics.Add(childGraphic);
+            }
             
             Graphic ownGraphic = transform.GetComponent<Graphic>();
             if (ownGraphic != null)

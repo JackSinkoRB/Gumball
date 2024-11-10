@@ -22,12 +22,10 @@ namespace Gumball
         /// <summary>
         /// How much 'fake time' is applied to the time values in this class.
         /// </summary>
-        public static long TimeOffsetSeconds { get; private set; }
-
-        [RuntimeInitializeOnLoadMethod]
-        private static void RuntimeInitialise()
+        public static long TimeOffsetSeconds
         {
-            TimeOffsetSeconds = 0;
+            get => DataManager.Settings.Get("Cheats.TimeOffset", 0);
+            set => DataManager.Settings.Set("Cheats.TimeOffset", value);
         }
         
         /// <summary>

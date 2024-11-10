@@ -56,7 +56,7 @@ namespace Gumball
         
         private void OnDisable()
         {
-            if (layoutManager.CurrentLayout == this)
+            if (layoutManager != null && layoutManager.CurrentLayout == this)
                 SetInactive();
         }
 
@@ -118,6 +118,14 @@ namespace Gumball
                 return;
             
             InputManager.Instance.CarInput.Accelerate.SetPressedOverride(isPressed);
+        }
+        
+        public void OnHoldAccelerateButton()
+        {
+            if (!InputManager.Instance.CarInput.IsEnabled)
+                return;
+            
+            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(true);
         }
 
         public void OnPressBrakeButton(bool isPressed)

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading.Tasks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -188,8 +189,12 @@ namespace Gumball
             CheckIfLoaded();
 
             if (!currentValues.ContainsKey(key))
-                return defaultValue;
-            return (T)currentValues[key];
+            {
+                Set(key, defaultValue);
+                return defaultValue; //return in case it is null
+            }
+
+            return (T)Convert.ChangeType(currentValues[key], typeof(T), CultureInfo.InvariantCulture);
         }
 
         public void RemoveKey(string key)

@@ -26,6 +26,7 @@ namespace Gumball
         public bool FuelRefill => fuelRefill;
         public int PremiumCurrency => premiumCurrency;
         public Unlockable[] Unlockables => unlockables;
+        public BlueprintReward[] Blueprints => blueprints;
         
 #if UNITY_EDITOR
         public void SetPremiumCurrencyReward(int amount)
@@ -74,8 +75,8 @@ namespace Gumball
 
             //give premium currency
             if (premiumCurrency > 0)
-                Currency.Premium.AddFunds(premiumCurrency);
-            
+                RewardManager.GivePremiumCurrency(premiumCurrency);
+
             //replenish fuel
             if (fuelRefill)
                 FuelManager.Instance.ReplenishFuel();

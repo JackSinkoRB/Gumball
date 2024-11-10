@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: 10f599f351f6bf84fbeb7c14b45dc9b2
   lastKnownName: Level 42 - Soar
+  displayName: Level
   description: Description of session
   scene:
     scene:
@@ -30,9 +31,9 @@ MonoBehaviour:
     m_EditorAssetChanged: 0
   vehicleStartingPosition: {x: 3, y: 0.1, z: 100}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
+  isNightTime: 0
   globalLightIntensity: 1
   reflectionIntensity: 1
-  fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 2200
   finishLineMarkers:
@@ -43,17 +44,77 @@ MonoBehaviour:
   racersStartingSpeed: 100
   trafficIsProcedural: 1
   trafficDensity: 100
-  trafficBikes: []
+  trafficBikes:
+  - m_AssetGUID: ad5d6e674d828354bae351ed392af887
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 7571d49649fd70547992a89a6320bf27
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: de0e97f38965fcd40b5a95aec4cf99a4
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c261adf1023fc5140a97bba6895a6a32
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficCars:
   - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  - m_AssetGUID: 81825441c04ee5c468680e955e2bb0b3
+  - m_AssetGUID: 854009bd5128bca4eb9970aaaa55e47e
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
-  trafficTrucks: []
+  - m_AssetGUID: dc61ee74d9b3f304995a46cf982f41fb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 583f4d2f825774941a7709d7a3188ab7
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 991d7ee70f56d8b4883a10ba83170b51
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 854009bd5128bca4eb9970aaaa55e47e
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: dc61ee74d9b3f304995a46cf982f41fb
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 583f4d2f825774941a7709d7a3188ab7
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  trafficTrucks:
+  - m_AssetGUID: 9df3aaea5c1ac4b4299ff7ed1c186d5f
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 31f43c0006dc22c44bf7e659902a0be2
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: c6391c593f9e2b544a2852ddfdd327d9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: f81bfb69dc8428742b705f8a705b99a9
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: 60332573bd046ef4eb65a4df6278f795
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   trafficSpawnPositions:
     Value: []
   rewards:
@@ -65,9 +126,10 @@ MonoBehaviour:
     subParts:
     - {fileID: 11400000, guid: 708800b511d4dd44a8fd8b7d3dccca60, type: 2}
     unlockables: []
-  mainChallengeDescription: This is the challenge description
+    blueprints: []
   subObjectives:
   - description: Score 100 Airtime Points
+    icon: {fileID: 0}
     tracker: {fileID: 11400000, guid: f4b8b28f698035e4296cf24669f1feaa, type: 2}
     goal: 0
     rewards:
@@ -78,7 +140,14 @@ MonoBehaviour:
       coreParts: []
       subParts: []
       unlockables: []
+      blueprints: []
     uniqueID: 74d531a6-ef26-46a1-a402-f1f64aabb91a
+  preSessionDialogue:
+    dialogue: []
+    uniqueID: 09ffb3ae-20c8-42ba-8022-ad12f425d962
+  postSessionDialogue:
+    dialogue: []
+    uniqueID: fd21a11b-e3de-4978-86f1-9a99a84824b4
   inProgress: 0
   currentRacers:
     list: []
@@ -86,6 +155,7 @@ MonoBehaviour:
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 708800b511d4dd44a8fd8b7d3dccca60, type: 2}
+  PreviousBlueprintRewards: 
   timeAllowedSeconds: 60
   timeRemainingSeconds: 0
   timerHasStarted: 0

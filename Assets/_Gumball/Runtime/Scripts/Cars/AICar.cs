@@ -234,6 +234,11 @@ namespace Gumball
         public delegate void OnGearChangedDelegate(int previousGear, int currentGear);
         public event OnGearChangedDelegate onGearChanged;
         
+        public event Action onStartBraking;
+        public event Action onStopBraking;
+        public event Action onEngageHandbrake;
+        public event Action onDisengageHandbrake;
+        
         private bool wasAcceleratingLastFrame;
         public bool IsAutomaticTransmission => autoDrive || GearboxSetting.Setting == GearboxSetting.GearboxOption.AUTOMATIC;
         public int CurrentGear => currentGear;
@@ -285,6 +290,7 @@ namespace Gumball
         private readonly Sequence[] handbrakeEaseOffTweens = new Sequence[2];
 
         public bool IsHandbrakeEngaged => isHandbrakeEngaged;
+        public bool IsHandbrakeEasingOff => handbrakeEaseOffTweens[0] != null && handbrakeEaseOffTweens[0].IsPlaying();
         
         [Header("Collisions")]
         [SerializeField] private GameObject colliders;
@@ -469,6 +475,15 @@ namespace Gumball
             //set the wheel mesh positions to match the colliders
             for (int wheelIndex = 0; wheelIndex < AllWheelColliders.Length; wheelIndex++)
                 AllWheelMeshes[wheelIndex].transform.position = AllWheelColliders[wheelIndex].transform.position;
+            
+            //start with lights disabled
+            if (brakelights != null)
+                brakelights.DisableInstantly();
+            if (headlights != null)
+            {
+                foreach (Light headlight in headlights)
+                    headlight.gameObject.SetActive(false);
+            }
         }
 
         /// <summary>
@@ -622,6 +637,9 @@ namespace Gumball
                                && GameSessionManager.Instance.CurrentSession != null
                                && GameSessionManager.Instance.CurrentSession.IsNightTime;
 
+            if (headlights == null)
+                return;
+            
             foreach (Light headlight in headlights)
             {
                 if (headlight != null)
@@ -693,14 +711,14 @@ namespace Gumball
 
             transform.position += offset;
             Rigidbody.position += offset;
-            GlobalLoggers.AICarLogger.Log($"Grounded {gameObject.name} - moved {offset}");
+            GlobalLoggers.AICarLogger.Log($"Grounded {gameObject.name} - moved {offset} (hit {groundedHitsCached[0].collider.gameObject.name})");
             
             //check to apply ride height - currently only for player cars
             if (IsPlayer)
             {
                 float rideHeight = DataManager.Cars.Get<float>($"{SaveKey}.RideHeight");
-                transform.position = transform.position.OffsetY(rideHeight);
-                Rigidbody.position = Rigidbody.position.OffsetY(rideHeight);
+                // transform.position = transform.position.OffsetY(rideHeight);
+                // Rigidbody.position = Rigidbody.position.OffsetY(rideHeight);
 
                 GlobalLoggers.AICarLogger.Log($"Applied {rideHeight} ride height to {gameObject.name}");
             }
@@ -1493,6 +1511,8 @@ namespace Gumball
 
                 wheelCollider.brakeTorque = HandbrakeTorque;
             }
+
+            onEngageHandbrake?.Invoke();
         }
 
         private void OnHandbrakeDisengage()
@@ -1514,6 +1534,8 @@ namespace Gumball
                         x => sidewaysFriction.stiffness = x, defaultRearWheelStiffness, HandbrakeEaseOffDuration)
                     .OnUpdate(() => wheelCollider.sidewaysFriction = sidewaysFriction));
             }
+            
+            onDisengageHandbrake?.Invoke();
         }
         
         private void OnStartReversing()
@@ -1535,6 +1557,8 @@ namespace Gumball
             {
                 wheelCollider.brakeTorque = BrakeTorque;
             }
+
+            onStartBraking?.Invoke();
         }
         
         private void OnBrake()
@@ -1551,6 +1575,8 @@ namespace Gumball
             {
                 wheelCollider.brakeTorque = 0;
             }
+
+            onStopBraking?.Invoke();
         }
 
         private void CheckForCorner()

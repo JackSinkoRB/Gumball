@@ -2,6 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
@@ -65,7 +68,7 @@ namespace Gumball
         private void OnValidate()
         {
             //if application isn't playing, set all the default values on the car so it can be visualised
-            if (!Application.isPlaying)
+            if (!Application.isPlaying && !EditorApplication.isUpdating && !EditorApplication.isCompiling)
                 ForceUpdateDefaultData();
         }
 
@@ -211,7 +214,7 @@ namespace Gumball
 
             float biggestExtent = wheelMesh.sharedMesh.bounds.extents.x * wheelMesh.transform.lossyScale.x;
             if (wheelMesh.sharedMesh.bounds.extents.y * wheelMesh.transform.lossyScale.y > biggestExtent)
-                biggestExtent = wheelMesh.sharedMesh.bounds.extents.y;
+                biggestExtent = wheelMesh.sharedMesh.bounds.extents.y * wheelMesh.transform.lossyScale.y;
             if (wheelMesh.sharedMesh.bounds.extents.z * wheelMesh.transform.lossyScale.z > biggestExtent)
                 biggestExtent = wheelMesh.sharedMesh.bounds.extents.z * wheelMesh.transform.lossyScale.z;
             

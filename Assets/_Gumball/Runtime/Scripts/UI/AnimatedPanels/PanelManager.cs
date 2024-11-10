@@ -114,6 +114,7 @@ public class PanelManager : PersistentSingleton<PanelManager>
         {
             GlobalLoggers.PanelLogger.Log($"Adding {panel.GetType()} to panel lookup");
             panelLookup[panel.GetType()] = panel;
+            panel.OnAddToPanelLookup();
             if (panel.gameObject.activeInHierarchy)
                 panel.Show(); //starts showing
             else

@@ -40,11 +40,17 @@ namespace Gumball
             yield return FindParts();
         }
         
+        /// <summary>
+        /// Sets the currently installed part on the car.
+        /// </summary>
         public static void SetCorePart(int carIndex, CorePart.PartType type, CorePart corePart)
         {
             DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}", corePart == null ? null : corePart.ID);
         }
         
+        /// <summary>
+        /// Gets the currently installed part on the car, or returns the default part if none.
+        /// </summary>
         public static CorePart GetCorePart(int carIndex, CorePart.PartType type)
         {
             string saveKey = $"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}";
@@ -124,26 +130,17 @@ namespace Gumball
             if (isAttachedToCurrentCar)
                 WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(carIndex));
         }
-        
-        
-        //TODO: sub parts
-        
-        // public static void SetSubPart(int carIndex, SubPart.SubPartType type, CorePart corePart)
-        // {
-        //     DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}", corePart == null ? null : corePart.ID);
-        // }
-        //
-        // public static SubPart GetSubPart(int carIndex, SubPart.SubPartType type)
-        // {
-        //     string partID = DataManager.Cars.Get<string>($"{GetSaveKeyFromIndex(carIndex)}.Sub.{type.ToString()}");
-        //     return SubPartManager.GetPartByID(partID);
-        // }
+
+        public static void RemovePartOnCar(CorePart.PartType type, int carIndex)
+        {
+            InstallPartOnCar(type, null, carIndex);
+        }
 
         private static IEnumerator FindParts()
         {
             allParts.Clear();
             
-            yield return AddressableUtils.LoadAssetsAsync(CorePartsAssetLabel, allParts, typeof(CorePart));
+            yield return AddressableUtils.LoadAssetsAsync(CorePartsAssetLabel, allParts);
 
             InitialiseSubPartSlots();
             GroupParts();

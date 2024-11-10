@@ -55,6 +55,8 @@ namespace Gumball
             
             if (PanelManager.PanelExists<PaintStripeBackgroundPanel>())
                 PanelManager.GetPanel<PaintStripeBackgroundPanel>().Hide();
+                
+            PanelManager.GetPanel<ModifyWorkshopSubMenu>().Show();
         }
         
         public void UpdatePerformanceRatingSliders()

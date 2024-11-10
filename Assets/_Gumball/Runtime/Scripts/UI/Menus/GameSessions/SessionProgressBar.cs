@@ -38,6 +38,19 @@ namespace Gumball
             UpdateRacerIconPositions();
             UpdateRacerLayering();
         }
+        
+        /// <summary>
+        /// Stops the racer icon from updating and greys it out.
+        /// </summary>
+        public void DisableRacerIcon(AICar racer)
+        {
+            if (racer.IsPlayer)
+                return; //player doesn't have an icon
+            
+            SessionProgressBarRacerIcon icon = currentRacerIcons[racer];
+            currentRacerIcons.Remove(racer);
+            icon.Disable();
+        }
 
         private void SetupRacerIcons()
         {
@@ -104,15 +117,5 @@ namespace Gumball
             }
         }
 
-        public void RemoveRacerIcon(AICar racer)
-        {
-            if (racer.IsPlayer)
-                return; //player doesn't have an icon
-            
-            SessionProgressBarRacerIcon icon = currentRacerIcons[racer];
-            Destroy(icon.gameObject);
-            currentRacerIcons.Remove(racer);
-        }
-        
     }
 }
