@@ -10,6 +10,9 @@ namespace Gumball
     {
 
         [SerializeField] private Image iconBackground;
+        [SerializeField] private string displayName = "General";
+
+        public string DisplayName => displayName;
 
         public override void OnAddToPanelLookup()
         {

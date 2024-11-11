@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+using TMPro;
 using UnityEngine;
 
 namespace Gumball
@@ -9,6 +10,8 @@ namespace Gumball
     public class SettingsPanel : AnimatedPanel
     {
 
+        [SerializeField] private TextMeshProUGUI subMenuTitle;
+        
         [Header("Debugging")]
         [SerializeField, ReadOnly] private SettingsSubMenu[] subMenus;
         
@@ -60,7 +63,10 @@ namespace Gumball
             
             //just show this menu
             if (subMenu != null)
+            {
                 subMenu.Show();
+                subMenuTitle.text = subMenu.DisplayName;
+            }
         }
         
         public void OpenSubMenu(int index) => OpenSubMenu(subMenus[index]);
