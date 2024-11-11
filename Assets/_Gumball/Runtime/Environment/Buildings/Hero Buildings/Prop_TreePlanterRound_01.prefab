@@ -100,6 +100,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Prop_CircularPlanter_01
       objectReference: {fileID: 0}
+    - target: {fileID: 934685048439810589, guid: cc107af84981b0e49aac9c9b2e9a6435,
+        type: 3}
+      propertyPath: m_Layer
+      value: 13
+      objectReference: {fileID: 0}
     - target: {fileID: 5754547582984399581, guid: cc107af84981b0e49aac9c9b2e9a6435,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -108,7 +113,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 934685048439810589, guid: cc107af84981b0e49aac9c9b2e9a6435,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 221185373505020303}
   m_SourcePrefab: {fileID: 100100000, guid: cc107af84981b0e49aac9c9b2e9a6435, type: 3}
 --- !u!4 &148535988855611285 stripped
 Transform:
@@ -116,3 +125,32 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 397739314511149182}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &683886156143350371 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 934685048439810589, guid: cc107af84981b0e49aac9c9b2e9a6435,
+    type: 3}
+  m_PrefabInstance: {fileID: 397739314511149182}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &221185373505020303
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 683886156143350371}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.562162
+  m_Height: 1.1243242
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0.12500003}
