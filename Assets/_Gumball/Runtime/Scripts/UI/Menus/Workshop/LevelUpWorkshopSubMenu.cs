@@ -20,18 +20,8 @@ namespace Gumball
             base.OnShow();
 
             PopulateOpenBlueprints();
-
-            UpdateLevelLabel();
-            UpdatePurchaseButton();
-        }
-
-        private void UpdateLevelLabel()
-        {
-            int carIndex = WarehouseManager.Instance.CurrentCar.CarIndex;
-            int currentLevel = BlueprintManager.Instance.GetLevelIndex(carIndex) + 1;
-            int maxLevel = BlueprintManager.Instance.MaxLevelIndex + 1;
             
-            levelLabel.text = $"Level {currentLevel} / {maxLevel}";
+            Refresh();
         }
 
         public void OnClickPurchaseButton()
@@ -67,7 +57,22 @@ namespace Gumball
             //level up the car
             BlueprintManager.Instance.SetLevelIndex(carIndex, nextLevelIndex);
 
+            Refresh();
+        }
+        
+        private void Refresh()
+        {
+            UpdateLevelLabel();
             UpdatePurchaseButton();
+        }
+
+        private void UpdateLevelLabel()
+        {
+            int carIndex = WarehouseManager.Instance.CurrentCar.CarIndex;
+            int currentLevel = BlueprintManager.Instance.GetLevelIndex(carIndex) + 1;
+            int maxLevel = BlueprintManager.Instance.MaxLevelIndex + 1;
+            
+            levelLabel.text = $"Level {currentLevel} / {maxLevel}";
         }
 
         private void PopulateOpenBlueprints()
