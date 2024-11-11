@@ -33,6 +33,17 @@ namespace Gumball
             MapSceneManager.LoadMapScene();
         }
 
+        public void OnClickRestartButton()
+        {
+            if (!FuelManager.Instance.HasFuel())
+            {
+                PanelManager.GetPanel<InsufficientFuelPanel>().Show();
+                return;
+            }
+            
+            GameSessionManager.Instance.RestartCurrentSession();
+        }
+
         public override void OnAddToStack()
         {
             base.OnAddToStack();
