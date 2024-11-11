@@ -17,6 +17,7 @@ namespace Gumball
         [Header("Gradient")]
         [SerializeField] private bool useGradient;
         [SerializeField, ConditionalField(nameof(useGradient))] private GlobalColourPalette.ColourCode gradientColor;
+        [SerializeField, ConditionalField(nameof(useGradient))] private GlobalColourPalette.ColourCode gradientBaseTint = GlobalColourPalette.ColourCode.C5;
         [SerializeField, ConditionalField(nameof(useGradient)), Range(-180f, 180f)] private float gradientAngle;
         [SerializeField, ConditionalField(nameof(useGradient))] private bool gradientIgnoreRatio = true;
 
@@ -80,13 +81,14 @@ namespace Gumball
             UIGradientUtils.Matrix2x3 localPositionMatrix = UIGradientUtils.LocalPositionMatrix(rect, dir);
 
             Color color = GlobalColourPalette.Instance.GetGlobalColor(gradientColor);
+            Color baseTint = GlobalColourPalette.Instance.GetGlobalColor(gradientBaseTint);
             
             UIVertex vertex = default(UIVertex);
             for (int i = 0; i < vertexHelper.currentVertCount; i++)
             {
                 vertexHelper.PopulateUIVertex (ref vertex, i);
                 Vector2 localPosition = localPositionMatrix * vertex.position;
-                vertex.color *= Color.Lerp(color, Color.white, localPosition.y);
+                vertex.color *= Color.Lerp(color, baseTint, localPosition.y);
                 vertexHelper.SetUIVertex (vertex, i);
             }
         }
