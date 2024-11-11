@@ -43,7 +43,7 @@ namespace Gumball
         public IEnumerator GiveRewards()
         {
             bool startedShowingVignette = false;
-            if (PanelManager.PanelExists<VignetteBackgroundPanel>() && !PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing)
+            if (PanelManager.PanelExists<VignetteBackgroundPanel>() && !PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing && !PanelManager.GetPanel<EndOfSessionVignetteBackgroundPanel>().IsShowing)
             {
                 PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
                 startedShowingVignette = true;
@@ -116,9 +116,12 @@ namespace Gumball
 
                 yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || !PanelManager.GetPanel<RewardPanel>().IsShowing);
             }
-            
+
             if (startedShowingVignette && PanelManager.PanelExists<VignetteBackgroundPanel>())
+            {
                 PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
+                PanelManager.GetPanel<EndOfSessionVignetteBackgroundPanel>().Hide();
+            }
         }
         
     }

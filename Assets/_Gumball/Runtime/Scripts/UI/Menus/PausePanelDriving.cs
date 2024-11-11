@@ -8,7 +8,23 @@ namespace Gumball
 {
     public class PausePanelDriving : GameSessionInfoPanel
     {
+        
+        public override void OnAddToStack()
+        {
+            base.OnAddToStack();
+            
+            Time.timeScale = 0;
+        }
 
+        public override void OnRemoveFromStack()
+        {
+            base.OnRemoveFromStack();
+            
+            PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
+            
+            Time.timeScale = 1;
+        }
+        
         protected override void OnShow()
         {
             base.OnShow();
@@ -43,20 +59,6 @@ namespace Gumball
             }
             
             GameSessionManager.Instance.RestartCurrentSession();
-        }
-
-        public override void OnAddToStack()
-        {
-            base.OnAddToStack();
-            
-            Time.timeScale = 0;
-        }
-
-        public override void OnRemoveFromStack()
-        {
-            base.OnRemoveFromStack();
-            
-            Time.timeScale = 1;
         }
 
     }

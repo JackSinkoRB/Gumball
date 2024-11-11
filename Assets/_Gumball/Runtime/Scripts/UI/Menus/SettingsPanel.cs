@@ -12,6 +12,8 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private SettingsSubMenu[] subMenus;
         
+        private bool responsibleForVignette;
+        
         protected override void Initialise()
         {
             base.Initialise();
@@ -22,6 +24,12 @@ namespace Gumball
         protected override void OnShow()
         {
             base.OnShow();
+
+            if (PanelManager.PanelExists<VignetteBackgroundPanel>() && !PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing)
+            {
+                responsibleForVignette = true;
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            }
             
             //disable all the sub menus instantly in case they were left open to prevent popping
             foreach (SettingsSubMenu subMenu in subMenus)
@@ -29,7 +37,18 @@ namespace Gumball
             
             OpenSubMenu(0);
         }
-        
+
+        protected override void OnHide()
+        {
+            foreach (SettingsSubMenu otherMenu in subMenus)
+                otherMenu.Hide();
+            
+            base.OnHide();
+
+            if (responsibleForVignette && PanelManager.PanelExists<VignetteBackgroundPanel>() && PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing)
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
+        }
+
         public void OpenSubMenu(SettingsSubMenu subMenu)
         {
             if (subMenu != null && subMenu.IsShowing)
