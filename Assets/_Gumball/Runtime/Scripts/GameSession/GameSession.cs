@@ -505,6 +505,8 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             SetupLighting();
+            
+            PanelManager.GetPanel<PausePanelDriving>().Initialise(this);
         }
 
         private void SetupLighting()

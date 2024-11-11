@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
 
 namespace Gumball
 {
-    public class PausePanelDriving : AnimatedPanel
+    public class PausePanelDriving : GameSessionInfoPanel
     {
 
         protected override void OnShow()
@@ -57,6 +58,6 @@ namespace Gumball
             
             Time.timeScale = 1;
         }
-        
+
     }
 }
