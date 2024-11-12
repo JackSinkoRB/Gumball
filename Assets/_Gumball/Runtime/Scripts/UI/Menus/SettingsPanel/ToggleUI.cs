@@ -11,6 +11,8 @@ namespace Gumball
     public abstract class ToggleUI : MonoBehaviour
     {
 
+        public event Action<bool> onToggleChange;
+
         [SerializeField] private Image selectorIcon;
         [SerializeField] private float selectorIconOffset = 25;
         [SerializeField] private TextMeshProUGUI leftSideLabel;
@@ -20,12 +22,14 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool rightSideEnabled;
-
+        
         private bool isInitialised;
         
         private Color selectedLabelColor => GlobalColourPalette.Instance.GetGlobalColor(selectedLabelColourCode);
         private Color deselectedLabelColor => GlobalColourPalette.Instance.GetGlobalColor(deselectedLabelColourCode);
         
+        public bool RightSideEnabled => rightSideEnabled;
+
         private void OnEnable()
         {
             if (!isInitialised)
@@ -42,6 +46,7 @@ namespace Gumball
         
         public void SetToggle(bool rightSideEnabled)
         {
+            bool previousValue = this.rightSideEnabled;
             this.rightSideEnabled = rightSideEnabled;
             
             selectorIcon.rectTransform.anchoredPosition = selectorIcon.rectTransform.anchoredPosition.SetX(rightSideEnabled ? selectorIconOffset : -selectorIconOffset);
@@ -52,6 +57,9 @@ namespace Gumball
                 OnSelectRightSide();
             else
                 OnSelectLeftSide();
+            
+            if (rightSideEnabled != previousValue)
+                onToggleChange?.Invoke(rightSideEnabled);
         }
         
         protected abstract void Initialise();
