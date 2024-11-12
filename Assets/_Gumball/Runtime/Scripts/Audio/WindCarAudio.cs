@@ -24,7 +24,7 @@ namespace Gumball
             base.UpdateWhileManagerActive();
 
             float speedAsPercent = Mathf.Clamp01((managerBelongsTo.CarBelongsTo.SpeedKmh - speedRangeKmh.Min) / speedRangeKmh.Difference);
-            source.volume = speedAsPercent * maxVolume;
+            SetVolumeWithMasterVolume(speedAsPercent * maxVolume);
         }
 
     }
