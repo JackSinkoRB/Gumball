@@ -22,6 +22,12 @@ namespace Gumball
         {
             ChunkMapSceneManager.Instance.DrivingCameraController.SetNextDrivingState();
         }
+
+        public void OnClickPauseButton()
+        {
+            PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            PanelManager.GetPanel<PausePanelDriving>().Show();
+        }
         
     }
 }

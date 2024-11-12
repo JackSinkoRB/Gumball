@@ -57,7 +57,7 @@ namespace Gumball
             if (managerBelongsTo.CarBelongsTo.IsRacer)
                 desiredVolume *= racerVolumeModifier;
             
-            source.volume = desiredVolume;
+            SetVolumeWithMasterVolume(desiredVolume);
             source.pitch = pitchRpmModifier.Evaluate(normalisedRpmInterpolated);
         }
         

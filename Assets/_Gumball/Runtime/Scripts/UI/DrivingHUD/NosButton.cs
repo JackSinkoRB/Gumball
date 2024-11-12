@@ -26,7 +26,10 @@ namespace Gumball
             if (!InputManager.Instance.CarInput.IsEnabled)
                 return;
             
-            nosManager.Activate();
+            if (nosManager.IsActivated)
+                nosManager.Deactivate();
+            else
+                nosManager.Activate();
         }
         
     }

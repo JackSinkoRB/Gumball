@@ -247,6 +247,10 @@ namespace Gumball
 
         protected virtual Vector3 GetPosition(bool interpolate)
         {
+            //don't interpolate while paused as it causes camera to move away
+            if (Time.timeScale == 0)
+                interpolate = false;
+            
             //get the position to match the desired offset - but keep height relative to the car (with rotation applied)
             if (!offsetIsLocalised)
             {

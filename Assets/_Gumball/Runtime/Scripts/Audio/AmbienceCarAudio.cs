@@ -28,7 +28,7 @@ namespace Gumball
         private void AdjustVolumeBasedOnSpeed()
         {
             float speedAsPercent = Mathf.Clamp01((carBelongsTo.SpeedKmh - speedRangeKmh.Min) / speedRangeKmh.Difference);
-            source.volume = speedAsPercent * maxVolume;
+            SetVolumeWithMasterVolume(speedAsPercent * maxVolume);
         }
         
     }
