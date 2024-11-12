@@ -8,28 +8,28 @@ using UnityEngine.UI;
 
 namespace Gumball
 {
-    public class UnitOfSpeedSetting : ToggleUI
+    public class DynamicQualitySetting : ToggleUI
     {
-        
-        public static bool UseMiles
+
+        public static bool UseDynamicQuality
         {
-            get => DataManager.Settings.Get("UnitOfSpeedIsMiles", false);
-            private set => DataManager.Settings.Set("UnitOfSpeedIsMiles", value);
+            get => DataManager.Settings.Get("UseDynamicQuality", true);
+            private set => DataManager.Settings.Set("UseDynamicQuality", value);
         }
 
         protected override void Initialise()
         {
-            SetToggle(UseMiles);
+            SetToggle(UseDynamicQuality);
         }
 
         protected override void OnSelectLeftSide()
         {
-            UseMiles = false;
+            UseDynamicQuality = false;
         }
 
         protected override void OnSelectRightSide()
         {
-            UseMiles = true;
+            UseDynamicQuality = true;
         }
         
     }

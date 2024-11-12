@@ -33,7 +33,12 @@ namespace Gumball
         
         private static void Update()
         {
-            CalculateResolution();
+            if (DynamicQualitySetting.UseDynamicQuality)
+                CalculateResolution();
+            else
+            {
+                //TODO: set the resolution based on the setting
+            }
         }
 
         private static void CalculateResolution()

@@ -31,7 +31,12 @@ namespace Gumball
         
         private static void Update()
         {
-            CalculateDistance();
+            if (DynamicQualitySetting.UseDynamicQuality)
+                CalculateDistance();
+            else
+            {
+                //TODO: set the cull distance based on the setting
+            }
         }
 
         private static void CalculateDistance()
