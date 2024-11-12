@@ -20,7 +20,6 @@ namespace Gumball
         [SerializeField, ReadOnly] private bool isInitialised;
 
         private IKPositionsInCar positions;
-        private Quaternion initialPelvisRotation;
         
         public void Initialise(IKPositionsInCar positions)
         {
@@ -28,8 +27,6 @@ namespace Gumball
             
             enabled = true;
             isInitialised = true;
-
-            initialPelvisRotation = pelvis.transform.rotation;
 
             leftArmChain.Initialise(positions.LeftHand);
             rightArmChain.Initialise(positions.RightHand);
@@ -53,7 +50,7 @@ namespace Gumball
 
         private void UpdateIkChains()
         {
-            pelvis.transform.rotation = initialPelvisRotation * positions.Pelvis.rotation; //apply the additional pelvis rotation
+            pelvis.transform.localRotation = positions.Pelvis.localRotation; //apply the additional pelvis rotation
             
             leftArmChain.ResolveIK();
             rightArmChain.ResolveIK();
