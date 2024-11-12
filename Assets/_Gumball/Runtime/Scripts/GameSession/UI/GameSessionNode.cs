@@ -93,7 +93,7 @@ namespace Gumball
         public void OnClicked()
         {
             PanelManager.GetPanel<GameSessionNodePanel>().Show();
-            PanelManager.GetPanel<GameSessionNodePanel>().Initialise(this);
+            PanelManager.GetPanel<GameSessionNodePanel>().Initialise(gameSession);
             PanelManager.GetPanel<GameSessionMapPanel>().Hide();
         }
         

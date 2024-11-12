@@ -13,6 +13,7 @@ namespace Gumball
 
         [HelpBox("It will match the size of all the children, but you can assign additional objects here.", position: HelpBoxAttribute.Position.ABOVE)]
         [SerializeField] private RectTransform[] additionalRects = Array.Empty<RectTransform>();
+        [SerializeField] private bool useChildren;
         [Space(5)]
         [SerializeField] private bool isHorizontal;
         [SerializeField] private bool isVertical;
@@ -24,16 +25,27 @@ namespace Gumball
 
         private void LateUpdate()
         {
-            UpdateSize();
+            Resize();
         }
 
-        private void UpdateSize()
+        public void Resize()
         {
             if (!isHorizontal && !isVertical)
                 return;
             
             float totalWidth = 0;
             float totalHeight = 0;
+            if (useChildren)
+            {
+                foreach (RectTransform child in transform)
+                {
+                    if (!child.gameObject.activeSelf)
+                        continue;
+                
+                    totalWidth += child.rect.width;
+                    totalHeight += child.rect.height;
+                }
+            }
             foreach (RectTransform additionalObject in additionalRects)
             {
                 if (!additionalObject.gameObject.activeSelf)
@@ -50,13 +62,13 @@ namespace Gumball
             HorizontalLayoutGroup horizontalLayoutGroup = gameObject.GetComponent<HorizontalLayoutGroup>();
             if (horizontalLayoutGroup != null && isHorizontal && horizontalLayoutGroup.isActiveAndEnabled)
             {
-                totalWidth += horizontalLayoutGroup.spacing * ((transform.childCount - 1) + additionalRects.Length);
+                totalWidth += transform.childCount == 0 ? 0 : horizontalLayoutGroup.spacing * ((transform.childCount - 1) + additionalRects.Length);
                 totalWidth += horizontalLayoutGroup.padding.left + horizontalLayoutGroup.padding.right;
             }
             VerticalLayoutGroup verticalLayoutGroup = gameObject.GetComponent<VerticalLayoutGroup>();
             if (verticalLayoutGroup != null && isVertical && verticalLayoutGroup.isActiveAndEnabled)
             {
-                totalHeight += verticalLayoutGroup.spacing * ((transform.childCount - 1) + additionalRects.Length);
+                totalHeight += transform.childCount == 0 ? 0 : verticalLayoutGroup.spacing * ((transform.childCount - 1) + additionalRects.Length);
                 totalHeight += verticalLayoutGroup.padding.bottom + verticalLayoutGroup.padding.top;
             }
 

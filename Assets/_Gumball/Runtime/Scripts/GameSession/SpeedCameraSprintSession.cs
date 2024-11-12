@@ -20,8 +20,6 @@ namespace Gumball
 
         [Header("Speed camera sprint")]
         [SerializeField] private SpeedCameraZoneMarker zoneMarkerPrefab;
-        [Tooltip("How many kmh past the speed limit can the racer be travelling without failing?")]
-        [SerializeField] private float speedLimitLeniencyKmh = 5;
         [SerializeField] private SpeedCameraZone[] speedCameraZones;
         [HelpBox("There is 1 value per racer.", MessageType.Info, HelpBoxAttribute.Position.ABOVE)]
         [Tooltip("Relative to the order of the session racer data.")]
@@ -173,7 +171,7 @@ namespace Gumball
 
                     if (zone.HasRacerPassedZone(racer))
                     {
-                        if (racer.SpeedKmh >= zone.SpeedLimitKmh + speedLimitLeniencyKmh)
+                        if (racer.SpeedKmh < zone.SpeedLimitKmh)
                             OnFailZone(racer, zone);
                         else
                             OnPassZone(racer, zone);

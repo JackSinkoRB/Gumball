@@ -66,6 +66,14 @@ namespace Gumball
 
         public MeshFilter MeshFilter => meshFilter;
 
+        private void OnValidate()
+        {
+#if UNITY_EDITOR
+            if (meshFilter != null && meshFilter.sharedMesh != null && !meshFilter.sharedMesh.isReadable)
+                meshFilter.sharedMesh.SetReadable();
+#endif
+        }
+
         public void EnablePainting()
         {
             //before resetting the textures, clear the previous texture it has made

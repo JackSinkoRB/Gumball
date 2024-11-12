@@ -9,9 +9,8 @@ namespace Gumball
     {
 
         [SerializeField] private MultiImageButton purchaseButton;
-        [SerializeField] private TextMeshProUGUI purchaseButtonLabel;
-        [SerializeField] private Transform purchaseButtonCostHolder;
-        [SerializeField] private TextMeshProUGUI purchaseButtonCostLabel;
+        [SerializeField] private TextMeshProUGUI levelLabel;
+        [SerializeField] private TextMeshProUGUI costLabel;
         
         [SerializeField] private OpenBlueprintOption openBlueprintOptionPrefab;
         [SerializeField] private Transform openBlueprintOptionHolder;
@@ -21,14 +20,25 @@ namespace Gumball
             base.OnShow();
 
             PopulateOpenBlueprints();
-
-            UpdatePurchaseButton();
+            
+            Refresh();
         }
 
         public void OnClickPurchaseButton()
         {
             int carIndex = WarehouseManager.Instance.CurrentCar.CarIndex;
             int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carIndex);
+            
+            int blueprints = BlueprintManager.Instance.GetBlueprints(carIndex);
+            int requiredBlueprints = BlueprintManager.Instance.Levels[nextLevelIndex].BlueprintsRequired;
+            bool hasEnoughBlueprints = blueprints >= requiredBlueprints;
+            if (!hasEnoughBlueprints)
+            {
+                int remainingBlueprints = requiredBlueprints - blueprints;
+                PanelManager.GetPanel<GenericMessagePanel>().Initialise($"Not enough blueprints! You require <b>{remainingBlueprints} more</b> blueprints to upgrade.");
+                PanelManager.GetPanel<GenericMessagePanel>().Show();
+                return;
+            }
             
             //take funds
             int standardCurrencyCost = BlueprintManager.Instance.Levels[nextLevelIndex].StandardCurrencyCostToUpgrade;
@@ -47,7 +57,22 @@ namespace Gumball
             //level up the car
             BlueprintManager.Instance.SetLevelIndex(carIndex, nextLevelIndex);
 
+            Refresh();
+        }
+        
+        private void Refresh()
+        {
+            UpdateLevelLabel();
             UpdatePurchaseButton();
+        }
+
+        private void UpdateLevelLabel()
+        {
+            int carIndex = WarehouseManager.Instance.CurrentCar.CarIndex;
+            int currentLevel = BlueprintManager.Instance.GetLevelIndex(carIndex) + 1;
+            int maxLevel = BlueprintManager.Instance.MaxLevelIndex + 1;
+            
+            levelLabel.text = $"Level {currentLevel} / {maxLevel}";
         }
 
         private void PopulateOpenBlueprints()
@@ -70,23 +95,9 @@ namespace Gumball
             int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carIndex);
             bool isMaxLevel = nextLevelIndex > BlueprintManager.Instance.MaxLevelIndex;
             
-            purchaseButtonCostHolder.gameObject.SetActive(!isMaxLevel);
-            
-            purchaseButtonLabel.text = isMaxLevel ? "Max Level" : $"Level {nextLevelIndex + 1}";
-            if (isMaxLevel)
-            {
-                purchaseButton.interactable = false;
-                return;
-            }
+            purchaseButton.interactable = !isMaxLevel;
 
-            int blueprints = BlueprintManager.Instance.GetBlueprints(carIndex);
-            int requiredBlueprints = BlueprintManager.Instance.Levels[nextLevelIndex].BlueprintsRequired;
-            bool hasEnoughBlueprints = blueprints >= requiredBlueprints;
-            
-            purchaseButton.interactable = hasEnoughBlueprints;
-
-            int requiredStandardCurrency = BlueprintManager.Instance.Levels[nextLevelIndex].StandardCurrencyCostToUpgrade;
-            purchaseButtonCostLabel.text = $"{requiredStandardCurrency}";
+            costLabel.text = isMaxLevel ? "N/A" : BlueprintManager.Instance.Levels[nextLevelIndex].StandardCurrencyCostToUpgrade.ToString();
         }
         
     }

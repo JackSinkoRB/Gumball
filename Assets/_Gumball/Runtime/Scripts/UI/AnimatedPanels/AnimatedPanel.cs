@@ -19,6 +19,7 @@ public abstract class AnimatedPanel : MonoBehaviour
     
     [Tooltip("Is the panel tracked in the PanelManager stack, or is it separate from it?")]
     [SerializeField] private bool isAddedToPanelStack = true;
+    [SerializeField] private bool hideOtherPanelsWhenShown;
     
     [Header("Animation")]
     [SerializeField] private bool ignoreTimescale = true;
@@ -31,6 +32,7 @@ public abstract class AnimatedPanel : MonoBehaviour
     private bool isInitialised;
     private readonly HashSet<Tween> currentTweens = new();
     private AnimatedElement[] allAnimatedElements;
+    private readonly List<AnimatedPanel> panelsHiding = new();
 
     public bool IsShowing { get; private set; }
 
@@ -81,6 +83,8 @@ public abstract class AnimatedPanel : MonoBehaviour
             return;
         }
         
+        CheckToHideOtherPanels();
+        
         gameObject.SetActive(true);
         KillCurrentTweens();
 
@@ -120,9 +124,9 @@ public abstract class AnimatedPanel : MonoBehaviour
             foreach (Tween tween in currentTweens)
                 tween.SetUpdate(true);
         }
-
+        
         IsShowing = true;
-
+        
         if (isAddedToPanelStack && !PanelManager.Instance.PanelStack.Contains(this))
             PanelManager.Instance.AddToStack(this);
         
@@ -145,6 +149,7 @@ public abstract class AnimatedPanel : MonoBehaviour
             return;
         }
 
+        bool wasShowing = IsShowing;
         IsShowing = false;
 
         KillCurrentTweens();
@@ -170,8 +175,11 @@ public abstract class AnimatedPanel : MonoBehaviour
             if (disableWhenHidden)
                 gameObject.SetActive(false);
 
-            onComplete?.Invoke();
-            OnHideComplete();
+            if (wasShowing)
+            {
+                onComplete?.Invoke();
+                OnHideComplete();
+            }
         }
         else
         {
@@ -181,8 +189,11 @@ public abstract class AnimatedPanel : MonoBehaviour
                 if (disableWhenHidden)
                     gameObject.SetActive(false);
 
-                onComplete?.Invoke();
-                OnHideComplete();
+                if (wasShowing)
+                {
+                    onComplete?.Invoke();
+                    OnHideComplete();
+                }
             });
         }
 
@@ -201,11 +212,19 @@ public abstract class AnimatedPanel : MonoBehaviour
         if (!keepInStack && PanelManager.ExistsRuntime && PanelManager.Instance.PanelStack.Contains(this))
             PanelManager.Instance.RemoveFromStack(this);
         
-        OnHide();
+        CheckToRestoreOtherPanels();
+
+        if (wasShowing)
+            OnHide();
         
         GlobalLoggers.PanelLogger.Log($"Hiding {gameObject.name}.");
     }
 
+    public virtual void OnAddToPanelLookup()
+    {
+        
+    }
+    
     public virtual void OnAddToStack()
     {
         
@@ -248,6 +267,46 @@ public abstract class AnimatedPanel : MonoBehaviour
         foreach (Tween tween in currentTweens)
             tween?.Kill();
         currentTweens.Clear();
+    }
+
+    private void CheckToHideOtherPanels()
+    {
+        if (!hideOtherPanelsWhenShown)
+            return;
+        
+        panelsHiding.Clear();
+        for (int index = PanelManager.Instance.PanelStack.Count - 1; index >= 0; index--)
+        {
+            AnimatedPanel panel = PanelManager.Instance.PanelStack[index];
+            if (panel == null)
+                continue;
+
+            if (panel == this)
+                continue;
+
+            if (panel is VignetteBackgroundPanel)
+                continue;
+
+            if (!panel.IsShowing)
+                continue; //might already be hidden by another panel
+
+            panel.Hide(keepInStack: true);
+            panelsHiding.Add(panel);
+        }
+    }
+
+    private void CheckToRestoreOtherPanels()
+    {
+        if (!hideOtherPanelsWhenShown)
+            return;
+
+        for (int index = panelsHiding.Count - 1; index >= 0; index--)
+        {
+            AnimatedPanel panel = panelsHiding[index];
+            panel.Show();
+        }
+
+        panelsHiding.Clear();
     }
     
 }

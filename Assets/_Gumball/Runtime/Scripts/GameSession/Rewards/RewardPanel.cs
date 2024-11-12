@@ -10,6 +10,7 @@ namespace Gumball
     {
         
         [SerializeField] private Sprite standardCurrencyIcon;
+        [SerializeField] private Sprite premiumCurrencyIcon;
         [SerializeField] private RewardUI rewardUIPrefab;
         [SerializeField] private Transform rewardsHolder;
 
@@ -17,8 +18,9 @@ namespace Gumball
         [SerializeField, ReadOnly] private List<CorePart> rewardQueueCoreParts = new();
         [SerializeField, ReadOnly] private List<SubPart> rewardQueueSubParts = new();
         [SerializeField, ReadOnly] private List<int> rewardQueueStandardCurrency = new();
+        [SerializeField, ReadOnly] private List<int> rewardQueuePremiumCurrency = new();
         
-        public int PendingRewards => rewardQueueCoreParts.Count + rewardQueueSubParts.Count + rewardQueueStandardCurrency.Count;
+        public int PendingRewards => rewardQueueCoreParts.Count + rewardQueueSubParts.Count + rewardQueueStandardCurrency.Count + rewardQueuePremiumCurrency.Count;
         
         protected override void OnShow()
         {
@@ -54,6 +56,11 @@ namespace Gumball
             rewardQueueStandardCurrency.Add(amount);
         }
         
+        public void QueuePremiumCurrencyReward(int amount)
+        {
+            rewardQueuePremiumCurrency.Add(amount);
+        }
+        
         public void Populate()
         {
             foreach (Transform child in rewardsHolder)
@@ -74,6 +81,14 @@ namespace Gumball
                 instance.Initialise(subPart.Icon, subPart.DisplayName);
             }
             rewardQueueSubParts.Clear();
+            
+            //show premium currency
+            foreach (int amount in rewardQueuePremiumCurrency)
+            {
+                RewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<RewardUI>(rewardsHolder);
+                instance.Initialise(premiumCurrencyIcon, $"{amount}");
+            }
+            rewardQueuePremiumCurrency.Clear();
             
             //show standard currency
             foreach (int amount in rewardQueueStandardCurrency)

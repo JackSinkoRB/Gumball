@@ -214,7 +214,7 @@ namespace Gumball
 
             float biggestExtent = wheelMesh.sharedMesh.bounds.extents.x * wheelMesh.transform.lossyScale.x;
             if (wheelMesh.sharedMesh.bounds.extents.y * wheelMesh.transform.lossyScale.y > biggestExtent)
-                biggestExtent = wheelMesh.sharedMesh.bounds.extents.y;
+                biggestExtent = wheelMesh.sharedMesh.bounds.extents.y * wheelMesh.transform.lossyScale.y;
             if (wheelMesh.sharedMesh.bounds.extents.z * wheelMesh.transform.lossyScale.z > biggestExtent)
                 biggestExtent = wheelMesh.sharedMesh.bounds.extents.z * wheelMesh.transform.lossyScale.z;
             

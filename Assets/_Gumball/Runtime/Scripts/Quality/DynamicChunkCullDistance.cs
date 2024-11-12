@@ -8,7 +8,7 @@ namespace Gumball
     public static class DynamicChunkCullDistance
     {
 
-        private static readonly MinMaxFloat minMaxDistance = new(300,800);
+        public static readonly MinMaxFloat MinMaxDistance = new(300,800);
         
         private const float timeBetweenChecks = 0.25f;
         private const float timeToGoFromMinToMax = 5;
@@ -25,13 +25,16 @@ namespace Gumball
             QualityUtils.onUpdateFPS += Update;
             
             //reset
-            CurrentDistance = minMaxDistance.Max;
+            CurrentDistance = MinMaxDistance.Max;
             timeSinceLastCheck = 0;
         }
         
         private static void Update()
         {
-            CalculateDistance();
+            if (DynamicQualitySetting.UseDynamicQuality)
+                CalculateDistance();
+            else
+                CurrentDistance = RenderDistanceSetting.RenderDistance; //manually set
         }
 
         private static void CalculateDistance()
@@ -43,9 +46,9 @@ namespace Gumball
             bool isDecreasing = QualityUtils.CurrentFPS < QualityUtils.TargetFPS;
             float timeToChange = isDecreasing ? timeToGoFromMaxToMin : timeToGoFromMinToMax;
             float frameTimePercent = Mathf.Clamp01(timeSinceLastCheck / timeToChange);
-            float distanceDelta = frameTimePercent * minMaxDistance.Difference;
+            float distanceDelta = frameTimePercent * MinMaxDistance.Difference;
             
-            CurrentDistance = minMaxDistance.Clamp(isDecreasing ? CurrentDistance - distanceDelta : CurrentDistance + distanceDelta);
+            CurrentDistance = MinMaxDistance.Clamp(isDecreasing ? CurrentDistance - distanceDelta : CurrentDistance + distanceDelta);
             
             timeSinceLastCheck = 0;
         }

@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Gumball
 {
     [RequireComponent(typeof(AudioSource))]
-    public class AmbienceCarAudio : MonoBehaviour
+    public class AmbienceCarAudio : Audio
     {
 
         [SerializeField] private float maxVolume = 1;
@@ -15,8 +15,6 @@ namespace Gumball
 
         private AICar carBelongsTo;
 
-        private AudioSource source => GetComponent<AudioSource>();
-        
         private void OnEnable()
         {
             carBelongsTo = transform.GetComponentInAllParents<AICar>();
@@ -30,7 +28,7 @@ namespace Gumball
         private void AdjustVolumeBasedOnSpeed()
         {
             float speedAsPercent = Mathf.Clamp01((carBelongsTo.SpeedKmh - speedRangeKmh.Min) / speedRangeKmh.Difference);
-            source.volume = speedAsPercent * maxVolume;
+            SetVolumeWithMasterVolume(speedAsPercent * maxVolume);
         }
         
     }

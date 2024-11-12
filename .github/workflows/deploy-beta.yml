@@ -386,7 +386,7 @@ jobs:
   deployToGoogle:
     needs: buildAndroid
     name: Deploy to Google Play internal track
-    runs-on: self-hosted
+    runs-on: runner-1
     env:
       GOOGLE_PLAY_KEY_FILE: ${{ secrets.GOOGLE_PLAY_KEY_FILE }}
       GOOGLE_PLAY_KEY_FILE_PATH:
@@ -415,6 +415,10 @@ jobs:
         with:
           ruby-version: 3.3
           bundler-cache: false
+
+      # Bundle install
+      - name: bundle install
+        run: bundle install
 
       - name: Upload to Google Play Internal
         uses: maierj/fastlane-action@v3.1.0

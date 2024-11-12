@@ -1,30 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
 
 namespace Gumball
 {
-    public class PausePanelDriving : AnimatedPanel
+    public class PausePanelDriving : GameSessionInfoPanel
     {
+        
+        public override void OnAddToStack()
+        {
+            base.OnAddToStack();
+            
+            Time.timeScale = 0;
+        }
 
-        [SerializeField] private AudioMixer mainAudioMixer;
-
+        public override void OnRemoveFromStack()
+        {
+            base.OnRemoveFromStack();
+            
+            PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
+            
+            Time.timeScale = 1;
+        }
+        
         protected override void OnShow()
         {
             base.OnShow();
             
-            mainAudioMixer.SetFloat("MasterVolume", -80f);
-            
             if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
                 PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
-        }
-
-        protected override void OnHide()
-        {
-            base.OnHide();
-            
-            mainAudioMixer.SetFloat("MasterVolume", 0f);
         }
 
         public void OnClickSettingsButton()
@@ -44,19 +50,16 @@ namespace Gumball
             MapSceneManager.LoadMapScene();
         }
 
-        public override void OnAddToStack()
+        public void OnClickRestartButton()
         {
-            base.OnAddToStack();
+            if (!FuelManager.Instance.HasFuel())
+            {
+                PanelManager.GetPanel<InsufficientFuelPanel>().Show();
+                return;
+            }
             
-            Time.timeScale = 0;
+            GameSessionManager.Instance.RestartCurrentSession();
         }
 
-        public override void OnRemoveFromStack()
-        {
-            base.OnRemoveFromStack();
-            
-            Time.timeScale = 1;
-        }
-        
     }
 }

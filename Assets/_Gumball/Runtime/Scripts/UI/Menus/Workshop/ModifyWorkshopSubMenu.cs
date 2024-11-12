@@ -15,16 +15,13 @@ namespace Gumball
 
         [SerializeField] private List<ModifyCorePartButton> corePartButtons = new();
         
-        [Header("Debugging")]
-        [SerializeField, ReadOnly] private int selectedCorePartIndex = -1;
-
-        public int SelectedCorePartIndex => selectedCorePartIndex;
+        private int selectedCorePartIndex;
         
         protected override void OnShow()
         {
             base.OnShow();
             
-            OpenSubMenu(0);
+            OpenSubMenu(selectedCorePartIndex);
         }
 
         public void OpenSubMenu(int partIndex)

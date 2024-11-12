@@ -20,6 +20,12 @@ namespace Gumball
         {
             base.OnInstanceLoaded();
 
+            //require internet connection
+            PlayFabManager.onSuccessfulConnection += OnConnectToPlayFab;
+        }
+
+        private void OnConnectToPlayFab()
+        {
             daily.Initialise();
             weekly.Initialise();
         }

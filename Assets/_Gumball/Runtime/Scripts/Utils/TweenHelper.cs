@@ -13,6 +13,7 @@ namespace Gumball
         [SerializeField] private bool doPosition;
 
         [ConditionalField(nameof(doPosition)), SerializeField] private float positionDuration;
+        [ConditionalField(nameof(doPosition)), SerializeField] private float positionDelay;
         [ConditionalField(nameof(doPosition)), SerializeField, Range(0, 1)] private float positionRandomisedDurationPercent = 0.1f;
         [ConditionalField(nameof(doPosition)), SerializeField] private float xMovement;
         [ConditionalField(nameof(doPosition)), SerializeField] private float yMovement;
@@ -113,8 +114,8 @@ namespace Gumball
             Tween tween;
             if (transform is RectTransform rectTransform)
                 tween = DOTween.To(() => rectTransform.anchoredPosition, x => rectTransform.anchoredPosition = x,
-                    new Vector2(defaultPosition.x, defaultPosition.y) + new Vector2(xMovement, yMovement), finalPositionDuration);
-            else tween = transform.DOMove(defaultPosition + new Vector3(xMovement, yMovement, zMovement), finalPositionDuration);
+                    new Vector2(defaultPosition.x, defaultPosition.y) + new Vector2(xMovement, yMovement), finalPositionDuration).SetDelay(positionDelay);
+            else tween = transform.DOMove(defaultPosition + new Vector3(xMovement, yMovement, zMovement), finalPositionDuration).SetDelay(positionDelay);
 
             tween.SetEase(positionEase);
             return tween;

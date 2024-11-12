@@ -85,6 +85,7 @@ namespace Gumball
 
         [Header("Dialogue")]
         [SerializeField] private DialogueData preSessionDialogue;
+        [SerializeField] private DialogueData preCountdownDialogue;
         [SerializeField] private DialogueData postSessionDialogue;
 
         [Header("Debugging")]
@@ -383,8 +384,8 @@ namespace Gumball
         {
             yield return new WaitForSeconds(1f);
             
-            if (PanelManager.PanelExists<VignetteBackgroundPanel>())
-                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            if (PanelManager.PanelExists<EndOfSessionVignetteBackgroundPanel>())
+                PanelManager.GetPanel<EndOfSessionVignetteBackgroundPanel>().Show();
             
             yield return new WaitForSeconds(1f);
             
@@ -420,13 +421,13 @@ namespace Gumball
 
         private IEnumerator StartSessionIE()
         {
+            inProgress = false;
+            
             if (preSessionDialogue != null && !preSessionDialogue.HasBeenCompleted)
             {
                 preSessionDialogue.Play();
                 yield return new WaitUntil(() => !DialogueManager.IsPlaying);
             }
-
-            inProgress = false;
             
             PanelManager.GetPanel<LoadingPanel>().Show();
 
@@ -478,7 +479,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StartListening(subObjective.ChallengeID, subObjective.Goal);
+                subObjective.Tracker.StartListening(subObjective.UniqueID, subObjective.Goal);
             }
         }
 
@@ -489,7 +490,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                subObjective.Tracker.StopListening(subObjective.ChallengeID);
+                subObjective.Tracker.StopListening(subObjective.UniqueID);
             }
         }
 
@@ -504,6 +505,8 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
             
             SetupLighting();
+            
+            PanelManager.GetPanel<PausePanelDriving>().Initialise(this);
         }
 
         private void SetupLighting()
@@ -534,6 +537,13 @@ namespace Gumball
             if (introTime <= 0)
                 yield break;
             
+            //set temporary speed limit
+            foreach (AICar racer in currentRacers.Keys)
+            {
+                if (racer != null)
+                    racer.SetTemporarySpeedLimit(racersStartingSpeed);
+            }
+
             drivingCameraController.SetState(drivingCameraController.IntroState);
             drivingCameraController.SkipTransition();
                 
@@ -541,8 +551,28 @@ namespace Gumball
             drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
                 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
+            
+            if (preCountdownDialogue != null && !preCountdownDialogue.HasBeenCompleted)
+            {
+                yield return new WaitUntil(() => drivingCameraController.GetCurrentTransition() == null);
+                
+                Time.timeScale = 0;
+                preCountdownDialogue.Play();
+                yield return new WaitUntil(() => !DialogueManager.IsPlaying);
+                Time.timeScale = 1;
+            }
 
             yield return IntroCountdownIE();
+            
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
+            PanelManager.GetPanel<SessionIntroPanel>().Hide();
+            
+            //remove temporary speed limit
+            foreach (AICar racer in currentRacers.Keys)
+            {
+                if (racer != null)
+                    racer.RemoveTemporarySpeedLimit();
+            }
         }
         
         private IEnumerator IntroCountdownIE()
@@ -559,9 +589,6 @@ namespace Gumball
                     
                 remainingIntroTime -= timeBetweenCountdownUpdates;
             }
-            
-            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
-            PanelManager.GetPanel<SessionIntroPanel>().Hide();
         }
 
         private void SetupPlayerCar()
@@ -710,7 +737,7 @@ namespace Gumball
             
             foreach (Challenge subObjective in subObjectives)
             {
-                if (subObjective.Tracker.GetListener(subObjective.ChallengeID).Progress < 1)
+                if (subObjective.Tracker.GetListener(subObjective.UniqueID).Progress < 1)
                     return false;
             }
 
