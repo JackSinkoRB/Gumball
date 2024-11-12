@@ -1,24 +1,75 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
+using TMPro;
 using UnityEngine;
 
 namespace Gumball
 {
     public class SettingsPanel : AnimatedPanel
     {
+
+        [SerializeField] private TextMeshProUGUI subMenuTitle;
         
-        [SerializeField] private StepOptionController gearboxOption;
-
-        private void OnEnable()
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private SettingsSubMenu[] subMenus;
+        
+        private bool responsibleForVignette;
+        
+        protected override void Initialise()
         {
-            UpdateDisplay();
+            base.Initialise();
+
+            subMenus = transform.GetComponentsInAllChildren<SettingsSubMenu>().ToArray();
+        }
+        
+        protected override void OnShow()
+        {
+            base.OnShow();
+
+            if (PanelManager.PanelExists<VignetteBackgroundPanel>() && !PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing)
+            {
+                responsibleForVignette = true;
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            }
+            
+            //disable all the sub menus instantly in case they were left open to prevent popping
+            foreach (SettingsSubMenu subMenu in subMenus)
+                subMenu.Hide(instant: true);
+            
+            OpenSubMenu(0);
         }
 
-        private void UpdateDisplay()
+        protected override void OnHide()
         {
-            gearboxOption.Select((int)GearboxSetting.Setting);
+            foreach (SettingsSubMenu otherMenu in subMenus)
+                otherMenu.Hide();
+            
+            base.OnHide();
+
+            if (responsibleForVignette && PanelManager.PanelExists<VignetteBackgroundPanel>() && PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing)
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
         }
+
+        public void OpenSubMenu(SettingsSubMenu subMenu)
+        {
+            if (subMenu != null && subMenu.IsShowing)
+                return; //already open
+            
+            //hide all other menus
+            foreach (SettingsSubMenu otherMenu in subMenus)
+                otherMenu.Hide();
+            
+            //just show this menu
+            if (subMenu != null)
+            {
+                subMenu.Show();
+                subMenuTitle.text = subMenu.DisplayName;
+            }
+        }
+        
+        public void OpenSubMenu(int index) => OpenSubMenu(subMenus[index]);
 
     }
 }
