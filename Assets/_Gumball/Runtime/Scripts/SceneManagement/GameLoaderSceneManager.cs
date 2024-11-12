@@ -33,6 +33,7 @@ namespace Gumball
             Loading_vehicle,
             Setup_vehicle_and_drivers,
             Initialising_PlayFab,
+            Initialising_Facebook,
             Initialising_Unity_services,
         }
 
@@ -85,9 +86,11 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log($"Scriptable singletons loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
 
             currentStage = Stage.Starting_async_loading;
-            //start loading playfab (async)
+            //start loading playfab
             TrackedCoroutine playfabInitialisationCoroutine = new TrackedCoroutine(PlayFabManager.Initialise());
-            //start loading unity services (async)
+            //start loading facebook
+            TrackedCoroutine facebookInitialisationCoroutine = new TrackedCoroutine(FacebookManager.Initialise());
+            //start loading unity services
             TrackedCoroutine loadUnityServicesAsync = new TrackedCoroutine(UnityServicesManager.LoadAllServices());
             //start loading avatars
             TrackedCoroutine driverAvatarLoadCoroutine = new TrackedCoroutine(AvatarManager.Instance.SpawnDriver());
@@ -122,6 +125,9 @@ namespace Gumball
             
             currentStage = Stage.Initialising_PlayFab;
             yield return new WaitUntil(() => !playfabInitialisationCoroutine.IsPlaying);
+            
+            currentStage = Stage.Initialising_Facebook;
+            yield return new WaitUntil(() => !facebookInitialisationCoroutine.IsPlaying);
             
             currentStage = Stage.Initialising_Unity_services;
             yield return new WaitUntil(() => !loadUnityServicesAsync.IsPlaying);
