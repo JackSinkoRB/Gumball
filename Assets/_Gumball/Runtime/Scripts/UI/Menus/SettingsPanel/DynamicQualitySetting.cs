@@ -19,17 +19,17 @@ namespace Gumball
 
         protected override void Initialise()
         {
-            SetToggle(UseDynamicQuality);
+            SetToggle(!UseDynamicQuality);
         }
 
         protected override void OnSelectLeftSide()
         {
-            UseDynamicQuality = false;
+            UseDynamicQuality = true;
         }
 
         protected override void OnSelectRightSide()
         {
-            UseDynamicQuality = true;
+            UseDynamicQuality = false;
         }
         
     }

@@ -15,13 +15,16 @@ namespace Gumball
         [SerializeField] private float selectorIconOffset = 25;
         [SerializeField] private TextMeshProUGUI leftSideLabel;
         [SerializeField] private TextMeshProUGUI rightSideLabel;
-        [SerializeField] private Color deselectedLabelColor = Color.white;
-        [SerializeField] private Color selectedLabelColor = Color.white;
+        [SerializeField] private GlobalColourPalette.ColourCode deselectedLabelColourCode = GlobalColourPalette.ColourCode.C3;
+        [SerializeField] private GlobalColourPalette.ColourCode selectedLabelColourCode = GlobalColourPalette.ColourCode.C13;
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool rightSideEnabled;
 
         private bool isInitialised;
+        
+        private Color selectedLabelColor => GlobalColourPalette.Instance.GetGlobalColor(selectedLabelColourCode);
+        private Color deselectedLabelColor => GlobalColourPalette.Instance.GetGlobalColor(deselectedLabelColourCode);
         
         private void OnEnable()
         {
