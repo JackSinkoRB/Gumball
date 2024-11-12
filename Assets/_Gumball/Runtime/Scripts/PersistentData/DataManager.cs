@@ -14,17 +14,29 @@ namespace Gumball
         public static JsonDataProvider Avatar { get; private set; } = new("Avatar");
         public static JsonDataProvider GameSessions { get; private set; } = new("GameSessions");
         public static JsonDataProvider Warehouse { get; private set; } = new("Warehouse");
+        public static JsonDataProvider Player { get; private set; } = new("Player");
+        public static JsonDataProvider Dialogue { get; private set; } = new("Dialogue");
+
+#if UNITY_EDITOR
+        public static bool IsUsingTestProviders;
+#endif
         
         /// <summary>
         /// Enable or disable whether it reads from the test providers, or the real providers.
         /// </summary>
         public static void EnableTestProviders(bool enableTestProviders)
         {
+#if UNITY_EDITOR
+            IsUsingTestProviders = enableTestProviders;
+#endif
+            
             Settings = new JsonDataProvider(enableTestProviders ? "Settings_Tests" : "Settings");
             Cars = new JsonDataProvider(enableTestProviders ? "Cars_Tests" : "Cars");
             Avatar = new JsonDataProvider(enableTestProviders ? "Avatar_Tests" : "Avatar");
             GameSessions = new JsonDataProvider(enableTestProviders ? "GameSessions_Tests" : "GameSessions");
             Warehouse = new JsonDataProvider(enableTestProviders ? "Warehouse_Tests" : "Warehouse");
+            Player = new JsonDataProvider(enableTestProviders ? "Player_Tests" : "Player");
+            Dialogue = new JsonDataProvider(enableTestProviders ? "Dialogue_Tests" : "Dialogue");
         }
         
         /// <summary>
@@ -40,7 +52,15 @@ namespace Gumball
             Avatar.LoadFromSourceAsync();
             GameSessions.LoadFromSourceAsync();
             Warehouse.LoadFromSourceAsync();
-            yield return new WaitUntil(() => Settings.IsLoaded && Cars.IsLoaded);
+            Player.LoadFromSourceAsync();
+            Dialogue.LoadFromSourceAsync();
+            yield return new WaitUntil(() => Settings.IsLoaded
+                                             && Cars.IsLoaded
+                                             && Avatar.IsLoaded
+                                             && GameSessions.IsLoaded
+                                             && Warehouse.IsLoaded
+                                             && Player.IsLoaded
+                                             && Dialogue.IsLoaded);
             onComplete?.Invoke();
         }
 
@@ -55,6 +75,8 @@ namespace Gumball
             Avatar.LoadFromSourceSync();
             GameSessions.LoadFromSourceSync();
             Warehouse.LoadFromSourceSync();
+            Player.LoadFromSourceSync();
+            Dialogue.LoadFromSourceSync();
         }
 
         public static void RemoveAllData()
@@ -64,6 +86,8 @@ namespace Gumball
             Avatar.RemoveFromSource();
             GameSessions.RemoveFromSource();
             Warehouse.RemoveFromSource();
+            Player.RemoveFromSource();
+            Dialogue.RemoveFromSource();
         }
         
     }

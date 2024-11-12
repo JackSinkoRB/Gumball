@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9170745452097778764}
   - component: {fileID: 314259639286951339}
-  m_Layer: 0
+  m_Layer: 17
   m_Name: Bush_Big
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -45,8 +45,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24fb55447ad17b84794eec1f13860521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPrefab: 0
+  isChildOfAnotherChunkObject: 0
   ignoreAtRuntime: 0
   loadSeparately: 1
+  hideWhenFarAway: 1
   alwaysGrounded: 1
   keepAtSpecificDistanceFromRoad: 0
   distanceFromRoad: 10
@@ -77,6 +80,13 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  colourTerrain: 0
+  colorModifier:
+    colliderToColourAround: {fileID: 0}
+    useColor: 0
+    color: {r: 1, g: 0, b: 0, a: 0.5}
+    useAlpha: 0
+    alpha: 0
   chunkBelongsTo: {fileID: 0}
   lastKnownPositionWhenGrounded: {x: 0, y: 0, z: 0}
 --- !u!1001 &4356877495017297946
@@ -171,6 +181,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Tree_Mobile_Plane
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 21cd2749e93acb447809ada418ac3304,
+        type: 3}
+      propertyPath: m_Layer
+      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 21cd2749e93acb447809ada418ac3304,
         type: 3}

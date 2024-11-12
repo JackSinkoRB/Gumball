@@ -45,11 +45,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   driveOnLeft: 1
-  racingLine: {fileID: 0}
+  racingLines: []
   speedLimitKmh: 40
-  density: 100
-  laneDistancesForward: []
-  laneDistancesBackward: []
+  lanesForward: []
+  lanesBackward: []
   chunk: {fileID: 4064674166884723120}
 --- !u!1 &5340176757185358792
 GameObject:
@@ -108,15 +107,14 @@ MonoBehaviour:
   barriers: []
   hasCustomLoadDistance: 0
   customLoadDistance: 3000
+  distanceFromRoadSplineToResetPlayer: 50
+  nextRacingLineInterpolateDistance: 65
   terrainHighLODDistance: 150
   currentLOD: 1
   terrainHighLOD: {fileID: 8910443321278746561}
   terrainLowLOD: {fileID: 8119181622010095684}
   isFullyLoaded: 0
   isAccessible: 0
-  splineMeshes:
-  - {fileID: 9088963484885695893}
-  - {fileID: 3819494120804670550}
   chunkMeshData:
     chunk: {fileID: 4064674166884723120}
     vertices:
@@ -5793,8 +5791,6 @@ MonoBehaviour:
       percent: 1
     optimizedIndices: 
     sampleMode: 1
-  ChunkObjectData:
-    _serializedList: []
 --- !u!114 &5272964571774866940
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5812,6 +5808,7 @@ MonoBehaviour:
   hasChunkConnected: 0
   updateImmediately: 1
   terrainData:
+    terrainMaterial: {fileID: 0}
     resolution: 100
     resolutionLowLOD: 20
     chunkBlendDistance: 25
@@ -5890,8 +5887,7 @@ MonoBehaviour:
       objectSurroundingRadius: 5
       objectSurroundingBlendRadius: 15
       objectSurroundingMaxOpacity: 0.8
-      noiseScale: 120
-      noiseMaxOpacity: 0.8
+      naturalLight: 0.1
       minMaxSlopeAngle:
         Min: 0
         Max: 50

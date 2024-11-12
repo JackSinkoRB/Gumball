@@ -412,9 +412,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -427,9 +427,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -442,9 +442,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -683,22 +683,16 @@ Shader "VC_Terrain_Triplanar"
 				
 				float2 temp_cast_5 = (_Red_Tiling).xx;
 				float3x3 ase_worldToTangent = float3x3(WorldTangent,WorldBiTangent,WorldNormal);
-				float3 triplanar208 = TriplanarSampling208( _Red_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_5, 1.0, 0 );
+				float3 triplanar208 = TriplanarSampling208( _Red_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_5, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal208 = mul( ase_worldToTangent, triplanar208 );
-				float3 unpack209 = UnpackNormalScale( float4( tanTriplanarNormal208 , 0.0 ), _Normal_Strength );
-				unpack209.z = lerp( 1, unpack209.z, saturate(_Normal_Strength) );
-				float2 temp_cast_7 = (_Green_Tiling).xx;
-				float3 triplanar213 = TriplanarSampling213( _Green_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_7, 1.0, 0 );
+				float2 temp_cast_6 = (_Green_Tiling).xx;
+				float3 triplanar213 = TriplanarSampling213( _Green_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_6, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal213 = mul( ase_worldToTangent, triplanar213 );
-				float3 unpack212 = UnpackNormalScale( float4( tanTriplanarNormal213 , 0.0 ), _Normal_Strength );
-				unpack212.z = lerp( 1, unpack212.z, saturate(_Normal_Strength) );
-				float3 lerpResult92 = lerp( ( unpack209 * IN.ase_color.r ) , unpack212 , IN.ase_color.g);
-				float2 temp_cast_9 = (_Blue_Tiling).xx;
-				float3 triplanar217 = TriplanarSampling217( _Blue_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_9, 1.0, 0 );
+				float3 lerpResult92 = lerp( ( tanTriplanarNormal208 * IN.ase_color.r ) , tanTriplanarNormal213 , IN.ase_color.g);
+				float2 temp_cast_7 = (_Blue_Tiling).xx;
+				float3 triplanar217 = TriplanarSampling217( _Blue_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_7, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal217 = mul( ase_worldToTangent, triplanar217 );
-				float3 unpack219 = UnpackNormalScale( float4( tanTriplanarNormal217 , 0.0 ), _Normal_Strength );
-				unpack219.z = lerp( 1, unpack219.z, saturate(_Normal_Strength) );
-				float3 lerpResult93 = lerp( lerpResult92 , unpack219 , IN.ase_color.b);
+				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal217 , IN.ase_color.b);
 				
 				float4 temp_output_170_0 = ( ( IN.ase_color.a * _Light_Color ) * _Light_Str );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
@@ -706,8 +700,8 @@ Shader "VC_Terrain_Triplanar"
 				
 				float lerpResult26 = lerp( ( triplanar207.a * IN.ase_color.r ) , triplanar214.a , IN.ase_color.g);
 				float lerpResult27 = lerp( lerpResult26 , triplanar218.a , IN.ase_color.b);
-				float2 temp_cast_13 = (_NoiseEffectGrain_Tiling).xx;
-				float4 triplanar205 = TriplanarSampling205( _NoiseEffectGrainTexture, WorldPosition, WorldNormal, 1.0, temp_cast_13, 1.0, 0 );
+				float2 temp_cast_10 = (_NoiseEffectGrain_Tiling).xx;
+				float4 triplanar205 = TriplanarSampling205( _NoiseEffectGrainTexture, WorldPosition, WorldNormal, 1.0, temp_cast_10, 1.0, 0 );
 				
 
 				float3 BaseColor = lerpResult122.xyz;
@@ -1737,9 +1731,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -1752,9 +1746,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -1767,9 +1761,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -1966,22 +1960,16 @@ Shader "VC_Terrain_Triplanar"
 				float3 ase_worldTangent = IN.ase_texcoord5.xyz;
 				float3 ase_worldBitangent = IN.ase_texcoord6.xyz;
 				float3x3 ase_worldToTangent = float3x3(ase_worldTangent,ase_worldBitangent,ase_worldNormal);
-				float3 triplanar208 = TriplanarSampling208( _Red_Normal, WorldPosition, ase_worldNormal, 1.0, temp_cast_6, 1.0, 0 );
+				float3 triplanar208 = TriplanarSampling208( _Red_Normal, WorldPosition, ase_worldNormal, 1.0, temp_cast_6, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal208 = mul( ase_worldToTangent, triplanar208 );
-				float3 unpack209 = UnpackNormalScale( float4( tanTriplanarNormal208 , 0.0 ), _Normal_Strength );
-				unpack209.z = lerp( 1, unpack209.z, saturate(_Normal_Strength) );
-				float2 temp_cast_8 = (_Green_Tiling).xx;
-				float3 triplanar213 = TriplanarSampling213( _Green_Normal, WorldPosition, ase_worldNormal, 1.0, temp_cast_8, 1.0, 0 );
+				float2 temp_cast_7 = (_Green_Tiling).xx;
+				float3 triplanar213 = TriplanarSampling213( _Green_Normal, WorldPosition, ase_worldNormal, 1.0, temp_cast_7, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal213 = mul( ase_worldToTangent, triplanar213 );
-				float3 unpack212 = UnpackNormalScale( float4( tanTriplanarNormal213 , 0.0 ), _Normal_Strength );
-				unpack212.z = lerp( 1, unpack212.z, saturate(_Normal_Strength) );
-				float3 lerpResult92 = lerp( ( unpack209 * IN.ase_color.r ) , unpack212 , IN.ase_color.g);
-				float2 temp_cast_10 = (_Blue_Tiling).xx;
-				float3 triplanar217 = TriplanarSampling217( _Blue_Normal, WorldPosition, ase_worldNormal, 1.0, temp_cast_10, 1.0, 0 );
+				float3 lerpResult92 = lerp( ( tanTriplanarNormal208 * IN.ase_color.r ) , tanTriplanarNormal213 , IN.ase_color.g);
+				float2 temp_cast_8 = (_Blue_Tiling).xx;
+				float3 triplanar217 = TriplanarSampling217( _Blue_Normal, WorldPosition, ase_worldNormal, 1.0, temp_cast_8, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal217 = mul( ase_worldToTangent, triplanar217 );
-				float3 unpack219 = UnpackNormalScale( float4( tanTriplanarNormal217 , 0.0 ), _Normal_Strength );
-				unpack219.z = lerp( 1, unpack219.z, saturate(_Normal_Strength) );
-				float3 lerpResult93 = lerp( lerpResult92 , unpack219 , IN.ase_color.b);
+				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal217 , IN.ase_color.b);
 				float4 temp_output_170_0 = ( ( IN.ase_color.a * _Light_Color ) * _Light_Str );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
@@ -2489,9 +2477,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -2504,9 +2492,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -2519,9 +2507,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -2700,22 +2688,16 @@ Shader "VC_Terrain_Triplanar"
 				float2 temp_cast_0 = (_Red_Tiling).xx;
 				float3 ase_worldBitangent = IN.ase_texcoord5.xyz;
 				float3x3 ase_worldToTangent = float3x3(WorldTangent.xyz,ase_worldBitangent,WorldNormal);
-				float3 triplanar208 = TriplanarSampling208( _Red_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_0, 1.0, 0 );
+				float3 triplanar208 = TriplanarSampling208( _Red_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_0, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal208 = mul( ase_worldToTangent, triplanar208 );
-				float3 unpack209 = UnpackNormalScale( float4( tanTriplanarNormal208 , 0.0 ), _Normal_Strength );
-				unpack209.z = lerp( 1, unpack209.z, saturate(_Normal_Strength) );
-				float2 temp_cast_2 = (_Green_Tiling).xx;
-				float3 triplanar213 = TriplanarSampling213( _Green_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_2, 1.0, 0 );
+				float2 temp_cast_1 = (_Green_Tiling).xx;
+				float3 triplanar213 = TriplanarSampling213( _Green_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_1, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal213 = mul( ase_worldToTangent, triplanar213 );
-				float3 unpack212 = UnpackNormalScale( float4( tanTriplanarNormal213 , 0.0 ), _Normal_Strength );
-				unpack212.z = lerp( 1, unpack212.z, saturate(_Normal_Strength) );
-				float3 lerpResult92 = lerp( ( unpack209 * IN.ase_color.r ) , unpack212 , IN.ase_color.g);
-				float2 temp_cast_4 = (_Blue_Tiling).xx;
-				float3 triplanar217 = TriplanarSampling217( _Blue_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_4, 1.0, 0 );
+				float3 lerpResult92 = lerp( ( tanTriplanarNormal208 * IN.ase_color.r ) , tanTriplanarNormal213 , IN.ase_color.g);
+				float2 temp_cast_2 = (_Blue_Tiling).xx;
+				float3 triplanar217 = TriplanarSampling217( _Blue_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_2, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal217 = mul( ase_worldToTangent, triplanar217 );
-				float3 unpack219 = UnpackNormalScale( float4( tanTriplanarNormal217 , 0.0 ), _Normal_Strength );
-				unpack219.z = lerp( 1, unpack219.z, saturate(_Normal_Strength) );
-				float3 lerpResult93 = lerp( lerpResult92 , unpack219 , IN.ase_color.b);
+				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal217 , IN.ase_color.b);
 				
 
 				float3 Normal = lerpResult93;
@@ -2995,9 +2977,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -3010,9 +2992,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -3025,9 +3007,9 @@ Shader "VC_Terrain_Triplanar"
 				xNorm = tex2D( topTexMap, tiling * worldPos.zy * float2(  nsign.x, 1.0 ) );
 				yNorm = tex2D( topTexMap, tiling * worldPos.xz * float2(  nsign.y, 1.0 ) );
 				zNorm = tex2D( topTexMap, tiling * worldPos.xy * float2( -nsign.z, 1.0 ) );
-				xNorm.xyz  = half3( UnpackNormalScale( xNorm , 1.0 ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
-				yNorm.xyz  = half3( UnpackNormalScale( yNorm , 1.0 ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
-				zNorm.xyz  = half3( UnpackNormalScale( zNorm , 1.0 ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
+				xNorm.xyz  = half3( UnpackNormalScale( xNorm, normalScale.y ).xy * float2(  nsign.x, 1.0 ) + worldNormal.zy, worldNormal.x ).zyx;
+				yNorm.xyz  = half3( UnpackNormalScale( yNorm, normalScale.x ).xy * float2(  nsign.y, 1.0 ) + worldNormal.xz, worldNormal.y ).xzy;
+				zNorm.xyz  = half3( UnpackNormalScale( zNorm, normalScale.y ).xy * float2( -nsign.z, 1.0 ) + worldNormal.xy, worldNormal.z ).xyz;
 				return normalize( xNorm.xyz * projNormal.x + yNorm.xyz * projNormal.y + zNorm.xyz * projNormal.z );
 			}
 			
@@ -3259,22 +3241,16 @@ Shader "VC_Terrain_Triplanar"
 				
 				float2 temp_cast_5 = (_Red_Tiling).xx;
 				float3x3 ase_worldToTangent = float3x3(WorldTangent,WorldBiTangent,WorldNormal);
-				float3 triplanar208 = TriplanarSampling208( _Red_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_5, 1.0, 0 );
+				float3 triplanar208 = TriplanarSampling208( _Red_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_5, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal208 = mul( ase_worldToTangent, triplanar208 );
-				float3 unpack209 = UnpackNormalScale( float4( tanTriplanarNormal208 , 0.0 ), _Normal_Strength );
-				unpack209.z = lerp( 1, unpack209.z, saturate(_Normal_Strength) );
-				float2 temp_cast_7 = (_Green_Tiling).xx;
-				float3 triplanar213 = TriplanarSampling213( _Green_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_7, 1.0, 0 );
+				float2 temp_cast_6 = (_Green_Tiling).xx;
+				float3 triplanar213 = TriplanarSampling213( _Green_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_6, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal213 = mul( ase_worldToTangent, triplanar213 );
-				float3 unpack212 = UnpackNormalScale( float4( tanTriplanarNormal213 , 0.0 ), _Normal_Strength );
-				unpack212.z = lerp( 1, unpack212.z, saturate(_Normal_Strength) );
-				float3 lerpResult92 = lerp( ( unpack209 * IN.ase_color.r ) , unpack212 , IN.ase_color.g);
-				float2 temp_cast_9 = (_Blue_Tiling).xx;
-				float3 triplanar217 = TriplanarSampling217( _Blue_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_9, 1.0, 0 );
+				float3 lerpResult92 = lerp( ( tanTriplanarNormal208 * IN.ase_color.r ) , tanTriplanarNormal213 , IN.ase_color.g);
+				float2 temp_cast_7 = (_Blue_Tiling).xx;
+				float3 triplanar217 = TriplanarSampling217( _Blue_Normal, WorldPosition, WorldNormal, 1.0, temp_cast_7, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal217 = mul( ase_worldToTangent, triplanar217 );
-				float3 unpack219 = UnpackNormalScale( float4( tanTriplanarNormal217 , 0.0 ), _Normal_Strength );
-				unpack219.z = lerp( 1, unpack219.z, saturate(_Normal_Strength) );
-				float3 lerpResult93 = lerp( lerpResult92 , unpack219 , IN.ase_color.b);
+				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal217 , IN.ase_color.b);
 				
 				float4 temp_output_170_0 = ( ( IN.ase_color.a * _Light_Color ) * _Light_Str );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
@@ -3282,8 +3258,8 @@ Shader "VC_Terrain_Triplanar"
 				
 				float lerpResult26 = lerp( ( triplanar207.a * IN.ase_color.r ) , triplanar214.a , IN.ase_color.g);
 				float lerpResult27 = lerp( lerpResult26 , triplanar218.a , IN.ase_color.b);
-				float2 temp_cast_13 = (_NoiseEffectGrain_Tiling).xx;
-				float4 triplanar205 = TriplanarSampling205( _NoiseEffectGrainTexture, WorldPosition, WorldNormal, 1.0, temp_cast_13, 1.0, 0 );
+				float2 temp_cast_10 = (_NoiseEffectGrain_Tiling).xx;
+				float4 triplanar205 = TriplanarSampling205( _NoiseEffectGrainTexture, WorldPosition, WorldNormal, 1.0, temp_cast_10, 1.0, 0 );
 				
 
 				float3 BaseColor = lerpResult122.xyz;
@@ -3906,7 +3882,7 @@ Version=19201
 Node;AmplifyShaderEditor.CommentaryNode;196;-112.9803,-547.7643;Inherit;False;1239.252;644.8874;Mat_Blend;7;14;9;8;5;89;93;92;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;195;-816.0725,-1381.572;Inherit;False;2250.711;513.5898;Skids + overlay - masked by green channel ;8;156;142;141;133;135;136;123;129;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.CommentaryNode;194;-805.9355,758.7853;Inherit;False;1599.278;621.6887;Gloss;10;75;26;99;27;53;21;51;101;205;206;;1,1,1,1;0;0
-Node;AmplifyShaderEditor.CommentaryNode;192;1015.32,676.8184;Inherit;False;2116.796;646.8859;Lighting;12;169;168;171;170;181;175;186;189;188;190;191;176;;1,1,1,1;0;0
+Node;AmplifyShaderEditor.CommentaryNode;192;876.22,689.8183;Inherit;False;2116.796;646.8859;Lighting;12;169;168;171;170;181;175;186;189;188;190;191;176;;1,1,1,1;0;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;157;-173.3386,-1467.079;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;159;-173.3386,-1467.079;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;160;-173.3386,-1467.079;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;DepthOnly;0;3;DepthOnly;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;True;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;False;False;True;1;LightMode=DepthOnly;False;False;0;;0;0;Standard;0;False;0
@@ -3917,20 +3893,20 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;164;-173.3386,-1467.079;Flo
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;165;-173.3386,-1467.079;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;SceneSelectionPass;0;8;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;166;-173.3386,-1467.079;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.LerpOp;122;1643.168,-339.2568;Inherit;True;3;0;FLOAT4;0,0,0,0;False;1;FLOAT4;0,0,0,0;False;2;FLOAT;0;False;1;FLOAT4;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;168;1381.39,1014.18;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;170;1785.952,1071.547;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;175;2072.975,866.7485;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.LerpOp;186;2313.674,950.1255;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;190;2737.769,887.3981;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.BreakToComponentsNode;176;1571.344,822.0348;Inherit;False;FLOAT3;1;0;FLOAT3;0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;168;1242.29,1027.18;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;170;1646.852,1084.546;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;175;1933.874,879.7484;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.LerpOp;186;2174.574,963.1254;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;190;2598.669,900.3979;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.BreakToComponentsNode;176;1432.244,835.0347;Inherit;False;FLOAT3;1;0;FLOAT3;0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
 Node;AmplifyShaderEditor.RangedFloatNode;12;1895.137,155.4311;Float;False;Constant;_Metallic;Metallic;5;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;26;-561.8494,917.0699;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;99;124.6973,873.9086;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.LerpOp;27;-299.9213,914.3257;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;21;-97.96638,1065.644;Float;False;Property;_ExtraGlossinesValue;ExtraGlossinesValue;17;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;51;233.9477,1122.336;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;181;2020.496,1166.167;Inherit;False;Constant;_Normal_Mask_Str;Normal_Mask_Str;14;0;Create;True;0;0;0;False;0;False;0.5;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;189;2126.774,771.2126;Inherit;False;Constant;_Albedo_Contribution_Str;Albedo_Contribution_Str;14;0;Create;True;0;0;0;False;0;False;0.8;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;181;1881.396,1179.166;Inherit;False;Constant;_Normal_Mask_Str;Normal_Mask_Str;14;0;Create;True;0;0;0;False;0;False;0.5;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;189;1987.673,784.2125;Inherit;False;Constant;_Albedo_Contribution_Str;Albedo_Contribution_Str;14;0;Create;True;0;0;0;False;0;False;0.8;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.VertexColorNode;102;-1447.939,-718.6578;Inherit;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.OneMinusNode;156;-2.554384,-1216.592;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;142;-194.7234,-1227.068;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
@@ -3948,30 +3924,27 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;8;-62.98028,-497.7643;Inherit;Fals
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;89;83.96151,-39.87687;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.LerpOp;93;865.2716,-193.0538;Inherit;True;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.LerpOp;92;419.2541,-134.3189;Inherit;False;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
-Node;AmplifyShaderEditor.ColorNode;169;1065.32,1114.703;Inherit;False;Property;_Light_Color;Light_Color;15;0;Create;True;0;0;0;False;0;False;0,0,0,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.ColorNode;169;926.2199,1127.702;Inherit;False;Property;_Light_Color;Light_Color;15;0;Create;True;0;0;0;False;0;False;0,0,0,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;206;-759.3643,1187.56;Inherit;False;Property;_NoiseEffectGrain_Tiling;NoiseEffectGrain_Tiling;9;1;[Header];Create;True;1;NoiseEffectGrain;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.TriplanarNode;205;-489.3642,1142.56;Inherit;True;Spherical;World;False;NoiseEffectGrainTexture;_NoiseEffectGrainTexture;white;10;Assets/_Gumball/Runtime/Textures/Noise/Noise.tga;Mid Texture 2;_MidTexture2;white;-1;None;Bot Texture 2;_BotTexture2;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;5;-10.85839,-375.9566;Inherit;False;2;2;0;FLOAT4;0,0,0,0;False;1;FLOAT;0;False;1;FLOAT4;0
 Node;AmplifyShaderEditor.RangedFloatNode;98;-3159.38,139.0783;Inherit;False;Property;_Normal_Strength;Normal_Strength;18;0;Create;True;0;0;0;False;0;False;1;1.242;0;3;0;1;FLOAT;0
-Node;AmplifyShaderEditor.UnpackScaleNormalNode;209;-1763.995,-234.2951;Inherit;False;Tangent;2;0;FLOAT4;0,0,0,0;False;1;FLOAT;1;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
 Node;AmplifyShaderEditor.TriplanarNode;207;-1865.42,-486.9787;Inherit;True;Spherical;World;False;Red;_Red;white;1;None;Mid Texture 3;_MidTexture3;white;-1;None;Bot Texture 3;_BotTexture3;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.TriplanarNode;208;-2164.667,-252.4478;Inherit;True;Spherical;World;True;Red_Normal;_Red_Normal;white;2;None;Mid Texture 4;_MidTexture4;white;-1;None;Bot Texture 4;_BotTexture4;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;210;-2457.808,-385.7;Inherit;False;Property;_Red_Tiling;Red_Tiling;0;1;[Header];Create;True;1;Red;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;215;-2464.297,41.71525;Inherit;False;Property;_Green_Tiling;Green_Tiling;3;1;[Header];Create;True;1;Green;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.TriplanarNode;213;-2171.156,172.8471;Inherit;True;Spherical;World;True;Green_Normal;_Green_Normal;white;5;None;Mid Texture 5;_MidTexture5;white;-1;None;Bot Texture 5;_BotTexture5;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.TriplanarNode;214;-1872.91,-60.68375;Inherit;True;Spherical;World;False;Green;_Green;white;4;None;Mid Texture 6;_MidTexture6;white;-1;None;Bot Texture 6;_BotTexture6;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.UnpackScaleNormalNode;212;-1770.485,190.9998;Inherit;False;Tangent;2;0;FLOAT4;0,0,0,0;False;1;FLOAT;1;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
-Node;AmplifyShaderEditor.UnpackScaleNormalNode;219;-1776.625,680.0471;Inherit;False;Tangent;2;0;FLOAT4;0,0,0,0;False;1;FLOAT;1;False;4;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;75;-755.9355,813.0497;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.TriplanarNode;218;-1879.051,428.3634;Inherit;True;Spherical;World;False;Blue;_Blue;white;7;None;Mid Texture 8;_MidTexture8;white;-1;None;Bot Texture 8;_BotTexture8;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.TriplanarNode;217;-2177.296,661.8943;Inherit;True;Spherical;World;True;Blue_Normal;_Blue_Normal;white;8;None;Mid Texture 7;_MidTexture7;white;-1;None;Bot Texture 7;_BotTexture7;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;216;-2498.437,530.7625;Inherit;False;Property;_Blue_Tiling;Blue_Tiling;6;1;[Header];Create;True;1;Blue;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.TriplanarNode;203;-630.8319,-1336.915;Inherit;True;Spherical;World;False;Skid;_Skid;white;13;Assets/_Gumball/Runtime/Textures/Noise/Noise_grunge_concrete_moss_small_Half.png;Mid Texture 1;_MidTexture1;white;-1;None;Bot Texture 1;_BotTexture1;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;0.1,0.1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;204;-788.0829,-1290.028;Inherit;False;Property;_Skid_Tiling;Skid_Tiling;11;1;[Header];Create;True;1;Skid;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;53;-323.8188,808.7853;Float;False;Property;_GlossinesValue;GlossinesValue;16;1;[Header];Create;True;1;Other values;0;0;False;0;False;0;0;0;3;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;171;1408.855,1181.197;Inherit;False;Property;_Light_Str;Light_Str;14;1;[Header];Create;True;1;Light;0;0;False;0;False;23.45971;0;0;30;0;1;FLOAT;0
-Node;AmplifyShaderEditor.SaturateNode;191;2954.117,897.6765;Inherit;False;1;0;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.LerpOp;188;2538.778,726.8184;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;171;1269.755,1194.196;Inherit;False;Property;_Light_Str;Light_Str;14;1;[Header];Create;True;1;Light;0;0;False;0;False;23.45971;0;0;30;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SaturateNode;191;2815.017,910.6764;Inherit;False;1;0;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.LerpOp;188;2399.678,739.8183;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.TriplanarNode;208;-2164.667,-280.5298;Inherit;True;Spherical;World;True;Red_Normal;_Red_Normal;white;2;None;Mid Texture 4;_MidTexture4;white;-1;None;Bot Texture 4;_BotTexture4;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.TriplanarNode;218;-1879.051,428.3634;Inherit;True;Spherical;World;False;Blue;_Blue;white;7;None;Mid Texture 8;_MidTexture8;white;-1;None;Bot Texture 8;_BotTexture8;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.TriplanarNode;217;-2177.296,661.8943;Inherit;True;Spherical;World;True;Blue_Normal;_Blue_Normal;white;8;None;Mid Texture 7;_MidTexture7;white;-1;None;Bot Texture 7;_BotTexture7;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 WireConnection;122;0;135;0
 WireConnection;122;1;14;0
 WireConnection;122;2;129;0
@@ -4022,35 +3995,32 @@ WireConnection;9;0;218;0
 WireConnection;9;1;102;3
 WireConnection;8;0;214;0
 WireConnection;8;1;102;2
-WireConnection;89;0;209;0
+WireConnection;89;0;208;0
 WireConnection;89;1;102;1
 WireConnection;93;0;92;0
-WireConnection;93;1;219;0
+WireConnection;93;1;217;0
 WireConnection;93;2;102;3
 WireConnection;92;0;89;0
-WireConnection;92;1;212;0
+WireConnection;92;1;213;0
 WireConnection;92;2;102;2
 WireConnection;205;3;206;0
 WireConnection;5;0;207;0
 WireConnection;5;1;102;1
-WireConnection;209;0;208;0
-WireConnection;209;1;98;0
 WireConnection;207;3;210;0
-WireConnection;208;3;210;0
+WireConnection;213;8;98;0
 WireConnection;213;3;215;0
 WireConnection;214;3;215;0
-WireConnection;212;0;213;0
-WireConnection;212;1;98;0
-WireConnection;219;0;217;0
-WireConnection;219;1;98;0
 WireConnection;75;0;207;4
 WireConnection;75;1;102;1
-WireConnection;218;3;216;0
-WireConnection;217;3;216;0
 WireConnection;203;3;204;0
 WireConnection;191;0;190;0
 WireConnection;188;0;122;0
 WireConnection;188;1;186;0
 WireConnection;188;2;189;0
+WireConnection;208;8;98;0
+WireConnection;208;3;210;0
+WireConnection;218;3;216;0
+WireConnection;217;8;98;0
+WireConnection;217;3;216;0
 ASEEND*/
-//CHKSM=19603BA6D32D925B62A93E216164508195238898
+//CHKSM=380474B82578D06ED002B3424EFD3ED644A5CB0A

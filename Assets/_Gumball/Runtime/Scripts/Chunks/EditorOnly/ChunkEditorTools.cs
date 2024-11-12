@@ -1,14 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Dreamteck.Splines;
 using JBooth.VertexPainterPro;
 using MyBox;
 #if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+using System.IO;
 using Gumball.Editor;
 using UnityEditor;
 #endif
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 namespace Gumball
@@ -18,6 +24,25 @@ namespace Gumball
     {
 
 #if UNITY_EDITOR
+        public static void OnDuplicateChunkAsset(string oldID, string newChunkPath, ChunkEditorTools newChunk)
+        {
+            //find the old chunk
+            string directory = Path.GetDirectoryName(newChunkPath);
+            UniqueIDAssigner idAssigner = UniqueIDAssigner.FindAssignerWithIDInDirectory(oldID, directory);
+
+            if (idAssigner != null)
+            {
+                ChunkEditorTools oldChunk = idAssigner.GetComponent<ChunkEditorTools>();
+                if (oldChunk != null)
+                {
+                    //rebuild the runtime chunk
+                    ChunkUtils.CreateRuntimeChunk(oldChunk.gameObject, saveAssetsOnComplete: false);
+                }
+            }
+            
+            AssetDatabase.SaveAssets();
+        }
+        
         private Chunk chunk => GetComponent<Chunk>();
         private float timeSinceUnityUpdated => Time.realtimeSinceStartup - timeWhenUnityLastUpdated;
 
@@ -32,30 +57,28 @@ namespace Gumball
         private float timeWhenUnityLastUpdated;
 
         private bool isRuntimeChunk => name.Contains(ChunkUtils.RuntimeChunkSuffix);
-        
+
         private void OnSavePrefab(string prefabName, string path)
         {
-            if (prefabName.Equals(gameObject.name) && !isRuntimeChunk)
-            {
-                chunk.FindSplineMeshes();
-                ChunkUtils.BakeMeshes(chunk);
-            }
+            if (!prefabName.Equals(gameObject.name))
+                return;
+            
+            CheckToAssignSplineMeshIDs();
         }
         
         private void OnEnable()
         {
-            SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
-            
             chunk.SplineComputer.onRebuild += CheckToUpdateMeshesImmediately;
+            SaveEditorAssetsEvents.onSavePrefab += OnSavePrefab;
+
             chunk.UpdateSplineSampleData();
         }
 
         private void OnDisable()
         {
             chunk.SplineComputer.onRebuild -= CheckToUpdateMeshesImmediately;
-
             SaveEditorAssetsEvents.onSavePrefab -= OnSavePrefab;
-            
+
             Tools.hidden = false;
         }
 
@@ -83,6 +106,23 @@ namespace Gumball
         {
             CheckToUpdateMeshesImmediately();
             CheckIfTerrainIsRaycastable();
+            
+            EditorApplication.delayCall -= CheckToUnbakeMeshes;
+            EditorApplication.delayCall += CheckToUnbakeMeshes;
+        }
+
+        private void CheckToUnbakeMeshes()
+        {
+            try
+            {
+                bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot == gameObject;
+                if (isPrefabMode)
+                    UnbakeSplineMeshes();
+            }
+            catch (MissingReferenceException)
+            {
+                //safely ignore - prefab may have closed
+            }
         }
 
         /// <summary>
@@ -92,11 +132,11 @@ namespace Gumball
         {
             foreach (ChunkObject chunkObject in chunk.transform.GetComponentsInAllChildren<ChunkObject>())
             {
-                if (chunkObject.CanFlattenTerrain)
+                if (chunkObject.CanFlattenTerrain && chunkObject.ColliderToFlattenTo != null)
                     chunkObject.ColliderToFlattenTo.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
                 
-                if (chunkObject.CanColourTerrain)
-                    chunkObject.ColliderToColourAround.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
+                if (chunkObject.CanColourTerrain && chunkObject.ColorModifier.ColliderToColourAround != null)
+                    chunkObject.ColorModifier.ColliderToColourAround.gameObject.layer = (int) LayersAndTags.Layer.ChunkObject;
             }
         }
         
@@ -335,6 +375,78 @@ namespace Gumball
             EditorApplication.delayCall -= RecreateTerrain;
             EditorApplication.delayCall += RecreateTerrain;
         }
+
+        public void CheckToAssignSplineMeshIDs()
+        {
+            bool needsUpdating = false;
+            SplineMesh[] splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            
+            //get spline meshes with duplicate IDs
+            HashSet<string> duplicateIDs = new HashSet<string>();
+            foreach (SplineMesh splineMesh in splineMeshes)
+            {
+                foreach (SplineMesh other in splineMeshes)
+                {
+                    if (other == splineMesh)
+                        continue;
+
+                    UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                    UniqueIDAssigner otherIdAssigner = other.GetComponent<UniqueIDAssigner>();
+                    if (idAssigner != null && otherIdAssigner != null && otherIdAssigner.UniqueID.Equals(idAssigner.UniqueID))
+                    {
+                        duplicateIDs.Add(splineMesh.GetComponent<UniqueIDAssigner>().UniqueID);
+                        break;
+                    }
+                }
+            }
+            
+            foreach (SplineMesh splineMesh in splineMeshes)
+            {
+                UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                if (idAssigner == null
+                    || idAssigner.UniqueID.IsNullOrEmpty()
+                    || duplicateIDs.Contains(idAssigner.UniqueID)
+                    || splineMesh.GetComponents<UniqueIDAssigner>().Length > 1)
+                {
+                    needsUpdating = true;
+                    break;
+                }
+            }
+            
+            if (needsUpdating)
+            {
+                string assetPath = GameObjectUtils.GetPathToPrefabAsset(gameObject);
+                
+                bool isPrefabMode = PrefabStageUtility.GetCurrentPrefabStage() != null && PrefabStageUtility.GetCurrentPrefabStage().assetPath.Equals(assetPath);
+                GameObject prefabInstance = isPrefabMode ? PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot : PrefabUtility.LoadPrefabContents(assetPath);
+                
+                SplineMesh[] splineMeshesInPrefab = prefabInstance.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+                foreach (SplineMesh splineMesh in splineMeshesInPrefab)
+                {
+                    UniqueIDAssigner idAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                    if (idAssigner == null
+                        || idAssigner.UniqueID.IsNullOrEmpty()
+                        || duplicateIDs.Contains(idAssigner.UniqueID)
+                        || splineMesh.GetComponents<UniqueIDAssigner>().Length > 1)
+                    {
+                        //remove all existing
+                        foreach (UniqueIDAssigner uniqueIDAssigner in splineMesh.gameObject.GetComponents<UniqueIDAssigner>())
+                            DestroyImmediate(uniqueIDAssigner);
+                        
+                        idAssigner = splineMesh.gameObject.AddComponent<UniqueIDAssigner>();
+                        idAssigner.Initialise();
+                        
+                        Debug.Log($"Updated ID for spline mesh {splineMesh.name}");
+                    }
+                }
+
+                if (!isPrefabMode)
+                {
+                    PrefabUtility.SaveAsPrefabAsset(prefabInstance, assetPath);
+                    PrefabUtility.UnloadPrefabContents(prefabInstance);
+                }
+            }
+        }
         
         /// <summary>
         /// Force the terrain to be recreated.
@@ -344,16 +456,12 @@ namespace Gumball
             DisconnectAll();
             
             GlobalLoggers.ChunkLogger.Log($"Recreating terrain for '{chunk.name}'");
-            Material[] previousMaterials = chunk.TerrainHighLOD.GetComponent<MeshRenderer>().sharedMaterials;
-
+            
             //check if there's additional vertex color data
             VertexInstanceStream vertexInstanceStream = chunk.TerrainHighLOD.GetComponent<VertexInstanceStream>();
             GenericDictionary<int, List<VertexInstanceStream.PaintData>> paintData = null;
             if (vertexInstanceStream != null)
                 paintData = vertexInstanceStream.paintedVertices;
-
-            DestroyImmediate(chunk.TerrainHighLOD);
-            DestroyImmediate(chunk.TerrainLowLOD);
 
             chunk.SplineComputer.RebuildImmediate();
 
@@ -376,24 +484,36 @@ namespace Gumball
 
         private void RecreateTerrainLODs()
         {
-            Dictionary<Chunk.TerrainLOD, GameObject> newTerrain = terrainData.Create(chunk);
-            foreach (Chunk.TerrainLOD key in newTerrain.Keys)
+            //destroy old terrain
+            DestroyImmediate(chunk.TerrainHighLOD);
+            DestroyImmediate(chunk.TerrainLowLOD);
+            
+            Dictionary<Chunk.ChunkLOD, GameObject> newTerrain = terrainData.Create(chunk);
+            foreach (Chunk.ChunkLOD key in newTerrain.Keys)
             {
                 GameObject terrain = newTerrain[key];
                 chunk.SetTerrain(key, terrain);
             }
             
-            chunk.SwitchTerrainLOD(Chunk.TerrainLOD.HIGH);
+            chunk.SwitchTerrainLOD(Chunk.ChunkLOD.HIGH);
         }
 
         private void UnbakeSplineMeshes()
         {
-            chunk.FindSplineMeshes();
-            foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
+            if (isRuntimeChunk)
+                return;
+            
+            SplineMesh[] splineMeshes = transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            foreach (SplineMesh splineMesh in splineMeshes)
             {
                 if (!splineMesh.gameObject.activeSelf)
                     continue;
-                splineMesh.Unbake();
+
+                if (splineMesh.baked)
+                {
+                    splineMesh.Unbake();
+                    EditorUtility.SetDirty(gameObject);
+                }
             }
         }
         
@@ -532,7 +652,74 @@ namespace Gumball
         [SerializeField] private bool showDebugLines;
 
         public bool ShowDebugLines => showDebugLines;
+
+        [Header("Chunk map search")]
+        [SerializeField] private GumballEvent[] eventsToSearchIn;
+        [SerializeField, ReadOnly] private ChunkMap[] mapsUsingChunk;
         
+        [ButtonMethod]
+        public void FindMapsUsingChunk()
+        {
+            if (eventsToSearchIn == null || eventsToSearchIn.Length == 0)
+                throw new InvalidOperationException($"Add an event to search for in the {nameof(eventsToSearchIn)} field.");
+                
+            HashSet<ChunkMap> chunkMaps = new();
+            //find all the chunks maps
+            foreach (GumballEvent eventToSearchIn in eventsToSearchIn)
+            {
+                if (eventToSearchIn == null)
+                    continue;
+                
+                foreach (AssetReferenceGameObject mapReference in eventToSearchIn.Maps)
+                {
+                    GameSessionMap map = mapReference.editorAsset.GetComponent<GameSessionMap>();
+                    foreach (GameSessionNode node in map.Nodes)
+                    {
+                        ChunkMap chunkMap = node.GameSession.ChunkMapAssetReference.editorAsset;
+                        if (chunkMap == null)
+                            continue;
+                        foreach (AssetReferenceGameObject chunkReference in chunkMap.ChunkReferences)
+                        {
+                            Chunk chunkInMap = chunkReference.editorAsset.GetComponent<Chunk>();
+                            if (chunkInMap.UniqueID.Equals(chunk.UniqueID))
+                            {
+                                chunkMaps.Add(chunkMap);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            mapsUsingChunk = chunkMaps.ToArray();
+            Debug.Log($"Found {mapsUsingChunk.Length} chunk maps using chunk {gameObject.name}.");
+        }
+
+        [ButtonMethod]
+        public void RebuildMapsUsingChunk()
+        {
+            FindMapsUsingChunk();
+            
+            if (Application.isPlaying)
+                throw new InvalidOperationException("Cannot rebuild during play mode.");
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            //rebuild the data (but only recreate runtime chunks once)
+            foreach (ChunkMap chunkMap in mapsUsingChunk)
+            {
+                if (chunkMap == null)
+                    continue;
+                
+                chunkMap.RebuildData(false);
+            }
+            
+            //reset the runtime chunk creation tracking
+            ChunkMap.ClearRuntimeChunksCreatedTracking();
+
+            Debug.Log($"Rebuild process took {stopwatch.Elapsed.ToPrettyString()}");
+        }
 #endif
+
     }
 }

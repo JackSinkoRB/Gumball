@@ -10,35 +10,56 @@ namespace Gumball
     [Serializable]
     public struct ChunkObjectData
     {
-        [SerializeField] private Vector3 localPosition;
-        [SerializeField] private Quaternion localRotation;
-        [SerializeField] private Vector3 localScale;
-        [SerializeField] private bool alwaysGrounded;
+        
+        [SerializeField] private bool hideWhenFarAway;
+        [SerializeField] private Vector3 positionRelativeToChunk;
+        [SerializeField] private Quaternion localRotationRelativeToChunk;
+        [SerializeField] private Vector3 scaleRelativeToChunk;
 
-        public ChunkObjectData(ChunkObject chunkObject)
+        public ChunkObjectData(Chunk chunkReference, ChunkObject chunkObject)
         {
-            localPosition = chunkObject.transform.localPosition;
-            localRotation = chunkObject.transform.localRotation;
-            localScale = chunkObject.transform.localScale;
-            alwaysGrounded = chunkObject.AlwaysGrounded;
+            hideWhenFarAway = chunkObject.HideWhenFarAway;
+            Transform desiredParent = hideWhenFarAway ? chunkReference.TerrainHighLOD.transform : chunkReference.transform;
+            positionRelativeToChunk = desiredParent.InverseTransformPoint(chunkObject.transform.position);
+            localRotationRelativeToChunk = GetRotationRelativeToChunk(chunkReference, chunkObject);
+            scaleRelativeToChunk = GetScaleRelativeToChunk(chunkReference, chunkObject);
         }
 
         public GameObject LoadIntoChunk(AsyncOperationHandle<GameObject> handle, Chunk chunk)
         {
-            GameObject chunkObject = Object.Instantiate(handle.Result, chunk.transform);
-            chunkObject.transform.localPosition = localPosition;
-            chunkObject.transform.localRotation = localRotation;
-            chunkObject.transform.localScale = localScale;
-            
-            if (alwaysGrounded)
-            {
-                bool groundedSuccessfully = ChunkUtils.GroundObject(chunkObject.transform);
-                if (!groundedSuccessfully)
-                    chunkObject.SetActive(false); //don't allow floating object
-            }
+            GameObject chunkObject = Object.Instantiate(handle.Result, hideWhenFarAway ? chunk.TerrainHighLOD.transform : chunk.transform);
+            chunkObject.transform.localPosition = positionRelativeToChunk;
+            chunkObject.transform.localRotation = localRotationRelativeToChunk;
+            chunkObject.transform.localScale = scaleRelativeToChunk;
 
             chunkObject.GetComponent<AddressableReleaseOnDestroy>(true).Init(handle);
             return chunkObject;
         }
+
+        private static Quaternion GetRotationRelativeToChunk(Chunk chunkReference, ChunkObject chunkObject)
+        {
+            Transform originalParent = chunkObject.transform.parent;
+            
+            chunkObject.transform.SetParent(chunkReference.transform);
+            Quaternion rotationRelativeToChunk = chunkObject.transform.localRotation;
+            
+            chunkObject.transform.SetParent(originalParent);
+
+            return rotationRelativeToChunk;
+        }
+
+        private static Vector3 GetScaleRelativeToChunk(Chunk chunkReference, ChunkObject chunkObject)
+        {
+            Vector3 totalScale = Vector3.one;
+            Transform parent = chunkObject.transform;
+            while (parent != null && parent != chunkReference.transform)
+            {
+                totalScale = totalScale.Multiply(parent.localScale);
+                parent = parent.parent;
+            }
+
+            return totalScale;
+        }
+        
     }
 }

@@ -122,7 +122,7 @@ namespace Gumball
 
             Position = context.ReadValue<Vector2>();
             OffsetSincePressed = PositionOnPress - Position;
-            OffsetSincePressedNormalised = GetNormalisedScreenPosition(OffsetSincePressed);
+            OffsetSincePressedNormalised = GraphicUtils.GetNormalisedScreenPosition(OffsetSincePressed);
             onPerform?.Invoke();
 
             bool isFirstContact = lastKnownPositionOnPerformed == Vector2.zero;
@@ -180,7 +180,7 @@ namespace Gumball
         
         private static void CheckForDrag(Vector2 offsetSinceLastFrame)
         {
-            Vector2 offsetSinceLastFrameNormalised = GetNormalisedScreenPosition(offsetSinceLastFrame);
+            Vector2 offsetSinceLastFrameNormalised = GraphicUtils.GetNormalisedScreenPosition(offsetSinceLastFrame);
             if (!offsetSinceLastFrameNormalised.Approximately(Vector2.zero, DragThreshold))
             {
                 if (!IsDragging)
@@ -235,16 +235,11 @@ namespace Gumball
             
             return clickablesUnderPointerCached;
         }
-        
-        private static Vector2 GetNormalisedScreenPosition(Vector2 screenPosition)
-        {
-            return new Vector2(screenPosition.x / Screen.width, screenPosition.y / Screen.height);
-        }
 
         private static void UpdateOffsetSinceLastFrame()
         {
             Vector2 offset = Position - lastKnownPosition;
-            OffsetSinceLastFrame = GetNormalisedScreenPosition(offset);
+            OffsetSinceLastFrame = GraphicUtils.GetNormalisedScreenPosition(offset);
             lastKnownPosition = Position;
         }
 

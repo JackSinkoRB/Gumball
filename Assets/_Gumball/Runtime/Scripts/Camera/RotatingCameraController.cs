@@ -44,6 +44,8 @@ namespace Gumball
         private Tween decelerationTween;
         private bool pressedUI;
         
+        public Vector2 DefaultTargetOffset => defaultTargetOffset;
+        
         protected virtual void OnEnable()
         {
             PrimaryContactInput.onPress += OnPrimaryContactPress;
@@ -81,6 +83,13 @@ namespace Gumball
             
             decelerationTween?.Kill();
             MoveCamera(Vector2.zero, movementTweenDuration);
+        }
+        
+        public void SetInitialPosition()
+        {
+            decelerationTween?.Kill();
+            currentMovementTween?.Kill();
+            MoveCamera(initialCameraOffset);
         }
         
         private void OnPinch(Vector2 offset)
@@ -137,18 +146,13 @@ namespace Gumball
         {
             velocity = newVelocity;
         }
-        
-        protected void SetInitialPosition()
-        {
-            decelerationTween?.Kill();
-            currentMovementTween?.Kill();
-            MoveCamera(initialCameraOffset);
-        }
 
         private void MoveCamera(Vector2 offset, float duration = 0)
         {
             if (target == null)
                 return;
+            
+            Debug.Log($"[HERE] Offset = {offset}");
 
             totalOffset += offset;
             
@@ -162,9 +166,11 @@ namespace Gumball
                 //keep the camera at the same zoomed amount
                 float distanceFromCarToTarget = Vector3.Distance(
                     WarehouseManager.Instance.CurrentCar.transform.position + defaultTargetOffset, 
-                    target.transform.position + targetOffset);
+                    target.position + targetOffset);
                 actualDistance = distance - distanceFromCarToTarget;
             }
+            Debug.Log($"[HERE] targetOffset = {targetOffset}");
+            Debug.Log($"[HERE] actualDistance = {actualDistance}");
 
             horizontal += offset.x * xSpeed * actualDistance; //multiply by distance so the closer you are, the slower it rotates
             vertical -= offset.y * ySpeed;
@@ -174,6 +180,7 @@ namespace Gumball
             Vector3 rotationEuler = new Vector3(vertical, horizontal, 0);
             Quaternion rotation = Quaternion.Euler(rotationEuler);
             Vector3 position = rotation * new Vector3(0, 0, -actualDistance) + target.position + targetOffset;
+            Debug.Log($"[HERE] position = {position}");
 
             currentMovementTween?.Kill();
             currentMovementTween = DOTween.Sequence()

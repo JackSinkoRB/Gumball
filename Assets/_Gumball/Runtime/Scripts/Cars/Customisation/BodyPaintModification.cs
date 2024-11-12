@@ -22,7 +22,6 @@ namespace Gumball
         public static readonly int ClearCoatSmoothnessShaderID = Shader.PropertyToID("_ClearCoatSmoothness");
         public static readonly int ClearCoatShaderID = Shader.PropertyToID("_ClearCoat");
         public static readonly int SmoothnessShaderID = Shader.PropertyToID("_Smoothness");
-        public static readonly int MetallicShaderID = Shader.PropertyToID("_Metallic");
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
@@ -33,16 +32,45 @@ namespace Gumball
         public MeshRenderer[] ColourableParts => colourableParts;
         public PaintMode CurrentPaintMode => GetCurrentSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
 
-        public ColourSwatchSerialized CurrentSwatch
+        public ColourSwatchSerialized SavedSwatch
         {
-            get => DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
-            set => DataManager.Cars.Set($"{saveKey}.CurrentSwatch", value);
+            get
+            {
+                if (!carBelongsTo.IsPlayer)
+                    throw new InvalidOperationException("Cannot get save value for non-player car.");
+                return DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
+            }
+            set
+            {
+                if (carBelongsTo.IsPlayer)
+                    DataManager.Cars.Set($"{saveKey}.CurrentSwatch", value);
+            }
         }
-        
-        public int CurrentSelectedPresetIndex
+
+        public void SetMaterialType(PaintMaterial.Type type)
         {
-            get => DataManager.Cars.Get($"{saveKey}.SelectedPreset", 0);
-            set => DataManager.Cars.Set($"{saveKey}.SelectedPreset", value);
+            //save to file
+            ColourSwatchSerialized swatch = SavedSwatch;
+            swatch.SetMaterialType(type);
+            SavedSwatch = swatch;
+            
+            //update visuals
+            ApplySwatch(SavedSwatch);
+        }
+
+        public int SavedSelectedPresetIndex
+        {
+            get
+            {
+                if (!carBelongsTo.IsPlayer)
+                    throw new InvalidOperationException("Cannot get save value for non-player car.");
+                return DataManager.Cars.Get($"{saveKey}.SelectedPreset", 0);
+            }
+            set
+            {
+                if (carBelongsTo.IsPlayer)
+                    DataManager.Cars.Set($"{saveKey}.SelectedPreset", value);
+            }
         }
 
 #if UNITY_EDITOR
@@ -76,7 +104,8 @@ namespace Gumball
             
             FindColourableParts();
 
-            LoadFromSave();
+            if (carBelongsTo.IsPlayer)
+                LoadFromSave();
         }
 
         public void ApplySwatch(ColourSwatch swatch)
@@ -98,18 +127,12 @@ namespace Gumball
                 meshRenderer.sharedMaterial.SetFloat(ClearCoatSmoothnessShaderID, swatch.ClearCoatSmoothness);
             }
 
-            CurrentSwatch = swatch;
+            SavedSwatch = swatch;
         }
 
         public void LoadFromSave()
         {
-            if (!DataManager.Cars.HasKey($"{saveKey}.CurrentSwatch"))
-            {
-                ApplySwatch(GlobalPaintPresets.Instance.BodySwatchPresets[0]); //apply the default
-                return;
-            }
-
-            ColourSwatchSerialized saveData = DataManager.Cars.Get<ColourSwatchSerialized>($"{saveKey}.CurrentSwatch");
+            ColourSwatchSerialized saveData = DataManager.Cars.Get($"{saveKey}.CurrentSwatch", GlobalPaintPresets.Instance.BodySwatchPresets[0].Serialize());
             ApplySwatch(saveData);
         }
 
@@ -119,7 +142,7 @@ namespace Gumball
             for (int index = 0; index < GlobalPaintPresets.Instance.BodySwatchPresets.Length; index++)
             {
                 ColourSwatch colourSwatch = GlobalPaintPresets.Instance.BodySwatchPresets[index];
-                if (CurrentSwatch.Equals(colourSwatch))
+                if (SavedSwatch.Equals(colourSwatch))
                     return index;
             }
             

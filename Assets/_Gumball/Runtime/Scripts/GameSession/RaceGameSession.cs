@@ -8,44 +8,78 @@ using UnityEngine;
 namespace Gumball
 {
     [CreateAssetMenu(menuName = "Gumball/GameSession/Race")]
-    public class RaceGameSession : GameSession
+    public class RaceGameSession : TimedGameSession
     {
 
-        [SerializeField, ReadOnly] private AICar[] racersInPositionOrder;
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] protected List<AICar> racersInPositionOrderCached;
         
-        private RaceSessionPanel sessionPanel => PanelManager.GetPanel<RaceSessionPanel>();
+        private int frameLastCachedRacerPositionOrder = -1;
 
-        public override string GetName()
+        protected List<AICar> RacersInPositionOrder
+        {
+            get
+            {
+                if (racersInPositionOrderCached == null
+                    || frameLastCachedRacerPositionOrder != Time.frameCount)
+                {
+                    frameLastCachedRacerPositionOrder = Time.frameCount;
+                    UpdateRacersPositions();
+                }
+
+                return racersInPositionOrderCached;
+            }
+        }
+        
+        public override string GetModeDisplayName()
         {
             return "Race";
         }
         
-        protected override IEnumerator LoadSession()
+        public override Sprite GetModeIcon()
         {
-            yield return base.LoadSession();
-
-            sessionPanel.Show();
-        }
-        
-        protected override void OnSessionEnd()
-        {
-            base.OnSessionEnd();
-            
-            PanelManager.GetPanel<RaceSessionPanel>().Hide();
-            PanelManager.GetPanel<RaceSessionEndPanel>().Show();
-            
-            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
+            return GameSessionManager.Instance.RaceIcon;
         }
 
-        public int GetRacePosition(AICar car)
+        public override ObjectiveUI.FakeChallengeData GetChallengeData()
         {
-            //sort the cars based on distanceTraveled (descending order)
-            racersInPositionOrder = CurrentRacers.OrderByDescending(
-                c => c.GetComponent<SplineTravelDistanceCalculator>().DistanceTraveled 
-                     + c.GetComponent<SplineTravelDistanceCalculator>().InitialDistance).ToArray();
-            
-            int rank = Array.IndexOf(racersInPositionOrder, car) + 1;
+            return GameSessionManager.Instance.RacePositionChallengeData;
+        }
+
+        protected override GameSessionPanel GetSessionPanel()
+        {
+            return PanelManager.GetPanel<RaceSessionPanel>();
+        }
+
+        protected override SessionEndPanel GetSessionEndPanel()
+        {
+            return PanelManager.GetPanel<RaceSessionEndPanel>();
+        }
+
+        public override string GetMainObjectiveGoalValue()
+        {
+            return "1st";
+        }
+
+        protected override bool IsCompleteOnCrossFinishLine()
+        {
+            int finishingRank = GetRacePosition(WarehouseManager.Instance.CurrentCar);
+            return finishingRank == 1;
+        }
+
+        public int GetRacePosition(AICar racer)
+        {
+            int rank = RacersInPositionOrder.IndexOf(racer) + 1;
             return rank;
+        }
+
+        protected virtual void UpdateRacersPositions()
+        {
+            if (!GameSessionManager.Instance.CurrentSession.InProgress)
+                return; //don't keep updating the positions once the session has ended
+            
+            //sort the cars based on distanceTraveled (descending order)
+            racersInPositionOrderCached = CurrentRacers.Keys.OrderByDescending(racer => racer.GetComponent<SplineTravelDistanceCalculator>().DistanceInMap).ToList();
         }
         
     }

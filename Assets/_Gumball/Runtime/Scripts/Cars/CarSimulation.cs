@@ -72,12 +72,12 @@ namespace Gumball
                 physicsCalculationsScene.GetPhysicsScene().Simulate(Time.fixedDeltaTime);
                 totalTime += Time.fixedDeltaTime;
 
-                if (car.Speed > 100 && zeroTo100Time == 0)
+                if (car.SpeedKmh > 100 && zeroTo100Time == 0)
                     zeroTo100Time = totalTime;
             }
             IsSimulating = false;
 
-            topSpeed = car.Speed;
+            topSpeed = car.SpeedKmh;
             
             GlobalLoggers.LoadingLogger.Log($"Simulation took {stopwatch.Elapsed.ToPrettyString(true)}.");
             stopwatch.Restart();

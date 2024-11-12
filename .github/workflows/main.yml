@@ -31,16 +31,14 @@ jobs:
       - name: Install Git
         run: sudo apt-get update && sudo apt-get install git
 
-  testAllModes:
+  testEditMode:
     needs: setup
-    name: Test in ${{ matrix.testMode }}
-    runs-on: self-hosted
+    name: Test in Edit Mode
+    runs-on:
+      labels: runner-1
     strategy:
       fail-fast: false
-      matrix:
-        testMode:
-          - playmode
-          - editmode
+
     steps:
 
       # Checkout
@@ -52,35 +50,35 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+          key: Library-editmode
 
       # Test
       - uses: game-ci/unity-test-runner@v4
+        name: Run tests
         id: tests
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          testMode: ${{ matrix.testMode }}
-          artifactsPath: ${{ matrix.testMode }}-artifacts
+          testMode: editmode
+          artifactsPath: editmode-artifacts
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: ${{ matrix.testMode }} Test Results
+          checkName: Edit Mode Test Results
           customParameters: -nographics
-          dockerMemoryLimit: 7500m
-          dockerCpuLimit: 2
+          unityVersion: 2022.3.42f1
+          dockerCpuLimit: 3.5
 
-  build:
-    needs: testAllModes
-    name: Build for ${{ matrix.targetPlatform }}
-    runs-on: self-hosted
+  testPlayMode:
+    needs: setup
+    name: Test in Play Mode
+    runs-on:
+      labels: runner-2
+    outputs:
+      testsPassed: ${{ steps.test_output.outputs.testsPassed }}
     strategy:
       fail-fast: false
-      matrix:
-        targetPlatform:
-          - Android
-          - StandaloneWindows
+
     steps:
 
       # Checkout
@@ -92,42 +90,222 @@ jobs:
       - uses: JackSinkoRB/local-cache@main
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}
-          restore-keys: Library-
+          key: Library-playmode
+
+      # Test
+      - uses: game-ci/unity-test-runner@v4
+        name: Run tests
+        id: tests
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          testMode: playmode
+          artifactsPath: playmode-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Play Mode Test Results
+          customParameters: -nographics
+          unityVersion: 2022.3.42f1
+          dockerCpuLimit: 3.5
+
+      # Delay for 10 seconds if the first attempt fails and the test mode is playmode
+      - name: Wait before retrying playmode test
+        if: ${{ always() && steps.tests.outcome == 'failure' }}
+        run: |
+          echo "Waiting 10 seconds before retrying..."
+          sleep 10
+
+      # Retry playmode if failed, as they can fail due to license issue if using pro license
+      - name: Retry tests if failed
+        id: retry-test
+        if: ${{ always() && steps.tests.outcome == 'failure' }}
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          testMode: playmode
+          artifactsPath: playmode-artifacts
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Play Mode Retry Test Results
+          customParameters: -nographics
+          unityVersion: 2022.3.42f1
+
+      - name: Generate output
+        id: test_output
+        if: always()
+        run: |
+          if [[ "${{ steps.tests.conclusion }}" == "success" || "${{ steps.retry-test.conclusion }}" == "success" ]]; then
+            echo "testsPassed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "testsPassed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  buildAndDeployAndroid:
+    needs: [testEditMode, testPlayMode]
+    if: |
+      always() && needs.testEditMode.result == 'success' && needs.testPlayMode.outputs.testsPassed == 'true'
+
+    name: Build and deploy Android
+    runs-on:
+      labels: runner-1
+    strategy:
+      fail-fast: false
+    env:
+      GOOGLE_PLAY_KEY_FILE: ${{ secrets.GOOGLE_PLAY_KEY_FILE }}
+      GOOGLE_PLAY_KEY_FILE_PATH:
+        ${{ format('{0}/fastlane/google-fastlane.json', github.workspace) }}
+      ANDROID_BUILD_FILE_PATH: ${{ format('{0}/build/Android/Gumball.aab', github.workspace) }}
+      ANDROID_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
+
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
+
+      # Cache
+      - uses: JackSinkoRB/local-cache@main
+        with:
+          path: Library
+          key: Library-Android
+
+      # Ensure Split Application Binary is enabled
+      - name: Ensure Split Application Binary enabled
+        run: |
+          sed -i 's/APKExpansionFiles: 0/APKExpansionFiles: 1/' ProjectSettings/ProjectSettings.asset
 
       # Build
       - uses: game-ci/unity-builder@v4
         id: buildStep
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          androidKeystoreName: user.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         with:
-          targetPlatform: ${{ matrix.targetPlatform }}
-          dockerMemoryLimit: 7500m
-          dockerCpuLimit: 2
+          targetPlatform: Android
+          androidExportType: androidAppBundle
+          androidTargetSdkVersion: 34
           buildName: 'Gumball'
+          versioning: Semantic
+          customParameters: -nographics
+          unityVersion: 2022.3.42f1
+          dockerCpuLimit: 3.5
 
-      # Zip Build Files
-      - name: Zip Build Files
-        run: |
-          find build/${{ matrix.targetPlatform }} -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
-          zip -r Gumball-${{ matrix.targetPlatform }}.zip build/${{ matrix.targetPlatform }}
-
-      # Move Build Files
-      - name: Move Build Files
+      - name: Add Authentication
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-        run: mv Gumball-${{ matrix.targetPlatform }}.zip /var/www/html
+        run: echo "$GOOGLE_PLAY_KEY_FILE" > $GOOGLE_PLAY_KEY_FILE_PATH
+
+      - name: Set up Fastlane
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: false
+
+      # Bundle install
+      - name: bundle install
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: bundle install
+
+      - name: Upload to Google Play Internal
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        uses: maierj/fastlane-action@v3.1.0
+        with:
+          platform: 'android'
+          lane: 'android internal'
 
       # Delete build folder to save space
       - name: Delete build folder
         run: rm -rf build
 
-  deploy:
-    needs: build
-    name: Deploy
+  buildAndDeployWindows:
+    needs: [testEditMode, testPlayMode]
+    if: |
+      always() && needs.testEditMode.result == 'success' && needs.testPlayMode.outputs.testsPassed == 'true'
+    name: Build and deploy Windows
+    runs-on:
+      labels: runner-2
+    outputs:
+      StandaloneWindows-runner-ip: ${{ steps.set-runner-ips.outputs.StandaloneWindows-runner-ip }}
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      # Set runner-specific IP addresses
+      - name: Set runner-specific IP addresses
+        id: set-runner-ips
+        run: |
+          if [[ "${{ runner.name }}" == "Hostinger-Runner-3-Singapore" ]]; then
+            echo "StandaloneWindows-runner-ip=141.136.47.108" >> "$GITHUB_OUTPUT"
+          else
+            echo "StandaloneWindows-runner-ip=178.16.143.69" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
+
+      # Cache
+      - uses: JackSinkoRB/local-cache@main
+        with:
+          path: Library
+          key: Library-StandaloneWindows
+
+      # Build
+      - uses: game-ci/unity-builder@v4
+        id: buildStep
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: StandaloneWindows
+          buildName: 'Gumball'
+          versioning: Semantic
+          customParameters: -nographics
+          unityVersion: 2022.3.42f1
+
+      # Zip Build Files
+      - name: Zip Build Files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: |
+          find build/StandaloneWindows -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
+          zip -r Gumball-StandaloneWindows.zip build/StandaloneWindows
+
+      # Move Build Files
+      - name: Move Build Files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        run: mv Gumball-StandaloneWindows.zip /var/www/html
+
+      # Delete build folder to save space
+      - name: Delete build folder
+        run: rm -rf build
+
+  deployToDiscord:
+    needs: [buildAndDeployAndroid, buildAndDeployWindows]
+    name: Deploy to Discord
     runs-on: self-hosted
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    if: |
+      always() && github.event_name == 'push' && github.ref == 'refs/heads/develop' && needs.buildAndDeployAndroid.result == 'success' && needs.buildAndDeployWindows.result == 'success'
     steps:
 
       # Get all the commits
@@ -140,14 +318,29 @@ jobs:
             COUNT=$(( $(echo "$COMMITS" | jq length) ))
             COMMIT_MESSAGES=""
             for ((i=0; i<$COUNT; i++)); do
-              # Get commit message, replace '\n' with a space, and remove '/'
-              COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | tr '\n' ' ' | tr -d '/')
+              # Get commit message, replace '\n' with a space, and remove '/', apostrophes and hash marks
+              COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[$i].message | tr '\n\t' ' ' | tr -d '/' | tr -d "'" | tr -d '#')
+              # Skip commits with 'merge branch' in the message
+              if [[ "$COMMIT_MESSAGE" == *"merge branch"* ]]; then
+                continue
+              fi
+              if [[ "$COMMIT_MESSAGE" == *"Merge branch"* ]]; then
+                continue
+              fi
+              # Remove any occurrence of "JackSinkoRB"
+              COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
+              # Remove 'Conflicts:' and anything after it
+              COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/Conflicts:.*//g')
               COMMIT_MESSAGES+="$((i+1)). $COMMIT_MESSAGE\\n"
             done
           else
             COUNT=1
-            # Get commit message, replace '\n' with a space, and remove '/'
-            COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | tr '\n' ' ' | tr -d '/')
+            # Get commit message, replace '\n' with a space, and remove '/', apostrophes and hash marks
+            COMMIT_MESSAGE=$(echo "$COMMITS" | jq -r .[0].message | tr '\n\t' ' ' | tr -d '/' | tr -d "'" | tr -d '#')
+            # Remove any occurrence of "JackSinkoRB"
+            COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/JackSinkoRB//g')
+            # Remove 'Conflicts:' and anything after it
+            COMMIT_MESSAGE=$(echo "$COMMIT_MESSAGE" | sed 's/Conflicts:.*//g')
             COMMIT_MESSAGES="$COMMIT_MESSAGE\\n"
           fi
           echo "number-of-commits=$COUNT" >> "$GITHUB_OUTPUT"
@@ -167,8 +360,8 @@ jobs:
             [{
               "title": "Gumball has a new build available.",
               "fields": [
-                { "name": "Android", "value": "[Download](http://178.16.143.69/Gumball-Android.zip)", "inline": true },
-                { "name": "Windows", "value": "[Download](http://178.16.143.69/Gumball-StandaloneWindows.zip)", "inline": true },
+                { "name": "Android", "value": "[Google Play](https://play.google.com/apps/internaltest/4700966647029801843)", "inline": true },
+                { "name": "Windows", "value": "[Download](http://${{ needs.buildAndDeployWindows.outputs.StandaloneWindows-runner-ip }}/Gumball-StandaloneWindows.zip)", "inline": true },
                 { "name": "Latest commit", "value": "[${{ env.SHA }}](https://github.com/${{github.repository}}/commit/${{github.sha}})" },
                 { "name": "Commits (${{ steps.pre-checkout.outputs.number-of-commits }})", "value": "${{ steps.pre-checkout.outputs.commit-messages }}" }
               ],

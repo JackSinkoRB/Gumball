@@ -561,19 +561,16 @@ Shader "RBG/Spec_Cars"
 
 				float2 texCoord13 = IN.ase_texcoord8.xy * float2( 1,1 ) + float2( 0,0 );
 				float4 tex2DNode5 = tex2D( _MainTexSample, texCoord13 );
-				Gradient gradient33 = NewGradient( 1, 8, 8, float4( 0.06323422, 0.06375436, 0.06603771, 0.2721446 ), float4( 0.9333333, 0.685698, 0.1176471, 0.3000076 ), float4( 0.9433962, 0.9433962, 0.9433962, 0.6264744 ), float4( 0.6698113, 0.6698113, 0.6698113, 0.7822843 ), float4( 0.4433962, 0.4433962, 0.4433962, 0.8996872 ), float4( 0.9056604, 0.1321661, 0.08116765, 0.9583734 ), float4( 0.09011213, 0.4548899, 0.764151, 0.981857 ), float4( 0, 0.1464589, 0.4811321, 1 ), float2( 0.09411765, 0.04483101 ), float2( 0.9764706, 0.5891203 ), float2( 0.05098039, 0.6542153 ), float2( 0.972549, 0.8868696 ), float2( 0.04313726, 0.9103532 ), float2( 0.9803922, 0.9509117 ), float2( 0.02352941, 0.9626459 ), float2( 0.9764706, 1 ) );
+				Gradient gradient33 = NewGradient( 1, 7, 8, float4( 0.06323422, 0.06375436, 0.06603771, 0.4273747 ), float4( 0.9333333, 0.6213551, 0.1176471, 0.4577401 ), float4( 0.8018868, 0.8018868, 0.8018868, 0.8055848 ), float4( 0.03724635, 0.06778699, 0.254717, 0.8172885 ), float4( 0.4433962, 0.4433962, 0.4433962, 0.8992141 ), float4( 0.8396226, 0.1124623, 0.06732824, 0.9687953 ), float4( 0.09420614, 0.4547247, 0.6886792, 1 ), 0, float2( 0.5960785, 0.04483101 ), float2( 0.9215686, 0.4460365 ), float2( 0.5960785, 0.4915541 ), float2( 0.9215686, 0.8745098 ), float2( 0.5960785, 0.9148241 ), float2( 0.9215686, 0.9356375 ), float2( 0.5960785, 0.9603418 ), float2( 0.9215686, 1 ) );
 				float2 temp_cast_0 = (_ColorSeed).xx;
 				float dotResult4_g1 = dot( temp_cast_0 , float2( 12.9898,78.233 ) );
 				float lerpResult10_g1 = lerp( 1.0 , 50.0 , frac( ( sin( dotResult4_g1 ) * 43758.55 ) ));
-				float temp_output_28_0 = (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0));
-				float4 lerpResult15 = lerp( tex2DNode5 , SampleGradient( gradient33, temp_output_28_0 ) , tex2DNode5.a);
+				float4 lerpResult15 = lerp( tex2DNode5 , SampleGradient( gradient33, (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0)) ) , tex2DNode5.a);
 				
 				float3 unpack7 = UnpackNormalScale( tex2D( _NormalMap, texCoord13 ), _Normal );
 				unpack7.z = lerp( 1, unpack7.z, saturate(_Normal) );
 				
 				float4 tex2DNode10 = tex2D( _GMAO, texCoord13 );
-				Gradient gradient43 = NewGradient( 1, 2, 8, float4( 0, 0, 0, 0 ), float4( 0, 0, 0, 1 ), 0, 0, 0, 0, 0, 0, float2( 0, 0.2956283 ), float2( 1, 0.3468528 ), float2( 0, 0.633936 ), float2( 1, 0.8591287 ), float2( 0, 0.8804761 ), float2( 1, 0.9199512 ), float2( 0, 0.9722591 ), float2( 1, 1 ) );
-				float lerpResult35 = lerp( tex2DNode10.g , SampleGradient( gradient43, temp_output_28_0 ).a , tex2DNode5.a);
 				
 				float lerpResult37 = lerp( tex2DNode10.r , _Duco_Gloss , tex2DNode5.a);
 				
@@ -582,8 +579,8 @@ Shader "RBG/Spec_Cars"
 				float3 Normal = unpack7;
 				float3 Emission = 0;
 				float3 Specular = 0.5;
-				float Metallic = lerpResult35;
-				float Smoothness = ( SampleGradient( gradient33, temp_output_28_0 ).a * lerpResult37 );
+				float Metallic = tex2DNode10.g;
+				float Smoothness = ( SampleGradient( gradient33, (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0)) ).a * lerpResult37 );
 				float Occlusion = tex2DNode10.b;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
@@ -1696,12 +1693,11 @@ Shader "RBG/Spec_Cars"
 
 				float2 texCoord13 = IN.ase_texcoord4.xy * float2( 1,1 ) + float2( 0,0 );
 				float4 tex2DNode5 = tex2D( _MainTexSample, texCoord13 );
-				Gradient gradient33 = NewGradient( 1, 8, 8, float4( 0.06323422, 0.06375436, 0.06603771, 0.2721446 ), float4( 0.9333333, 0.685698, 0.1176471, 0.3000076 ), float4( 0.9433962, 0.9433962, 0.9433962, 0.6264744 ), float4( 0.6698113, 0.6698113, 0.6698113, 0.7822843 ), float4( 0.4433962, 0.4433962, 0.4433962, 0.8996872 ), float4( 0.9056604, 0.1321661, 0.08116765, 0.9583734 ), float4( 0.09011213, 0.4548899, 0.764151, 0.981857 ), float4( 0, 0.1464589, 0.4811321, 1 ), float2( 0.09411765, 0.04483101 ), float2( 0.9764706, 0.5891203 ), float2( 0.05098039, 0.6542153 ), float2( 0.972549, 0.8868696 ), float2( 0.04313726, 0.9103532 ), float2( 0.9803922, 0.9509117 ), float2( 0.02352941, 0.9626459 ), float2( 0.9764706, 1 ) );
+				Gradient gradient33 = NewGradient( 1, 7, 8, float4( 0.06323422, 0.06375436, 0.06603771, 0.4273747 ), float4( 0.9333333, 0.6213551, 0.1176471, 0.4577401 ), float4( 0.8018868, 0.8018868, 0.8018868, 0.8055848 ), float4( 0.03724635, 0.06778699, 0.254717, 0.8172885 ), float4( 0.4433962, 0.4433962, 0.4433962, 0.8992141 ), float4( 0.8396226, 0.1124623, 0.06732824, 0.9687953 ), float4( 0.09420614, 0.4547247, 0.6886792, 1 ), 0, float2( 0.5960785, 0.04483101 ), float2( 0.9215686, 0.4460365 ), float2( 0.5960785, 0.4915541 ), float2( 0.9215686, 0.8745098 ), float2( 0.5960785, 0.9148241 ), float2( 0.9215686, 0.9356375 ), float2( 0.5960785, 0.9603418 ), float2( 0.9215686, 1 ) );
 				float2 temp_cast_0 = (_ColorSeed).xx;
 				float dotResult4_g1 = dot( temp_cast_0 , float2( 12.9898,78.233 ) );
 				float lerpResult10_g1 = lerp( 1.0 , 50.0 , frac( ( sin( dotResult4_g1 ) * 43758.55 ) ));
-				float temp_output_28_0 = (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0));
-				float4 lerpResult15 = lerp( tex2DNode5 , SampleGradient( gradient33, temp_output_28_0 ) , tex2DNode5.a);
+				float4 lerpResult15 = lerp( tex2DNode5 , SampleGradient( gradient33, (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0)) ) , tex2DNode5.a);
 				
 
 				float3 BaseColor = lerpResult15.rgb;
@@ -1995,12 +1991,11 @@ Shader "RBG/Spec_Cars"
 
 				float2 texCoord13 = IN.ase_texcoord2.xy * float2( 1,1 ) + float2( 0,0 );
 				float4 tex2DNode5 = tex2D( _MainTexSample, texCoord13 );
-				Gradient gradient33 = NewGradient( 1, 8, 8, float4( 0.06323422, 0.06375436, 0.06603771, 0.2721446 ), float4( 0.9333333, 0.685698, 0.1176471, 0.3000076 ), float4( 0.9433962, 0.9433962, 0.9433962, 0.6264744 ), float4( 0.6698113, 0.6698113, 0.6698113, 0.7822843 ), float4( 0.4433962, 0.4433962, 0.4433962, 0.8996872 ), float4( 0.9056604, 0.1321661, 0.08116765, 0.9583734 ), float4( 0.09011213, 0.4548899, 0.764151, 0.981857 ), float4( 0, 0.1464589, 0.4811321, 1 ), float2( 0.09411765, 0.04483101 ), float2( 0.9764706, 0.5891203 ), float2( 0.05098039, 0.6542153 ), float2( 0.972549, 0.8868696 ), float2( 0.04313726, 0.9103532 ), float2( 0.9803922, 0.9509117 ), float2( 0.02352941, 0.9626459 ), float2( 0.9764706, 1 ) );
+				Gradient gradient33 = NewGradient( 1, 7, 8, float4( 0.06323422, 0.06375436, 0.06603771, 0.4273747 ), float4( 0.9333333, 0.6213551, 0.1176471, 0.4577401 ), float4( 0.8018868, 0.8018868, 0.8018868, 0.8055848 ), float4( 0.03724635, 0.06778699, 0.254717, 0.8172885 ), float4( 0.4433962, 0.4433962, 0.4433962, 0.8992141 ), float4( 0.8396226, 0.1124623, 0.06732824, 0.9687953 ), float4( 0.09420614, 0.4547247, 0.6886792, 1 ), 0, float2( 0.5960785, 0.04483101 ), float2( 0.9215686, 0.4460365 ), float2( 0.5960785, 0.4915541 ), float2( 0.9215686, 0.8745098 ), float2( 0.5960785, 0.9148241 ), float2( 0.9215686, 0.9356375 ), float2( 0.5960785, 0.9603418 ), float2( 0.9215686, 1 ) );
 				float2 temp_cast_0 = (_ColorSeed).xx;
 				float dotResult4_g1 = dot( temp_cast_0 , float2( 12.9898,78.233 ) );
 				float lerpResult10_g1 = lerp( 1.0 , 50.0 , frac( ( sin( dotResult4_g1 ) * 43758.55 ) ));
-				float temp_output_28_0 = (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0));
-				float4 lerpResult15 = lerp( tex2DNode5 , SampleGradient( gradient33, temp_output_28_0 ) , tex2DNode5.a);
+				float4 lerpResult15 = lerp( tex2DNode5 , SampleGradient( gradient33, (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0)) ) , tex2DNode5.a);
 				
 
 				float3 BaseColor = lerpResult15.rgb;
@@ -2736,19 +2731,16 @@ Shader "RBG/Spec_Cars"
 
 				float2 texCoord13 = IN.ase_texcoord8.xy * float2( 1,1 ) + float2( 0,0 );
 				float4 tex2DNode5 = tex2D( _MainTexSample, texCoord13 );
-				Gradient gradient33 = NewGradient( 1, 8, 8, float4( 0.06323422, 0.06375436, 0.06603771, 0.2721446 ), float4( 0.9333333, 0.685698, 0.1176471, 0.3000076 ), float4( 0.9433962, 0.9433962, 0.9433962, 0.6264744 ), float4( 0.6698113, 0.6698113, 0.6698113, 0.7822843 ), float4( 0.4433962, 0.4433962, 0.4433962, 0.8996872 ), float4( 0.9056604, 0.1321661, 0.08116765, 0.9583734 ), float4( 0.09011213, 0.4548899, 0.764151, 0.981857 ), float4( 0, 0.1464589, 0.4811321, 1 ), float2( 0.09411765, 0.04483101 ), float2( 0.9764706, 0.5891203 ), float2( 0.05098039, 0.6542153 ), float2( 0.972549, 0.8868696 ), float2( 0.04313726, 0.9103532 ), float2( 0.9803922, 0.9509117 ), float2( 0.02352941, 0.9626459 ), float2( 0.9764706, 1 ) );
+				Gradient gradient33 = NewGradient( 1, 7, 8, float4( 0.06323422, 0.06375436, 0.06603771, 0.4273747 ), float4( 0.9333333, 0.6213551, 0.1176471, 0.4577401 ), float4( 0.8018868, 0.8018868, 0.8018868, 0.8055848 ), float4( 0.03724635, 0.06778699, 0.254717, 0.8172885 ), float4( 0.4433962, 0.4433962, 0.4433962, 0.8992141 ), float4( 0.8396226, 0.1124623, 0.06732824, 0.9687953 ), float4( 0.09420614, 0.4547247, 0.6886792, 1 ), 0, float2( 0.5960785, 0.04483101 ), float2( 0.9215686, 0.4460365 ), float2( 0.5960785, 0.4915541 ), float2( 0.9215686, 0.8745098 ), float2( 0.5960785, 0.9148241 ), float2( 0.9215686, 0.9356375 ), float2( 0.5960785, 0.9603418 ), float2( 0.9215686, 1 ) );
 				float2 temp_cast_0 = (_ColorSeed).xx;
 				float dotResult4_g1 = dot( temp_cast_0 , float2( 12.9898,78.233 ) );
 				float lerpResult10_g1 = lerp( 1.0 , 50.0 , frac( ( sin( dotResult4_g1 ) * 43758.55 ) ));
-				float temp_output_28_0 = (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0));
-				float4 lerpResult15 = lerp( tex2DNode5 , SampleGradient( gradient33, temp_output_28_0 ) , tex2DNode5.a);
+				float4 lerpResult15 = lerp( tex2DNode5 , SampleGradient( gradient33, (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0)) ) , tex2DNode5.a);
 				
 				float3 unpack7 = UnpackNormalScale( tex2D( _NormalMap, texCoord13 ), _Normal );
 				unpack7.z = lerp( 1, unpack7.z, saturate(_Normal) );
 				
 				float4 tex2DNode10 = tex2D( _GMAO, texCoord13 );
-				Gradient gradient43 = NewGradient( 1, 2, 8, float4( 0, 0, 0, 0 ), float4( 0, 0, 0, 1 ), 0, 0, 0, 0, 0, 0, float2( 0, 0.2956283 ), float2( 1, 0.3468528 ), float2( 0, 0.633936 ), float2( 1, 0.8591287 ), float2( 0, 0.8804761 ), float2( 1, 0.9199512 ), float2( 0, 0.9722591 ), float2( 1, 1 ) );
-				float lerpResult35 = lerp( tex2DNode10.g , SampleGradient( gradient43, temp_output_28_0 ).a , tex2DNode5.a);
 				
 				float lerpResult37 = lerp( tex2DNode10.r , _Duco_Gloss , tex2DNode5.a);
 				
@@ -2757,8 +2749,8 @@ Shader "RBG/Spec_Cars"
 				float3 Normal = unpack7;
 				float3 Emission = 0;
 				float3 Specular = 0.5;
-				float Metallic = lerpResult35;
-				float Smoothness = ( SampleGradient( gradient33, temp_output_28_0 ).a * lerpResult37 );
+				float Metallic = tex2DNode10.g;
+				float Smoothness = ( SampleGradient( gradient33, (0.0 + (lerpResult10_g1 - 1.0) * (1.0 - 0.0) / (50.0 - 1.0)) ).a * lerpResult37 );
 				float Occlusion = tex2DNode10.b;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0.5;
@@ -3359,17 +3351,12 @@ Node;AmplifyShaderEditor.TFHCRemapNode;28;-1124.705,-725.9466;Inherit;False;5;0;
 Node;AmplifyShaderEditor.SamplerNode;5;-712.7311,-456.2021;Inherit;True;Property;_MainTexSample;MainTexSample;0;0;Create;True;0;0;0;False;0;False;-1;None;31fcd630baf4eed48808afd7acebf7ca;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.GradientSampleNode;25;-710.4261,-750.47;Inherit;True;2;0;OBJECT;;False;1;FLOAT;0;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.LerpOp;37;-247.0461,-186.0001;Inherit;True;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.GradientSampleNode;44;-647.2643,-1040.081;Inherit;True;2;0;OBJECT;;False;1;FLOAT;0;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;9;-1006.199,189.6;Float;False;Property;_Normal;Normal;3;0;Create;True;0;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.StickyNoteNode;50;-2741.76,-1295.447;Inherit;False;960.0531;350.4369;;Randomising;1,1,1,0;;0;0
 Node;AmplifyShaderEditor.LerpOp;15;14.08915,-512.188;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SamplerNode;7;-686.7109,3.069184;Inherit;True;Property;_NormalMap;NormalMap;2;0;Create;True;0;0;0;False;0;False;-1;None;d5fdb726c0ac31849a204e193fd2da24;True;0;True;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.StickyNoteNode;49;-1111.996,-1272.603;Inherit;False;227.9459;161.5702;Metallic sample;;1,1,1,0;Controlled by alpha (0-1);0;0
 Node;AmplifyShaderEditor.StickyNoteNode;48;-1136.495,-980.7852;Inherit;False;227.9459;161.5702;Color sample;;1,1,1,0;Gloss controlled by Alpha (0-1);0;0
-Node;AmplifyShaderEditor.LerpOp;35;25.72834,-372.5614;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;41;72.41686,-227.9135;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.StickyNoteNode;51;-653.326,-1078.189;Inherit;False;264.7611;103.2952;;Samples;1,1,1,0;;0;0
-Node;AmplifyShaderEditor.SamplerNode;10;-428.6864,258.1414;Inherit;True;Property;_GMAO;GMAO;1;0;Create;True;0;0;0;False;0;False;-1;None;f8f7abd8e61ce4d40af4abb1dc39bee6;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;53;642.2327,-41.18967;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;54;642.2327,-41.18967;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/Spec_Cars;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;55;642.2327,-41.18967;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;;0;0;Standard;0;False;0
@@ -3380,12 +3367,12 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;59;642.2327,-41.18967;Float
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;60;642.2327,-41.18967;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;GBuffer;0;7;GBuffer;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalGBuffer;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;61;642.2327,-41.18967;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;SceneSelectionPass;0;8;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;62;642.2327,-41.18967;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.GradientNode;33;-1128.168,-893.2108;Inherit;False;1;8;8;0.06323422,0.06375436,0.06603771,0.2721446;0.9333333,0.685698,0.1176471,0.3000076;0.9433962,0.9433962,0.9433962,0.6264744;0.6698113,0.6698113,0.6698113,0.7822843;0.4433962,0.4433962,0.4433962,0.8996872;0.9056604,0.1321661,0.08116765,0.9583734;0.09011213,0.4548899,0.764151,0.981857;0,0.1464589,0.4811321,1;0.09411765,0.04483101;0.9764706,0.5891203;0.05098039,0.6542153;0.972549,0.8868696;0.04313726,0.9103532;0.9803922,0.9509117;0.02352941,0.9626459;0.9764706,1;0;1;OBJECT;0
-Node;AmplifyShaderEditor.GradientNode;43;-1114.977,-1189.565;Inherit;False;1;2;8;0,0,0,0;0,0,0,1;0,0.2956283;1,0.3468528;0,0.633936;1,0.8591287;0,0.8804761;1,0.9199512;0,0.9722591;1,1;0;1;OBJECT;0
 Node;AmplifyShaderEditor.DynamicAppendNode;30;-2294.852,-1210.097;Inherit;False;FLOAT2;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;3;FLOAT;0;False;1;FLOAT2;0
 Node;AmplifyShaderEditor.WorldToObjectTransfNode;32;-2741.814,-1223.411;Inherit;True;1;0;FLOAT4;0,0,0,1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.BreakToComponentsNode;29;-2472.753,-1227.216;Inherit;False;FLOAT4;1;0;FLOAT4;0,0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
 Node;AmplifyShaderEditor.RangedFloatNode;66;-1662.872,-709.532;Inherit;False;Property;_ColorSeed;_ColorSeed;5;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SamplerNode;10;-440.0312,217.3;Inherit;True;Property;_GMAO;GMAO;1;0;Create;True;0;0;0;False;0;False;-1;None;f8f7abd8e61ce4d40af4abb1dc39bee6;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.GradientNode;33;-1128.168,-894.2108;Inherit;False;1;7;8;0.06323422,0.06375436,0.06603771,0.4273747;0.9333333,0.6213551,0.1176471,0.4577401;0.8018868,0.8018868,0.8018868,0.8055848;0.03724635,0.06778699,0.254717,0.8172885;0.4433962,0.4433962,0.4433962,0.8992141;0.8396226,0.1124623,0.06732824,0.9687953;0.09420614,0.4547247,0.6886792,1;0.5960785,0.04483101;0.9215686,0.4460365;0.5960785,0.4915541;0.9215686,0.8745098;0.5960785,0.9148241;0.9215686,0.9356375;0.5960785,0.9603418;0.9215686,1;0;1;OBJECT;0
 WireConnection;20;1;66;0
 WireConnection;28;0;20;0
 WireConnection;5;1;13;0
@@ -3394,26 +3381,21 @@ WireConnection;25;1;28;0
 WireConnection;37;0;10;1
 WireConnection;37;1;36;0
 WireConnection;37;2;5;4
-WireConnection;44;0;43;0
-WireConnection;44;1;28;0
 WireConnection;15;0;5;0
 WireConnection;15;1;25;0
 WireConnection;15;2;5;4
 WireConnection;7;1;13;0
 WireConnection;7;5;9;0
-WireConnection;35;0;10;2
-WireConnection;35;1;44;4
-WireConnection;35;2;5;4
 WireConnection;41;0;25;4
 WireConnection;41;1;37;0
-WireConnection;10;1;13;0
 WireConnection;54;0;15;0
 WireConnection;54;1;7;0
-WireConnection;54;3;35;0
+WireConnection;54;3;10;2
 WireConnection;54;4;41;0
 WireConnection;54;5;10;3
 WireConnection;30;0;29;0
 WireConnection;30;1;29;2
 WireConnection;29;0;32;0
+WireConnection;10;1;13;0
 ASEEND*/
-//CHKSM=A9B03449CB9646F3FECAC1F956F15998E4C1C820
+//CHKSM=DFE96CFC7E8D9732D6E2D0702A5E74CD5BEBC1B6

@@ -58,8 +58,14 @@ namespace MyBox.Internal
 		{
 			if (property == null) return true;
 
-			string asString = property.AsStringValue().ToUpper();
+			if (property.isArray)
+			{
+				bool hasValue = property.arraySize > 0;
+				return inverse ? !hasValue : hasValue;
+			}
 
+			string asString = property.AsStringValue().ToUpper();
+			
 			if (compareAgainst != null && compareAgainst.Length > 0)
 			{
 				var matchAny = CompareAgainstValues(asString, compareAgainst, IsFlagsEnum());
@@ -67,7 +73,8 @@ namespace MyBox.Internal
 				return matchAny;
 			}
 
-			bool someValueAssigned = asString != "FALSE" && asString != "0" && asString != "NULL" && asString != "NONE";
+			bool someValueAssigned = property.propertyType == SerializedPropertyType.Enum ? property.enumValueIndex > 0 //treat first values as default values
+				: asString != "FALSE" && asString != "0" && asString != "NULL" && asString != "NONE";
 			if (someValueAssigned) return !inverse;
 
 			return inverse;

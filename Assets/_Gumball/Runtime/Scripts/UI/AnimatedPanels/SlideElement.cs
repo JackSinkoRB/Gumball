@@ -37,13 +37,13 @@ public class SlideElement : AnimatedElement
                 case ScreenPosition.TOP:
                 {
                     RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform,
-                        new Vector2(0, Screen.height), null, out var topOfScreenLocal);
+                        new Vector2(0, Screen.height), null, out Vector2 topOfScreenLocal);
                     return new Vector2(0, topOfScreenLocal.y);
                 }
                 case ScreenPosition.BOTTOM:
                 {
                     RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform,
-                        new Vector2(0, -Screen.height), null, out var topOfScreenLocal);
+                        new Vector2(0, -Screen.height), null, out Vector2 topOfScreenLocal);
                     return new Vector2(0, topOfScreenLocal.y);
                 }
                 default:

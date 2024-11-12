@@ -2,10 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Gumball
 {
+    [ExecuteAlways]
     [RequireComponent(typeof(WheelCollider))]
     public class StanceModification : MonoBehaviour
     {
@@ -35,6 +39,7 @@ namespace Gumball
         public RangedFloatValue RimWidth => rimWidth;
 
         public float CurrentCamber { get; private set; }
+        public float CurrentOffset { get; private set; }
 
         public void Initialise(AICar carBelongsTo)
         {
@@ -42,7 +47,7 @@ namespace Gumball
             
             FindWheelMesh();
             
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 ApplySavedPlayerData();
             else ApplyDefaultData();
         }
@@ -54,10 +59,16 @@ namespace Gumball
         }
 
 #if UNITY_EDITOR
+        private void LateUpdate()
+        {
+            if (!Application.isPlaying)
+                ForceUpdateDefaultData();
+        }
+        
         private void OnValidate()
         {
             //if application isn't playing, set all the default values on the car so it can be visualised
-            if (!Application.isPlaying)
+            if (!Application.isPlaying && !EditorApplication.isUpdating && !EditorApplication.isCompiling)
                 ForceUpdateDefaultData();
         }
 
@@ -105,7 +116,7 @@ namespace Gumball
             wheelCollider.suspensionDistance = heightValue;
 
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.SuspensionHeight", heightValue);
             
             carBelongsTo.UpdateWheelMeshes();
@@ -116,7 +127,7 @@ namespace Gumball
             CurrentCamber = rotationValue;
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.Camber", rotationValue);
             
             carBelongsTo.UpdateWheelMeshes();
@@ -124,10 +135,10 @@ namespace Gumball
 
         public void ApplyOffset(float offsetValue)
         {
-            wheelCollider.transform.localPosition = wheelCollider.transform.localPosition.SetX(offsetValue);
+            CurrentOffset = offsetValue;
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.Offset", offsetValue);
             
             carBelongsTo.UpdateWheelMeshes();
@@ -138,7 +149,7 @@ namespace Gumball
             WheelMesh.transform.localScale = WheelMesh.transform.localScale.SetYZ(rimDiameterValue, rimDiameterValue);
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.RimDiameter", rimDiameterValue);
             
             UpdateWheelColliderRadius();
@@ -149,16 +160,19 @@ namespace Gumball
             WheelMesh.transform.localScale = WheelMesh.transform.localScale.SetX(rimWidthValue);
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.RimWidth", rimWidthValue);
         }
                                 
         public void ApplyTyreProfile(float tyreProfileValue)
         {
+            if (WheelMesh.Tyre == null)
+                return;
+            
             WheelMesh.Tyre.transform.localScale = WheelMesh.Tyre.transform.localScale.SetXY(tyreProfileValue, tyreProfileValue);
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.TyreProfile", tyreProfileValue);
             
             WheelMesh.StretchTyre();
@@ -167,10 +181,13 @@ namespace Gumball
         
         public void ApplyTyreWidth(float tyreWidthValue)
         {
+            if (WheelMesh.Tyre == null)
+                return;
+            
             WheelMesh.Tyre.transform.localScale = WheelMesh.Tyre.transform.localScale.SetZ(tyreWidthValue);
             
             //save to file
-            if (carBelongsTo.IsPlayerCar)
+            if (carBelongsTo.IsPlayer)
                 DataManager.Cars.Set($"{saveKey}.TyreWidth", tyreWidthValue);
             
             WheelMesh.StretchTyre();
@@ -190,11 +207,33 @@ namespace Gumball
 
         private void UpdateWheelColliderRadius()
         {
-            //the tyre is always larger than the wheel, so get the tyre extents (accounting for transform scales)
-            Vector3 tyreSize = WheelMesh.Tyre.transform.TransformPoint(WheelMesh.Tyre.MeshFilter.sharedMesh.bounds.extents) - WheelMesh.Tyre.transform.position;
+            MeshFilter wheelMesh = GetWheelMesh();
+
+            if (wheelMesh == null)
+                return;
+
+            float biggestExtent = wheelMesh.sharedMesh.bounds.extents.x * wheelMesh.transform.lossyScale.x;
+            if (wheelMesh.sharedMesh.bounds.extents.y * wheelMesh.transform.lossyScale.y > biggestExtent)
+                biggestExtent = wheelMesh.sharedMesh.bounds.extents.y * wheelMesh.transform.lossyScale.y;
+            if (wheelMesh.sharedMesh.bounds.extents.z * wheelMesh.transform.lossyScale.z > biggestExtent)
+                biggestExtent = wheelMesh.sharedMesh.bounds.extents.z * wheelMesh.transform.lossyScale.z;
             
-            //tyre is circular, so add the height and width and divide by 2. This is because we're working with world position and the tyre might be rotated in world space.
-            wheelCollider.radius = (Mathf.Abs(tyreSize.y) + Mathf.Abs(tyreSize.z)) / 2f;
+            wheelCollider.radius = biggestExtent;
+            
+            //set the force app distance relative to the wheel size
+            const float additional = 0.01f;
+            wheelCollider.forceAppPointDistance = (wheelCollider.radius * 2) + additional; //set to the top of the car plus offset
+        }
+
+        private MeshFilter GetWheelMesh()
+        {
+            if (WheelMesh.Tyre != null)
+                return WheelMesh.Tyre.MeshFilter;
+
+            if (WheelMesh.Rim != null && WheelMesh.Rim.Barrel != null)
+                return WheelMesh.Rim.Barrel;
+
+            return null;
         }
         
     }

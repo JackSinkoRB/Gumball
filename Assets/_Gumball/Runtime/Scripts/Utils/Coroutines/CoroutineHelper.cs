@@ -12,12 +12,49 @@ namespace Gumball
         public static event Action onUnityLateUpdate;
         public static event Action onUnityFixedUpdate;
 
-        [RuntimeInitializeOnLoadMethod]
+        private static readonly Dictionary<string, CoroutineHelperInstance> sceneCoroutineInstances = new();
+        
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void RuntimeInitialise()
         {
             onUnityUpdate = null;
             onUnityLateUpdate = null;
             onUnityFixedUpdate = null;
+
+            sceneCoroutineInstances.Clear();
+        }
+        
+        /// <summary>
+        /// Starts the coroutine on the current scene only. If the scene is unloaded, the coroutine will stop.
+        /// </summary>
+        public static Coroutine StartCoroutineOnCurrentScene(IEnumerator routine)
+        {
+            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (!sceneCoroutineInstances.ContainsKey(sceneName) || sceneCoroutineInstances[sceneName] == null)
+                sceneCoroutineInstances[sceneName] = new GameObject($"CoroutineHelper-{sceneName}").AddComponent<CoroutineHelperInstance>();
+            
+            return sceneCoroutineInstances[sceneName].StartCoroutine(routine);
+        }
+        
+        /// <summary>
+        /// Starts the coroutine on the current scene only. If the scene is unloaded, the coroutine will stop.
+        /// </summary>
+        public static void StopCoroutineOnCurrentScene(Coroutine coroutine)
+        {
+            if (coroutine == null)
+            {
+                Debug.LogError("Could not stop coroutine on current scene, because the coroutine is invalid.");
+                return;
+            }
+            
+            string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            if (!sceneCoroutineInstances.ContainsKey(sceneName) || sceneCoroutineInstances[sceneName] == null)
+            {
+                Debug.LogError("Could not stop coroutine on current scene, because the scene coroutine instance doesn't exist.");
+                return;
+            }
+            
+            sceneCoroutineInstances[sceneName].StopCoroutine(coroutine);
         }
         
         private void Update()
@@ -44,43 +81,51 @@ namespace Gumball
                 monoToRunOn = Instance;
             return monoToRunOn.StartCoroutine(PerformNextFrameIE(action));
         }
-
-        public static void PerformAfterFixedUpdate(Action action, MonoBehaviour monoToRunOn = null)
+        
+        public static Coroutine PerformNextFrameOnCurrentScene(Action action, MonoBehaviour monoToRunOn = null)
         {
             if (action == null)
-                return;
+                return null;
+            
+            return StartCoroutineOnCurrentScene(PerformNextFrameIE(action));
+        }
+
+        public static Coroutine PerformAfterFixedUpdate(Action action, MonoBehaviour monoToRunOn = null)
+        {
+            if (action == null)
+                return null;
 
             if (monoToRunOn == null)
                 monoToRunOn = Instance;
-            monoToRunOn.StartCoroutine(PerformAfterFixedUpdateIE(action));
+            return monoToRunOn.StartCoroutine(PerformAfterFixedUpdateIE(action));
         }
 
-        public static void PerformAfterTrue(Func<bool> condition, Action action, MonoBehaviour monoToRunOn = null)
+        public static Coroutine PerformAfterTrue(Func<bool> condition, Action action, MonoBehaviour monoToRunOn = null)
         {
             if (condition == null || condition.Invoke())
             {
                 //can perform instantly
                 action?.Invoke();
-                return;
+                return null;
             }
 
             if (monoToRunOn == null)
                 monoToRunOn = Instance;
-            monoToRunOn.StartCoroutine(PerformAfterTrueIE(condition, action));
+            return monoToRunOn.StartCoroutine(PerformAfterTrueIE(condition, action));
         }
 
-        public static void PerformAfterDelay(float delay, Action action, MonoBehaviour monoToRunOn = null)
+        public static Coroutine PerformAfterDelay(float delay, Action action, MonoBehaviour monoToRunOn = null)
         {
             if (delay <= 0)
             {
                 //can perform instantly
                 action?.Invoke();
-                return;
+                return null;
             }
 
             if (monoToRunOn == null)
                 monoToRunOn = Instance;
-            monoToRunOn.StartCoroutine(PerformAfterDelayIE(delay, action));
+            return monoToRunOn.StartCoroutine(PerformAfterDelayIE(delay, action));
         }
 
         private static IEnumerator PerformNextFrameIE(Action action)

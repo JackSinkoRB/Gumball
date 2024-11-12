@@ -9,6 +9,7 @@ namespace Gumball
 
         public enum Layer
         {
+            Default = 0,
             Ground = 3,
             LiveDecal = 6,
             Terrain = 7,
@@ -20,6 +21,25 @@ namespace Gumball
             Barrier = 13,
             RacerCar = 14,
             MovementPath = 15,
+            Grass = 16,
+            Trees = 17,
+            PlayerResetTrigger = 18,
+            RacerObstacle = 19,
+            PlayerOnly = 20,
+            DestructibleObjectTrigger = 21
+        }
+
+        public enum RenderingLayer
+        {
+            Default = 0,
+            Ground = 1
+        }
+
+        public enum Tag
+        {
+            Terrain,
+            CanPaintDecals,
+            DontHideMeshWhenFarAway
         }
         
         public static LayerMask AllCarLayers = 1 << (int)Layer.TrafficCar | 1 << (int)Layer.PlayerCar | 1 << (int)Layer.RacerCar;

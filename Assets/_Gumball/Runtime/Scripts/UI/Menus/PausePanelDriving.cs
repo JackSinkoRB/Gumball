@@ -1,11 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace Gumball
 {
     public class PausePanelDriving : AnimatedPanel
     {
+
+        protected override void OnShow()
+        {
+            base.OnShow();
+            
+            if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
+                PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
+        }
 
         public void OnClickSettingsButton()
         {
@@ -16,9 +25,12 @@ namespace Gumball
         public void OnClickQuitButton()
         {
             if (GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null)
-                GameSessionManager.Instance.CurrentSession.EndSession();
-            
-            MainSceneManager.LoadMainScene();
+            {
+                GameSessionManager.Instance.CurrentSession.EndSession(GameSession.ProgressStatus.ATTEMPTED);
+                GameSessionManager.Instance.CurrentSession.UnloadSession();
+            }
+
+            MapSceneManager.LoadMapScene();
         }
 
         public override void OnAddToStack()

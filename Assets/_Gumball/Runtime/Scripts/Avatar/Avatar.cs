@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using CC;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -14,6 +13,8 @@ namespace Gumball
         public delegate void OnChangeBodyTypeDelegate(Avatar avatar, AvatarBodyType previousBodyType, AvatarBodyType newBodyType);
         public static event OnChangeBodyTypeDelegate onChangeBodyType;
 
+        private static readonly int MouthMask = Shader.PropertyToID("_MouthMask");
+
         [SerializeField] private AvatarStateManager stateManager;
         [SerializeField] private AssetReferenceGameObject femaleBodyReference;
         [SerializeField] private AssetReferenceGameObject maleBodyReference;
@@ -25,7 +26,8 @@ namespace Gumball
         /// If the body type hasn't been saved, default to this body type.
         /// </summary>
         private AvatarBodyType defaultBodyType;
-        
+        private readonly Dictionary<Material, Shader> defaultShaders = new();
+
         private string savedBodyTypeKey => $"{SaveKey}.CurrentBodyType";
 
         public AvatarBody CurrentBody => currentBodyType == AvatarBodyType.MALE ? CurrentMaleBody : CurrentFemaleBody;
@@ -46,6 +48,8 @@ namespace Gumball
         public AvatarBody CurrentMaleBody { get; private set; }
         public AvatarBody CurrentFemaleBody { get; private set; }
 
+        public AssetReferenceGameObject MaleBodyReference => maleBodyReference;
+        
         public void Initialise(AvatarBodyType defaultBodyType)
         {
             this.defaultBodyType = defaultBodyType;
@@ -77,6 +81,17 @@ namespace Gumball
             
             newBody.Initialise(this);
         }
+        
+#if UNITY_EDITOR
+        public void ForceSetBodyType(AvatarBody body)
+        {
+            currentBodyType = body.BodyType;
+            if (currentBodyType == AvatarBodyType.MALE)
+                CurrentMaleBody = body;
+            if (currentBodyType == AvatarBodyType.FEMALE)
+                CurrentFemaleBody = body;
+        }        
+#endif
 
         public void ChangeBodyType(AvatarBodyType newBodyType)
         {
@@ -142,6 +157,42 @@ namespace Gumball
                 CurrentMaleBody = null;
             
             Destroy(bodyToDestroy.gameObject);
+        }
+
+        public void EnableHead(bool enable)
+        {
+            //head cosmetics:
+            HairCosmetic hairCosmetic = CurrentBody.GetCosmetic<HairCosmetic>();
+            if (hairCosmetic.CurrentItem != null)
+                hairCosmetic.CurrentItem.SetActive(enable);
+            
+            EyewearCosmetic eyewearCosmetic = CurrentBody.GetCosmetic<EyewearCosmetic>();
+            if (eyewearCosmetic.CurrentItem != null)
+                eyewearCosmetic.CurrentItem.SetActive(enable);
+            
+            BeardCosmetic beardCosmetic = CurrentBody.GetCosmetic<BeardCosmetic>();
+            if (beardCosmetic != null && beardCosmetic.CurrentItem != null)
+                beardCosmetic.CurrentItem.SetActive(enable);
+            
+            //head materials:
+            foreach (SkinnedMeshRenderer skinnedMeshRenderer in CurrentBody.SkinnedMeshRenderers)
+            {
+                foreach (Material material in skinnedMeshRenderer.materials)
+                {
+                    const string bodyMaterialName = "M_Skin_Body";
+                    if (material.name.Contains(bodyMaterialName))
+                    {
+                        //set the mouth mask
+                        material.SetTexture(MouthMask, enable ? null : AvatarManager.Instance.MouthMask);
+                        continue;
+                    }
+
+                    if (!enable && !defaultShaders.ContainsKey(material))
+                        defaultShaders[material] = material.shader;
+                    
+                    material.shader = enable ? defaultShaders[material] : AvatarManager.Instance.InvisibleShader;
+                }
+            }
         }
         
     }

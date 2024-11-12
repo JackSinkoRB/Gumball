@@ -13,29 +13,41 @@ namespace Gumball
         [SerializeField] private Quaternion rotation;
         [SerializeField] private ChunkMeshData finalMeshData;
             
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         [SerializeField] private bool hasCustomLoadDistance;
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         [SerializeField] private float customLoadDistance;
         [SerializeField] private Vector3 splineStartPosition;
         [SerializeField] private Vector3 splineEndPosition;
 
         [Header("Debugging")]
+        [SerializeField, ReadOnly] private GenericDictionary<string, List<ChunkObjectData>> chunkObjectData;
         [SerializeField, ReadOnly] private float splineLength;
+
+        private Chunk originalChunk;
         
         public Vector3 Position => position;
         public Quaternion Rotation => rotation;
         public ChunkMeshData FinalMeshData => finalMeshData;
 
+        public GenericDictionary<string, List<ChunkObjectData>> ChunkObjectData => chunkObjectData;
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         public bool HasCustomLoadDistance => hasCustomLoadDistance;
+        [Obsolete("Chunk load distance currently driven by global factor.")]
         public float CustomLoadDistance => customLoadDistance;
         public Vector3 SplineStartPosition => splineStartPosition;
         public Vector3 SplineEndPosition => splineEndPosition;
         public float SplineLength => splineLength;
         
-        public ChunkMapData(Chunk originalChunk, ChunkMeshData finalMeshData)
+        public ChunkMapData(Chunk originalChunk, ChunkMeshData finalMeshData, GenericDictionary<string, List<ChunkObjectData>> chunkObjectData = null)
         {
+            this.originalChunk = originalChunk;
+            this.finalMeshData = finalMeshData;
+
+            this.chunkObjectData = chunkObjectData;
+            
             position = originalChunk.transform.position;
             rotation = originalChunk.transform.rotation;
-            this.finalMeshData = finalMeshData;
                 
             hasCustomLoadDistance = originalChunk.HasCustomLoadDistance;
             customLoadDistance = originalChunk.CustomLoadDistance;
@@ -57,5 +69,12 @@ namespace Gumball
             
             chunk.UpdateSplineImmediately();
         }
+        
+        public void SetChunkObjectData(Dictionary<string, List<ChunkObjectData>> chunkObjectData)
+        {
+            this.chunkObjectData = GenericDictionary<string, List<ChunkObjectData>>.FromDictionary(chunkObjectData);
+            Debug.Log($"Setting {chunkObjectData.Keys.Count} chunk object data for {originalChunk.gameObject.name}.");
+        }
+        
     }
 }

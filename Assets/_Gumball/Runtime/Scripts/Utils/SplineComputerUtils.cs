@@ -27,7 +27,10 @@ namespace Gumball
             {
                 SplineSample sample = sampleCollection.samples[index];
                 
-                float distance = Vector3.SqrMagnitude(fromPoint - sample.position);
+                //no need to use Y position, vector2 square magnitude is more optimised
+                Vector2 diff = new Vector2(fromPoint.x - sample.position.x, fromPoint.z - sample.position.z);
+                float distance = diff.x * diff.x + diff.y * diff.y;
+                
                 if (distance < closestDistanceSqr)
                 {
                     closestDistanceSqr = distance;
@@ -43,6 +46,18 @@ namespace Gumball
             var (closestIndex, closestDistanceSqr) = GetClosestSampleIndexOnSpline(sampleCollection, fromPoint);
             SplineSample sample = sampleCollection.samples[closestIndex];
             return (sample, closestDistanceSqr);
+        }
+        
+        public static float GetOffsetFromSpline(this SampleCollection sampleCollection, Vector3 fromPoint)
+        {
+            var (splineSample, distanceSqr) = sampleCollection.GetClosestSampleOnSpline(fromPoint);
+            float distance = Mathf.Sqrt(distanceSqr);
+            
+            //is the position to the left or right of the spline?
+            bool isRight = fromPoint.IsFurtherInDirection(splineSample.position, splineSample.right);
+            float offsetDirection = isRight ? 1 : -1;
+            
+            return distance * offsetDirection;
         }
         
     }

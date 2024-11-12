@@ -15,13 +15,17 @@ namespace Gumball
     [ExecuteAlways]
     public class ChunkObject : MonoBehaviour
     {
-        
+
+        [Header("Settings")]
         [Tooltip("Should the object be ignored from the chunk at runtime? eg. if it is just to modify the terrain etc.")]
         [SerializeField] private bool ignoreAtRuntime;
         
         [Tooltip("If enabled, the chunk will ignore these objects and load them separately across multiple frames to reduce instantiation lag.")]
-        [HelpBox("The object is not loading separately, which can contribute to lag when the chunk is loaded.", MessageType.Warning, true)]
+        [HelpBox("The object is not loading separately, which can contribute to lag when the chunk is loaded.", MessageType.Warning, onlyShowWhenDefaultValue: true)]
         [SerializeField, ConditionalField(nameof(ignoreAtRuntime), true)] private bool loadSeparately = true;
+
+        [Tooltip("Is the object hidden when the high terrain LOD is hidden?")]
+        [SerializeField] private bool hideWhenFarAway;
         
         [Space(10)]
         [Tooltip("When enabled, the transform is always moved to be placed on the terrain.")]
@@ -35,7 +39,7 @@ namespace Gumball
         
         [Space(10)]
         [Tooltip("When enabled, the terrain is flattened to the collider specified below.")]
-        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, true, true)]
+        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, onlyShowWhenDefaultValue: true, inverse: true)]
         [SerializeField] private bool flattenTerrain;
         [Tooltip("Assign a collider for the terrain to flatten to.")]
         [SerializeField, ConditionalField(nameof(flattenTerrain))]
@@ -48,20 +52,12 @@ namespace Gumball
         
         [Space(10)]
         [Tooltip("When enabled, the specified vertex colour is blended into the current vertex colours around the supplied mesh.")]
-        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, true, true)]
+        [HelpBox("Must manually recreate the terrain to apply this setting. Use the 'Recreate Terrain' button below.", MessageType.Info, onlyShowWhenDefaultValue: true, inverse: true)]
         [SerializeField] private bool colourTerrain;
-        [Tooltip("Assign a collider for the terrain to colour around.")]
-        [SerializeField, ConditionalField(nameof(colourTerrain))]
-        private Collider colliderToColourAround;
-        [SerializeField, ConditionalField(nameof(colourTerrain))]
-        private Color colourTerrainColor;
-        [SerializeField, ConditionalField(nameof(colourTerrain))]
-        private float colourTerrainStrength = 0.5f;
-        
-        public bool CanColourTerrain => isActiveAndEnabled && colourTerrain && colliderToColourAround != null;
-        public Collider ColliderToColourAround => colliderToColourAround;
-        public Color ColourTerrainColor => colourTerrainColor;
-        public float ColourTerrainStrength => colourTerrainStrength;
+        [SerializeField, ConditionalField(nameof(colourTerrain))] private ChunkObjectColorModifier colorModifier;
+
+        public ChunkObjectColorModifier ColorModifier => colorModifier;
+        public bool CanColourTerrain => isActiveAndEnabled && colourTerrain && colorModifier.ColliderToColourAround != null;
 
         public bool CanFlattenTerrain => isActiveAndEnabled && flattenTerrain && colliderToFlattenTo != null;
         public Collider ColliderToFlattenTo => colliderToFlattenTo;
@@ -70,6 +66,7 @@ namespace Gumball
         
         public bool LoadSeparately => loadSeparately;
         public bool IgnoreAtRuntime => ignoreAtRuntime;
+        public bool HideWhenFarAway => hideWhenFarAway;
         public bool AlwaysGrounded => alwaysGrounded;
         public Chunk Chunk => chunkBelongsTo;
         
@@ -79,12 +76,6 @@ namespace Gumball
         [SerializeField, HideInInspector] private Vector3 lastKnownPositionWhenGrounded;
         
 #if UNITY_EDITOR
-        [ButtonMethod]
-        public void RecreateTerrain()
-        {
-            chunkBelongsTo.GetComponent<ChunkEditorTools>().RecreateTerrain();
-        }
-        
         public bool IsChildOfAnotherChunkObject {
             get
             {
@@ -98,6 +89,17 @@ namespace Gumball
 
                 return false;
             }
+        }
+        
+        [ButtonMethod]
+        public void RecreateTerrain()
+        {
+            chunkBelongsTo.GetComponent<ChunkEditorTools>().RecreateTerrain();
+        }
+
+        public void SetChunkBelongsTo(Chunk chunk)
+        {
+            chunkBelongsTo = chunk;
         }
 
         private void Initialise()
@@ -194,7 +196,7 @@ namespace Gumball
             transform.position = desiredPosition.SetY(transform.position.y);
         }
 
-        private void UpdatePosition()
+        public void UpdatePosition()
         {
             if (!gameObject.scene.IsValid())
                 return;

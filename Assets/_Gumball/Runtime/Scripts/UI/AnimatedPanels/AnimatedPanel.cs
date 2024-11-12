@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using Gumball;
+using MyBox;
 using UnityEngine;
 
 /// <summary>
@@ -15,7 +16,8 @@ public abstract class AnimatedPanel : MonoBehaviour
     public event Action onHide;
     public event Action onShowComplete;
     public event Action onHideComplete;
-
+    
+    [Tooltip("Is the panel tracked in the PanelManager stack, or is it separate from it?")]
     [SerializeField] private bool isAddedToPanelStack = true;
     
     [Header("Animation")]
@@ -27,70 +29,97 @@ public abstract class AnimatedPanel : MonoBehaviour
     [SerializeField] private SlideElement[] slideElements;
 
     private bool isInitialised;
-    private Sequence currentTween;
+    private readonly HashSet<Tween> currentTweens = new();
+    private AnimatedElement[] allAnimatedElements;
 
     public bool IsShowing { get; private set; }
-    public bool IsTransitioning => currentTween != null && currentTween.IsActive() && currentTween.IsPlaying();
 
-    private void OnEnable()
+    public bool IsTransitioning
     {
-        if (!isInitialised)
-            Initialise();
-    }
+        get
+        {
+            foreach (Tween tween in currentTweens)
+            {
+                if (tween != null && tween.IsActive() && tween.IsPlaying())
+                    return true;
+            }
 
+            return false;
+        }
+    }
+    
     protected virtual void Initialise()
     {
         isInitialised = true;
+
+        CacheAllAnimatedElements();
     }
-    
+
     private void OnDisable()
     {
         if (IsShowing && !IsTransitioning)
             Hide(instant: true);
         
-        currentTween?.Kill(); //ensure tween is killed
+        KillCurrentTweens();
     }
     
     //shortcuts for unity events:
-    public void Show() => Show(null);
-    public void Hide() => Hide(false, false, null);
+    [ButtonMethod] public void Show() => Show(null);
+    [ButtonMethod] public void Hide() => Hide(false, false, null);
 
-    public Sequence Show(Action onComplete = null)
+    public void Show(Action onComplete = null)
     {
+        if (!Application.isPlaying)
+            throw new InvalidOperationException("Must be in play made to show panel.");
+        
+        if (!isInitialised)
+            Initialise();
+        
         if (IsShowing)
         {
             Debug.LogWarning($"Tried showing panel {gameObject.name} but it is already showing.");
-            return null;
+            return;
         }
         
         gameObject.SetActive(true);
-        currentTween?.Kill();
-        currentTween = DOTween.Sequence();
+        KillCurrentTweens();
 
-        //do slides
-        foreach (SlideElement slideElement in slideElements)
+        Tween longestTween = null;
+        foreach (AnimatedElement animatedElement in allAnimatedElements)
         {
-            Tween slideTween = slideElement.TryShow();
-            if (slideTween != null)
-                currentTween.Join(slideTween);
+            Tween tween = animatedElement.TryShow();
+            if (tween == null)
+                continue;
+            
+            currentTweens.Add(tween);
+
+            float totalDuration = tween.Duration() + tween.Delay();
+            float longestDuration = longestTween == null ? 0 : longestTween.Duration() + longestTween.Delay();
+            if (totalDuration > longestDuration)
+                longestTween = tween;
         }
 
-        //do fades
-        foreach (FadeElement fadeElement in fadeElements)
+        if (longestTween == null)
         {
-            Tween fadeTween = fadeElement.TryShow();
-            if (fadeTween != null)
-                currentTween.Join(fadeTween);
-        }
-
-        currentTween.OnComplete(() =>
-        {
+            //complete instantly
             OnShowComplete();
             onComplete?.Invoke();
-        });
+        }
+        else
+        {
+            //complete when longest tween is complete
+            longestTween.OnComplete(() =>
+            {
+                OnShowComplete();
+                onComplete?.Invoke();
+            });
+        }
 
         if (ignoreTimescale)
-            currentTween.SetUpdate(true);
+        {
+            foreach (Tween tween in currentTweens)
+                tween.SetUpdate(true);
+        }
 
         IsShowing = true;
 
@@ -100,63 +129,89 @@ public abstract class AnimatedPanel : MonoBehaviour
         OnShow();
         
         GlobalLoggers.PanelLogger.Log($"Showing {gameObject.name}.");
-
-        return currentTween;
     }
 
-    public Sequence Hide(bool keepInStack = false, bool instant = false, Action onComplete = null)
+    public void Hide(bool keepInStack = false, bool instant = false, Action onComplete = null)
     {
+        if (!Application.isPlaying)
+            throw new InvalidOperationException("Must be in play made to hide panel.");
+        
+        if (!isInitialised)
+            Initialise();
+        
         if (!IsShowing && !instant)
         {
             Debug.LogWarning($"Tried hiding panel {gameObject.name} but it is not already showing.");
-            return null;
+            return;
         }
 
-        //animate:
-        currentTween?.Kill();
-        currentTween = DOTween.Sequence();
+        bool wasShowing = IsShowing;
+        IsShowing = false;
 
-        //do slides
-        foreach (SlideElement slideElement in slideElements)
+        KillCurrentTweens();
+
+        Tween longestTween = null;
+        foreach (AnimatedElement animatedElement in allAnimatedElements)
         {
-            Tween slideTween = slideElement.TryHide();
-            if (slideTween != null)
-                currentTween.Join(slideTween);
+            Tween tween = animatedElement.TryHide();
+            if (tween == null)
+                continue;
+            
+            currentTweens.Add(tween);
+
+            float totalDuration = tween.Duration() + tween.Delay();
+            float longestDuration = longestTween == null ? 0 : longestTween.Duration() + longestTween.Delay();
+            if (totalDuration > longestDuration)
+                longestTween = tween;
         }
 
-        //do fades
-        foreach (FadeElement fadeElement in fadeElements)
+        if (longestTween == null)
         {
-            Tween fadeTween = fadeElement.TryHide();
-            if (fadeTween != null)
-                currentTween.Join(fadeTween);
-        }
-
-        currentTween.OnComplete(() =>
-        {
+            //complete instantly
             if (disableWhenHidden)
                 gameObject.SetActive(false);
 
-            onComplete?.Invoke();
-            OnHideComplete();
-        });
-        
+            if (wasShowing)
+            {
+                onComplete?.Invoke();
+                OnHideComplete();
+            }
+        }
+        else
+        {
+            //complete when longest tween is complete
+            longestTween.OnComplete(() =>
+            {
+                if (disableWhenHidden)
+                    gameObject.SetActive(false);
+
+                if (wasShowing)
+                {
+                    onComplete?.Invoke();
+                    OnHideComplete();
+                }
+            });
+        }
+
         if (ignoreTimescale)
-            currentTween.SetUpdate(true);
+        {
+            foreach (Tween tween in currentTweens)
+                tween.SetUpdate(true);
+        }
 
         if (instant)
-            currentTween.Complete();
-
-        IsShowing = false;
-
+        {
+            foreach (Tween tween in currentTweens)
+                tween.Complete();
+        }
+        
         if (!keepInStack && PanelManager.ExistsRuntime && PanelManager.Instance.PanelStack.Contains(this))
             PanelManager.Instance.RemoveFromStack(this);
         
-        OnHide();
+        if (wasShowing)
+            OnHide();
         
         GlobalLoggers.PanelLogger.Log($"Hiding {gameObject.name}.");
-
-        return currentTween;
     }
 
     public virtual void OnAddToStack()
@@ -188,4 +243,24 @@ public abstract class AnimatedPanel : MonoBehaviour
     {
         onHideComplete?.Invoke();
     }
+    
+    private void CacheAllAnimatedElements()
+    {
+        allAnimatedElements = new AnimatedElement[slideElements.Length + fadeElements.Length];
+        Array.Copy(slideElements, allAnimatedElements, slideElements.Length);
+        Array.Copy(fadeElements, 0, allAnimatedElements, slideElements.Length, fadeElements.Length);
+    }
+    
+    private void KillCurrentTweens()
+    {
+        foreach (Tween tween in currentTweens)
+            tween?.Kill();
+        currentTweens.Clear();
+    }
+
+    public virtual void OnAddToPanelLookup()
+    {
+        
+    }
+    
 }

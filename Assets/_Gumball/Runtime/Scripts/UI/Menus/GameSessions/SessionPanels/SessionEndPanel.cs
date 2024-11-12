@@ -1,0 +1,68 @@
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace Gumball
+{
+    public abstract class SessionEndPanel : AnimatedPanel
+    {
+
+        [SerializeField] private AutosizeTextMeshPro levelNameLabel;
+        [Space(5)]
+        [SerializeField] private TextMeshProUGUI positionLabel;
+        [SerializeField] private GameObject positionLabelHolder;
+        [SerializeField] private bool showPositionOnFail;
+        [Space(5)]
+        [SerializeField] private AutosizeTextMeshPro victoryDefeatLabel;
+        [SerializeField] private string victoryText = "Victory!";
+        [SerializeField] private string defeatText = "Try again";
+        [Space(5)]
+        [SerializeField] private GlobalColourAssigner[] colourAssignersVictoryDefeat;
+        [SerializeField] private GlobalColourPalette.ColourCode victoryColourCode;
+        [SerializeField] private GlobalColourPalette.ColourCode defeatColourCode;
+        [Space(5)]
+        [SerializeField] private GameObject confettiParticles;
+        
+        protected override void OnShow()
+        {
+            base.OnShow();
+            
+            SetLevelName();
+            SetVictory(GameSessionManager.Instance.CurrentSession.LastProgress == GameSession.ProgressStatus.COMPLETE);
+        }
+
+        public void OnClickNextButton()
+        {
+            Hide();
+            PanelManager.GetPanel<SessionScorePanel>().Show();
+            PanelManager.GetPanel<SessionScorePanel>().Initialise(GameSessionManager.Instance.CurrentSession);
+        }
+        
+        private void SetLevelName()
+        {
+            levelNameLabel.text = GameSessionManager.Instance.CurrentSession.name;
+            levelNameLabel.Resize();
+        }
+        
+        protected void SetVictory(bool isVictory)
+        {
+            confettiParticles.gameObject.SetActive(isVictory);
+
+            foreach (GlobalColourAssigner colourAssigner in colourAssignersVictoryDefeat)
+                colourAssigner.SetColour(isVictory ? victoryColourCode : defeatColourCode);
+
+            positionLabelHolder.SetActive(showPositionOnFail);
+            
+            victoryDefeatLabel.text = isVictory ? victoryText : defeatText;
+            victoryDefeatLabel.Resize();
+        }
+
+        protected void SetPosition(int position)
+        {
+            positionLabel.text = position.ToOrdinalString();
+        }
+
+    }
+}

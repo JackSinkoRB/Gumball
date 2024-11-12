@@ -7,36 +7,47 @@ namespace Gumball
 {
     public class WarehousePanel : AnimatedPanel
     {
-
-        [SerializeField] private MagneticScroll magneticScroll;
-
-        public void OnClickBackButton()
-        {
-            MainSceneManager.LoadMainScene();
-        }
         
         protected override void OnShow()
         {
             base.OnShow();
-
-            PopulateMagneticScroll();
+            
+            if (PanelManager.PanelExists<CarStatsPanel>())
+                PanelManager.GetPanel<CarStatsPanel>().Show();
         }
 
-        private void PopulateMagneticScroll()
+        protected override void OnHide()
         {
-            List<ScrollItem> scrollItems = new List<ScrollItem>();
-            for (int index = 0; index < WarehouseSceneManager.Instance.CarSlots.Length; index++)
-            {
-                int finalIndex = index;
-                
-                ScrollItem scrollItem = new ScrollItem();
-                scrollItem.onSelect += () => WarehouseSceneManager.Instance.SelectSlot(finalIndex);
+            base.OnHide();
+            
+            if (PanelManager.PanelExists<CarStatsPanel>())
+                PanelManager.GetPanel<CarStatsPanel>().Hide();
+        }
 
-                scrollItems.Add(scrollItem);
-            }
-
-            magneticScroll.SetItems(scrollItems);
+        public void OnClickBackButton()
+        {
+            WarehouseSceneManager.Instance.ExitWarehouseScene();
         }
         
+        public void OnClickUpgradeButton()
+        {
+            Hide();
+            PanelManager.GetPanel<UpgradeWorkshopPanel>().Show();
+        }
+        
+        public void OnClickCustomiseButton()
+        {
+            Hide();
+            PanelManager.GetPanel<CustomiseWorkshopPanel>().Show();
+        }
+        
+        public void OnClickBrowseButton()
+        {
+            Hide();
+            PanelManager.GetPanel<PlayerStatsPanel>().Hide();
+            
+            PanelManager.GetPanel<SwapCarPanel>().Show();
+        }
+
     }
 }

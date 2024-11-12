@@ -20,14 +20,39 @@ namespace Gumball
         [Space(5)]
         [SerializeField, ReadOnly] private float timeRemainingSeconds;
         [SerializeField, ReadOnly] private bool timerHasStarted;
-        
+
+        public float TimeAllowedSeconds => timeAllowedSeconds;
         public float TimeRemainingSeconds => timeRemainingSeconds;
-        
-        private TimedSessionPanel sessionPanel => PanelManager.GetPanel<TimedSessionPanel>();
-        
-        public override string GetName()
+
+        public override string GetModeDisplayName()
         {
             return "Timed";
+        }
+
+        public override Sprite GetModeIcon()
+        {
+            return GameSessionManager.Instance.TimedIcon;
+        }
+
+        protected override GameSessionPanel GetSessionPanel()
+        {
+            return PanelManager.GetPanel<TimedSessionPanel>();
+        }
+        
+        protected override SessionEndPanel GetSessionEndPanel()
+        {
+            return PanelManager.GetPanel<TimedSessionEndPanel>();
+        }
+        
+        public override ObjectiveUI.FakeChallengeData GetChallengeData()
+        {
+            return GameSessionManager.Instance.TimeChallengeData;
+        }
+
+        public override string GetMainObjectiveGoalValue()
+        {
+            string timeGoalUserFriendly = TimeSpan.FromSeconds(timeAllowedSeconds).ToPrettyString();
+            return timeGoalUserFriendly;
         }
 
         protected override IEnumerator LoadSession()
@@ -35,7 +60,6 @@ namespace Gumball
             yield return base.LoadSession();
 
             InitialiseTimer();
-            sessionPanel.Show();
         }
 
         protected override void OnSessionStart()
@@ -72,19 +96,9 @@ namespace Gumball
 
         private void OnTimerExpire()
         {
-            EndSession();
+            EndSession(ProgressStatus.ATTEMPTED);
         }
 
-        protected override void OnSessionEnd()
-        {
-            base.OnSessionEnd();
-            
-            PanelManager.GetPanel<TimedSessionPanel>().Hide();
-            PanelManager.GetPanel<TimedSessionEndPanel>().Show();
-            
-            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
-        }
-        
         private void InitialiseTimer()
         {
             timerHasStarted = false;

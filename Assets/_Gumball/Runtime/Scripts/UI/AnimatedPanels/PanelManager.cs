@@ -42,7 +42,7 @@ public class PanelManager : PersistentSingleton<PanelManager>
     
     public static AnimatedPanel GetPanel(Type panelType)
     {
-        if (!Instance.panelLookup.ContainsKey(panelType))
+        if (!PanelExists(panelType))
             throw new NullReferenceException($"Could not find panel {panelType} in lookup. Scene is: {SceneManager.GetActiveScene().name}");
         
         return Instance.panelLookup[panelType];
@@ -55,15 +55,25 @@ public class PanelManager : PersistentSingleton<PanelManager>
     
     public static bool PanelExists(Type panelType)
     {
-        return Instance.panelLookup.ContainsKey(panelType);
+        return Instance.panelLookup.ContainsKey(panelType) && Instance.panelLookup[panelType] != null;
     }
 
+    public void AddToStack<T>() where T : AnimatedPanel
+    {
+        AddToStack(GetPanel<T>());
+    }
+    
     public void AddToStack(AnimatedPanel animatedPanel)
     {
         panelStack.Add(animatedPanel);
         
         animatedPanel.OnAddToStack();
         GlobalLoggers.PanelLogger.Log($"Added {animatedPanel.gameObject.name} to stack.");
+    }
+
+    public void RemoveFromStack<T>() where T : AnimatedPanel
+    {
+        RemoveFromStack(GetPanel<T>());
     }
     
     public void RemoveFromStack(AnimatedPanel animatedPanel)
@@ -104,6 +114,7 @@ public class PanelManager : PersistentSingleton<PanelManager>
         {
             GlobalLoggers.PanelLogger.Log($"Adding {panel.GetType()} to panel lookup");
             panelLookup[panel.GetType()] = panel;
+            panel.OnAddToPanelLookup();
             if (panel.gameObject.activeInHierarchy)
                 panel.Show(); //starts showing
             else
@@ -112,6 +123,8 @@ public class PanelManager : PersistentSingleton<PanelManager>
         
         stopwatch.Stop();
         GlobalLoggers.LoadingLogger.Log($"Took {stopwatch.Elapsed.ToPrettyString(true)} to create the panel lookup for {sceneName}.");
+        
+        Canvas.ForceUpdateCanvases();
     }
     
     /// <summary>

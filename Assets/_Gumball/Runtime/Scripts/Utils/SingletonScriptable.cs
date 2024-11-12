@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -29,21 +27,18 @@ namespace Gumball
             {
                 if (instance == null)
                 {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    LoadInstanceAsync();
-                    
 #if UNITY_EDITOR
-                    if (!Application.isPlaying || SingletonScriptableHelper.LazyLoadingEnabled)
+                    if ((!Application.isBatchMode && !Application.isPlaying) //Application.isPlaying can only be called from main thread
+                        || SingletonScriptableHelper.LazyLoadingEnabled)
                     {
-                        instance = handle.WaitForCompletion();
-                        stopwatch.Stop();
-                        Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously ({stopwatch.ElapsedMilliseconds}ms)");
+                        LoadInstanceSync();
                         return instance;
                     }
 #endif
-
+                    CoroutineHelper.Instance.StartCoroutine(LoadInstanceAsync());
                     throw new NullReferenceException($"Trying to access singleton scriptable {typeof(T).Name}, but it has not loaded yet.");
                 }
+                
                 return instance;
             }
         }
@@ -52,15 +47,47 @@ namespace Gumball
         public static bool IsLoading => handle.IsValid() && !handle.IsDone;
         
         private static AsyncOperationHandle<T> handle;
-        
-        public static AsyncOperationHandle LoadInstanceAsync()
+
+#if UNITY_EDITOR
+        public static void LoadInstanceSync()
         {
             if (IsLoading)
-                return handle;
-            
-            handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
-            handle.Completed += h => instance = h.Result;
-            return handle;
+                return;
+
+            if (Application.isBatchMode && !SingletonScriptableHelper.LazyLoadingEnabled)
+                return; //cannot load addressables sync in batch mode (causes to hang)
+                
+            LoadInstance();
+
+            void LoadInstance()
+            {
+                handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
+                instance = handle.WaitForCompletion();
+                instance.OnInstanceLoaded();
+
+                Debug.LogWarning($"Had to load singleton scriptable {typeof(T).Name} synchronously.");
+            }
         }
+#endif
+
+        public static IEnumerator LoadInstanceAsync()
+        {
+            if (IsLoading)
+                yield return handle;
+            else
+            {
+                handle = Addressables.LoadAssetAsync<T>(typeof(T).Name);
+                yield return handle;
+            }
+
+            instance = handle.Result;
+            instance.OnInstanceLoaded();
+        }
+
+        protected virtual void OnInstanceLoaded()
+        {
+            
+        }
+        
     }
 }

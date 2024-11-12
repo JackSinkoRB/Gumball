@@ -1,53 +1,65 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
 {
     public class UpgradeWorkshopPanel : AnimatedPanel
     {
+        
+        [SerializeField] private VirtualButton cancelButton;
+        [SerializeField] private ModifyWorkshopSubMenu modifySubMenu;
+        [SerializeField] private LevelUpWorkshopSubMenu levelUpSubMenu;
 
-        [Header("Sub part menus")]
-        [SerializeField] private SubPartsWorkshopSubMenu engineSubPartMenu;
-        [SerializeField] private SubPartsWorkshopSubMenu wheelsSubPartMenu;
-        [SerializeField] private SubPartsWorkshopSubMenu drivetrainSubPartMenu;
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private WorkshopSubMenu currentSubMenu;
 
-        private SubPartsWorkshopSubMenu currentSubPartMenu;
+        public ModifyWorkshopSubMenu ModifySubMenu => modifySubMenu;
         
         protected override void OnShow()
         {
             base.OnShow();
-            
-            OpenSubMenu(null);
+
+            PanelManager.GetPanel<CarStatsPanel>().Show();
+
+            //disable all the sub menus instantly in case they were left open to prevent popping
+            modifySubMenu.Hide(instant: true);
+            levelUpSubMenu.Hide(instant: true);
         }
-        
+
         public void OnClickBackButton()
         {
             Hide();
-            PanelManager.GetPanel<WorkshopSelectPanel>().Show();
+            PanelManager.GetPanel<WarehousePanel>().Show();
         }
 
         public void OnClickCancelButton()
         {
-            if (currentSubPartMenu != null)
-                currentSubPartMenu.Hide();
+            if (currentSubMenu != null)
+            {
+                currentSubMenu.Hide();
+                cancelButton.gameObject.SetActive(false); //disable cancel button if no menus open as it blocks
+            }
         }
         
-        public void OpenSubMenu(SubPartsWorkshopSubMenu subMenu)
+        public void OpenSubMenu(WorkshopSubMenu subMenu)
         {
             if (subMenu != null && subMenu.IsShowing)
                 return; //already open
 
-            currentSubPartMenu = subMenu;
+            currentSubMenu = subMenu;
             
             //hide all other menus
-            engineSubPartMenu.Hide();
-            wheelsSubPartMenu.Hide();
-            drivetrainSubPartMenu.Hide();
+            modifySubMenu.Hide();
+            levelUpSubMenu.Hide();
             
             //just show this menu
             if (subMenu != null)
                 subMenu.Show();
+            
+            cancelButton.gameObject.SetActive(subMenu != null); //disable cancel button if no menus open as it blocks
         }
 
     }

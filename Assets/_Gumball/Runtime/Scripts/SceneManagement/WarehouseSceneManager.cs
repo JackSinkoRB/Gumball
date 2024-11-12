@@ -6,6 +6,7 @@ using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -23,55 +24,77 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(SceneManager.WarehouseSceneName, LoadSceneMode.Single, true);
+            yield return Addressables.LoadSceneAsync(SceneManager.WarehouseSceneAddress, LoadSceneMode.Single, true);
             sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.WarehouseSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.WarehouseSceneAddress} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
+            
+            WarehouseManager.Instance.CurrentCar.Teleport(Instance.carPosition.Position, Instance.carPosition.Rotation);
+            
+            Instance.SetupCamera();
             
             AvatarManager.Instance.HideAvatars(true);
 
-            yield return Instance.PopulateSlots();
-            Instance.SelectSlot(0); //select the first slot
-            
             PanelManager.GetPanel<LoadingPanel>().Hide();
         }
         #endregion
-
-        public event Action<WarehouseCarSlot> onSelectSlot;
         
-        [SerializeField] private WarehouseCarSlot[] carSlots;
-        [SerializeField, ReadOnly] private WarehouseCarSlot currentSelectedSlot;
+        [SerializeField] private WarehouseCameraController cameraController;
+        [SerializeField] private PositionAndRotation carPosition;
+        [SerializeField] private Transform lockedCarIcon;
 
-        public WarehouseCarSlot[] CarSlots => carSlots;
-
-        public void SelectSlot(WarehouseCarSlot slot)
+        public Transform LockedCarIcon => lockedCarIcon;
+        
+#if UNITY_EDITOR
+        [Header("Testing")]
+        [SerializeField] private Rewards blueprintsRewardTesting;
+        
+        [ButtonMethod]
+        public void TestGiveRewards()
         {
-            currentSelectedSlot = slot;
+            if (!Application.isPlaying)
+                throw new InvalidOperationException("Cannot give rewards outside play mode.");
 
-            slot.OnSelected();
-            onSelectSlot?.Invoke(slot);
+            CoroutineHelper.Instance.StartCoroutine(blueprintsRewardTesting.GiveRewards());
+        }
+#endif
+        
+        private readonly RaycastHit[] groundedHitsCached = new RaycastHit[1];
+        
+        public void ExitWarehouseScene()
+        {
+            SaveRideHeight();
+            MainSceneManager.LoadMainScene();
         }
         
-        public void SelectSlot(int slotIndex) => SelectSlot(carSlots[slotIndex]);
-
-        public IEnumerator PopulateSlots()
+        /// <summary>
+        /// Calculates the distance to the ground and saves it to file. 
+        /// </summary>
+        private void SaveRideHeight()
         {
-            int index = 0;
-            HashSet<TrackedCoroutine> slotHandles = new HashSet<TrackedCoroutine>();
-            foreach (WarehouseCarSlot slot in carSlots)
-            {
-                if (index >= WarehouseManager.Instance.AllCars.Count)
-                    break; //not enough cars
+            AICar currentCar = WarehouseManager.Instance.CurrentCar;
+            int numberOfHitsDown = Physics.RaycastNonAlloc(currentCar.transform.position.OffsetY(10000), Vector3.down, groundedHitsCached, Mathf.Infinity, LayersAndTags.GetLayerMaskFromLayers(new []{LayersAndTags.Layer.Ground, LayersAndTags.Layer.Default}));
 
-                if (index == WarehouseManager.Instance.CurrentCar.CarIndex)
-                    slot.PopulateWithCar(WarehouseManager.Instance.CurrentCar); //can reuse the car
-                else
-                    slotHandles.Add(new TrackedCoroutine(slot.PopulateWithCar(index))); //spawn new car
-                
-                index++;
+            if (numberOfHitsDown == 0)
+            {
+                Debug.LogWarning($"Could not save ride height for {currentCar.name} because there is no ground above or below.");
+                return;
             }
 
-            yield return new WaitUntil(slotHandles.AreAllComplete);
+            Vector3 offset = currentCar.transform.position - groundedHitsCached[0].point;
+            float rideHeight = offset.y;
+            
+            DataManager.Cars.Set($"{currentCar.SaveKey}.RideHeight", rideHeight);
+            
+            GlobalLoggers.AICarLogger.Log($"Saved ride height for {currentCar.SaveKey} to {rideHeight}");
         }
         
+        private void SetupCamera()
+        {
+            if (WarehouseManager.Instance.CurrentCar != null)
+                cameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform, cameraController.DefaultTargetOffset);
+            
+            cameraController.SetInitialPosition();
+        }
+
     }
 }

@@ -9,19 +9,18 @@ namespace Gumball
 {
     public class CarPartGroup : MonoBehaviour
     {
-
-        [SerializeField] private int currentPartIndex = -1;
-
+        
         [Header("Debugging")]
         [Tooltip("The car parts are retrieved and cached from under this object lazilly when required.")]
         [SerializeField, ReadOnly] private CarPart[] carPartsCached;
         [SerializeField, ReadOnly] private AICar carBelongsTo;
+        [SerializeField, ReadOnly] private int currentPartIndex = -1;
         
         private string groupID => gameObject.name;
         private string savedPartIndexKey => $"{carBelongsTo.SaveKey}.{groupID}";
 
         public int CurrentPartIndex => currentPartIndex;
-
+        public AICar CarBelongsTo => carBelongsTo;
         public int SavedPartIndex => DataManager.Cars.Get(savedPartIndexKey, 0);
         
         public CarPart[] CarParts
@@ -51,6 +50,11 @@ namespace Gumball
             //load the saved part, or set the first part active
             SetPartActive(SavedPartIndex);
         }
+
+        public void SetPartActive(CarPart part)
+        {
+            SetPartActive(CarParts.IndexOfItem(part));    
+        }
         
         public void SetPartActive(int index)
         {
@@ -77,7 +81,7 @@ namespace Gumball
 
         private void SaveData()
         {
-            if (!carBelongsTo.IsPlayerCar)
+            if (!carBelongsTo.IsPlayer)
                 return; //non player cars don't get saved
             
             DataManager.Cars.Set(savedPartIndexKey, currentPartIndex);

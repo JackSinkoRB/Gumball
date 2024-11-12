@@ -32,38 +32,31 @@ namespace Gumball
         }
         #endregion
 
-#if UNITY_EDITOR
-        private int trafficCarID; //a unique identifier for debugging
-#endif
-        
         private const float timeBetweenSpawnChecks = 1;
-        
-        [SerializeField] private AICar[] trafficCarPrefabs;
 
         private float lastSpawnCheckTime;
         
         private float timeSinceLastSpawnCheck => Time.realtimeSinceStartup - lastSpawnCheckTime;
-        
-        public AICar SpawnCar(Vector3 position, Quaternion rotation)
+
+        public AICar SpawnCar(Vector3 position, Quaternion rotation, AICar prefabToUse)
         {
-            AICar randomCarVariant = trafficCarPrefabs.GetRandom().gameObject.GetSpareOrCreate<AICar>(transform, position, rotation);
+            AICar randomCarVariant = prefabToUse.gameObject.GetSpareOrCreate<AICar>(transform, position, rotation);
             
             randomCarVariant.InitialiseAsTraffic();
             TrackCar(randomCarVariant);
             randomCarVariant.onDisable += () => UntrackCar(randomCarVariant);
 
-#if UNITY_EDITOR
-            randomCarVariant.name = $"TrafficCar-{randomCarVariant.gameObject.name}-{trafficCarID}";
-            trafficCarID++;
-#endif
-            
             return randomCarVariant;
         }
 
         private void LateUpdate()
         {
-            if (timeSinceLastSpawnCheck >= timeBetweenSpawnChecks)
+            if (GameSessionManager.Instance.CurrentSession != null
+                && GameSessionManager.Instance.CurrentSession.TrafficIsProcedural
+                && timeSinceLastSpawnCheck >= timeBetweenSpawnChecks)
+            {
                 CheckToSpawnCars();
+            }
         }
 
         private void CheckToSpawnCars()

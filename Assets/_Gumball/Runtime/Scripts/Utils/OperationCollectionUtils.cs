@@ -12,7 +12,29 @@ namespace Gumball
     public static class OperationCollectionUtils
     {
 
+        public static bool AreAllTrue(this bool[] collection)
+        {
+            foreach (bool value in collection)
+            {
+                if (!value)
+                    return false;
+            }
+
+            return true;
+        }
+        
         public static bool AreAllComplete(this IEnumerable<AsyncOperationHandle> handles)
+        {
+            foreach (AsyncOperationHandle handle in handles)
+            {
+                if (!handle.IsDone)
+                    return false;
+            }
+            
+            return true;
+        }
+        
+        public static bool AreAllComplete<T>(this IEnumerable<AsyncOperationHandle<T>> handles)
         {
             foreach (AsyncOperationHandle handle in handles)
             {

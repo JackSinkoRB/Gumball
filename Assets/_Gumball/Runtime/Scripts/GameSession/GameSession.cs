@@ -2,30 +2,42 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using Dreamteck.Splines;
 using MyBox;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Debug = UnityEngine.Debug;
+using Random = UnityEngine.Random;
 
 namespace Gumball
 {
     [Serializable]
-    public abstract class GameSession : ScriptableObject
+    public abstract class GameSession : UniqueScriptableObject, ISerializationCallbackReceiver
     {
-        
-        [Serializable]
-        public struct RacerSessionData
-        {
-            [SerializeField] private AssetReferenceGameObject assetReference;
-            [SerializeField] private PositionAndRotation startingPosition;
 
-            public AssetReferenceGameObject AssetReference => assetReference;
-            public PositionAndRotation StartingPosition => startingPosition;
+        public delegate void OnSessionEndDelegate(GameSession session, ProgressStatus progress);
+        public static OnSessionEndDelegate onSessionEnd;
+        
+        public static Action<GameSession> onSessionStart;
+        
+        public enum ProgressStatus
+        {
+            NOT_ATTEMPTED,
+            ATTEMPTED,
+            COMPLETE
         }
         
-        private static readonly int LightStrShaderID = Shader.PropertyToID("_Light_Str");
+        private const string trafficCarsAddressableLabel = "TrafficCars";
 
+        [Header("Info")]
+        [SerializeField] private string displayName = "Level";
+        [SerializeField] private string description = "Description of session";
+        
         [Header("Map setup")]
         [SerializeField] private AddressableSceneReference scene;
         [SerializeField] private AssetReferenceT<ChunkMap> chunkMapAssetReference;
@@ -33,46 +45,222 @@ namespace Gumball
         [SerializeField] private Vector3 vehicleStartingRotation;
         
         [Header("Lighting")]
+        [Tooltip("Whether or not car night lights, and night-time objects are shown.")]
+        [SerializeField] private bool isNightTime;
         [Tooltip("This is directional light intensity value.")]
         [SerializeField] private float globalLightIntensity = 1;
         [Tooltip("This is environment reflections intensity multiplier value that is passed to the environment rendering settings.")]
         [Range(0, 1), SerializeField] private float reflectionIntensity = 1;
-        [Tooltip("This is the value that is passed to the shader for fake lighting using the alpha channel.")]
-        [Range(0, 30), SerializeField] private float fakeLightingIntensity;
+
+        public bool IsNightTime => isNightTime;
 
         [Header("Session setup")]
         [SerializeField] private float introTime = 3;
-        [SerializeField] private RacerSessionData[] racerData;
-        [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] protected float raceDistanceMetres;
+        [SerializeField] private CheckpointMarkers finishLineMarkers;
+
+        [Header("Racers")]
+        [SerializeField] protected RacerSessionData[] racerData;
+        [Tooltip("Optional: set a race distance. At the end of the distance is the finish line.")]
         [SerializeField] private float racersStartingSpeed = 70;
 
-        [Header("Rewards")]
-        [SerializeField, DisplayInspector] private CorePart[] corePartRewards;
+        public RacerSessionData[] RacerData => racerData;
         
+        [Header("Traffic")]
+        [HelpBox("Use the button at the bottom of this component to randomise the traffic, or directly modify in the 'Traffic Spawn Positions' collection below.", MessageType.Info, onlyShowWhenDefaultValue: true)]
+        [Tooltip("If enabled, each frame it will check to spawn traffic to keep the desired traffic density designated in the chunks.")]
+        [SerializeField] private bool trafficIsProcedural = true;
+        [Tooltip("This value represents the number of metres for each car. Eg. A value of 10 means 1 car every 10 metres.")]
+        [SerializeField] private int trafficDensity = 100;
+        [SerializeField] private AssetReferenceGameObject[] trafficBikes;
+        [SerializeField] private AssetReferenceGameObject[] trafficCars;
+        [SerializeField] private AssetReferenceGameObject[] trafficTrucks;
+        [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
+
+        [Header("Rewards")]
+        [SerializeField] private Rewards rewards;
+
+        [Header("Challenges")]
+        [SerializeField] private Challenge[] subObjectives;
+
+        [Header("Dialogue")]
+        [SerializeField] private DialogueData preSessionDialogue;
+        [SerializeField] private DialogueData preCountdownDialogue;
+        [SerializeField] private DialogueData postSessionDialogue;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool inProgress;
-        [SerializeField, ReadOnly] private AICar[] currentRacers;
+        [SerializeField, ReadOnly] private GenericDictionary<AICar, RacerSessionData> currentRacers = new();
 
         private AsyncOperationHandle<ChunkMap> chunkMapHandle;
         private ChunkMap currentChunkMapCached;
         private Coroutine sessionCoroutine;
-
-        private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
+        private Dictionary<AssetReferenceGameObject, AsyncOperationHandle> trafficPrefabHandles = new();
         
+        private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
+
+        public ProgressStatus LastProgress { get; private set; }
+        public ProgressStatus Progress
+        {
+            get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
+            private set => DataManager.GameSessions.Set($"SessionStatus.{ID}", value);
+        }
+
+        public Challenge[] SubObjectives => subObjectives;
+
+        public string DisplayName => displayName;
+        public string Description => description;
         public AssetReferenceT<ChunkMap> ChunkMapAssetReference => chunkMapAssetReference;
         public Vector3 VehicleStartingPosition => vehicleStartingPosition;
         public bool InProgress => inProgress;
         public float RaceDistanceMetres => raceDistanceMetres;
-        public AICar[] CurrentRacers => currentRacers;
-        
-        public abstract string GetName();
+        public GenericDictionary<AICar, RacerSessionData> CurrentRacers => currentRacers;
+        public Rewards Rewards => rewards;
+        public bool HasLoaded { get; private set; }
+        public bool HasStarted { get; private set; }
+        public bool TrafficIsProcedural => trafficIsProcedural;
+        public int TrafficDensity => trafficDensity;
+        public AssetReferenceGameObject[] TrafficBikes => trafficBikes;
+        public AssetReferenceGameObject[] TrafficCars => trafficCars;
+        public AssetReferenceGameObject[] TrafficTrucks => trafficTrucks;
+        public TrafficSpawnPosition[] TrafficSpawnPositions => trafficSpawnPositions.Value;
+        public ChunkMap CurrentChunkMap => currentChunkMapCached;
+
+        protected abstract GameSessionPanel GetSessionPanel();
+        protected abstract SessionEndPanel GetSessionEndPanel();
+
+        public abstract string GetModeDisplayName();
+        public abstract Sprite GetModeIcon();
+        public abstract ObjectiveUI.FakeChallengeData GetChallengeData();
+        public abstract string GetMainObjectiveGoalValue();
 
         public void StartSession()
         {
+            HasLoaded = false;
+            HasStarted = false;
             GameSessionManager.Instance.SetCurrentSession(this);
             sessionCoroutine = CoroutineHelper.Instance.StartCoroutine(StartSessionIE());
         }
+        
+        public void OnBeforeSerialize()
+        {
+#if UNITY_EDITOR
+            if (scene != null && scene.IsDirty)
+            {
+                EditorUtility.SetDirty(this);
+                scene.SetDirty(false);
+            }
+#endif
+        }
+
+        public void OnAfterDeserialize()
+        {
+            
+        }
+        
+#if UNITY_EDITOR
+        [SerializeField, HideInInspector] private CorePart[] previousCorePartRewards = Array.Empty<CorePart>();
+        [SerializeField, HideInInspector] private SubPart[] previousSubPartRewards = Array.Empty<SubPart>();
+
+        [SerializeField, HideInInspector] public string PreviousBlueprintRewards;
+        
+        protected override void OnValidate()
+        {
+            base.OnValidate();
+            
+            TrackCorePartRewards();
+            TrackSubPartRewards();
+        }
+
+        [ButtonMethod(ButtonMethodDrawOrder.AfterInspector, nameof(trafficIsProcedural), true)]
+        public void RandomiseTraffic()
+        {
+            List<TrafficSpawnPosition> spawnPositions = new();
+
+            ChunkMap chunkMap = chunkMapAssetReference.editorAsset;
+            
+            float chunkStartDistance = 0;
+            for (int chunkIndex = 0; chunkIndex < chunkMap.ChunkReferences.Length; chunkIndex++)
+            {
+                AssetReferenceGameObject chunkReference = chunkMap.ChunkReferences[chunkIndex];
+                Chunk chunk = chunkReference.editorAsset.gameObject.GetComponent<Chunk>();
+                
+                float chunkEndDistance = chunkStartDistance + chunk.SplineLengthCached;
+                
+                int desiredCars = Mathf.RoundToInt(chunk.SplineLengthCached / trafficDensity);
+
+                for (int count = 0; count < desiredCars; count++)
+                {
+                    float randomDistance = Random.Range(chunkStartDistance, chunkEndDistance);
+                    
+                    ChunkTrafficManager.LaneDirection? randomDirection = chunk.TrafficManager.ChooseRandomLaneDirection();
+                    if (randomDirection == null)
+                    {
+                        Debug.LogError($"Could not spawn traffic car at index {count} because there are no lanes in {chunk.name}.");
+                        continue;
+                    }
+                    
+                    TrafficLane[] lanes = randomDirection == ChunkTrafficManager.LaneDirection.FORWARD ? chunk.TrafficManager.LanesForward : chunk.TrafficManager.LanesBackward;
+                    int randomLaneIndex = Random.Range(0, lanes.Length);
+
+                    //get random car prefab
+                    List<GameObject> allCars = AddressableUtils.LoadAssetsSync<GameObject>(trafficCarsAddressableLabel);
+                    AICar randomCar = allCars.GetRandom().GetComponent<AICar>();
+                    
+                    spawnPositions.Add(new TrafficSpawnPosition(randomDistance, randomDirection.Value, randomLaneIndex, randomCar));
+                }
+
+                chunkStartDistance += chunk.SplineLengthCached;
+            }
+
+            trafficSpawnPositions = new CollectionWrapperTrafficSpawnPosition();
+            trafficSpawnPositions.Value = spawnPositions.ToArray();
+        }
+
+        private void TrackCorePartRewards()
+        {
+            foreach (CorePart corePart in rewards.CoreParts)
+            {
+                if (corePart == null)
+                    continue;
+                
+                corePart.TrackAsReward(this);
+            }
+            
+            foreach (CorePart corePart in previousCorePartRewards)
+            {
+                if (corePart == null)
+                    continue;
+                
+                if (!rewards.CoreParts.Contains(corePart))
+                    corePart.UntrackAsReward(this);
+            }
+            
+            previousCorePartRewards = (CorePart[])rewards.CoreParts.Clone();
+        }
+        
+        private void TrackSubPartRewards()
+        {
+            foreach (SubPart subPart in rewards.SubParts)
+            {
+                if (subPart == null)
+                    continue;
+                
+                subPart.TrackAsReward(this);
+            }
+            
+            foreach (SubPart subPart in previousSubPartRewards)
+            {
+                if (subPart == null)
+                    continue;
+                
+                if (!rewards.SubParts.Contains(subPart))
+                    subPart.UntrackAsReward(this);
+            }
+            
+            previousSubPartRewards = (SubPart[])rewards.SubParts.Clone();
+        }
+#endif
 
         public IEnumerator LoadChunkMap()
         {
@@ -87,11 +275,15 @@ namespace Gumball
         {
             PanelManager.GetPanel<DrivingControlsPanel>().Show();
             
+            //setup car:
+            WarehouseManager.Instance.CurrentCar.ResetState();
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
+            //start with max NOS
+            WarehouseManager.Instance.CurrentCar.NosManager.SetNos(1);
             
             AvatarManager.Instance.HideAvatars(true);
 
-            SetupPlayerCar(currentChunkMapCached);
+            SetupPlayerCar();
 
             //load the map chunks
             Stopwatch chunkLoadingStopwatch = Stopwatch.StartNew();
@@ -110,43 +302,104 @@ namespace Gumball
                 AvatarManager.Instance.DriverAvatar.StateManager.SetState<AvatarDrivingState>();
                 AvatarManager.Instance.CoDriverAvatar.StateManager.SetState<AvatarDrivingState>();
             }
+            
+            //reset skill check manager
+            SkillCheckManager.Instance.ResetForSession();
         }
 
-        public void EndSession()
+        public void EndSession(ProgressStatus progress)
         {
             inProgress = false;
-
+            LastProgress = progress;
+            
             if (sessionCoroutine != null)
                 CoroutineHelper.Instance.StopCoroutine(sessionCoroutine);
             
             OnSessionEnd();
             
-            GameSessionManager.Instance.SetCurrentSession(null);
+            GlobalLoggers.GameSessionLogger.Log($"Ended {name} ({displayName}).");
 
+            if (Progress != ProgressStatus.COMPLETE && progress == ProgressStatus.COMPLETE)
+            {
+                OnCompleteSessionForFirstTime();
+            }
+            else
+            {
+                OnFailMission();
+            }
+
+            onSessionEnd?.Invoke(this, progress);
+        }
+
+        public void UnloadSession()
+        {
+            GameSessionManager.Instance.SetCurrentSession(null);
+            
             if (chunkMapHandle.IsValid())
                 Addressables.Release(chunkMapHandle);
+            
+            StopTrackingObjectives();
+            
+            Destroy(currentChunkMapCached);
+            trafficPrefabHandles.Clear(); //remove the traffic car references so they can be unloaded 
+        }
+        
+        public AsyncOperationHandle GetTrafficVehicleHandle(AssetReferenceGameObject assetReference)
+        {
+            return trafficPrefabHandles[assetReference];
         }
 
         protected virtual void OnSessionEnd()
         {
-            PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+            HasStarted = false;
+
+            if (PanelManager.ExistsRuntime && PanelManager.PanelExists<DrivingControlsPanel>())
+                PanelManager.GetPanel<DrivingControlsPanel>().Hide();
+
+            if (PanelManager.PanelExists<DrivingResetButtonPanel>() && PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
+                PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
+
+            if (ChunkMapSceneManager.ExistsRuntime)
+                drivingCameraController.SetState(drivingCameraController.OutroState);
             
-            drivingCameraController.SetState(drivingCameraController.OutroState);
-            
-            //come to a stop
-            WarehouseManager.Instance.CurrentCar.SetTemporarySpeedLimit(0);
-            
+            //disable NOS
+            WarehouseManager.Instance.CurrentCar.NosManager.Deactivate();
+
+            WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
+
             InputManager.Instance.CarInput.Disable();
 
             RemoveDistanceCalculators();
             
-            GiveRewards();
+            //convert skill points to followers
+            if (SkillCheckManager.ExistsRuntime)
+                FollowersManager.AddFollowers(Mathf.RoundToInt(SkillCheckManager.Instance.CurrentPoints));
+
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Hide();
+            CoroutineHelper.StartCoroutineOnCurrentScene(ShowSessionEndPanel());
         }
-        
+
+        private IEnumerator ShowSessionEndPanel()
+        {
+            yield return new WaitForSeconds(1f);
+            
+            if (PanelManager.PanelExists<VignetteBackgroundPanel>())
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+            
+            yield return new WaitForSeconds(1f);
+            
+            if (PanelManager.PanelExists<RetrySessionButtonPanel>())
+                PanelManager.GetPanel<RetrySessionButtonPanel>().Show();
+            
+            if (GetSessionEndPanel() != null)
+                GetSessionEndPanel().Show();
+        }
+
         public virtual void UpdateWhenCurrent()
         {
             SplineTravelDistanceCalculator playerDistanceCalculator = WarehouseManager.Instance.CurrentCar.GetComponent<SplineTravelDistanceCalculator>();
-            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceTraveled >= raceDistanceMetres)
+            if (raceDistanceMetres > 0 && playerDistanceCalculator != null && playerDistanceCalculator.DistanceInMap >= raceDistanceMetres)
                 OnCrossFinishLine();
         }
 
@@ -164,41 +417,81 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log("Loaded session");
 
             inProgress = true;
-            InputManager.Instance.CarInput.Enable();
         }
 
         private IEnumerator StartSessionIE()
         {
+            inProgress = false;
+            
+            if (preSessionDialogue != null && !preSessionDialogue.HasBeenCompleted)
+            {
+                preSessionDialogue.Play();
+                yield return new WaitUntil(() => !DialogueManager.IsPlaying);
+            }
+            
             PanelManager.GetPanel<LoadingPanel>().Show();
 
             yield return LoadChunkMap();
             yield return LoadScene();
+            yield return LoadTrafficVehicles();
             yield return SetupSession();
             
             GlobalLoggers.LoadingLogger.Log("Loading session...");
             yield return LoadSession();
 
+            HasLoaded = true;
             PanelManager.GetPanel<LoadingPanel>().Hide();
-
+            
+            InputManager.Instance.CarInput.Enable();
+            
             yield return IntroCinematicIE();
 
             OnSessionStart();
             
-            drivingCameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
-            drivingCameraController.SetState(drivingCameraController.DrivingState);
+            drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
             
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(false);
-
-            foreach (AICar racer in currentRacers)
-            {
-                //tween the racing line offset to 0 for optimal driving
-                racer.SetRacingLineOffset(0, 3);
-            }
+            
+            //auto accelerate (for non-buttons layout)
+            DrivingControlLayoutManager layoutManager = PanelManager.GetPanel<DrivingControlsPanel>().LayoutManager;
+            InputManager.Instance.CarInput.Accelerate.SetPressedOverride(layoutManager.CurrentLayout.AutoAccelerate);
         }
 
         protected virtual void OnSessionStart()
         {
+            StartTrackingObjectives();
             
+            //only take fuel once session has properly started (in case loading failed)
+            FuelManager.Instance.TakeFuel();
+            
+            onSessionStart?.Invoke(this);
+            
+            if (GetSessionPanel() != null)
+                GetSessionPanel().Show();
+
+            HasStarted = true;
+        }
+
+        public void StartTrackingObjectives()
+        {
+            if (subObjectives == null)
+                return;
+            
+            foreach (Challenge subObjective in subObjectives)
+            {
+                subObjective.Tracker.StartListening(subObjective.UniqueID, subObjective.Goal);
+            }
+        }
+
+        private void StopTrackingObjectives()
+        {
+            if (subObjectives == null)
+                return;
+            
+            foreach (Challenge subObjective in subObjectives)
+            {
+                subObjective.Tracker.StopListening(subObjective.UniqueID);
+            }
         }
 
         private IEnumerator LoadScene()
@@ -206,7 +499,7 @@ namespace Gumball
             GlobalLoggers.LoadingLogger.Log("Scene loading started...");
             Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
             
-            yield return Addressables.LoadSceneAsync(scene.SceneName);
+            yield return Addressables.LoadSceneAsync(scene.Address);
             
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
@@ -228,10 +521,11 @@ namespace Gumball
             
             //set reflection intensity
             RenderSettings.reflectionIntensity = reflectionIntensity;
-            
-            //set the fake lighting
-            ChunkManager.Instance.TerrainMaterial.SetFloat(LightStrShaderID, fakeLightingIntensity);
-            
+            //
+            // //shader adjustments
+            // foreach (GameSessionMaterialAdjustment materialAdjustment in materialAdjustments)
+            //     materialAdjustment.UpdateMaterial();
+            //
             sceneLoadingStopwatch.Stop();
             GlobalLoggers.LoadingLogger.Log($"{scene.SceneName} lighting setup complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
         }
@@ -241,21 +535,48 @@ namespace Gumball
             if (introTime <= 0)
                 yield break;
             
+            //set temporary speed limit
+            foreach (AICar racer in currentRacers.Keys)
+            {
+                if (racer != null)
+                    racer.SetTemporarySpeedLimit(racersStartingSpeed);
+            }
+
             drivingCameraController.SetState(drivingCameraController.IntroState);
-            drivingCameraController.SetTarget(WarehouseManager.Instance.CurrentCar.transform);
             drivingCameraController.SkipTransition();
                 
             //start the transition to driving start
-            drivingCameraController.SetState(drivingCameraController.DrivingState);
+            drivingCameraController.SetState(drivingCameraController.CurrentDrivingState);
                 
             WarehouseManager.Instance.CurrentCar.SetAutoDrive(true);
+            
+            if (preCountdownDialogue != null && !preCountdownDialogue.HasBeenCompleted)
+            {
+                yield return new WaitUntil(() => drivingCameraController.GetCurrentTransition() == null);
                 
+                Time.timeScale = 0;
+                preCountdownDialogue.Play();
+                yield return new WaitUntil(() => !DialogueManager.IsPlaying);
+                Time.timeScale = 1;
+            }
+
             yield return IntroCountdownIE();
+            
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Hide();
+            PanelManager.GetPanel<SessionIntroPanel>().Hide();
+            
+            //remove temporary speed limit
+            foreach (AICar racer in currentRacers.Keys)
+            {
+                if (racer != null)
+                    racer.RemoveTemporarySpeedLimit();
+            }
         }
         
         private IEnumerator IntroCountdownIE()
         {
             PanelManager.GetPanel<SessionIntroPanel>().Show();
+            PanelManager.GetPanel<DrivingControlsIntroPanel>().Show();
             
             int remainingIntroTime = Mathf.CeilToInt(introTime);
             while (remainingIntroTime > 0)
@@ -266,11 +587,9 @@ namespace Gumball
                     
                 remainingIntroTime -= timeBetweenCountdownUpdates;
             }
-            
-            PanelManager.GetPanel<SessionIntroPanel>().Hide();
         }
 
-        private void SetupPlayerCar(ChunkMap chunkMap)
+        private void SetupPlayerCar()
         {
             //freeze the car
             Rigidbody currentCarRigidbody = WarehouseManager.Instance.CurrentCar.Rigidbody;
@@ -281,6 +600,8 @@ namespace Gumball
             //remove constraints
             WarehouseManager.Instance.CurrentCar.Rigidbody.constraints = RigidbodyConstraints.None;
             
+            WarehouseManager.Instance.CurrentCar.SetObeySpeedLimit(false);
+            
             //move the car to the right position
             currentCarRigidbody.Move(vehicleStartingPosition, Quaternion.Euler(vehicleStartingRotation));
             GlobalLoggers.LoadingLogger.Log($"Moved vehicle to map's starting position: {vehicleStartingPosition}");
@@ -290,50 +611,82 @@ namespace Gumball
         {
             racerData ??= Array.Empty<RacerSessionData>();
                 
-            currentRacers = new AICar[racerData.Length + 1];
-            List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>();
+            currentRacers.Clear();
+            AsyncOperationHandle<GameObject>[] handles = new AsyncOperationHandle<GameObject>[racerData.Length];
 
             for (int index = 0; index < racerData.Length; index++)
             {
                 RacerSessionData data = racerData[index];
-                
-                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.AssetReference);
-                int finalIndex = index;
-                handle.Completed += h =>
+
+                if (data.CarAssetReference == null)
                 {
-                    AICar racer = Instantiate(h.Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
-                    racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(h);
-
-                    racer.InitialiseAsRacer();
-
-                    //calculate the starting distance
-                    racer.PerformAfterTrue(() => racer.CurrentChunk != null, () =>
-                    {
-                        float distance = racer.CurrentChunk.TrafficManager.GetOffsetFromRacingLine(data.StartingPosition.Position);
-                        racer.SetRacingLineOffset(distance);
-                    });
-
-                    currentRacers[finalIndex] = racer;
-                };
-                handles.Add(handle);
+                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                    continue;
+                }
+                
+                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(data.CarAssetReference);
+                handles[index] = handle;
             }
 
             //add the player's car as a racer
-            currentRacers[^1] = WarehouseManager.Instance.CurrentCar;
+            currentRacers[WarehouseManager.Instance.CurrentCar] = new RacerSessionData();
 
             yield return new WaitUntil(() => handles.AreAllComplete());
-            
+
+            for (int index = 0; index < racerData.Length; index++)
+            {
+                if (handles[index].Result == null)
+                {
+                    Debug.LogError($"There is a null racer at index {index} in {name}. Skipping it.");
+                    continue;
+                }
+
+                RacerSessionData data = racerData[index];
+                AICar racer = Instantiate(handles[index].Result, data.StartingPosition.Position, data.StartingPosition.Rotation).GetComponent<AICar>();
+                racer.GetComponent<AddressableReleaseOnDestroy>(true).Init(handles[index]);
+
+                racer.InitialiseAsRacer();
+                data.LoadIntoCar(racer);
+
+                currentRacers[racer] = data;
+            }
+
             //set initial speeds
-            foreach (AICar racer in currentRacers)
+            foreach (AICar racer in currentRacers.Keys)
             {
                 racer.SetSpeed(racersStartingSpeed);
             }
         }
 
+        private IEnumerator LoadTrafficVehicles()
+        {
+            trafficPrefabHandles.Clear();
+            
+            AssetReferenceGameObject[] allVehicles = (trafficBikes ?? Array.Empty<AssetReferenceGameObject>())
+                .Concat(trafficCars ?? Array.Empty<AssetReferenceGameObject>())
+                .Concat(trafficTrucks ?? Array.Empty<AssetReferenceGameObject>())
+                .ToArray();
+            
+            foreach (AssetReferenceGameObject assetReference in allVehicles)
+            {
+                if (assetReference == null)
+                {
+                    Debug.LogError($"There is a null traffic vehicle in {name}. Skipping it.");
+                    continue;
+                }
+
+                AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
+                trafficPrefabHandles[assetReference] = handle;
+            }
+            
+            //wait until all cars have loaded
+            yield return new WaitUntil(() => trafficPrefabHandles.Values.AreAllComplete());
+        }
+
         private void InitialiseRaceMode()
         {
             //add distance calculators to racers
-            foreach (AICar racer in currentRacers)
+            foreach (AICar racer in currentRacers.Keys)
             {
                 racer.gameObject.AddComponent<SplineTravelDistanceCalculator>();
             }
@@ -343,7 +696,7 @@ namespace Gumball
         
         private void RemoveDistanceCalculators()
         {
-            foreach (AICar racer in currentRacers)
+            foreach (AICar racer in currentRacers.Keys)
             {
                 Destroy(racer.gameObject.GetComponent<SplineTravelDistanceCalculator>());
             }
@@ -357,27 +710,54 @@ namespace Gumball
                 Debug.LogError($"Could not create finish line as the race distance {raceDistanceMetres} is bigger than the map length {mapLength}.");
                 return;
             }
-            
-            //TODO:
+
+            finishLineMarkers.Spawn(raceDistanceMetres);
         }
-        
+
         private void OnCrossFinishLine()
         {
-            EndSession();
+            ProgressStatus status = ProgressStatus.ATTEMPTED;
+            if (AreAllSubObjectivesComplete() && IsCompleteOnCrossFinishLine())
+                status = ProgressStatus.COMPLETE;
+            
+            EndSession(status);
         }
 
-        private void GiveRewards()
+        protected virtual bool IsCompleteOnCrossFinishLine()
         {
-            if (corePartRewards != null)
+            return true;
+        }
+
+        private bool AreAllSubObjectivesComplete()
+        {
+            if (subObjectives == null)
+                return true;
+            
+            foreach (Challenge subObjective in subObjectives)
             {
-                foreach (CorePart corePartReward in corePartRewards)
-                {
-                    if (!corePartReward.IsUnlocked)
-                        RewardManager.GiveReward(corePartReward);
-                }
+                if (subObjective.Tracker.GetListener(subObjective.UniqueID).Progress < 1)
+                    return false;
             }
 
-            //todo: sub parts
+            return true;
+        }
+
+        private void OnCompleteSessionForFirstTime()
+        {
+            GlobalLoggers.GameSessionLogger.Log($"Completed {name} ({displayName}) for the first time.");
+            Progress = ProgressStatus.COMPLETE;
+
+            if (!postSessionDialogue.HasBeenCompleted)
+            {
+                CoroutineHelper.PerformAfterTrue(
+                    () => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MapSceneName) && !PanelManager.GetPanel<LoadingPanel>().IsShowing,
+                    () => postSessionDialogue.Play());
+            }
+        }
+        
+        private void OnFailMission()
+        {
+            Progress = ProgressStatus.ATTEMPTED;
         }
         
     }

@@ -19,6 +19,11 @@ namespace Gumball
         public static Logger AICarLogger => Instance.trafficLogger;
         public static Logger AvatarLogger => Instance.avatarLogger;
         public static Logger PowerlineLogger => Instance.powerlineLogger;
+        public static Logger CurrencyLogger => Instance.currencyLogger;
+        public static Logger PlayFabLogger => Instance.playFabLogger;
+        public static Logger StoreLogger => Instance.storeLogger;
+        public static Logger GameSessionLogger => Instance.gameSessionLogger;
+        public static Logger ChallengesLogger => Instance.challengesLogger;
 
         [SerializeField] private Logger loadingLogger;
         [SerializeField] private Logger chunkLogger;
@@ -30,6 +35,11 @@ namespace Gumball
         [SerializeField] private Logger trafficLogger;
         [SerializeField] private Logger avatarLogger;
         [SerializeField] private Logger powerlineLogger;
+        [SerializeField] private Logger currencyLogger;
+        [SerializeField] private Logger playFabLogger;
+        [SerializeField] private Logger storeLogger;
+        [SerializeField] private Logger gameSessionLogger;
+        [SerializeField] private Logger challengesLogger;
 
     }
 }

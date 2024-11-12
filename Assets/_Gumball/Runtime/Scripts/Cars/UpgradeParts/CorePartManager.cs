@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Gumball
 {
@@ -11,7 +12,7 @@ namespace Gumball
     {
         
         /// <summary>
-        /// The addressables address for the core parts data group.
+        /// The addressables label for the core parts data group.
         /// </summary>
         public const string CorePartsAssetLabel = "CorePart";
         
@@ -20,12 +21,68 @@ namespace Gumball
         private static readonly Dictionary<string, CorePart> partsMappedByID = new();
 
         public static ReadOnlyCollection<CorePart> AllParts => allParts.AsReadOnly();
+
+        private static bool isInitialised;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RuntimeInitialise()
+        {
+            isInitialised = false;
+        }
         
         public static IEnumerator Initialise()
         {
+            if (isInitialised)
+                yield break;
+
+            isInitialised = true;
+            
             yield return FindParts();
         }
+        
+        /// <summary>
+        /// Sets the currently installed part on the car.
+        /// </summary>
+        public static void SetCorePart(int carIndex, CorePart.PartType type, CorePart corePart)
+        {
+            DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}", corePart == null ? null : corePart.ID);
+        }
+        
+        /// <summary>
+        /// Gets the currently installed part on the car, or returns the default part if none.
+        /// </summary>
+        public static CorePart GetCorePart(int carIndex, CorePart.PartType type)
+        {
+            string saveKey = $"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}";
+            
+            WarehouseCarData carData = WarehouseManager.Instance.AllCarData[carIndex];
+            CorePart defaultPart = carData.GetDefaultPart(type);
+            
+            string partID = DataManager.Cars.Get(saveKey, defaultPart != null ? defaultPart.ID : null);
+            return GetPartByID(partID);
+        }
 
+        public static Dictionary<CorePart.PartType, CorePart> GetCoreParts(int carIndex)
+        {
+            Dictionary<CorePart.PartType, CorePart> parts = new();
+            
+            foreach (CorePart.PartType partType in Enum.GetValues(typeof(CorePart.PartType)))
+                parts[partType] = GetCorePart(carIndex, partType);
+            
+            return parts;
+        }
+
+        public static void InstallParts(int carIndex)
+        {
+            foreach (CorePart part in GetCoreParts(carIndex).Values)
+            {
+                if (part == null)
+                    continue; //no part applied
+                
+                InstallPartOnCar(part.Type, part, carIndex);
+            }
+        }
+        
         public static CorePart GetPartByID(string ID)
         {
             if (ID == null)
@@ -38,7 +95,7 @@ namespace Gumball
         }
         
         /// <returns>A collection of unlocked parts of type 'partType'.</returns>
-        public static HashSet<CorePart> GetSpareParts(CorePart.PartType partType)
+        public static HashSet<CorePart> GetSpareParts(CorePart.PartType partType, CarType? carType = null)
         {
             HashSet<CorePart> spareParts = new();
 
@@ -47,7 +104,7 @@ namespace Gumball
             
             foreach (CorePart part in allPartsGrouped[partType])
             {
-                if (part.IsUnlocked && !part.IsAppliedToCar)
+                if (part.IsUnlocked && !part.IsAppliedToCar && (carType == null || carType.Value == part.CarType))
                     spareParts.Add(part);
             }
             
@@ -57,33 +114,51 @@ namespace Gumball
         public static void InstallPartOnCar(CorePart.PartType type, CorePart part, int carIndex)
         {
             //if car has a part already installed, remove the reference to set it as a spare
-            CorePart existingPart = PartModification.GetCorePart(carIndex, type);
+            CorePart existingPart = GetCorePart(carIndex, type);
             if (existingPart != null)
                 existingPart.RemoveFromCar();
 
             //apply to car
-            PartModification.SetCorePart(carIndex, type, part);
+            SetCorePart(carIndex, type, part);
             
             //apply to part
             if (part != null)
                 part.ApplyToCar(carIndex);
             
-            //update the cars modifiers
+            //update the cars performance profile if it's the active car
             bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == carIndex;
             if (isAttachedToCurrentCar)
-                WarehouseManager.Instance.CurrentCar.PartModification.ApplyModifiers();
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(carIndex));
+        }
+
+        public static void RemovePartOnCar(CorePart.PartType type, int carIndex)
+        {
+            InstallPartOnCar(type, null, carIndex);
         }
 
         private static IEnumerator FindParts()
         {
-            yield return AddressableUtils.LoadAssetsAsync(CorePartsAssetLabel, allParts, typeof(CorePart));
+            allParts.Clear();
+            
+            yield return AddressableUtils.LoadAssetsAsync(CorePartsAssetLabel, allParts);
 
+            InitialiseSubPartSlots();
             GroupParts();
             CreateIDLookup();
         }
 
+        private static void InitialiseSubPartSlots()
+        {
+            foreach (CorePart part in allParts)
+            {
+                part.InitialiseSubPartSlots();
+            }
+        }
+
         private static void GroupParts()
         {
+            allPartsGrouped.Clear();
+            
             Dictionary<CorePart.PartType, HashSet<CorePart>> grouped = new();
         
             //group
@@ -104,6 +179,8 @@ namespace Gumball
 
         private static void CreateIDLookup()
         {
+            partsMappedByID.Clear();
+            
             foreach (CorePart corePart in allParts)
             {
                 if (partsMappedByID.ContainsKey(corePart.ID))
@@ -111,6 +188,11 @@ namespace Gumball
 
                 partsMappedByID[corePart.ID] = corePart;
             } 
+        }
+        
+        private static string GetSaveKeyFromIndex(int carIndex)
+        {
+            return $"{AICar.GetSaveKeyFromIndex(carIndex)}.Parts";
         }
         
     }

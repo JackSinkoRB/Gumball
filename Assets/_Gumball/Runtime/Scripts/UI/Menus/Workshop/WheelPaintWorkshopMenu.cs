@@ -21,7 +21,10 @@ namespace Gumball
         
         [SerializeField] private GameObject simpleMenu;
         [SerializeField] private GameObject advancedMenu;
-
+        [SerializeField] private SwitchButton switchButton;
+        [Space(5)]
+        [SerializeField] private WheelModificationPositionButton[] wheelModificationPositionButtons;
+        
         [Header("Advanced")]
         [SerializeField] private ColorPicker primaryColorPicker;
         [SerializeField] private ColorPicker secondaryColorPicker;
@@ -29,7 +32,9 @@ namespace Gumball
         [SerializeField] private Slider clearcoatSlider;
         
         [Header("Simple")]
-        [SerializeField] private MagneticScroll swatchMagneticScroll;
+        [SerializeField] private ColourOption colourOptionPrefab;
+        [SerializeField] private GridLayoutWithScreenSize colourOptionHolder;
+        [SerializeField] private PaintMaterialButton[] paintMaterialButtons;
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private WheelsToModifyPosition wheelsToModifyPosition;
@@ -37,18 +42,17 @@ namespace Gumball
         private readonly ColourSwatch advancedSwatch = new();
         private WheelPaintModification.PaintMode? currentMode;
         
-        private WheelPaintModification selectedWheelPaintModification => wheelsToModify[0].GetComponent<WheelPaintModification>();
         private WheelMesh[] wheelsToModify => wheelsToModifyPosition == WheelsToModifyPosition.ALL ? WarehouseManager.Instance.CurrentCar.AllWheelMeshes
             : (wheelsToModifyPosition == WheelsToModifyPosition.FRONT ?
                 WarehouseManager.Instance.CurrentCar.FrontWheelMeshes : WarehouseManager.Instance.CurrentCar.RearWheelMeshes);
         
-        public override void Show()
+        protected override void OnShow()
         {
-            base.Show();
+            base.OnShow();
             
             SetWheelsToModifyPosition(WheelsToModifyPosition.ALL);
             
-            SelectTab(selectedWheelPaintModification.CurrentPaintMode);
+            SelectTab(wheelsToModify[0].GetComponent<WheelPaintModification>().CurrentPaintMode);
         }
 
         /// <summary>
@@ -58,9 +62,6 @@ namespace Gumball
         
         public void SelectTab(WheelPaintModification.PaintMode paintMode)
         {
-            if (currentMode == paintMode)
-                return; //already selected
-
             currentMode = paintMode;
 
             switch (paintMode)
@@ -89,8 +90,41 @@ namespace Gumball
             wheelsToModifyPosition = position;
             
             UpdateInputUI();
+            
+            for (int index = 0; index < wheelModificationPositionButtons.Length; index++)
+            {
+                WheelModificationPositionButton button = wheelModificationPositionButtons[index];
+                WheelsToModifyPosition buttonPosition = (WheelsToModifyPosition)index;
+                
+                bool isSelected = buttonPosition == position;
+                if (isSelected)
+                    button.Select();
+                else
+                    button.Deselect();
+            }
         }
 
+        public void SetPaintMaterialType(int materialTypeIndex)
+        {
+            //functionality:
+            foreach (WheelMesh wheelMesh in wheelsToModify)
+            {
+                wheelMesh.GetComponent<WheelPaintModification>().SetMaterialType((PaintMaterial.Type)materialTypeIndex);
+            }
+
+            //UI selection:
+            for (int index = 0; index < paintMaterialButtons.Length; index++)
+            {
+                PaintMaterialButton button = paintMaterialButtons[index];
+                
+                bool isSelected = (index+1) == materialTypeIndex; //add 1 to account for NONE
+                if (isSelected)
+                    button.Select();
+                else
+                    button.Deselect();
+            }
+        }
+        
         public void OnPrimaryColourChange()
         {
             advancedSwatch.SetColor(primaryColorPicker.CurrentColor);
@@ -130,10 +164,11 @@ namespace Gumball
         private void UpdateInputUI()
         {
             //read from the actual material
-            advancedSwatch.SetColor(selectedWheelPaintModification.CurrentSwatch.Color.ToColor());
-            advancedSwatch.SetSpecular(selectedWheelPaintModification.CurrentSwatch.Specular.ToColor());
-            advancedSwatch.SetSmoothness(selectedWheelPaintModification.CurrentSwatch.Smoothness);
-            advancedSwatch.SetClearcoat(selectedWheelPaintModification.CurrentSwatch.ClearCoat);
+            WheelPaintModification selectedWheelPaintModification = wheelsToModify[0].GetComponent<WheelPaintModification>();
+            advancedSwatch.SetColor(selectedWheelPaintModification.SavedSwatch.Color.ToColor());
+            advancedSwatch.SetSpecular(selectedWheelPaintModification.SavedSwatch.Specular.ToColor());
+            advancedSwatch.SetSmoothness(selectedWheelPaintModification.SavedSwatch.Smoothness);
+            advancedSwatch.SetClearcoat(selectedWheelPaintModification.SavedSwatch.ClearCoat);
             
             primaryColorPicker.AssignColor(advancedSwatch.Color);
             secondaryColorPicker.AssignColor(advancedSwatch.Specular);
@@ -144,8 +179,13 @@ namespace Gumball
 
         private void OnSelectSimpleTab()
         {
-            bool isCustomSwatch = selectedWheelPaintModification.GetCurrentSwatchIndexInPresets() == -1;
+            switchButton.OnClickLeftSwitch();
+            
+            WheelPaintModification selectedWheelPaintModification = wheelsToModify[0].GetComponent<WheelPaintModification>();
+            bool isCustomSwatch = selectedWheelPaintModification.GetSavedSwatchIndexInPresets() == -1;
             PopulateSwatchScroll(isCustomSwatch);
+            
+            SetPaintMaterialType((int)selectedWheelPaintModification.SavedSwatch.MaterialType);
             
             simpleMenu.gameObject.SetActive(true);
             advancedMenu.gameObject.SetActive(false);
@@ -153,63 +193,63 @@ namespace Gumball
         
         private void OnSelectAdvancedTab()
         {
+            switchButton.OnClickRightSwitch();
+            
             simpleMenu.gameObject.SetActive(false);
             advancedMenu.gameObject.SetActive(true);
         }
         
         private void PopulateSwatchScroll(bool showCustomSwatchOption)
         {
-            List<ScrollItem> scrollItems = new List<ScrollItem>();
+            
+            foreach (Transform child in colourOptionHolder.transform)
+                child.gameObject.Pool();
             
             if (showCustomSwatchOption)
             {
                 //add an additional ScrollItem at the beginning with the advanced colour settings
-                ColourSwatchSerialized colourSwatch = selectedWheelPaintModification.CurrentSwatch;
-                ScrollItem customSwatchItem = new ScrollItem();
                 
-                customSwatchItem.onLoad += () =>
-                {
-                    ColourScrollIcon partsScrollIcon = (ColourScrollIcon)customSwatchItem.CurrentIcon;
-                    partsScrollIcon.ImageComponent.color = colourSwatch.Color.ToColor().WithAlphaSetTo(1);
-                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular.ToColor().WithAlphaSetTo(1);
-                };
-
-                customSwatchItem.onSelect += () =>
-                {
-                    selectedWheelPaintModification.ApplySwatch(colourSwatch);
-                };
+                WheelPaintModification selectedWheelPaintModification = wheelsToModify[0].GetComponent<WheelPaintModification>();
+                ColourSwatchSerialized colourSwatch = selectedWheelPaintModification.SavedSwatch;
                 
-                scrollItems.Add(customSwatchItem);
-            }
+                ColourOption instance = colourOptionPrefab.gameObject.GetSpareOrCreate<ColourOption>(colourOptionHolder.transform);
+                instance.Initialise(colourSwatch);
+                instance.onSelect += OnSelectInstance;
+                instance.transform.SetAsLastSibling();
 
-            for (int index = 0; index < GlobalPaintPresets.Instance.WheelSwatchPresets.Length; index++)
-            {
-                ColourSwatch colourSwatch = GlobalPaintPresets.Instance.WheelSwatchPresets[index];
-                ScrollItem scrollItem = new ScrollItem();
-                int finalIndex = index;
-                
-                scrollItem.onLoad += () =>
-                {
-                    ColourScrollIcon partsScrollIcon = (ColourScrollIcon)scrollItem.CurrentIcon;
-                    partsScrollIcon.ImageComponent.color = colourSwatch.Color.WithAlphaSetTo(1);
-                    partsScrollIcon.SecondaryColour.color = colourSwatch.Specular.WithAlphaSetTo(1);
-                };
-
-                scrollItem.onSelect += () =>
+                void OnSelectInstance()
                 {
                     foreach (WheelMesh wheelMesh in wheelsToModify)
                     {
                         WheelPaintModification paintModification = wheelMesh.GetComponent<WheelPaintModification>();
                         paintModification.ApplySwatch(colourSwatch);
-                        paintModification.CurrentSelectedPresetIndex = finalIndex;
+                        SetPaintMaterialType((int)colourSwatch.MaterialType);
                     }
-                };
-
-                scrollItems.Add(scrollItem);
+                }
             }
 
-            int indexToShow = showCustomSwatchOption ? 0 : selectedWheelPaintModification.CurrentSelectedPresetIndex;
-            swatchMagneticScroll.SetItems(scrollItems, indexToShow);
+            for (int index = 0; index < GlobalPaintPresets.Instance.WheelSwatchPresets.Length; index++)
+            {
+                int finalIndex = index;
+                ColourSwatch colourSwatch = GlobalPaintPresets.Instance.WheelSwatchPresets[index];
+                ColourOption instance = colourOptionPrefab.gameObject.GetSpareOrCreate<ColourOption>(colourOptionHolder.transform);
+                instance.Initialise(colourSwatch);
+                instance.onSelect += OnSelectInstance;
+                instance.transform.SetAsLastSibling();
+
+                void OnSelectInstance()
+                {
+                    foreach (WheelMesh wheelMesh in wheelsToModify)
+                    {
+                        WheelPaintModification paintModification = wheelMesh.GetComponent<WheelPaintModification>();
+                        paintModification.ApplySwatch(colourSwatch);
+                        paintModification.SavedSelectedPresetIndex = finalIndex;
+                        SetPaintMaterialType((int)colourSwatch.MaterialType);
+                    }
+                }
+            }
+            
+            this.PerformAtEndOfFrame(() => colourOptionHolder.Resize());
         }
         
     }

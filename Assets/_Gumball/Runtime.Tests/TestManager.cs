@@ -26,10 +26,9 @@ namespace Gumball.Runtime.Tests
         }
 
         [SerializeField] private SceneAsset bootScene;
-        [SerializeField] private SceneAsset decalEditorScene;
         [SerializeField] private SceneAsset avatarEditorScene;
         [SerializeField] private SceneAsset chunkMapScene;
-        [SerializeField] private SceneAsset workshopScene;
+        [SerializeField] private SceneAsset warehouseScene;
 
         [Header("Chunks")]
         [SerializeField] private GameSession chunkTestingSession;
@@ -41,12 +40,18 @@ namespace Gumball.Runtime.Tests
         [Header("Core parts")]
         [SerializeField] private CorePart corePartA;
         [SerializeField] private CorePart corePartB;
+
+        [Header("Sub parts")]
+        [SerializeField] private SubPart subPartA;
+        [SerializeField] private SubPart subPartB;
         
-        public string DecalEditorScenePath => AssetDatabase.GetAssetPath(decalEditorScene);
-        public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
+        [Header("Warehouse manager")]
+        [SerializeField] private GameObject carTemplatePrefab;
+        
         public string BootScenePath => AssetDatabase.GetAssetPath(bootScene);
+        public string AvatarEditorScenePath => AssetDatabase.GetAssetPath(avatarEditorScene);
         public string ChunkMapScenePath => AssetDatabase.GetAssetPath(chunkMapScene);
-        public string WorkshopScenePath => AssetDatabase.GetAssetPath(workshopScene);
+        public string WarehouseScenePath => AssetDatabase.GetAssetPath(warehouseScene);
 
         public GameSession ChunkTestingSession => chunkTestingSession;
         public AssetReferenceGameObject TestChunkPrefabA => testChunkPrefabA;
@@ -56,6 +61,11 @@ namespace Gumball.Runtime.Tests
 
         public CorePart CorePartA => corePartA;
         public CorePart CorePartB => corePartB;
+
+        public SubPart SubPartA => subPartA;
+        public SubPart SubPartB => subPartB;
+
+        public GameObject CarTemplatePrefab => carTemplatePrefab;
 
     }
 }

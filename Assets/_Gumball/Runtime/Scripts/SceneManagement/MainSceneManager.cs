@@ -11,6 +11,8 @@ namespace Gumball
     public class MainSceneManager : Singleton<MainSceneManager>
     {
 
+        [SerializeField] private CameraShakeInstance cameraShake;
+        
         [SerializeField] private Vector3 carPosition;
         [SerializeField] private Vector3 carRotationEuler;
         
@@ -28,10 +30,24 @@ namespace Gumball
         
         private void Start()
         {
-            this.PerformAfterTrue(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MainSceneName),
-                () => PanelManager.GetPanel<MainMenuPanel>().Show());
+            this.PerformAfterTrue(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MainSceneAddress),
+                () =>
+                {
+                    PanelManager.GetPanel<MainMenuPanel>().Show();
+                    PanelManager.GetPanel<PlayerStatsPanel>().Show();
+                });
         }
         
+        protected override void Initialise()
+        {
+            base.Initialise();
+            
+            cameraShake.DoShake();
+
+            this.PerformAfterTrue(() => WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null, 
+                () => WarehouseManager.Instance.CurrentCar.SetAutoDrive(false));
+        }
+
         public static void LoadMainScene()
         {
             CoroutineHelper.Instance.StartCoroutine(LoadMainSceneIE());
@@ -42,12 +58,13 @@ namespace Gumball
             PanelManager.GetPanel<LoadingPanel>().Show();
             
             Stopwatch stopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(SceneManager.MainSceneName, LoadSceneMode.Single, true);
+            yield return Addressables.LoadSceneAsync(SceneManager.MainSceneAddress, LoadSceneMode.Single, true);
             stopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneName} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
+            GlobalLoggers.LoadingLogger.Log($"{SceneManager.MainSceneAddress} loading complete in {stopwatch.Elapsed.ToPrettyString(true)}");
             
             //ensure car is showing
             WarehouseManager.Instance.CurrentCar.gameObject.SetActive(true);
+            WarehouseManager.Instance.CurrentCar.ResetState();
             
             //ensure avatars are showing
             AvatarManager.Instance.HideAvatars(false);

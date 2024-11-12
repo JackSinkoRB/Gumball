@@ -17,7 +17,7 @@ namespace Gumball
 
         public static LiveDecal CreateLiveDecal(DecalUICategory category, DecalTexture decalTexture, int priority = -1)
         {
-            LiveDecal liveDecal = Instance.liveDecalPrefab.gameObject.GetSpareOrCreate<LiveDecal>();
+            LiveDecal liveDecal = Instance.liveDecalPrefab.gameObject.GetSpareOrCreate<LiveDecal>(poolOnDisable: false);
             DontDestroyOnLoad(liveDecal);
 
             liveDecal.transform.SetParent(DecalEditor.Instance.CurrentCar.transform);
@@ -35,8 +35,9 @@ namespace Gumball
         /// </summary>
         public static void SaveLiveDecalData(AICar car, List<LiveDecal> liveDecals)
         {
-            LiveDecal.LiveDecalData[] liveDecalData = CreateLiveDecalData(liveDecals);
+            LiveDecalData[] liveDecalData = CreateLiveDecalData(liveDecals);
             DataManager.Cars.Set(GetDecalsSaveKey(car), liveDecalData);
+            DataManager.Cars.Set($"{GetDecalsSaveKey(car)}.RotationOfCar", car.transform.rotation.eulerAngles.ToSerializedVector());
             GlobalLoggers.DecalsLogger.Log($"Saving {liveDecals.Count} live decals for {car.gameObject.name}.");
         }
 
@@ -47,23 +48,32 @@ namespace Gumball
         {
             if (!DecalEditor.ExistsRuntime)
             {
-                Debug.LogWarning("Could not apply decals as the decal editor doesn't exist.");
+                Debug.LogError("Could not apply decals as the decal editor doesn't exist.");
                 yield break;
             }
 
-            yield return DecalEditor.Instance.StartSession(car);
+            Quaternion previousRotation = car.transform.rotation;
+            Quaternion rotationOfCarWhenDataWasSaved = Quaternion.Euler(DataManager.Cars.Get<SerializedVector3>($"{GetDecalsSaveKey(car)}.RotationOfCar").ToVector3());
+            car.transform.rotation = rotationOfCarWhenDataWasSaved;
+            DecalEditor.Instance.StartSession(car);
             yield return DecalEditor.Instance.EndSession();
+            car.transform.rotation = previousRotation;
+            car.Rigidbody.rotation = previousRotation;
         }
 
+        public static LiveDecalData[] GetSavedDecalData(AICar car)
+        {
+            LiveDecalData[] liveDecalData = DataManager.Cars.Get(GetDecalsSaveKey(car), Array.Empty<LiveDecalData>());
+            return liveDecalData;
+        }
+        
         /// <summary>
         /// Creates a list of live decals from the specified car's save data.
         /// </summary>
-        public static List<LiveDecal> CreateLiveDecalsFromData(AICar car)
+        public static List<LiveDecal> CreateLiveDecalsFromData(LiveDecalData[] liveDecalData)
         {
             List<LiveDecal> liveDecals = new();
-            LiveDecal.LiveDecalData[] liveDecalData = DataManager.Cars.Get(GetDecalsSaveKey(car), Array.Empty<LiveDecal.LiveDecalData>());
-
-            foreach (LiveDecal.LiveDecalData data in liveDecalData)
+            foreach (LiveDecalData data in liveDecalData)
             {
                 LiveDecal liveDecal = CreateLiveDecalFromData(data);
                 liveDecals.Add(liveDecal);
@@ -74,7 +84,7 @@ namespace Gumball
             return decalsSorted;
         }
         
-        public static LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
+        public static LiveDecal CreateLiveDecalFromData(LiveDecalData data)
         {
             DecalUICategory category = Instance.decalUICategories[data.CategoryIndex];
             DecalTexture decalTexture = category.DecalTextures[data.TextureIndex];
@@ -83,13 +93,13 @@ namespace Gumball
             return liveDecal;
         }
 
-        private static LiveDecal.LiveDecalData[] CreateLiveDecalData(List<LiveDecal> liveDecals)
+        private static LiveDecalData[] CreateLiveDecalData(List<LiveDecal> liveDecals)
         {
-            LiveDecal.LiveDecalData[] finalData = new LiveDecal.LiveDecalData[liveDecals.Count];
+            LiveDecalData[] finalData = new LiveDecalData[liveDecals.Count];
             for (int index = 0; index < liveDecals.Count; index++)
             {
                 LiveDecal liveDecal = liveDecals[index];
-                finalData[index] = new LiveDecal.LiveDecalData(liveDecal);
+                finalData[index] = new LiveDecalData(liveDecal);
             }
 
             return finalData;

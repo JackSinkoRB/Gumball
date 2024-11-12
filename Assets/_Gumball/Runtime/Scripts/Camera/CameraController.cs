@@ -9,7 +9,6 @@ namespace Gumball
     {
         
         [SerializeField] private CameraState defaultState;
-        [SerializeField] private Transform target;
 
         [Header("Transitions")]
         [SerializeField] private CameraTransition[] transitions;
@@ -29,26 +28,17 @@ namespace Gumball
             }
         }
 
-        private void LateUpdate()
+        private void Update()
         {
+            if (Time.timeScale == 0)
+                return; //don't update cameras while frozen
+            
             timeSinceStateChange += Time.deltaTime;
             
             SetPositionAndRotation();
-        }
-
-        public void SetTarget(Transform newTarget, bool snap = true)
-        {
-            if (newTarget == target)
-                return;
             
-            target = newTarget;
-            
-            Rigidbody targetRigidbody = target.GetComponent<Rigidbody>();
-            if (targetRigidbody != null)
-                targetRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
-
-            if (snap && target != null)
-                CurrentState.SnapToTarget(this, target);
+            if (currentState != null)
+                currentState.UpdateWhenCurrent();
         }
         
         public CameraTransition GetCurrentTransition()
@@ -69,42 +59,56 @@ namespace Gumball
                 return;
 
             previousState = currentState;
+            if (previousState != null)
+                previousState.OnNoLongerCurrent();
+            
             currentState = state;
+            if (currentState != null)
+                currentState.OnSetCurrent(this);
+            
             timeSinceStateChange = 0;
         }
         
         public void SkipTransition()
         {
             timeSinceStateChange = Mathf.Infinity;
-            CurrentState.SnapToTarget(this, target);
+            CurrentState.Snap();
         }
-
+        
         private void SetPositionAndRotation()
         {
-            if (target == null)
+            if (CurrentState == null)
                 return;
-            
+
             CameraTransition currentTransition = GetCurrentTransition();
             if (currentTransition == null)
             {
-                var (position, lookAtPosition) = CurrentState.Calculate(this, target);
-                transform.position = position;
-                transform.LookAt(lookAtPosition);
+                TransformOperation[] operations = CurrentState.Calculate();
+
+                foreach (TransformOperation operation in operations)
+                    operation.Apply();
             }
             else
             {
+                //foreach operation in CurrentState, check if there's a corresponding target
+                // if yes, blend the 2 positions and rotations
+                // if no, just apply the operation
+                
                 //blend between the 2 transitions
-                var (currentPosition, currentLookAtPosition) = CurrentState.Calculate(this, target);
-                var (previousPosition, previousLookAtPosition) = previousState.Calculate(this, target);
+                TransformOperation[] currentOperations = CurrentState.Calculate();
+                TransformOperation[] previousOperations = previousState.Calculate();
 
                 float timePercent = Mathf.Clamp01(timeSinceStateChange / currentTransition.TransitionTime);
                 float blendPercent = currentTransition.BlendCurve.Evaluate(timePercent);
 
-                Vector3 positionBlended = Vector3.Lerp(previousPosition, currentPosition, blendPercent);
-                transform.position = positionBlended;
-
-                Vector3 lookAtPositionBlended = Vector3.Lerp(previousLookAtPosition, currentLookAtPosition, blendPercent);
-                transform.LookAt(lookAtPositionBlended);
+                foreach (TransformOperation previousOperation in previousOperations)
+                {
+                    foreach (TransformOperation currentOperation in currentOperations)
+                    {
+                        if (previousOperation.TryBlend(currentOperation, blendPercent))
+                            break;
+                    }
+                }
             }
         }
         

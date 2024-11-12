@@ -10,8 +10,7 @@ using System.IO;
 using UnityEditor;
 #endif
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 namespace Gumball
@@ -26,11 +25,28 @@ namespace Gumball
             AFTER
         }
 
+        private struct ChunkObjectHandling
+        {
+            public readonly bool CanDestroy;
+            public readonly bool CanSaveData;
+            public readonly string AssetKey;
+
+            public ChunkObjectHandling(bool destroy, bool saveData, string assetKey)
+            {
+                CanDestroy = destroy;
+                CanSaveData = saveData;
+                AssetKey = assetKey;
+            }
+        }
+        
         public const string TerrainTag = "Terrain";
         public const string ChunkMeshAssetFolderPath = "Assets/_Gumball/Runtime/Meshes/Chunks";
         public const string ChunkFolderPath = "Assets/_Gumball/Runtime/Prefabs/Chunks";
         public const string RuntimeChunkSuffix = "_runtime";
         public const string RuntimeChunksPath = "Assets/_Gumball/Runtime/Prefabs/Chunks/_Runtime";
+        
+        private const string chunkObjectAddressableGroup = "ChunkObjects";
+        private const string chunkObjectAddressableSuffix = "_ChunkObject";
         
 #if UNITY_EDITOR
         /// <summary>
@@ -177,42 +193,52 @@ namespace Gumball
         }
 
 #if UNITY_EDITOR
-        public static void BakeMeshes(Chunk chunk, bool replace = true)
+        public static void BakeMeshes(Chunk chunk)
         {
-            foreach (SplineMesh splineMesh in chunk.SplinesMeshes)
+            SplineMesh[] splineMeshes = chunk.transform.GetComponentsInAllChildren<SplineMesh>().ToArray();
+            foreach (SplineMesh splineMesh in splineMeshes)
             {
-                if (!splineMesh.gameObject.activeSelf)
+                if (splineMesh == null || !splineMesh.gameObject.activeSelf)
                     continue;
-                
-                bool alreadyBaked = splineMesh.baked;
-                if (alreadyBaked && !replace)
-                    continue;
-
-                splineMesh.Unbake();
-                splineMesh.Bake(true, true);
-
-                MeshFilter meshFilter = splineMesh.GetComponent<MeshFilter>();
 
                 string chunkDirectory = $"{ChunkMeshAssetFolderPath}/{chunk.UniqueID}";
                 if (!Directory.Exists(chunkDirectory))
                     Directory.CreateDirectory(chunkDirectory);
-                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}.asset";
-                if (AssetDatabase.LoadAssetAtPath<Mesh>(path) != null)
+
+                UniqueIDAssigner uniqueIDAssigner = splineMesh.GetComponent<UniqueIDAssigner>();
+                if (uniqueIDAssigner == null)
+                    continue;
+
+                splineMesh.Unbake();
+                if (splineMesh.GetChannelCount() > 0)
+                    splineMesh.Bake(true, true);
+                
+                string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{uniqueIDAssigner.UniqueID}.asset";
+                Mesh existingAsset = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+                if (existingAsset != null)
                     AssetDatabase.DeleteAsset(path);
+                
+                MeshFilter meshFilter = splineMesh.GetComponent<MeshFilter>();
                 AssetDatabase.CreateAsset(meshFilter.sharedMesh, path);
+                AssetDatabase.SaveAssets();
 
                 MeshCollider meshCollider = splineMesh.GetComponent<MeshCollider>();
                 Mesh savedMesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-                meshFilter.sharedMesh = savedMesh;
-                meshCollider.sharedMesh = savedMesh;
+                if (meshFilter != null)
+                {
+                    meshFilter.sharedMesh = savedMesh;
+                    EditorUtility.SetDirty(meshFilter);
+                }
 
-                PrefabUtility.RecordPrefabInstancePropertyModifications(meshFilter);
-                PrefabUtility.RecordPrefabInstancePropertyModifications(meshCollider);
-                PrefabUtility.RecordPrefabInstancePropertyModifications(splineMesh);
+                if (meshCollider != null)
+                {
+                    meshCollider.sharedMesh = savedMesh;
+                    EditorUtility.SetDirty(meshCollider);
+                }
+                
+                EditorUtility.SetDirty(splineMesh);
                 EditorUtility.SetDirty(chunk.gameObject);
-
-                AssetDatabase.SaveAssets();
-
+                
                 GlobalLoggers.ChunkLogger.Log("Baked " + path);
             }
         }
@@ -224,115 +250,120 @@ namespace Gumball
         {
             return $"{RuntimeChunksPath}/{chunk.name}{RuntimeChunkSuffix}.prefab";
         }
+
+        private static ChunkObjectHandling GetChunkObjectHandling(ChunkObject chunkObject)
+        {
+            if (chunkObject == null)
+                return new ChunkObjectHandling(false, false, null);
+            
+            if (chunkObject.IsChildOfAnotherChunkObject)
+            {
+                Debug.LogWarning($"Chunk object {chunkObject.gameObject.name} will not be treated as a chunk object, as it is a child of another chunk object.");
+                return new ChunkObjectHandling(true, false, null);
+            }
+            
+            if (chunkObject.IgnoreAtRuntime || !chunkObject.gameObject.activeSelf || !chunkObject.enabled)
+                return new ChunkObjectHandling(true, false, null);
+
+            //check if there's at least 1 mesh renderer - otherwise just delete it - may have been removed after combining meshes
+            bool nothingToRender = chunkObject.GetComponent<MeshRenderer>() == null && chunkObject.transform.GetComponentsInAllChildren<MeshRenderer>().Count == 0;
+            if (nothingToRender)
+                return new ChunkObjectHandling(true, false, null);
+            
+            if (!chunkObject.LoadSeparately)
+                return new ChunkObjectHandling(false, false, null); //not destroying
+            
+            string assetKey = GameObjectUtils.GetOrSetAddressableKeyFromGameObject(chunkObject.gameObject, chunkObjectAddressableGroup, chunkObjectAddressableSuffix, false);
+            if (assetKey == null)
+            {
+                Debug.LogError($"Asset key was null for {chunkObject.gameObject.name}, therefore it won't be treated as a ChunkObject. Is it a prefab asset ending in .prefab?");
+                return new ChunkObjectHandling(false, false, null);
+            }
+            
+            return new ChunkObjectHandling(true, true, assetKey);
+        }
         
         /// <summary>
         /// Creates a runtime version of the original chunk that is stripped of chunk objects.
         /// </summary>
         /// <returns>The addressable runtime key for the runtime chunk.</returns>
-        public static string CreateRuntimeChunk(GameObject originalChunk, bool saveAssetsOnComplete = true)
+        public static string CreateRuntimeChunk(GameObject prefab, GameObject instanceToCopy = null, bool saveAssetsOnComplete = true)
         {
-            if (originalChunk.name.Contains(RuntimeChunkSuffix))
+            if (prefab.name.Contains(RuntimeChunkSuffix))
             {
-                Debug.LogError($"Cannot create runtime chunk from another runtime chunk ({originalChunk.name}).");
+                Debug.LogError($"Cannot create runtime chunk from another runtime chunk ({prefab.name}).");
                 return null;
             }
+
+            GameObject chunk = instanceToCopy == null ? prefab : instanceToCopy;
             
-            List<ChunkObject> chunkObjectsInOriginalChunk = originalChunk.transform.GetComponentsInAllChildren<ChunkObject>();
-            List<string> assetKeys = new();
-            foreach (ChunkObject chunkObject in chunkObjectsInOriginalChunk)
+            //create runtime chunk
+            GameObject runtimeInstance = Object.Instantiate(chunk);
+            Chunk runtimeInstanceChunk = runtimeInstance.GetComponent<Chunk>();
+            runtimeInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
+
+            List<ChunkObject> chunkObjectsInPrefab = prefab.transform.GetComponentsInAllChildren<ChunkObject>();
+            List<ChunkObject> chunkObjectsInInstance = runtimeInstance.transform.GetComponentsInAllChildren<ChunkObject>();
+
+            //check to remove any chunk objects
+            for (int index = 0; index < chunkObjectsInPrefab.Count; index++)
             {
-                string assetKey = GameObjectUtils.GetAddressableKeyFromGameObject(chunkObject.gameObject);
-                assetKeys.Add(assetKey);
+                ChunkObject chunkObjectInPrefab = chunkObjectsInPrefab[index];
+                ChunkObject chunkObjectInInstance = chunkObjectsInInstance[index];
+
+                if (GetChunkObjectHandling(chunkObjectInPrefab).CanDestroy
+                    && chunkObjectInInstance != null) //may have already been destroyed
+                {
+                    Object.DestroyImmediate(chunkObjectInInstance.gameObject);
+                }
+            }
+            
+            //bake spline meshes
+            BakeMeshes(runtimeInstanceChunk);
+
+            //delete empty gameobjects
+            HashSet<GameObject> emptyObjects = new();
+            foreach (Transform child in runtimeInstance.transform)
+            {
+                if (child.gameObject.IsCompletelyEmpty())
+                    emptyObjects.Add(child.gameObject);
+            }
+            foreach (GameObject emptyGameObject in emptyObjects)
+            {
+                Object.DestroyImmediate(emptyGameObject);
             }
 
-            //update spline meshes in original chunk in case they haven't had a chunk to save
-            originalChunk.GetComponent<Chunk>().FindSplineMeshes();
-
-            string newChunkPath = GetRuntimeChunkPath(originalChunk);
-            GameObject runtimePrefabInstance = Object.Instantiate(originalChunk);
-
-            runtimePrefabInstance.GetComponent<UniqueIDAssigner>().SetPersistent(true);
+            //show error if there's a large amount of objects (suggesting to use ChunkObjects)
+            const int maxChildrenBeforeError = 50;
+            int totalChildren = runtimeInstance.GetTotalChildCount();
+            if (totalChildren > maxChildrenBeforeError)
+                Debug.LogWarning($"{runtimeInstance.name.Replace("(Clone)", "")} has a large amount of children ({totalChildren}) in the runtime chunk. Could any objects be setup as ChunkObjects and loaded separately?");
             
-            //find all chunk object references and save the data
-            // - then destroy all the chunk objects
-            List<ChunkObject> chunkObjects = runtimePrefabInstance.transform.GetComponentsInAllChildren<ChunkObject>();
-            Dictionary<string, List<ChunkObjectData>> chunkObjectData = new();
-            
-            for (int index = 0; index < chunkObjects.Count; index++)
-            {
-                ChunkObject chunkObject = chunkObjects[index];
-
-                if (chunkObject == null || chunkObject.IsChildOfAnotherChunkObject)
-                {
-                    Debug.LogWarning($"Chunk object at index {index} could not be saved as it is a child of another chunk object that was removed.");
-                    continue;
-                }
-
-                if (!chunkObject.isActiveAndEnabled)
-                    continue;
-                
-                if (chunkObject.IgnoreAtRuntime)
-                {
-                    Object.DestroyImmediate(chunkObject.gameObject);
-                    continue;
-                }
-                
-                if (!chunkObject.LoadSeparately)
-                    continue;
-                
-                string assetKey = assetKeys[index];
-                if (assetKey == null)
-                {
-                    Debug.LogError($"Asset key was null for index {index} ({chunkObject.gameObject.name}. Is it a prefab?");
-                    continue;
-                }
-                
-                chunkObject.transform.SetParent(runtimePrefabInstance.transform);
-                
-                List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
-                ChunkObjectData data = new ChunkObjectData(chunkObject);
-                chunkObjectList.Add(data);
-                chunkObjectData[assetKey] = chunkObjectList;
-
-                Object.DestroyImmediate(chunkObject.gameObject);
-            }
-
-            //need to reattach the meshes as the references get lost:
-            SplineMesh[] meshes = runtimePrefabInstance.GetComponent<Chunk>().SplinesMeshes;
-            for (int index = 0; index < meshes.Length; index++)
-            {
-                SplineMesh splineMesh = meshes[index];
-                
-                Mesh originalMesh = originalChunk.GetComponent<Chunk>().SplinesMeshes[index].GetComponent<MeshFilter>().sharedMesh;
-                splineMesh.GetComponent<MeshFilter>().sharedMesh = originalMesh;
-
-                //make sure all spline meshes are readable
-                //originalMesh.SetReadable(true);
-            }
-
             //create raycast detector object
-            runtimePrefabInstance.GetComponent<Chunk>().TryCreateChunkDetector();
-            
-            //update the data
-            runtimePrefabInstance.GetComponent<Chunk>().SetChunkObjectData(chunkObjectData);
+            runtimeInstanceChunk.TryCreateChunkDetector();
 
             //calculate the spline length
-            runtimePrefabInstance.GetComponent<Chunk>().CalculateSplineLength();
-            
-            PrefabUtility.SaveAsPrefabAsset(runtimePrefabInstance, newChunkPath);
+            runtimeInstanceChunk.CalculateSplineLength();
 
+            runtimeInstanceChunk.EnsureBarriersHaveCorrectPhysicsMaterial();
+            runtimeInstanceChunk.EnsureGroundHasCorrectRenderLayer();
+            
+            //save the runtime chunk asset
+            string runtimeChunkPath = GetRuntimeChunkPath(prefab);
+            PrefabUtility.SaveAsPrefabAsset(runtimeInstance, runtimeChunkPath);
+            
             //dispose of instance
-            Object.DestroyImmediate(runtimePrefabInstance);
+            Object.DestroyImmediate(runtimeInstance);
             
             //set the asset as addressable
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             
             const string groupName = "RuntimeChunks";
             AddressableAssetGroup group = settings.FindGroup(groupName);
-            string guid = AssetDatabase.AssetPathToGUID(newChunkPath);
+            string guid = AssetDatabase.AssetPathToGUID(runtimeChunkPath);
             
             AddressableAssetEntry entry = settings.CreateOrMoveEntry(guid, group);
-            entry.address = $"{originalChunk.name}{RuntimeChunkSuffix}";
+            entry.address = $"{prefab.name}{RuntimeChunkSuffix}";
             
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entry, true);
             
@@ -341,8 +372,39 @@ namespace Gumball
             
             return entry.address;
         }
+
+        public static Dictionary<string, List<ChunkObjectData>> CreateChunkObjectData(GameObject chunkPrefab, Chunk chunkInstance)
+        {
+            Dictionary<string, List<ChunkObjectData>> chunkObjectData = new();
+            
+            //find all chunk objects and save the data
+            List<ChunkObject> chunkObjectsFromPrefab = chunkPrefab.transform.GetComponentsInAllChildren<ChunkObject>();
+            List<ChunkObject> chunkObjectsFromInstance = chunkInstance.transform.GetComponentsInAllChildren<ChunkObject>();
+
+            for (int index = 0; index < chunkObjectsFromPrefab.Count; index++)
+            {
+                ChunkObject chunkObjectFromPrefab = chunkObjectsFromPrefab[index];
+                ChunkObject chunkObjectFromInstance = chunkObjectsFromInstance[index];
+                
+                ChunkObjectHandling chunkObjectHandling = GetChunkObjectHandling(chunkObjectFromPrefab);
+                if (!chunkObjectHandling.CanSaveData)
+                    continue;
+
+                //make sure chunk objects have updated (eg. applied grounded, distance from road spline)
+                chunkObjectFromInstance.UpdatePosition();
+
+                string assetKey = chunkObjectHandling.AssetKey;
+
+                List<ChunkObjectData> chunkObjectList = chunkObjectData.ContainsKey(assetKey) ? chunkObjectData[assetKey] : new List<ChunkObjectData>();
+                ChunkObjectData data = new ChunkObjectData(chunkInstance, chunkObjectFromInstance);
+                chunkObjectList.Add(data);
+                chunkObjectData[assetKey] = chunkObjectList;
+            }
+
+            return chunkObjectData;
+        }
 #endif
-        
+
         private static void MoveChunkToOther(Chunk chunk1, Chunk chunk2, LoadDirection direction)
         {
             //align the rotation of chunk2 to match chunk1

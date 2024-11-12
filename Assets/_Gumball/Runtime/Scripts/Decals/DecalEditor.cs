@@ -57,8 +57,6 @@ namespace Gumball
         public Color[] ColorPalette => colorPalette;
 
         private readonly RaycastHit[] decalsUnderPointer = new RaycastHit[MaxDecalsAllowed];
-        private int currentSessionTicketNumber;
-        private int maxWaitingSessionTicketNumber = -1;
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RuntimeInitialise()
@@ -75,34 +73,10 @@ namespace Gumball
             currentCar = null;
             liveDecals.Clear();
         }
-        
-        public static void LoadEditor()
-        {
-            CoroutineHelper.Instance.StartCoroutine(LoadEditorIE());
-        }
-        
-        private static IEnumerator LoadEditorIE()
-        {
-            PanelManager.GetPanel<LoadingPanel>().Show();
-
-            Stopwatch sceneLoadingStopwatch = Stopwatch.StartNew();
-            yield return Addressables.LoadSceneAsync(SceneManager.DecalEditorSceneName, LoadSceneMode.Single, true);
-            sceneLoadingStopwatch.Stop();
-            GlobalLoggers.LoadingLogger.Log($"{SceneManager.DecalEditorSceneName} loading complete in {sceneLoadingStopwatch.Elapsed.ToPrettyString(true)}");
-
-            AICar car = WarehouseManager.Instance.CurrentCar;
-
-            yield return Instance.StartSession(car);
-            
-            AvatarManager.Instance.HideAvatars(true);
-
-            PanelManager.GetPanel<LoadingPanel>().Hide();
-        }
 
         private void Update()
         {
-            bool canFade = PrimaryContactInput.IsPressed && currentSelected != null && currentSelected.IsValidPosition;
-            selectedLiveDecalUI.Fade(canFade);
+            CheckToFadeSelectedDecalUI();
         }
 
         private void LateUpdate()
@@ -112,33 +86,21 @@ namespace Gumball
         
         private void OnPrimaryContactReleased()
         {
-            if (!PanelManager.PanelExists<DecalEditorPanel>())
+            if (!PanelManager.PanelExists<LiveryWorkshopMenu>())
                 return; //editor panel isn't open
-            
-            bool pointerWasPressed = PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.PressedThreshold);
-            if (!pointerWasPressed)
-                return;
 
-            if (PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().TrashButton.image)
-                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().ColourButton.image)
-                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().SendForwardButton.image)
-                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalEditorPanel>().SendBackwardButton.image)
-                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalColourSelectorPanel>().MagneticScroll.GetComponent<Image>()))
-                return;
-
-            UpdateDecalUnderPointer();
+            CheckToMoveDecalUnderPointer();
         }
 
-        public IEnumerator StartSession(AICar car)
+        public void StartSession(AICar car)
         {
-            int sessionTicketNumber = ++maxWaitingSessionTicketNumber;
-            while (currentSessionTicketNumber != sessionTicketNumber)
+            if (isSessionActive)
             {
-                GlobalLoggers.DecalsLogger.Log($"Cannot start decal session, because one has already been started. Waiting for its turn... ({currentSessionTicketNumber} / {sessionTicketNumber})");
-                yield return null;
+                GlobalLoggers.DecalsLogger.Log($"Cannot start decal session, because one has already been started.");
+                return;
             }
 
-            GlobalLoggers.DecalsLogger.Log($"Started session {currentSessionTicketNumber}.");
+            GlobalLoggers.DecalsLogger.Log($"Started session.");
             isSessionActive = true;
             currentCar = car;
 
@@ -150,7 +112,7 @@ namespace Gumball
             //set the vehicle kinematic
             currentCar.Rigidbody.isKinematic = true;
             
-            liveDecals = DecalManager.CreateLiveDecalsFromData(car);
+            liveDecals = DecalManager.CreateLiveDecalsFromData(DecalManager.GetSavedDecalData(car));
             
             GlobalLoggers.DecalsLogger.Log($"Starting session for {car.gameObject.name} with {liveDecals.Count} saved decals.");
             
@@ -163,11 +125,12 @@ namespace Gumball
             
             //disable the car's collider temporarily
             car.Colliders.SetActive(false);
+
+            ApplyBaseDecals(car);
             
             onSessionStart?.Invoke();
-            
-            yield return null;
-            DeselectLiveDecal(); //perform at end of frame as magnetic scroll will select it in LateUpdate()
+
+            DeselectLiveDecal();
         }
 
         public IEnumerator EndSession()
@@ -175,7 +138,7 @@ namespace Gumball
             if (!isSessionActive)
                 yield break;
             
-            GlobalLoggers.DecalsLogger.Log($"Ending session {currentSessionTicketNumber}.");
+            GlobalLoggers.DecalsLogger.Log($"Ending session.");
 
             PrimaryContactInput.onRelease -= OnPrimaryContactReleased;
             DataProvider.onBeforeSaveAllDataOnAppExit -= OnBeforeSaveAllDataOnAppExit;
@@ -184,6 +147,11 @@ namespace Gumball
             
             DecalManager.SaveLiveDecalData(currentCar, liveDecals);
 
+            //ensure car is active before applying
+            bool wasActiveBefore = currentCar.gameObject.activeSelf;
+            currentCar.gameObject.SetActive(true);
+            
+            //apply
             foreach (LiveDecal liveDecal in liveDecals)
             {
                 liveDecal.Apply();
@@ -198,11 +166,14 @@ namespace Gumball
 
             //need to wait for the texture to fully apply before removing paintable components
             yield return null;
-            SessionCleanup();
             
-            GlobalLoggers.DecalsLogger.Log($"Ended session {currentSessionTicketNumber}.");
+            //restore
+            currentCar.gameObject.SetActive(wasActiveBefore);
+            
+            SessionCleanup();
+
+            GlobalLoggers.DecalsLogger.Log($"Ended session.");
             isSessionActive = false;
-            currentSessionTicketNumber++;
 
             onSessionEnd?.Invoke();
         }
@@ -250,7 +221,7 @@ namespace Gumball
             return liveDecal;
         }
 
-        public LiveDecal CreateLiveDecalFromData(LiveDecal.LiveDecalData data)
+        public LiveDecal CreateLiveDecalFromData(LiveDecalData data)
         {
             LiveDecal liveDecal = DecalManager.CreateLiveDecalFromData(data);
 
@@ -369,6 +340,18 @@ namespace Gumball
             }
         }
 
+        private void ApplyBaseDecals(AICar car)
+        {
+            WarehouseCarData carData = WarehouseManager.Instance.AllCarData[car.CarIndex];
+            List<LiveDecal> baseDecals = DecalManager.CreateLiveDecalsFromData(carData.BaseDecalData);
+            
+            foreach (LiveDecal liveDecal in baseDecals)
+            {
+                liveDecal.Apply();
+                Destroy(liveDecal.gameObject);
+            }
+        }
+
         private void OnLiveDecalsListChanged()
         {
             //reassign the priorities based on order in the list
@@ -378,8 +361,47 @@ namespace Gumball
                 liveDecal.SetPriority(index + 1); 
             }
         }
+
+        private void CheckToFadeSelectedDecalUI()
+        {
+            bool canFade = PrimaryContactInput.IsPressed && currentSelected != null && currentSelected.IsValidPosition;
+            selectedLiveDecalUI.Fade(canFade);
+        }
+
+        private void CheckToMoveDecalUnderPointer()
+        {
+            bool pointerWasPressed = PrimaryContactInput.OffsetSincePressedNormalised.Approximately(Vector2.zero, PrimaryContactInput.PressedThreshold);
+            if (!pointerWasPressed)
+                return;
+
+            if (PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<LiveryWorkshopMenu>().TrashButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<LiveryWorkshopMenu>().ColourButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<LiveryWorkshopMenu>().SendForwardButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<LiveryWorkshopMenu>().SendBackwardButton.image)
+                || PrimaryContactInput.IsGraphicUnderPointer(PanelManager.GetPanel<DecalColourSelectorPanel>().MagneticScroll.GetComponent<Image>()))
+                return;
+
+            UpdateDecalUnderPointer();
+        }
         
 #if UNITY_EDITOR
+        [Tooltip("Editor only: Copy this data for the base livery.")]
+        [SerializeField] private LiveDecalData[] decalData;
+        
+        /// <summary>
+        /// Save the current car data, and serialize it in the decal data array.
+        /// </summary>
+        [ButtonMethod]
+        public void RetrieveData()
+        {
+            if (!Application.isPlaying)
+                throw new InvalidOperationException("Can only retrieve decal data in play mode.");
+
+            AICar carToUse = WarehouseManager.Instance.CurrentCar;
+            DecalManager.SaveLiveDecalData(carToUse, liveDecals);
+            decalData = DecalManager.GetSavedDecalData(carToUse);
+        }
+        
         /// <summary>
         /// Use this method to generate an array of colours that can be used as a colour pallete.
         /// </summary>

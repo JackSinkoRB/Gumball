@@ -8,13 +8,19 @@ namespace Gumball
 {
     public class RewardPanel : AnimatedPanel
     {
-
-        [SerializeField] private MagneticScroll magneticScroll;
         
+        [SerializeField] private Sprite standardCurrencyIcon;
+        [SerializeField] private Sprite premiumCurrencyIcon;
+        [SerializeField] private RewardUI rewardUIPrefab;
+        [SerializeField] private Transform rewardsHolder;
+
         [Header("Debugging")]
         [SerializeField, ReadOnly] private List<CorePart> rewardQueueCoreParts = new();
-
-        public int PendingRewards => rewardQueueCoreParts.Count; //TODO: add other reward counts
+        [SerializeField, ReadOnly] private List<SubPart> rewardQueueSubParts = new();
+        [SerializeField, ReadOnly] private List<int> rewardQueueStandardCurrency = new();
+        [SerializeField, ReadOnly] private List<int> rewardQueuePremiumCurrency = new();
+        
+        public int PendingRewards => rewardQueueCoreParts.Count + rewardQueueSubParts.Count + rewardQueueStandardCurrency.Count + rewardQueuePremiumCurrency.Count;
         
         protected override void OnShow()
         {
@@ -33,31 +39,64 @@ namespace Gumball
             
             rewardQueueCoreParts.Add(corePart);
         }
-
+        
+        public void QueueReward(SubPart subPart)
+        {
+            if (rewardQueueSubParts.Contains(subPart))
+            {
+                Debug.LogWarning($"Tried queuing {subPart.name} but it is already queued.");
+                return;
+            }
+            
+            rewardQueueSubParts.Add(subPart);
+        }
+        
+        public void QueueStandardCurrencyReward(int amount)
+        {
+            rewardQueueStandardCurrency.Add(amount);
+        }
+        
+        public void QueuePremiumCurrencyReward(int amount)
+        {
+            rewardQueuePremiumCurrency.Add(amount);
+        }
+        
         public void Populate()
         {
-            List<ScrollItem> scrollItems = new List<ScrollItem>();
+            foreach (Transform child in rewardsHolder)
+                child.gameObject.Pool();
             
             //do core parts first
-            if (rewardQueueCoreParts.Count > 0)
+            foreach (CorePart corePart in rewardQueueCoreParts)
             {
-                CorePart corePart = rewardQueueCoreParts[0];
-                rewardQueueCoreParts.RemoveAt(0);
-                
-                ScrollItem scrollItem = new ScrollItem();
-
-                scrollItem.onLoad += () =>
-                {
-                    RewardScrollIcon rewardScrollIcon = (RewardScrollIcon) scrollItem.CurrentIcon;
-                    rewardScrollIcon.Initialise(corePart.DisplayName, corePart.Icon);
-                };
-                
-                scrollItems.Add(scrollItem);
+                RewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<RewardUI>(rewardsHolder);
+                instance.Initialise(corePart.Icon, corePart.DisplayName);
             }
+            rewardQueueCoreParts.Clear();
 
-            //TODO: sub parts etc.
+            //show sub parts
+            foreach (SubPart subPart in rewardQueueSubParts)
+            {
+                RewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<RewardUI>(rewardsHolder);
+                instance.Initialise(subPart.Icon, subPart.DisplayName);
+            }
+            rewardQueueSubParts.Clear();
             
-            magneticScroll.SetItems(scrollItems);
+            //show premium currency
+            foreach (int amount in rewardQueuePremiumCurrency)
+            {
+                RewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<RewardUI>(rewardsHolder);
+                instance.Initialise(premiumCurrencyIcon, $"{amount}");
+            }
+            rewardQueuePremiumCurrency.Clear();
+            
+            //show standard currency
+            foreach (int amount in rewardQueueStandardCurrency)
+            {
+                RewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<RewardUI>(rewardsHolder);
+                instance.Initialise(standardCurrencyIcon, $"{amount}");
+            }
+            rewardQueueStandardCurrency.Clear();
         }
         
     }

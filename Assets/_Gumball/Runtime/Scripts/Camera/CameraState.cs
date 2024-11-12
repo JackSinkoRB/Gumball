@@ -1,56 +1,60 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
 {
-    public class CameraState : MonoBehaviour
+    public abstract class CameraState : MonoBehaviour
     {
 
-        [SerializeField] private float targetOffsetHorizontal;
-        [SerializeField] private float targetOffsetVertical = 0.35f;
-        [SerializeField] private float verticalLookAtOffset;
-        [SerializeField] private float horizontalAngleOffset;
-        [SerializeField] private float distance = 2.3f;
-        [SerializeField] private float rotationSnapTime = 0.15f;
-        
-        private float desiredRotationAngle;
-        private float desiredHeight;
-        private float currentRotationAngle;
-        private Quaternion currentRotation;
-        private Vector3 desiredPosition;
-        private float yVelocity;
-        private float zVelocity;
+        [SerializeField, ReadOnly] protected CameraController controller;
+        [SerializeField] protected Transform rotationPivot;
+        [SerializeField] protected Transform depthPivot;
+        [SerializeField] protected Transform lookAtPivot;
+        [Space(5)]
+        [SerializeField] protected Transform fakeController;
+        [SerializeField] protected Transform fakeRotationPivot;
+        [SerializeField] protected Transform fakeDepthPivot;
+        [SerializeField] protected Transform fakeLookAtPivot;
 
-        public (Vector3, Vector3) Calculate(CameraController controller, Transform target)
+        private bool isInitialised;
+
+        protected virtual void OnEnable()
         {
-            desiredRotationAngle = target.eulerAngles.y + horizontalAngleOffset;
-            currentRotationAngle = controller.transform.eulerAngles.y;
-
-            currentRotationAngle = Mathf.SmoothDampAngle(currentRotationAngle, desiredRotationAngle, ref yVelocity, rotationSnapTime);
-
-            Vector3 targetPosition = target.position + new Vector3(targetOffsetHorizontal, targetOffsetVertical, 0);
-            desiredPosition = targetPosition;
-            
-            desiredPosition += Quaternion.Euler(0, currentRotationAngle, 0) * new Vector3(0, 0, -distance);
-            
-            Vector3 lookAtPosition = target.position + new Vector3(targetOffsetHorizontal, 0, 0) + new Vector3(0, verticalLookAtOffset, 0);
-            return (desiredPosition, lookAtPosition);
+            if (!isInitialised)
+                Initialise();
         }
 
-        public void SnapToTarget(CameraController controller, Transform target)
+        protected virtual void Initialise()
         {
-            desiredRotationAngle = target.eulerAngles.y + horizontalAngleOffset;
+            isInitialised = true;
+        }
+
+        public virtual void OnSetCurrent(CameraController controller)
+        {
+            this.controller = controller;
+        }
+
+        public virtual void UpdateWhenCurrent()
+        {
             
-            Vector3 targetPosition = target.position + (target.right * targetOffsetHorizontal) + (target.up * targetOffsetVertical);
-            desiredPosition = targetPosition;
+        }
+
+        public virtual void OnNoLongerCurrent()
+        {
             
-            desiredPosition += Quaternion.Euler(0, desiredRotationAngle, 0) * new Vector3(0, 0, -distance);
+        }
+
+        public abstract TransformOperation[] Calculate(bool interpolate = true);
+        
+        public virtual void Snap()
+        {
+            TransformOperation[] operations = Calculate(false);
             
-            Vector3 lookAtPosition = target.position + (target.right * targetOffsetHorizontal) + (target.up * verticalLookAtOffset);
-            
-            controller.transform.position = desiredPosition;
-            controller.transform.LookAt(lookAtPosition);
+            foreach (TransformOperation operation in operations)
+                operation.Apply();
         }
 
     }

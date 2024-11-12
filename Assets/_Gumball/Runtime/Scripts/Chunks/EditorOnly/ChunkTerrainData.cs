@@ -16,6 +16,7 @@ namespace Gumball
 
         private const string defaultTerrainMaterialPath = "Assets/_Gumball/Runtime/Materials/DefaultTerrain.mat";
         
+        [SerializeField] private Material terrainMaterial;
         [PositiveValueOnly, SerializeField] private int resolution = 100;
         [PositiveValueOnly, SerializeField] private int resolutionLowLOD = 20;
         [PositiveValueOnly, SerializeField] private float chunkBlendDistance = 5;
@@ -51,15 +52,15 @@ namespace Gumball
         public ChunkGrid GridLowLOD { get; private set; }
         public ChunkGrid Grid { get; private set; }
 
-        public Dictionary<Chunk.TerrainLOD, GameObject> Create(Chunk chunkToUse, Material[] materialsToUse = null)
+        public Dictionary<Chunk.ChunkLOD, GameObject> Create(Chunk chunkToUse)
         {
             chunk = chunkToUse;
             UpdateGrid();
 
-            Dictionary<Chunk.TerrainLOD, GameObject> terrains = new()
+            Dictionary<Chunk.ChunkLOD, GameObject> terrains = new()
             {
-                [Chunk.TerrainLOD.LOW] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.LOW, materialsToUse),
-                [Chunk.TerrainLOD.HIGH] = GenerateTerrainMeshFromGrid(Chunk.TerrainLOD.HIGH, materialsToUse)
+                [Chunk.ChunkLOD.LOW] = GenerateTerrainMeshFromGrid(Chunk.ChunkLOD.LOW),
+                [Chunk.ChunkLOD.HIGH] = GenerateTerrainMeshFromGrid(Chunk.ChunkLOD.HIGH)
             };
             
             return terrains;
@@ -71,9 +72,9 @@ namespace Gumball
             Grid = new ChunkGrid(chunk, resolution, widthAroundRoad);
         }
         
-        private GameObject GenerateTerrainMeshFromGrid(Chunk.TerrainLOD lod, Material[] materialsToAssign = null)
+        private GameObject GenerateTerrainMeshFromGrid(Chunk.ChunkLOD lod)
         {
-            ChunkGrid grid = lod == Chunk.TerrainLOD.HIGH ? Grid : GridLowLOD;
+            ChunkGrid grid = lod == Chunk.ChunkLOD.HIGH ? Grid : GridLowLOD;
             
             //create the gameobject
             GameObject terrain = new GameObject($"Terrain-{lod.ToString()}");
@@ -84,9 +85,7 @@ namespace Gumball
             
             //apply materials
             MeshRenderer meshRenderer = terrain.AddComponent<MeshRenderer>();
-            meshRenderer.sharedMaterials = materialsToAssign.HasValidMaterials()
-                ? materialsToAssign
-                : new[] { GetDefaultMaterial() }; //set a material with the default shader if none
+            meshRenderer.sharedMaterial = GetTerrainMaterial(); //set a material with the default shader if none
 
             //apply mesh
             MeshFilter meshFilter = terrain.AddComponent<MeshFilter>();
@@ -130,7 +129,7 @@ namespace Gumball
             AssetDatabase.SaveAssets();
 
             //add a collider
-            if (lod == Chunk.TerrainLOD.HIGH)
+            if (lod == Chunk.ChunkLOD.HIGH)
                 terrain.AddComponent<MeshCollider>().sharedMesh = newMesh;
             
             return terrain;
@@ -380,28 +379,34 @@ namespace Gumball
             }
 
             //check to blend
-            foreach (ChunkObject chunkObject in chunkObjects)
+            if (desiredOffsets.Count == 0) //if there's already flattening from something underneath, then don't blend with other objects
             {
-                if (desiredOffsets.ContainsKey(chunkObject) || !chunkObject.CanFlattenTerrain || chunkObject.FlattenTerrainBlendDistance <= 0)
-                    continue;
-                
-                float maxDistanceSqr = chunkObject.FlattenTerrainBlendDistance * chunkObject.FlattenTerrainBlendDistance;
-                //get distance from collider to currentPosition
-                var (closestPosition, distanceSqr) = chunkObject.ColliderToFlattenTo.ClosestVertex(currentPosition, true);
-                
-                bool isWithinBlendRadius = distanceSqr <= maxDistanceSqr;
-                if (!isWithinBlendRadius)
-                    continue;
+                foreach (ChunkObject chunkObject in chunkObjects)
+                {
+                    if (!chunkObject.isActiveAndEnabled)
+                        continue;
 
-                float blendPercent = distanceSqr / maxDistanceSqr;
-                float blendPercentWithCurve = chunkObject.FlattenTerrainBlendCurve.Evaluate(blendPercent);
-                float blendModifier = Mathf.Clamp01(blendPercentWithCurve); //furthest away = 0 : 1
-                float offset = closestPosition.y - currentPosition.y;
+                    if (desiredOffsets.ContainsKey(chunkObject) || !chunkObject.CanFlattenTerrain || chunkObject.FlattenTerrainBlendDistance <= 0)
+                        continue;
 
-                float offsetWithBlending = offset * blendModifier;
-                
-                desiredOffsets[chunkObject] = offsetWithBlending;
-                sumOfOffsets += offsetWithBlending;
+                    float maxDistanceSqr = chunkObject.FlattenTerrainBlendDistance * chunkObject.FlattenTerrainBlendDistance;
+                    //get distance from collider to currentPosition
+                    var (closestPosition, distanceSqr) = chunkObject.ColliderToFlattenTo.ClosestVertex(currentPosition, true);
+
+                    bool isWithinBlendRadius = distanceSqr <= maxDistanceSqr;
+                    if (!isWithinBlendRadius)
+                        continue;
+
+                    float blendPercent = distanceSqr / maxDistanceSqr;
+                    float blendPercentWithCurve = chunkObject.FlattenTerrainBlendCurve.Evaluate(blendPercent);
+                    float blendModifier = Mathf.Clamp01(blendPercentWithCurve); //furthest away = 0 : 1
+                    float offset = closestPosition.y - currentPosition.y;
+
+                    float offsetWithBlending = offset * blendModifier;
+
+                    desiredOffsets[chunkObject] = offsetWithBlending;
+                    sumOfOffsets += offsetWithBlending;
+                }
             }
 
             if (desiredOffsets.Count == 0)
@@ -414,9 +419,9 @@ namespace Gumball
             return newHeight;
         }
         
-        private static Material GetDefaultMaterial()
+        private Material GetTerrainMaterial()
         {
-            return AssetDatabase.LoadAssetAtPath<Material>(defaultTerrainMaterialPath);
+            return terrainMaterial != null ? terrainMaterial : AssetDatabase.LoadAssetAtPath<Material>(defaultTerrainMaterialPath);
         }
         
     }

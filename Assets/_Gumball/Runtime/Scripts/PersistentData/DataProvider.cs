@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading.Tasks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -32,6 +33,14 @@ namespace Gumball
         /// </summary>
         public static void SaveAllAsync()
         {
+#if UNITY_EDITOR
+            if (DataManager.IsUsingTestProviders)
+            {
+                SaveAllSync();
+                return; //do not save ASYNC when using test providers
+            }
+#endif
+
             GlobalLoggers.SaveDataLogger.Log("Checking to save all dirty data providers (asynchronously).");
 
             foreach (DataProvider provider in dirtyProviders)
@@ -157,7 +166,7 @@ namespace Gumball
         {
             CheckIfLoaded();
 
-            if (currentValues.ContainsKey(key) && currentValues[key] == value)
+            if (currentValues.ContainsKey(key) && currentValues[key].Equals(value))
                 return;
 
             if (!currentValues.ContainsKey(key) && value == null)
@@ -180,8 +189,12 @@ namespace Gumball
             CheckIfLoaded();
 
             if (!currentValues.ContainsKey(key))
-                return defaultValue;
-            return (T)currentValues[key];
+            {
+                Set(key, defaultValue);
+                return defaultValue; //return in case it is null
+            }
+
+            return (T)Convert.ChangeType(currentValues[key], typeof(T), CultureInfo.InvariantCulture);
         }
 
         public void RemoveKey(string key)
@@ -230,7 +243,7 @@ namespace Gumball
             }
         }
 
-        public abstract bool SourceHasValue();
+        public abstract bool SourceExists();
         protected abstract void SaveToSource();
         protected abstract void LoadFromSource();
         protected abstract void OnRemoveFromSource();

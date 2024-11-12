@@ -8,44 +8,14 @@ using UnityEngine.TestTools;
 
 namespace Gumball.Runtime.Tests
 {
-    public class StanceModificationTests : IPrebuildSetup, IPostBuildCleanup
+    public class StanceModificationTests : BaseRuntimeTests
     {
         
         private const int carIndexToUse = 1; //test with the 911
         
         private bool isInitialised;
-
-        public void Setup()
-        {
-            BootSceneClear.TrySetup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = true;
-        }
-
-        public void Cleanup()
-        {
-            BootSceneClear.TryCleanup();
-            
-            SingletonScriptableHelper.LazyLoadingEnabled = false;
-        }
         
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            DecalEditor.IsRunningTests = true;
-            DataManager.EnableTestProviders(true);
-
-            AsyncOperation loadWorkshopScene = EditorSceneManager.LoadSceneAsyncInPlayMode(TestManager.Instance.WorkshopScenePath, new LoadSceneParameters(LoadSceneMode.Single));
-            loadWorkshopScene.completed += OnSceneLoadComplete;
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            DataManager.EnableTestProviders(false);
-            if (WarehouseManager.Instance.CurrentCar != null)
-                Object.DestroyImmediate(WarehouseManager.Instance.CurrentCar.gameObject);
-        }
+        protected override string sceneToLoadPath => TestManager.Instance.WarehouseScenePath;
 
         [SetUp]
         public void SetUp()
@@ -53,16 +23,25 @@ namespace Gumball.Runtime.Tests
             DataManager.RemoveAllData();
         }
 
-        private void OnSceneLoadComplete(AsyncOperation asyncOperation)
+        protected override void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
-            CoroutineHelper.Instance.StartCoroutine(WarehouseManager.Instance.SpawnCar(carIndexToUse, 
-                Vector3.zero, 
-                Quaternion.Euler(Vector3.zero), 
-                (car) =>
+            base.OnSceneLoadComplete(asyncOperation);
+            
+            CoroutineHelper.Instance.StartCoroutine(Initialise());
+        }
+        
+        private IEnumerator Initialise()
+        {
+            //require the part managers to spawn the player car
+            yield return CorePartManager.Initialise();
+            yield return SubPartManager.Initialise();
+
+            yield return WarehouseManager.Instance.SpawnCar(carIndexToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
+                (carInstance) =>
                 {
-                    WarehouseManager.Instance.SetCurrentCar(car);
+                    WarehouseManager.Instance.SetCurrentCar(carInstance);
                     isInitialised = true;
-                }));
+                });
         }
         
         [UnityTest]
@@ -143,20 +122,21 @@ namespace Gumball.Runtime.Tests
 
             const int indexToUse = 0;
             WheelCollider wheelCollider = WarehouseManager.Instance.CurrentCar.AllWheelColliders[indexToUse];
+            WheelMesh wheelMesh = WarehouseManager.Instance.CurrentCar.AllWheelMeshes[indexToUse];
             StanceModification stanceModification = wheelCollider.GetComponent<StanceModification>();
 
             float valueToUse = stanceModification.Offset.MinValue;
             stanceModification.ApplyOffset(valueToUse);
-            Assert.AreEqual(valueToUse, wheelCollider.transform.localPosition.x);
+            Assert.AreEqual(wheelCollider.transform.localPosition.x + valueToUse, wheelMesh.transform.position.x, 0.01f);
             
             //check for persistency: reapply the saved data should be the same
             stanceModification.ApplySavedPlayerData();
-            Assert.AreEqual(valueToUse, wheelCollider.transform.localPosition.x);
+            Assert.AreEqual(wheelCollider.transform.localPosition.x + valueToUse, wheelMesh.transform.position.x, 0.01f);
             
             //check default value works
             float defaultValue = stanceModification.Offset.DefaultValue;
             stanceModification.ApplyOffset(defaultValue);
-            Assert.AreEqual(defaultValue, wheelCollider.transform.localPosition.x);
+            Assert.AreEqual(wheelCollider.transform.localPosition.x + defaultValue, wheelMesh.transform.position.x, 0.01f);
         }
         
         [UnityTest]

@@ -1,0 +1,449 @@
+name: Deploy builds (internal testing)
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    tags:
+      - "v*.*"
+
+concurrency:
+  group: ${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+
+  buildAndroid:
+    name: Build Android
+    runs-on:
+      labels: runner-1
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
+
+      # Cache
+      - uses: JackSinkoRB/local-cache@main
+        with:
+          path: Library
+          key: Library-Android
+
+      # Ensure Split Application Binary is enabled
+      - name: Ensure Split Application Binary enabled
+        run: |
+          sed -i 's/APKExpansionFiles: 0/APKExpansionFiles: 1/' ProjectSettings/ProjectSettings.asset
+
+      # Build
+      - uses: game-ci/unity-builder@v4
+        id: buildStep
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          androidKeystoreName: user.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+        with:
+          targetPlatform: Android
+          androidExportType: androidAppBundle
+          androidTargetSdkVersion: 34
+          buildName: 'Gumball'
+          versioning: Semantic
+          customParameters: -nographics
+          unityVersion: 2022.3.42f1
+          dockerCpuLimit: 3.5
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-Android
+          path: build/Android
+
+  buildIOS:
+    name: Build iOS
+    runs-on:
+      labels: runner-2
+    strategy:
+      fail-fast: false
+
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: rm -rf Library
+
+      # Cache
+      - uses: JackSinkoRB/local-cache@main
+        with:
+          path: Library
+          key: Library-iOS
+
+      # Build
+      - uses: game-ci/unity-builder@v4
+        id: buildStep
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: iOS
+          buildName: 'Gumball'
+          versioning: Semantic
+          customParameters: -nographics
+          unityVersion: 2022.3.42f1
+          dockerCpuLimit: 3.5
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-iOS
+          path: build/iOS
+
+  deployToApple:
+    needs: buildIOS
+    name: Deploy to TestFlight
+    runs-on: macos-latest
+    steps:
+
+      - name: Show disk space 1
+        run: df -h
+
+      - name: Clear unnecessary files
+        run: |
+          # .NET Core SDKs
+          rm -rf /usr/local/share/dotnet/sdk/7.0.102
+          rm -rf /usr/local/share/dotnet/sdk/7.0.202
+          rm -rf /usr/local/share/dotnet/sdk/7.0.306
+          rm -rf /usr/local/share/dotnet/sdk/7.0.410
+          rm -rf /usr/local/share/dotnet/sdk/8.0.101
+          rm -rf /usr/local/share/dotnet/sdk/8.0.204
+          rm -rf /usr/local/share/dotnet/sdk/8.0.303
+          rm -rf /usr/local/share/dotnet/sdk/8.0.401
+
+          # Clang/LLVM
+          rm -rf /usr/local/clang_14.0.3
+          rm -rf $(brew --prefix llvm@15)
+
+          # GCC
+          rm -rf /usr/local/bin/gcc-12
+          rm -rf /usr/local/bin/gcc-13
+          rm -rf /usr/local/bin/gcc-14
+
+          # Fortran
+          rm -rf /usr/local/bin/gfortran-12
+          rm -rf /usr/local/bin/gfortran-13
+          rm -rf /usr/local/bin/gfortran-14
+
+          # Kotlin
+          rm -rf /usr/local/bin/kotlin
+
+          # Mono
+          rm -rf /usr/local/mono
+
+          # Node.js
+          rm -rf /usr/local/bin/node
+
+          # Perl
+          rm -rf /usr/local/bin/perl
+
+          # Python
+          rm -rf /usr/local/bin/python3
+
+          # Carthage
+          rm -rf /usr/local/bin/carthage
+
+          # Homebrew
+          rm -rf /usr/local/Homebrew
+
+          # NPM
+          rm -rf /usr/local/bin/npm
+
+          # NuGet
+          rm -rf /usr/local/bin/nuget
+
+          # Pip3
+          rm -rf /usr/local/bin/pip3
+
+          # Pipx
+          rm -rf /usr/local/bin/pipx
+
+          # Yarn
+          rm -rf /usr/local/bin/yarn
+
+          # Apache Ant
+          rm -rf /usr/local/bin/ant
+
+          # Apache Maven
+          rm -rf /usr/local/bin/mvn
+
+          # Gradle
+          rm -rf /usr/local/bin/gradle
+
+          # 7-Zip
+          rm -rf /usr/local/bin/7z
+
+          # aria2
+          rm -rf /usr/local/bin/aria2c
+
+          # azcopy
+          rm -rf /usr/local/bin/azcopy
+
+          # Bazel
+          rm -rf /usr/local/bin/bazel
+
+          # Bazelisk
+          rm -rf /usr/local/bin/bazelisk
+
+          # Git
+          rm -rf /usr/local/bin/git
+          rm -rf /usr/local/bin/git-lfs
+
+          # GitHub CLI
+          rm -rf /usr/local/bin/gh
+
+          # Curl
+          rm -rf /usr/local/bin/curl
+
+          # GNU Tar
+          rm -rf /usr/local/bin/gtar
+
+          # GNU Wget
+          rm -rf /usr/local/bin/wget
+
+          # GPG
+          rm -rf /usr/local/bin/gpg
+
+          # jq
+          rm -rf /usr/local/bin/jq
+
+          # OpenSSL
+          rm -rf /usr/local/bin/openssl
+
+          # Packer
+          rm -rf /usr/local/bin/packer
+
+          # pkg-config
+          rm -rf /usr/local/bin/pkg-config
+
+          # yq
+          rm -rf /usr/local/bin/yq
+
+          # zstd
+          rm -rf /usr/local/bin/zstd
+
+          # AWS CLI
+          rm -rf /usr/local/bin/aws
+
+          # AWS SAM CLI
+          rm -rf /usr/local/bin/sam
+
+          # Azure CLI
+          rm -rf /usr/local/bin/az
+
+          # Bicep CLI
+          rm -rf /usr/local/bin/bicep
+
+          # CMake
+          rm -rf /usr/local/bin/cmake
+
+          # SwiftFormat
+          rm -rf /usr/local/bin/swiftformat
+
+          # Java SDKs
+          rm -rf $JAVA_HOME_11_arm64
+          rm -rf $JAVA_HOME_17_arm64
+          rm -rf $JAVA_HOME_21_arm64
+
+          # Python (cached versions)
+          rm -rf ~/.pyenv/versions/3.9.13
+          rm -rf ~/.pyenv/versions/3.10.11
+          rm -rf ~/.pyenv/versions/3.11.9
+          rm -rf ~/.pyenv/versions/3.12.5
+
+          # Node.js (cached versions)
+          rm -rf ~/.nvm/versions/node/v18.20.4
+          rm -rf ~/.nvm/versions/node/v20.17.0
+
+          # Go (cached versions)
+          rm -rf ~/.goenv/versions/1.20.14
+          rm -rf ~/.goenv/versions/1.21.13
+          rm -rf ~/.goenv/versions/1.22.6
+
+          # Rust
+          rm -rf ~/.cargo/bin/rustup
+          rm -rf ~/.cargo/bin/rustc
+          rm -rf ~/.cargo/bin/cargo
+
+          # PowerShell
+          rm -rf /usr/local/bin/pwsh
+
+          # PowerShell Modules
+          rm -rf ~/.local/share/powershell/Modules/Az
+          rm -rf ~/.local/share/powershell/Modules/Pester
+          rm -rf ~/.local/share/powershell/Modules/PSScriptAnalyzer
+
+          # Xcode Versions
+          rm -rf /Applications/Xcode_16.1_beta.app
+          rm -rf /Applications/Xcode_16_beta_6.app
+          rm -rf /Applications/Xcode_15.3.app
+          rm -rf /Applications/Xcode_15.2.app
+          rm -rf /Applications/Xcode_15.1.app
+          rm -rf /Applications/Xcode_15.0.1.app
+          rm -rf /Applications/Xcode_14.3.1.app
+
+          df -h
+
+      - name: Checkout necessary files for Fastlane
+        uses: actions/checkout@v4
+        with:
+          # Only fetch the necessary files for Fastlane
+          fetch-depth: 1
+          # Limit checkout to specific files or directories (e.g., fastlane, Gemfile)
+          sparse-checkout: |
+            Gemfile
+            Gemfile.lock
+            fastlane
+
+      - name: Show disk space 2
+        run: df -h
+
+      - name: Download IOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-iOS
+          path: build/iOS
+
+      - name: Show disk space 3
+        run: df -h
+
+      - name: Build and upload with fastlane
+        env:
+          APPLE_CONNECT_EMAIL: ${{ secrets.APPLE_CONNECT_EMAIL }}
+          APPLE_DEVELOPER_EMAIL: ${{ secrets.APPLE_DEVELOPER_EMAIL }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+          MATCH_REPOSITORY: ${{ secrets.MATCH_REPOSITORY }}
+          MATCH_DEPLOY_KEY: ${{ secrets.MATCH_DEPLOY_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_P8: ${{ secrets.APPSTORE_P8 }}
+
+          IOS_BUILD_PATH: ${{ format('{0}/build/iOS', github.workspace) }}
+          IOS_BUNDLE_ID: com.RoadburnGames.Gumball
+          PROJECT_NAME: Gumball
+        run: |
+          # Start the SSH agent
+          eval "$(ssh-agent -s)"
+
+          # Add the SSH deploy key
+          ssh-add - <<< "${MATCH_DEPLOY_KEY}"
+
+          # Fix file permissions for shell scripts and usymtool
+          find $IOS_BUILD_PATH -type f -name "**.sh" -exec chmod +x {} \;
+          find $IOS_BUILD_PATH -type f -iname "usymtool" -exec chmod +x {} \;
+
+          # Install Ruby gems
+          bundle install
+
+          # Show disk space
+          df -h
+
+          # Run Fastlane to build the app
+          bundle exec fastlane ios build
+
+          # Clean up old build and archive directories
+          echo "Cleaning up build and archive directories"
+          rm -rf /Users/runner/work/Gumball/Gumball/build
+          rm -rf /Users/runner/Library/Developer/Xcode/Archives
+
+          # Run Fastlane to upload the build
+          bundle exec fastlane ios upload_testflight
+
+      - name: Show disk space 4
+        run: df -h
+
+      - name: Cleanup to avoid storage limit
+        if: always()
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build-iOS
+
+  deployToGoogle:
+    needs: buildAndroid
+    name: Deploy to Google Play internal track
+    runs-on: runner-1
+    env:
+      GOOGLE_PLAY_KEY_FILE: ${{ secrets.GOOGLE_PLAY_KEY_FILE }}
+      GOOGLE_PLAY_KEY_FILE_PATH:
+        ${{ format('{0}/fastlane/google-fastlane.json', github.workspace) }}
+      ANDROID_BUILD_FILE_PATH: ${{ format('{0}/build/Android/Gumball.aab', github.workspace) }}
+      ANDROID_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
+
+    steps:
+
+      # Checkout
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Download Android artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-Android
+          path: build/Android
+
+      - name: Add Authentication
+        run: echo "$GOOGLE_PLAY_KEY_FILE" > $GOOGLE_PLAY_KEY_FILE_PATH
+
+      - name: Set up Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+          bundler-cache: false
+
+      # Bundle install
+      - name: bundle install
+        run: bundle install
+
+      - name: Upload to Google Play Internal
+        uses: maierj/fastlane-action@v3.1.0
+        with:
+          lane: 'android internal'
+
+      - name: Cleanup to avoid storage limit
+        if: always()
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: build-Android
+
+  sendDiscordNotification:
+    needs: [deployToApple, deployToGoogle]
+    name: Discord Notification
+    runs-on: self-hosted
+    steps:
+
+      # Send Discord notification
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_EMBEDS: |
+            [{
+              "title": "Gumball deployed an internal release: ${{ github.ref_name }}",
+              "description": "It will be available on TestFlight and GooglePlay soon."
+            }]
+        uses: Ilshidur/action-discord@0.3.2

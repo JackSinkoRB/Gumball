@@ -1,0 +1,214 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f95fac6b423c8945a66202d2ca5cb92, type: 3}
+  m_Name: ChallengeManager
+  m_EditorClassIdentifier: 
+  daily:
+    id: Daily
+    challengePool:
+    - description: Drive 1km
+      icon: {fileID: 21300000, guid: 2b80bd498c1097a4bb553595ab83ebaf, type: 3}
+      tracker: {fileID: 11400000, guid: 8f1a98fc1f573fa409afbdbc36a217d7, type: 2}
+      goal: 1000
+      rewards:
+        xp: 100
+        standardCurrency: 100
+        premiumCurrency: 0
+        fuelRefill: 0
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: f620aa8f-5e6a-4a45-b63b-0cf2d899d664
+    - description: Drive 5km
+      icon: {fileID: 21300000, guid: 2b80bd498c1097a4bb553595ab83ebaf, type: 3}
+      tracker: {fileID: 11400000, guid: 8f1a98fc1f573fa409afbdbc36a217d7, type: 2}
+      goal: 5000
+      rewards:
+        xp: 100
+        standardCurrency: 0
+        premiumCurrency: 1
+        fuelRefill: 0
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: 7f6a0cb2-9bb5-4c2f-bbcf-6230d8dc0afe
+    - description: Drive 10km
+      icon: {fileID: 21300000, guid: 2b80bd498c1097a4bb553595ab83ebaf, type: 3}
+      tracker: {fileID: 11400000, guid: 8f1a98fc1f573fa409afbdbc36a217d7, type: 2}
+      goal: 10000
+      rewards:
+        xp: 50
+        standardCurrency: 0
+        premiumCurrency: 0
+        fuelRefill: 1
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: 832ebba5-48e3-4e3c-a2ef-7e1afe51633c
+    - description: Have 50 near misses
+      icon: {fileID: 21300000, guid: 427453d22840b5a4e998a01d7629a0ef, type: 3}
+      tracker: {fileID: 11400000, guid: ac13337b63e39a04eae6b5ec41baf474, type: 2}
+      goal: 50
+      rewards:
+        xp: 100
+        standardCurrency: 0
+        premiumCurrency: 0
+        fuelRefill: 1
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: c80026db-b157-4a9b-8380-d6d008087030
+    - description: Have 10 near misses in a single session
+      icon: {fileID: 21300000, guid: 427453d22840b5a4e998a01d7629a0ef, type: 3}
+      tracker: {fileID: 11400000, guid: 0f21c9d34faefb849b7a29310f279693, type: 2}
+      goal: 10
+      rewards:
+        xp: 50
+        standardCurrency: 100
+        premiumCurrency: 0
+        fuelRefill: 0
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: 477191fd-da8e-496f-9abc-a9195356dd7e
+    numberOfChallenges: 3
+    timeBetweenReset:
+      seconds: 0
+      minutes: 0
+      hours: 0
+      days: 1
+    challengesBetweenRepeats: 3
+    minorRewardPercent: 0.5
+    minorRewardsPool:
+    - xp: 50
+      standardCurrency: 500
+      premiumCurrency: 0
+      fuelRefill: 0
+      coreParts: []
+      subParts: []
+      unlockables: []
+      blueprints: []
+    majorRewardPercent: 0.8
+    majorRewardsPool:
+    - xp: 500
+      standardCurrency: 1500
+      premiumCurrency: 1
+      fuelRefill: 0
+      coreParts: []
+      subParts: []
+      unlockables: []
+      blueprints: []
+  weekly:
+    id: Weekly
+    challengePool:
+    - description: Drive 1km
+      icon: {fileID: 21300000, guid: 2b80bd498c1097a4bb553595ab83ebaf, type: 3}
+      tracker: {fileID: 11400000, guid: 8f1a98fc1f573fa409afbdbc36a217d7, type: 2}
+      goal: 1000
+      rewards:
+        xp: 100
+        standardCurrency: 0
+        premiumCurrency: 0
+        fuelRefill: 1
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: 7daa7f49-f10d-4731-aaa8-6379c1e11cb6
+    - description: Drive 5km
+      icon: {fileID: 21300000, guid: 2b80bd498c1097a4bb553595ab83ebaf, type: 3}
+      tracker: {fileID: 11400000, guid: 8f1a98fc1f573fa409afbdbc36a217d7, type: 2}
+      goal: 5000
+      rewards:
+        xp: 100
+        standardCurrency: 100
+        premiumCurrency: 0
+        fuelRefill: 0
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: f64f958f-0ac3-4152-937c-e9973cde0727
+    - description: Drive 10km
+      icon: {fileID: 21300000, guid: 2b80bd498c1097a4bb553595ab83ebaf, type: 3}
+      tracker: {fileID: 11400000, guid: 8f1a98fc1f573fa409afbdbc36a217d7, type: 2}
+      goal: 10000
+      rewards:
+        xp: 50
+        standardCurrency: 0
+        premiumCurrency: 0
+        fuelRefill: 1
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: 5e872a07-daa3-4b0e-8a24-ac7325011926
+    - description: Have 50 near misses
+      icon: {fileID: 21300000, guid: 427453d22840b5a4e998a01d7629a0ef, type: 3}
+      tracker: {fileID: 11400000, guid: ac13337b63e39a04eae6b5ec41baf474, type: 2}
+      goal: 50
+      rewards:
+        xp: 100
+        standardCurrency: 100
+        premiumCurrency: 100
+        fuelRefill: 1
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: ef899880-a606-48f0-a88e-a3b1b38d6c99
+    - description: Have 10 near misses in a single session
+      icon: {fileID: 21300000, guid: 427453d22840b5a4e998a01d7629a0ef, type: 3}
+      tracker: {fileID: 11400000, guid: 0f21c9d34faefb849b7a29310f279693, type: 2}
+      goal: 10
+      rewards:
+        xp: 100
+        standardCurrency: 100
+        premiumCurrency: 100
+        fuelRefill: 1
+        coreParts: []
+        subParts: []
+        unlockables: []
+        blueprints: []
+      uniqueID: dd8b2a0b-0e83-477c-85a7-be5902fe08d0
+    numberOfChallenges: 3
+    timeBetweenReset:
+      seconds: 0
+      minutes: 0
+      hours: 0
+      days: 7
+    challengesBetweenRepeats: 3
+    minorRewardPercent: 0.5
+    minorRewardsPool:
+    - xp: 100
+      standardCurrency: 500
+      premiumCurrency: 1
+      fuelRefill: 0
+      coreParts: []
+      subParts: []
+      unlockables: []
+      blueprints: []
+    majorRewardPercent: 0.8
+    majorRewardsPool:
+    - xp: 500
+      standardCurrency: 1500
+      premiumCurrency: 1
+      fuelRefill: 0
+      coreParts: []
+      subParts: []
+      unlockables: []
+      blueprints: []
