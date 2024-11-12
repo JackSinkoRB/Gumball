@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyBox;
 using UnityEngine;
 
 namespace Gumball
@@ -14,6 +15,9 @@ namespace Gumball
         [SerializeField] private IkChain rightArmChain;
         [SerializeField] private IkChain leftLegChain;
         [SerializeField] private IkChain rightLegChain;
+        
+        [Header("Debugging")]
+        [SerializeField, ReadOnly] private bool isInitialised;
 
         private IKPositionsInCar positions;
         private Quaternion initialPelvisRotation;
@@ -23,6 +27,7 @@ namespace Gumball
             this.positions = positions;
             
             enabled = true;
+            isInitialised = true;
 
             initialPelvisRotation = pelvis.transform.rotation;
 
@@ -42,7 +47,8 @@ namespace Gumball
 
         private void LateUpdate()
         {
-            UpdateIkChains();
+            if (isInitialised)
+                UpdateIkChains();
         }
 
         private void UpdateIkChains()
