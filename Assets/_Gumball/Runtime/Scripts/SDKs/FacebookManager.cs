@@ -1,9 +1,8 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using Facebook.Unity;
-using PlayFab;
-using PlayFab.ClientModels;
 using UnityEngine;
-using LoginResult = PlayFab.ClientModels.LoginResult;
 
 namespace Gumball
 {
@@ -12,6 +11,7 @@ namespace Gumball
 
         public enum Status
         {
+            NOT_ATTEMPTED,
             LOADING,
             SUCCESS,
             ERROR,
@@ -22,7 +22,7 @@ namespace Gumball
         [RuntimeInitializeOnLoadMethod]
         private static void RuntimeInitialise()
         {
-            LogInStatus = Status.LOADING;
+            LogInStatus = Status.NOT_ATTEMPTED;
         }
         
         public static IEnumerator Initialise()
@@ -37,55 +37,45 @@ namespace Gumball
                 FB.Init(OnInitialised);
                 yield return new WaitUntil(() => FB.IsInitialized);
             }
-
-            //TODO: attempt to login
         }
         
         private static void OnInitialised()
         {
+            FB.ActivateApp();
+
             GlobalLoggers.PlayFabLogger.Log($"Facebook initialised! Is logged in? {FB.IsLoggedIn}");
+        }
+
+        public static void Login()
+        {
+            LogInStatus = Status.LOADING;
             
             GlobalLoggers.PlayFabLogger.Log("Logging into Facebook...");
-            
-            // Once Facebook SDK is initialized, if we are logged in, we log out to demonstrate the entire authentication cycle.
+
             if (FB.IsLoggedIn)
-                FB.LogOut();
-            
-            // We invoke basic login procedure and pass in the callback to process the result
-            FB.LogInWithReadPermissions(callback: OnFacebookLoggedIn);
-        }
-
-        private static void OnFacebookLoggedIn(ILoginResult result)
-        {
-            // If result has no errors, it means we have authenticated in Facebook successfully
-            if (result == null || string.IsNullOrEmpty(result.Error))
             {
-                GlobalLoggers.PlayFabLogger.Log("Facebook Auth Complete! Access Token: " + AccessToken.CurrentAccessToken.TokenString + "\nLogging into PlayFab...");
-
-                /*
-                 * We proceed with making a call to PlayFab API. We pass in current Facebook AccessToken and let it create
-                 * and account using CreateAccount flag set to true. We also pass the callback for Success and Failure results
-                 */
-                PlayFabClientAPI.LoginWithFacebook(new LoginWithFacebookRequest { CreateAccount = true, AccessToken = AccessToken.CurrentAccessToken.TokenString },
-                    OnPlayfabFacebookAuthComplete, OnPlayfabFacebookAuthFailed);
+                GlobalLoggers.PlayFabLogger.Log("User already logged in to Facebook.");
+                LogInStatus = Status.SUCCESS;
+                return;
             }
-            else
-            {
-                // If Facebook authentication failed, we stop the cycle with the message
-                Debug.LogError($"Facebook Auth Failed: {result.Error}\n{result.RawResult}");
-            }
-        }
 
-        // When processing both results, we just set the message, explaining what's going on.
-        private static void OnPlayfabFacebookAuthComplete(LoginResult result)
-        {
-            GlobalLoggers.PlayFabLogger.Log("PlayFab Facebook Auth Complete. Session ticket: " + result.SessionTicket);
-        }
-
-        private static void OnPlayfabFacebookAuthFailed(PlayFabError error)
-        {
-            Debug.LogError($"PlayFab Facebook Auth Failed: {error.GenerateErrorReport()}");
+            //show login screen
+            FB.LogInWithReadPermissions(new[] { "public_profile" }, OnFacebookLoggedIn);
         }
         
+        private static void OnFacebookLoggedIn(ILoginResult result)
+        {
+            if (result != null && string.IsNullOrEmpty(result.Error))
+            {
+                Debug.LogError($"Facebook Auth Failed: {result.Error} {result.RawResult}");
+                LogInStatus = Status.ERROR;
+                return;
+            }
+
+            GlobalLoggers.PlayFabLogger.Log($"Facebook Auth Complete! Access Token: {AccessToken.CurrentAccessToken.TokenString}\nLogging into PlayFab...");
+                
+            PlayFabManager.LoginWithFacebook();
+        }
+
     }
 }

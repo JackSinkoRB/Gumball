@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Facebook.Unity;
 using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
@@ -131,14 +132,51 @@ namespace Gumball
             
             ConnectionStatus = ConnectionStatusType.LOADING;
             
+            //check for cloud save login
+            CheckIfAccountHasChanged();
+            GlobalLoggers.PlayFabLogger.Log($"Logging in with {CloudSaveManager.CurrentSaveMethod}");
+            if (CloudSaveManager.CurrentSaveMethod == CloudSaveManager.SaveMethod.FACEBOOK)
+            {
+                LoginWithFacebook();
+            }
+            else
+            {
+                //no cloud save
+                LoginWithCustomID();
+            }
+        }
+
+        public static void LoginWithFacebook()
+        {
+            GlobalLoggers.PlayFabLogger.Log($"Logging in with Facebook.");
+            LoginWithFacebookRequest request = new LoginWithFacebookRequest
+            { 
+                CreateAccount = true, 
+                AccessToken = AccessToken.CurrentAccessToken.TokenString
+            };
+            
+            PlayFabClientAPI.LoginWithFacebook(request, OnLoginSuccess, OnLoginFailure);
+        }
+
+        public static void LoginWithCustomID()
+        {
+            GlobalLoggers.PlayFabLogger.Log($"Logging in with custom ID.");
             LoginWithCustomIDRequest request = new LoginWithCustomIDRequest
             {
                 TitleId = PlayFabSettings.TitleId,
                 CustomId = SystemInfo.deviceUniqueIdentifier,
                 CreateAccount = true
             };
-
             PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnLoginFailure);
+        }
+        
+        private static void CheckIfAccountHasChanged()
+        {
+            if (CloudSaveManager.CurrentSaveMethod == CloudSaveManager.SaveMethod.FACEBOOK && !FB.IsLoggedIn)
+            {
+                Debug.Log("Current save method is Facebook, but player is not logged in. Therefore defaulting to local save method.");
+                CloudSaveManager.SetCurrentSaveMethod(CloudSaveManager.SaveMethod.LOCAL);
+            }
         }
 
         private static void OnLoginFailure(PlayFabError error)
