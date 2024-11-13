@@ -29,13 +29,18 @@ namespace Gumball
 
         public static event Action onSuccessfulConnection;
         
+        private const string cloudSaveDeviceIDKey = "CloudSaveDeviceID";
+        
         private static Dictionary<string, string> titleDataCached;
+        private static Dictionary<string, UserDataRecord> userDataCached;
 
         private static long serverTimeOnInitialise;
         private static long gameTimeOnInitialise;
 
-        public static ConnectionStatusType ConnectionStatus { get; private set; }
+        public static ConnectionStatusType LoginStatus { get; private set; }
         public static ConnectionStatusType ServerTimeInitialisationStatus { get; private set; }
+        public static ConnectionStatusType TitleDataInitialisationStatus { get; private set; }
+        public static ConnectionStatusType UserDataInitialisationStatus { get; private set; }
 
         /// <summary>
         /// Returns the current time (in epoch seconds) after being synced with the PlayFab server.
@@ -68,28 +73,38 @@ namespace Gumball
             DisableServerTime = false;
 #endif
             
-            ConnectionStatus = ConnectionStatusType.LOADING;
+            LoginStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
+            TitleDataInitialisationStatus = ConnectionStatusType.LOADING;
+            UserDataInitialisationStatus = ConnectionStatusType.LOADING;
         }
 
         public static IEnumerator Initialise()
         {
-            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+            if (LoginStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
             {
                 Debug.LogWarning("Trying to initialise PlayFab, but it is already connected.");
                 yield break;
             }
 
-            ConnectionStatus = ConnectionStatusType.LOADING;
+            LoginStatus = ConnectionStatusType.LOADING;
             ServerTimeInitialisationStatus = ConnectionStatusType.LOADING;
+            TitleDataInitialisationStatus = ConnectionStatusType.LOADING;
+            UserDataInitialisationStatus = ConnectionStatusType.LOADING;
             
             Login();
-            yield return new WaitUntil(() => ConnectionStatus != ConnectionStatusType.LOADING);
+            yield return new WaitUntil(() => LoginStatus != ConnectionStatusType.LOADING);
             
+            LoadUserData();
+            yield return new WaitUntil(() => UserDataInitialisationStatus != ConnectionStatusType.LOADING);
+
+            LoadTitleData();
+            yield return new WaitUntil(() => TitleDataInitialisationStatus != ConnectionStatusType.LOADING);
+
             RetrieveServerTime();
             yield return new WaitUntil(() => ServerTimeInitialisationStatus != ConnectionStatusType.LOADING);
 
-            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+            if (LoginStatus == ConnectionStatusType.SUCCESS && TitleDataInitialisationStatus == ConnectionStatusType.SUCCESS && UserDataInitialisationStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
                 onSuccessfulConnection?.Invoke();
         }
         
@@ -128,16 +143,16 @@ namespace Gumball
             //check to break quickly if internet is not connected - otherwise the service check may take longer and increase game load time
             if (Application.internetReachability == NetworkReachability.NotReachable)
             {
-                ConnectionStatus = ConnectionStatusType.ERROR;
+                LoginStatus = ConnectionStatusType.ERROR;
                 
                 Debug.LogError($"Could not login to PlayFab: no internet connection");
                 return;
             }
             
-            ConnectionStatus = ConnectionStatusType.LOADING;
+            LoginStatus = ConnectionStatusType.LOADING;
             
             //check for cloud save login
-            CheckIfAccountHasChanged();
+            CheckIfSaveMethodHasChanged();
             GlobalLoggers.PlayFabLogger.Log($"Logging in with {CloudSaveManager.CurrentSaveMethod}");
             if (CloudSaveManager.CurrentSaveMethod == CloudSaveManager.SaveMethod.FACEBOOK)
             {
@@ -176,7 +191,7 @@ namespace Gumball
         
         public static void TryUploadData()
         {
-            if (ConnectionStatus != ConnectionStatusType.SUCCESS)
+            if (LoginStatus != ConnectionStatusType.SUCCESS)
                 return;
             
             //only upload players with linked accounts
@@ -187,11 +202,11 @@ namespace Gumball
             DataProvider.SaveAllAsync(() =>
             {
                 GlobalLoggers.SaveDataLogger.Log("Uploading save data to Playfab.");
-                UploadFiles(DataManager.AllFilePaths); 
+                UploadFiles(DataManager.AllFilePaths);
             });
         }
         
-        private static void CheckIfAccountHasChanged()
+        private static void CheckIfSaveMethodHasChanged()
         {
             if (CloudSaveManager.CurrentSaveMethod == CloudSaveManager.SaveMethod.FACEBOOK && !FB.IsLoggedIn)
             {
@@ -202,7 +217,7 @@ namespace Gumball
 
         private static void OnLoginFailure(PlayFabError error)
         {
-            ConnectionStatus = ConnectionStatusType.ERROR;
+            LoginStatus = ConnectionStatusType.ERROR;
             
             Debug.LogError($"Could not login to PlayFab: {error.Error} - {error.ErrorMessage}");
         }
@@ -210,33 +225,107 @@ namespace Gumball
         private static void OnLoginSuccess(LoginResult result)
         {
             GlobalLoggers.PlayFabLogger.Log($"Logged into PlayFab successfully with ID {result.PlayFabId}.");
+            LoginStatus = ConnectionStatusType.SUCCESS;
+        }
 
-            LoadTitleData();
+        private static void LoadUserData()
+        {
+            GlobalLoggers.PlayFabLogger.Log($"Loading user data.");
+            
+            PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnLoadUserDataSuccess, OnLoadUserDataFailure);
+        }
+
+        private static void OnLoadUserDataSuccess(GetUserDataResult result)
+        {
+            userDataCached = result.Data;
+
+            UserDataInitialisationStatus = ConnectionStatusType.SUCCESS;
+            
+            GlobalLoggers.PlayFabLogger.Log($"Loaded {userDataCached.Count} entries from user data.");
+
+            CheckToSyncCloudData();
+        }
+
+        private static void CheckToSyncCloudData()
+        {
+            GlobalLoggers.PlayFabLogger.Log($"Checking to sync cloud data...");
+
+            if (CloudSaveManager.CurrentSaveMethod != CloudSaveManager.SaveMethod.FACEBOOK)
+                return; //no cloud save
+            
+            if (userDataCached == null || !userDataCached.ContainsKey(cloudSaveDeviceIDKey))
+            {
+                GlobalLoggers.PlayFabLogger.Log("No saved device ID found.");
+                return; //no data saved on cloud
+            }
+
+            //if the saved data 'device ID of save' in Player is different - show prompt
+            string savedDeviceID = userDataCached[cloudSaveDeviceIDKey].Value;
+            string currentDeviceID = SystemInfo.deviceUniqueIdentifier;
+
+            if (savedDeviceID == currentDeviceID)
+            {
+                GlobalLoggers.PlayFabLogger.Log("Cloud save data is in sync - no need to update.");
+                return;
+            }
+            
+            GlobalLoggers.PlayFabLogger.Log("Cloud save is from a different device. Prompting user to sync when ready.");
+                            
+            //TODO: wait until in main scene to prompt to download
+            // - if confirmed, download the save data and continue with login
+            // - if denied, log out from facebook and ensure using local save only
+            //PromptUserForCloudSaveDownload();
+        }
+
+        private static void OnLoadUserDataFailure(PlayFabError error)
+        {
+            Debug.LogError("Failed to retrieve user data from PlayFab: " + error.GenerateErrorReport());
+            
+            UserDataInitialisationStatus = ConnectionStatusType.ERROR;
+        }
+
+        private static void UpdateCloudSaveDeviceID()
+        {
+            UpdateUserDataRequest request = new UpdateUserDataRequest
+            {
+                Data = new Dictionary<string, string>
+                {
+                    { cloudSaveDeviceIDKey, SystemInfo.deviceUniqueIdentifier }
+                }
+            };
+
+            PlayFabClientAPI.UpdateUserData(request, 
+                result => GlobalLoggers.PlayFabLogger.Log("Device ID saved to PlayFab Player Data."), 
+                error => Debug.LogError("Failed to save Device ID: " + error.GenerateErrorReport()));
         }
 
         private static void LoadTitleData()
         {
-            GlobalLoggers.PlayFabLogger.Log($"Loading PlayFab title data.");
+            GlobalLoggers.PlayFabLogger.Log($"Loading title data.");
             
             PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(),
-                result =>
-                {
-                    titleDataCached = result.Data;
+                OnLoadTitleDataSuccess, OnLoadTitleDataFailure);
+        }
+
+        private static void OnLoadTitleDataSuccess(GetTitleDataResult result)
+        {
+            titleDataCached = result.Data;
                     
-                    ConnectionStatus = ConnectionStatusType.SUCCESS;
+            TitleDataInitialisationStatus = ConnectionStatusType.SUCCESS;
                     
-                    GlobalLoggers.PlayFabLogger.Log($"Loaded {titleDataCached.Count} entries from PlayFab title data.");
-                }, error =>
-                {
-                    ConnectionStatus = ConnectionStatusType.ERROR;
+            GlobalLoggers.PlayFabLogger.Log($"Loaded {titleDataCached.Count} entries from title data.");
+        }
+
+        private static void OnLoadTitleDataFailure(PlayFabError error)
+        {
+            TitleDataInitialisationStatus = ConnectionStatusType.ERROR;
                     
-                    Debug.LogError($"Error getting PlayFab title data:\n{error.GenerateErrorReport()}");
-                });
+            Debug.LogError($"Error getting PlayFab title data:\n{error.GenerateErrorReport()}");
         }
         
         private static void RetrieveServerTime()
         {
-            if (ConnectionStatus != ConnectionStatusType.SUCCESS)
+            if (LoginStatus != ConnectionStatusType.SUCCESS)
             {
                 ServerTimeInitialisationStatus = ConnectionStatusType.ERROR;
                 return;
@@ -268,7 +357,7 @@ namespace Gumball
             
             yield return Initialise();
             
-            if (ConnectionStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
+            if (LoginStatus == ConnectionStatusType.SUCCESS && TitleDataInitialisationStatus == ConnectionStatusType.SUCCESS && UserDataInitialisationStatus == ConnectionStatusType.SUCCESS && ServerTimeInitialisationStatus == ConnectionStatusType.SUCCESS)
                 onSuccess?.Invoke();
             else
                 onFailure?.Invoke();
@@ -278,6 +367,8 @@ namespace Gumball
 
         private static void UploadFiles(List<string> filePaths)
         {
+            UpdateCloudSaveDeviceID();
+            
             //get file names
             List<string> fileNames = new List<string>();
             foreach (string path in filePaths)

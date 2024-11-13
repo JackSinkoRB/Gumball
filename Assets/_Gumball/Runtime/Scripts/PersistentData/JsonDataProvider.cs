@@ -11,9 +11,11 @@ namespace Gumball
 
         public readonly string FilePath;
 
+        public string FileName => $"{Identifier}.json";
+        
         public JsonDataProvider(string identifier) : base(identifier)
         {
-            FilePath = $"{Application.persistentDataPath}/{identifier}.json";
+            FilePath = $"{Application.persistentDataPath}/{FileName}";
         }
 
         public override bool SourceExists()
