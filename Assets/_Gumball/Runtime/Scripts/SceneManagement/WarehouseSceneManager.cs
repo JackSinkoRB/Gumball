@@ -5,6 +5,7 @@ using System.Diagnostics;
 using MyBox;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 
@@ -62,10 +63,31 @@ namespace Gumball
         
         public void ExitWarehouseScene()
         {
-            SaveRideHeight();
             MainSceneManager.LoadMainScene();
         }
-        
+
+        private void OnEnable()
+        {
+            UnityEngine.SceneManagement.SceneManager.activeSceneChanged += OnSceneChanged;
+        }
+
+        private void OnSceneChanged(Scene oldScene, Scene newScene)
+        {
+            if (newScene.name.Equals(SceneManager.WarehouseSceneName))
+                return;
+            
+            UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= OnSceneChanged;
+
+            OnExitWarehouseScene();
+        }
+
+        private void OnExitWarehouseScene()
+        {
+            SaveRideHeight();
+            
+            PlayFabManager.TryUploadData();
+        }
+
         /// <summary>
         /// Calculates the distance to the ground and saves it to file. 
         /// </summary>

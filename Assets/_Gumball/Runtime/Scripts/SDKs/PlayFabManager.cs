@@ -1,11 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using Facebook.Unity;
 using Newtonsoft.Json;
 using PlayFab;
 using PlayFab.ClientModels;
+using PlayFab.DataModels;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Gumball
 {
@@ -170,6 +174,23 @@ namespace Gumball
             PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnLoginFailure);
         }
         
+        public static void TryUploadData()
+        {
+            if (ConnectionStatus != ConnectionStatusType.SUCCESS)
+                return;
+            
+            //only upload players with linked accounts
+            if (CloudSaveManager.CurrentSaveMethod != CloudSaveManager.SaveMethod.FACEBOOK)
+                return;
+            
+            //ensure data providers are up to date
+            DataProvider.SaveAllAsync(() =>
+            {
+                GlobalLoggers.SaveDataLogger.Log("Uploading save data to Playfab.");
+                UploadFiles(DataManager.AllFilePaths); 
+            });
+        }
+        
         private static void CheckIfAccountHasChanged()
         {
             if (CloudSaveManager.CurrentSaveMethod == CloudSaveManager.SaveMethod.FACEBOOK && !FB.IsLoggedIn)
@@ -254,6 +275,94 @@ namespace Gumball
             
             PanelManager.GetPanel<PlayFabReconnectionPanel>().Hide();
         }
+
+        private static void UploadFiles(List<string> filePaths)
+        {
+            //get file names
+            List<string> fileNames = new List<string>();
+            foreach (string path in filePaths)
+                fileNames.Add(Path.GetFileName(path));
+
+            InitiateFileUploadsRequest initiateRequest = new InitiateFileUploadsRequest
+            {
+                Entity = new PlayFab.DataModels.EntityKey
+                {
+                    Id = PlayFabSettings.staticPlayer.EntityId,
+                    Type = PlayFabSettings.staticPlayer.EntityType,
+                },
+                FileNames = fileNames
+            };
+            
+            PlayFabDataAPI.InitiateFileUploads(initiateRequest, async result =>
+                {
+                    GlobalLoggers.PlayFabLogger.Log("Initiated file uploads with PlayFab.");
+
+                    // Step 2: Upload each file to the returned URLs
+                    List<Task> uploadTasks = new List<Task>();
+                    for (int i = 0; i < result.UploadDetails.Count; i++)
+                    {
+                        var uploadDetail = result.UploadDetails[i];
+                        string filePath = filePaths[i];
+                        uploadTasks.Add(UploadFileToUrl(filePath, uploadDetail.UploadUrl));
+                    }
+
+                    // Wait for all files to be uploaded
+                    await Task.WhenAll(uploadTasks);
+
+                    // Step 3: Finalize the uploads
+                    FinalizeUploads(fileNames);
+                },
+                error =>
+                {
+                    Debug.LogError("Failed to initiate file uploads: " + error.GenerateErrorReport());
+                });
+        }
         
+        private static async Task UploadFileToUrl(string filePath, string uploadUrl)
+        {
+            byte[] fileData = await File.ReadAllBytesAsync(filePath);
+            UnityWebRequest request = new UnityWebRequest(uploadUrl, "PUT");
+            request.uploadHandler = new UploadHandlerRaw(fileData);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/octet-stream");
+
+            // Send the request and wait for it to complete
+            UnityWebRequestAsyncOperation asyncOp = request.SendWebRequest();
+            while (!asyncOp.isDone)
+                await Task.Yield();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Error uploading file {Path.GetFileName(filePath)}: {request.error}");
+            }
+            else
+            {
+                GlobalLoggers.PlayFabLogger.Log($"File {Path.GetFileName(filePath)} uploaded successfully.");
+            }
+
+            request.Dispose();
+        }
+
+        private static void FinalizeUploads(List<string> fileNames)
+        {
+            var finalizeRequest = new FinalizeFileUploadsRequest
+            {
+                Entity = new PlayFab.DataModels.EntityKey
+                {
+                    Id = PlayFabSettings.staticPlayer.EntityId,
+                    Type = PlayFabSettings.staticPlayer.EntityType,
+                },
+                FileNames = fileNames
+            };
+
+            PlayFabDataAPI.FinalizeFileUploads(finalizeRequest, result =>
+                {
+                    GlobalLoggers.PlayFabLogger.Log("Successfully finalized file uploads.");
+                },
+                error =>
+                {
+                    Debug.LogError("Failed to finalize file uploads: " + error.GenerateErrorReport());
+                });
+        }
     }
 }

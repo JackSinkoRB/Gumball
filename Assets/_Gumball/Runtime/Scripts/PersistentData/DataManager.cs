@@ -20,6 +20,17 @@ namespace Gumball
 #if UNITY_EDITOR
         public static bool IsUsingTestProviders;
 #endif
+
+        public static List<string> AllFilePaths = new()
+        {
+            Settings.FilePath,
+            Cars.FilePath,
+            Avatar.FilePath,
+            GameSessions.FilePath,
+            Warehouse.FilePath,
+            Player.FilePath,
+            Dialogue.FilePath 
+        };
         
         /// <summary>
         /// Enable or disable whether it reads from the test providers, or the real providers.

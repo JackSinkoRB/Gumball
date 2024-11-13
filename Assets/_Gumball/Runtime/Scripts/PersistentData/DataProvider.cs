@@ -31,7 +31,7 @@ namespace Gumball
         /// Force save any dirty providers to their source.
         /// <remarks>This shouldn't need to be called as the autosaver handles saving to source.</remarks>
         /// </summary>
-        public static void SaveAllAsync()
+        public static void SaveAllAsync(Action onComplete = null)
         {
 #if UNITY_EDITOR
             if (DataManager.IsUsingTestProviders)
@@ -43,10 +43,20 @@ namespace Gumball
 
             GlobalLoggers.SaveDataLogger.Log("Checking to save all dirty data providers (asynchronously).");
 
+            int providersWaitingFor = dirtyProviders.Count;
             foreach (DataProvider provider in dirtyProviders)
-                provider.SaveToSourceAsync();
+            {
+                provider.SaveToSourceAsync(() => providersWaitingFor--);
+            }
 
             dirtyProviders.Clear();
+
+            CoroutineHelper.Instance.PerformAfterTrue(() => providersWaitingFor == 0, () => onComplete?.Invoke());
+        }
+
+        public static void UploadDataOnNextSave()
+        {
+            
         }
 
         /// <summary>
@@ -123,17 +133,17 @@ namespace Gumball
 
         #endregion
 
-        protected readonly string identifier;
         protected Dictionary<string, object> currentValues = new();
         
         private readonly object accessLock = new();
 
+        public readonly string Identifier;
         public bool IsLoaded { get; private set; }
         public bool IsDirty => dirtyProviders.Contains(this);
 
         public DataProvider(string identifier)
         {
-            this.identifier = identifier;
+            this.Identifier = identifier;
         }
 
         public async void LoadFromSourceAsync(Action onComplete = null)
@@ -152,7 +162,7 @@ namespace Gumball
                 stopwatch.Stop();
 
                 IsLoaded = true;
-                GlobalLoggers.SaveDataLogger.Log($"Loaded from source '{identifier}' ({stopwatch.ElapsedMilliseconds}ms)");
+                GlobalLoggers.SaveDataLogger.Log($"Loaded from source '{Identifier}' ({stopwatch.ElapsedMilliseconds}ms)");
             }
         }
 
@@ -181,7 +191,7 @@ namespace Gumball
             currentValues[key] = value;
             SetDirty();
 
-            GlobalLoggers.SaveDataLogger.Log($"Set {key} to '{value}' in {identifier}.");
+            GlobalLoggers.SaveDataLogger.Log($"Set {key} to '{value}' in {Identifier}.");
         }
 
         public T Get<T>(string key, T defaultValue = default)
@@ -203,7 +213,7 @@ namespace Gumball
 
             if (!currentValues.ContainsKey(key))
             {
-                GlobalLoggers.SaveDataLogger.Log($"Tried removing key '{key}' from {identifier}, but it didn't exist.");
+                GlobalLoggers.SaveDataLogger.Log($"Tried removing key '{key}' from {Identifier}, but it didn't exist.");
                 return;
             }
 
@@ -225,7 +235,7 @@ namespace Gumball
                 OnRemoveFromSource();
                 
                 if (GlobalLoggers.HasLoaded)
-                    GlobalLoggers.SaveDataLogger.Log($"Removed all keys from {identifier}.");
+                    GlobalLoggers.SaveDataLogger.Log($"Removed all keys from {Identifier}.");
             }
         }
         
@@ -260,7 +270,7 @@ namespace Gumball
             await Task.Run(SaveOrRemoveFromSource);
             stopwatch.Stop();
 
-            GlobalLoggers.SaveDataLogger.Log($"Saved all to '{identifier}' (async - {stopwatch.ElapsedMilliseconds}ms)");
+            GlobalLoggers.SaveDataLogger.Log($"Saved all to '{Identifier}' (async - {stopwatch.ElapsedMilliseconds}ms)");
             onComplete?.Invoke();
         }
 
@@ -304,11 +314,11 @@ namespace Gumball
 
 #if UNITY_EDITOR
             LoadFromSourceSync();
-            Debug.LogWarning($"Tried accessing {identifier} before it was loaded, so force loaded it.");
+            Debug.LogWarning($"Tried accessing {Identifier} before it was loaded, so force loaded it.");
             return;
 #endif
 
-            throw new InvalidOperationException($"Tried setting value in {identifier} but is has not fully loaded yet. You should wait for loading to complete first.");
+            throw new InvalidOperationException($"Tried setting value in {Identifier} but is has not fully loaded yet. You should wait for loading to complete first.");
         }
     }
 }

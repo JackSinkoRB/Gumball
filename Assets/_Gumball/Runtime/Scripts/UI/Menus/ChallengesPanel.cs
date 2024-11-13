@@ -32,6 +32,8 @@ namespace Gumball
             base.OnHide();
             
             PanelManager.GetPanel<MainMenuPanel>().Show();
+            
+            PlayFabManager.TryUploadData();
         }
 
         public void OpenSubMenu(ChallengesSubMenu subMenu)
