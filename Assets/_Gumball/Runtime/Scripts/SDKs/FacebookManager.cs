@@ -74,6 +74,7 @@ namespace Gumball
             {
                 GlobalLoggers.PlayFabLogger.Log($"Facebook Auth Failed: {(result != null ? result.Error : "")} {(result != null ? result.RawResult : "")}");
                 FB.LogOut();
+                onLogout?.Invoke();
                 return;
             }
 

@@ -236,6 +236,12 @@ namespace Gumball
 
         private static void LoadUserData()
         {
+            if (LoginStatus != ConnectionStatusType.SUCCESS)
+            {
+                UserDataInitialisationStatus = ConnectionStatusType.ERROR;
+                return;
+            }
+            
             GlobalLoggers.PlayFabLogger.Log($"Loading user data.");
             
             PlayFabClientAPI.GetUserData(new GetUserDataRequest(), OnLoadUserDataSuccess, OnLoadUserDataFailure);
@@ -404,6 +410,12 @@ namespace Gumball
 
         private static void LoadTitleData()
         {
+            if (LoginStatus != ConnectionStatusType.SUCCESS)
+            {
+                TitleDataInitialisationStatus = ConnectionStatusType.ERROR;
+                return;
+            }
+            
             GlobalLoggers.PlayFabLogger.Log($"Loading title data.");
             
             PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(),
