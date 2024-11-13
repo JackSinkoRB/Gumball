@@ -229,6 +229,9 @@ namespace Gumball
         {
             GlobalLoggers.PlayFabLogger.Log($"Logged into PlayFab successfully with ID {result.PlayFabId}.");
             LoginStatus = ConnectionStatusType.SUCCESS;
+
+            //load the new users data
+            LoadUserData();
         }
 
         private static void LoadUserData()
