@@ -24,7 +24,7 @@ namespace Gumball
             OpenSubMenu(null);
             
             //disable the specials category if no PlayFab connection
-            if (PlayFabManager.ConnectionStatus != PlayFabManager.ConnectionStatusType.SUCCESS)
+            if (PlayFabManager.LoginStatus != PlayFabManager.ConnectionStatusType.SUCCESS)
                 specialsCategoryButton.interactable = false;
         }
         

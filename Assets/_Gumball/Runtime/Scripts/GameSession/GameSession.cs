@@ -341,7 +341,9 @@ namespace Gumball
             StopTrackingObjectives();
             
             Destroy(currentChunkMapCached);
-            trafficPrefabHandles.Clear(); //remove the traffic car references so they can be unloaded 
+            trafficPrefabHandles.Clear(); //remove the traffic car references so they can be unloaded
+            
+            PlayFabManager.TryUploadData();
         }
         
         public AsyncOperationHandle GetTrafficVehicleHandle(AssetReferenceGameObject assetReference)
