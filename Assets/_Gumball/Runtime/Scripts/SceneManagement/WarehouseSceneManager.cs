@@ -83,7 +83,8 @@ namespace Gumball
 
         private void OnExitWarehouseScene()
         {
-            SaveRideHeight();
+            if (WarehouseManager.HasLoaded && WarehouseManager.Instance.CurrentCar != null)
+                SaveRideHeight();
             
             PlayFabManager.TryUploadData();
         }
