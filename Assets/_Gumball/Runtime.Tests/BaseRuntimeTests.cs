@@ -45,6 +45,7 @@ namespace Gumball.Runtime.Tests
             PersistentCooldown.IsRunningTests = true;
             
             PlayFabManager.DisableServerTime = true;
+            PlayFabManager.IsRunningTests = true;
 
             UniversalRenderPipelineUtils.SetRendererFeatureActive("Decal", false);
             

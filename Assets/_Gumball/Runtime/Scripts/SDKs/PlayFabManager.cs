@@ -21,6 +21,7 @@ namespace Gumball
 
 #if UNITY_EDITOR
         public static bool DisableServerTime;
+        public static bool IsRunningTests;
 #endif
         
         public enum ConnectionStatusType
@@ -74,6 +75,7 @@ namespace Gumball
             onSuccessfulConnection = null;
 #if UNITY_EDITOR
             DisableServerTime = false;
+            IsRunningTests = false;
 #endif
             
             LoginStatus = ConnectionStatusType.LOADING;
@@ -194,6 +196,11 @@ namespace Gumball
         
         public static void TryUploadData()
         {
+#if UNITY_EDITOR
+            if (IsRunningTests)
+                return;
+#endif
+            
             if (LoginStatus != ConnectionStatusType.SUCCESS)
                 return;
             
@@ -260,6 +267,10 @@ namespace Gumball
 
         private static void CheckToSyncCloudData()
         {
+#if UNITY_EDITOR
+            if (IsRunningTests)
+                return;
+#endif
             GlobalLoggers.PlayFabLogger.Log($"Checking to sync cloud data...");
 
             if (CloudSaveManager.CurrentSaveMethod != CloudSaveManager.SaveMethod.FACEBOOK)
