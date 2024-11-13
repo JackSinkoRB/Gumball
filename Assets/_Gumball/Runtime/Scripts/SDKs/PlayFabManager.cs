@@ -266,7 +266,7 @@ namespace Gumball
             string savedDeviceID = userDataCached[cloudSaveDeviceIDKey].Value;
             string currentDeviceID = SystemInfo.deviceUniqueIdentifier;
 
-            if (savedDeviceID != currentDeviceID)
+            if (savedDeviceID == currentDeviceID)
             {
                 GlobalLoggers.PlayFabLogger.Log("Cloud save data is in sync - no need to update.");
                 return;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Facebook.Unity;
 using UnityEngine;
 
 namespace Gumball
@@ -16,6 +17,15 @@ namespace Gumball
         private void OnEnable()
         {
             Refresh();
+
+            FacebookManager.onLogin += Refresh;
+            FacebookManager.onLogout += Refresh;
+        }
+
+        private void OnDisable()
+        {
+            FacebookManager.onLogin -= Refresh;
+            FacebookManager.onLogout -= Refresh;
         }
 
         public void OnClickButton()
@@ -25,14 +35,14 @@ namespace Gumball
 
         private void Refresh()
         {
-            button.interactable = FacebookManager.LogInStatus != FacebookManager.Status.SUCCESS;
-            loggedInIcon.gameObject.SetActive(FacebookManager.LogInStatus == FacebookManager.Status.SUCCESS);
+            button.interactable = !FB.IsLoggedIn;
+            loggedInIcon.gameObject.SetActive(FB.IsLoggedIn);
         }
         
         private IEnumerator LoginWithFacebookIE()
         {
             FacebookManager.Login();
-            yield return new WaitUntil(() => FacebookManager.LogInStatus != FacebookManager.Status.NOT_ATTEMPTED && FacebookManager.LogInStatus != FacebookManager.Status.LOADING);
+            yield return new WaitUntil(() => FB.IsLoggedIn);
 
             Refresh();
         }

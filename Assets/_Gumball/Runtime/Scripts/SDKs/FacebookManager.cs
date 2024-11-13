@@ -9,22 +9,9 @@ namespace Gumball
     public static class FacebookManager
     {
 
-        public enum Status
-        {
-            NOT_ATTEMPTED,
-            LOADING,
-            SUCCESS,
-            ERROR,
-        }
-        
-        public static Status LogInStatus { get; private set; }
+        public static event Action onLogin;
+        public static event Action onLogout;
 
-        [RuntimeInitializeOnLoadMethod]
-        private static void RuntimeInitialise()
-        {
-            LogInStatus = Status.NOT_ATTEMPTED;
-        }
-        
         public static IEnumerator Initialise()
         {
             GlobalLoggers.PlayFabLogger.Log("Initialising Facebook...");
@@ -44,18 +31,25 @@ namespace Gumball
             FB.ActivateApp();
 
             GlobalLoggers.PlayFabLogger.Log($"Facebook initialised! Is logged in? {FB.IsLoggedIn}");
+
+            if (FB.IsLoggedIn)
+            {
+                //if for some reason the player is logged into facebook but the cloud save method is not facebook, then set it anyway
+                if (CloudSaveManager.CurrentSaveMethod != CloudSaveManager.SaveMethod.FACEBOOK)
+                    CloudSaveManager.SetCurrentSaveMethod(CloudSaveManager.SaveMethod.FACEBOOK);
+                
+                //trigger the onLogin event as the login was automatic
+                onLogin?.Invoke();
+            }
         }
 
         public static void Login()
         {
-            LogInStatus = Status.LOADING;
-            
             GlobalLoggers.PlayFabLogger.Log("Logging into Facebook...");
 
             if (FB.IsLoggedIn)
             {
                 GlobalLoggers.PlayFabLogger.Log("User already logged in to Facebook.");
-                LogInStatus = Status.SUCCESS;
                 return;
             }
 
@@ -67,18 +61,19 @@ namespace Gumball
         {
             FB.LogOut();
             
-            LogInStatus = Status.NOT_ATTEMPTED;
             CloudSaveManager.SetCurrentSaveMethod(CloudSaveManager.SaveMethod.LOCAL);
 
             GlobalLoggers.PlayFabLogger.Log("Logged out of Facebook.");
+
+            onLogout?.Invoke();
         }
         
         private static void OnFacebookLoggedIn(ILoginResult result)
         {
-            if (result != null && string.IsNullOrEmpty(result.Error))
+            if (result == null || !string.IsNullOrEmpty(result.Error))
             {
-                Debug.LogWarning($"Facebook Auth Failed: {result.Error} {result.RawResult}");
-                LogInStatus = Status.ERROR;
+                GlobalLoggers.PlayFabLogger.Log($"Facebook Auth Failed: {(result != null ? result.Error : "")} {(result != null ? result.RawResult : "")}");
+                FB.LogOut();
                 return;
             }
 
@@ -87,6 +82,8 @@ namespace Gumball
             CloudSaveManager.SetCurrentSaveMethod(CloudSaveManager.SaveMethod.FACEBOOK);
             
             PlayFabManager.LoginWithFacebook();
+
+            onLogin?.Invoke();
         }
 
     }
