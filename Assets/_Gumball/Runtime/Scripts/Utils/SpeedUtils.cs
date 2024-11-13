@@ -24,6 +24,11 @@ namespace Gumball
         {
             return km * 0.621371f;
         }
+        
+        public static float FromMetresToFeet(float metres)
+        {
+            return metres * 3.28084f;
+        }
 
         /// <summary>
         /// Converts metres into a user friendly string, taking into consideration the unit of speed setting. Eg. metres=1000 returns 1km (or 0.6 miles)

@@ -33,7 +33,12 @@ namespace Gumball
         
         private static void Update()
         {
-            CalculateResolution();
+            if (DynamicQualitySetting.UseDynamicQuality)
+                CalculateResolution();
+            else
+                CurrentScale = ResolutionScaleSetting.ResolutionScale; //manually set
+
+            UpdateResolution();
         }
 
         private static void CalculateResolution()
@@ -44,8 +49,12 @@ namespace Gumball
             
             timeSinceLastCheck = 0;
             
-            CurrentScale = QualityUtils.CurrentFPS < QualityUtils.TargetFPS ? Mathf.Max(minResolutionScale, CurrentScale - scaleStep) : Mathf.Min(maxResolutionScale, CurrentScale + scaleStep);
-
+            CurrentScale = DynamicQualitySetting.UseDynamicQuality ? QualityUtils.CurrentFPS < QualityUtils.TargetFPS ? Mathf.Max(minResolutionScale, CurrentScale - scaleStep) : Mathf.Min(maxResolutionScale, CurrentScale + scaleStep)
+                : ResolutionScaleSetting.ResolutionScale;
+        }
+        
+        private static void UpdateResolution()
+        {
 #if UNITY_EDITOR || UNITY_STANDALONE_WIN
             UniversalRenderPipelineAsset urp = (UniversalRenderPipelineAsset)GraphicsSettings.currentRenderPipeline;
             urp.renderScale = CurrentScale;

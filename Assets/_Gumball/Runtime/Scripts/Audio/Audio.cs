@@ -10,7 +10,14 @@ namespace Gumball
     public class Audio : MonoBehaviour
     {
 
+        public enum Category
+        {
+            SFX,
+            MUSIC
+        }
+        
         [SerializeField] protected AudioSource source;
+        [SerializeField] protected Category category;
         [SerializeField] private bool muteWhenGameIsPaused = true;
         
         [Header("Fade")]
@@ -20,6 +27,7 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private bool isPaused;
         [SerializeField, ReadOnly] private float defaultVolume;
+        [SerializeField, ReadOnly] private float currentVolumeWithoutMaster;
 
         private bool isInitialised;
         private bool hasFadedInBefore;
@@ -32,11 +40,19 @@ namespace Gumball
         {
             if (!isInitialised)
                 Initialise();
+            
+            ListenForVolumeSettingChange();
+        }
+
+        private void OnDisable()
+        {
+            StopListeningForVolumeSettingChange();
         }
 
         private void Initialise()
         {
             defaultVolume = source.volume;
+            SetVolumeWithMasterVolume(defaultVolume);
         }
 
         private void Update()
@@ -50,6 +66,12 @@ namespace Gumball
             }
         }
 
+        public void SetVolumeWithMasterVolume(float volumePercent)
+        {
+            currentVolumeWithoutMaster = volumePercent;
+            source.volume = volumePercent * GetMasterVolumePercent();
+        }
+        
         public void Pause()
         {
             if (isPaused)
@@ -83,11 +105,11 @@ namespace Gumball
             if (!hasFadedInBefore)
             {
                 hasFadedInBefore = true;
-                source.volume = 0; //start at 0 volume
+                SetVolumeWithMasterVolume(0); //start at 0 volume
             }
 
             currentFadeTween?.Kill();
-            currentFadeTween = source.DOFade(defaultVolume, fadeInDuration);
+            currentFadeTween = source.DOFade(defaultVolume * GetMasterVolumePercent(), fadeInDuration);
         }
         
         protected void FadeOut()
@@ -101,6 +123,51 @@ namespace Gumball
                 gameObject.SetActive(false);
                 isFadingOut = false;
             });
+        }
+        
+        protected float GetMasterVolumePercent()
+        {
+            return category switch
+            {
+                Category.SFX => SFXVolumeSetting.SFXVolumePercent,
+                Category.MUSIC => MusicVolumeSetting.MusicVolumePercent,
+                _ => throw new NotImplementedException()
+            };
+        }
+        
+        protected void ListenForVolumeSettingChange()
+        {
+            switch (category)
+            {
+                case Category.SFX:
+                    SFXVolumeSetting.onVolumeSettingChange += OnVolumeSettingChange;
+                    break;
+                case Category.MUSIC:
+                    MusicVolumeSetting.onVolumeSettingChange += OnVolumeSettingChange;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+        
+        protected void StopListeningForVolumeSettingChange()
+        {
+            switch (category)
+            {
+                case Category.SFX:
+                    SFXVolumeSetting.onVolumeSettingChange -= OnVolumeSettingChange;
+                    break;
+                case Category.MUSIC:
+                    MusicVolumeSetting.onVolumeSettingChange -= OnVolumeSettingChange;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private void OnVolumeSettingChange(float newVolume)
+        {
+            SetVolumeWithMasterVolume(currentVolumeWithoutMaster);
         }
         
     }
