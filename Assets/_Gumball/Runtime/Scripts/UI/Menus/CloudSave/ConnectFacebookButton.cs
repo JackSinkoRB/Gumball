@@ -34,9 +34,6 @@ namespace Gumball
             FacebookManager.Login();
             yield return new WaitUntil(() => FacebookManager.LogInStatus != FacebookManager.Status.NOT_ATTEMPTED && FacebookManager.LogInStatus != FacebookManager.Status.LOADING);
 
-            if (FacebookManager.LogInStatus == FacebookManager.Status.SUCCESS)
-                CloudSaveManager.SetCurrentSaveMethod(CloudSaveManager.SaveMethod.FACEBOOK);
-            
             Refresh();
         }
         

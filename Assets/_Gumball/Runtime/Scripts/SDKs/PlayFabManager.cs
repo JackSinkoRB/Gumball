@@ -9,7 +9,10 @@ using PlayFab;
 using PlayFab.ClientModels;
 using PlayFab.DataModels;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
+using EntityKey = PlayFab.DataModels.EntityKey;
 
 namespace Gumball
 {
@@ -210,7 +213,7 @@ namespace Gumball
         {
             if (CloudSaveManager.CurrentSaveMethod == CloudSaveManager.SaveMethod.FACEBOOK && !FB.IsLoggedIn)
             {
-                Debug.Log("Current save method is Facebook, but player is not logged in. Therefore defaulting to local save method.");
+                GlobalLoggers.PlayFabLogger.Log("Current save method is Facebook, but player is not logged in. Therefore defaulting to local save method.");
                 CloudSaveManager.SetCurrentSaveMethod(CloudSaveManager.SaveMethod.LOCAL);
             }
         }
@@ -263,7 +266,7 @@ namespace Gumball
             string savedDeviceID = userDataCached[cloudSaveDeviceIDKey].Value;
             string currentDeviceID = SystemInfo.deviceUniqueIdentifier;
 
-            if (savedDeviceID == currentDeviceID)
+            if (savedDeviceID != currentDeviceID)
             {
                 GlobalLoggers.PlayFabLogger.Log("Cloud save data is in sync - no need to update.");
                 return;
@@ -271,10 +274,107 @@ namespace Gumball
             
             GlobalLoggers.PlayFabLogger.Log("Cloud save is from a different device. Prompting user to sync when ready.");
                             
-            //TODO: wait until in main scene to prompt to download
+            //wait until in main scene to prompt to download
             // - if confirmed, download the save data and continue with login
             // - if denied, log out from facebook and ensure using local save only
-            //PromptUserForCloudSaveDownload();
+            CoroutineHelper.Instance.PerformAfterTrue(
+                () => GameLoaderSceneManager.HasLoaded && UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MainSceneName), () =>
+                {
+                    PanelManager.GetPanel<ConfirmationPanel>().Initialise("Cloud Save Found", "There is another account linked to this Facebook account.\n\nWould you like to <b>override</b> your account data with the saved data?", 
+                        DownloadCloudSaveData, 
+                        () =>
+                        {
+                            FacebookManager.Logout();
+                            LoginWithCustomID();
+                        
+                            PanelManager.GetPanel<GenericMessagePanel>().Initialise("Your Facebook connection has been logged out.\n\nConsider signing in to keep your account data saved on the cloud.");
+                            PanelManager.GetPanel<GenericMessagePanel>().Show();
+                        });
+                    PanelManager.GetPanel<ConfirmationPanel>().Show();
+                });
+        }
+
+        private static void DownloadCloudSaveData()
+        {
+            PanelManager.GetPanel<SimpleMessagePanel>().Initialise("Please wait while the game loads the cloud data.");
+            PanelManager.GetPanel<SimpleMessagePanel>().Show();
+            
+            DownloadAndReplaceSaveDataFiles();
+            UpdateCloudSaveDeviceID();
+        }
+        
+        public static void DownloadAndReplaceSaveDataFiles()
+        {
+            GetFilesRequest request = new GetFilesRequest
+            {
+                Entity = new EntityKey
+                {
+                    Id = PlayFabSettings.staticPlayer.EntityId,
+                    Type = PlayFabSettings.staticPlayer.EntityType,
+                }
+            };
+
+            PlayFabDataAPI.GetFiles(request, OnUserFilesDownloaded,
+            error =>
+                {
+                    Debug.LogError("Failed to retrieve files from PlayFab: " + error.GenerateErrorReport());
+                });
+        }
+
+        private static async void OnUserFilesDownloaded(GetFilesResponse result)
+        {
+            GlobalLoggers.PlayFabLogger.Log("User files downloaded successfully.");
+            
+            Dictionary<string, string> fileNamesMappedWithPaths = new();
+            foreach (JsonDataProvider jsonDataProvider in DataManager.AllDataProviders)
+                fileNamesMappedWithPaths[jsonDataProvider.FileName] = jsonDataProvider.FilePath;
+            
+            DataManager.RemoveAllData();
+            
+            GlobalLoggers.PlayFabLogger.Log("Retrieved user file metadata from PlayFab.");
+
+            //download the files to the local path
+            List<Task> downloadTasks = new List<Task>();
+
+            foreach ((string playFabFileName, GetFileMetadata value) in result.Metadata)
+            {
+                string localPath = fileNamesMappedWithPaths[playFabFileName];
+                        
+                downloadTasks.Add(DownloadFile(value.DownloadUrl, localPath));
+            }
+
+            //wait for downloads to complete
+            await Task.WhenAll(downloadTasks);
+            
+            GlobalLoggers.PlayFabLogger.Log("All files downloaded and replaced locally.");
+
+            CoroutineHelper.Instance.StartCoroutine(GameReloadManager.ReloadGame());
+        }
+        
+        private static async Task DownloadFile(string downloadUrl, string localPath)
+        {
+            using UnityWebRequest request = UnityWebRequest.Get(downloadUrl);
+            // Send the request and wait for it to complete
+            UnityWebRequestAsyncOperation asyncOp = request.SendWebRequest();
+            while (!asyncOp.isDone)
+                await Task.Yield();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Error downloading file: {request.error}");
+                return;
+            }
+
+            // Save the downloaded data to the specified local path, overwriting any existing file
+            try
+            {
+                await File.WriteAllBytesAsync(localPath, request.downloadHandler.data);
+                GlobalLoggers.PlayFabLogger.Log($"File saved to {localPath}");
+            }
+            catch (IOException ioEx)
+            {
+                Debug.LogError($"Error writing file to {localPath}: {ioEx.Message}");
+            }
         }
 
         private static void OnLoadUserDataFailure(PlayFabError error)
@@ -353,7 +453,8 @@ namespace Gumball
 
         private static IEnumerator AttemptReconnectionIE(Action onSuccess, Action onFailure)
         {
-            PanelManager.GetPanel<PlayFabReconnectionPanel>().Show();
+            PanelManager.GetPanel<SimpleMessagePanel>().Initialise("Please wait while we check for an internet connection.");
+            PanelManager.GetPanel<SimpleMessagePanel>().Show();
             
             yield return Initialise();
             
@@ -362,7 +463,7 @@ namespace Gumball
             else
                 onFailure?.Invoke();
             
-            PanelManager.GetPanel<PlayFabReconnectionPanel>().Hide();
+            PanelManager.GetPanel<SimpleMessagePanel>().Hide();
         }
 
         private static void UploadFiles(List<string> filePaths)
@@ -455,5 +556,6 @@ namespace Gumball
                     Debug.LogError("Failed to finalize file uploads: " + error.GenerateErrorReport());
                 });
         }
+        
     }
 }

@@ -21,7 +21,18 @@ namespace Gumball
         public static bool IsUsingTestProviders;
 #endif
 
-        public static List<string> AllFilePaths = new()
+        public static readonly List<JsonDataProvider> AllDataProviders = new()
+        {
+            Settings,
+            Cars,
+            Avatar,
+            GameSessions,
+            Warehouse,
+            Player,
+            Dialogue
+        };
+        
+        public static readonly List<string> AllFilePaths = new()
         {
             Settings.FilePath,
             Cars.FilePath,

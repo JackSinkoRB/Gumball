@@ -62,18 +62,30 @@ namespace Gumball
             //show login screen
             FB.LogInWithReadPermissions(new[] { "public_profile" }, OnFacebookLoggedIn);
         }
+
+        public static void Logout()
+        {
+            FB.LogOut();
+            
+            LogInStatus = Status.NOT_ATTEMPTED;
+            CloudSaveManager.SetCurrentSaveMethod(CloudSaveManager.SaveMethod.LOCAL);
+
+            GlobalLoggers.PlayFabLogger.Log("Logged out of Facebook.");
+        }
         
         private static void OnFacebookLoggedIn(ILoginResult result)
         {
             if (result != null && string.IsNullOrEmpty(result.Error))
             {
-                Debug.LogError($"Facebook Auth Failed: {result.Error} {result.RawResult}");
+                Debug.LogWarning($"Facebook Auth Failed: {result.Error} {result.RawResult}");
                 LogInStatus = Status.ERROR;
                 return;
             }
 
             GlobalLoggers.PlayFabLogger.Log($"Facebook Auth Complete! Access Token: {AccessToken.CurrentAccessToken.TokenString}\nLogging into PlayFab...");
-                
+            
+            CloudSaveManager.SetCurrentSaveMethod(CloudSaveManager.SaveMethod.FACEBOOK);
+            
             PlayFabManager.LoginWithFacebook();
         }
 
