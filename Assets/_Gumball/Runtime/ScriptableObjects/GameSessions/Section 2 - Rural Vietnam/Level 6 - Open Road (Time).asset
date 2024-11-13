@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ff023cbf706d2f64dace4263ec5fe7ef, type: 3}
-  m_Name: Level 6 - Open Road
+  m_Name: Level 6 - Open Road (Time)
   m_EditorClassIdentifier: 
   uniqueID: 48fbad0faf7477e4abd9a4d4c07a1e95
   lastKnownName: Level 6 - Open Road
@@ -222,12 +222,32 @@ MonoBehaviour:
     blueprints: []
   subObjectives: []
   preSessionDialogue:
-    dialogue: []
+    dialogue:
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'Man it''s gorgeous out here, hey? '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'I think I see a couple other Gumballers up ahead. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'I hope that win against Max hasn''t put you off racing against us
+        lowly peasants now. '
     uniqueID: ca0d8700-1be3-417a-88a1-016cd572606d
-  postSessionDialogue:
+  preCountdownDialogue:
     dialogue: []
+    uniqueID: a0026bee-b434-4200-8dce-6828f77a90a4
+  postSessionDialogue:
+    dialogue:
+    - character: {fileID: 11400000, guid: e88656644526b074ba5226ff2a18d04f, type: 2}
+      characterPosition: 1
+      message: Great race. Can we get your number so we can message you when we're
+        down for another?
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 0
+      message: 'Definitely! Hold on, where did I put my phone. '
     uniqueID: 8d86c8d3-5170-4ae0-a05b-01875aa2f156
-  inProgress: 0
+  inProgress: 1
   currentRacers:
     list:
     - Key: {fileID: 0}
@@ -275,5 +295,5 @@ MonoBehaviour:
   previousSubPartRewards: []
   PreviousBlueprintRewards: 
   timeAllowedSeconds: 60
-  timeRemainingSeconds: 29.028606
+  timeRemainingSeconds: 57.7021
   timerHasStarted: 1

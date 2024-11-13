@@ -60,11 +60,11 @@ MonoBehaviour:
       handling: 0.02
       nos: 0.04
     currentPerformanceRating:
-      totalRating: 181
-      maxSpeedRating: 47
-      accelerationSpeedRating: 63
-      handlingRating: 39
-      nosRating: 32
+      totalRating: 214
+      maxSpeedRating: 58
+      accelerationSpeedRating: 80
+      handlingRating: 45
+      nosRating: 31
     bodyPaintSwatch:
       color: {r: 1, g: 1, b: 1, a: 1}
       specular: {r: 0, g: 0, b: 0, a: 1}
@@ -98,11 +98,11 @@ MonoBehaviour:
       handling: 0.02
       nos: 0.04
     currentPerformanceRating:
-      totalRating: 181
-      maxSpeedRating: 47
-      accelerationSpeedRating: 63
-      handlingRating: 39
-      nosRating: 32
+      totalRating: 214
+      maxSpeedRating: 58
+      accelerationSpeedRating: 80
+      handlingRating: 45
+      nosRating: 31
     bodyPaintSwatch:
       color: {r: 1, g: 1, b: 1, a: 1}
       specular: {r: 0, g: 0, b: 0, a: 1}
@@ -136,11 +136,11 @@ MonoBehaviour:
       handling: 0.02
       nos: 0.04
     currentPerformanceRating:
-      totalRating: 181
-      maxSpeedRating: 47
-      accelerationSpeedRating: 63
-      handlingRating: 39
-      nosRating: 32
+      totalRating: 214
+      maxSpeedRating: 58
+      accelerationSpeedRating: 80
+      handlingRating: 45
+      nosRating: 31
     bodyPaintSwatch:
       color: {r: 1, g: 1, b: 1, a: 1}
       specular: {r: 0, g: 0, b: 0, a: 1}
@@ -174,11 +174,11 @@ MonoBehaviour:
       handling: 0.02
       nos: 0.04
     currentPerformanceRating:
-      totalRating: 181
-      maxSpeedRating: 47
-      accelerationSpeedRating: 63
-      handlingRating: 39
-      nosRating: 32
+      totalRating: 214
+      maxSpeedRating: 58
+      accelerationSpeedRating: 80
+      handlingRating: 45
+      nosRating: 31
     bodyPaintSwatch:
       color: {r: 1, g: 1, b: 1, a: 1}
       specular: {r: 0, g: 0, b: 0, a: 1}
@@ -212,11 +212,11 @@ MonoBehaviour:
       handling: 0.02
       nos: 0.04
     currentPerformanceRating:
-      totalRating: 181
-      maxSpeedRating: 47
-      accelerationSpeedRating: 63
-      handlingRating: 39
-      nosRating: 32
+      totalRating: 214
+      maxSpeedRating: 58
+      accelerationSpeedRating: 80
+      handlingRating: 45
+      nosRating: 31
     bodyPaintSwatch:
       color: {r: 1, g: 1, b: 1, a: 1}
       specular: {r: 0, g: 0, b: 0, a: 1}
@@ -250,11 +250,11 @@ MonoBehaviour:
       handling: 0.02
       nos: 0.04
     currentPerformanceRating:
-      totalRating: 181
-      maxSpeedRating: 47
-      accelerationSpeedRating: 63
-      handlingRating: 39
-      nosRating: 32
+      totalRating: 214
+      maxSpeedRating: 58
+      accelerationSpeedRating: 80
+      handlingRating: 45
+      nosRating: 31
     bodyPaintSwatch:
       color: {r: 1, g: 1, b: 1, a: 1}
       specular: {r: 0, g: 0, b: 0, a: 1}
@@ -637,12 +637,35 @@ MonoBehaviour:
     blueprints: []
   subObjectives: []
   preSessionDialogue:
-    dialogue: []
+    dialogue:
+    - character: {fileID: 11400000, guid: 6b68fe646fb608747ba8f924d8c486a0, type: 2}
+      characterPosition: 1
+      message: 'Hey Gumballer, I wanted to introduce you to another first timer.
+        This is Oscar Luthra. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 0
+      message: Hey, good to meet you! First time in Gumball for you to, hey?
+    - character: {fileID: 11400000, guid: 6b68fe646fb608747ba8f924d8c486a0, type: 2}
+      characterPosition: 1
+      message: I'll leave you two to it. Phnom Penh can't wait.
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 0
+      message: 'Thanks Max! '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 0
+      message: 'Love the car by the way. Nothing beats a classic, hey? How about
+        a race against my R34? '
     uniqueID: b465c1e3-a74f-45cc-a993-246a09a3b0b7
-  postSessionDialogue:
+  preCountdownDialogue:
     dialogue: []
+    uniqueID: 875443bb-7c0e-407e-ad2b-82acd58fb49c
+  postSessionDialogue:
+    dialogue:
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: That was great! Looks like I'll have to work to keep up with you.
     uniqueID: 9e580320-53cd-42fe-91f4-adc4c194897f
-  inProgress: 1
+  inProgress: 0
   currentRacers:
     list:
     - Key: {fileID: 0}
@@ -925,10 +948,11 @@ MonoBehaviour:
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
-    keyCollision: 0
+    keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 626e772ed2f5b4340a74b8ccdef384f0, type: 2}
+  PreviousBlueprintRewards: 
   timeAllowedSeconds: 60
   timeRemainingSeconds: 32.55721
   timerHasStarted: 1
