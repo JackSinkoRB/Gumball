@@ -1,4 +1,4 @@
-#if UNITY_IOS
+//#if UNITY_IOS
 using UnityEngine;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -7,18 +7,18 @@ using System.IO;
 
 namespace Gumball.Editor
 {
-    public class IOSCocoaPodsFile : IPostprocessBuildWithReport
+    public class IOSCocoaPodsFile : IPreprocessBuildWithReport
     {
 
         public int callbackOrder => 0;
 
-        public void OnPostprocessBuild(BuildReport report)
+        public void OnPreprocessBuild(BuildReport report)
         {
             if (report.summary.platform != BuildTarget.iOS) //check if the build is for iOS 
                 return;
 
             string buildPath = report.summary.outputPath;
-            string podfilePath = Path.Combine(buildPath, "Podfile");
+            string podfilePath = Path.Combine(buildPath, "iOS", "Podfile");
 
             // Check if the Podfile already exists, if not, create it
             if (!File.Exists(podfilePath))
