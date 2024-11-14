@@ -41,9 +41,7 @@ namespace Gumball
         protected override void OnValidate()
         {
             base.OnValidate();
-            
-            if (!GlobalColourPalette.HasLoaded)
-                GlobalColourPalette.LoadInstanceSync();
+
             UpdateColors();
         }
 #endif
@@ -58,6 +56,9 @@ namespace Gumball
         {
 #if UNITY_EDITOR
             if (DataManager.IsUsingTestProviders) //disable if running tests as it causes issues
+                return;
+
+            if (Application.isBatchMode)
                 return;
 #endif
             
