@@ -44,6 +44,11 @@ platform :ios do
 
   desc "Create .ipa"
   lane :build do
+    cocoapods(
+      clean_install: true,
+      podfile: "#{ENV['IOS_BUILD_PATH']}/iOS/"
+    )
+
     setup_ci
 
     sync_certificates
@@ -52,7 +57,7 @@ platform :ios do
     # See https://github.com/fastlane/fastlane/discussions/17458 for context
     update_code_signing_settings(
       use_automatic_signing: true,
-      path: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcworkspace"
+      path: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcodeproj"
     )
 
     update_code_signing_settings(
@@ -60,13 +65,13 @@ platform :ios do
       team_id: ENV["sigh_#{ENV['IOS_BUNDLE_ID']}_appstore_team-id"],
       code_sign_identity: 'iPhone Distribution',
       targets: 'Unity-iPhone',
-      path: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcworkspace",
+      path: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcodeproj",
       profile_name: ENV["sigh_#{ENV['IOS_BUNDLE_ID']}_appstore_profile-name"],
       profile_uuid: ENV["sigh_#{ENV['IOS_BUNDLE_ID']}_appstore"]
     )
 
     build_app( #alias: gym
-      workspace: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcworkspace",
+      project: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcodeproj",
       scheme: 'Unity-iPhone',
       xcargs: '-allowProvisioningUpdates'
     )
