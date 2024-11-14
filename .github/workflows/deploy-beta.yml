@@ -363,9 +363,6 @@ jobs:
           # List IOS build directory
           ls -R "${{ format('{0}/build/iOS', github.workspace) }}"
 
-          # Remove BOM from Info.plist
-          sed -i '1s/^\xEF\xBB\xBF//' "${{ env.IOS_BUILD_PATH }}/Gumball/Info.plist"
-
           # Show disk space
           df -h
 
