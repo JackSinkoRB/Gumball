@@ -71,7 +71,7 @@ platform :ios do
     )
 
     build_app( #alias: gym
-      project: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcodeproj",
+      workspace: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcworkspace",
       scheme: 'Unity-iPhone',
       xcargs: '-allowProvisioningUpdates'
     )
