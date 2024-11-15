@@ -698,10 +698,46 @@ MonoBehaviour:
     blueprints: []
   subObjectives: []
   preSessionDialogue:
-    dialogue: []
+    dialogue:
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: That was one hell of a party! Who knew they'd be locking off the whole
+        monument?
+    - character: {fileID: 11400000, guid: 0dda2abca75ddde4399ef4d515cf4a0d, type: 2}
+      characterPosition: 0
+      message: They did say so at the beginning.
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: How could anyone be calm enough to listen through that?
+    - character: {fileID: 11400000, guid: 0dda2abca75ddde4399ef4d515cf4a0d, type: 2}
+      characterPosition: 0
+      message: 'Calm down Oscar, you are too loud. '
+    - character: {fileID: 11400000, guid: 6b68fe646fb608747ba8f924d8c486a0, type: 2}
+      characterPosition: 1
+      message: 'Hey everyone, we''re going to drive off from the Hard Rock Cafe as
+        a group. '
+    - character: {fileID: 11400000, guid: 6b68fe646fb608747ba8f924d8c486a0, type: 2}
+      characterPosition: 1
+      message: 'A few want to turn it into a race if you want to join in. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: Definitely!
     uniqueID: c03e1620-2669-4b52-91ff-c59263ae18f1
-  postSessionDialogue:
+  preCountdownDialogue:
     dialogue: []
+    uniqueID: 3fbaeda4-6b00-4df0-a2b1-a7437219596b
+  postSessionDialogue:
+    dialogue:
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: This is so cool.
+    - character: {fileID: 11400000, guid: 0dda2abca75ddde4399ef4d515cf4a0d, type: 2}
+      characterPosition: 0
+      message: What is?
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: How many people can say they've ever sped through Phnom Penh like
+        that?
     uniqueID: 57ce0ec1-9ec4-4ad3-90fe-fd0f0e25599a
   inProgress: 0
   currentRacers:
@@ -797,7 +833,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 5, y: 0.1, z: 150}
+          position: {x: 5, y: 0.1, z: 125}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 0
@@ -837,7 +873,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: -5, y: 0.1, z: 150}
+          position: {x: -5, y: 0.1, z: 125}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 1
         racingLineImprecisionMaxDistance: 0
@@ -877,7 +913,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: -15, y: 0.1, z: 150}
+          position: {x: -15, y: 0.1, z: 125}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 1
         racingLineImprecisionMaxDistance: 0
@@ -917,7 +953,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 10, y: 0.1, z: 180}
+          position: {x: 10, y: 0.1, z: 150}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 0
@@ -957,7 +993,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 15, y: 0.1, z: 200}
+          position: {x: 15, y: 0.1, z: 150}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 0
@@ -997,7 +1033,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: -15, y: 0.1, z: 200}
+          position: {x: -15, y: 0.1, z: 150}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 1
         racingLineImprecisionMaxDistance: 0
@@ -1037,7 +1073,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 5, y: 0.1, z: 250}
+          position: {x: 5, y: 0.1, z: 175}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 0
@@ -1077,7 +1113,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: -10, y: 0.1, z: 300}
+          position: {x: -10, y: 0.1, z: 175}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 1
         racingLineImprecisionMaxDistance: 0
@@ -1117,7 +1153,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: -5, y: 0.1, z: 350}
+          position: {x: -5, y: 0.1, z: 175}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 1
         racingLineImprecisionMaxDistance: 0
@@ -1157,7 +1193,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: -15, y: 0.1, z: 350}
+          position: {x: -15, y: 0.1, z: 200}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 1
         racingLineImprecisionMaxDistance: 0
@@ -1197,7 +1233,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 5, y: 0.1, z: 350}
+          position: {x: 5, y: 0.1, z: 200}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 0
@@ -1237,7 +1273,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 10, y: 0.1, z: 380}
+          position: {x: 10, y: 0.1, z: 200}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 0
@@ -1277,7 +1313,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 15, y: 0.1, z: 400}
+          position: {x: 15, y: 0.1, z: 225}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 0
@@ -1317,7 +1353,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: -15, y: 0.1, z: 400}
+          position: {x: -15, y: 0.1, z: 225}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 1
         racingLineImprecisionMaxDistance: 0
@@ -1346,12 +1382,12 @@ MonoBehaviour:
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
-    keyCollision: 0
+    keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards: []
   PreviousBlueprintRewards: 
   timeAllowedSeconds: 60
-  timeRemainingSeconds: 14.020082
+  timeRemainingSeconds: 13.155795
   timerHasStarted: 1
   racersInPositionOrderCached:
   - {fileID: 0}
