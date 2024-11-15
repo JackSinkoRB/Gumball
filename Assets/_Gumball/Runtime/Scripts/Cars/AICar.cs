@@ -1745,7 +1745,7 @@ namespace Gumball
                 
                 //set offset
                 if (stanceModification != null)
-                    frontWheelMesh.transform.position = frontWheelMesh.transform.TransformPoint(new Vector3(stanceModification.CurrentOffset,0,0));
+                    frontWheelMesh.transform.position += transform.right * stanceModification.CurrentOffset;
             }
 
             //add camber

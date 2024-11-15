@@ -44,18 +44,14 @@ platform :ios do
 
   desc "Create .ipa"
   lane :build do
+    cocoapods(
+      clean_install: true,
+      podfile: "#{ENV['IOS_BUILD_PATH']}/iOS/"
+    )
+
     setup_ci
 
     sync_certificates
-
-    # Set Missing Export Compliance
-    update_info_plist(
-      xcodeproj: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcodeproj",
-      plist_path: 'Info.plist',
-      block: proc do |plist|
-        plist['ITSAppUsesNonExemptEncryption'] = false
-      end
-    )
 
     # Unity has specific requirements around codesigning that we have to handle
     # See https://github.com/fastlane/fastlane/discussions/17458 for context
@@ -75,7 +71,7 @@ platform :ios do
     )
 
     build_app( #alias: gym
-      project: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcodeproj",
+      workspace: "#{ENV['IOS_BUILD_PATH']}/Gumball/Unity-iPhone.xcworkspace",
       scheme: 'Unity-iPhone',
       xcargs: '-allowProvisioningUpdates'
     )

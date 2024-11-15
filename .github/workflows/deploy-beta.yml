@@ -360,6 +360,12 @@ jobs:
           # Install Ruby gems
           bundle install
 
+          # Install cocoapods
+          sudo gem install cocoapods
+
+          # List IOS build directory
+          ls -R "${{ format('{0}/build/iOS', github.workspace) }}"
+
           # Show disk space
           df -h
 

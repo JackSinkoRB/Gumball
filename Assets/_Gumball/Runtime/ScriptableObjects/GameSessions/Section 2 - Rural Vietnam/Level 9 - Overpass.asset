@@ -426,10 +426,26 @@ MonoBehaviour:
     blueprints: []
   subObjectives: []
   preSessionDialogue:
-    dialogue: []
+    dialogue:
+    - character: {fileID: 11400000, guid: e88656644526b074ba5226ff2a18d04f, type: 2}
+      characterPosition: 1
+      message: What do you say to a race to catch up to Oscar?
+    - character: {fileID: 11400000, guid: e88656644526b074ba5226ff2a18d04f, type: 2}
+      characterPosition: 1
+      message: 'There''s an overpass ahead that apparently stands out, let''s see
+        who''s faster. '
     uniqueID: d4a6bfca-97ec-4581-af3a-ee86246cc502
-  postSessionDialogue:
+  preCountdownDialogue:
     dialogue: []
+    uniqueID: e8ea831b-76fe-45b4-b9e5-aa86962d1b7d
+  postSessionDialogue:
+    dialogue:
+    - character: {fileID: 11400000, guid: e88656644526b074ba5226ff2a18d04f, type: 2}
+      characterPosition: 1
+      message: 'Hey Oscar! '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 0
+      message: 'You caught up quick! I didn''t even get a chance to see her yet. '
     uniqueID: 11d2bca7-6ada-4532-9879-a8cdbb638143
   inProgress: 0
   currentRacers:
@@ -474,7 +490,7 @@ MonoBehaviour:
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
-    keyCollision: 0
+    keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: eb1d43fcaef23244889543a9f3560950, type: 2}

@@ -9,22 +9,24 @@ namespace Gumball
     public sealed class JsonDataProvider : DataProvider
     {
 
-        private readonly string filePath;
+        public readonly string FilePath;
 
+        public string FileName => $"{Identifier}.json";
+        
         public JsonDataProvider(string identifier) : base(identifier)
         {
-            filePath = $"{Application.persistentDataPath}/{identifier}.json";
+            FilePath = $"{Application.persistentDataPath}/{FileName}";
         }
 
         public override bool SourceExists()
         {
-            return File.Exists(filePath);
+            return File.Exists(FilePath);
         }
 
         protected override void SaveToSource()
         {
             //serialise to binary file
-            using FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+            using FileStream fileStream = new FileStream(FilePath, FileMode.Create, FileAccess.Write);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             binaryFormatter.Serialize(fileStream, currentValues);
             fileStream.Flush();
@@ -34,12 +36,12 @@ namespace Gumball
         {
             if (!SourceExists())
             {
-                GlobalLoggers.SaveDataLogger.Log($"No previously saved data for '{identifier}'.");
+                GlobalLoggers.SaveDataLogger.Log($"No previously saved data for '{Identifier}'.");
                 return;
             }
 
             //deserialise from the binary file
-            using FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            using FileStream fileStream = new FileStream(FilePath, FileMode.Open, FileAccess.Read);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             try
             {
@@ -54,7 +56,7 @@ namespace Gumball
 
         protected override void OnRemoveFromSource()
         {
-            File.Delete(filePath);
+            File.Delete(FilePath);
         }
         
     }
