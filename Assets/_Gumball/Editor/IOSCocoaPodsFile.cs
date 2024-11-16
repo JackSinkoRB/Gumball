@@ -18,7 +18,7 @@ namespace Gumball.Editor
                 return;
 
             string buildPath = report.summary.outputPath;
-            string podfilePath = Path.Combine(buildPath, "iOS", "Podfile");
+            string podfilePath = Path.Combine(buildPath, "Podfile");
 
             // Check if the Podfile already exists, if not, create it
             if (!File.Exists(podfilePath))
@@ -53,7 +53,7 @@ namespace Gumball.Editor
 
                 writer.WriteLine("end");
 
-                Debug.Log($"Podfile created successfully at {directoryPath}.");
+                Debug.Log($"Podfile created successfully at {podfilePath}.");
             }
             catch (System.Exception ex)
             {
