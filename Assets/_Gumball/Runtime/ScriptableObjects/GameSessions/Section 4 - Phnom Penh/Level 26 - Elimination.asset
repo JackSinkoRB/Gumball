@@ -524,12 +524,42 @@ MonoBehaviour:
     blueprints: []
   subObjectives: []
   preSessionDialogue:
-    dialogue: []
+    dialogue:
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: Let's do a knockout race again.
+    - character: {fileID: 11400000, guid: 0dda2abca75ddde4399ef4d515cf4a0d, type: 2}
+      characterPosition: 0
+      message: Sure, it should be fun!
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'Hold on, I''ll message a few others to join in. '
     uniqueID: 58ee1f47-a9cf-4b52-bb8d-1ca564008258
-  postSessionDialogue:
+  preCountdownDialogue:
     dialogue: []
+    uniqueID: 18bf1e74-307e-44ae-9c57-b8d55e045d71
+  postSessionDialogue:
+    dialogue:
+    - character: {fileID: 11400000, guid: e88656644526b074ba5226ff2a18d04f, type: 2}
+      characterPosition: 1
+      message: 'That was awesome! We''re ganna call a few others to try it. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'Looks like you''ve made a hit Liza. '
+    - character: {fileID: 11400000, guid: 0dda2abca75ddde4399ef4d515cf4a0d, type: 2}
+      characterPosition: 0
+      message: 'I am glad that you all like it. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'We should do it again with a few more people. '
+    - character: {fileID: 11400000, guid: 0dda2abca75ddde4399ef4d515cf4a0d, type: 2}
+      characterPosition: 0
+      message: 'Maybe we should not. We do not want to get sick of it after all. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'Oh, yeah, I guess so. '
     uniqueID: eab924d9-4182-4e55-ad1e-d92cfe120665
-  inProgress: 1
+  inProgress: 0
   currentRacers:
     list:
     - Key: {fileID: 0}
@@ -623,7 +653,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 3, y: 0.1, z: 150}
+          position: {x: 3, y: 0.1, z: 160}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 2.7
@@ -663,7 +693,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 3, y: 0.1, z: 175}
+          position: {x: 3, y: 0.1, z: 195}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 2.7
@@ -703,7 +733,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 3, y: 0.1, z: 200}
+          position: {x: 3, y: 0.1, z: 230}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 2.7
@@ -743,7 +773,7 @@ MonoBehaviour:
           displayName: Racer
           icon: {fileID: 0}
         startingPosition:
-          position: {x: 3, y: 0.1, z: 225}
+          position: {x: 3, y: 0.1, z: 265}
           rotation: {x: 0, y: 0, z: 0, w: 0}
         canCrossMiddle: 0
         racingLineImprecisionMaxDistance: 2
@@ -772,13 +802,13 @@ MonoBehaviour:
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
-    keyCollision: 0
+    keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards:
   - {fileID: 11400000, guid: 626e772ed2f5b4340a74b8ccdef384f0, type: 2}
   PreviousBlueprintRewards: 
   timeAllowedSeconds: 60
-  timeRemainingSeconds: 45.924465
+  timeRemainingSeconds: 16.629843
   timerHasStarted: 1
   racersInPositionOrderCached:
   - {fileID: 0}

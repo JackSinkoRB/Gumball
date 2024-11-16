@@ -46,7 +46,7 @@ platform :ios do
   lane :build do
     cocoapods(
       clean_install: true,
-      podfile: "#{ENV['IOS_BUILD_PATH']}/iOS/"
+      podfile: "#{ENV['IOS_BUILD_PATH']}/"
     )
 
     setup_ci

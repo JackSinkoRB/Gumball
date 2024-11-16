@@ -18,7 +18,7 @@ namespace Gumball.Editor
                 return;
 
             string buildPath = report.summary.outputPath;
-            string podfilePath = Path.Combine(buildPath, "iOS", "Podfile");
+            string podfilePath = Path.Combine(buildPath, "Podfile");
 
             // Check if the Podfile already exists, if not, create it
             if (!File.Exists(podfilePath))
@@ -32,6 +32,11 @@ namespace Gumball.Editor
         {
             try
             {
+                // Ensure the directory exists
+                string directoryPath = Path.GetDirectoryName(podfilePath);
+                if (!Directory.Exists(directoryPath))
+                    Directory.CreateDirectory(directoryPath);
+                
                 using StreamWriter writer = new StreamWriter(podfilePath);
                 writer.WriteLine("platform :ios, '11.0'"); // Set minimum iOS version
 
@@ -48,7 +53,7 @@ namespace Gumball.Editor
 
                 writer.WriteLine("end");
 
-                Debug.Log("Podfile created successfully.");
+                Debug.Log($"Podfile created successfully at {podfilePath}.");
             }
             catch (System.Exception ex)
             {

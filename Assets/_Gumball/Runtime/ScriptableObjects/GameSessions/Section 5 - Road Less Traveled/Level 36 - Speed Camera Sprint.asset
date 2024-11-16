@@ -362,15 +362,35 @@ MonoBehaviour:
     blueprints: []
   subObjectives: []
   preSessionDialogue:
-    dialogue: []
+    dialogue:
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: So this Roman dude pretty much told you to stay away huh? I wonder
+        what for.
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'Let''s just catch him and find out. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'The next area has a bunch of speed cameras coming up. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'How about this; the person with the highest speed at a speed camera
+        wins some cash? '
     uniqueID: f9a5750d-fc23-475a-8dbd-d6cd6c1a3f53
   preCountdownDialogue:
     dialogue: []
     uniqueID: 5029274e-a4ac-40ba-931f-bf90f788a61a
   postSessionDialogue:
-    dialogue: []
+    dialogue:
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'That was great! I reckon we could bring a few others into it. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: We'll catch up to that Roman dude easy enough.
     uniqueID: edb0964c-a49a-4317-a4b1-b880c97b3206
-  inProgress: 1
+  inProgress: 0
   currentRacers:
     list:
     - Key: {fileID: 0}
@@ -533,12 +553,12 @@ MonoBehaviour:
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
-    keyCollision: 0
+    keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards: []
   PreviousBlueprintRewards: 
   timeAllowedSeconds: 60
-  timeRemainingSeconds: 17.963507
+  timeRemainingSeconds: 31.997793
   timerHasStarted: 1
   racersInPositionOrderCached:
   - {fileID: 0}
@@ -547,7 +567,6 @@ MonoBehaviour:
   - {fileID: 0}
   zoneMarkerPrefab: {fileID: 1079706687065447843, guid: e56b88bb75a02b94586ec9113368521e,
     type: 3}
-  speedLimitLeniencyKmh: 5
   speedCameraZones:
   - position: 700
     speedLimitKmh: 100
@@ -581,74 +600,73 @@ MonoBehaviour:
         list:
         - Key:
             position: 700
-            speedLimitKmh: 60
+            speedLimitKmh: 100
           Value:
-            Min: 680.89185
-            Max: 705.881
+            Min: 676.35065
+            Max: 712.9807
         - Key:
             position: 1400
-            speedLimitKmh: 60
+            speedLimitKmh: 100
           Value:
-            Min: 1377.2834
-            Max: 1400.4564
+            Min: 1393.0444
+            Max: 1422.9563
         - Key:
             position: 2100
-            speedLimitKmh: 60
+            speedLimitKmh: 100
           Value:
-            Min: 2094.9812
-            Max: 2112.2832
+            Min: 2085.6853
+            Max: 2123.7349
         keyCollision: 0
     - Key: {fileID: 0}
       Value:
         list:
         - Key:
             position: 700
-            speedLimitKmh: 60
+            speedLimitKmh: 100
           Value:
-            Min: 686.436
-            Max: 717.2277
+            Min: 695.2339
+            Max: 722.002
         - Key:
             position: 1400
-            speedLimitKmh: 60
+            speedLimitKmh: 100
           Value:
-            Min: 1394.319
-            Max: 1411.9503
+            Min: 1388.1516
+            Max: 1413.8643
         - Key:
             position: 2100
-            speedLimitKmh: 60
+            speedLimitKmh: 100
           Value:
-            Min: 2089.362
-            Max: 2104.7617
+            Min: 2086.671
+            Max: 2103.2786
         keyCollision: 0
     - Key: {fileID: 0}
       Value:
         list:
         - Key:
             position: 700
-            speedLimitKmh: 60
+            speedLimitKmh: 100
           Value:
-            Min: 693.2051
-            Max: 719.7676
+            Min: 690.21173
+            Max: 704.4566
         - Key:
             position: 1400
-            speedLimitKmh: 60
+            speedLimitKmh: 100
           Value:
-            Min: 1396.1141
-            Max: 1411.5226
+            Min: 1382.5356
+            Max: 1405.0421
         - Key:
             position: 2100
-            speedLimitKmh: 60
+            speedLimitKmh: 100
           Value:
-            Min: 2079.887
-            Max: 2121.288
+            Min: 2080.0227
+            Max: 2115.1606
         keyCollision: 0
-    keyCollision: 0
+    keyCollision: 1
   zonesPassed:
     list:
     - Key: {fileID: 0}
-    keyCollision: 0
+    - Key: {fileID: 0}
+    keyCollision: 1
   zonesFailed:
-    list:
-    - Key: {fileID: 0}
-    - Key: {fileID: 0}
-    keyCollision: 0
+    list: []
+    keyCollision: 1
