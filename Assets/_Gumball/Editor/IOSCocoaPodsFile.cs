@@ -32,6 +32,13 @@ namespace Gumball.Editor
         {
             try
             {
+                // Ensure the directory exists
+                string directoryPath = Path.GetDirectoryName(podfilePath);
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                
                 using StreamWriter writer = new StreamWriter(podfilePath);
                 writer.WriteLine("platform :ios, '11.0'"); // Set minimum iOS version
 
