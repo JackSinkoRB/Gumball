@@ -9,19 +9,15 @@ namespace Gumball
     public class StorePanel : AnimatedPanel
     {
         
-        [SerializeField] private SpecialsStoreMenu specialsMenu;
-        [SerializeField] private ContentPacksStoreMenu contentPacksMenu;
-        [SerializeField] private CarsStoreMenu carsMenu;
-        [SerializeField] private PartsStoreMenu partsMenu;
-        [SerializeField] private CurrencyStoreMenu currencyMenu;
+        [SerializeField] private StoreSubMenu[] subMenus;
         [Space(5)]
         [SerializeField] private Button specialsCategoryButton;
         
         protected override void OnShow()
         {
             base.OnShow();
-            
-            OpenSubMenu(null);
+
+            OpenDefaultMenu();
             
             //disable the specials category if no PlayFab connection
             if (PlayFabManager.LoginStatus != PlayFabManager.ConnectionStatusType.SUCCESS)
@@ -34,15 +30,20 @@ namespace Gumball
                 return; //already open
             
             //hide all menus
-            specialsMenu.Hide();
-            contentPacksMenu.Hide();
-            carsMenu.Hide();
-            partsMenu.Hide();
-            currencyMenu.Hide();
+            foreach (StoreSubMenu menu in subMenus)
+                menu.Hide();
             
             //just show this menu
             if (subMenu != null)
                 subMenu.Show();
+        }
+
+        private void OpenDefaultMenu()
+        {
+            StoreSubMenu specialsMenu = subMenus[0];
+            StoreSubMenu currencyMenu = subMenus[1];
+            StoreSubMenu defaultMenu = PlayFabManager.LoginStatus == PlayFabManager.ConnectionStatusType.SUCCESS ? specialsMenu : currencyMenu;
+            OpenSubMenu(defaultMenu);
         }
         
 #if UNITY_EDITOR
