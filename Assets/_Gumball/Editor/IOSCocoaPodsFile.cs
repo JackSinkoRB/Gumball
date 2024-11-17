@@ -18,7 +18,7 @@ namespace Gumball.Editor
                 return;
 
             string buildPath = report.summary.outputPath;
-            string podfilePath = Path.Combine(buildPath, "Podfile");
+            string podfilePath = Path.Combine(buildPath, "Gumball", "Podfile");
 
             // Check if the Podfile already exists, if not, create it
             if (!File.Exists(podfilePath))
