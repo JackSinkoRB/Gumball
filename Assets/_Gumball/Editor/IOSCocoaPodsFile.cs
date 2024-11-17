@@ -47,6 +47,9 @@ namespace Gumball.Editor
                 writer.WriteLine("pod \"FBSDKLoginKit\"");
                 writer.WriteLine("pod \"FBSDKShareKit\"");
                 writer.WriteLine("pod \"FBSDKMessengerShareKit\"");
+                
+                // Enable use_frameworks! to allow dynamic frameworks
+                writer.WriteLine("use_frameworks!");
 
                 writer.WriteLine("end");
 
