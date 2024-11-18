@@ -47,8 +47,9 @@ namespace Gumball
         
         [SerializeField] private AssetReferenceGameObject carPrefabReference;
         [SerializeField] private Sprite icon;
-        [Tooltip("The index (starting at index 0) that the car needs to be unlocked. Setting to -1 means it will be unlocked by default.")]
-        [SerializeField] private int startingLevelIndex = -1;
+        [Tooltip("The level that the car needs to be unlocked.")]
+        [SerializeField] private int startingLevel = 1;
+        [SerializeField] private int maxLevel = 10;
         [Tooltip("If enabled, the car will be unlocked at the start of the game (eg. a starting car).")]
         [SerializeField] private bool isUnlockedByDefault;
         [SerializeField] private PurchaseData costToUnlock;
@@ -70,7 +71,8 @@ namespace Gumball
         public PurchaseData CostToUnlock => costToUnlock;
         public AssetReferenceGameObject CarPrefabReference => carPrefabReference;
         public Sprite Icon => icon;
-        public int StartingLevelIndex => startingLevelIndex;
+        public int StartingLevelIndex => startingLevel - 1;
+        public int MaxLevelIndex => maxLevel - 1;
         
         public bool IsUnlocked
         {

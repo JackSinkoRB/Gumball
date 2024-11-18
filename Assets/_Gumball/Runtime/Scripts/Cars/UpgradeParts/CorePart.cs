@@ -173,7 +173,7 @@ namespace Gumball
                 WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CarBelongsToIndex));
         }
         
-        public CarPerformanceProfileModifiers GetTotalModifiers()
+        public CarPerformanceProfileModifiers GetTotalModifiers(int carIndex)
         {
             CarPerformanceProfileModifiers subPartModifiers = new CarPerformanceProfileModifiers();
             if (subPartSlots == null)
@@ -187,16 +187,24 @@ namespace Gumball
                 
                 subPartModifiers += subPart.CorePartModifiers;
             }
+
+            //since cars can have different levels, we need to normalise the percent to the max percent; so that the parts gives 100% when at max level
+            int maxLevelIndex = WarehouseManager.Instance.AllCarData[carIndex].MaxLevelIndex;
+            float maxPercent = levels[maxLevelIndex].MaxPerformanceModifierPercent;
             
             //sub part modifiers goes between performanceModifiers * min and performanceModifiers * max
-            float minPercent = levels.Length == 0 ? 0 : levels[CurrentLevelIndex].MinPerformanceModifierPercent;
-            float maxPercent = levels.Length == 0 ? 1 : levels[CurrentLevelIndex].MaxPerformanceModifierPercent;
-            CarPerformanceProfileModifiers min = performanceModifiers * minPercent;
-            CarPerformanceProfileModifiers max = performanceModifiers * maxPercent;
+            float percentWithNoSubPartsInstalled = levels.Length == 0 ? 0 : levels[CurrentLevelIndex].MinPerformanceModifierPercent;
+            float percentWithNoSubPartsInstalledNormalised = percentWithNoSubPartsInstalled / maxPercent;
+            
+            float percentWithAllSubPartsInstalled = levels.Length == 0 ? 1 : levels[CurrentLevelIndex].MaxPerformanceModifierPercent;
+            float percentWithAllSubPartsInstalledNormalised = percentWithAllSubPartsInstalled / maxPercent;
+
+            CarPerformanceProfileModifiers min = performanceModifiers * percentWithNoSubPartsInstalledNormalised;
+            CarPerformanceProfileModifiers max = performanceModifiers * percentWithAllSubPartsInstalledNormalised;
             CarPerformanceProfileModifiers difference = max - min;
             return min + (subPartModifiers * difference);
         }
-
+        
         public void InitialiseSubPartSlots()
         {
             if (subPartSlots == null)

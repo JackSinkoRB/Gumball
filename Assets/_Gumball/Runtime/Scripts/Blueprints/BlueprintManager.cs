@@ -95,9 +95,8 @@ namespace Gumball
         
         public int GetLevelIndex(int carIndex)
         {
-            bool isUnlocked = WarehouseManager.Instance.AllCarData[carIndex].IsUnlocked;
-            int startingLevel = WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
-            return DataManager.Cars.Get($"{GetSaveKey(carIndex)}.LevelIndex", isUnlocked ? startingLevel : -1);
+            int startingLevelIndex = WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
+            return DataManager.Cars.Get($"{GetSaveKey(carIndex)}.LevelIndex", startingLevelIndex);
         }
         
         public void SetLevelIndex(int carIndex, int levelIndex)
