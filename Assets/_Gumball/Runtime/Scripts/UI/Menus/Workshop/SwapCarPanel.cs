@@ -64,14 +64,12 @@ namespace Gumball
             foreach (Transform child in carOptionHolder)
                 child.gameObject.Pool();
 
-            for (int carIndex = 0; carIndex < WarehouseManager.Instance.AllCarData.Count; carIndex++)
+            foreach (WarehouseCarData car in WarehouseManager.Instance.AllCarData)
             {
-                WarehouseCarData car = WarehouseManager.Instance.AllCarData[carIndex];
-                
                 CarOptionUI carOptionInstance = carOptionPrefab.gameObject.GetSpareOrCreate<CarOptionUI>(carOptionHolder);
-                carOptionInstance.Initialise(car, carIndex);
+                carOptionInstance.Initialise(car);
 
-                if (carIndex == WarehouseManager.Instance.SavedCarGUID)
+                if (car.GUID.Equals(WarehouseManager.Instance.SavedCarGUID))
                     SelectCarOption(carOptionInstance);
             }
         }

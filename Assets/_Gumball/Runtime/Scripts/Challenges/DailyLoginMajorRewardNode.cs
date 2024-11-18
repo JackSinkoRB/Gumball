@@ -168,7 +168,7 @@ namespace Gumball
             {
                 DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
                 instance.transform.SetAsLastSibling();
-                instance.Initialise(dayNumber, WarehouseManager.Instance.AllCarData[blueprintReward.CarIndex].Icon, blueprintReward.Blueprints);
+                instance.Initialise(dayNumber, WarehouseManager.Instance.GetCarDataFromGUID(blueprintReward.CarGUID).Icon, blueprintReward.Blueprints);
             }
             
             foreach (Unlockable unlockableReward in reward.Rewards.Unlockables)

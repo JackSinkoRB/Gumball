@@ -70,7 +70,7 @@ namespace Gumball
 
         private void InitialiseForPlayer()
         {
-            Initialise(WarehouseManager.Instance.CurrentCar.PerformanceSettings, new CarPerformanceProfile(WarehouseManager.Instance.CurrentCar.CarIndex));
+            Initialise(WarehouseManager.Instance.CurrentCar.PerformanceSettings, new CarPerformanceProfile(WarehouseManager.Instance.CurrentCar.CarGUID));
 
             WarehouseManager.Instance.onCurrentCarChanged -= OnCarChange;
             WarehouseManager.Instance.onCurrentCarChanged += OnCarChange;

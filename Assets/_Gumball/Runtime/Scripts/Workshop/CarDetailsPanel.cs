@@ -52,7 +52,7 @@ namespace Gumball
 
             //spawn the car
             CoroutineHelper.Instance.StartCoroutine(
-                WarehouseManager.Instance.SpawnCar(selectedOption.CarIndex, WarehouseManager.Instance.CurrentCar.transform.position, 
+                WarehouseManager.Instance.SpawnCar(selectedOption.CarData.GUID, WarehouseManager.Instance.CurrentCar.transform.position, 
                 WarehouseManager.Instance.CurrentCar.transform.rotation, OnCarSpawned));
             
             makeLabel.text = selectedOption.CarData.MakeDisplayName;
@@ -64,16 +64,16 @@ namespace Gumball
             purchaseButton.SetPurchaseData(selectedOption.CarData.CostToUnlock);
 
             levelHolder.gameObject.SetActive(selectedOption.CarData.IsUnlocked);
-            carLevelUI.SetCarIndex(selectedOption.CarIndex);
+            carLevelUI.SetCarGUID(selectedOption.CarData.GUID);
             
-            blueprintUI.SetCarIndex(selectedOption.CarIndex);
+            blueprintUI.SetCarIndex(selectedOption.CarData.GUID);
 
             openBlueprints.gameObject.SetActive(!selectedOption.CarData.IsUnlocked);
             
             //check if enough blueprints
             if (!selectedOption.CarData.IsUnlocked)
             {
-                int blueprints = BlueprintManager.Instance.GetBlueprints(selectedOption.CarIndex);
+                int blueprints = BlueprintManager.Instance.GetBlueprints(selectedOption.CarData.GUID);
                 int requiredBlueprints = BlueprintManager.Instance.Levels[selectedOption.CarData.StartingLevelIndex].BlueprintsRequired;
                 purchaseButton.GetComponent<MultiImageButton>().interactable = blueprints >= requiredBlueprints;
                 
@@ -131,7 +131,7 @@ namespace Gumball
             ratingLabel.text = $"{carInstance.CurrentPerformanceRating.TotalRating}";
             this.PerformAtEndOfFrame(ratingLabel.Resize);
             
-            CarPerformanceProfile currentProfile = new CarPerformanceProfile(instance.CarIndex);
+            CarPerformanceProfile currentProfile = new CarPerformanceProfile(instance.CarGUID);
             maxSpeedSlider.Initialise(selectedOption.CarData.PerformanceSettings, currentProfile);
             accelerationSlider.Initialise(selectedOption.CarData.PerformanceSettings, currentProfile);
             handlingSlider.Initialise(selectedOption.CarData.PerformanceSettings, currentProfile);
@@ -156,7 +156,7 @@ namespace Gumball
                 child.gameObject.Pool();
             
             //get the sessions that give the CarIndex blueprint as a reward
-            foreach (GameSession session in BlueprintManager.Instance.GetSessionsThatGiveBlueprint(selectedOption.CarIndex))
+            foreach (GameSession session in BlueprintManager.Instance.GetSessionsThatGiveBlueprint(selectedOption.CarData.GUID))
             {
                 OpenBlueprintOption instance = openBlueprintOptionPrefab.gameObject.GetSpareOrCreate<OpenBlueprintOption>(openBlueprintOptionHolder);
                 instance.transform.SetAsLastSibling();

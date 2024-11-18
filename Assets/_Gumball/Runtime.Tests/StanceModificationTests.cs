@@ -11,7 +11,7 @@ namespace Gumball.Runtime.Tests
     public class StanceModificationTests : BaseRuntimeTests
     {
         
-        private const int carIndexToUse = 1; //test with the 911
+        private const string carGUIDToUse = "5c4d7d74-d87a-4060-a55d-926bc4b42d6c"; //test with the XJ
         
         private bool isInitialised;
         
@@ -36,7 +36,7 @@ namespace Gumball.Runtime.Tests
             yield return CorePartManager.Initialise();
             yield return SubPartManager.Initialise();
 
-            yield return WarehouseManager.Instance.SpawnCar(carIndexToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
+            yield return WarehouseManager.Instance.SpawnCar(carGUIDToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
                 (carInstance) =>
                 {
                     WarehouseManager.Instance.SetCurrentCar(carInstance);
@@ -51,7 +51,7 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             Assert.IsNotNull(WarehouseManager.Instance.CurrentCar);
-            Assert.AreEqual(WarehouseManager.Instance.CurrentCar.CarIndex, carIndexToUse);
+            Assert.AreEqual(WarehouseManager.Instance.CurrentCar.CarGUID, carGUIDToUse);
 
             //ensure all the wheels have the stance modification component
             const int numberOfWheels = 4;

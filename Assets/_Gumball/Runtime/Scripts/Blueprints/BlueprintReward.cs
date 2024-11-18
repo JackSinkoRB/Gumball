@@ -10,20 +10,20 @@ namespace Gumball
     public struct BlueprintReward
     {
             
-        [SerializeField] private int carIndex;
+        [SerializeField] private string carGUID;
         [SerializeField, MinValue(1)] private int blueprints;
 
-        public int CarIndex => carIndex;
+        public string CarGUID => carGUID;
         public int Blueprints => blueprints;
         
         public void GiveReward()
         {
-            BlueprintManager.Instance.AddBlueprints(carIndex, blueprints);
+            BlueprintManager.Instance.AddBlueprints(carGUID, blueprints);
         }
         
         public override string ToString()
         {
-            return $"{carIndex}-{blueprints}";
+            return $"{carGUID}-{blueprints}";
         }
             
     }

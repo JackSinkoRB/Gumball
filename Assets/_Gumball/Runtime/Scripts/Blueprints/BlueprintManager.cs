@@ -37,7 +37,7 @@ namespace Gumball
         [SerializeField] private List<Level> levels = new();
 
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private GenericDictionary<int, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car index, collection of sessions
+        [SerializeField, ReadOnly] private GenericDictionary<string, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car GUID, collection of sessions
         
         public List<Level> Levels => levels;
 
@@ -149,8 +149,8 @@ namespace Gumball
                     //cache the blueprint reward car
                     foreach (BlueprintReward blueprintReward in node.GameSession.Rewards.Blueprints)
                     {
-                        List<GameSession> sessions = sessionsThatGiveCarBlueprintCache.ContainsKey(blueprintReward.CarIndex)
-                            ? sessionsThatGiveCarBlueprintCache[blueprintReward.CarIndex]
+                        List<GameSession> sessions = sessionsThatGiveCarBlueprintCache.ContainsKey(blueprintReward.CarGUID)
+                            ? sessionsThatGiveCarBlueprintCache[blueprintReward.CarGUID]
                             : new List<GameSession>();
 
                         if (sessions.Contains(node.GameSession))
@@ -159,7 +159,7 @@ namespace Gumball
                         sessions.Add(node.GameSession);
                         sessionsFoundWithBlueprints++;
                         
-                        sessionsThatGiveCarBlueprintCache[blueprintReward.CarIndex] = sessions;
+                        sessionsThatGiveCarBlueprintCache[blueprintReward.CarGUID] = sessions;
                     }
                 }
             }
@@ -171,9 +171,9 @@ namespace Gumball
         }
 #endif
         
-        public List<GameSession> GetSessionsThatGiveBlueprint(int carIndex)
+        public List<GameSession> GetSessionsThatGiveBlueprint(string carGUID)
         {
-            return sessionsThatGiveCarBlueprintCache.ContainsKey(carIndex) ? sessionsThatGiveCarBlueprintCache[carIndex] : new List<GameSession>();
+            return sessionsThatGiveCarBlueprintCache.ContainsKey(carGUID) ? sessionsThatGiveCarBlueprintCache[carGUID] : new List<GameSession>();
         }
         
         private string GetSaveKey(string carGUID)

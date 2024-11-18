@@ -11,6 +11,7 @@ namespace Gumball.Runtime.Tests
     public class ChunkManagerTests : BaseRuntimeTests
     {
 
+        private const string carGUIDToUse = "5c4d7d74-d87a-4060-a55d-926bc4b42d6c"; //test with the XJ
         private const float chunkSplineLengths = 100;
 
         private bool isInitialised;
@@ -36,7 +37,7 @@ namespace Gumball.Runtime.Tests
             //require the part managers to spawn the player car
             yield return CorePartManager.Initialise();
             yield return SubPartManager.Initialise();
-            yield return WarehouseManager.Instance.SpawnCar(0, Vector3.zero, Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
+            yield return WarehouseManager.Instance.SpawnCar(carGUIDToUse, Vector3.zero, Quaternion.Euler(Vector3.zero), (car) => WarehouseManager.Instance.SetCurrentCar(car));
             yield return GameSession.LoadChunkMap();
             yield return GameSession.SetupSession();
             

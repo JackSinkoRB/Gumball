@@ -9,7 +9,7 @@ namespace Gumball.Runtime.Tests
     public class BlueprintTests : BaseRuntimeTests
     {
 
-        private const int carIndex = 0;
+        private const string carGUIDToUse = "5c4d7d74-d87a-4060-a55d-926bc4b42d6c";
         private bool isInitialised;
 
         [OneTimeSetUp]
@@ -46,7 +46,7 @@ namespace Gumball.Runtime.Tests
         {
             yield return new WaitUntil(() => isInitialised);
             
-            Assert.AreEqual(0, BlueprintManager.Instance.GetBlueprints(carIndex));
+            Assert.AreEqual(0, BlueprintManager.Instance.GetBlueprints(carGUIDToUse));
         }
         
         [UnityTest]
@@ -56,9 +56,9 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             const int amount = 10;
-            BlueprintManager.Instance.SetBlueprints(carIndex, amount);
+            BlueprintManager.Instance.SetBlueprints(carGUIDToUse, amount);
             
-            Assert.AreEqual(amount, BlueprintManager.Instance.GetBlueprints(carIndex));
+            Assert.AreEqual(amount, BlueprintManager.Instance.GetBlueprints(carGUIDToUse));
         }
         
         [UnityTest]
@@ -68,12 +68,12 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             const int before = 5;
-            BlueprintManager.Instance.SetBlueprints(carIndex, before);
+            BlueprintManager.Instance.SetBlueprints(carGUIDToUse, before);
             
             const int amountToAdd = 4;
-            BlueprintManager.Instance.AddBlueprints(carIndex, amountToAdd);
+            BlueprintManager.Instance.AddBlueprints(carGUIDToUse, amountToAdd);
             
-            Assert.AreEqual(before + amountToAdd, BlueprintManager.Instance.GetBlueprints(carIndex));
+            Assert.AreEqual(before + amountToAdd, BlueprintManager.Instance.GetBlueprints(carGUIDToUse));
         }
 
     }
