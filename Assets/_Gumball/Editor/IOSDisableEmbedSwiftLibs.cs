@@ -9,26 +9,24 @@ namespace Gumball.Editor
     public static class DisableEmbedSwiftLibs
     {
         [PostProcessBuild(int.MaxValue)] //We want this code to run last!
-        public static void OnPostProcessBuild(BuildTarget buildTarget, string path)
+        public static void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
         {
             if (buildTarget != BuildTarget.iOS)
                 return; // Make sure its iOS build
             
-            string projPath = PBXProject.GetPBXProjectPath(path);
-           
-            var project = new PBXProject();
-            project.ReadFromFile(projPath);
+            string projPath = PBXProject.GetPBXProjectPath(pathToBuiltProject);
+            PBXProject proj = new PBXProject();
+            proj.ReadFromFile(projPath);
+            string main = proj.GetUnityMainTargetGuid();
+            string framework = proj.GetUnityFrameworkTargetGuid();
 
-            string mainTargetGuid = project.GetUnityMainTargetGuid();
-           
-            foreach (var targetGuid in new[] { mainTargetGuid, project.GetUnityFrameworkTargetGuid() })
-            {
-                project.SetBuildProperty(targetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
-            }
-           
-            project.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "YES");
+            proj.SetBuildProperty(main, "EMBEDDED_CONTENT_CONTAINS_SWIFT", "YES");
+            proj.SetBuildProperty(main, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "YES");
 
-            project.WriteToFile(projPath);
+            proj.SetBuildProperty(framework, "EMBEDDED_CONTENT_CONTAINS_SWIFT", "NO");
+            proj.SetBuildProperty(framework, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+                
+            proj.WriteToFile(projPath);
         }
     }
 }

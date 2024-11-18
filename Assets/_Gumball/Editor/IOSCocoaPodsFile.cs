@@ -45,10 +45,7 @@ namespace Gumball.Editor
                 // Add the required pods for Facebook SDK
                 writer.WriteLine("pod \"FBSDKCoreKit\"");
                 writer.WriteLine("pod \"FBSDKLoginKit\"");
-                writer.WriteLine("pod \"FBSDKShareKit\"");
                 writer.WriteLine("pod \"FBSDKCoreKit_Basics\"");
-                writer.WriteLine("pod \"FBSDKMessengerShareKit\"");
-                writer.WriteLine("pod \"FBSDKGamingServicesKit\"");
                 
                 // Enable use_frameworks! to allow dynamic frameworks
                 writer.WriteLine("use_frameworks!");
