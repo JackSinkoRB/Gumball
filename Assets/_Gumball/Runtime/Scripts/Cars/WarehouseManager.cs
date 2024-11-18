@@ -23,11 +23,22 @@ namespace Gumball
 
         public AICar CurrentCar { get; private set; }
         public List<WarehouseCarData> AllCarData => allCarData;
+
+        [SerializeField, ReadOnly] private GenericDictionary<string, int> lookupByGUID = new();
         
-        public int SavedCarIndex
+        public WarehouseCarData GetCarDataFromGUID(string guid)
         {
-            get => DataManager.Warehouse.Get("CurrentCar.Index", 0);
-            private set => DataManager.Warehouse.Set("CurrentCar.Index", value);
+            if (!lookupByGUID.ContainsKey(guid))
+                throw new NullReferenceException($"There is no car data matching the GUID {guid}");
+
+            int carIndex = lookupByGUID[guid];
+            return allCarData[carIndex];
+        }
+        
+        public string SavedCarGUID
+        {
+            get => DataManager.Warehouse.Get<string>("CurrentCar.GUID", null);
+            private set => DataManager.Warehouse.Set("CurrentCar.GUID", value);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -42,13 +53,23 @@ namespace Gumball
             UpdateCachedData();
 #endif
         }
-
+        
 #if UNITY_EDITOR
         public void UpdateCachedData()
         {
-            foreach (WarehouseCarData carData in allCarData)
+            lookupByGUID.Clear();
+
+            HashSet<string> duplicateCheck = new();
+            for (int carIndex = 0; carIndex < allCarData.Count; carIndex++)
             {
+                WarehouseCarData carData = allCarData[carIndex];
                 carData.CacheCarData();
+
+                if (duplicateCheck.Contains(carData.GUID))
+                    carData.AssignNewGUID();
+                
+                lookupByGUID[carData.GUID] = carIndex;
+                duplicateCheck.Add(carData.GUID);
             }
         }
 #endif
@@ -62,7 +83,7 @@ namespace Gumball
             CurrentCar = car;
 
             //save the values:
-            SavedCarIndex = car.CarIndex;
+            SavedCarGUID = car.CarGUID;
             
             onCurrentCarChanged?.Invoke(car);
             
@@ -71,14 +92,14 @@ namespace Gumball
             DontDestroyOnLoad(car.gameObject);
         }
         
-        public IEnumerator SwapCurrentCar(int carIndex, Action onComplete = null)
+        public IEnumerator SwapCurrentCar(string carGUID, Action onComplete = null)
         {
-            if (SavedCarIndex == carIndex)
+            if (SavedCarGUID.Equals(carGUID))
                 yield break; //already selected
                 
             Destroy(CurrentCar.gameObject);
             
-            yield return SpawnCar(carIndex, 
+            yield return SpawnCar(carGUID, 
                 CurrentCar.transform.position, 
                 CurrentCar.transform.rotation,
                 SetCurrentCar);
@@ -88,7 +109,7 @@ namespace Gumball
         
         public void SwapCurrentCar(AICar car)
         {
-            if (SavedCarIndex == car.CarIndex)
+            if (SavedCarGUID.Equals(car.CarGUID))
                 return; //already selected
                 
             if (CurrentCar != null)
@@ -99,14 +120,14 @@ namespace Gumball
         
         public IEnumerator SpawnSavedCar(Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
         {
-            yield return SpawnCar(SavedCarIndex, position, rotation, onComplete);
+            yield return SpawnCar(SavedCarGUID, position, rotation, onComplete);
         }
 
-        public IEnumerator SpawnCar(int index, Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
+        public IEnumerator SpawnCar(string carGUID, Vector3 position, Quaternion rotation, Action<AICar> onComplete = null)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             
-            AssetReferenceGameObject assetReference = allCarData[index].CarPrefabReference;
+            AssetReferenceGameObject assetReference = GetCarDataFromGUID(carGUID).CarPrefabReference;
             AsyncOperationHandle<GameObject> handle = Addressables.LoadAssetAsync<GameObject>(assetReference);
             yield return handle;
             
@@ -115,7 +136,7 @@ namespace Gumball
             
             car.gameObject.SetActive(false); //disable until complete
             
-            car.InitialiseAsPlayer(index);
+            car.InitialiseAsPlayer(carGUID);
             car.SetGrounded();
             
             yield return DecalManager.ApplyDecalDataToCar(car);

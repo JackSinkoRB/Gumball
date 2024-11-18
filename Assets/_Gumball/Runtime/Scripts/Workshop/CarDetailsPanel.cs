@@ -74,7 +74,7 @@ namespace Gumball
             if (!selectedOption.CarData.IsUnlocked)
             {
                 int blueprints = BlueprintManager.Instance.GetBlueprints(selectedOption.CarIndex);
-                int requiredBlueprints = BlueprintManager.Instance.Levels[selectedOption.CarData.StartingLevelIndex + 1].BlueprintsRequired;
+                int requiredBlueprints = BlueprintManager.Instance.Levels[selectedOption.CarData.StartingLevelIndex].BlueprintsRequired;
                 purchaseButton.GetComponent<MultiImageButton>().interactable = blueprints >= requiredBlueprints;
                 
                 PopulateOpenBlueprints();

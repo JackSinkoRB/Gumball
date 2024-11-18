@@ -27,7 +27,7 @@ namespace Gumball
         public WarehouseCarData CarData => carData;
         public int CarIndex => carIndex;
 
-        public bool IsCurrentCar => carIndex == WarehouseManager.Instance.SavedCarIndex;
+        public bool IsCurrentCar => carIndex == WarehouseManager.Instance.SavedCarGUID;
         
         public void Initialise(WarehouseCarData carData, int carIndex)
         {

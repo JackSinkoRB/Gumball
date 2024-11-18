@@ -57,6 +57,8 @@ namespace Gumball
         [SerializeField] private LiveDecalData[] baseDecalData;
         [SerializeField, ReadOnly] private CachedData cachedData;
 
+        [SerializeField, ReadOnly] public string GUID = Guid.NewGuid().ToString();
+        
         private int carIndexCached = -1;
         public int CarIndex
         {
@@ -115,6 +117,11 @@ namespace Gumball
                 return;
             
             cachedData.Cache(car);
+        }
+        
+        public void AssignNewGUID()
+        {
+            GUID = Guid.NewGuid().ToString();
         }
 #endif
 

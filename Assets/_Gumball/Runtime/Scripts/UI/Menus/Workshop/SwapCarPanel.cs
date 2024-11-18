@@ -71,7 +71,7 @@ namespace Gumball
                 CarOptionUI carOptionInstance = carOptionPrefab.gameObject.GetSpareOrCreate<CarOptionUI>(carOptionHolder);
                 carOptionInstance.Initialise(car, carIndex);
 
-                if (carIndex == WarehouseManager.Instance.SavedCarIndex)
+                if (carIndex == WarehouseManager.Instance.SavedCarGUID)
                     SelectCarOption(carOptionInstance);
             }
         }

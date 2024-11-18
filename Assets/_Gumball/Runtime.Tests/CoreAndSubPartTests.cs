@@ -80,7 +80,7 @@ namespace Gumball.Runtime.Tests
             
             //check it applied to the part
             Assert.IsTrue(TestManager.Instance.CorePartA.IsAppliedToCar);
-            Assert.AreEqual(carIndexToUse, TestManager.Instance.CorePartA.CarBelongsToIndex);
+            Assert.AreEqual(carIndexToUse, TestManager.Instance.CorePartA.CarBelongsToGUID);
 
             //check it applied to the car
             Assert.AreEqual(TestManager.Instance.CorePartA, CorePartManager.GetCorePart(carIndexToUse, CorePart.PartType.ENGINE));
@@ -106,11 +106,11 @@ namespace Gumball.Runtime.Tests
             
             //check it removed from the previous part
             Assert.IsFalse(TestManager.Instance.CorePartA.IsAppliedToCar);
-            Assert.AreEqual(-1, TestManager.Instance.CorePartA.CarBelongsToIndex);
+            Assert.AreEqual(-1, TestManager.Instance.CorePartA.CarBelongsToGUID);
             
             //check it applied to the part
             Assert.IsTrue(TestManager.Instance.CorePartB.IsAppliedToCar);
-            Assert.AreEqual(carIndexToUse, TestManager.Instance.CorePartB.CarBelongsToIndex);
+            Assert.AreEqual(carIndexToUse, TestManager.Instance.CorePartB.CarBelongsToGUID);
 
             //check it applied to the car
             Assert.AreEqual(TestManager.Instance.CorePartB, CorePartManager.GetCorePart(carIndexToUse, CorePart.PartType.ENGINE));
