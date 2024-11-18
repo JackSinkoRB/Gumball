@@ -1,9 +1,7 @@
 #if UNITY_IOS
-using System;
 using UnityEditor;
 using UnityEditor.iOS.Xcode;
 using UnityEditor.Callbacks;
-using UnityEditor.iOS.Xcode;
 
 namespace Gumball.Editor
 {
@@ -11,22 +9,26 @@ namespace Gumball.Editor
     public static class DisableEmbedSwiftLibs
     {
         [PostProcessBuild(int.MaxValue)] //We want this code to run last!
-        public static void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuildProject)
+        public static void OnPostProcessBuild(BuildTarget buildTarget, string path)
         {
             if (buildTarget != BuildTarget.iOS)
                 return; // Make sure its iOS build
             
-            // Getting access to the xcode project file
-            string projectPath = pathToBuildProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
-            PBXProject pbxProject = new PBXProject();
-            pbxProject.ReadFromFile(projectPath);
-            
-            // Getting the UnityFramework Target and changing build settings
-            string target = pbxProject.GetUnityFrameworkTargetGuid();
-            pbxProject.SetBuildProperty(target, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+            string projPath = PBXProject.GetPBXProjectPath(path);
+           
+            var project = new PBXProject();
+            project.ReadFromFile(projPath);
 
-            // After we're done editing the build settings we save it 
-            pbxProject.WriteToFile(projectPath);
+            string mainTargetGuid = project.GetUnityMainTargetGuid();
+           
+            foreach (var targetGuid in new[] { mainTargetGuid, project.GetUnityFrameworkTargetGuid() })
+            {
+                project.SetBuildProperty(targetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "NO");
+            }
+           
+            project.SetBuildProperty(mainTargetGuid, "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES", "YES");
+
+            project.WriteToFile(projPath);
         }
     }
 }
