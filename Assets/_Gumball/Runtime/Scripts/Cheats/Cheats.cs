@@ -22,12 +22,7 @@ namespace Gumball
             DataManager.RemoveAllData();
 
             if (Application.isPlaying)
-            {
-#if UNITY_EDITOR
-                EditorApplication.isPlaying = false;
-#endif
-                Application.Quit();
-            }
+                StartCoroutine(GameReloadManager.ReloadGame());
         }
         
         public void Add10000StandardCurrency()

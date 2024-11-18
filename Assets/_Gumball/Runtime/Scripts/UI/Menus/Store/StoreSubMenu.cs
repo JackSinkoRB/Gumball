@@ -8,22 +8,23 @@ namespace Gumball
     public class StoreSubMenu : SubMenu
     {
 
-        [SerializeField] private Button categoryButton;
-        [SerializeField] private Color selectedCategoryButtonColor = Color.white;
-        [SerializeField] private Color deselectedCategoryButtonColor = Color.white;
-        
+        [SerializeField] private Transform categoryButtonSelected;
+        [SerializeField] private Transform categoryButtonDeselected;
+
         protected override void OnShow()
         {
             base.OnShow();
-
-            categoryButton.image.color = selectedCategoryButtonColor;
+            
+            categoryButtonDeselected.gameObject.SetActive(false);
+            categoryButtonSelected.gameObject.SetActive(true);
         }
 
         protected override void OnHide()
         {
             base.OnHide();
             
-            categoryButton.image.color = deselectedCategoryButtonColor;
+            categoryButtonDeselected.gameObject.SetActive(true);
+            categoryButtonSelected.gameObject.SetActive(false);
         }
         
     }

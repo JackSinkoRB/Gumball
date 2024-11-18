@@ -136,11 +136,11 @@ MonoBehaviour:
       handling: 0.136
       nos: 0.206
     currentPerformanceRating:
-      totalRating: 440
-      maxSpeedRating: 60
-      accelerationSpeedRating: 267
-      handlingRating: 50
-      nosRating: 63
+      totalRating: 269
+      maxSpeedRating: 57
+      accelerationSpeedRating: 103
+      handlingRating: 55
+      nosRating: 54
     bodyPaintSwatch:
       color: {r: 1, g: 1, b: 1, a: 1}
       specular: {r: 0, g: 0, b: 0, a: 1}
@@ -616,13 +616,52 @@ MonoBehaviour:
     coreParts: []
     subParts: []
     unlockables: []
-    blueprints: []
+    blueprints:
+    - carIndex: 5
+      blueprints: 1
   subObjectives: []
   preSessionDialogue:
-    dialogue: []
+    dialogue:
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: Alright, almost in the next province! Should we do another knockout
+        to celebrate? What do you think Liza?
+    - character: {fileID: 11400000, guid: 0dda2abca75ddde4399ef4d515cf4a0d, type: 2}
+      characterPosition: 0
+      message: 'We should. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: Time to message everyone then!
+    - character: {fileID: 11400000, guid: 0dda2abca75ddde4399ef4d515cf4a0d, type: 2}
+      characterPosition: 0
+      message: Also, I am sorry about how I have been acting.
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: Ah, don't worry about it. Let's just have as much fun as possible,
+        hey?
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'How about we up the stakes with this one. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'Anyone that can beat me can get my spare key to the R34! '
     uniqueID: cede9a73-a76a-4871-b3a1-568d385dd0d8
-  postSessionDialogue:
+  preCountdownDialogue:
     dialogue: []
+    uniqueID: 102d822a-1907-4941-998f-773c01bbe66a
+  postSessionDialogue:
+    dialogue:
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'I''m a man of my word. Here''s the spare key Gumballer. Feel free
+        to drive it whenever and I''ll ride shotgun. '
+    - character: {fileID: 11400000, guid: 0dda2abca75ddde4399ef4d515cf4a0d, type: 2}
+      characterPosition: 0
+      message: 'Oscar, you should not be giving the keys away so easily. '
+    - character: {fileID: 11400000, guid: 012c876cdac026a42ab4ba9bcfc2e22f, type: 2}
+      characterPosition: 1
+      message: 'It''s fine. I wouldn''t be surprised if my dad would do the same
+        thing anyway. '
     uniqueID: 14f7b07a-7b42-468f-acfd-cc739773592b
   inProgress: 0
   currentRacers:
@@ -947,10 +986,10 @@ MonoBehaviour:
           smoothness: 0.5
           clearCoat: 1
           clearCoatSmoothness: 1
-    keyCollision: 0
+    keyCollision: 1
   previousCorePartRewards: []
   previousSubPartRewards: []
-  PreviousBlueprintRewards: 
+  PreviousBlueprintRewards: 5-1
   timeAllowedSeconds: 90
   timeRemainingSeconds: 0
   timerHasStarted: 1
