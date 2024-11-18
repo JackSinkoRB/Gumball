@@ -122,6 +122,8 @@ namespace Gumball
         public void AssignNewGUID()
         {
             GUID = Guid.NewGuid().ToString();
+            EditorUtility.SetDirty(WarehouseManager.Instance);
+            Debug.Log($"Assigned new ID to {(carPrefabReference == null || carPrefabReference.editorAsset == null ? "null" : carPrefabReference.editorAsset.gameObject.name)}");
         }
 #endif
 

@@ -73,7 +73,7 @@ namespace Gumball
             private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.LevelIndex", value);
         }
 
-        public bool IsAppliedToCar => CarBelongsToGUID != null;
+        public bool IsAppliedToCar => !CarBelongsToGUID.IsNullOrEmpty();
 
 #if UNITY_EDITOR
         protected override void OnValidate()
@@ -190,7 +190,11 @@ namespace Gumball
 
             //since cars can have different levels, we need to normalise the percent to the max percent; so that the parts gives 100% when at max level
             int maxLevelIndex = WarehouseManager.Instance.GetCarDataFromGUID(carGUID).MaxLevelIndex;
-            float maxPercent = levels[maxLevelIndex].MaxPerformanceModifierPercent;
+            //clamp the max level to the core parts max level
+            if (maxLevelIndex >= levels.Length)
+                maxLevelIndex = levels.Length - 1;
+            
+            float maxPercent = maxLevelIndex < 0 ? 1 : levels[maxLevelIndex].MaxPerformanceModifierPercent;
             
             //sub part modifiers goes between performanceModifiers * min and performanceModifiers * max
             float percentWithNoSubPartsInstalled = levels.Length == 0 ? 0 : levels[CurrentLevelIndex].MinPerformanceModifierPercent;
