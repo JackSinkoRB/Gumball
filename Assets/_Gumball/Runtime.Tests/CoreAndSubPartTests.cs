@@ -11,11 +11,18 @@ namespace Gumball.Runtime.Tests
     public class CoreAndSubPartTests : BaseRuntimeTests
     {
         
-        private const string carGUIDToUse = "5c4d7d74-d87a-4060-a55d-926bc4b42d6c"; //test with the XJ
+        private const string carGUIDToUse = "0860d6f6-93bc-4cde-941e-538b44020cbd"; //test with the XJ
         
         private bool isInitialised;
         
         protected override string sceneToLoadPath => TestManager.Instance.WarehouseScenePath;
+
+        public override void OneTimeSetUp()
+        {
+            base.OneTimeSetUp();
+            
+            DataManager.RemoveAllData();
+        }
 
         protected override void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
@@ -72,7 +79,7 @@ namespace Gumball.Runtime.Tests
         public IEnumerator CorePartInstalling()
         {
             yield return new WaitUntil(() => isInitialised);
-
+            
             Assert.IsFalse(TestManager.Instance.CorePartA.IsAppliedToCar);
 
             //apply the part to the car
@@ -106,7 +113,7 @@ namespace Gumball.Runtime.Tests
             
             //check it removed from the previous part
             Assert.IsFalse(TestManager.Instance.CorePartA.IsAppliedToCar);
-            Assert.AreEqual(-1, TestManager.Instance.CorePartA.CarBelongsToGUID);
+            Assert.AreEqual(null, TestManager.Instance.CorePartA.CarBelongsToGUID);
             
             //check it applied to the part
             Assert.IsTrue(TestManager.Instance.CorePartB.IsAppliedToCar);

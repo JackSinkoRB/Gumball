@@ -16,6 +16,7 @@ namespace Gumball
         
         private static readonly GenericDictionary<PerformanceRatingCalculator.Component, int> maxPerformanceRatingValuesCached = new();
 
+        [SerializeField] private string defaultCarGUID;
         [SerializeField] private List<WarehouseCarData> allCarData = new();
         
         public delegate void CarChangedDelegate(AICar newCar);
@@ -37,7 +38,7 @@ namespace Gumball
         
         public string SavedCarGUID
         {
-            get => DataManager.Warehouse.Get<string>("CurrentCar.GUID", null);
+            get => DataManager.Warehouse.Get("CurrentCar.GUID", defaultCarGUID);
             private set => DataManager.Warehouse.Set("CurrentCar.GUID", value);
         }
 

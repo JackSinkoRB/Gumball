@@ -149,6 +149,9 @@ namespace Gumball
                     //cache the blueprint reward car
                     foreach (BlueprintReward blueprintReward in node.GameSession.Rewards.Blueprints)
                     {
+                        if (blueprintReward.CarGUID == null)
+                            return; //not initialised
+                        
                         List<GameSession> sessions = sessionsThatGiveCarBlueprintCache.ContainsKey(blueprintReward.CarGUID)
                             ? sessionsThatGiveCarBlueprintCache[blueprintReward.CarGUID]
                             : new List<GameSession>();

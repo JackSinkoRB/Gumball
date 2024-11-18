@@ -45,6 +45,7 @@ namespace Gumball
             }
         }
         
+        [SerializeField, ReadOnly] public string GUID = Guid.NewGuid().ToString();
         [SerializeField] private AssetReferenceGameObject carPrefabReference;
         [SerializeField] private Sprite icon;
         [Tooltip("The level that the car needs to be unlocked.")]
@@ -56,8 +57,6 @@ namespace Gumball
         [Tooltip("Copy the live decal data from a car to set it as the base livery here.")]
         [SerializeField] private LiveDecalData[] baseDecalData;
         [SerializeField, ReadOnly] private CachedData cachedData;
-
-        [SerializeField, ReadOnly] public string GUID = Guid.NewGuid().ToString();
         
         private int carIndexCached = -1;
         public int CarIndex
