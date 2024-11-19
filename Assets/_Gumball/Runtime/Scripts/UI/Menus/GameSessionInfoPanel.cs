@@ -47,14 +47,11 @@ namespace Gumball
             mainObjectiveUI.transform.SetAsLastSibling();
             
             //add subobjectives
-            if (gameSession.SubObjectives != null)
+            foreach (Challenge subObjective in gameSession.SubObjectives)
             {
-                foreach (Challenge subObjective in gameSession.SubObjectives)
-                {
-                    ObjectiveUI objectiveUI = objectiveUIPrefab.gameObject.GetSpareOrCreate<ObjectiveUI>(objectiveUIHolder, poolOnDisable: false);
-                    objectiveUI.Initialise(subObjective);
-                    objectiveUI.transform.SetAsLastSibling();
-                }
+                ObjectiveUI objectiveUI = objectiveUIPrefab.gameObject.GetSpareOrCreate<ObjectiveUI>(objectiveUIHolder, poolOnDisable: false);
+                objectiveUI.Initialise(subObjective);
+                objectiveUI.transform.SetAsLastSibling();
             }
         }
 
