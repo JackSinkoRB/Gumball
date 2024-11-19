@@ -28,7 +28,7 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rf Library
+        run: rm -rv $GITHUB_WORKSPACE/Library
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -84,7 +84,7 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rf Library
+        run: rm -rv $GITHUB_WORKSPACE/Library
 
       # Cache
       - uses: JackSinkoRB/local-cache@main

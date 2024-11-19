@@ -169,7 +169,7 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rf Library
+        run: rm -rv $GITHUB_WORKSPACE/Library
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -229,7 +229,7 @@ jobs:
 
       # Delete build folder to save space
       - name: Delete build folder
-        run: rm -rf build
+        run: rm -rv $GITHUB_WORKSPACE/build
 
   buildAndDeployWindows:
     needs: [testEditMode, testPlayMode]
@@ -262,7 +262,7 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rf Library
+        run: rm -rv $GITHUB_WORKSPACE/Library
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -288,7 +288,7 @@ jobs:
       - name: Zip Build Files
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: |
-          find build/StandaloneWindows -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
+          find build/StandaloneWindows -type d -name 'DoNotShip*' -exec rm -rv {} \; #delete folders with 'DoNotShip' before moving
           zip -r Gumball-StandaloneWindows.zip build/StandaloneWindows
 
       # Move Build Files
@@ -298,7 +298,7 @@ jobs:
 
       # Delete build folder to save space
       - name: Delete build folder
-        run: rm -rf build
+        run: rm -rv $GITHUB_WORKSPACE/build
 
   deployToDiscord:
     needs: [buildAndDeployAndroid, buildAndDeployWindows]
