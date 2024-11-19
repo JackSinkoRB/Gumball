@@ -375,17 +375,17 @@ jobs:
           rm -rf /Users/runner/Library/Developer/Xcode/Archives
 
           # Check if the Frameworks folder exists and remove it if found
-          if [ -d "build/iOS/Gumball/Gumball.app/Frameworks/UnityFramework.framework/Frameworks" ]; then
+          if [ -d "${IOS_BUILD_PATH}/Gumball/Gumball.app/Frameworks/UnityFramework.framework/Frameworks" ]; then
             echo "Removing Frameworks folder"
-            rm -rf build/iOS/Gumball/Gumball.app/Frameworks/UnityFramework.framework/Frameworks
+            rm -rf "${IOS_BUILD_PATH}/Gumball/Gumball.app/Frameworks/UnityFramework.framework/Frameworks"
           else
             echo "Frameworks folder not found; skipping"
           fi
 
           # Verify the UnityFramework.framework directory structure
-          if [ -d "build/iOS/Gumball/Gumball.app/Frameworks/UnityFramework.framework" ]; then
+          if [ -d "${IOS_BUILD_PATH}/Gumball/Gumball.app/Frameworks/UnityFramework.framework" ]; then
             echo "Contents of UnityFramework.framework:"
-            ls -R build/iOS/Gumball/Gumball.app/Frameworks/UnityFramework.framework
+            ls -R "${IOS_BUILD_PATH}/Gumball/Gumball.app/Frameworks/UnityFramework.framework"
           else
             echo "UnityFramework.framework not found; skipping verification"
           fi
