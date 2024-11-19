@@ -99,8 +99,8 @@ namespace Gumball
                     continue;
                 }
 
-                float progressPercent = challenge.Tracker.GetListener(challenge.UniqueID).Progress;
-                currentPercent += progressPercent;
+                ChallengeTracker.Listener listener = challenge.Tracker.GetListener(challenge.UniqueID);
+                currentPercent += listener.Progress;
             }
 
             return Mathf.Clamp01(currentPercent / maxPercent);
