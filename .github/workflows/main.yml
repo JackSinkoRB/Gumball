@@ -27,6 +27,8 @@ jobs:
           sudo apt-get purge -y docker.io
           sudo rm -rf /var/lib/docker
           sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo systemctl enable docker
 
       # Ensure Git LFS is installed
       - name: Install Git LFS
