@@ -37,8 +37,7 @@ namespace Gumball
             nameLabel.text = challenge.Tracker.DisplayName;
             icon.sprite = challenge.Icon;
             
-            ChallengeTracker.Listener challengeListener = challenge.Tracker.GetListener(challenge.UniqueID);
-            goalValueLabel.text = challenge.Tracker.GetValueFormatted(challengeListener.Goal);
+            goalValueLabel.text = challenge.Tracker.GetValueFormatted(challenge.Goal);
         }
 
         public void Initialise(FakeChallengeData objectiveData, string objectiveValue)
