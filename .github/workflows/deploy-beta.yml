@@ -29,11 +29,12 @@ jobs:
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
         run: |
-          if [ -d "$GITHUB_WORKSPACE/Library" ]; then
-            echo "Library directory exists. Deleting..."
-            rm -rf "$GITHUB_WORKSPACE/Library"
+          LIBRARY_PATH="$GITHUB_WORKSPACE/Library"
+          if [ -d "$LIBRARY_PATH" ]; then
+            echo "Library directory exists at $LIBRARY_PATH. Deleting..."
+            rm -rf "$LIBRARY_PATH"
           else
-            echo "Library directory does not exist. Nothing to delete."
+            echo "Library directory does not exist at $LIBRARY_PATH. Nothing to delete."
           fi
 
       # Cache
@@ -91,11 +92,12 @@ jobs:
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
         run: |
-          if [ -d "$GITHUB_WORKSPACE/Library" ]; then
-            echo "Library directory exists. Deleting..."
-            rm -rf "$GITHUB_WORKSPACE/Library"
+          LIBRARY_PATH="$GITHUB_WORKSPACE/Library"
+          if [ -d "$LIBRARY_PATH" ]; then
+            echo "Library directory exists at $LIBRARY_PATH. Deleting..."
+            rm -rf "$LIBRARY_PATH"
           else
-            echo "Library directory does not exist. Nothing to delete."
+            echo "Library directory does not exist at $LIBRARY_PATH. Nothing to delete."
           fi
 
       # Cache
