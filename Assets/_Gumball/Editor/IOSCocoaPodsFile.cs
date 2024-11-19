@@ -40,16 +40,15 @@ namespace Gumball.Editor
                 using StreamWriter writer = new StreamWriter(podfilePath);
                 writer.WriteLine("platform :ios, '11.0'"); // Set minimum iOS version
 
+                // Enable use_frameworks! to allow dynamic frameworks
+                writer.WriteLine("use_frameworks!");
+
                 writer.WriteLine("target 'Unity-iPhone' do");
 
                 // Add the required pods for Facebook SDK
                 writer.WriteLine("pod \"FBSDKCoreKit\"");
                 writer.WriteLine("pod \"FBSDKLoginKit\"");
-                writer.WriteLine("pod \"FBSDKShareKit\"");
-                writer.WriteLine("pod \"FBSDKMessengerShareKit\"");
-                
-                // Enable use_frameworks! to allow dynamic frameworks
-                writer.WriteLine("use_frameworks!");
+                writer.WriteLine("pod \"FBSDKCoreKit_Basics\"");
 
                 writer.WriteLine("end");
 
