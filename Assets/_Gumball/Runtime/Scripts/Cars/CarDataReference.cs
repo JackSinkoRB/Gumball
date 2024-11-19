@@ -22,7 +22,9 @@ namespace Gumball
 
         public void OnBeforeSerialize()
         {
+#if UNITY_EDITOR
             FindGUIDFromCarReference();
+#endif
         }
 
         public void OnAfterDeserialize()
@@ -30,6 +32,7 @@ namespace Gumball
             
         }
         
+#if UNITY_EDITOR
         private void FindGUIDFromCarReference()
         {
             guid = "INVALID";
@@ -47,6 +50,7 @@ namespace Gumball
                 }
             }
         }
+#endif
         
     }
 }
