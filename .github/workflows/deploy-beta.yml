@@ -369,23 +369,31 @@ jobs:
           # Run Fastlane to build the app
           bundle exec fastlane ios build
 
+          # Find the Gumball.app file
+          echo "Finding the Gumball.app directory"
+          find "$GITHUB_WORKSPACE" -type d -name "Gumball.app"
+
+          # List directory contents
+          ls -R "$GITHUB_WORKSPACE"
+
           # Clean up old build and archive directories
           echo "Cleaning up build and archive directories"
           rm -rf /Users/runner/work/Gumball/Gumball/build
           rm -rf /Users/runner/Library/Developer/Xcode/Archives
 
           # Check if the Frameworks folder exists and remove it if found
-          if [ -d "${IOS_BUILD_PATH}/Gumball/Gumball.app/Frameworks/UnityFramework.framework/Frameworks" ]; then
+          echo "Searching in {{ github.workspace }}/Gumball.app/Frameworks/UnityFramework.framework/Frameworks"
+          if [ -d "${{ github.workspace }}/Gumball.app/Frameworks/UnityFramework.framework/Frameworks" ]; then
             echo "Removing Frameworks folder"
-            rm -rf "${IOS_BUILD_PATH}/Gumball/Gumball.app/Frameworks/UnityFramework.framework/Frameworks"
+            rm -rf "${{ github.workspace}}/Gumball.app/Frameworks/UnityFramework.framework/Frameworks"
           else
             echo "Frameworks folder not found; skipping"
           fi
 
           # Verify the UnityFramework.framework directory structure
-          if [ -d "${IOS_BUILD_PATH}/Gumball/Gumball.app/Frameworks/UnityFramework.framework" ]; then
+          if [ -d "${{ github.workspace }}/Gumball.app/Frameworks/UnityFramework.framework" ]; then
             echo "Contents of UnityFramework.framework:"
-            ls -R "${IOS_BUILD_PATH}/Gumball/Gumball.app/Frameworks/UnityFramework.framework"
+            ls -R "${{ github.workspace }}/Gumball.app/Frameworks/UnityFramework.framework"
           else
             echo "UnityFramework.framework not found; skipping verification"
           fi
