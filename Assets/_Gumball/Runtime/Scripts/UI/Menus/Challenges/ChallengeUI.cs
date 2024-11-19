@@ -89,6 +89,9 @@ namespace Gumball
             
             foreach (BlueprintReward blueprintReward in challenge.Rewards.Blueprints)
             {
+                if (blueprintReward.CarGUID == null)
+                    continue;
+                
                 ChallengeRewardUI instance = rewardPrefab.gameObject.GetSpareOrCreate<ChallengeRewardUI>(rewardHolder);
                 instance.transform.SetAsLastSibling();
                 instance.Initialise(WarehouseManager.Instance.GetCarDataFromGUID(blueprintReward.CarGUID).Icon, blueprintReward.Blueprints.ToString());

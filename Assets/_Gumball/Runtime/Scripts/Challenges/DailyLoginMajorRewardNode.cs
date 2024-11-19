@@ -166,6 +166,9 @@ namespace Gumball
             
             foreach (BlueprintReward blueprintReward in reward.Rewards.Blueprints)
             {
+                if (blueprintReward.CarGUID == null)
+                    continue;
+                
                 DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
                 instance.transform.SetAsLastSibling();
                 instance.Initialise(dayNumber, WarehouseManager.Instance.GetCarDataFromGUID(blueprintReward.CarGUID).Icon, blueprintReward.Blueprints);

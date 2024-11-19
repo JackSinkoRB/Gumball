@@ -63,6 +63,9 @@ namespace Gumball
         
         public WarehouseCarData GetCarDataFromGUID(string guid)
         {
+            if (guid == null)
+                throw new NullReferenceException("Cannot get car data from null GUID.");
+            
             if (!lookupByGUID.ContainsKey(guid))
                 throw new NullReferenceException($"There is no car data matching the GUID {guid}");
 
