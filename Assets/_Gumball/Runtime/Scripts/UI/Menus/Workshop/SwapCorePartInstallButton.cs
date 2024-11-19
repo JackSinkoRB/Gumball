@@ -17,7 +17,7 @@ namespace Gumball
 
         public void Initialise(CorePart.PartType type, CorePart part)
         {
-            bool isSelected = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, type) == part;
+            bool isSelected = CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarGUID, type) == part;
             if (isSelected || part == null)
             {
                 label.alignment = TextAlignmentOptions.Center;

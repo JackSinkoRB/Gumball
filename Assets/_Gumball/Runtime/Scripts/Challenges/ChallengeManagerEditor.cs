@@ -17,25 +17,10 @@ namespace Gumball
         {
             base.OnInspectorGUI();
 
-            EnsureChallengesAreUnique(challengeManager.Daily);
-            EnsureChallengesAreUnique(challengeManager.Weekly);
+            Challenge.EnsureChallengesAreUnique(challengeManager.Daily.ChallengePool, challengeManager);
+            Challenge.EnsureChallengesAreUnique(challengeManager.Weekly.ChallengePool, challengeManager);
         }
 
-        private void EnsureChallengesAreUnique(Challenges challenges)
-        {
-            HashSet<string> uniqueIDs = new HashSet<string>();
-
-            foreach (Challenge challenge in challenges.ChallengePool)
-            {
-                while (uniqueIDs.Contains(challenge.UniqueID))
-                    challenge.AssignNewID();
-            
-                uniqueIDs.Add(challenge.UniqueID);
-            }
-        
-            EditorUtility.SetDirty(challengeManager);
-        }
-        
     }
 }
 #endif

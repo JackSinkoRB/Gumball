@@ -11,11 +11,18 @@ namespace Gumball.Runtime.Tests
     public class CoreAndSubPartTests : BaseRuntimeTests
     {
         
-        private const int carIndexToUse = 0; //test with the XJ
+        private const string carGUIDToUse = "b5028991c62dbc64a99eb0b82d8b0745"; //test with the XJ
         
         private bool isInitialised;
         
         protected override string sceneToLoadPath => TestManager.Instance.WarehouseScenePath;
+
+        public override void OneTimeSetUp()
+        {
+            base.OneTimeSetUp();
+            
+            DataManager.RemoveAllData();
+        }
 
         protected override void OnSceneLoadComplete(AsyncOperation asyncOperation)
         {
@@ -30,7 +37,7 @@ namespace Gumball.Runtime.Tests
             yield return CorePartManager.Initialise();
             yield return SubPartManager.Initialise();
 
-            yield return WarehouseManager.Instance.SpawnCar(carIndexToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
+            yield return WarehouseManager.Instance.SpawnCar(carGUIDToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
                 (carInstance) =>
                 {
                     WarehouseManager.Instance.SetCurrentCar(carInstance);
@@ -45,7 +52,7 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             Assert.IsNotNull(WarehouseManager.Instance.CurrentCar);
-            Assert.AreEqual(WarehouseManager.Instance.CurrentCar.CarIndex, carIndexToUse);
+            Assert.AreEqual(WarehouseManager.Instance.CurrentCar.CarGUID, carGUIDToUse);
         }
 
         [UnityTest]
@@ -72,18 +79,18 @@ namespace Gumball.Runtime.Tests
         public IEnumerator CorePartInstalling()
         {
             yield return new WaitUntil(() => isInitialised);
-
+            
             Assert.IsFalse(TestManager.Instance.CorePartA.IsAppliedToCar);
 
             //apply the part to the car
-            CorePartManager.InstallPartOnCar(CorePart.PartType.ENGINE, TestManager.Instance.CorePartA, carIndexToUse);
+            CorePartManager.InstallPartOnCar(CorePart.PartType.ENGINE, TestManager.Instance.CorePartA, carGUIDToUse);
             
             //check it applied to the part
             Assert.IsTrue(TestManager.Instance.CorePartA.IsAppliedToCar);
-            Assert.AreEqual(carIndexToUse, TestManager.Instance.CorePartA.CarBelongsToIndex);
+            Assert.AreEqual(carGUIDToUse, TestManager.Instance.CorePartA.CarBelongsToGUID);
 
             //check it applied to the car
-            Assert.AreEqual(TestManager.Instance.CorePartA, CorePartManager.GetCorePart(carIndexToUse, CorePart.PartType.ENGINE));
+            Assert.AreEqual(TestManager.Instance.CorePartA, CorePartManager.GetCorePart(carGUIDToUse, CorePart.PartType.ENGINE));
             
             //ensure it is removed from spare parts
             Assert.AreEqual(1, CorePartManager.GetSpareParts(CorePart.PartType.ENGINE).Count);
@@ -102,18 +109,18 @@ namespace Gumball.Runtime.Tests
             Assert.IsTrue(TestManager.Instance.CorePartA.IsAppliedToCar);
 
             //apply the part to the car
-            CorePartManager.InstallPartOnCar(CorePart.PartType.ENGINE, TestManager.Instance.CorePartB, carIndexToUse);
+            CorePartManager.InstallPartOnCar(CorePart.PartType.ENGINE, TestManager.Instance.CorePartB, carGUIDToUse);
             
             //check it removed from the previous part
             Assert.IsFalse(TestManager.Instance.CorePartA.IsAppliedToCar);
-            Assert.AreEqual(-1, TestManager.Instance.CorePartA.CarBelongsToIndex);
+            Assert.AreEqual(null, TestManager.Instance.CorePartA.CarBelongsToGUID);
             
             //check it applied to the part
             Assert.IsTrue(TestManager.Instance.CorePartB.IsAppliedToCar);
-            Assert.AreEqual(carIndexToUse, TestManager.Instance.CorePartB.CarBelongsToIndex);
+            Assert.AreEqual(carGUIDToUse, TestManager.Instance.CorePartB.CarBelongsToGUID);
 
             //check it applied to the car
-            Assert.AreEqual(TestManager.Instance.CorePartB, CorePartManager.GetCorePart(carIndexToUse, CorePart.PartType.ENGINE));
+            Assert.AreEqual(TestManager.Instance.CorePartB, CorePartManager.GetCorePart(carGUIDToUse, CorePart.PartType.ENGINE));
             
             //ensure it is removed from spare parts
             Assert.AreEqual(1, CorePartManager.GetSpareParts(CorePart.PartType.ENGINE).Count);

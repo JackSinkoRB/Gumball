@@ -209,10 +209,13 @@ namespace Gumball
                 if (uniqueIDAssigner == null)
                     continue;
 
-                splineMesh.Unbake();
-                if (splineMesh.GetChannelCount() > 0)
-                    splineMesh.Bake(true, true);
-                
+                if (splineMesh != null && splineMesh.spline != null)
+                {
+                    splineMesh.Unbake();
+                    if (splineMesh.GetChannelCount() > 0)
+                        splineMesh.Bake(true, true);
+                }
+
                 string path = $"{chunkDirectory}/{splineMesh.gameObject.name}_{uniqueIDAssigner.UniqueID}.asset";
                 Mesh existingAsset = AssetDatabase.LoadAssetAtPath<Mesh>(path);
                 if (existingAsset != null)

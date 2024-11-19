@@ -10,20 +10,19 @@ namespace Gumball.Editor
     [CustomEditor(typeof(GameSession), editorForChildClasses: true)]
     public class GameSessionEditor : UnityObjectEditor
     {
-        
-        private GameSession gameSession => (GameSession)target;
-        
-        public override void OnInspectorGUI()
-        {
-            base.OnInspectorGUI();
 
-            CacheBlueprintRewardsIfModified();
+#region STATIC
+        public static void OnInspectorGUI(GameSession gameSession)
+        {
+            CacheBlueprintRewardsIfModified(gameSession);
 
             foreach (RacerSessionData data in gameSession.RacerData)
                 data.CachePerformanceRatings();
+
+            Challenge.EnsureChallengesAreUnique(gameSession.SubObjectives, gameSession);
         }
         
-        private void CacheBlueprintRewardsIfModified()
+        private static void CacheBlueprintRewardsIfModified(GameSession gameSession)
         {
             string currentBlueprintRewards = string.Join(", ", gameSession.Rewards.Blueprints);
             bool blueprintsHaveChanged = !currentBlueprintRewards.Equals(gameSession.PreviousBlueprintRewards);
@@ -34,7 +33,17 @@ namespace Gumball.Editor
                 EditorUtility.SetDirty(gameSession);
             }
         }
+#endregion
         
+        private GameSession gameSession => (GameSession)target;
+        
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+
+            OnInspectorGUI(gameSession);
+        }
+
     }
 }
 #endif

@@ -26,7 +26,7 @@ namespace Gumball
         private Button button => GetComponent<Button>();
 
         public CorePart CorePart => corePart;
-        public bool IsCurrentPart => corePart == CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, corePart.Type);
+        public bool IsCurrentPart => corePart == CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarGUID, corePart.Type);
 
         public void Initialise(CorePart corePart)
         {

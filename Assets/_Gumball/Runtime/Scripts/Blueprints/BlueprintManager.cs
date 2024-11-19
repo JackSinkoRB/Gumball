@@ -24,7 +24,7 @@ namespace Gumball
             public int StandardCurrencyCostToUpgrade => standardCurrencyCostToUpgrade;
         }
 
-        public delegate void OnValueChangeDelegate(int carIndex, int previousAmount, int newAmount);
+        public delegate void OnValueChangeDelegate(string carGUID, int previousAmount, int newAmount);
         public static event OnValueChangeDelegate onBlueprintsChange;
         public static event OnValueChangeDelegate onLevelChange;
         
@@ -37,12 +37,10 @@ namespace Gumball
         [SerializeField] private List<Level> levels = new();
 
         [Header("Debugging")]
-        [SerializeField, ReadOnly] private GenericDictionary<int, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car index, collection of sessions
+        [SerializeField, ReadOnly] private GenericDictionary<string, List<GameSession>> sessionsThatGiveCarBlueprintCache = new(); //car GUID, collection of sessions
         
         public List<Level> Levels => levels;
 
-        public int MaxLevelIndex => levels.Count - 1;
-        
         protected override void OnInstanceLoaded()
         {
             base.OnInstanceLoaded();
@@ -54,12 +52,12 @@ namespace Gumball
 #endif
         }
 
-        public int GetBlueprints(int carIndex)
+        public int GetBlueprints(string carGUID)
         {
-            return DataManager.Cars.Get($"{GetSaveKey(carIndex)}.Amount", 0);
+            return DataManager.Cars.Get($"{GetSaveKey(carGUID)}.Amount", 0);
         }
 
-        public void SetBlueprints(int carIndex, int amount)
+        public void SetBlueprints(string carGUID, int amount)
         {
             if (amount < 0)
             {
@@ -67,40 +65,39 @@ namespace Gumball
                 amount = 0;
             }
 
-            int previous = GetBlueprints(carIndex);
+            int previous = GetBlueprints(carGUID);
             if (previous == amount)
                 return; //no change
             
-            DataManager.Cars.Set($"{GetSaveKey(carIndex)}.Amount", amount);
+            DataManager.Cars.Set($"{GetSaveKey(carGUID)}.Amount", amount);
             
-            onBlueprintsChange?.Invoke(carIndex, previous, amount);
+            onBlueprintsChange?.Invoke(carGUID, previous, amount);
         }
         
-        public void AddBlueprints(int carIndex, int amount)
+        public void AddBlueprints(string carGUID, int amount)
         {
-            SetBlueprints(carIndex, GetBlueprints(carIndex) + amount);
+            SetBlueprints(carGUID, GetBlueprints(carGUID) + amount);
         }
         
-        public void TakeBlueprints(int carIndex, int amount)
+        public void TakeBlueprints(string carGUID, int amount)
         {
-            int newAmount = GetBlueprints(carIndex) - amount;
+            int newAmount = GetBlueprints(carGUID) - amount;
             if (newAmount < 0)
             {
                 newAmount = 0;
                 Debug.LogError("Tried setting blueprints below 0 - this shouldn't happen.");
             }
 
-            SetBlueprints(carIndex, newAmount);
+            SetBlueprints(carGUID, newAmount);
         }
         
-        public int GetLevelIndex(int carIndex)
+        public int GetLevelIndex(string carGUID)
         {
-            bool isUnlocked = WarehouseManager.Instance.AllCarData[carIndex].IsUnlocked;
-            int startingLevel = WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
-            return DataManager.Cars.Get($"{GetSaveKey(carIndex)}.LevelIndex", isUnlocked ? startingLevel : -1);
+            int startingLevelIndex = WarehouseManager.Instance.GetCarDataFromGUID(carGUID).StartingLevelIndex;
+            return DataManager.Cars.Get($"{GetSaveKey(carGUID)}.LevelIndex", startingLevelIndex);
         }
         
-        public void SetLevelIndex(int carIndex, int levelIndex)
+        public void SetLevelIndex(string carGUID, int levelIndex)
         {
             if (levelIndex < -1)
             {
@@ -108,31 +105,31 @@ namespace Gumball
                 levelIndex = -1;
             }
 
-            int previous = GetLevelIndex(carIndex);
+            int previous = GetLevelIndex(carGUID);
             if (previous == levelIndex)
                 return; //no change
             
-            DataManager.Cars.Set($"{GetSaveKey(carIndex)}.LevelIndex", levelIndex);
+            DataManager.Cars.Set($"{GetSaveKey(carGUID)}.LevelIndex", levelIndex);
             
-            onLevelChange?.Invoke(carIndex, previous, levelIndex);
+            onLevelChange?.Invoke(carGUID, previous, levelIndex);
         }
 
-        public bool IsUnlocked(int carIndex)
+        public bool IsUnlocked(string carGUID)
         {
-            return GetLevelIndex(carIndex) >= GetLevelToUnlock(carIndex);
+            return GetLevelIndex(carGUID) >= GetLevelToUnlock(carGUID);
         }
 
-        public int GetLevelToUnlock(int carIndex)
+        public int GetLevelToUnlock(string carGUID)
         {
-            return WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
+            return WarehouseManager.Instance.GetCarDataFromGUID(carGUID).StartingLevelIndex;
         }
 
-        public int GetNextLevelIndex(int carIndex)
+        public int GetNextLevelIndex(string carGUID)
         {
-            int unlockLevelIndex = WarehouseManager.Instance.AllCarData[carIndex].StartingLevelIndex;
-            int currentLevelIndex = GetLevelIndex(carIndex);
-            int nextLevelIndex = IsUnlocked(carIndex) ? currentLevelIndex + 1 : unlockLevelIndex;
-            return nextLevelIndex > MaxLevelIndex ? -1 : nextLevelIndex;
+            int unlockLevelIndex = WarehouseManager.Instance.GetCarDataFromGUID(carGUID).StartingLevelIndex;
+            int currentLevelIndex = GetLevelIndex(carGUID);
+            int nextLevelIndex = IsUnlocked(carGUID) ? currentLevelIndex + 1 : unlockLevelIndex;
+            return nextLevelIndex > WarehouseManager.Instance.GetCarDataFromGUID(carGUID).MaxLevelIndex ? -1 : nextLevelIndex;
         }
         
 #if UNITY_EDITOR
@@ -150,8 +147,11 @@ namespace Gumball
                     //cache the blueprint reward car
                     foreach (BlueprintReward blueprintReward in node.GameSession.Rewards.Blueprints)
                     {
-                        List<GameSession> sessions = sessionsThatGiveCarBlueprintCache.ContainsKey(blueprintReward.CarIndex)
-                            ? sessionsThatGiveCarBlueprintCache[blueprintReward.CarIndex]
+                        if (blueprintReward.CarGUID == null)
+                            return; //not initialised
+                        
+                        List<GameSession> sessions = sessionsThatGiveCarBlueprintCache.ContainsKey(blueprintReward.CarGUID)
+                            ? sessionsThatGiveCarBlueprintCache[blueprintReward.CarGUID]
                             : new List<GameSession>();
 
                         if (sessions.Contains(node.GameSession))
@@ -160,7 +160,7 @@ namespace Gumball
                         sessions.Add(node.GameSession);
                         sessionsFoundWithBlueprints++;
                         
-                        sessionsThatGiveCarBlueprintCache[blueprintReward.CarIndex] = sessions;
+                        sessionsThatGiveCarBlueprintCache[blueprintReward.CarGUID] = sessions;
                     }
                 }
             }
@@ -172,14 +172,14 @@ namespace Gumball
         }
 #endif
         
-        public List<GameSession> GetSessionsThatGiveBlueprint(int carIndex)
+        public List<GameSession> GetSessionsThatGiveBlueprint(string carGUID)
         {
-            return sessionsThatGiveCarBlueprintCache.ContainsKey(carIndex) ? sessionsThatGiveCarBlueprintCache[carIndex] : new List<GameSession>();
+            return sessionsThatGiveCarBlueprintCache.ContainsKey(carGUID) ? sessionsThatGiveCarBlueprintCache[carGUID] : new List<GameSession>();
         }
         
-        private string GetSaveKey(int carIndex)
+        private string GetSaveKey(string carGUID)
         {
-            return $"Blueprints.{carIndex}";
+            return $"Blueprints.{carGUID}";
         }
         
     }

@@ -30,7 +30,7 @@ namespace Gumball
         /// <summary>
         /// Construct a performance profile from a players car depending on installed parts.
         /// </summary>
-        public CarPerformanceProfile(int carIndex) : this(CorePartManager.GetCoreParts(carIndex).Values)
+        public CarPerformanceProfile(string carGUID) : this(CorePartManager.GetCoreParts(carGUID).Values, carGUID)
         {
             
         }
@@ -38,7 +38,7 @@ namespace Gumball
         /// <summary>
         /// Construct a performance profile from certain core parts.
         /// </summary>
-        public CarPerformanceProfile(IEnumerable<CorePart> coreParts)
+        public CarPerformanceProfile(IEnumerable<CorePart> coreParts, string carGUID)
         {
             CarPerformanceProfileModifiers finalModifiers = new CarPerformanceProfileModifiers();
             
@@ -47,7 +47,7 @@ namespace Gumball
                 if (corePart == null)
                     continue; //no part applied
 
-                CarPerformanceProfileModifiers totalModifiers = corePart.GetTotalModifiers();
+                CarPerformanceProfileModifiers totalModifiers = corePart.GetTotalModifiers(carGUID);
                 finalModifiers += totalModifiers;
             }
 
