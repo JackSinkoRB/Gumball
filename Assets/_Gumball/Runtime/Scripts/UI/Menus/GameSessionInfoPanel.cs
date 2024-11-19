@@ -79,6 +79,9 @@ namespace Gumball
             //blueprints
             foreach (BlueprintReward blueprintReward in gameSession.Rewards.Blueprints)
             {
+                if (blueprintReward.CarGUID == null)
+                    continue;
+                
                 GameSessionNodeReward reward = rewardPrefab.gameObject.GetSpareOrCreate<GameSessionNodeReward>(rewardsHolder, poolOnDisable: false);
                 reward.Initialise(blueprintReward.Blueprints.ToString(), WarehouseManager.Instance.GetCarDataFromGUID(blueprintReward.CarGUID).Icon);
                 reward.transform.SetAsLastSibling();
