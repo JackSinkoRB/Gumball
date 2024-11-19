@@ -16,7 +16,7 @@ namespace Gumball
         
         private static readonly GenericDictionary<PerformanceRatingCalculator.Component, int> maxPerformanceRatingValuesCached = new();
 
-        [SerializeField] private string defaultCarGUID;
+        [SerializeField] private CarDataReference defaultCar;
         [SerializeField] private List<WarehouseCarData> allCarData = new();
         
         public delegate void CarChangedDelegate(AICar newCar);
@@ -26,19 +26,11 @@ namespace Gumball
         public List<WarehouseCarData> AllCarData => allCarData;
 
         [SerializeField, ReadOnly] private GenericDictionary<string, int> lookupByGUID = new();
-        
-        public WarehouseCarData GetCarDataFromGUID(string guid)
-        {
-            if (!lookupByGUID.ContainsKey(guid))
-                throw new NullReferenceException($"There is no car data matching the GUID {guid}");
+        [SerializeField, ReadOnly] private GenericDictionary<AssetReferenceGameObject, int> lookupByAssetReference = new();
 
-            int carIndex = lookupByGUID[guid];
-            return allCarData[carIndex];
-        }
-        
         public string SavedCarGUID
         {
-            get => DataManager.Warehouse.Get("CurrentCar.GUID", defaultCarGUID);
+            get => DataManager.Warehouse.Get("CurrentCar.GUID", defaultCar.GUID);
             private set => DataManager.Warehouse.Set("CurrentCar.GUID", value);
         }
 
@@ -59,6 +51,7 @@ namespace Gumball
         public void UpdateCachedData()
         {
             lookupByGUID.Clear();
+            lookupByAssetReference.Clear();
 
             HashSet<string> duplicateCheck = new();
             for (int carIndex = 0; carIndex < allCarData.Count; carIndex++)
@@ -70,10 +63,20 @@ namespace Gumball
                     carData.AssignNewGUID();
                 
                 lookupByGUID[carData.GUID] = carIndex;
+                lookupByAssetReference[carData.CarPrefabReference] = carIndex;
                 duplicateCheck.Add(carData.GUID);
             }
         }
 #endif
+        
+        public WarehouseCarData GetCarDataFromGUID(string guid)
+        {
+            if (!lookupByGUID.ContainsKey(guid))
+                throw new NullReferenceException($"There is no car data matching the GUID {guid}");
+
+            int carIndex = lookupByGUID[guid];
+            return allCarData[carIndex];
+        }
 
         public void SetCurrentCar(AICar car)
         {
