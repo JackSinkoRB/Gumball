@@ -19,7 +19,7 @@ namespace Gumball
         [Header("Debugging")]
         [SerializeField, ReadOnly] private CorePart.PartType corePartType;
         
-        private CorePart corePart => CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarIndex, corePartType);
+        private CorePart corePart => CorePartManager.GetCorePart(WarehouseManager.Instance.CurrentCar.CarGUID, corePartType);
         private bool isMaxLevel => corePart.CurrentLevelIndex >= corePart.Levels.Length - 1;
 
         public void Initialise(CorePart.PartType corePartType)

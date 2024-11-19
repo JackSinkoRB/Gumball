@@ -81,7 +81,7 @@ namespace Gumball
         [SerializeField] private Rewards rewards;
 
         [Header("Challenges")]
-        [SerializeField] private Challenge[] subObjectives;
+        [SerializeField] private Challenge[] subObjectives = Array.Empty<Challenge>();
 
         [Header("Dialogue")]
         [SerializeField] private DialogueData preSessionDialogue;
@@ -476,24 +476,14 @@ namespace Gumball
 
         public void StartTrackingObjectives()
         {
-            if (subObjectives == null)
-                return;
-            
             foreach (Challenge subObjective in subObjectives)
-            {
                 subObjective.Tracker.StartListening(subObjective.UniqueID, subObjective.Goal);
-            }
         }
 
         private void StopTrackingObjectives()
         {
-            if (subObjectives == null)
-                return;
-            
             foreach (Challenge subObjective in subObjectives)
-            {
                 subObjective.Tracker.StopListening(subObjective.UniqueID);
-            }
         }
 
         private IEnumerator LoadScene()
@@ -734,9 +724,6 @@ namespace Gumball
 
         private bool AreAllSubObjectivesComplete()
         {
-            if (subObjectives == null)
-                return true;
-            
             foreach (Challenge subObjective in subObjectives)
             {
                 if (subObjective.Tracker.GetListener(subObjective.UniqueID).Progress < 1)

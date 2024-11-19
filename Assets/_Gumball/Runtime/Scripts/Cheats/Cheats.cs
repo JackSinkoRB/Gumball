@@ -46,10 +46,8 @@ namespace Gumball
 
         public void GiveAllBlueprints()
         {
-            for (int carIndex = 0; carIndex < WarehouseManager.Instance.AllCarData.Count; carIndex++)
-            {
-                BlueprintManager.Instance.AddBlueprints(carIndex, BlueprintManager.Instance.Levels[^1].BlueprintsRequired);
-            }
+            foreach (WarehouseCarData carData in WarehouseManager.Instance.AllCarData)
+                BlueprintManager.Instance.AddBlueprints(carData.GUID, BlueprintManager.Instance.Levels[^1].BlueprintsRequired);
         }
         
         public void UnlockAllSessions()

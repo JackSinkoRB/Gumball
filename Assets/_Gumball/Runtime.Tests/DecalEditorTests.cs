@@ -14,7 +14,7 @@ namespace Gumball.Runtime.Tests
     public class DecalEditorTests : BaseRuntimeTests
     {
 
-        private const int carIndexToUse = 0; //test with the XJ
+        private const string carGUIDToUse = "b5028991c62dbc64a99eb0b82d8b0745"; //test with the XJ
         
         private bool isInitialised;
 
@@ -44,8 +44,8 @@ namespace Gumball.Runtime.Tests
             //require the part managers to spawn the player car
             yield return CorePartManager.Initialise();
             yield return SubPartManager.Initialise();
-
-            yield return WarehouseManager.Instance.SpawnCar(carIndexToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
+            
+            yield return WarehouseManager.Instance.SpawnCar(carGUIDToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
                 (carInstance) =>
                 {
                     WarehouseManager.Instance.SetCurrentCar(carInstance);
@@ -99,7 +99,7 @@ namespace Gumball.Runtime.Tests
             Object.Destroy(WarehouseManager.Instance.CurrentCar.gameObject);
             Vector3 newCarPosition = new Vector3(-3, 3, -1);
             Vector3 newCarRotationEuler = new Vector3(5, 180, 20);
-            yield return WarehouseManager.Instance.SpawnCar(0, 
+            yield return WarehouseManager.Instance.SpawnCar(carGUIDToUse, 
                 newCarPosition, 
                 Quaternion.Euler(newCarRotationEuler), 
                 (car) => WarehouseManager.Instance.SetCurrentCar(car));

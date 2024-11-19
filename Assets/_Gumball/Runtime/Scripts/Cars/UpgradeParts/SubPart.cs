@@ -180,9 +180,9 @@ namespace Gumball
             }
 
             //update the cars performance profile if it's the active car
-            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CorePartBelongsTo.CarBelongsToIndex;
+            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarGUID.Equals(CorePartBelongsTo.CarBelongsToGUID);
             if (isAttachedToCurrentCar)
-                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CorePartBelongsTo.CarBelongsToIndex));
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CorePartBelongsTo.CarBelongsToGUID));
             
             CorePartBelongsTo = null;
         }

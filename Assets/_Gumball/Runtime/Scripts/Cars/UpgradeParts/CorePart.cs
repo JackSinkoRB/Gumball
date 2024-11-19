@@ -61,10 +61,10 @@ namespace Gumball
             private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.IsUnlocked", value);
         }
         
-        public int CarBelongsToIndex
+        public string CarBelongsToGUID
         {
-            get => DataManager.Cars.Get($"Parts.Core.{SaveKey}.CarBelongsToIndex", -1);
-            private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.CarBelongsToIndex", value);
+            get => DataManager.Cars.Get<string>($"Parts.Core.{SaveKey}.CarBelongsToGUID", null);
+            private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.CarBelongsToGUID", value);
         }
 
         public int CurrentLevelIndex
@@ -73,7 +73,7 @@ namespace Gumball
             private set => DataManager.Cars.Set($"Parts.Core.{SaveKey}.LevelIndex", value);
         }
 
-        public bool IsAppliedToCar => CarBelongsToIndex != -1;
+        public bool IsAppliedToCar => !CarBelongsToGUID.IsNullOrEmpty();
 
 #if UNITY_EDITOR
         protected override void OnValidate()
@@ -142,19 +142,19 @@ namespace Gumball
             CurrentLevelIndex++;
             
             //remove if it is now higher than the car level
-            if (CurrentLevelIndex > BlueprintManager.Instance.GetLevelIndex(CarBelongsToIndex))
-                CorePartManager.RemovePartOnCar(type, CarBelongsToIndex);
+            if (CurrentLevelIndex > BlueprintManager.Instance.GetLevelIndex(CarBelongsToGUID))
+                CorePartManager.RemovePartOnCar(type, CarBelongsToGUID);
         }
 
-        public void ApplyToCar(int carIndex)
+        public void ApplyToCar(string carGUID)
         {
             if (IsAppliedToCar)
             {
-                Debug.LogError($"Trying to apply core part {name} to carIndex {carIndex}, but it is already applied to {CarBelongsToIndex}");
+                Debug.LogError($"Trying to apply core part {name} to car GUID {carGUID}, but it is already applied to {CarBelongsToGUID}");
                 return;
             }
 
-            CarBelongsToIndex = carIndex;
+            CarBelongsToGUID = carGUID;
         }
 
         public void RemoveFromCar()
@@ -165,15 +165,15 @@ namespace Gumball
                 return;
             }
 
-            CarBelongsToIndex = -1;
+            CarBelongsToGUID = null;
             
             //update the cars performance profile if it's the active car
-            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == CarBelongsToIndex;
+            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarGUID.Equals(CarBelongsToGUID);
             if (isAttachedToCurrentCar)
-                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CarBelongsToIndex));
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(CarBelongsToGUID));
         }
         
-        public CarPerformanceProfileModifiers GetTotalModifiers()
+        public CarPerformanceProfileModifiers GetTotalModifiers(string carGUID)
         {
             CarPerformanceProfileModifiers subPartModifiers = new CarPerformanceProfileModifiers();
             if (subPartSlots == null)
@@ -187,16 +187,28 @@ namespace Gumball
                 
                 subPartModifiers += subPart.CorePartModifiers;
             }
+
+            //since cars can have different levels, we need to normalise the percent to the max percent; so that the parts gives 100% when at max level
+            int maxLevelIndex = WarehouseManager.Instance.GetCarDataFromGUID(carGUID).MaxLevelIndex;
+            //clamp the max level to the core parts max level
+            if (maxLevelIndex >= levels.Length)
+                maxLevelIndex = levels.Length - 1;
+            
+            float maxPercent = maxLevelIndex < 0 ? 1 : levels[maxLevelIndex].MaxPerformanceModifierPercent;
             
             //sub part modifiers goes between performanceModifiers * min and performanceModifiers * max
-            float minPercent = levels.Length == 0 ? 0 : levels[CurrentLevelIndex].MinPerformanceModifierPercent;
-            float maxPercent = levels.Length == 0 ? 1 : levels[CurrentLevelIndex].MaxPerformanceModifierPercent;
-            CarPerformanceProfileModifiers min = performanceModifiers * minPercent;
-            CarPerformanceProfileModifiers max = performanceModifiers * maxPercent;
+            float percentWithNoSubPartsInstalled = levels.Length == 0 ? 0 : levels[CurrentLevelIndex].MinPerformanceModifierPercent;
+            float percentWithNoSubPartsInstalledNormalised = percentWithNoSubPartsInstalled / maxPercent;
+            
+            float percentWithAllSubPartsInstalled = levels.Length == 0 ? 1 : levels[CurrentLevelIndex].MaxPerformanceModifierPercent;
+            float percentWithAllSubPartsInstalledNormalised = percentWithAllSubPartsInstalled / maxPercent;
+
+            CarPerformanceProfileModifiers min = performanceModifiers * percentWithNoSubPartsInstalledNormalised;
+            CarPerformanceProfileModifiers max = performanceModifiers * percentWithAllSubPartsInstalledNormalised;
             CarPerformanceProfileModifiers difference = max - min;
             return min + (subPartModifiers * difference);
         }
-
+        
         public void InitialiseSubPartSlots()
         {
             if (subPartSlots == null)

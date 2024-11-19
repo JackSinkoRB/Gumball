@@ -12,6 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81854db63fc5cac4895e418d362bfe4f, type: 3}
   m_Name: WarehouseManager
   m_EditorClassIdentifier: 
+  defaultCar:
+    car:
+      m_AssetGUID: b5028991c62dbc64a99eb0b82d8b0745
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    runtimeKey: b5028991c62dbc64a99eb0b82d8b0745
   allCarData:
   - carPrefabReference:
       m_AssetGUID: cd7759c55dec919479f188792fe7cd7f
@@ -19,7 +26,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: 25e090ee48cccae478a52a9a6c16532d, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 1
     costToUnlock:
       currencyType: 1
@@ -233,7 +241,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: 65e54fa616d9cda4bac8de597b8cc518, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 1
     costToUnlock:
       currencyType: 1
@@ -248,6 +257,845 @@ MonoBehaviour:
       displayName: 911
       makeDisplayName: Porsche
       carType: 2
+      performanceSettings:
+        baseMaxSpeed: 0
+        baseAcceleration: 0
+        baseHandling: 0
+        baseNos: 0
+        minTorqueCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 400
+            inSlope: 227.16423
+            outSlope: 227.16423
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0.20588234
+          - serializedVersion: 3
+            time: 0.64
+            value: 620
+            inSlope: -7.4538
+            outSlope: -7.4538
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.254902
+            outWeight: 0.3690476
+          - serializedVersion: 3
+            time: 0.92
+            value: 620
+            inSlope: 1.3518212
+            outSlope: 1.3518212
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.33333334
+            outWeight: 1
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: -7073.967
+            outSlope: -7073.967
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.08333323
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        additionalPeakTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          max: 780
+        minTorquePercentToPeak:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          maxPercent: 0.28
+        engineRpmRangeMin:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          min: 850
+          max: 1500
+        engineRpmRangeMax:
+          maxSpeedWeight: 1
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 0
+          min: 6600
+          max: 11000
+        rigidbodyMass:
+          maxSpeedWeight: 0.5
+          accelerationWeight: 0.5
+          handlingWeight: 0
+          nosWeight: 0
+          min: 1470
+          max: 735
+        brakeTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 1700
+          max: 4000
+        handbrakeEaseOffDuration:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 0.85
+          max: 2
+        handbrakeTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 3400
+          max: 8000
+        steerSpeed:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 1.7
+          max: 4
+        steerReleaseSpeed:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 14.45
+          max: 34
+        maxSteerAngle:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 50
+              inSlope: -108.714584
+              outSlope: -108.714584
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0.035658635
+            - serializedVersion: 3
+              time: 1
+              value: 14.45
+              inSlope: -0.0000020807438
+              outSlope: -0.0000020807438
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0.22916669
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          max:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 50
+              inSlope: -43.40245
+              outSlope: -43.40245
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0.0875
+            - serializedVersion: 3
+              time: 1
+              value: 34
+              inSlope: -0.0000020807438
+              outSlope: -0.0000020807438
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0.22916669
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+        nosDepletionRate:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 6.8
+          max: 16
+        nosFillRate:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 46.75
+          max: 110
+        nosTorqueAddition:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 595
+          max: 1400
+      defaultEngine: {fileID: 11400000, guid: 9b005d74032644b48aa6b42e40b635e9, type: 2}
+      defaultWheels: {fileID: 11400000, guid: 82589e08369ec0d4aa2352b4cdf61993, type: 2}
+      defaultDrivetrain: {fileID: 11400000, guid: 8650bdc40e00a3149a3b65b4d3df3b5e,
+        type: 2}
+  - carPrefabReference:
+      m_AssetGUID: 731da51f959bc554aaa0545c94562d25
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    icon: {fileID: 21300000, guid: 6a34e13a85bd93246961ed9fa5eb82ed, type: 3}
+    startingLevel: 1
+    maxLevel: 10
+    isUnlockedByDefault: 1
+    costToUnlock:
+      currencyType: 1
+      product:
+        productID: <STORE PRODUCT ID>
+        type: 1
+      price: 100
+      isSale: 0
+      discountPercent: 0.2
+    baseDecalData: []
+    cachedData:
+      displayName: BMW E36
+      makeDisplayName: Toyota
+      carType: 0
+      performanceSettings:
+        baseMaxSpeed: 0
+        baseAcceleration: 0
+        baseHandling: 0
+        baseNos: 0
+        minTorqueCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 200
+            inSlope: 590.8019
+            outSlope: 590.8019
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0.2020202
+          - serializedVersion: 3
+            time: 0.33
+            value: 480
+            inSlope: -4.427817
+            outSlope: -4.427817
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.33333334
+            outWeight: 0.44833335
+          - serializedVersion: 3
+            time: 0.83
+            value: 462
+            inSlope: -53.709717
+            outSlope: -53.709717
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.254902
+            outWeight: 1
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: -2664.8096
+            outSlope: -2664.8096
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.12254889
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        additionalPeakTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          max: 10000
+        minTorquePercentToPeak:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          maxPercent: 0.636
+        engineRpmRangeMin:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          min: 800
+          max: 1300
+        engineRpmRangeMax:
+          maxSpeedWeight: 1
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 0
+          min: 6200
+          max: 14000
+        rigidbodyMass:
+          maxSpeedWeight: 0.5
+          accelerationWeight: 0.5
+          handlingWeight: 0
+          nosWeight: 0
+          min: 1440
+          max: 720
+        brakeTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 1530
+          max: 3600
+        handbrakeEaseOffDuration:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 0.93
+          max: 2.2
+        handbrakeTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 0
+          min: 2975
+          max: 7000
+        steerSpeed:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 1.53
+          max: 3.6
+        steerReleaseSpeed:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 12.75
+          max: 30
+        maxSteerAngle:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 50
+              inSlope: -108.714584
+              outSlope: -108.714584
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0.035658635
+            - serializedVersion: 3
+              time: 1
+              value: 12.75
+              inSlope: -0.0000020807438
+              outSlope: -0.0000020807438
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0.22916669
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          max:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 50
+              inSlope: -43.40245
+              outSlope: -43.40245
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0.0875
+            - serializedVersion: 3
+              time: 1
+              value: 30
+              inSlope: -0.0000020807438
+              outSlope: -0.0000020807438
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0.22916669
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+        nosDepletionRate:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 7.65
+          max: 18
+        nosFillRate:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 100
+          max: 42.5
+        nosTorqueAddition:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 595
+          max: 1400
+      defaultEngine: {fileID: 0}
+      defaultWheels: {fileID: 0}
+      defaultDrivetrain: {fileID: 0}
+  - carPrefabReference:
+      m_AssetGUID: d2502054733f50042a64ef15cf60e626
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    icon: {fileID: 21300000, guid: d47c72bfadb0ca4408f9d43f878c2665, type: 3}
+    startingLevel: 1
+    maxLevel: 10
+    isUnlockedByDefault: 0
+    costToUnlock:
+      currencyType: 1
+      product:
+        productID: <STORE PRODUCT ID>
+        type: 1
+      price: 100
+      isSale: 0
+      discountPercent: 0.2
+    baseDecalData: []
+    cachedData:
+      displayName: Cooper
+      makeDisplayName: Mini
+      carType: 0
+      performanceSettings:
+        baseMaxSpeed: 0
+        baseAcceleration: 0
+        baseHandling: 0
+        baseNos: 0
+        minTorqueCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 97
+            inSlope: 346.7288
+            outSlope: 346.7288
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0.17676768
+          - serializedVersion: 3
+            time: 0.66
+            value: 166
+            inSlope: -2.8263538
+            outSlope: -2.8263538
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.33333334
+            outWeight: 0.6323529
+          - serializedVersion: 3
+            time: 1
+            value: 0
+            inSlope: -1315.0562
+            outSlope: -1315.0562
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.09803931
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        additionalPeakTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          max: 432
+        minTorquePercentToPeak:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          maxPercent: 0.46
+        engineRpmRangeMin:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          min: 680
+          max: 1600
+        engineRpmRangeMax:
+          maxSpeedWeight: 1
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 0
+          min: 5700
+          max: 13000
+        rigidbodyMass:
+          maxSpeedWeight: 0.5
+          accelerationWeight: 0.5
+          handlingWeight: 0
+          nosWeight: 0
+          min: 696
+          max: 348
+        brakeTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 1487
+          max: 3500
+        handbrakeEaseOffDuration:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 0.89
+          max: 2.1
+        handbrakeTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 2975
+          max: 7000
+        steerSpeed:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 1.7
+          max: 4
+        steerReleaseSpeed:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 15.3
+          max: 36
+        maxSteerAngle:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 50
+              inSlope: -108.714584
+              outSlope: -108.714584
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0.035658635
+            - serializedVersion: 3
+              time: 1
+              value: 15.3
+              inSlope: -0.0000020807438
+              outSlope: -0.0000020807438
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0.22916669
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          max:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 50
+              inSlope: -43.40245
+              outSlope: -43.40245
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0.0875
+            - serializedVersion: 3
+              time: 1
+              value: 36
+              inSlope: -0.0000020807438
+              outSlope: -0.0000020807438
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0.22916669
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+        nosDepletionRate:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 2.55
+          max: 6
+        nosFillRate:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 48
+          max: 20.4
+        nosTorqueAddition:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 595
+          max: 1400
+      defaultEngine: {fileID: 0}
+      defaultWheels: {fileID: 0}
+      defaultDrivetrain: {fileID: 0}
+  - carPrefabReference:
+      m_AssetGUID: d61b189db7a08774c852be5f47c6c10e
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    icon: {fileID: 21300000, guid: a5bbe01b956862743a0124e4ff3f51f6, type: 3}
+    startingLevel: 1
+    maxLevel: 10
+    isUnlockedByDefault: 0
+    costToUnlock:
+      currencyType: 1
+      product:
+        productID: <STORE PRODUCT ID>
+        type: 1
+      price: 100
+      isSale: 0
+      discountPercent: 0.2
+    baseDecalData: []
+    cachedData:
+      displayName: Mustang 2016
+      makeDisplayName: Ford
+      carType: 0
+      performanceSettings:
+        baseMaxSpeed: 0
+        baseAcceleration: 0
+        baseHandling: 0
+        baseNos: 0
+        minTorqueCurve:
+          serializedVersion: 2
+          m_Curve:
+          - serializedVersion: 3
+            time: 0
+            value: 645
+            inSlope: 460.75497
+            outSlope: 460.75497
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0
+            outWeight: 0.11612021
+          - serializedVersion: 3
+            time: 0.61
+            value: 746
+            inSlope: 15.193749
+            outSlope: 15.193749
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.3374317
+            outWeight: 0.3690476
+          - serializedVersion: 3
+            time: 1
+            value: 681
+            inSlope: -444.03122
+            outSlope: -444.03122
+            tangentMode: 0
+            weightedMode: 0
+            inWeight: 0.23504268
+            outWeight: 0
+          m_PreInfinity: 2
+          m_PostInfinity: 2
+          m_RotationOrder: 4
+        additionalPeakTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          max: 814
+        minTorquePercentToPeak:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          maxPercent: 0.7
+        engineRpmRangeMin:
+          maxSpeedWeight: 0
+          accelerationWeight: 1
+          handlingWeight: 0
+          nosWeight: 0
+          min: 765
+          max: 1800
+        engineRpmRangeMax:
+          maxSpeedWeight: 1
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 0
+          min: 6600
+          max: 14000
+        rigidbodyMass:
+          maxSpeedWeight: 1
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 0
+          min: 1843
+          max: 801
+        brakeTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 1402
+          max: 3300
+        handbrakeEaseOffDuration:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 0.8
+          max: 1.9
+        handbrakeTorque:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 2805
+          max: 6600
+        steerSpeed:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 1.53
+          max: 3.6
+        steerReleaseSpeed:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min: 9.775
+          max: 23
+        maxSteerAngle:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 1
+          nosWeight: 0
+          min:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 50
+              inSlope: -108.714584
+              outSlope: -108.714584
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0.035658635
+            - serializedVersion: 3
+              time: 1
+              value: 9.775
+              inSlope: -0.0000020807438
+              outSlope: -0.0000020807438
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0.22916669
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+          max:
+            serializedVersion: 2
+            m_Curve:
+            - serializedVersion: 3
+              time: 0
+              value: 50
+              inSlope: -79.256615
+              outSlope: -79.256615
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0
+              outWeight: 0.045833334
+            - serializedVersion: 3
+              time: 1
+              value: 23
+              inSlope: -0.0000020807438
+              outSlope: -0.0000020807438
+              tangentMode: 0
+              weightedMode: 0
+              inWeight: 0.22916669
+              outWeight: 0
+            m_PreInfinity: 2
+            m_PostInfinity: 2
+            m_RotationOrder: 4
+        nosDepletionRate:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 2.975
+          max: 7
+        nosFillRate:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 90
+          max: 38.25
+        nosTorqueAddition:
+          maxSpeedWeight: 0
+          accelerationWeight: 0
+          handlingWeight: 0
+          nosWeight: 1
+          min: 620
+          max: 1460
+      defaultEngine: {fileID: 0}
+      defaultWheels: {fileID: 0}
+      defaultDrivetrain: {fileID: 0}
+  - carPrefabReference:
+      m_AssetGUID: 9e6cb95863f6d6a4bbd5c83903375a7a
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    icon: {fileID: 21300000, guid: 89b3ffd1a8d16d44bb7c0b7a04276f5f, type: 3}
+    startingLevel: 1
+    maxLevel: 10
+    isUnlockedByDefault: 0
+    costToUnlock:
+      currencyType: 1
+      product:
+        productID: <STORE PRODUCT ID>
+        type: 1
+      price: 100
+      isSale: 0
+      discountPercent: 0.2
+    baseDecalData: []
+    cachedData:
+      displayName: R34
+      makeDisplayName: Nissan
+      carType: 0
       performanceSettings:
         baseMaxSpeed: 0
         baseAcceleration: 0
@@ -455,841 +1303,6 @@ MonoBehaviour:
           nosWeight: 1
           min: 637
           max: 1500
-      defaultEngine: {fileID: 11400000, guid: 9b005d74032644b48aa6b42e40b635e9, type: 2}
-      defaultWheels: {fileID: 11400000, guid: 82589e08369ec0d4aa2352b4cdf61993, type: 2}
-      defaultDrivetrain: {fileID: 11400000, guid: 8650bdc40e00a3149a3b65b4d3df3b5e,
-        type: 2}
-  - carPrefabReference:
-      m_AssetGUID: 731da51f959bc554aaa0545c94562d25
-      m_SubObjectName: 
-      m_SubObjectType: 
-      m_EditorAssetChanged: 0
-    icon: {fileID: 21300000, guid: 6a34e13a85bd93246961ed9fa5eb82ed, type: 3}
-    startingLevelIndex: -1
-    isUnlockedByDefault: 1
-    costToUnlock:
-      currencyType: 1
-      product:
-        productID: <STORE PRODUCT ID>
-        type: 1
-      price: 100
-      isSale: 0
-      discountPercent: 0.2
-    baseDecalData: []
-    cachedData:
-      displayName: BMW E36
-      makeDisplayName: Toyota
-      carType: 0
-      performanceSettings:
-        baseMaxSpeed: 0
-        baseAcceleration: 0
-        baseHandling: 0
-        baseNos: 0
-        minTorqueCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 400
-            inSlope: 227.16423
-            outSlope: 227.16423
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0.20588234
-          - serializedVersion: 3
-            time: 0.64
-            value: 620
-            inSlope: -7.4538
-            outSlope: -7.4538
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.254902
-            outWeight: 0.3690476
-          - serializedVersion: 3
-            time: 0.92
-            value: 620
-            inSlope: 1.3518212
-            outSlope: 1.3518212
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.33333334
-            outWeight: 1
-          - serializedVersion: 3
-            time: 1
-            value: 0
-            inSlope: -7073.967
-            outSlope: -7073.967
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.08333323
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        additionalPeakTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          max: 780
-        minTorquePercentToPeak:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          maxPercent: 0.28
-        engineRpmRangeMin:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          min: 850
-          max: 1500
-        engineRpmRangeMax:
-          maxSpeedWeight: 1
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 0
-          min: 6600
-          max: 11000
-        rigidbodyMass:
-          maxSpeedWeight: 0.5
-          accelerationWeight: 0.5
-          handlingWeight: 0
-          nosWeight: 0
-          min: 1470
-          max: 735
-        brakeTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 1700
-          max: 4000
-        handbrakeEaseOffDuration:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 0.85
-          max: 2
-        handbrakeTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 3400
-          max: 8000
-        steerSpeed:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 1.7
-          max: 4
-        steerReleaseSpeed:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 14.45
-          max: 34
-        maxSteerAngle:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min:
-            serializedVersion: 2
-            m_Curve:
-            - serializedVersion: 3
-              time: 0
-              value: 50
-              inSlope: -108.714584
-              outSlope: -108.714584
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0.035658635
-            - serializedVersion: 3
-              time: 1
-              value: 14.45
-              inSlope: -0.0000020807438
-              outSlope: -0.0000020807438
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0.22916669
-              outWeight: 0
-            m_PreInfinity: 2
-            m_PostInfinity: 2
-            m_RotationOrder: 4
-          max:
-            serializedVersion: 2
-            m_Curve:
-            - serializedVersion: 3
-              time: 0
-              value: 50
-              inSlope: -43.40245
-              outSlope: -43.40245
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0.0875
-            - serializedVersion: 3
-              time: 1
-              value: 34
-              inSlope: -0.0000020807438
-              outSlope: -0.0000020807438
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0.22916669
-              outWeight: 0
-            m_PreInfinity: 2
-            m_PostInfinity: 2
-            m_RotationOrder: 4
-        nosDepletionRate:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 6.8
-          max: 16
-        nosFillRate:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 46.75
-          max: 110
-        nosTorqueAddition:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 595
-          max: 1400
-      defaultEngine: {fileID: 0}
-      defaultWheels: {fileID: 0}
-      defaultDrivetrain: {fileID: 0}
-  - carPrefabReference:
-      m_AssetGUID: d2502054733f50042a64ef15cf60e626
-      m_SubObjectName: 
-      m_SubObjectType: 
-      m_EditorAssetChanged: 0
-    icon: {fileID: 21300000, guid: d47c72bfadb0ca4408f9d43f878c2665, type: 3}
-    startingLevelIndex: -1
-    isUnlockedByDefault: 0
-    costToUnlock:
-      currencyType: 1
-      product:
-        productID: <STORE PRODUCT ID>
-        type: 1
-      price: 100
-      isSale: 0
-      discountPercent: 0.2
-    baseDecalData: []
-    cachedData:
-      displayName: Cooper
-      makeDisplayName: Mini
-      carType: 0
-      performanceSettings:
-        baseMaxSpeed: 0
-        baseAcceleration: 0
-        baseHandling: 0
-        baseNos: 0
-        minTorqueCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 97
-            inSlope: 346.7288
-            outSlope: 346.7288
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0.17676768
-          - serializedVersion: 3
-            time: 0.66
-            value: 166
-            inSlope: -2.8263538
-            outSlope: -2.8263538
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.33333334
-            outWeight: 0.6323529
-          - serializedVersion: 3
-            time: 1
-            value: 0
-            inSlope: -1315.0562
-            outSlope: -1315.0562
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.09803931
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        additionalPeakTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          max: 432
-        minTorquePercentToPeak:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          maxPercent: 0.46
-        engineRpmRangeMin:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          min: 680
-          max: 1600
-        engineRpmRangeMax:
-          maxSpeedWeight: 1
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 0
-          min: 5700
-          max: 13000
-        rigidbodyMass:
-          maxSpeedWeight: 0.5
-          accelerationWeight: 0.5
-          handlingWeight: 0
-          nosWeight: 0
-          min: 696
-          max: 348
-        brakeTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 1487
-          max: 3500
-        handbrakeEaseOffDuration:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 0.89
-          max: 2.1
-        handbrakeTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 2975
-          max: 7000
-        steerSpeed:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 1.7
-          max: 4
-        steerReleaseSpeed:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 15.3
-          max: 36
-        maxSteerAngle:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min:
-            serializedVersion: 2
-            m_Curve:
-            - serializedVersion: 3
-              time: 0
-              value: 50
-              inSlope: -108.714584
-              outSlope: -108.714584
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0.035658635
-            - serializedVersion: 3
-              time: 1
-              value: 15.3
-              inSlope: -0.0000020807438
-              outSlope: -0.0000020807438
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0.22916669
-              outWeight: 0
-            m_PreInfinity: 2
-            m_PostInfinity: 2
-            m_RotationOrder: 4
-          max:
-            serializedVersion: 2
-            m_Curve:
-            - serializedVersion: 3
-              time: 0
-              value: 50
-              inSlope: -43.40245
-              outSlope: -43.40245
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0.0875
-            - serializedVersion: 3
-              time: 1
-              value: 36
-              inSlope: -0.0000020807438
-              outSlope: -0.0000020807438
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0.22916669
-              outWeight: 0
-            m_PreInfinity: 2
-            m_PostInfinity: 2
-            m_RotationOrder: 4
-        nosDepletionRate:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 2.55
-          max: 6
-        nosFillRate:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 48
-          max: 20.4
-        nosTorqueAddition:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 595
-          max: 1400
-      defaultEngine: {fileID: 0}
-      defaultWheels: {fileID: 0}
-      defaultDrivetrain: {fileID: 0}
-  - carPrefabReference:
-      m_AssetGUID: d61b189db7a08774c852be5f47c6c10e
-      m_SubObjectName: 
-      m_SubObjectType: 
-      m_EditorAssetChanged: 0
-    icon: {fileID: 21300000, guid: a5bbe01b956862743a0124e4ff3f51f6, type: 3}
-    startingLevelIndex: -1
-    isUnlockedByDefault: 0
-    costToUnlock:
-      currencyType: 1
-      product:
-        productID: <STORE PRODUCT ID>
-        type: 1
-      price: 100
-      isSale: 0
-      discountPercent: 0.2
-    baseDecalData: []
-    cachedData:
-      displayName: Mustang 2016
-      makeDisplayName: Ford
-      carType: 0
-      performanceSettings:
-        baseMaxSpeed: 0
-        baseAcceleration: 0
-        baseHandling: 0
-        baseNos: 0
-        minTorqueCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 200
-            inSlope: 590.8019
-            outSlope: 590.8019
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0.2020202
-          - serializedVersion: 3
-            time: 0.33
-            value: 480
-            inSlope: -4.427817
-            outSlope: -4.427817
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.33333334
-            outWeight: 0.44833335
-          - serializedVersion: 3
-            time: 0.83
-            value: 462
-            inSlope: -53.709717
-            outSlope: -53.709717
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.254902
-            outWeight: 1
-          - serializedVersion: 3
-            time: 1
-            value: 0
-            inSlope: -2664.8096
-            outSlope: -2664.8096
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.12254889
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        additionalPeakTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          max: 10000
-        minTorquePercentToPeak:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          maxPercent: 0.636
-        engineRpmRangeMin:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          min: 800
-          max: 1300
-        engineRpmRangeMax:
-          maxSpeedWeight: 1
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 0
-          min: 6200
-          max: 14000
-        rigidbodyMass:
-          maxSpeedWeight: 0.5
-          accelerationWeight: 0.5
-          handlingWeight: 0
-          nosWeight: 0
-          min: 1440
-          max: 720
-        brakeTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 1530
-          max: 3600
-        handbrakeEaseOffDuration:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 0.93
-          max: 2.2
-        handbrakeTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 0
-          min: 2975
-          max: 7000
-        steerSpeed:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 1.53
-          max: 3.6
-        steerReleaseSpeed:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 12.75
-          max: 30
-        maxSteerAngle:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min:
-            serializedVersion: 2
-            m_Curve:
-            - serializedVersion: 3
-              time: 0
-              value: 50
-              inSlope: -108.714584
-              outSlope: -108.714584
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0.035658635
-            - serializedVersion: 3
-              time: 1
-              value: 12.75
-              inSlope: -0.0000020807438
-              outSlope: -0.0000020807438
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0.22916669
-              outWeight: 0
-            m_PreInfinity: 2
-            m_PostInfinity: 2
-            m_RotationOrder: 4
-          max:
-            serializedVersion: 2
-            m_Curve:
-            - serializedVersion: 3
-              time: 0
-              value: 50
-              inSlope: -43.40245
-              outSlope: -43.40245
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0.0875
-            - serializedVersion: 3
-              time: 1
-              value: 30
-              inSlope: -0.0000020807438
-              outSlope: -0.0000020807438
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0.22916669
-              outWeight: 0
-            m_PreInfinity: 2
-            m_PostInfinity: 2
-            m_RotationOrder: 4
-        nosDepletionRate:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 7.65
-          max: 18
-        nosFillRate:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 100
-          max: 42.5
-        nosTorqueAddition:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 595
-          max: 1400
-      defaultEngine: {fileID: 0}
-      defaultWheels: {fileID: 0}
-      defaultDrivetrain: {fileID: 0}
-  - carPrefabReference:
-      m_AssetGUID: 9e6cb95863f6d6a4bbd5c83903375a7a
-      m_SubObjectName: 
-      m_SubObjectType: 
-      m_EditorAssetChanged: 0
-    icon: {fileID: 21300000, guid: 89b3ffd1a8d16d44bb7c0b7a04276f5f, type: 3}
-    startingLevelIndex: -1
-    isUnlockedByDefault: 0
-    costToUnlock:
-      currencyType: 1
-      product:
-        productID: <STORE PRODUCT ID>
-        type: 1
-      price: 100
-      isSale: 0
-      discountPercent: 0.2
-    baseDecalData: []
-    cachedData:
-      displayName: R34
-      makeDisplayName: Nissan
-      carType: 0
-      performanceSettings:
-        baseMaxSpeed: 0
-        baseAcceleration: 0
-        baseHandling: 0
-        baseNos: 0
-        minTorqueCurve:
-          serializedVersion: 2
-          m_Curve:
-          - serializedVersion: 3
-            time: 0
-            value: 645
-            inSlope: 460.75497
-            outSlope: 460.75497
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0
-            outWeight: 0.11612021
-          - serializedVersion: 3
-            time: 0.61
-            value: 746
-            inSlope: 15.193749
-            outSlope: 15.193749
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.3374317
-            outWeight: 0.3690476
-          - serializedVersion: 3
-            time: 1
-            value: 681
-            inSlope: -444.03122
-            outSlope: -444.03122
-            tangentMode: 0
-            weightedMode: 0
-            inWeight: 0.23504268
-            outWeight: 0
-          m_PreInfinity: 2
-          m_PostInfinity: 2
-          m_RotationOrder: 4
-        additionalPeakTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          max: 814
-        minTorquePercentToPeak:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          maxPercent: 0.7
-        engineRpmRangeMin:
-          maxSpeedWeight: 0
-          accelerationWeight: 1
-          handlingWeight: 0
-          nosWeight: 0
-          min: 765
-          max: 1800
-        engineRpmRangeMax:
-          maxSpeedWeight: 1
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 0
-          min: 6600
-          max: 14000
-        rigidbodyMass:
-          maxSpeedWeight: 1
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 0
-          min: 1843
-          max: 801
-        brakeTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 1402
-          max: 3300
-        handbrakeEaseOffDuration:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 0.8
-          max: 1.9
-        handbrakeTorque:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 2805
-          max: 6600
-        steerSpeed:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 1.53
-          max: 3.6
-        steerReleaseSpeed:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min: 9.775
-          max: 23
-        maxSteerAngle:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 1
-          nosWeight: 0
-          min:
-            serializedVersion: 2
-            m_Curve:
-            - serializedVersion: 3
-              time: 0
-              value: 50
-              inSlope: -108.714584
-              outSlope: -108.714584
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0.035658635
-            - serializedVersion: 3
-              time: 1
-              value: 9.775
-              inSlope: -0.0000020807438
-              outSlope: -0.0000020807438
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0.22916669
-              outWeight: 0
-            m_PreInfinity: 2
-            m_PostInfinity: 2
-            m_RotationOrder: 4
-          max:
-            serializedVersion: 2
-            m_Curve:
-            - serializedVersion: 3
-              time: 0
-              value: 50
-              inSlope: -79.256615
-              outSlope: -79.256615
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0
-              outWeight: 0.045833334
-            - serializedVersion: 3
-              time: 1
-              value: 23
-              inSlope: -0.0000020807438
-              outSlope: -0.0000020807438
-              tangentMode: 0
-              weightedMode: 0
-              inWeight: 0.22916669
-              outWeight: 0
-            m_PreInfinity: 2
-            m_PostInfinity: 2
-            m_RotationOrder: 4
-        nosDepletionRate:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 2.975
-          max: 7
-        nosFillRate:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 90
-          max: 38.25
-        nosTorqueAddition:
-          maxSpeedWeight: 0
-          accelerationWeight: 0
-          handlingWeight: 0
-          nosWeight: 1
-          min: 620
-          max: 1460
       defaultEngine: {fileID: 0}
       defaultWheels: {fileID: 0}
       defaultDrivetrain: {fileID: 0}
@@ -1299,7 +1312,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: 785c1ea588a536241b474c777628e9d7, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -1503,7 +1517,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: 42fbfc3b9e942064383807b53ac8881d, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -1716,7 +1731,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: 8be06fec769378540b5b00bd18d4d3fe, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -1929,7 +1945,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: a36fd58e41a2d1e4f94fb967ad2047e8, type: 3}
-    startingLevelIndex: 0
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -2142,7 +2159,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: dc270b57313553c478d18a32b845f99f, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -2355,7 +2373,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: d3453bf30a165754d9281a3403bec498, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -2568,7 +2587,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: be7ecc7a0e5697e4e98311feb50fe4b4, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -2772,7 +2792,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: 40e83c969e63f0b4c95b5f538f74da3d, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -2985,7 +3006,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: 646cb3d9b34f5384e9dfdd057d0acb8b, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -3198,7 +3220,8 @@ MonoBehaviour:
       m_SubObjectType: 
       m_EditorAssetChanged: 0
     icon: {fileID: 21300000, guid: e3cd5e567295c1244a373539bacd561d, type: 3}
-    startingLevelIndex: -1
+    startingLevel: 1
+    maxLevel: 10
     isUnlockedByDefault: 0
     costToUnlock:
       currencyType: 1
@@ -3414,3 +3437,38 @@ MonoBehaviour:
       defaultEngine: {fileID: 0}
       defaultWheels: {fileID: 0}
       defaultDrivetrain: {fileID: 0}
+  lookupByGUID:
+    list:
+    - Key: cd7759c55dec919479f188792fe7cd7f
+      Value: 0
+    - Key: 6f46e795bac33904aa0828a7953feaf1
+      Value: 1
+    - Key: 731da51f959bc554aaa0545c94562d25
+      Value: 2
+    - Key: d2502054733f50042a64ef15cf60e626
+      Value: 3
+    - Key: d61b189db7a08774c852be5f47c6c10e
+      Value: 4
+    - Key: 9e6cb95863f6d6a4bbd5c83903375a7a
+      Value: 5
+    - Key: e88edf073eda248429d699a6081a669f
+      Value: 6
+    - Key: 531fe7c3e4cf0f444b824994d5ee47d4
+      Value: 7
+    - Key: 85be286bbb1296645af649949498a02b
+      Value: 8
+    - Key: b5028991c62dbc64a99eb0b82d8b0745
+      Value: 9
+    - Key: 47f4d02b4ba412e4580ea836908a19ca
+      Value: 10
+    - Key: 84f0cc59c380ea34098e0ce3c1cd53e3
+      Value: 11
+    - Key: 007b6760012e172418eb7e49956334ab
+      Value: 12
+    - Key: 00432d7c7f7e1f247bd38567fcccc346
+      Value: 13
+    - Key: 99c974c8da4d7ca4f9489658e6adb107
+      Value: 14
+    - Key: 2810a7c750d016a4eafcd426871217b5
+      Value: 15
+    keyCollision: 0
