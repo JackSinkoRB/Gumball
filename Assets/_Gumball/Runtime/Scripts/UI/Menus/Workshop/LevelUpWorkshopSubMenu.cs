@@ -68,9 +68,9 @@ namespace Gumball
 
         private void UpdateLevelLabel()
         {
-            string carIndex = WarehouseManager.Instance.CurrentCar.CarGUID;
-            int currentLevel = BlueprintManager.Instance.GetLevelIndex(carIndex) + 1;
-            int maxLevel = BlueprintManager.Instance.MaxLevelIndex + 1;
+            string carGUID = WarehouseManager.Instance.CurrentCar.CarGUID;
+            int currentLevel = BlueprintManager.Instance.GetLevelIndex(carGUID) + 1;
+            int maxLevel = WarehouseManager.Instance.GetCarDataFromGUID(carGUID).MaxLevelIndex + 1;
             
             levelLabel.text = $"Level {currentLevel} / {maxLevel}";
         }
@@ -93,7 +93,8 @@ namespace Gumball
         {
             string carGUID = WarehouseManager.Instance.CurrentCar.CarGUID;
             int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carGUID);
-            bool isMaxLevel = nextLevelIndex > BlueprintManager.Instance.MaxLevelIndex;
+            int maxLevelIndex = WarehouseManager.Instance.GetCarDataFromGUID(carGUID).MaxLevelIndex;
+            bool isMaxLevel = nextLevelIndex > maxLevelIndex;
             
             purchaseButton.interactable = !isMaxLevel;
 

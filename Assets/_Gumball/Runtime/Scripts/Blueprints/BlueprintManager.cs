@@ -41,8 +41,6 @@ namespace Gumball
         
         public List<Level> Levels => levels;
 
-        public int MaxLevelIndex => levels.Count - 1;
-        
         protected override void OnInstanceLoaded()
         {
             base.OnInstanceLoaded();
@@ -131,7 +129,7 @@ namespace Gumball
             int unlockLevelIndex = WarehouseManager.Instance.GetCarDataFromGUID(carGUID).StartingLevelIndex;
             int currentLevelIndex = GetLevelIndex(carGUID);
             int nextLevelIndex = IsUnlocked(carGUID) ? currentLevelIndex + 1 : unlockLevelIndex;
-            return nextLevelIndex > MaxLevelIndex ? -1 : nextLevelIndex;
+            return nextLevelIndex > WarehouseManager.Instance.GetCarDataFromGUID(carGUID).MaxLevelIndex ? -1 : nextLevelIndex;
         }
         
 #if UNITY_EDITOR
