@@ -1770,7 +1770,6 @@ namespace Gumball
             for (int index = 0; index < rearWheelBrakes.Length; index++)
             {
                 Transform brake = rearWheelBrakes[index];
-                
                 brake.transform.position = rearWheelMeshes[index].transform.position;
             }
         }

@@ -46,6 +46,17 @@ jobs:
         with:
           lfs: true
 
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: |
+          LIBRARY_PATH="$GITHUB_WORKSPACE/Library"
+          if [ -d "$LIBRARY_PATH" ]; then
+            echo "Library directory exists at $LIBRARY_PATH. Deleting..."
+            rm -rf "$LIBRARY_PATH"
+          else
+            echo "Library directory does not exist at $LIBRARY_PATH. Nothing to delete."
+          fi
+
       # Cache
       - uses: JackSinkoRB/local-cache@main
         with:
@@ -85,6 +96,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: |
+          LIBRARY_PATH="$GITHUB_WORKSPACE/Library"
+          if [ -d "$LIBRARY_PATH" ]; then
+            echo "Library directory exists at $LIBRARY_PATH. Deleting..."
+            rm -rf "$LIBRARY_PATH"
+          else
+            echo "Library directory does not exist at $LIBRARY_PATH. Nothing to delete."
+          fi
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -169,7 +191,14 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rf Library
+        run: |
+          LIBRARY_PATH="$GITHUB_WORKSPACE/Library"
+          if [ -d "$LIBRARY_PATH" ]; then
+            echo "Library directory exists at $LIBRARY_PATH. Deleting..."
+            rm -rf "$LIBRARY_PATH"
+          else
+            echo "Library directory does not exist at $LIBRARY_PATH. Nothing to delete."
+          fi
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -229,7 +258,14 @@ jobs:
 
       # Delete build folder to save space
       - name: Delete build folder
-        run: rm -rf build
+        run: |
+          BUILD_PATH="$GITHUB_WORKSPACE/build"
+          if [ -d "$BUILD_PATH" ]; then
+            echo "Build directory exists at $BUILD_PATH. Deleting..."
+            rm -rf "$BUILD_PATH"
+          else
+            echo "Build directory does not exist at $BUILD_PATH. Nothing to delete."
+          fi
 
   buildAndDeployWindows:
     needs: [testEditMode, testPlayMode]
@@ -262,7 +298,14 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rf Library
+        run: |
+          LIBRARY_PATH="$GITHUB_WORKSPACE/Library"
+          if [ -d "$LIBRARY_PATH" ]; then
+            echo "Library directory exists at $LIBRARY_PATH. Deleting..."
+            rm -rf "$LIBRARY_PATH"
+          else
+            echo "Library directory does not exist at $LIBRARY_PATH. Nothing to delete."
+          fi
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -298,7 +341,14 @@ jobs:
 
       # Delete build folder to save space
       - name: Delete build folder
-        run: rm -rf build
+        run: |
+          BUILD_PATH="$GITHUB_WORKSPACE/build"
+          if [ -d "$BUILD_PATH" ]; then
+            echo "Build directory exists at $BUILD_PATH. Deleting..."
+            rm -rf "$BUILD_PATH"
+          else
+            echo "Build directory does not exist at $BUILD_PATH. Nothing to delete."
+          fi
 
   deployToDiscord:
     needs: [buildAndDeployAndroid, buildAndDeployWindows]

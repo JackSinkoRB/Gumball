@@ -131,13 +131,13 @@ namespace Gumball.Runtime.Tests
         //
         //         foreach (Transform brake in car.FrontWheelBrakes)
         //         {
-        //             if (brake.childCount == 0)
+        //             if (brake == null || brake.childCount == 0)
         //                 carsWithoutBrakesSetup += $"\n - {car.name} (index {index}) ({brake.name})";
         //         }
         //         
         //         foreach (Transform brake in car.RearWheelBrakes)
         //         {
-        //             if (brake.childCount == 0)
+        //             if (brake == null || brake.childCount == 0)
         //                 carsWithoutBrakesSetup += $"\n - {car.name} (index {index}) ({brake.name})";
         //         }
         //     }
