@@ -11,7 +11,7 @@ namespace Gumball.Runtime.Tests
     public class CarPartTests : BaseRuntimeTests
     {
         
-        private const string carGUIDToUse = "b5028991c62dbc64a99eb0b82d8b0745"; //test with the XJ
+        private const string carGUIDToUse = "cd7759c55dec919479f188792fe7cd7f"; //test with the supra (has 2 body kits)
         
         private bool isInitialised;
         
