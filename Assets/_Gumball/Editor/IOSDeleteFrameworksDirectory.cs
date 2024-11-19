@@ -8,15 +8,17 @@ using UnityEngine;
 
 namespace Gumball.Editor
 {
-    public class IOSDeleteFrameworksDirectory : MonoBehaviour
+    public static class IOSDeleteFrameworksDirectory
     {
-        [PostProcessBuild(999)]
-        public static void OnPostProcessBuild(BuildTarget buildTarget, string path)
+        [PostProcessBuild(int.MaxValue)]
+        public static void OnPostProcessBuild(BuildTarget buildTarget, string pathToBuiltProject)
         {
-            if (buildTarget != BuildTarget.iOS) return;
+            if (buildTarget != BuildTarget.iOS)
+                return;
     
-            string unityFrameworkPath = Path.Combine(path, "Gumball.app/Frameworks/UnityFramework.framework/Frameworks");
+            string unityFrameworkPath = Path.Combine(pathToBuiltProject, "Gumball.app/Frameworks/UnityFramework.framework/Frameworks");
     
+            Debug.Log($"unityFrameworkPath: {unityFrameworkPath}");
             if (Directory.Exists(unityFrameworkPath))
             {
                 Directory.Delete(unityFrameworkPath, true);
