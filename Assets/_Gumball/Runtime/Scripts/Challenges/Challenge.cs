@@ -12,6 +12,7 @@ namespace Gumball
     public class Challenge
     {
         
+#if UNITY_EDITOR
         public static void EnsureChallengesAreUnique(Challenge[] challenges, Object context)
         {
             HashSet<string> uniqueIDs = new HashSet<string>();
@@ -31,6 +32,7 @@ namespace Gumball
             if (isDirty)
                 EditorUtility.SetDirty(context);
         }
+#endif
         
         [SerializeField] private string description = "Description of challenge";
         [SerializeField] private Sprite icon;
