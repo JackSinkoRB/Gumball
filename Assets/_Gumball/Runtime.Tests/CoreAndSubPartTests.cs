@@ -11,7 +11,7 @@ namespace Gumball.Runtime.Tests
     public class CoreAndSubPartTests : BaseRuntimeTests
     {
         
-        private const string carGUIDToUse = "0860d6f6-93bc-4cde-941e-538b44020cbd"; //test with the XJ
+        private const string carGUIDToUse = "b5028991c62dbc64a99eb0b82d8b0745"; //test with the XJ
         
         private bool isInitialised;
         

@@ -26,7 +26,6 @@ namespace Gumball
         public List<WarehouseCarData> AllCarData => allCarData;
 
         [SerializeField, ReadOnly] private GenericDictionary<string, int> lookupByGUID = new();
-        [SerializeField, ReadOnly] private GenericDictionary<AssetReferenceGameObject, int> lookupByAssetReference = new();
 
         public string SavedCarGUID
         {
@@ -51,20 +50,13 @@ namespace Gumball
         public void UpdateCachedData()
         {
             lookupByGUID.Clear();
-            lookupByAssetReference.Clear();
 
-            HashSet<string> duplicateCheck = new();
             for (int carIndex = 0; carIndex < allCarData.Count; carIndex++)
             {
                 WarehouseCarData carData = allCarData[carIndex];
                 carData.CacheCarData();
 
-                if (duplicateCheck.Contains(carData.GUID))
-                    carData.AssignNewGUID();
-                
                 lookupByGUID[carData.GUID] = carIndex;
-                lookupByAssetReference[carData.CarPrefabReference] = carIndex;
-                duplicateCheck.Add(carData.GUID);
             }
         }
 #endif

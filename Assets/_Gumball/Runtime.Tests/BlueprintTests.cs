@@ -9,7 +9,7 @@ namespace Gumball.Runtime.Tests
     public class BlueprintTests : BaseRuntimeTests
     {
 
-        private const string carGUIDToUse = "0860d6f6-93bc-4cde-941e-538b44020cbd";
+        private const string carGUIDToUse = "b5028991c62dbc64a99eb0b82d8b0745";
         private bool isInitialised;
 
         [OneTimeSetUp]

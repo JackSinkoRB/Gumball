@@ -15,15 +15,16 @@ namespace Gumball
         [SerializeField] private AssetReferenceGameObject car;
 #endif
 
-        [SerializeField, ReadOnly] private string guid;
+        [SerializeField, ReadOnly] private string runtimeKey;
 
-        public string GUID => guid.IsNullOrEmpty() || guid.Equals("INVALID") ? null : guid;
+        public string GUID => runtimeKey.IsNullOrEmpty() || runtimeKey.Equals("INVALID") ? null : runtimeKey;
         public WarehouseCarData CarData { get; private set; }
 
         public void OnBeforeSerialize()
         {
 #if UNITY_EDITOR
-            FindGUIDFromCarReference();
+            if (car == null || !car.RuntimeKeyIsValid() || !car.RuntimeKey.ToString().Equals(runtimeKey))
+                FindGUIDFromCarReference();
 #endif
         }
 
@@ -35,17 +36,17 @@ namespace Gumball
 #if UNITY_EDITOR
         private void FindGUIDFromCarReference()
         {
-            guid = "INVALID";
+            runtimeKey = "INVALID";
 
-            if (car == null || car.editorAsset == null)
+            if (car == null || !car.RuntimeKeyIsValid())
                 return;
             
             foreach (WarehouseCarData carData in WarehouseManager.Instance.AllCarData)
             {
                 if (car.editorAsset.gameObject == carData.CarPrefabReference.editorAsset.gameObject)
                 {
-                    guid = carData.GUID;
                     CarData = carData;
+                    runtimeKey = car.RuntimeKey.ToString();
                     break;
                 }
             }

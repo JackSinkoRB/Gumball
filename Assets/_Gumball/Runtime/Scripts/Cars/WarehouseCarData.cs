@@ -45,7 +45,6 @@ namespace Gumball
             }
         }
         
-        [SerializeField, ReadOnly] public string GUID = Guid.NewGuid().ToString();
         [SerializeField] private AssetReferenceGameObject carPrefabReference;
         [SerializeField] private Sprite icon;
         [Tooltip("The level that the car needs to be unlocked.")]
@@ -69,6 +68,7 @@ namespace Gumball
             }
         }
 
+        public string GUID => carPrefabReference.RuntimeKey.ToString();
         public PurchaseData CostToUnlock => costToUnlock;
         public AssetReferenceGameObject CarPrefabReference => carPrefabReference;
         public Sprite Icon => icon;
@@ -116,13 +116,6 @@ namespace Gumball
                 return;
             
             cachedData.Cache(car);
-        }
-        
-        public void AssignNewGUID()
-        {
-            GUID = Guid.NewGuid().ToString();
-            EditorUtility.SetDirty(WarehouseManager.Instance);
-            Debug.Log($"Assigned new ID to {(carPrefabReference == null || carPrefabReference.editorAsset == null ? "null" : carPrefabReference.editorAsset.gameObject.name)}");
         }
 #endif
 
