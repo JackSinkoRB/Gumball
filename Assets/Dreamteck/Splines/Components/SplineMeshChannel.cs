@@ -1108,6 +1108,13 @@ namespace Dreamteck.Splines
                         vertexGroups = new List<VertexGroup>();
                         return;
                     }
+                    
+                    if (!_mesh.isReadable)
+                    {
+                        Debug.LogWarning($"[SplineMesh] Mesh {_mesh} is not readable.");
+                        return;
+                    }
+                    
                     if (vertices.Length != _mesh.vertexCount) vertices = new Vector3[_mesh.vertexCount];
                     if (normals.Length != _mesh.normals.Length) normals = new Vector3[_mesh.normals.Length];
                     if (colors.Length != _mesh.colors.Length) colors = new Color[_mesh.colors.Length];
