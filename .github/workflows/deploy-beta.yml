@@ -12,7 +12,30 @@ concurrency:
 
 jobs:
 
+  setup:
+    name: Setup
+    runs-on: self-hosted
+
+    steps:
+
+      # Ensure Docker is purged and reinstalled
+      - name: Purge and Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get purge -y docker.io
+          sudo rm -rf /var/lib/docker
+          sudo apt-get install -y docker.io
+
+      # Ensure Git LFS is installed
+      - name: Install Git LFS
+        run: sudo apt-get update && sudo apt-get install git-lfs
+
+      # Ensure Git is installed
+      - name: Install Git
+        run: sudo apt-get update && sudo apt-get install git
+
   buildAndroid:
+    needs: setup
     name: Build Android
     runs-on:
       labels: runner-1
@@ -76,6 +99,7 @@ jobs:
           path: build/Android
 
   buildIOS:
+    needs: setup
     name: Build iOS
     runs-on:
       labels: runner-2
