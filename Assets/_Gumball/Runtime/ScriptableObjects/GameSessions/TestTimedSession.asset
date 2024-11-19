@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: 9026ef96a6ac02141980b94916304d75
   lastKnownName: TestTimedSession
+  displayName: Level
   description: Timed race for testing
   scene:
     scene:
@@ -30,11 +31,14 @@ MonoBehaviour:
     m_EditorAssetChanged: 1
   vehicleStartingPosition: {x: 0, y: 0, z: 5}
   vehicleStartingRotation: {x: 0, y: 0, z: 0}
+  isNightTime: 0
   globalLightIntensity: 1
   reflectionIntensity: 1
-  fakeLightingIntensity: 0
   introTime: 3
   raceDistanceMetres: 1950
+  finishLineMarkers:
+    checkpointMarkerPrefab: {fileID: 0}
+    distanceFromSpline: 5
   racerData: []
   racersStartingSpeed: 70
   trafficIsProcedural: 1
@@ -44,20 +48,32 @@ MonoBehaviour:
   trafficTrucks: []
   trafficSpawnPositions:
     Value: []
-  xpReward: 100
-  standardCurrencyReward: 10
-  corePartRewards:
-  - {fileID: 11400000, guid: e1e3bbdd733d9ff43ab407db0fcb606d, type: 2}
-  subPartRewards:
-  - {fileID: 11400000, guid: de4fd7b6bf6b7bf4ba4b8691fa6028c7, type: 2}
+  rewards:
+    xp: 0
+    standardCurrency: 0
+    premiumCurrency: 0
+    fuelRefill: 0
+    coreParts: []
+    subParts: []
+    unlockables: []
+    blueprints: []
+  subObjectives: []
+  preSessionDialogue:
+    dialogue: []
+    uniqueID: e7ac4cfe-083a-4005-821b-28c0e4cf189d
+  preCountdownDialogue:
+    dialogue: []
+    uniqueID: 519a6fca-9cae-4c1c-83d6-a1755a13b834
+  postSessionDialogue:
+    dialogue: []
+    uniqueID: 9f2e997c-70af-4182-941f-26dc48e764f2
   inProgress: 0
   currentRacers:
     list: []
     keyCollision: 0
-  previousCorePartRewards:
-  - {fileID: 11400000, guid: e1e3bbdd733d9ff43ab407db0fcb606d, type: 2}
-  previousSubPartRewards:
-  - {fileID: 11400000, guid: de4fd7b6bf6b7bf4ba4b8691fa6028c7, type: 2}
+  previousCorePartRewards: []
+  previousSubPartRewards: []
+  PreviousBlueprintRewards: 
   timeAllowedSeconds: 5
   timeRemainingSeconds: 0
   timerHasStarted: 0
