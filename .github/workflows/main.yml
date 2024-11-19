@@ -46,6 +46,16 @@ jobs:
         with:
           lfs: true
 
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: |
+          if [ -d "$GITHUB_WORKSPACE/Library" ]; then
+            echo "Library directory exists. Deleting..."
+            rm -rf "$GITHUB_WORKSPACE/Library"
+          else
+            echo "Library directory does not exist. Nothing to delete."
+          fi
+
       # Cache
       - uses: JackSinkoRB/local-cache@main
         with:
@@ -85,6 +95,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
+
+      # Delete library folder (if existing) before retrieving new library folder from cache
+      - name: Delete library folder
+        run: |
+          if [ -d "$GITHUB_WORKSPACE/Library" ]; then
+            echo "Library directory exists. Deleting..."
+            rm -rf "$GITHUB_WORKSPACE/Library"
+          else
+            echo "Library directory does not exist. Nothing to delete."
+          fi
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -169,7 +189,13 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rv $GITHUB_WORKSPACE/Library
+        run: |
+          if [ -d "$GITHUB_WORKSPACE/Library" ]; then
+            echo "Library directory exists. Deleting..."
+            rm -rf "$GITHUB_WORKSPACE/Library"
+          else
+            echo "Library directory does not exist. Nothing to delete."
+          fi
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -229,7 +255,13 @@ jobs:
 
       # Delete build folder to save space
       - name: Delete build folder
-        run: rm -rv $GITHUB_WORKSPACE/build
+        run: |
+          if [ -d "$GITHUB_WORKSPACE/build" ]; then
+            echo "Build directory exists. Deleting..."
+            rm -rf "$GITHUB_WORKSPACE/build"
+          else
+            echo "Build directory does not exist. Nothing to delete."
+          fi
 
   buildAndDeployWindows:
     needs: [testEditMode, testPlayMode]
@@ -262,7 +294,13 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rv $GITHUB_WORKSPACE/Library
+        run: |
+          if [ -d "$GITHUB_WORKSPACE/Library" ]; then
+            echo "Library directory exists. Deleting..."
+            rm -rf "$GITHUB_WORKSPACE/Library"
+          else
+            echo "Library directory does not exist. Nothing to delete."
+          fi
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -288,7 +326,7 @@ jobs:
       - name: Zip Build Files
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: |
-          find build/StandaloneWindows -type d -name 'DoNotShip*' -exec rm -rv {} \; #delete folders with 'DoNotShip' before moving
+          find build/StandaloneWindows -type d -name 'DoNotShip*' -exec rm -rf {} \; #delete folders with 'DoNotShip' before moving
           zip -r Gumball-StandaloneWindows.zip build/StandaloneWindows
 
       # Move Build Files
@@ -298,7 +336,13 @@ jobs:
 
       # Delete build folder to save space
       - name: Delete build folder
-        run: rm -rv $GITHUB_WORKSPACE/build
+        run: |
+          if [ -d "$GITHUB_WORKSPACE/build" ]; then
+            echo "Build directory exists. Deleting..."
+            rm -rf "$GITHUB_WORKSPACE/build"
+          else
+            echo "Build directory does not exist. Nothing to delete."
+          fi
 
   deployToDiscord:
     needs: [buildAndDeployAndroid, buildAndDeployWindows]
