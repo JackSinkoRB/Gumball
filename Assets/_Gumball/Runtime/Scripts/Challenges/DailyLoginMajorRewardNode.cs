@@ -85,7 +85,7 @@ namespace Gumball
                 standardCurrencyIcon.sprite = standardCurrencySprite;
             }
             else
-            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && DailyLoginManager.Instance.IsDayClaimed(dayNumber))
+            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && !DailyLoginManager.Instance.IsDayClaimed(dayNumber))
             {
                 //ready but not claimed
                 button.interactable = true;

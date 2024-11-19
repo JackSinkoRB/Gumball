@@ -231,18 +231,7 @@ namespace Gumball
         private void SetCurrentChallenge(int slotIndex, int challengeIndex)
         {
             //end the previous tracker
-            Challenge previousChallenge = GetCurrentChallenge(slotIndex);
-            if (previousChallenge != null)
-            {
-                if (!previousChallenge.IsClaimed && previousChallenge.Tracker.GetListener(previousChallenge.UniqueID).IsComplete)
-                {
-                    //add to unclaimed challenges
-                    AddUnclaimedChallenge(previousChallenge);
-                }
-                
-                previousChallenge.SetClaimed(false); //reset
-                previousChallenge.Tracker.StopListening(previousChallenge.UniqueID);
-            }
+            EndCurrentChallenge(slotIndex);
 
             DataManager.Player.Set($"Challenges.{id}.Current.{slotIndex}", challengeIndex);
             
@@ -256,6 +245,24 @@ namespace Gumball
             //start tracker
             Challenge currentChallenge = challengePool[challengeIndex];
             currentChallenge.Tracker.StartListening(currentChallenge.UniqueID, currentChallenge.Goal);
+        }
+        
+        private void EndCurrentChallenge(int slotIndex)
+        {
+            Challenge currentChallenge = GetCurrentChallenge(slotIndex);
+            if (currentChallenge == null)
+                return;
+            
+            currentChallenge.SetClaimed(false); //reset
+                
+            ChallengeTracker.Listener previousChallengeListener = currentChallenge.Tracker.GetListener(currentChallenge.UniqueID);
+            if (!currentChallenge.IsClaimed && previousChallengeListener.IsComplete)
+            {
+                //add to unclaimed challenges
+                AddUnclaimedChallenge(currentChallenge);
+            }
+
+            currentChallenge.Tracker.StopListening(currentChallenge.UniqueID);
         }
 
         private void AddUnclaimedChallenge(Challenge challenge)

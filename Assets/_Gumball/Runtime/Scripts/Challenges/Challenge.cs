@@ -13,20 +13,22 @@ namespace Gumball
     {
         
 #if UNITY_EDITOR
+        public static Dictionary<string, Challenge> AllChallengeIDs = new();
+
         public static void EnsureChallengesAreUnique(Challenge[] challenges, Object context)
         {
-            HashSet<string> uniqueIDs = new HashSet<string>();
             bool isDirty = false;
             
             foreach (Challenge challenge in challenges)
             {
-                while (challenge.uniqueID.IsNullOrEmpty() || uniqueIDs.Contains(challenge.UniqueID))
+                while (challenge.uniqueID.IsNullOrEmpty()
+                       || (AllChallengeIDs.ContainsKey(challenge.UniqueID) && AllChallengeIDs[challenge.uniqueID] != challenge))
                 {
                     isDirty = true;
                     challenge.AssignNewID();
                 }
 
-                uniqueIDs.Add(challenge.UniqueID);
+                AllChallengeIDs[challenge.uniqueID] = challenge;
             }
         
             if (isDirty)
