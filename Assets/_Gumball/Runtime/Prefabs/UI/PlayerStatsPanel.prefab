@@ -99,6 +99,7 @@ MonoBehaviour:
   - {fileID: 8034067982592027871}
   - {fileID: 4647325117619725379}
   - {fileID: 430029721943167796}
+  useChildren: 0
   isHorizontal: 1
   isVertical: 0
   additionalWidth: 0
@@ -255,9 +256,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelLabel: {fileID: 8871082448941532925}
-  experienceBar: {fileID: 2469741177098612228}
   progressBarFillStart: 0.1
   progressBarFillEnd: 0.9
+  experienceBar: {fileID: 2469741177098612228}
+  experienceBarTweenDuration: 0
+  experienceBarTweenEase: 0
 --- !u!114 &1130981777258648115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -299,6 +302,7 @@ MonoBehaviour:
   additionalRects:
   - {fileID: 7853489902340200268}
   - {fileID: 4899090270653456336}
+  useChildren: 0
   isHorizontal: 1
   isVertical: 0
   additionalWidth: 0
@@ -402,6 +406,7 @@ MonoBehaviour:
   - {fileID: 7691687221136440622}
   - {fileID: 5025593973502801330}
   - {fileID: 8419819397037379207}
+  useChildren: 0
   isHorizontal: 1
   isVertical: 0
   additionalWidth: 0
@@ -556,9 +561,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isAddedToPanelStack: 1
+  hideOtherPanelsWhenShown: 0
   ignoreTimescale: 1
   disableWhenHidden: 1
-  fadeElements: []
+  fadeElements:
+  - ignoreTimescale: 1
+    startHidden: 1
+    disableWhenHidden: 0
+    doShowAnimation: 1
+    doHideAnimation: 1
+    showDelay: 0
+    hideDelay: 0
+    showDuration: 0.2
+    hideDuration: 0.2
+    rectTransform: {fileID: 7024688194247550948}
+    showEase: 4
+    hideEase: 4
   slideElements: []
 --- !u!1 &943185079221868950
 GameObject:
@@ -955,6 +973,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 5
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &1488127848078026031
 GameObject:
   m_ObjectHideFlags: 0
@@ -1129,6 +1152,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 11
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &2035750420685717976
 GameObject:
   m_ObjectHideFlags: 0
@@ -1228,6 +1256,7 @@ MonoBehaviour:
   - {fileID: 8245520628720823983}
   - {fileID: 6732277273422636595}
   - {fileID: 7940742890679558122}
+  useChildren: 0
   isHorizontal: 1
   isVertical: 0
   additionalWidth: 0
@@ -1425,6 +1454,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 5
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!114 &519235476228752533
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1466,6 +1500,7 @@ MonoBehaviour:
   additionalRects:
   - {fileID: 6885310644897857000}
   - {fileID: 326738667406827695}
+  useChildren: 0
   isHorizontal: 1
   isVertical: 0
   additionalWidth: 0
@@ -1619,6 +1654,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &3431889742012448955
 GameObject:
   m_ObjectHideFlags: 0
@@ -1744,6 +1784,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &3513782330382342435
 GameObject:
   m_ObjectHideFlags: 0
@@ -1907,6 +1952,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &3788172619670831496
 GameObject:
   m_ObjectHideFlags: 0
@@ -1996,6 +2046,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 9
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &4606571537928388332
 GameObject:
   m_ObjectHideFlags: 0
@@ -2469,6 +2524,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &5441164182401182816
 GameObject:
   m_ObjectHideFlags: 0
@@ -2558,6 +2618,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &5457878267472742064
 GameObject:
   m_ObjectHideFlags: 0
@@ -2723,6 +2788,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 9
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!114 &2014241317349017288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2826,6 +2896,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &5639077908822293905
 GameObject:
   m_ObjectHideFlags: 0
@@ -2915,6 +2990,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &5781443068341327203
 GameObject:
   m_ObjectHideFlags: 0
@@ -3079,6 +3159,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 9
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &6003650609061380065
 GameObject:
   m_ObjectHideFlags: 0
@@ -3168,6 +3253,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &6459701476844073512
 GameObject:
   m_ObjectHideFlags: 0
@@ -3332,6 +3422,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &6496149390120257979
 GameObject:
   m_ObjectHideFlags: 0
@@ -3496,6 +3591,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &6910237024473454666
 GameObject:
   m_ObjectHideFlags: 0
@@ -3660,6 +3760,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &7466606906654851055
 GameObject:
   m_ObjectHideFlags: 0
@@ -3929,6 +4034,7 @@ MonoBehaviour:
   additionalRects:
   - {fileID: 8920003529428749644}
   - {fileID: 3070081140564931803}
+  useChildren: 0
   isHorizontal: 1
   isVertical: 0
   additionalWidth: 10
@@ -3946,6 +4052,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 9
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &8238928650965510407
 GameObject:
   m_ObjectHideFlags: 0
@@ -4037,6 +4148,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 4
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!1 &8768802361546372518
 GameObject:
   m_ObjectHideFlags: 0
@@ -4165,6 +4281,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 0
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1
 --- !u!114 &7449202185559157535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4352,3 +4473,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colourCode: 9
+  useGradient: 0
+  gradientColor: 0
+  gradientBaseTint: 4
+  gradientAngle: 0
+  gradientIgnoreRatio: 1

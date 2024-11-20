@@ -27,9 +27,12 @@ namespace Gumball
 
         [Header("UI")]
         [SerializeField] private bool updatesUI = true;
-        [SerializeField, ConditionalField(nameof(updatesUI))] private AutosizeTextMeshPro priceLabel;
-        [SerializeField, ConditionalField(nameof(updatesUI))] private Image standardCurrencySymbol;
-        [SerializeField, ConditionalField(nameof(updatesUI))] private Image premiumCurrencySymbol;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private RectTransform standardCurrencyHolder;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private TextMeshProUGUI standardCurrencyCostLabel;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private RectTransform premiumCurrencyHolder;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private TextMeshProUGUI premiumCurrencyCostLabel;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private RectTransform realCurrencyHolder;
+        [SerializeField, ConditionalField(nameof(updatesUI))] private TextMeshProUGUI realCurrencyCostLabel;
         [Space(5)]
         [SerializeField, ConditionalField(nameof(updatesUI))] private GameObject saleHolder;
         [SerializeField, ConditionalField(nameof(updatesUI))] private AutosizeTextMeshPro salePercentLabel;
@@ -172,11 +175,22 @@ namespace Gumball
         {
             if (!updatesUI)
                 return;
+
+            standardCurrencyHolder.gameObject.SetActive(purchaseData.CurrencyType == CurrencyType.STANDARD);
+            premiumCurrencyHolder.gameObject.SetActive(purchaseData.CurrencyType == CurrencyType.PREMIUM);
+            realCurrencyHolder.gameObject.SetActive(purchaseData.CurrencyType == CurrencyType.REAL);
             
-            if (priceLabel != null)
+            switch (purchaseData.CurrencyType)
             {
-                priceLabel.text = GetPriceFormatted();
-                this.PerformAtEndOfFrame(priceLabel.Resize);
+                case CurrencyType.STANDARD:
+                    standardCurrencyCostLabel.text = GetPriceFormatted();
+                    break;
+                case CurrencyType.PREMIUM:
+                    premiumCurrencyCostLabel.text = GetPriceFormatted();
+                    break;
+                case CurrencyType.REAL:
+                    realCurrencyCostLabel.text = GetPriceFormatted();
+                    break;
             }
 
             if (purchaseData.IsSale)
@@ -190,12 +204,6 @@ namespace Gumball
             {
                 saleHolder.gameObject.SetActive(false);
             }
-
-            if (standardCurrencySymbol != null)
-                standardCurrencySymbol.gameObject.SetActive(purchaseData.CurrencyType == CurrencyType.STANDARD);
-            
-            if (premiumCurrencySymbol != null)
-                premiumCurrencySymbol.gameObject.SetActive(purchaseData.CurrencyType == CurrencyType.PREMIUM);
         }
 
     }

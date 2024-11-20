@@ -273,11 +273,15 @@ public abstract class AnimatedPanel : MonoBehaviour
     {
         if (!hideOtherPanelsWhenShown)
             return;
+
+        List<AnimatedPanel> stackCopy = new List<AnimatedPanel>(PanelManager.Instance.PanelStack);
+        if (stackCopy.Count == 0)
+            return; //nothing to hide
         
         panelsHiding.Clear();
-        for (int index = PanelManager.Instance.PanelStack.Count - 1; index >= 0; index--)
+        for (int index = stackCopy.Count - 1; index >= 0; index--)
         {
-            AnimatedPanel panel = PanelManager.Instance.PanelStack[index];
+            AnimatedPanel panel = stackCopy[index];
             if (panel == null)
                 continue;
 
@@ -300,6 +304,9 @@ public abstract class AnimatedPanel : MonoBehaviour
         if (!hideOtherPanelsWhenShown)
             return;
 
+        if (panelsHiding.Count == 0)
+            return; //nothing to restore
+        
         for (int index = panelsHiding.Count - 1; index >= 0; index--)
         {
             AnimatedPanel panel = panelsHiding[index];
