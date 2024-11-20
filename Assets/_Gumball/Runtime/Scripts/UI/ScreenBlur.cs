@@ -275,7 +275,11 @@ namespace Gumball
 
         public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
         {
+#if UNITY_EDITOR
             BlurPass currentPass = renderingData.cameraData.isSceneViewCamera ? sceneview_pass : pass;
+#else
+            BlurPass currentPass = pass;
+#endif
             currentPass.colorSource = renderer.cameraColorTarget;
         }
 
