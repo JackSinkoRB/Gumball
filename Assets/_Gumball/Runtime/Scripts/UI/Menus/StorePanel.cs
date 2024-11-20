@@ -20,16 +20,18 @@ namespace Gumball
             OpenDefaultMenu();
             
             //disable the specials category if no PlayFab connection
-            if (PlayFabManager.LoginStatus != PlayFabManager.ConnectionStatusType.SUCCESS)
+            if (PlayFabManager.TitleDataInitialisationStatus != PlayFabManager.ConnectionStatusType.SUCCESS)
                 specialsCategoryButton.interactable = false;
             
+            PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
             ScreenBlur.Show(true);
         }
 
-        protected override void OnHide()
+        public override void OnRemoveFromStack()
         {
-            base.OnHide();
-            
+            base.OnRemoveFromStack();
+
+            PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
             ScreenBlur.Show(false);
         }
 
@@ -47,11 +49,16 @@ namespace Gumball
                 subMenu.Show();
         }
 
+        public void OnClickSettingsButton()
+        {
+            PanelManager.GetPanel<SettingsPanel>().Show();
+        }
+        
         private void OpenDefaultMenu()
         {
             StoreSubMenu specialsMenu = subMenus[0];
             StoreSubMenu currencyMenu = subMenus[1];
-            StoreSubMenu defaultMenu = PlayFabManager.LoginStatus == PlayFabManager.ConnectionStatusType.SUCCESS ? specialsMenu : currencyMenu;
+            StoreSubMenu defaultMenu = PlayFabManager.TitleDataInitialisationStatus == PlayFabManager.ConnectionStatusType.SUCCESS ? specialsMenu : currencyMenu;
             OpenSubMenu(defaultMenu);
         }
         
