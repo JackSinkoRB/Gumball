@@ -36,9 +36,7 @@ namespace Gumball.Editor
             //setup frameworks
             List<string> frameworks = new List<string>
             {
-                "FBSDKCoreKit",
-                "FBSDKLoginKit",
-                "FBSDKGamingServicesKit"
+                "FBSDKLoginKit"
             };
             foreach (string framework in frameworks)
             {
