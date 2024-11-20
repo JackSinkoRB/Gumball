@@ -273,6 +273,9 @@ public abstract class AnimatedPanel : MonoBehaviour
     {
         if (!hideOtherPanelsWhenShown)
             return;
+
+        if (PanelManager.Instance.PanelStack.Count == 0)
+            return; //nothing to hide
         
         panelsHiding.Clear();
         for (int index = PanelManager.Instance.PanelStack.Count - 1; index >= 0; index--)
@@ -300,6 +303,9 @@ public abstract class AnimatedPanel : MonoBehaviour
         if (!hideOtherPanelsWhenShown)
             return;
 
+        if (panelsHiding.Count == 0)
+            return; //nothing to restore
+        
         for (int index = panelsHiding.Count - 1; index >= 0; index--)
         {
             AnimatedPanel panel = panelsHiding[index];
