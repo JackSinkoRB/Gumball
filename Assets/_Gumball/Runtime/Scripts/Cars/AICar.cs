@@ -1764,12 +1764,18 @@ namespace Gumball
             for (int index = 0; index < frontWheelBrakes.Length; index++)
             {
                 Transform brake = frontWheelBrakes[index];
+                if (brake == null)
+                    continue;
+                
                 brake.transform.position = frontWheelMeshes[index].transform.position;
             }
             
             for (int index = 0; index < rearWheelBrakes.Length; index++)
             {
                 Transform brake = rearWheelBrakes[index];
+                if (brake == null)
+                    continue;
+                
                 brake.transform.position = rearWheelMeshes[index].transform.position;
             }
         }
