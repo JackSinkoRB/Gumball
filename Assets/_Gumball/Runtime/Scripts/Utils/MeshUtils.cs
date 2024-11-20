@@ -46,7 +46,8 @@ namespace Gumball
             {
                 File.WriteAllLines(assetMetaPath, lines);
             
-                AssetDatabase.Refresh();
+                EditorApplication.delayCall += AssetDatabase.Refresh;
+                
                 Debug.Log($"Set mesh {mesh.name} readable.");
             }
         }
