@@ -8,7 +8,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
 		_Color("Color", Color) = (0,0,0,0)
 		_Albedo_O("Albedo_O", 2D) = "white" {}
-		_Emission_Str("Emission_Str", Range( 0 , 20)) = 1
+		_Emission_Str_Mask("_Emission_Str_Mask", Range( 0 , 20)) = 1
 		_Opacity("Opacity", Range( 0 , 3)) = 0.3152174
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
@@ -191,7 +191,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -287,7 +287,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
 			float4 _Albedo_O_ST;
-			float _Emission_Str;
+			float _Emission_Str_Mask;
 			float _Opacity;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -540,7 +540,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 
 				float3 BaseColor = float3(0.5, 0.5, 0.5);
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = ( ( _Color * tex2DNode5.r ) * _Emission_Str ).rgb;
+				float3 Emission = ( ( _Color * tex2DNode5.r ) * _Emission_Str_Mask ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0;
 				float Smoothness = 0.5;
@@ -796,7 +796,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -853,7 +853,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
 			float4 _Albedo_O_ST;
-			float _Emission_Str;
+			float _Emission_Str_Mask;
 			float _Opacity;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1082,7 +1082,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1136,7 +1136,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
 			float4 _Albedo_O_ST;
-			float _Emission_Str;
+			float _Emission_Str_Mask;
 			float _Opacity;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1338,7 +1338,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 				
 
 				float3 BaseColor = float3(0.5, 0.5, 0.5);
-				float3 Emission = ( ( _Color * tex2DNode5.r ) * _Emission_Str ).rgb;
+				float3 Emission = ( ( _Color * tex2DNode5.r ) * _Emission_Str_Mask ).rgb;
 				float Alpha = ( _Opacity * tex2DNode5.r );
 				float AlphaClipThreshold = 0.5;
 
@@ -1378,7 +1378,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1422,7 +1422,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
 			float4 _Albedo_O_ST;
-			float _Emission_Str;
+			float _Emission_Str_Mask;
 			float _Opacity;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1643,7 +1643,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1705,7 +1705,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
 			float4 _Albedo_O_ST;
-			float _Emission_Str;
+			float _Emission_Str_Mask;
 			float _Opacity;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1983,7 +1983,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -2074,7 +2074,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
 			float4 _Albedo_O_ST;
-			float _Emission_Str;
+			float _Emission_Str_Mask;
 			float _Opacity;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -2322,7 +2322,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 
 				float3 BaseColor = float3(0.5, 0.5, 0.5);
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = ( ( _Color * tex2DNode5.r ) * _Emission_Str ).rgb;
+				float3 Emission = ( ( _Color * tex2DNode5.r ) * _Emission_Str_Mask ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0;
 				float Smoothness = 0.5;
@@ -2446,7 +2446,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2488,7 +2488,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
 			float4 _Albedo_O_ST;
-			float _Emission_Str;
+			float _Emission_Str_Mask;
 			float _Opacity;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -2695,7 +2695,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			#define ASE_FOG 1
 			#define _SURFACE_TYPE_TRANSPARENT 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2737,7 +2737,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
 			float4 _Albedo_O_ST;
-			float _Emission_Str;
+			float _Emission_Str_Mask;
 			float _Opacity;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -2938,7 +2938,7 @@ Shader "RBG/Transparent/Albedo_Emissive"
 /*ASEBEGIN
 Version=19201
 Node;AmplifyShaderEditor.ColorNode;2;-910.2014,-424.0851;Float;False;Property;_Color;Color;0;0;Create;True;0;0;0;False;0;False;0,0,0,0;1,1,1,1;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.SamplerNode;5;-995.096,0.9771118;Inherit;True;Property;_Albedo_O;Albedo_O;1;0;Create;True;0;0;0;False;0;False;-1;d15a9b8edafbc294f9b8357c7771927b;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.SamplerNode;5;-995.096,0.9771118;Inherit;True;Property;_Albedo_O;Albedo_O;1;0;Create;True;0;0;0;False;0;False;-1;d15a9b8edafbc294f9b8357c7771927b;d15a9b8edafbc294f9b8357c7771927b;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;31;326.4148,-115.6898;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ExtraPrePass;0;0;ExtraPrePass;5;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;0;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;0;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;32;326.4148,-115.6898;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/Transparent/Albedo_Emissive;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;2;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;5;False;;10;False;;1;1;False;;10;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;1;638518471308931063;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;0;638518465306141802;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;False;True;True;True;True;True;True;True;False;;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;33;326.4148,-115.6898;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ShadowCaster;0;2;ShadowCaster;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;True;False;False;False;False;0;False;;False;False;False;False;False;False;False;False;False;True;1;False;;True;3;False;;False;True;1;LightMode=ShadowCaster;False;False;0;;0;0;Standard;0;False;0
@@ -2951,9 +2951,9 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;39;326.4148,-115.6898;Float
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;40;326.4148,-115.6898;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.RangedFloatNode;41;-649.5002,315.5204;Inherit;False;Property;_Opacity;Opacity;3;0;Create;True;0;0;0;False;0;False;0.3152174;0;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;7;-213.5,136.5;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;10;-436.2403,-90.2756;Inherit;False;Property;_Emission_Str;Emission_Str;2;0;Create;True;0;0;0;False;0;False;1;3.37;0;20;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;6;-372.7621,-254.6753;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;9;-28.11292,-263.1732;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;10;-436.2403,-90.2756;Inherit;False;Property;_Emission_Str_Mask;_Emission_Str_Mask;2;0;Create;True;0;0;0;False;0;False;1;3.37;0;20;0;1;FLOAT;0
 WireConnection;32;2;9;0
 WireConnection;32;6;7;0
 WireConnection;7;0;41;0
@@ -2963,4 +2963,4 @@ WireConnection;6;1;5;1
 WireConnection;9;0;6;0
 WireConnection;9;1;10;0
 ASEEND*/
-//CHKSM=30181807CB925A2138E7871AF4FE41031FB63135
+//CHKSM=443C0D5BC0068418CE235C60572BD0093A730B40

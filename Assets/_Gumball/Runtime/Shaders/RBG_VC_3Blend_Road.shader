@@ -4,8 +4,8 @@ Shader "RBG/VC_Road"
 {
 	Properties
 	{
-		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
+		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		_Red_Albedo_G("Red_Albedo_G", 2D) = "white" {}
 		_Red_Normal("Red_Normal", 2D) = "bump" {}
 		_Red_Nrm_Str("Red_Nrm_Str", Float) = 1
@@ -19,6 +19,7 @@ Shader "RBG/VC_Road"
 		_Metallic("Metallic", Range( 0 , 1)) = 0
 		_Skids_Masked_G_VC("Skids_Masked_G_VC", 2D) = "white" {}
 		_Skids_Str("Skids_Str", Range( 0 , 2)) = 0.5
+		_Terrain_Glow("_Terrain_Glow", Float) = 0
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -200,7 +201,7 @@ Shader "RBG/VC_Road"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -307,6 +308,7 @@ Shader "RBG/VC_Road"
 			float _Red_Nrm_Str;
 			float _Green_Nrm_Str;
 			float _Blue_Nrm_Str;
+			float _Terrain_Glow;
 			float _Metallic;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -586,7 +588,7 @@ Shader "RBG/VC_Road"
 				float3 lerpResult93 = lerp( lerpResult92 , unpack245 , IN.ase_color.b);
 				
 				float4 color169 = IsGammaSpace() ? float4(0.9529412,0.8823529,0.7333333,0) : float4(0.8962694,0.7529422,0.496933,0);
-				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 0.0 );
+				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * _Terrain_Glow );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
@@ -853,7 +855,7 @@ Shader "RBG/VC_Road"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -921,6 +923,7 @@ Shader "RBG/VC_Road"
 			float _Red_Nrm_Str;
 			float _Green_Nrm_Str;
 			float _Blue_Nrm_Str;
+			float _Terrain_Glow;
 			float _Metallic;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -1171,7 +1174,7 @@ Shader "RBG/VC_Road"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1237,6 +1240,7 @@ Shader "RBG/VC_Road"
 			float _Red_Nrm_Str;
 			float _Green_Nrm_Str;
 			float _Blue_Nrm_Str;
+			float _Terrain_Glow;
 			float _Metallic;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -1459,7 +1463,7 @@ Shader "RBG/VC_Road"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1524,6 +1528,7 @@ Shader "RBG/VC_Road"
 			float _Red_Nrm_Str;
 			float _Green_Nrm_Str;
 			float _Blue_Nrm_Str;
+			float _Terrain_Glow;
 			float _Metallic;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -1752,7 +1757,7 @@ Shader "RBG/VC_Road"
 				unpack245.z = lerp( 1, unpack245.z, saturate(_Blue_Nrm_Str) );
 				float3 lerpResult93 = lerp( lerpResult92 , unpack245 , IN.ase_color.b);
 				float4 color169 = IsGammaSpace() ? float4(0.9529412,0.8823529,0.7333333,0) : float4(0.8962694,0.7529422,0.496933,0);
-				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 0.0 );
+				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * _Terrain_Glow );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
@@ -1798,7 +1803,7 @@ Shader "RBG/VC_Road"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1854,6 +1859,7 @@ Shader "RBG/VC_Road"
 			float _Red_Nrm_Str;
 			float _Green_Nrm_Str;
 			float _Blue_Nrm_Str;
+			float _Terrain_Glow;
 			float _Metallic;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -2090,7 +2096,7 @@ Shader "RBG/VC_Road"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2164,6 +2170,7 @@ Shader "RBG/VC_Road"
 			float _Red_Nrm_Str;
 			float _Green_Nrm_Str;
 			float _Blue_Nrm_Str;
+			float _Terrain_Glow;
 			float _Metallic;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -2457,7 +2464,7 @@ Shader "RBG/VC_Road"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -2559,6 +2566,7 @@ Shader "RBG/VC_Road"
 			float _Red_Nrm_Str;
 			float _Green_Nrm_Str;
 			float _Blue_Nrm_Str;
+			float _Terrain_Glow;
 			float _Metallic;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -2833,7 +2841,7 @@ Shader "RBG/VC_Road"
 				float3 lerpResult93 = lerp( lerpResult92 , unpack245 , IN.ase_color.b);
 				
 				float4 color169 = IsGammaSpace() ? float4(0.9529412,0.8823529,0.7333333,0) : float4(0.8962694,0.7529422,0.496933,0);
-				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * 0.0 );
+				float4 temp_output_170_0 = ( ( IN.ase_color.a * color169 ) * _Terrain_Glow );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
@@ -2967,7 +2975,7 @@ Shader "RBG/VC_Road"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3018,6 +3026,7 @@ Shader "RBG/VC_Road"
 			float _Red_Nrm_Str;
 			float _Green_Nrm_Str;
 			float _Blue_Nrm_Str;
+			float _Terrain_Glow;
 			float _Metallic;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -3218,7 +3227,7 @@ Shader "RBG/VC_Road"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3269,6 +3278,7 @@ Shader "RBG/VC_Road"
 			float _Red_Nrm_Str;
 			float _Green_Nrm_Str;
 			float _Blue_Nrm_Str;
+			float _Terrain_Glow;
 			float _Metallic;
 			float _Gloss;
 			#ifdef ASE_TRANSMISSION
@@ -3475,7 +3485,6 @@ Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;163;-173.3386,-1467.079;Flo
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;164;-173.3386,-1467.079;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;GBuffer;0;7;GBuffer;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalGBuffer;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;165;-173.3386,-1467.079;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;SceneSelectionPass;0;8;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;2;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;False;False;0;;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;166;-173.3386,-1467.079;Float;False;False;-1;2;UnityEditor.ShaderGraphLitGUI;0;1;New Amplify Shader;94348b07e5e8bab40bd6c8a1e3df54cd;True;ScenePickingPass;0;9;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;False;False;0;;0;0;Standard;0;False;0
-Node;AmplifyShaderEditor.SimpleMultiplyOpNode;168;1332.101,1021.221;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;170;1736.663,1078.588;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;175;2023.687,873.7899;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.LerpOp;186;2264.386,957.1669;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
@@ -3507,7 +3516,6 @@ Node;AmplifyShaderEditor.LerpOp;93;812.9227,-269.6323;Inherit;True;3;0;FLOAT3;0,
 Node;AmplifyShaderEditor.RangedFloatNode;229;2714.444,-228.5149;Inherit;False;Property;_Metallic;Metallic;10;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;123;233.8444,-980.9817;Float;False;Property;_Skids_Str;Skids_Str;12;0;Create;True;0;0;0;False;0;False;0.5;0.8091814;0;2;0;1;FLOAT;0
 Node;AmplifyShaderEditor.ColorNode;169;1030.927,1121.744;Inherit;False;Constant;_Light_Color;Light_Color;17;0;Create;True;0;0;0;False;0;False;0.9529412,0.8823529,0.7333333,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;239;1358.325,1205.913;Inherit;False;Constant;_Lioght_Str;Lioght_Str;17;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SamplerNode;238;-809.6796,-1321.244;Inherit;True;Property;_Skids_Masked_G_VC;Skids_Masked_G_VC;11;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SamplerNode;240;-1784.316,-622.4008;Inherit;True;Property;_Red_Albedo_G;Red_Albedo_G;0;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;198;-2013.267,-344.7286;Inherit;False;Property;_Red_Nrm_Str;Red_Nrm_Str;2;0;Create;True;0;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
@@ -3521,8 +3529,8 @@ Node;AmplifyShaderEditor.SamplerNode;242;-1776.615,-397.4268;Inherit;True;Proper
 Node;AmplifyShaderEditor.SamplerNode;243;-1747.903,45.9954;Inherit;True;Property;_Green_Normal;Green_Normal;4;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SamplerNode;245;-1724.506,549.0818;Inherit;True;Property;_Blue_Normal;Blue_Normal;7;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;bump;Auto;True;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.LerpOp;92;375.2541,-226.3189;Inherit;False;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
-WireConnection;168;0;102;4
-WireConnection;168;1;169;0
+Node;AmplifyShaderEditor.RangedFloatNode;239;1358.325,1205.913;Inherit;False;Property;_Terrain_Glow;_Terrain_Glow;13;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.SimpleMultiplyOpNode;168;1332.101,1021.221;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 WireConnection;170;0;168;0
 WireConnection;170;1;239;0
 WireConnection;175;0;176;1
@@ -3585,5 +3593,7 @@ WireConnection;245;5;208;0
 WireConnection;92;0;89;0
 WireConnection;92;1;243;0
 WireConnection;92;2;102;2
+WireConnection;168;0;102;4
+WireConnection;168;1;169;0
 ASEEND*/
-//CHKSM=52E6E03CE924C87DCFB69E9E1D329B4B0FC6E190
+//CHKSM=AF95F2F2FCCAE4AB98CA2E73C3A571E1CE6096F6

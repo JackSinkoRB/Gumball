@@ -12,7 +12,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 		_Metallic("Metallic", Range( 0 , 1)) = 0
 		_Normal("Normal", 2D) = "bump" {}
 		_Nrm_Str("Nrm_Str", Float) = 1
-		_Light_Str("Light_Str", Float) = 10
+		_Light_Str("_Light_Str", Float) = 10
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -194,7 +194,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -821,7 +821,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1133,7 +1133,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1415,7 +1415,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1729,7 +1729,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1998,7 +1998,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2343,7 +2343,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -2827,7 +2827,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3072,7 +3072,7 @@ Shader "RBG/VC_VertLighting_Albedo_Gloss_Normal"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3343,7 +3343,7 @@ Node;AmplifyShaderEditor.ColorNode;245;1746.736,-619.2963;Inherit;False;Property
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;244;2092.813,-466.561;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;99;2151.294,-76.19696;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;53;1771.469,-183.1839;Float;False;Property;_Gloss;Gloss;2;0;Create;True;0;0;0;False;0;False;1;0;0;3;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;239;1486.097,1344.632;Inherit;False;Property;_Light_Str;Light_Str;6;0;Create;True;0;0;0;False;0;False;10;10;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;239;1486.097,1344.632;Inherit;False;Property;_Light_Str;_Light_Str;6;0;Create;True;0;0;0;False;0;False;10;10;0;0;0;1;FLOAT;0
 WireConnection;168;0;102;4
 WireConnection;168;1;169;0
 WireConnection;170;0;168;0
@@ -3375,4 +3375,4 @@ WireConnection;244;1;245;0
 WireConnection;99;0;53;0
 WireConnection;99;1;240;4
 ASEEND*/
-//CHKSM=34C468EB51290FEAD97405F8DE7F4080D2F24164
+//CHKSM=DCEF9DE9BBAEAB4C012477DB77D1C379579691A3
