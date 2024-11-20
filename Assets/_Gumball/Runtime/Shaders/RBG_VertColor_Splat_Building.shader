@@ -20,6 +20,7 @@ Shader "RBG/VertColor_Splat_Building"
 		_Noise_Str("Noise_Str", Range( 0 , 1)) = 0.89
 		_Gloss_Str("Gloss_Str", Range( 0 , 3)) = 1
 		_Metal("Metal", Range( 0 , 1)) = 0
+		_3B_Light_Str("_3B_Light_Str", Range( 0 , 50)) = 38.8989
 		_Grunge_Str("Grunge_Str", Range( 0 , 5)) = 0.5
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
@@ -202,7 +203,7 @@ Shader "RBG/VertColor_Splat_Building"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -311,6 +312,7 @@ Shader "RBG/VertColor_Splat_Building"
 			float _Noise_Str;
 			float _Grunge_Str;
 			float _Normal_Strength1;
+			float _3B_Light_Str;
 			float _Metal;
 			float _Gloss_Str;
 			#ifdef ASE_TRANSMISSION
@@ -623,7 +625,7 @@ Shader "RBG/VertColor_Splat_Building"
 				float3 localTopMidBot160 = TopMidBot160( top160 , mid160 , bot160 , blendposition160 , blendthickness160 , mask160 );
 				float2 uv_Grunge_Mask = IN.ase_texcoord8.xy * _Grunge_Mask_ST.xy + _Grunge_Mask_ST.zw;
 				float temp_output_291_0 = ( ( tex2D( _Grunge_Mask, uv_Grunge_Mask ).r * _Grunge_Str ) * IN.ase_color.g );
-				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968647,0.01151679,0.005228601,0);
+				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968646,0.01151679,0.0052286,0);
 				float4 lerpResult287 = lerp( float4( localTopMidBot160 , 0.0 ) , ( float4( localTopMidBot160 , 0.0 ) * ( temp_output_291_0 * color284 ) ) , temp_output_291_0);
 				
 				float2 uv_RedNormal1 = IN.ase_texcoord8.xy * _RedNormal1_ST.xy + _RedNormal1_ST.zw;
@@ -644,7 +646,7 @@ Shader "RBG/VertColor_Splat_Building"
 				float3 localTopMidBot232 = TopMidBot232( top232 , mid232 , bot232 , blendposition232 , blendthickness232 , mask232 );
 				
 				float4 color273 = IsGammaSpace() ? float4(0.9716981,0.9300067,0.637104,0) : float4(0.9368213,0.8481022,0.3635845,0);
-				float4 temp_output_270_0 = ( ( IN.ase_color.a * color273 ) * 38.8989 );
+				float4 temp_output_270_0 = ( ( IN.ase_color.a * color273 ) * _3B_Light_Str );
 				float4 lerpResult268 = lerp( ( temp_output_270_0 * localTopMidBot232.y ) , temp_output_270_0 , 0.2);
 				float4 lerpResult269 = lerp( float4( localTopMidBot160 , 0.0 ) , lerpResult268 , 0.25);
 				float4 break278 = lerpResult268;
@@ -922,7 +924,7 @@ Shader "RBG/VertColor_Splat_Building"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -992,6 +994,7 @@ Shader "RBG/VertColor_Splat_Building"
 			float _Noise_Str;
 			float _Grunge_Str;
 			float _Normal_Strength1;
+			float _3B_Light_Str;
 			float _Metal;
 			float _Gloss_Str;
 			#ifdef ASE_TRANSMISSION
@@ -1242,7 +1245,7 @@ Shader "RBG/VertColor_Splat_Building"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1310,6 +1313,7 @@ Shader "RBG/VertColor_Splat_Building"
 			float _Noise_Str;
 			float _Grunge_Str;
 			float _Normal_Strength1;
+			float _3B_Light_Str;
 			float _Metal;
 			float _Gloss_Str;
 			#ifdef ASE_TRANSMISSION
@@ -1532,7 +1536,7 @@ Shader "RBG/VertColor_Splat_Building"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1599,6 +1603,7 @@ Shader "RBG/VertColor_Splat_Building"
 			float _Noise_Str;
 			float _Grunge_Str;
 			float _Normal_Strength1;
+			float _3B_Light_Str;
 			float _Metal;
 			float _Gloss_Str;
 			#ifdef ASE_TRANSMISSION
@@ -1848,11 +1853,11 @@ Shader "RBG/VertColor_Splat_Building"
 				float3 localTopMidBot160 = TopMidBot160( top160 , mid160 , bot160 , blendposition160 , blendthickness160 , mask160 );
 				float2 uv_Grunge_Mask = IN.ase_texcoord4.xy * _Grunge_Mask_ST.xy + _Grunge_Mask_ST.zw;
 				float temp_output_291_0 = ( ( tex2D( _Grunge_Mask, uv_Grunge_Mask ).r * _Grunge_Str ) * IN.ase_color.g );
-				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968647,0.01151679,0.005228601,0);
+				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968646,0.01151679,0.0052286,0);
 				float4 lerpResult287 = lerp( float4( localTopMidBot160 , 0.0 ) , ( float4( localTopMidBot160 , 0.0 ) * ( temp_output_291_0 * color284 ) ) , temp_output_291_0);
 				
 				float4 color273 = IsGammaSpace() ? float4(0.9716981,0.9300067,0.637104,0) : float4(0.9368213,0.8481022,0.3635845,0);
-				float4 temp_output_270_0 = ( ( IN.ase_color.a * color273 ) * 38.8989 );
+				float4 temp_output_270_0 = ( ( IN.ase_color.a * color273 ) * _3B_Light_Str );
 				float2 uv_RedNormal1 = IN.ase_texcoord4.xy * _RedNormal1_ST.xy + _RedNormal1_ST.zw;
 				float3 unpack235 = UnpackNormalScale( tex2D( _RedNormal1, uv_RedNormal1 ), _Normal_Strength1 );
 				unpack235.z = lerp( 1, unpack235.z, saturate(_Normal_Strength1) );
@@ -1915,7 +1920,7 @@ Shader "RBG/VertColor_Splat_Building"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1973,6 +1978,7 @@ Shader "RBG/VertColor_Splat_Building"
 			float _Noise_Str;
 			float _Grunge_Str;
 			float _Normal_Strength1;
+			float _3B_Light_Str;
 			float _Metal;
 			float _Gloss_Str;
 			#ifdef ASE_TRANSMISSION
@@ -2193,7 +2199,7 @@ Shader "RBG/VertColor_Splat_Building"
 				float3 localTopMidBot160 = TopMidBot160( top160 , mid160 , bot160 , blendposition160 , blendthickness160 , mask160 );
 				float2 uv_Grunge_Mask = IN.ase_texcoord2.xy * _Grunge_Mask_ST.xy + _Grunge_Mask_ST.zw;
 				float temp_output_291_0 = ( ( tex2D( _Grunge_Mask, uv_Grunge_Mask ).r * _Grunge_Str ) * IN.ase_color.g );
-				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968647,0.01151679,0.005228601,0);
+				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968646,0.01151679,0.0052286,0);
 				float4 lerpResult287 = lerp( float4( localTopMidBot160 , 0.0 ) , ( float4( localTopMidBot160 , 0.0 ) * ( temp_output_291_0 * color284 ) ) , temp_output_291_0);
 				
 
@@ -2232,7 +2238,7 @@ Shader "RBG/VertColor_Splat_Building"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2307,6 +2313,7 @@ Shader "RBG/VertColor_Splat_Building"
 			float _Noise_Str;
 			float _Grunge_Str;
 			float _Normal_Strength1;
+			float _3B_Light_Str;
 			float _Metal;
 			float _Gloss_Str;
 			#ifdef ASE_TRANSMISSION
@@ -2621,7 +2628,7 @@ Shader "RBG/VertColor_Splat_Building"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -2725,6 +2732,7 @@ Shader "RBG/VertColor_Splat_Building"
 			float _Noise_Str;
 			float _Grunge_Str;
 			float _Normal_Strength1;
+			float _3B_Light_Str;
 			float _Metal;
 			float _Gloss_Str;
 			#ifdef ASE_TRANSMISSION
@@ -3032,7 +3040,7 @@ Shader "RBG/VertColor_Splat_Building"
 				float3 localTopMidBot160 = TopMidBot160( top160 , mid160 , bot160 , blendposition160 , blendthickness160 , mask160 );
 				float2 uv_Grunge_Mask = IN.ase_texcoord8.xy * _Grunge_Mask_ST.xy + _Grunge_Mask_ST.zw;
 				float temp_output_291_0 = ( ( tex2D( _Grunge_Mask, uv_Grunge_Mask ).r * _Grunge_Str ) * IN.ase_color.g );
-				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968647,0.01151679,0.005228601,0);
+				float4 color284 = IsGammaSpace() ? float4(0.1886792,0.1092381,0.06318974,0) : float4(0.02968646,0.01151679,0.0052286,0);
 				float4 lerpResult287 = lerp( float4( localTopMidBot160 , 0.0 ) , ( float4( localTopMidBot160 , 0.0 ) * ( temp_output_291_0 * color284 ) ) , temp_output_291_0);
 				
 				float2 uv_RedNormal1 = IN.ase_texcoord8.xy * _RedNormal1_ST.xy + _RedNormal1_ST.zw;
@@ -3053,7 +3061,7 @@ Shader "RBG/VertColor_Splat_Building"
 				float3 localTopMidBot232 = TopMidBot232( top232 , mid232 , bot232 , blendposition232 , blendthickness232 , mask232 );
 				
 				float4 color273 = IsGammaSpace() ? float4(0.9716981,0.9300067,0.637104,0) : float4(0.9368213,0.8481022,0.3635845,0);
-				float4 temp_output_270_0 = ( ( IN.ase_color.a * color273 ) * 38.8989 );
+				float4 temp_output_270_0 = ( ( IN.ase_color.a * color273 ) * _3B_Light_Str );
 				float4 lerpResult268 = lerp( ( temp_output_270_0 * localTopMidBot232.y ) , temp_output_270_0 , 0.2);
 				float4 lerpResult269 = lerp( float4( localTopMidBot160 , 0.0 ) , lerpResult268 , 0.25);
 				float4 break278 = lerpResult268;
@@ -3198,7 +3206,7 @@ Shader "RBG/VertColor_Splat_Building"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3251,6 +3259,7 @@ Shader "RBG/VertColor_Splat_Building"
 			float _Noise_Str;
 			float _Grunge_Str;
 			float _Normal_Strength1;
+			float _3B_Light_Str;
 			float _Metal;
 			float _Gloss_Str;
 			#ifdef ASE_TRANSMISSION
@@ -3451,7 +3460,7 @@ Shader "RBG/VertColor_Splat_Building"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3504,6 +3513,7 @@ Shader "RBG/VertColor_Splat_Building"
 			float _Noise_Str;
 			float _Grunge_Str;
 			float _Normal_Strength1;
+			float _3B_Light_Str;
 			float _Metal;
 			float _Gloss_Str;
 			#ifdef ASE_TRANSMISSION
@@ -3733,7 +3743,6 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;267;3255.092,-257.7538;Inherit;Tru
 Node;AmplifyShaderEditor.LerpOp;268;3713.509,-155.8735;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.LerpOp;269;4058.202,-504.6777;Inherit;True;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;270;2810.553,92.04744;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
-Node;AmplifyShaderEditor.RangedFloatNode;271;2407.571,213.5526;Inherit;False;Constant;_Light_Str1;Light_Str;13;0;Create;True;0;0;0;False;0;False;38.8989;0;0;50;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;272;2411.282,10.70028;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.ColorNode;273;2055.62,176.8721;Inherit;False;Constant;_Light_Color1;Light_Color;14;0;Create;True;0;0;0;False;0;False;0.9716981,0.9300067,0.637104,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.BreakToComponentsNode;274;3296.986,-483.5978;Inherit;False;FLOAT3;1;0;FLOAT3;0,0,0;False;16;FLOAT;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4;FLOAT;5;FLOAT;6;FLOAT;7;FLOAT;8;FLOAT;9;FLOAT;10;FLOAT;11;FLOAT;12;FLOAT;13;FLOAT;14;FLOAT;15
@@ -3752,11 +3761,12 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;285;4456.294,-2520.09;Inherit;Fals
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;291;3929.878,-2647.114;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ColorNode;284;3981.323,-2460.055;Inherit;False;Constant;_Color0;Color 0;13;0;Create;True;0;0;0;False;0;False;0.1886792,0.1092381,0.06318974,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;289;3815.631,-2778.894;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;290;3508.804,-2669.662;Inherit;False;Property;_Grunge_Str;Grunge_Str;14;0;Create;True;0;0;0;False;0;False;0.5;0.5;0;5;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;290;3508.804,-2669.662;Inherit;False;Property;_Grunge_Str;Grunge_Str;15;0;Create;True;0;0;0;False;0;False;0.5;0.5;0;5;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SamplerNode;298;3457.938,-2917.542;Inherit;True;Property;_Grunge_Mask;Grunge_Mask;7;0;Create;True;0;0;0;False;0;False;-1;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;238;4027.238,-1521.315;Inherit;False;2;2;0;FLOAT3;0,0,0;False;1;FLOAT;0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.RangedFloatNode;239;3657.963,-1429.048;Inherit;True;Property;_Gloss_Str;Gloss_Str;12;0;Create;True;0;0;0;False;0;False;1;0;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;246;4261.992,-1630.229;Inherit;False;Property;_Metal;Metal;13;0;Create;True;0;0;0;False;0;False;0;1;0;1;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;271;2407.571,213.5526;Inherit;False;Property;_3B_Light_Str;_3B_Light_Str;14;0;Create;True;0;0;0;False;0;False;38.8989;38.8989;0;50;0;1;FLOAT;0
 WireConnection;216;0;219;1
 WireConnection;216;1;213;0
 WireConnection;220;0;216;0
@@ -3830,4 +3840,4 @@ WireConnection;289;1;290;0
 WireConnection;238;0;237;0
 WireConnection;238;1;239;0
 ASEEND*/
-//CHKSM=351B8214E6ADF7C3E9A333FBF36EA9A1842BF07A
+//CHKSM=EA23551855DF9A033136FD02AB0BE78B200DC52F

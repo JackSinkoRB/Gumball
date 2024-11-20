@@ -20,10 +20,11 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 		_R_Grundge_Gloss("R_Grundge_Gloss", Range( 0 , 3)) = 0.8293218
 		_Noise1("G_Grunge", 2D) = "white" {}
 		_G_Grunge_Color("G_Grunge_Color", Color) = (0,0,0,0)
+		_1MG_Light_Str("_1MG_Light_Str", Range( 0 , 38)) = 38
 		_G_Grunge_Str("G_Grunge_Str", Range( 0 , 3)) = 1
 		_G_Grundge_Gloss("G_Grundge_Gloss", Range( 0 , 3)) = 0.8293218
-		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 		[HideInInspector] _texcoord3( "", 2D ) = "white" {}
+		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
 		//_TransmissionShadow( "Transmission Shadow", Range( 0, 1 ) ) = 0.5
@@ -301,20 +302,21 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
-			float4 _MainTex_ST;
-			float4 _R_Grunge_Color;
-			float4 _Noise_ST;
-			float4 _G_Grunge_Color;
-			float4 _Noise1_ST;
-			float4 _BumpMap_ST;
 			float4 _BumpMap1_ST;
+			float4 _Noise1_ST;
+			float4 _G_Grunge_Color;
+			float4 _BumpMap_ST;
+			float4 _R_Grunge_Color;
+			float4 _MainTex_ST;
+			float4 _Noise_ST;
 			float _R_Grunge_Str;
 			float _G_Grunge_Str;
+			float _R_Grundge_Gloss;
 			float _Normal_Str;
 			float _R_Normal_Str;
+			float _1MG_Light_Str;
 			float _Metal;
 			float _Gloss;
-			float _R_Grundge_Gloss;
 			float _G_Grundge_Gloss;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -585,8 +587,8 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				float3 lerpResult293 = lerp( unpack235 , tex2DNode292 , temp_output_261_0);
 				float3 lerpResult301 = lerp( lerpResult293 , tex2DNode292 , temp_output_279_0);
 				
-				float4 color303 = IsGammaSpace() ? float4(0.9811321,0.9570845,0.8098968,0) : float4(0.957614,0.9051372,0.6207381,0);
-				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.0 );
+				float4 color303 = IsGammaSpace() ? float4(0.9811321,0.9570845,0.8098968,0) : float4(0.957614,0.9051372,0.6207382,0);
+				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * _1MG_Light_Str );
 				float4 lerpResult310 = lerp( ( temp_output_306_0 * lerpResult293.y ) , temp_output_306_0 , 0.2);
 				float4 lerpResult313 = lerp( temp_output_355_0 , lerpResult310 , 0.25);
 				float4 break331 = lerpResult310;
@@ -915,20 +917,21 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
-			float4 _MainTex_ST;
-			float4 _R_Grunge_Color;
-			float4 _Noise_ST;
-			float4 _G_Grunge_Color;
-			float4 _Noise1_ST;
-			float4 _BumpMap_ST;
 			float4 _BumpMap1_ST;
+			float4 _Noise1_ST;
+			float4 _G_Grunge_Color;
+			float4 _BumpMap_ST;
+			float4 _R_Grunge_Color;
+			float4 _MainTex_ST;
+			float4 _Noise_ST;
 			float _R_Grunge_Str;
 			float _G_Grunge_Str;
+			float _R_Grundge_Gloss;
 			float _Normal_Str;
 			float _R_Normal_Str;
+			float _1MG_Light_Str;
 			float _Metal;
 			float _Gloss;
-			float _R_Grundge_Gloss;
 			float _G_Grundge_Gloss;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1234,20 +1237,21 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
-			float4 _MainTex_ST;
-			float4 _R_Grunge_Color;
-			float4 _Noise_ST;
-			float4 _G_Grunge_Color;
-			float4 _Noise1_ST;
-			float4 _BumpMap_ST;
 			float4 _BumpMap1_ST;
+			float4 _Noise1_ST;
+			float4 _G_Grunge_Color;
+			float4 _BumpMap_ST;
+			float4 _R_Grunge_Color;
+			float4 _MainTex_ST;
+			float4 _Noise_ST;
 			float _R_Grunge_Str;
 			float _G_Grunge_Str;
+			float _R_Grundge_Gloss;
 			float _Normal_Str;
 			float _R_Normal_Str;
+			float _1MG_Light_Str;
 			float _Metal;
 			float _Gloss;
-			float _R_Grundge_Gloss;
 			float _G_Grundge_Gloss;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1524,20 +1528,21 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
-			float4 _MainTex_ST;
-			float4 _R_Grunge_Color;
-			float4 _Noise_ST;
-			float4 _G_Grunge_Color;
-			float4 _Noise1_ST;
-			float4 _BumpMap_ST;
 			float4 _BumpMap1_ST;
+			float4 _Noise1_ST;
+			float4 _G_Grunge_Color;
+			float4 _BumpMap_ST;
+			float4 _R_Grunge_Color;
+			float4 _MainTex_ST;
+			float4 _Noise_ST;
 			float _R_Grunge_Str;
 			float _G_Grunge_Str;
+			float _R_Grundge_Gloss;
 			float _Normal_Str;
 			float _R_Normal_Str;
+			float _1MG_Light_Str;
 			float _Metal;
 			float _Gloss;
-			float _R_Grundge_Gloss;
 			float _G_Grundge_Gloss;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1748,8 +1753,8 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				float4 lerpResult282 = lerp( lerpResult253 , _G_Grunge_Color , temp_output_279_0);
 				float4 temp_output_355_0 = ( _Color * lerpResult282 );
 				
-				float4 color303 = IsGammaSpace() ? float4(0.9811321,0.9570845,0.8098968,0) : float4(0.957614,0.9051372,0.6207381,0);
-				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.0 );
+				float4 color303 = IsGammaSpace() ? float4(0.9811321,0.9570845,0.8098968,0) : float4(0.957614,0.9051372,0.6207382,0);
+				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * _1MG_Light_Str );
 				float2 uv_BumpMap = IN.ase_texcoord4.xy * _BumpMap_ST.xy + _BumpMap_ST.zw;
 				float3 unpack235 = UnpackNormalScale( tex2D( _BumpMap, uv_BumpMap ), _Normal_Str );
 				unpack235.z = lerp( 1, unpack235.z, saturate(_Normal_Str) );
@@ -1852,20 +1857,21 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
-			float4 _MainTex_ST;
-			float4 _R_Grunge_Color;
-			float4 _Noise_ST;
-			float4 _G_Grunge_Color;
-			float4 _Noise1_ST;
-			float4 _BumpMap_ST;
 			float4 _BumpMap1_ST;
+			float4 _Noise1_ST;
+			float4 _G_Grunge_Color;
+			float4 _BumpMap_ST;
+			float4 _R_Grunge_Color;
+			float4 _MainTex_ST;
+			float4 _Noise_ST;
 			float _R_Grunge_Str;
 			float _G_Grunge_Str;
+			float _R_Grundge_Gloss;
 			float _Normal_Str;
 			float _R_Normal_Str;
+			float _1MG_Light_Str;
 			float _Metal;
 			float _Gloss;
-			float _R_Grundge_Gloss;
 			float _G_Grundge_Gloss;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -2165,20 +2171,21 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
-			float4 _MainTex_ST;
-			float4 _R_Grunge_Color;
-			float4 _Noise_ST;
-			float4 _G_Grunge_Color;
-			float4 _Noise1_ST;
-			float4 _BumpMap_ST;
 			float4 _BumpMap1_ST;
+			float4 _Noise1_ST;
+			float4 _G_Grunge_Color;
+			float4 _BumpMap_ST;
+			float4 _R_Grunge_Color;
+			float4 _MainTex_ST;
+			float4 _Noise_ST;
 			float _R_Grunge_Str;
 			float _G_Grunge_Str;
+			float _R_Grundge_Gloss;
 			float _Normal_Str;
 			float _R_Normal_Str;
+			float _1MG_Light_Str;
 			float _Metal;
 			float _Gloss;
-			float _R_Grundge_Gloss;
 			float _G_Grundge_Gloss;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -2567,20 +2574,21 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
-			float4 _MainTex_ST;
-			float4 _R_Grunge_Color;
-			float4 _Noise_ST;
-			float4 _G_Grunge_Color;
-			float4 _Noise1_ST;
-			float4 _BumpMap_ST;
 			float4 _BumpMap1_ST;
+			float4 _Noise1_ST;
+			float4 _G_Grunge_Color;
+			float4 _BumpMap_ST;
+			float4 _R_Grunge_Color;
+			float4 _MainTex_ST;
+			float4 _Noise_ST;
 			float _R_Grunge_Str;
 			float _G_Grunge_Str;
+			float _R_Grundge_Gloss;
 			float _Normal_Str;
 			float _R_Normal_Str;
+			float _1MG_Light_Str;
 			float _Metal;
 			float _Gloss;
-			float _R_Grundge_Gloss;
 			float _G_Grundge_Gloss;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -2846,8 +2854,8 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 				float3 lerpResult293 = lerp( unpack235 , tex2DNode292 , temp_output_261_0);
 				float3 lerpResult301 = lerp( lerpResult293 , tex2DNode292 , temp_output_279_0);
 				
-				float4 color303 = IsGammaSpace() ? float4(0.9811321,0.9570845,0.8098968,0) : float4(0.957614,0.9051372,0.6207381,0);
-				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * 38.0 );
+				float4 color303 = IsGammaSpace() ? float4(0.9811321,0.9570845,0.8098968,0) : float4(0.957614,0.9051372,0.6207382,0);
+				float4 temp_output_306_0 = ( ( IN.ase_color.a * color303 ) * _1MG_Light_Str );
 				float4 lerpResult310 = lerp( ( temp_output_306_0 * lerpResult293.y ) , temp_output_306_0 , 0.2);
 				float4 lerpResult313 = lerp( temp_output_355_0 , lerpResult310 , 0.25);
 				float4 break331 = lerpResult310;
@@ -3026,20 +3034,21 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
-			float4 _MainTex_ST;
-			float4 _R_Grunge_Color;
-			float4 _Noise_ST;
-			float4 _G_Grunge_Color;
-			float4 _Noise1_ST;
-			float4 _BumpMap_ST;
 			float4 _BumpMap1_ST;
+			float4 _Noise1_ST;
+			float4 _G_Grunge_Color;
+			float4 _BumpMap_ST;
+			float4 _R_Grunge_Color;
+			float4 _MainTex_ST;
+			float4 _Noise_ST;
 			float _R_Grunge_Str;
 			float _G_Grunge_Str;
+			float _R_Grundge_Gloss;
 			float _Normal_Str;
 			float _R_Normal_Str;
+			float _1MG_Light_Str;
 			float _Metal;
 			float _Gloss;
-			float _R_Grundge_Gloss;
 			float _G_Grundge_Gloss;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -3280,20 +3289,21 @@ Shader "RBG/VC_R_Grunge_G_Grunge_B_AO_Albedo_G_Normal"
 
 			CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
-			float4 _MainTex_ST;
-			float4 _R_Grunge_Color;
-			float4 _Noise_ST;
-			float4 _G_Grunge_Color;
-			float4 _Noise1_ST;
-			float4 _BumpMap_ST;
 			float4 _BumpMap1_ST;
+			float4 _Noise1_ST;
+			float4 _G_Grunge_Color;
+			float4 _BumpMap_ST;
+			float4 _R_Grunge_Color;
+			float4 _MainTex_ST;
+			float4 _Noise_ST;
 			float _R_Grunge_Str;
 			float _G_Grunge_Str;
+			float _R_Grundge_Gloss;
 			float _Normal_Str;
 			float _R_Normal_Str;
+			float _1MG_Light_Str;
 			float _Metal;
 			float _Gloss;
-			float _R_Grundge_Gloss;
 			float _G_Grundge_Gloss;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -3511,7 +3521,7 @@ Node;AmplifyShaderEditor.LerpOp;313;4891.086,-849.0276;Inherit;True;3;0;COLOR;0,
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;306;3643.433,-252.3018;Inherit;True;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;305;3244.162,-333.6491;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.ColorNode;303;2888.5,-167.4775;Inherit;False;Constant;_Light_Color;Light_Color;14;0;Create;True;0;0;0;False;0;False;0.9811321,0.9570845,0.8098968,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;296;3449.499,-1143.472;Inherit;False;Property;_G_Grundge_Gloss;G_Grundge_Gloss;15;0;Create;True;0;0;0;False;0;False;0.8293218;0.8293218;0;3;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;296;3449.499,-1143.472;Inherit;False;Property;_G_Grundge_Gloss;G_Grundge_Gloss;16;0;Create;True;0;0;0;False;0;False;0.8293218;0.8293218;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;265;3088.381,-1152.327;Inherit;False;Property;_R_Grundge_Gloss;R_Grundge_Gloss;11;0;Create;True;0;0;0;False;0;False;0.8293218;0.22;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;261;2507.648,-1813.48;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;314;4453.982,-858.787;Inherit;True;Constant;_Albedo_Contribution_Str;Albedo_Contribution_Str;15;0;Create;True;0;0;0;False;0;False;0.25;0;0;0;0;1;FLOAT;0
@@ -3536,7 +3546,7 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;268;2971.028,-2194.635;Inherit;Fal
 Node;AmplifyShaderEditor.LerpOp;253;3377.245,-2433.083;Inherit;True;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;276;2367.229,-2940.837;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SamplerNode;278;1980.938,-2918.434;Inherit;True;Property;_Noise1;G_Grunge;12;0;Create;False;0;0;0;False;0;False;-1;8e0e388733a4e25479f0ca669c0069e1;0a8a62b6c2ef0524bbc4bb8f13590eda;True;2;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;1;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.RangedFloatNode;277;1975.237,-3075.928;Float;False;Property;_G_Grunge_Str;G_Grunge_Str;14;0;Create;True;0;0;0;False;0;False;1;0.862;0;3;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;277;1975.237,-3075.928;Float;False;Property;_G_Grunge_Str;G_Grunge_Str;15;0;Create;True;0;0;0;False;0;False;1;0.862;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;279;2721.47,-2882.566;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ColorNode;280;3244.709,-2994.461;Inherit;False;Property;_G_Grunge_Color;G_Grunge_Color;13;0;Create;True;0;0;0;False;0;False;0,0,0,0;0.735849,0.6638445,0.510235,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;238;3154.954,-1415.659;Inherit;True;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
@@ -3544,12 +3554,12 @@ Node;AmplifyShaderEditor.OneMinusNode;270;3511.768,-991.0393;Inherit;False;1;0;F
 Node;AmplifyShaderEditor.LerpOp;266;3524.971,-1407.078;Inherit;True;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.ColorNode;356;4799.466,-2518.123;Inherit;False;Property;_Color;Color;0;0;Create;True;0;0;0;False;0;False;1,1,1,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;355;5230.049,-2182.021;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
-Node;AmplifyShaderEditor.RangedFloatNode;304;3240.451,-130.7971;Inherit;False;Constant;_Light_Str;Light_Str;13;0;Create;True;0;0;0;False;0;False;38;0;0;38;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SaturateNode;333;5510.542,-795.5469;Inherit;False;1;0;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;275;5555.516,-1361.424;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;246;5494.786,-1519.89;Inherit;False;Property;_Metal;Metal;3;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;359;5615.713,-1714.96;Inherit;False;Constant;_Float0;Float 0;16;0;Create;True;0;0;0;False;0;False;70;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;358;5784.95,-1446.392;Inherit;False;2;2;0;FLOAT;0;False;1;COLOR;0,0,0,0;False;1;COLOR;0
+Node;AmplifyShaderEditor.RangedFloatNode;304;3240.451,-130.7971;Inherit;False;Property;_1MG_Light_Str;_1MG_Light_Str;14;0;Create;True;0;0;0;False;0;False;38;38;0;38;0;1;FLOAT;0
 WireConnection;274;0;213;0
 WireConnection;274;1;219;1
 WireConnection;282;0;253;0
@@ -3618,4 +3628,4 @@ WireConnection;275;1;270;0
 WireConnection;358;0;359;0
 WireConnection;358;1;333;0
 ASEEND*/
-//CHKSM=67FF674A0BD814363C548228AE644AF7EE0AC5F1
+//CHKSM=783B0554A626E07DB5D43209CAF508547C98EDEC
