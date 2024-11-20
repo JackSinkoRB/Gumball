@@ -21,7 +21,8 @@ namespace Gumball
             base.OnRemoveFromStack();
             
             PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
-            
+            ScreenBlur.Show(false);
+
             Time.timeScale = 1;
         }
         
@@ -29,6 +30,7 @@ namespace Gumball
         {
             base.OnShow();
             
+            ScreenBlur.Show(true);
             if (PanelManager.GetPanel<DrivingResetButtonPanel>().IsShowing)
                 PanelManager.GetPanel<DrivingResetButtonPanel>().Hide(); //hide the reset button
         }

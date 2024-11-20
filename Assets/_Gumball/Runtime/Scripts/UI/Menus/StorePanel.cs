@@ -22,8 +22,17 @@ namespace Gumball
             //disable the specials category if no PlayFab connection
             if (PlayFabManager.LoginStatus != PlayFabManager.ConnectionStatusType.SUCCESS)
                 specialsCategoryButton.interactable = false;
+            
+            ScreenBlur.Show(true);
         }
-        
+
+        protected override void OnHide()
+        {
+            base.OnHide();
+            
+            ScreenBlur.Show(false);
+        }
+
         public void OpenSubMenu(StoreSubMenu subMenu)
         {
             if (subMenu != null && subMenu.IsShowing)
