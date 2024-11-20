@@ -12,7 +12,31 @@ concurrency:
 
 jobs:
 
+  setup:
+    name: Setup
+    runs-on: self-hosted
+
+    steps:
+
+      # Ensure Docker is purged and reinstalled
+      - name: Purge and Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo systemctl enable docker
+          docker system prune -a -f
+
+      # Ensure Git LFS is installed
+      - name: Install Git LFS
+        run: sudo apt-get update && sudo apt-get install git-lfs
+
+      # Ensure Git is installed
+      - name: Install Git
+        run: sudo apt-get update && sudo apt-get install git
+
   buildAndroid:
+    needs: setup
     name: Build Android
     runs-on:
       labels: runner-1
@@ -28,7 +52,14 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rf Library
+        run: |
+          LIBRARY_PATH="$GITHUB_WORKSPACE/Library"
+          if [ -d "$LIBRARY_PATH" ]; then
+            echo "Library directory exists at $LIBRARY_PATH. Deleting..."
+            rm -rf "$LIBRARY_PATH"
+          else
+            echo "Library directory does not exist at $LIBRARY_PATH. Nothing to delete."
+          fi
 
       # Cache
       - uses: JackSinkoRB/local-cache@main
@@ -69,6 +100,7 @@ jobs:
           path: build/Android
 
   buildIOS:
+    needs: setup
     name: Build iOS
     runs-on:
       labels: runner-2
@@ -84,7 +116,14 @@ jobs:
 
       # Delete library folder (if existing) before retrieving new library folder from cache
       - name: Delete library folder
-        run: rm -rf Library
+        run: |
+          LIBRARY_PATH="$GITHUB_WORKSPACE/Library"
+          if [ -d "$LIBRARY_PATH" ]; then
+            echo "Library directory exists at $LIBRARY_PATH. Deleting..."
+            rm -rf "$LIBRARY_PATH"
+          else
+            echo "Library directory does not exist at $LIBRARY_PATH. Nothing to delete."
+          fi
 
       # Cache
       - uses: JackSinkoRB/local-cache@main

@@ -11,7 +11,7 @@ namespace Gumball.Runtime.Tests
     public class WheelPaintModificationTests : BaseRuntimeTests
     {
         
-        private const int carIndexToUse = 0; //test with the XJ
+        private const string carGUIDToUse = "b5028991c62dbc64a99eb0b82d8b0745"; //test with the XJ
         
         private bool isInitialised;
         
@@ -36,7 +36,7 @@ namespace Gumball.Runtime.Tests
             yield return CorePartManager.Initialise();
             yield return SubPartManager.Initialise();
 
-            yield return WarehouseManager.Instance.SpawnCar(carIndexToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
+            yield return WarehouseManager.Instance.SpawnCar(carGUIDToUse, Vector3.zero, Quaternion.Euler(Vector3.zero),
                 (carInstance) =>
                 {
                     WarehouseManager.Instance.SetCurrentCar(carInstance);
@@ -51,7 +51,7 @@ namespace Gumball.Runtime.Tests
             yield return new WaitUntil(() => isInitialised);
             
             Assert.IsNotNull(WarehouseManager.Instance.CurrentCar);
-            Assert.AreEqual(WarehouseManager.Instance.CurrentCar.CarIndex, carIndexToUse);
+            Assert.AreEqual(WarehouseManager.Instance.CurrentCar.CarGUID, carGUIDToUse);
 
             foreach (WheelMesh wheelMesh in WarehouseManager.Instance.CurrentCar.AllWheelMeshes)
             {
@@ -183,7 +183,7 @@ namespace Gumball.Runtime.Tests
                 paintModification.ApplySwatch(swatchToTest);
                 paintModification.LoadFromSave();
 
-                WarehouseManager.Instance.CurrentCar.InitialiseAsPlayer(carIndexToUse); //have to set as player again to retrieve the saved swatch
+                WarehouseManager.Instance.CurrentCar.InitialiseAsPlayer(carGUIDToUse); //have to set as player again to retrieve the saved swatch
                 ColourSwatchSerialized currentSwatch = paintModification.SavedSwatch;
 
                 Assert.AreEqual(initialSwatch.Color, currentSwatch.Color);

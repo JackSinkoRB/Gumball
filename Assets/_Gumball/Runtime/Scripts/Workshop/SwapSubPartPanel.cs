@@ -76,7 +76,7 @@ namespace Gumball
                 slot.InstallSubPart(sparePart);
 
                 //create a profile with the specific core part with the sub part installed
-                profileWithPart = new CarPerformanceProfile(currentCar.CarIndex);
+                profileWithPart = new CarPerformanceProfile(currentCar.CarGUID);
 
                 //uninstall
                 slot.UninstallSubPart();
@@ -84,10 +84,10 @@ namespace Gumball
             else
             {
                 //is already applied, use the current profile
-                profileWithPart = new CarPerformanceProfile(currentCar.CarIndex);
+                profileWithPart = new CarPerformanceProfile(currentCar.CarGUID);
             }
             
-            CarPerformanceProfile currentProfile = new CarPerformanceProfile(currentCar.CarIndex);
+            CarPerformanceProfile currentProfile = new CarPerformanceProfile(currentCar.CarGUID);
             maxSpeedSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
             accelerationSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
             handlingSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);

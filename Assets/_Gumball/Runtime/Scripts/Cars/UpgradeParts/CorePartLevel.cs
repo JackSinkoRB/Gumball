@@ -14,8 +14,10 @@ namespace Gumball
         [Header("Details")]
         [SerializeField] private int standardCurrencyCost;
 
-        [Header("Stats")]
+        [Header("Sub part modifiers")]
+        [Tooltip("This is the value when no sub parts are installed. The core part performance profile gets multiplied by this.")]
         [SerializeField, Range(0, 1)] private float minPerformanceModifierPercent;
+        [Tooltip("This is the value when all sub parts are installed. The core part performance profile gets multiplied by this.")]
         [SerializeField, Range(0, 1)] private float maxPerformanceModifierPercent;
         
         [Header("Slots")]

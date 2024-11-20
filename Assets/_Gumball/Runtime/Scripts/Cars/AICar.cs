@@ -20,9 +20,9 @@ namespace Gumball
     public class AICar : MonoBehaviour
     {
 
-        public static string GetSaveKeyFromIndex(int carIndex)
+        public static string GetSaveKeyFromIndex(string carGUID)
         {
-            return $"CarData.{carIndex}";
+            return $"CarData.{carGUID}";
         }
         
         public event Action onDisable;
@@ -60,12 +60,12 @@ namespace Gumball
         
         [Space(5)]
         [SerializeField, ReadOnly] private bool isPlayerDrivingEnabled;
-        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private int carIndex;
+        [ConditionalField(nameof(canBeDrivenByPlayer)), SerializeField, ReadOnly] private string carGUID;
 
         public CarIKManager AvatarIKManager => avatarIKManager;
         public SteeringWheel SteeringWheel => steeringWheel;
-        public int CarIndex => carIndex;
-        public string SaveKey => GetSaveKeyFromIndex(carIndex);
+        public string CarGUID => carGUID;
+        public string SaveKey => GetSaveKeyFromIndex(carGUID);
 
         public bool CanBeDrivenByPlayer => canBeDrivenByPlayer;
         public Transform CockpitCameraTarget => cockpitCameraTarget;
@@ -497,9 +497,9 @@ namespace Gumball
             Rigidbody.constraints = RigidbodyConstraints.FreezeRotationZ;
         }
         
-        public void InitialiseAsPlayer(int carIndex)
+        public void InitialiseAsPlayer(string carGUID)
         {
-            this.carIndex = carIndex;
+            this.carGUID = carGUID;
             
             gameObject.layer = (int)LayersAndTags.Layer.PlayerCar;
             colliders.layer = (int)LayersAndTags.Layer.PlayerCar;
@@ -513,10 +513,10 @@ namespace Gumball
                 racerIcon.gameObject.SetActive(false);
 
             //load the parts
-            CorePartManager.InstallParts(carIndex);
+            CorePartManager.InstallParts(carGUID);
 
             //construct a new performance profile
-            SetPerformanceProfile(new CarPerformanceProfile(carIndex));
+            SetPerformanceProfile(new CarPerformanceProfile(carGUID));
 
             nosManager = transform.GetOrAddComponent<NosManager>();
             nosManager.Initialise(this);
@@ -1770,7 +1770,6 @@ namespace Gumball
             for (int index = 0; index < rearWheelBrakes.Length; index++)
             {
                 Transform brake = rearWheelBrakes[index];
-                
                 brake.transform.position = rearWheelMeshes[index].transform.position;
             }
         }

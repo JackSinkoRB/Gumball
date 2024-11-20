@@ -22,20 +22,17 @@ namespace Gumball
         
         [Header("Debugging")]
         [SerializeField, ReadOnly] private WarehouseCarData carData;
-        [SerializeField, ReadOnly] private int carIndex;
 
         public WarehouseCarData CarData => carData;
-        public int CarIndex => carIndex;
 
-        public bool IsCurrentCar => carIndex == WarehouseManager.Instance.SavedCarIndex;
+        public bool IsCurrentCar => carData.GUID.Equals(WarehouseManager.Instance.SavedCarGUID);
         
-        public void Initialise(WarehouseCarData carData, int carIndex)
+        public void Initialise(WarehouseCarData carData)
         {
             this.carData = carData;
-            this.carIndex = carIndex;
             
             nameLabel.text = carData.DisplayName;
-            performanceRatingLabel.text = $"{PerformanceRatingCalculator.GetCalculator(carData.PerformanceSettings, new CarPerformanceProfile(carIndex)).TotalRating}";
+            performanceRatingLabel.text = $"{PerformanceRatingCalculator.GetCalculator(carData.PerformanceSettings, new CarPerformanceProfile(carData.GUID)).TotalRating}";
             
             icon.sprite = carData.Icon;
             icon.gameObject.SetActive(icon.sprite != null);

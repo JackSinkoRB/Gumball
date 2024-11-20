@@ -10,11 +10,11 @@ namespace Gumball
         [SerializeField] private bool usePlayerCar = true;
         [SerializeField] private AutosizeTextMeshPro label;
         
-        private int carIndex;
+        private string carGUID;
 
-        public void SetCarIndex(int carIndex)
+        public void SetCarIndex(string carGUID)
         {
-            this.carIndex = carIndex;
+            this.carGUID = carGUID;
             
             RefreshLabel();
         }
@@ -33,23 +33,23 @@ namespace Gumball
             BlueprintManager.onLevelChange -= OnLevelChange;
         }
         
-        private void OnBlueprintsChange(int carIndex, int previousAmount, int newAmount)
+        private void OnBlueprintsChange(string carGUID, int previousAmount, int newAmount)
         {
             if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
                 return;
             
-            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
-            if (carIndexToUse == carIndex)
+            string carGUIDToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarGUID : carGUID;
+            if (carGUIDToUse.Equals(carGUID))
                 RefreshLabel();
         }
         
-        private void OnLevelChange(int carIndex, int previousAmount, int newAmount)
+        private void OnLevelChange(string carGUID, int previousAmount, int newAmount)
         {
             if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
                 return;
             
-            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
-            if (carIndexToUse == carIndex)
+            string carGUIDToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarGUID : carGUID;
+            if (carGUIDToUse.Equals(carGUID))
                 RefreshLabel();
         }
         
@@ -61,10 +61,10 @@ namespace Gumball
                 return;
             }
 
-            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
-            int currentBlueprints = BlueprintManager.Instance.GetBlueprints(carIndexToUse);
+            string carGUIDToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarGUID : carGUID;
+            int currentBlueprints = BlueprintManager.Instance.GetBlueprints(carGUIDToUse);
             
-            int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carIndexToUse);
+            int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carGUIDToUse);
             if (nextLevelIndex < 0)
             {
                 //is max level

@@ -342,7 +342,7 @@ namespace Gumball
 
         private void ApplyBaseDecals(AICar car)
         {
-            WarehouseCarData carData = WarehouseManager.Instance.AllCarData[car.CarIndex];
+            WarehouseCarData carData = WarehouseManager.Instance.GetCarDataFromGUID(car.CarGUID);
             List<LiveDecal> baseDecals = DecalManager.CreateLiveDecalsFromData(carData.BaseDecalData);
             
             foreach (LiveDecal liveDecal in baseDecals)

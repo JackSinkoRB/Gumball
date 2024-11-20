@@ -47,14 +47,11 @@ namespace Gumball
             mainObjectiveUI.transform.SetAsLastSibling();
             
             //add subobjectives
-            if (gameSession.SubObjectives != null)
+            foreach (Challenge subObjective in gameSession.SubObjectives)
             {
-                foreach (Challenge subObjective in gameSession.SubObjectives)
-                {
-                    ObjectiveUI objectiveUI = objectiveUIPrefab.gameObject.GetSpareOrCreate<ObjectiveUI>(objectiveUIHolder, poolOnDisable: false);
-                    objectiveUI.Initialise(subObjective);
-                    objectiveUI.transform.SetAsLastSibling();
-                }
+                ObjectiveUI objectiveUI = objectiveUIPrefab.gameObject.GetSpareOrCreate<ObjectiveUI>(objectiveUIHolder, poolOnDisable: false);
+                objectiveUI.Initialise(subObjective);
+                objectiveUI.transform.SetAsLastSibling();
             }
         }
 
@@ -82,8 +79,11 @@ namespace Gumball
             //blueprints
             foreach (BlueprintReward blueprintReward in gameSession.Rewards.Blueprints)
             {
+                if (blueprintReward.CarGUID == null)
+                    continue;
+                
                 GameSessionNodeReward reward = rewardPrefab.gameObject.GetSpareOrCreate<GameSessionNodeReward>(rewardsHolder, poolOnDisable: false);
-                reward.Initialise(blueprintReward.Blueprints.ToString(), WarehouseManager.Instance.AllCarData[blueprintReward.CarIndex].Icon);
+                reward.Initialise(blueprintReward.Blueprints.ToString(), WarehouseManager.Instance.GetCarDataFromGUID(blueprintReward.CarGUID).Icon);
                 reward.transform.SetAsLastSibling();
             }
             

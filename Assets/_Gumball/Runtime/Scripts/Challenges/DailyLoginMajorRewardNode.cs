@@ -85,7 +85,7 @@ namespace Gumball
                 standardCurrencyIcon.sprite = standardCurrencySprite;
             }
             else
-            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && DailyLoginManager.Instance.IsDayClaimed(dayNumber))
+            if (DailyLoginManager.Instance.IsDayReady(dayNumber) && !DailyLoginManager.Instance.IsDayClaimed(dayNumber))
             {
                 //ready but not claimed
                 button.interactable = true;
@@ -166,9 +166,12 @@ namespace Gumball
             
             foreach (BlueprintReward blueprintReward in reward.Rewards.Blueprints)
             {
+                if (blueprintReward.CarGUID == null)
+                    continue;
+                
                 DailyLoginMajorRewardNodeRewardUI instance = rewardUIPrefab.gameObject.GetSpareOrCreate<DailyLoginMajorRewardNodeRewardUI>(rewardUIHolder);
                 instance.transform.SetAsLastSibling();
-                instance.Initialise(dayNumber, WarehouseManager.Instance.AllCarData[blueprintReward.CarIndex].Icon, blueprintReward.Blueprints);
+                instance.Initialise(dayNumber, WarehouseManager.Instance.GetCarDataFromGUID(blueprintReward.CarGUID).Icon, blueprintReward.Blueprints);
             }
             
             foreach (Unlockable unlockableReward in reward.Rewards.Unlockables)

@@ -82,7 +82,7 @@ namespace Gumball
         public void OnClickInstallButton()
         {
             int partLevel = selectedOption.CorePart.CurrentLevelIndex + 1;
-            int carLevel = BlueprintManager.Instance.GetLevelIndex(WarehouseManager.Instance.CurrentCar.CarIndex) + 1;
+            int carLevel = BlueprintManager.Instance.GetLevelIndex(WarehouseManager.Instance.CurrentCar.CarGUID) + 1;
             if (partLevel > carLevel)
             {
                 PanelManager.GetPanel<GenericMessagePanel>().Show();
@@ -103,7 +103,7 @@ namespace Gumball
                 Currency.Standard.TakeFunds(selectedOption.CorePart.StandardCurrencyInstallCost);
             }
 
-            CorePartManager.InstallPartOnCar(partType, selectedOption.CorePart, currentCar.CarIndex);
+            CorePartManager.InstallPartOnCar(partType, selectedOption.CorePart, currentCar.CarGUID);
             installButton.Initialise(partType, selectedOption.CorePart);
 
             //update the sub parts menu
@@ -123,7 +123,7 @@ namespace Gumball
                 child.gameObject.Pool();
 
             //add the current part option as it doesn't show in spare parts
-            CorePart currentPart = CorePartManager.GetCorePart(currentCar.CarIndex, partType);
+            CorePart currentPart = CorePartManager.GetCorePart(currentCar.CarGUID, partType);
             if (currentPart != null && currentPart.CarType == headerFilter.CurrentSelected)
                 CreatePartButtonInstance(currentPart);
 
@@ -147,12 +147,12 @@ namespace Gumball
                 return;
             
             //create a profile with the specific core part
-            Dictionary<CorePart.PartType, CorePart> allParts = CorePartManager.GetCoreParts(currentCar.CarIndex);
+            Dictionary<CorePart.PartType, CorePart> allParts = CorePartManager.GetCoreParts(currentCar.CarGUID);
             allParts[selectedOption.CorePart.Type] = selectedOption.CorePart;
 
-            CarPerformanceProfile profileWithPart = new CarPerformanceProfile(allParts.Values);
+            CarPerformanceProfile profileWithPart = new CarPerformanceProfile(allParts.Values, currentCar.CarGUID);
 
-            CarPerformanceProfile currentProfile = new CarPerformanceProfile(currentCar.CarIndex);
+            CarPerformanceProfile currentProfile = new CarPerformanceProfile(currentCar.CarGUID);
             maxSpeedSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
             accelerationSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
             handlingSlider.Initialise(currentCar.PerformanceSettings, currentProfile, profileWithPart);
@@ -175,7 +175,7 @@ namespace Gumball
             
             foreach (SwapCorePartOptionButton optionButton in partOptions)
             {
-                CorePart currentInstalledPart = CorePartManager.GetCorePart(currentCar.CarIndex, partType);
+                CorePart currentInstalledPart = CorePartManager.GetCorePart(currentCar.CarGUID, partType);
                 if (optionButton.CorePart == currentInstalledPart)
                     return optionButton;
             }

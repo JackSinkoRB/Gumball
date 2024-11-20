@@ -43,43 +43,43 @@ namespace Gumball
         /// <summary>
         /// Sets the currently installed part on the car.
         /// </summary>
-        public static void SetCorePart(int carIndex, CorePart.PartType type, CorePart corePart)
+        public static void SetCorePart(string carGUID, CorePart.PartType type, CorePart corePart)
         {
-            DataManager.Cars.Set($"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}", corePart == null ? null : corePart.ID);
+            DataManager.Cars.Set($"{GetSaveKeyFromGUID(carGUID)}.Core.{type.ToString()}", corePart == null ? null : corePart.ID);
         }
         
         /// <summary>
         /// Gets the currently installed part on the car, or returns the default part if none.
         /// </summary>
-        public static CorePart GetCorePart(int carIndex, CorePart.PartType type)
+        public static CorePart GetCorePart(string carGUID, CorePart.PartType type)
         {
-            string saveKey = $"{GetSaveKeyFromIndex(carIndex)}.Core.{type.ToString()}";
+            string saveKey = $"{GetSaveKeyFromGUID(carGUID)}.Core.{type.ToString()}";
             
-            WarehouseCarData carData = WarehouseManager.Instance.AllCarData[carIndex];
+            WarehouseCarData carData = WarehouseManager.Instance.GetCarDataFromGUID(carGUID);
             CorePart defaultPart = carData.GetDefaultPart(type);
             
             string partID = DataManager.Cars.Get(saveKey, defaultPart != null ? defaultPart.ID : null);
             return GetPartByID(partID);
         }
 
-        public static Dictionary<CorePart.PartType, CorePart> GetCoreParts(int carIndex)
+        public static Dictionary<CorePart.PartType, CorePart> GetCoreParts(string carGUID)
         {
             Dictionary<CorePart.PartType, CorePart> parts = new();
             
             foreach (CorePart.PartType partType in Enum.GetValues(typeof(CorePart.PartType)))
-                parts[partType] = GetCorePart(carIndex, partType);
+                parts[partType] = GetCorePart(carGUID, partType);
             
             return parts;
         }
 
-        public static void InstallParts(int carIndex)
+        public static void InstallParts(string carGUID)
         {
-            foreach (CorePart part in GetCoreParts(carIndex).Values)
+            foreach (CorePart part in GetCoreParts(carGUID).Values)
             {
                 if (part == null)
                     continue; //no part applied
                 
-                InstallPartOnCar(part.Type, part, carIndex);
+                InstallPartOnCar(part.Type, part, carGUID);
             }
         }
         
@@ -111,29 +111,29 @@ namespace Gumball
             return spareParts;
         }
 
-        public static void InstallPartOnCar(CorePart.PartType type, CorePart part, int carIndex)
+        public static void InstallPartOnCar(CorePart.PartType type, CorePart part, string carGUID)
         {
             //if car has a part already installed, remove the reference to set it as a spare
-            CorePart existingPart = GetCorePart(carIndex, type);
+            CorePart existingPart = GetCorePart(carGUID, type);
             if (existingPart != null)
                 existingPart.RemoveFromCar();
 
             //apply to car
-            SetCorePart(carIndex, type, part);
+            SetCorePart(carGUID, type, part);
             
             //apply to part
             if (part != null)
-                part.ApplyToCar(carIndex);
+                part.ApplyToCar(carGUID);
             
             //update the cars performance profile if it's the active car
-            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarIndex == carIndex;
+            bool isAttachedToCurrentCar = WarehouseManager.Instance.CurrentCar != null && WarehouseManager.Instance.CurrentCar.CarGUID.Equals(carGUID);
             if (isAttachedToCurrentCar)
-                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(carIndex));
+                WarehouseManager.Instance.CurrentCar.SetPerformanceProfile(new CarPerformanceProfile(carGUID));
         }
 
-        public static void RemovePartOnCar(CorePart.PartType type, int carIndex)
+        public static void RemovePartOnCar(CorePart.PartType type, string carGUID)
         {
-            InstallPartOnCar(type, null, carIndex);
+            InstallPartOnCar(type, null, carGUID);
         }
 
         private static IEnumerator FindParts()
@@ -190,9 +190,9 @@ namespace Gumball
             } 
         }
         
-        private static string GetSaveKeyFromIndex(int carIndex)
+        private static string GetSaveKeyFromGUID(string carGUID)
         {
-            return $"{AICar.GetSaveKeyFromIndex(carIndex)}.Parts";
+            return $"{AICar.GetSaveKeyFromIndex(carGUID)}.Parts";
         }
         
     }

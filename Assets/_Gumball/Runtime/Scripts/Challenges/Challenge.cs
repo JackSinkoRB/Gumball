@@ -4,12 +4,37 @@ using System.Collections.Generic;
 using MyBox;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Gumball
 {
     [Serializable]
     public class Challenge
     {
+        
+#if UNITY_EDITOR
+        public static Dictionary<string, Challenge> AllChallengeIDs = new();
+
+        public static void EnsureChallengesAreUnique(Challenge[] challenges, Object context)
+        {
+            bool isDirty = false;
+            
+            foreach (Challenge challenge in challenges)
+            {
+                while (challenge.uniqueID.IsNullOrEmpty()
+                       || (AllChallengeIDs.ContainsKey(challenge.UniqueID) && AllChallengeIDs[challenge.uniqueID] != challenge))
+                {
+                    isDirty = true;
+                    challenge.AssignNewID();
+                }
+
+                AllChallengeIDs[challenge.uniqueID] = challenge;
+            }
+        
+            if (isDirty)
+                EditorUtility.SetDirty(context);
+        }
+#endif
         
         [SerializeField] private string description = "Description of challenge";
         [SerializeField] private Sprite icon;

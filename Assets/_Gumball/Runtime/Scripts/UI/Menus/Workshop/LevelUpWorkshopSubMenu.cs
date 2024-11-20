@@ -26,10 +26,10 @@ namespace Gumball
 
         public void OnClickPurchaseButton()
         {
-            int carIndex = WarehouseManager.Instance.CurrentCar.CarIndex;
-            int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carIndex);
+            string carGUID = WarehouseManager.Instance.CurrentCar.CarGUID;
+            int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carGUID);
             
-            int blueprints = BlueprintManager.Instance.GetBlueprints(carIndex);
+            int blueprints = BlueprintManager.Instance.GetBlueprints(carGUID);
             int requiredBlueprints = BlueprintManager.Instance.Levels[nextLevelIndex].BlueprintsRequired;
             bool hasEnoughBlueprints = blueprints >= requiredBlueprints;
             if (!hasEnoughBlueprints)
@@ -52,10 +52,10 @@ namespace Gumball
             
             //take the blueprints
             int blueprintsCost = BlueprintManager.Instance.Levels[nextLevelIndex].BlueprintsRequired;
-            BlueprintManager.Instance.TakeBlueprints(carIndex, blueprintsCost);
+            BlueprintManager.Instance.TakeBlueprints(carGUID, blueprintsCost);
             
             //level up the car
-            BlueprintManager.Instance.SetLevelIndex(carIndex, nextLevelIndex);
+            BlueprintManager.Instance.SetLevelIndex(carGUID, nextLevelIndex);
 
             Refresh();
         }
@@ -68,9 +68,9 @@ namespace Gumball
 
         private void UpdateLevelLabel()
         {
-            int carIndex = WarehouseManager.Instance.CurrentCar.CarIndex;
-            int currentLevel = BlueprintManager.Instance.GetLevelIndex(carIndex) + 1;
-            int maxLevel = BlueprintManager.Instance.MaxLevelIndex + 1;
+            string carGUID = WarehouseManager.Instance.CurrentCar.CarGUID;
+            int currentLevel = BlueprintManager.Instance.GetLevelIndex(carGUID) + 1;
+            int maxLevel = WarehouseManager.Instance.GetCarDataFromGUID(carGUID).MaxLevelIndex + 1;
             
             levelLabel.text = $"Level {currentLevel} / {maxLevel}";
         }
@@ -81,7 +81,7 @@ namespace Gumball
                 child.gameObject.Pool();
             
             //get the sessions that give the CarIndex blueprint as a reward
-            foreach (GameSession session in BlueprintManager.Instance.GetSessionsThatGiveBlueprint(WarehouseManager.Instance.CurrentCar.CarIndex))
+            foreach (GameSession session in BlueprintManager.Instance.GetSessionsThatGiveBlueprint(WarehouseManager.Instance.CurrentCar.CarGUID))
             {
                 OpenBlueprintOption instance = openBlueprintOptionPrefab.gameObject.GetSpareOrCreate<OpenBlueprintOption>(openBlueprintOptionHolder);
                 instance.transform.SetAsLastSibling();
@@ -91,9 +91,10 @@ namespace Gumball
 
         private void UpdatePurchaseButton()
         {
-            int carIndex = WarehouseManager.Instance.CurrentCar.CarIndex;
-            int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carIndex);
-            bool isMaxLevel = nextLevelIndex > BlueprintManager.Instance.MaxLevelIndex;
+            string carGUID = WarehouseManager.Instance.CurrentCar.CarGUID;
+            int nextLevelIndex = BlueprintManager.Instance.GetNextLevelIndex(carGUID);
+            int maxLevelIndex = WarehouseManager.Instance.GetCarDataFromGUID(carGUID).MaxLevelIndex;
+            bool isMaxLevel = nextLevelIndex > maxLevelIndex;
             
             purchaseButton.interactable = !isMaxLevel;
 

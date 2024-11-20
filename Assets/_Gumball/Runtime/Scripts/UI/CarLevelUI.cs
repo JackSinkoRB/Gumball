@@ -10,11 +10,11 @@ namespace Gumball
         [SerializeField] private bool usePlayerCar = true;
         [SerializeField] private AutosizeTextMeshPro label;
 
-        private int carIndex;
+        private string carGUID;
         
-        public void SetCarIndex(int carIndex)
+        public void SetCarGUID(string carGUID)
         {
-            this.carIndex = carIndex;
+            this.carGUID = carGUID;
             
             RefreshLabel();
         }
@@ -31,13 +31,13 @@ namespace Gumball
             BlueprintManager.onLevelChange -= OnLevelChange;
         }
         
-        private void OnLevelChange(int carIndex, int previousAmount, int newAmount)
+        private void OnLevelChange(string carGUID, int previousAmount, int newAmount)
         {
             if (usePlayerCar && WarehouseManager.Instance.CurrentCar == null)
                 return;
             
-            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
-            if (carIndexToUse == carIndex)
+            string carGUIDToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarGUID : carGUID;
+            if (carGUIDToUse.Equals(carGUID))
                 RefreshLabel();
         }
         
@@ -49,8 +49,8 @@ namespace Gumball
                 return;
             }
 
-            int carIndexToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarIndex : carIndex;
-            label.text = $"{BlueprintManager.Instance.GetLevelIndex(carIndexToUse) + 1}";
+            string carGUIDToUse = usePlayerCar ? WarehouseManager.Instance.CurrentCar.CarGUID : carGUID;
+            label.text = $"{BlueprintManager.Instance.GetLevelIndex(carGUIDToUse) + 1}";
             this.PerformAtEndOfFrame(label.Resize);
         }
 
