@@ -9,6 +9,7 @@ Shader "RBG/Tree"
 		_MainTex("_MainTex", 2D) = "white" {}
 		_ColorTint("Color Tint", Color) = (0.5754717,0.5754717,0.5754717,0)
 		_Clip("Clip", Range( 0 , 1)) = 0.7
+		_Tree_Glow("_Tree_Glow", Float) = 0.3
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -286,6 +287,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Tree_Glow;
 			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -542,7 +544,7 @@ Shader "RBG/Tree"
 
 				float3 BaseColor = temp_output_38_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = ( temp_output_38_0 * ( 0.3 * ase_lightColor.a ) ).rgb;
+				float3 Emission = ( temp_output_38_0 * ( _Tree_Glow * ase_lightColor.a ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -858,6 +860,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Tree_Glow;
 			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1171,6 +1174,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Tree_Glow;
 			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1453,6 +1457,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Tree_Glow;
 			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -1658,7 +1663,7 @@ Shader "RBG/Tree"
 				
 
 				float3 BaseColor = temp_output_38_0.rgb;
-				float3 Emission = ( temp_output_38_0 * ( 0.3 * ase_lightColor.a ) ).rgb;
+				float3 Emission = ( temp_output_38_0 * ( _Tree_Glow * ase_lightColor.a ) ).rgb;
 				float Alpha = tex2DNode1.a;
 				float AlphaClipThreshold = _Clip;
 
@@ -1742,6 +1747,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Tree_Glow;
 			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -2025,6 +2031,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Tree_Glow;
 			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -2393,6 +2400,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Tree_Glow;
 			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -2644,7 +2652,7 @@ Shader "RBG/Tree"
 
 				float3 BaseColor = temp_output_38_0.rgb;
 				float3 Normal = float3(0, 0, 1);
-				float3 Emission = ( temp_output_38_0 * ( 0.3 * ase_lightColor.a ) ).rgb;
+				float3 Emission = ( temp_output_38_0 * ( _Tree_Glow * ase_lightColor.a ) ).rgb;
 				float3 Specular = 0.5;
 				float Metallic = 0.0;
 				float Smoothness = 0.0;
@@ -2810,6 +2818,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Tree_Glow;
 			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -3058,6 +3067,7 @@ Shader "RBG/Tree"
 			CBUFFER_START(UnityPerMaterial)
 			float4 _ColorTint;
 			float4 _MainTex_ST;
+			float _Tree_Glow;
 			float _Clip;
 			#ifdef ASE_TRANSMISSION
 				float _TransmissionShadow;
@@ -3272,10 +3282,10 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;38;935.1312,-77.96011;Inherit;Fals
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;169;1792.34,191.996;Float;False;True;-1;2;UnityEditor.ShaderGraphLitGUI;0;12;RBG/Tree;94348b07e5e8bab40bd6c8a1e3df54cd;True;Forward;0;1;Forward;20;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;;False;True;0;False;;False;False;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;4;RenderPipeline=UniversalPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;UniversalMaterialType=Lit;True;5;True;12;all;0;False;True;1;1;False;;0;False;;1;1;False;;0;False;;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;;False;False;False;False;False;False;False;True;False;0;False;;255;False;;255;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;0;False;;False;True;1;False;;True;3;False;;True;True;0;False;;0;False;;True;1;LightMode=UniversalForward;False;False;0;;0;0;Standard;41;Workflow;1;0;Surface;0;0;  Refraction Model;0;0;  Blend;0;0;Two Sided;1;0;Fragment Normal Space,InvertActionOnDeselection;0;0;Forward Only;0;0;Transmission;0;0;  Transmission Shadow;0.5,False,;0;Translucency;0;0;  Translucency Strength;1,False,;0;  Normal Distortion;0.5,False,;0;  Scattering;2,False,;0;  Direct;0.9,False,;0;  Ambient;0.1,False,;0;  Shadow;0.5,False,;0;Cast Shadows;1;0;  Use Shadow Threshold;0;0;Receive Shadows;1;0;GPU Instancing;1;0;LOD CrossFade;1;0;Built-in Fog;1;0;_FinalColorxAlpha;0;0;Meta Pass;1;0;Override Baked GI;0;0;Extra Pre Pass;0;0;DOTS Instancing;0;0;Tessellation;0;0;  Phong;0;0;  Strength;0.5,False,;0;  Type;0;0;  Tess;16,False,;0;  Min;10,False,;0;  Max;25,False,;0;  Edge Length;16,False,;0;  Max Displacement;25,False,;0;Write Depth;0;0;  Early Z;0;0;Vertex Position,InvertActionOnDeselection;1;0;Debug Display;0;0;Clear Coat;0;0;0;10;False;True;True;True;True;True;True;True;True;True;False;;False;0
 Node;AmplifyShaderEditor.RangedFloatNode;110;1302.877,543.2866;Inherit;False;Property;_Clip;Clip;2;0;Create;True;0;0;0;False;0;False;0.7;0.7;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.LightColorNode;187;826.91,376.5799;Inherit;False;0;3;COLOR;0;FLOAT3;1;FLOAT;2
-Node;AmplifyShaderEditor.RangedFloatNode;189;840.9844,205.5287;Inherit;False;Constant;_Float1;Float 1;3;0;Create;True;0;0;0;False;0;False;0.3;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;192;1059.326,315.731;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;191;1203.326,147.731;Inherit;False;2;2;0;COLOR;0,0,0,0;False;1;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.RangedFloatNode;185;1460.279,272.5935;Inherit;False;Constant;_Float0;Float 0;5;0;Create;True;0;0;0;False;0;False;0;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;189;840.9844,205.5287;Inherit;False;Property;_Tree_Glow;_Tree_Glow;3;0;Create;True;0;0;0;False;0;False;0.3;0.3;0;0;0;1;FLOAT;0
 WireConnection;38;0;37;0
 WireConnection;38;1;1;0
 WireConnection;169;0;38;0
@@ -3290,4 +3300,4 @@ WireConnection;192;1;187;2
 WireConnection;191;0;38;0
 WireConnection;191;1;192;0
 ASEEND*/
-//CHKSM=A86A4BFF0BB9C468DB5F052287D823AFF9B4E2ED
+//CHKSM=F5B96BFA7DE0C0B7DAE016821724E48C568F062A

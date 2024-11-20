@@ -22,7 +22,7 @@ namespace Gumball
 
         public static float CurrentFPS { get; private set; }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void RuntimeInitialise()
         {
             onUpdateFPS = null;

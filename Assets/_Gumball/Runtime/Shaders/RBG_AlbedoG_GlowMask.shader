@@ -11,7 +11,7 @@ Shader "RBG/AlbedoG_Glow"
 		_GlowMap("GlowMap", 2D) = "white" {}
 		_Metal("Metal", Range( 0 , 1)) = 0
 		_Gloss("Gloss", Range( 0 , 1)) = 0
-		_Glow_Str("Glow_Str", Range( 0 , 3)) = 1
+		_Glow_Str("_Glow_Str", Range( 0 , 3)) = 1
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
 
 
@@ -192,7 +192,7 @@ Shader "RBG/AlbedoG_Glow"
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -802,7 +802,7 @@ Shader "RBG/AlbedoG_Glow"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1112,7 +1112,7 @@ Shader "RBG/AlbedoG_Glow"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1392,7 +1392,7 @@ Shader "RBG/AlbedoG_Glow"
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1692,7 +1692,7 @@ Shader "RBG/AlbedoG_Glow"
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1958,7 +1958,7 @@ Shader "RBG/AlbedoG_Glow"
 			#pragma multi_compile_fragment _ LOD_FADE_CROSSFADE
 			#define ASE_FOG 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2292,7 +2292,7 @@ Shader "RBG/AlbedoG_Glow"
 			#pragma multi_compile_fog
 			#define ASE_FOG 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -2759,7 +2759,7 @@ Shader "RBG/AlbedoG_Glow"
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3002,7 +3002,7 @@ Shader "RBG/AlbedoG_Glow"
 			#define _NORMAL_DROPOFF_TS 1
 			#define ASE_FOG 1
 			#define _EMISSION
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3257,7 +3257,7 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;6;-235.8689,-86.78656;Inherit;Fals
 Node;AmplifyShaderEditor.RangedFloatNode;3;-270.8961,108.2503;Float;False;Property;_Metal;Metal;3;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;7;-224.7317,190.711;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;4;-744.8961,340.2502;Float;False;Property;_Gloss;Gloss;4;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;21;-741.7046,251.9243;Inherit;False;Property;_Glow_Str;Glow_Str;5;0;Create;True;0;0;0;False;0;False;1;1;0;3;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;21;-741.7046,251.9243;Inherit;False;Property;_Glow_Str;_Glow_Str;5;0;Create;True;0;0;0;False;0;False;1;1;0;3;0;1;FLOAT;0
 WireConnection;9;0;6;0
 WireConnection;9;2;19;0
 WireConnection;9;3;3;0
@@ -3269,4 +3269,4 @@ WireConnection;6;1;5;0
 WireConnection;7;0;4;0
 WireConnection;7;1;5;4
 ASEEND*/
-//CHKSM=DC8E3ED880C3A9B0E404FFB80A56327759C69BFB
+//CHKSM=6ACB3AAEDB6FF80054A433DB1D3B481C19D33CF4

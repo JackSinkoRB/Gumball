@@ -20,7 +20,7 @@ Shader "VC_Terrain_Triplanar"
 		[Header(Skid)]_Skid_Tiling("Skid_Tiling", Float) = 1
 		_Skids_Str("Skids_Str", Range( 0 , 2)) = 1.377689
 		_Skid("Skid", 2D) = "white" {}
-		[Header(Light)]_Light_Str("Light_Str", Range( 0 , 30)) = 23.45971
+		[Header(Light)]_TerrainLight_Str("_TerrainLight_Str", Range( 0 , 30)) = 23.45971
 		_Light_Color("Light_Color", Color) = (0,0,0,0)
 		[Header(Other values)]_GlossinesValue("GlossinesValue", Range( 0 , 3)) = 0
 		_ExtraGlossinesValue("ExtraGlossinesValue", Range( 0 , 1)) = 0
@@ -205,7 +205,7 @@ Shader "VC_Terrain_Triplanar"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -311,7 +311,7 @@ Shader "VC_Terrain_Triplanar"
 			float _Green_Tiling;
 			float _Blue_Tiling;
 			float _Normal_Strength;
-			float _Light_Str;
+			float _TerrainLight_Str;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
 			float _NoiseEffectGrain_Tiling;
@@ -694,7 +694,7 @@ Shader "VC_Terrain_Triplanar"
 				float3 tanTriplanarNormal217 = mul( ase_worldToTangent, triplanar217 );
 				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal217 , IN.ase_color.b);
 				
-				float4 temp_output_170_0 = ( ( IN.ase_color.a * _Light_Color ) * _Light_Str );
+				float4 temp_output_170_0 = ( ( IN.ase_color.a * _Light_Color ) * _TerrainLight_Str );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
@@ -963,7 +963,7 @@ Shader "VC_Terrain_Triplanar"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1027,7 +1027,7 @@ Shader "VC_Terrain_Triplanar"
 			float _Green_Tiling;
 			float _Blue_Tiling;
 			float _Normal_Strength;
-			float _Light_Str;
+			float _TerrainLight_Str;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
 			float _NoiseEffectGrain_Tiling;
@@ -1279,7 +1279,7 @@ Shader "VC_Terrain_Triplanar"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1341,7 +1341,7 @@ Shader "VC_Terrain_Triplanar"
 			float _Green_Tiling;
 			float _Blue_Tiling;
 			float _Normal_Strength;
-			float _Light_Str;
+			float _TerrainLight_Str;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
 			float _NoiseEffectGrain_Tiling;
@@ -1565,7 +1565,7 @@ Shader "VC_Terrain_Triplanar"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -1631,7 +1631,7 @@ Shader "VC_Terrain_Triplanar"
 			float _Green_Tiling;
 			float _Blue_Tiling;
 			float _Normal_Strength;
-			float _Light_Str;
+			float _TerrainLight_Str;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
 			float _NoiseEffectGrain_Tiling;
@@ -1970,7 +1970,7 @@ Shader "VC_Terrain_Triplanar"
 				float3 triplanar217 = TriplanarSampling217( _Blue_Normal, WorldPosition, ase_worldNormal, 1.0, temp_cast_8, _Normal_Strength, 0 );
 				float3 tanTriplanarNormal217 = mul( ase_worldToTangent, triplanar217 );
 				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal217 , IN.ase_color.b);
-				float4 temp_output_170_0 = ( ( IN.ase_color.a * _Light_Color ) * _Light_Str );
+				float4 temp_output_170_0 = ( ( IN.ase_color.a * _Light_Color ) * _TerrainLight_Str );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
@@ -2016,7 +2016,7 @@ Shader "VC_Terrain_Triplanar"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2069,7 +2069,7 @@ Shader "VC_Terrain_Triplanar"
 			float _Green_Tiling;
 			float _Blue_Tiling;
 			float _Normal_Strength;
-			float _Light_Str;
+			float _TerrainLight_Str;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
 			float _NoiseEffectGrain_Tiling;
@@ -2355,7 +2355,7 @@ Shader "VC_Terrain_Triplanar"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -2429,7 +2429,7 @@ Shader "VC_Terrain_Triplanar"
 			float _Green_Tiling;
 			float _Blue_Tiling;
 			float _Normal_Strength;
-			float _Light_Str;
+			float _TerrainLight_Str;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
 			float _NoiseEffectGrain_Tiling;
@@ -2773,7 +2773,7 @@ Shader "VC_Terrain_Triplanar"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma shader_feature_local _RECEIVE_SHADOWS_OFF
@@ -2874,7 +2874,7 @@ Shader "VC_Terrain_Triplanar"
 			float _Green_Tiling;
 			float _Blue_Tiling;
 			float _Normal_Strength;
-			float _Light_Str;
+			float _TerrainLight_Str;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
 			float _NoiseEffectGrain_Tiling;
@@ -3252,7 +3252,7 @@ Shader "VC_Terrain_Triplanar"
 				float3 tanTriplanarNormal217 = mul( ase_worldToTangent, triplanar217 );
 				float3 lerpResult93 = lerp( lerpResult92 , tanTriplanarNormal217 , IN.ase_color.b);
 				
-				float4 temp_output_170_0 = ( ( IN.ase_color.a * _Light_Color ) * _Light_Str );
+				float4 temp_output_170_0 = ( ( IN.ase_color.a * _Light_Color ) * _TerrainLight_Str );
 				float4 lerpResult186 = lerp( ( lerpResult93.y * temp_output_170_0 ) , temp_output_170_0 , 0.5);
 				float4 lerpResult188 = lerp( lerpResult122 , lerpResult186 , 0.8);
 				
@@ -3388,7 +3388,7 @@ Shader "VC_Terrain_Triplanar"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3435,7 +3435,7 @@ Shader "VC_Terrain_Triplanar"
 			float _Green_Tiling;
 			float _Blue_Tiling;
 			float _Normal_Strength;
-			float _Light_Str;
+			float _TerrainLight_Str;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
 			float _NoiseEffectGrain_Tiling;
@@ -3637,7 +3637,7 @@ Shader "VC_Terrain_Triplanar"
 			#define ASE_FOG 1
 			#define _EMISSION
 			#define _NORMALMAP 1
-			#define ASE_SRP_VERSION 140008
+			#define ASE_SRP_VERSION 140011
 
 
 			#pragma vertex vert
@@ -3684,7 +3684,7 @@ Shader "VC_Terrain_Triplanar"
 			float _Green_Tiling;
 			float _Blue_Tiling;
 			float _Normal_Strength;
-			float _Light_Str;
+			float _TerrainLight_Str;
 			float _GlossinesValue;
 			float _ExtraGlossinesValue;
 			float _NoiseEffectGrain_Tiling;
@@ -3905,7 +3905,6 @@ Node;AmplifyShaderEditor.SimpleMultiplyOpNode;99;124.6973,873.9086;Inherit;False
 Node;AmplifyShaderEditor.LerpOp;27;-299.9213,914.3257;Inherit;False;3;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;21;-97.96638,1065.644;Float;False;Property;_ExtraGlossinesValue;ExtraGlossinesValue;17;0;Create;True;0;0;0;False;0;False;0;0;0;1;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;51;233.9477,1122.336;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;181;1881.396,1179.166;Inherit;False;Constant;_Normal_Mask_Str;Normal_Mask_Str;14;0;Create;True;0;0;0;False;0;False;0.5;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;189;1987.673,784.2125;Inherit;False;Constant;_Albedo_Contribution_Str;Albedo_Contribution_Str;14;0;Create;True;0;0;0;False;0;False;0.8;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.VertexColorNode;102;-1447.939,-718.6578;Inherit;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.OneMinusNode;156;-2.554384,-1216.592;Inherit;False;1;0;FLOAT;0;False;1;FLOAT;0
@@ -3926,7 +3925,7 @@ Node;AmplifyShaderEditor.LerpOp;93;865.2716,-193.0538;Inherit;True;3;0;FLOAT3;0,
 Node;AmplifyShaderEditor.LerpOp;92;419.2541,-134.3189;Inherit;False;3;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;1;FLOAT3;0
 Node;AmplifyShaderEditor.ColorNode;169;926.2199,1127.702;Inherit;False;Property;_Light_Color;Light_Color;15;0;Create;True;0;0;0;False;0;False;0,0,0,0;0,0,0,0;True;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;206;-759.3643,1187.56;Inherit;False;Property;_NoiseEffectGrain_Tiling;NoiseEffectGrain_Tiling;9;1;[Header];Create;True;1;NoiseEffectGrain;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.TriplanarNode;205;-489.3642,1142.56;Inherit;True;Spherical;World;False;NoiseEffectGrainTexture;_NoiseEffectGrainTexture;white;10;Assets/_Gumball/Runtime/Textures/Noise/Noise.tga;Mid Texture 2;_MidTexture2;white;-1;None;Bot Texture 2;_BotTexture2;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.TriplanarNode;205;-489.3642,1142.56;Inherit;True;Spherical;World;False;NoiseEffectGrainTexture;_NoiseEffectGrainTexture;white;10;None;Mid Texture 2;_MidTexture2;white;-1;None;Bot Texture 2;_BotTexture2;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;5;-10.85839,-375.9566;Inherit;False;2;2;0;FLOAT4;0,0,0,0;False;1;FLOAT;0;False;1;FLOAT4;0
 Node;AmplifyShaderEditor.RangedFloatNode;98;-3159.38,139.0783;Inherit;False;Property;_Normal_Strength;Normal_Strength;18;0;Create;True;0;0;0;False;0;False;1;1.242;0;3;0;1;FLOAT;0
 Node;AmplifyShaderEditor.TriplanarNode;207;-1865.42,-486.9787;Inherit;True;Spherical;World;False;Red;_Red;white;1;None;Mid Texture 3;_MidTexture3;white;-1;None;Bot Texture 3;_BotTexture3;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
@@ -3936,15 +3935,16 @@ Node;AmplifyShaderEditor.TriplanarNode;213;-2171.156,172.8471;Inherit;True;Spher
 Node;AmplifyShaderEditor.TriplanarNode;214;-1872.91,-60.68375;Inherit;True;Spherical;World;False;Green;_Green;white;4;None;Mid Texture 6;_MidTexture6;white;-1;None;Bot Texture 6;_BotTexture6;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.SimpleMultiplyOpNode;75;-755.9355,813.0497;Inherit;False;2;2;0;FLOAT;0;False;1;FLOAT;0;False;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;216;-2498.437,530.7625;Inherit;False;Property;_Blue_Tiling;Blue_Tiling;6;1;[Header];Create;True;1;Blue;0;0;False;0;False;1;0;0;0;0;1;FLOAT;0
-Node;AmplifyShaderEditor.TriplanarNode;203;-630.8319,-1336.915;Inherit;True;Spherical;World;False;Skid;_Skid;white;13;Assets/_Gumball/Runtime/Textures/Noise/Noise_grunge_concrete_moss_small_Half.png;Mid Texture 1;_MidTexture1;white;-1;None;Bot Texture 1;_BotTexture1;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;0.1,0.1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.TriplanarNode;203;-630.8319,-1336.915;Inherit;True;Spherical;World;False;Skid;_Skid;white;13;None;Mid Texture 1;_MidTexture1;white;-1;None;Bot Texture 1;_BotTexture1;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;0.1,0.1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;204;-788.0829,-1290.028;Inherit;False;Property;_Skid_Tiling;Skid_Tiling;11;1;[Header];Create;True;1;Skid;0;0;False;0;False;1;1;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.RangedFloatNode;53;-323.8188,808.7853;Float;False;Property;_GlossinesValue;GlossinesValue;16;1;[Header];Create;True;1;Other values;0;0;False;0;False;0;0;0;3;0;1;FLOAT;0
-Node;AmplifyShaderEditor.RangedFloatNode;171;1269.755,1194.196;Inherit;False;Property;_Light_Str;Light_Str;14;1;[Header];Create;True;1;Light;0;0;False;0;False;23.45971;0;0;30;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SaturateNode;191;2815.017,910.6764;Inherit;False;1;0;COLOR;0,0,0,0;False;1;COLOR;0
 Node;AmplifyShaderEditor.LerpOp;188;2399.678,739.8183;Inherit;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.TriplanarNode;208;-2164.667,-280.5298;Inherit;True;Spherical;World;True;Red_Normal;_Red_Normal;white;2;None;Mid Texture 4;_MidTexture4;white;-1;None;Bot Texture 4;_BotTexture4;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.TriplanarNode;218;-1879.051,428.3634;Inherit;True;Spherical;World;False;Blue;_Blue;white;7;None;Mid Texture 8;_MidTexture8;white;-1;None;Bot Texture 8;_BotTexture8;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT4;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.TriplanarNode;217;-2177.296,661.8943;Inherit;True;Spherical;World;True;Blue_Normal;_Blue_Normal;white;8;None;Mid Texture 7;_MidTexture7;white;-1;None;Bot Texture 7;_BotTexture7;white;-1;None;Triplanar Sampler;Tangent;10;0;SAMPLER2D;;False;5;FLOAT;1;False;1;SAMPLER2D;;False;6;FLOAT;0;False;2;SAMPLER2D;;False;7;FLOAT;0;False;9;FLOAT3;0,0,0;False;8;FLOAT;1;False;3;FLOAT2;1,1;False;4;FLOAT;1;False;5;FLOAT3;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.RangedFloatNode;181;1881.396,1179.166;Inherit;False;Constant;_Normal_Mask_Str;Normal_Mask_Str;14;0;Create;True;0;0;0;False;0;False;0.5;0;0;0;0;1;FLOAT;0
+Node;AmplifyShaderEditor.RangedFloatNode;171;1269.755,1194.196;Inherit;False;Property;_TerrainLight_Str;_TerrainLight_Str;14;1;[Header];Create;True;1;Light;0;0;False;0;False;23.45971;0;0;30;0;1;FLOAT;0
 WireConnection;122;0;135;0
 WireConnection;122;1;14;0
 WireConnection;122;2;129;0
@@ -4023,4 +4023,4 @@ WireConnection;218;3;216;0
 WireConnection;217;8;98;0
 WireConnection;217;3;216;0
 ASEEND*/
-//CHKSM=380474B82578D06ED002B3424EFD3ED644A5CB0A
+//CHKSM=B0A30C5452F23EE67D0AB5AE18FB18F93E4498BF
