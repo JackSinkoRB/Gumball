@@ -32,6 +32,7 @@ namespace Gumball
             {
                 responsibleForVignette = true;
                 PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+                ScreenBlur.Show(true);
             }
             
             //disable all the sub menus instantly in case they were left open to prevent popping
@@ -48,8 +49,12 @@ namespace Gumball
             
             base.OnHide();
 
-            if (responsibleForVignette && PanelManager.PanelExists<VignetteBackgroundPanel>() && PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing)
-                PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
+            if (responsibleForVignette)
+            {
+                if (PanelManager.PanelExists<VignetteBackgroundPanel>() && PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing)
+                    PanelManager.GetPanel<VignetteBackgroundPanel>().Hide();
+                ScreenBlur.Show(false);
+            }
         }
 
         public void OpenSubMenu(SettingsSubMenu subMenu)
