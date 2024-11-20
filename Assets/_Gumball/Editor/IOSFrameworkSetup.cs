@@ -44,6 +44,13 @@ namespace Gumball.Editor
             {
                 string frameworkName = framework + ".xcframework";
                 string src = Path.Combine("Pods", framework, "XCFrameworks", frameworkName);
+                
+                if (project.ContainsFileByProjectPath(src))
+                {
+                    Debug.Log($"[IOS Framework Setup] {framework} already exists in project. Skipping.");
+                    continue; // Skip already added frameworks
+                }
+                
                 string frameworkPath = project.AddFile(src, src);
                 project.AddFileToBuild(mainTargetGuid, frameworkPath);
                 project.AddFileToEmbedFrameworks(mainTargetGuid, frameworkPath);
