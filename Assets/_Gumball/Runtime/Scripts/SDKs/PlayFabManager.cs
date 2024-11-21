@@ -368,7 +368,7 @@ namespace Gumball
             
             GlobalLoggers.PlayFabLogger.Log("All files downloaded and replaced locally.");
 
-            CoroutineHelper.Instance.StartCoroutine(GameReloadManager.ReloadGame());
+            GameReloadManager.ReloadGame();
         }
         
         private static async Task DownloadFile(string downloadUrl, string localPath)
