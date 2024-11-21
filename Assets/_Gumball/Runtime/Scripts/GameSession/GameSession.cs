@@ -23,7 +23,17 @@ namespace Gumball
         public delegate void OnSessionEndDelegate(GameSession session, ProgressStatus progress);
         public static OnSessionEndDelegate onSessionEnd;
         
+        public static Action<GameSession> onSessionLoad;
         public static Action<GameSession> onSessionStart;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void RuntimeInitialise()
+        {
+            //reset
+            onSessionLoad = null;
+            onSessionStart = null;
+            onSessionEnd = null;
+        }
         
         public enum ProgressStatus
         {
@@ -416,6 +426,8 @@ namespace Gumball
                 InitialiseRaceMode();
             }
             
+            onSessionLoad?.Invoke(this);
+
             GlobalLoggers.LoadingLogger.Log("Loaded session");
 
             inProgress = true;
