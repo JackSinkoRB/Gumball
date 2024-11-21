@@ -3787,6 +3787,7 @@ MonoBehaviour:
     SnapBackStrength: 1
     previousPositions: []
     previousRotations: []
+  isInitialised: 0
 --- !u!1 &5034045259004981563
 GameObject:
   m_ObjectHideFlags: 0
@@ -4797,6 +4798,105 @@ Transform:
   - {fileID: 8527649079555453677}
   m_Father: {fileID: 2556014576999099256}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6988061643783170921
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4058192194905483861}
+  - component: {fileID: 8503669851415498299}
+  m_Layer: 0
+  m_Name: Wristwear
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4058192194905483861
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6988061643783170921}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1031853244338214227}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8503669851415498299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6988061643783170921}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b278a5552a427214189d9b738f524c6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  category: 2
+  displayName: Wristwear
+  icon: {fileID: 21300000, guid: d6a0bcfc2179117489220a082a34a4ce, type: 3}
+  defaultIndex: 0
+  cameraPosition: 0
+  avatarBelongsTo: {fileID: 0}
+  currentIndex: -1
+  items:
+  - prefab:
+      m_AssetGUID: 
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    icon: {fileID: 0}
+    mask: {fileID: 0}
+    addCopyPose: 0
+    footOffset:
+      IsUsed: 0
+      HeightOffset: 0
+      FootRotation: 0
+      BallRotation: 0
+    colorable:
+      isColorable: 0
+      defaultColorIndex: 0
+      colorMaterialProperties:
+        Value: []
+      materialNamesToIgnore:
+        Value: []
+      colors:
+        Value: []
+  - prefab:
+      m_AssetGUID: d52023da6df5b6e4ca04d8d8cceab3bc
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    icon: {fileID: 0}
+    mask: {fileID: 0}
+    addCopyPose: 0
+    footOffset:
+      IsUsed: 0
+      HeightOffset: 0
+      FootRotation: 0
+      BallRotation: 0
+    colorable:
+      isColorable: 0
+      defaultColorIndex: 0
+      colorMaterialProperties:
+        Value: []
+      materialNamesToIgnore:
+        Value: []
+      colors:
+        Value: []
+  maskProperty: 
+  currentItem: {fileID: 0}
+  currentColorIndex: -1
 --- !u!1 &7250615081419717836
 GameObject:
   m_ObjectHideFlags: 0
@@ -5423,6 +5523,7 @@ Transform:
   - {fileID: 5096568933455046929}
   - {fileID: 6039968261446040961}
   - {fileID: 4991210629981765939}
+  - {fileID: 4058192194905483861}
   m_Father: {fileID: 4940314657144353765}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8390066012147583378

@@ -295,6 +295,7 @@ namespace Gumball
         [Header("Collisions")]
         [SerializeField] private GameObject colliders;
         [SerializeField] private float collisionRecoverDuration = 1;
+        [SerializeField] private ImpactParticles impactParticlesPrefab;
         [Space(5)]
         [SerializeField, ReadOnly] private List<AICar> collisions = new();
         [SerializeField, ReadOnly] private bool isPushingAnotherRacer;
@@ -791,18 +792,21 @@ namespace Gumball
             const float maxVerticalVelocity = 0.1f;
             if (Rigidbody.velocity.y > maxVerticalVelocity)
                 Rigidbody.velocity = Rigidbody.velocity.SetY(maxVerticalVelocity);
-            
+
+            if (impactParticlesPrefab != null)
+            {
+                ImpactParticles instance = impactParticlesPrefab.gameObject.GetSpareOrCreate<ImpactParticles>(transform, rotation: Quaternion.Euler(Vector3.up));
+                instance.transform.position = collision.GetContact(0).point;
+            }
+
             AICar car = collision.gameObject.GetComponent<AICar>();
-            if (car == null)
-                return;
-
-            CheckIfCollidedWithRacer(car, true);
-
-            GlobalLoggers.AICarLogger.Log($"{gameObject.name} collided with {collision.gameObject.name}");
-
-            timeOfLastCollision = Time.time; //reset collision time
-
-            collisions.Add(car);
+            if (car != null)
+            {
+                GlobalLoggers.AICarLogger.Log($"{gameObject.name} collided with {car.gameObject.name}");
+                CheckIfCollidedWithRacer(car, true);
+                timeOfLastCollision = Time.time; //reset collision time
+                collisions.Add(car);
+            }
         }
 
         private void OnCollisionExit(Collision collision)
