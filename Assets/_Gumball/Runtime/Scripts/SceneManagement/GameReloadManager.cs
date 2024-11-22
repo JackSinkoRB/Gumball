@@ -9,11 +9,11 @@ namespace Gumball
     public static class GameReloadManager
     {
 
-        public static IEnumerator ReloadGame()
+        public static void ReloadGame()
         {
             DestroyAllInDontDestroyOnLoad();
             
-            yield return Addressables.LoadSceneAsync(SceneManager.BootSceneAddress, LoadSceneMode.Single, true);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManager.BootSceneName, LoadSceneMode.Single);
         }
         
         public static void DestroyAllInDontDestroyOnLoad()
