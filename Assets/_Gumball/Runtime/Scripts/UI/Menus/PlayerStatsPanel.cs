@@ -6,11 +6,6 @@ namespace Gumball
 {
     public class PlayerStatsPanel : AnimatedPanel
     {
-        
-        public void OnClickDriveButton()
-        {
-            MapSceneManager.LoadMapScene();
-        }
 
         public void OnClickSettingsButton()
         {
