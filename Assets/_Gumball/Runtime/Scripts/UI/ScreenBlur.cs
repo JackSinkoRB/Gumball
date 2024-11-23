@@ -81,7 +81,7 @@ namespace Gumball
 
         internal abstract class BlurPass : ScriptableRenderPass, IDisposable
         {
-            public FastBlurSettings blurSettings { get; set; }
+            public FastBlurSettings blurSettings { get; set; } = new();
             public RenderTargetIdentifier colorSource { get; set; }
 
             public virtual void Dispose()
@@ -91,16 +91,15 @@ namespace Gumball
 
         internal class BlurPassStandard : BlurPass
         {
-            Material blurMat => blurSettings.BlurMat;
+            private Material blurMat => blurSettings.BlurMat;
 
+            private RenderTargetHandle tempTexture;
+            private RenderTexture BlurTexture;
 
-            RenderTargetHandle tempTexture;
-            RenderTexture BlurTexture;
-
-            int blurIterations => (int)blurSettings.Radius;
-            RenderTextureDescriptor renderTextureDescriptor1;
-            Resolution downScaledResolution;
-            bool isScene = false;
+            private int blurIterations => (int)blurSettings.Radius;
+            private RenderTextureDescriptor renderTextureDescriptor1;
+            private Resolution downScaledResolution;
+            private bool isScene = false;
 
             public BlurPassStandard(RenderTextureDescriptor renderTextureDescriptor, bool isScene = false)
             {
@@ -217,9 +216,9 @@ namespace Gumball
             }
         }
 
-        void CreateMat()
+        private void CreateMat()
         {
-            var shader = Shader.Find("hidden/FastBlur");
+            Shader shader = Shader.Find("hidden/FastBlur");
             if (shader == null)
             {
                 Debug.LogWarning("Cannot find hidden/FastBlur shader!");
@@ -229,11 +228,18 @@ namespace Gumball
             Settings.BlurMat = CoreUtils.CreateEngineMaterial(shader);
         }
 
-        BlurPass pass = null;
+        private BlurPass pass = null;
 #if UNITY_EDITOR
-        BlurPass sceneview_pass = null;
+        private BlurPass sceneview_pass = null;
 #endif
-        public FastBlurSettings Settings = FastBlurSettings.Default;
+        public FastBlurSettings Settings = new()
+        {
+            BlurMat = null,
+            Radius = 32,
+            RenderQueue = RenderPassEvent.AfterRenderingTransparents,
+            QueueOffset = 0,
+            ShowBlurredTexture = false,
+        };
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
         {
@@ -257,12 +263,14 @@ namespace Gumball
                     pass = currentPass;
                 }
 #else
+                currentPass = new BlurPassStandard(renderingData.cameraData.cameraTargetDescriptor, false);
                 pass = currentPass;
 #endif
                 CreateMat();
             }
 
             currentPass.blurSettings = Settings;
+
             if (Settings.BlurMat == null)
             {
                 CreateMat();
@@ -329,14 +337,5 @@ namespace Gumball
         public bool ShowBlurredTexture;
 
         internal Material BlurMat { get; set; }
-
-        public static FastBlurSettings Default => new()
-        {
-            BlurMat = null,
-            Radius = 32,
-            RenderQueue = RenderPassEvent.AfterRenderingTransparents,
-            QueueOffset = 0,
-            ShowBlurredTexture = false,
-        };
     }
 }
