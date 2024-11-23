@@ -793,7 +793,7 @@ namespace Gumball
             if (Rigidbody.velocity.y > maxVerticalVelocity)
                 Rigidbody.velocity = Rigidbody.velocity.SetY(maxVerticalVelocity);
 
-            if (impactParticlesPrefab != null)
+            if (impactParticlesPrefab != null && GameSessionManager.ExistsRuntime && GameSessionManager.Instance.CurrentSession != null && GameSessionManager.Instance.CurrentSession.HasLoaded)
             {
                 ImpactParticles instance = impactParticlesPrefab.gameObject.GetSpareOrCreate<ImpactParticles>(transform, rotation: Quaternion.Euler(Vector3.up));
                 instance.transform.position = collision.GetContact(0).point;

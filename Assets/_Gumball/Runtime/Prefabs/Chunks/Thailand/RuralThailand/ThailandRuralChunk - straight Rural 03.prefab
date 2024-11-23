@@ -6698,7 +6698,6 @@ MonoBehaviour:
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 30
   nextRacingLineInterpolateDistance: 65
-  terrainHighLODDistance: 500
   currentTerrainLOD: 1
   currentChildMeshLOD: 0
   terrainHighLOD: {fileID: 8824554420251297338}
@@ -11701,9 +11700,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   driveOnLeft: 1
   racingLines: []
-  speedLimitKmh: 60
-  lanesForward: []
-  lanesBackward: []
+  speedLimitKmh: 100
+  lanesForward:
+  - type: 0
+    distanceFromCenter: -7.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: -12.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  lanesBackward:
+  - type: 0
+    distanceFromCenter: 7.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: 12.5
+    path: {fileID: 0}
+    vehicleTypes: -1
   chunk: {fileID: 6860265999645676851}
 --- !u!1 &8738830741209872534
 GameObject:
@@ -30599,7 +30614,7 @@ PrefabInstance:
     - target: {fileID: 8260593707156016995, guid: 84e40955feed4654c910544e51629cf2,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: 1.3837891
+      value: 1.3828125
       objectReference: {fileID: 0}
     - target: {fileID: 8260593707156016995, guid: 84e40955feed4654c910544e51629cf2,
         type: 3}
@@ -30634,7 +30649,7 @@ PrefabInstance:
     - target: {fileID: 8972480391998195715, guid: 84e40955feed4654c910544e51629cf2,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.3837891
+      value: 1.3828125
       objectReference: {fileID: 0}
     - target: {fileID: 8972480391998195715, guid: 84e40955feed4654c910544e51629cf2,
         type: 3}
@@ -32631,7 +32646,7 @@ PrefabInstance:
     - target: {fileID: 11483249568462206, guid: 5176839eae4b283418303e7069cd514a,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.14648438
+      value: 0.14746094
       objectReference: {fileID: 0}
     - target: {fileID: 11483249568462206, guid: 5176839eae4b283418303e7069cd514a,
         type: 3}
@@ -32696,7 +32711,7 @@ PrefabInstance:
     - target: {fileID: 9143257221526320955, guid: 5176839eae4b283418303e7069cd514a,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: 0.14648438
+      value: 0.14746094
       objectReference: {fileID: 0}
     - target: {fileID: 9143257221526320955, guid: 5176839eae4b283418303e7069cd514a,
         type: 3}
@@ -47636,7 +47651,7 @@ PrefabInstance:
     - target: {fileID: 1775974906720877164, guid: 69d1b79a78e26b04a81c24f4c64b52a7,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: 1.2880859
+      value: 1.2871094
       objectReference: {fileID: 0}
     - target: {fileID: 1775974906720877164, guid: 69d1b79a78e26b04a81c24f4c64b52a7,
         type: 3}
@@ -47676,7 +47691,7 @@ PrefabInstance:
     - target: {fileID: 9170745452097778764, guid: 69d1b79a78e26b04a81c24f4c64b52a7,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.2880859
+      value: 1.2871094
       objectReference: {fileID: 0}
     - target: {fileID: 9170745452097778764, guid: 69d1b79a78e26b04a81c24f4c64b52a7,
         type: 3}

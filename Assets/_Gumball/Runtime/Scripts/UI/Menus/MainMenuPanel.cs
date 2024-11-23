@@ -16,6 +16,11 @@ namespace Gumball
 
             RefreshChallengesNotification();
         }
+        
+        public void OnClickDriveButton()
+        {
+            MapSceneManager.LoadMapScene();
+        }
 
         public void OnClickChallengesButton()
         {
