@@ -3470,7 +3470,6 @@ MonoBehaviour:
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 30
   nextRacingLineInterpolateDistance: 65
-  terrainHighLODDistance: 500
   currentTerrainLOD: 1
   currentChildMeshLOD: 0
   terrainHighLOD: {fileID: 5641801559352306413}
@@ -18193,9 +18192,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   driveOnLeft: 1
   racingLines: []
-  speedLimitKmh: 60
-  lanesForward: []
-  lanesBackward: []
+  speedLimitKmh: 100
+  lanesForward:
+  - type: 0
+    distanceFromCenter: -7.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: -12.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  lanesBackward:
+  - type: 0
+    distanceFromCenter: 7.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: 12.5
+    path: {fileID: 0}
+    vehicleTypes: -1
   chunk: {fileID: 9125714472723058853}
 --- !u!1 &5641801559352306413
 GameObject:
@@ -18437,7 +18452,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 348316183fd855845981c1f379bf7b21, type: 2}
 --- !u!1 &9216589891493637476
