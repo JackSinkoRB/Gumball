@@ -15,18 +15,18 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 1
-  m_FogColor: {r: 0.4245283, g: 0.3569442, b: 0.26232645, a: 1}
+  m_FogColor: {r: 0, g: 0, b: 0, a: 1}
   m_FogMode: 1
   m_FogDensity: 0.21
-  m_LinearFogStart: 20
-  m_LinearFogEnd: 290.7
+  m_LinearFogStart: 2.7
+  m_LinearFogEnd: 196.72
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: ed4603b2a1c0cd04a8b1cf5e4a2073b7, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 3be34eea967cd0d43a29db144f6f00fe, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -151,8 +151,8 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 0.9339623, g: 0.7858472, b: 0.58592916, a: 1}
-  m_Intensity: 0.78
+  m_Color: {r: 0.8862745, g: 0.74354947, b: 0.62352943, a: 1}
+  m_Intensity: 0.2
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -210,13 +210,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 217043835}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.62713265, y: -0.62902266, z: 0.44668505, w: -0.107274175}
+  m_LocalRotation: {x: 0.78471315, y: -0.570605, z: 0.15040533, w: 0.18977234}
   m_LocalPosition: {x: -10.506461, y: 0.07614195, z: 59.96655}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 25.303, y: 129.737, z: 258.15}
+  m_LocalEulerAnglesHint: {x: 28, y: 178.736, z: 251.73001}
 --- !u!114 &217043838
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -240,7 +240,7 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
---- !u!1001 &1056449041
+--- !u!1001 &679855979
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -298,16 +298,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6727833139170012027, guid: 4cdc9bd8000fc744bb500ea48eac6628,
-        type: 3}
-      propertyPath: sharedProfile
-      value: 
-      objectReference: {fileID: 11400000, guid: db8325f67e6301249a3e5d6cfad07c18,
-        type: 2}
     - target: {fileID: 7765318077379117007, guid: 4cdc9bd8000fc744bb500ea48eac6628,
         type: 3}
       propertyPath: m_Name
       value: PostProcessing_Dusk_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 7765318077379117007, guid: 4cdc9bd8000fc744bb500ea48eac6628,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -433,4 +432,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 217043837}
   - {fileID: 2045996352}
-  - {fileID: 1056449041}
+  - {fileID: 679855979}
