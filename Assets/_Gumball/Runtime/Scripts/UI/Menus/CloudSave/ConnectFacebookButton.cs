@@ -10,7 +10,8 @@ namespace Gumball
     public class ConnectFacebookButton : MonoBehaviour
     {
 
-        [SerializeField] private Transform loggedInIcon;
+        [SerializeField] private Transform notSyncedHolder;
+        [SerializeField] private Transform syncedHolder;
 
         private MultiImageButton button => GetComponent<MultiImageButton>();
         
@@ -36,7 +37,8 @@ namespace Gumball
         private void Refresh()
         {
             button.interactable = !FB.IsLoggedIn;
-            loggedInIcon.gameObject.SetActive(FB.IsLoggedIn);
+            notSyncedHolder.gameObject.SetActive(!FB.IsLoggedIn);
+            syncedHolder.gameObject.SetActive(FB.IsLoggedIn);
         }
         
         private IEnumerator LoginWithFacebookIE()

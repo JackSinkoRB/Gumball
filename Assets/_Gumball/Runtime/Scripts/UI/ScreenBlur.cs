@@ -62,6 +62,8 @@ namespace Gumball
                     int desiredRadius = Mathf.CeilToInt(currentRadius);
                     SetRadius(desiredRadius);
                 });
+            
+            Debug.Log($"{(show ? "Showing" : "Hiding")} screen blur.");
         }
 
         private static void SetRadius(int radius)

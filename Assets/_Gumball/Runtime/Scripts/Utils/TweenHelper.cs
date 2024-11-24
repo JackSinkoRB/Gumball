@@ -26,6 +26,7 @@ namespace Gumball
         [SerializeField] private bool doScale;
 
         [ConditionalField(nameof(doScale)), SerializeField] private float scaleDuration;
+        [ConditionalField(nameof(doScale)), SerializeField] private float scaleDelay;
         [ConditionalField(nameof(doScale)), SerializeField, Range(0, 1)] private float scaleRandomisedDurationPercent = 0.1f;
         [ConditionalField(nameof(doScale)), SerializeField] private Vector3 scaleAmount;
         [ConditionalField(nameof(doScale)), SerializeField] private Ease scaleEase;
@@ -123,7 +124,7 @@ namespace Gumball
 
         private Tween GetScaleTween()
         {
-            Tween tween = transform.DOScale(defaultScale + scaleAmount, finalScaleDuration);
+            Tween tween = transform.DOScale(defaultScale + scaleAmount, finalScaleDuration).SetDelay(scaleDelay);
 
             tween.SetEase(scaleEase);
             return tween;
