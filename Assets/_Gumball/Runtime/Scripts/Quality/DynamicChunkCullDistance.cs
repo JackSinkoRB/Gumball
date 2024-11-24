@@ -31,6 +31,9 @@ namespace Gumball
         
         private static void Update()
         {
+            if (!GameLoaderSceneManager.HasLoaded)
+                return;
+            
             if (DynamicQualitySetting.UseDynamicQuality)
                 CalculateDistance();
             else

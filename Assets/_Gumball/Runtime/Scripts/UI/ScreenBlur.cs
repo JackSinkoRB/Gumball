@@ -43,8 +43,9 @@ namespace Gumball
         {
             //start disabled
             currentTween?.Kill();
-            currentRadius = 0;
-            SetRadius(0);
+            currentRadius = 1;
+            SetRadius(1);
+            Instance.SetActive(false);
         }
 
         public static void Show(bool show)
@@ -52,6 +53,9 @@ namespace Gumball
             const int radius = 10;
             const float showDuration = 0.1f;
             const float hideDuration = 0.2f;
+            
+            if (show)
+                Instance.SetActive(true);
             
             currentTween?.Kill();
             currentTween = DOTween.To(() => currentRadius, x => currentRadius = x, show ? radius : 0, show ? showDuration : hideDuration)
@@ -62,6 +66,8 @@ namespace Gumball
                     int desiredRadius = Mathf.CeilToInt(currentRadius);
                     SetRadius(desiredRadius);
                 });
+            
+            Debug.Log($"{(show ? "Showing" : "Hiding")} screen blur.");
         }
 
         private static void SetRadius(int radius)
