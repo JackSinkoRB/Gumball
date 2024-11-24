@@ -165,7 +165,10 @@ namespace Gumball
             DecalStateManager.ClearHistory();
 
             //need to wait for the texture to fully apply before removing paintable components
-            yield return null;
+            if (Application.isBatchMode)
+                yield return null; //WaitForEndOfFrame won't work during tests
+            else
+                yield return new WaitForEndOfFrame();
             
             //restore
             currentCar.gameObject.SetActive(wasActiveBefore);
