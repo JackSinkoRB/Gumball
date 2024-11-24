@@ -6188,7 +6188,6 @@ MonoBehaviour:
   customLoadDistance: 3000
   distanceFromRoadSplineToResetPlayer: 30
   nextRacingLineInterpolateDistance: 65
-  terrainHighLODDistance: 500
   currentTerrainLOD: 1
   currentChildMeshLOD: 0
   terrainHighLOD: {fileID: 5292397578663628735}
@@ -11850,9 +11849,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   driveOnLeft: 1
   racingLines: []
-  speedLimitKmh: 60
-  lanesForward: []
-  lanesBackward: []
+  speedLimitKmh: 100
+  lanesForward:
+  - type: 0
+    distanceFromCenter: -7.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: -12.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  lanesBackward:
+  - type: 0
+    distanceFromCenter: 7.5
+    path: {fileID: 0}
+    vehicleTypes: -1
+  - type: 0
+    distanceFromCenter: 12.5
+    path: {fileID: 0}
+    vehicleTypes: -1
   chunk: {fileID: 6860265999645676851}
 --- !u!1 &7920810606851003831
 GameObject:
@@ -29693,7 +29708,7 @@ PrefabInstance:
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.001953125
+      value: 0.0009765625
       objectReference: {fileID: 0}
     - target: {fileID: 2949925419975290807, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -29748,7 +29763,7 @@ PrefabInstance:
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: 0.001953125
+      value: 0.0009765625
       objectReference: {fileID: 0}
     - target: {fileID: 6494081511701928529, guid: 526eea43c55576441b07b0004c5a85dd,
         type: 3}
@@ -48573,7 +48588,7 @@ PrefabInstance:
     - target: {fileID: 1775974906720877164, guid: 69d1b79a78e26b04a81c24f4c64b52a7,
         type: 3}
       propertyPath: lastKnownPositionWhenGrounded.y
-      value: 1.2880859
+      value: 1.2871094
       objectReference: {fileID: 0}
     - target: {fileID: 1775974906720877164, guid: 69d1b79a78e26b04a81c24f4c64b52a7,
         type: 3}
@@ -48608,7 +48623,7 @@ PrefabInstance:
     - target: {fileID: 9170745452097778764, guid: 69d1b79a78e26b04a81c24f4c64b52a7,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.2880859
+      value: 1.2871094
       objectReference: {fileID: 0}
     - target: {fileID: 9170745452097778764, guid: 69d1b79a78e26b04a81c24f4c64b52a7,
         type: 3}
