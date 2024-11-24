@@ -56,7 +56,7 @@ namespace Gumball
                 numberOfRows = Mathf.CeilToInt((float)transform.childCount / numberOfColumns);
 
                 //don't let it overlap
-                float maxElementSizePercent = 1f / numberOfRows;
+                float maxElementSizePercent = fitVertical ? 1 : 1f / numberOfRows;
                 if (elementSizeAsPercent > maxElementSizePercent)
                     elementSizeAsPercent = maxElementSizePercent;
             }
@@ -67,7 +67,7 @@ namespace Gumball
                 numberOfColumns = Mathf.CeilToInt((float)transform.childCount / numberOfRows);
                 
                 //don't let it overlap
-                float maxElementSizePercent = 1f / numberOfColumns;
+                float maxElementSizePercent = fitHorizontal ? 1 : 1f / numberOfColumns;
                 if (elementSizeAsPercent > maxElementSizePercent)
                     elementSizeAsPercent = maxElementSizePercent;
             }
