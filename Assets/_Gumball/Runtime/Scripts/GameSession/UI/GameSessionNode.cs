@@ -39,10 +39,10 @@ namespace Gumball
                 if (Cheats.AllSessionsAreUnlocked)
                     return true;
                 
-                if (requiredSessionNode != null && requiredSessionNode.gameSession.Progress != GameSession.ProgressStatus.COMPLETE)
+                if (requiredSessionNode != null && requiredSessionNode.gameSession.SavedProgress != GameSession.ProgressStatus.COMPLETE)
                     return false;
                 
-                if (requiredSession != null && requiredSession.Progress != GameSession.ProgressStatus.COMPLETE)
+                if (requiredSession != null && requiredSession.SavedProgress != GameSession.ProgressStatus.COMPLETE)
                     return false;
 
                 if (requireFans && FollowersManager.CurrentFollowers < fansRequired)

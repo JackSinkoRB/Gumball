@@ -95,9 +95,9 @@ namespace Gumball.Runtime.Tests
             Assert.AreEqual(ExperienceManager.Instance.Levels[3].XPRequired - difference, ExperienceManager.RemainingXPForNextLevel);
         }
 
-        [Test]
+        [UnityTest]
         [Order(5)]
-        public void GivePremiumCurrencyOnLevelUp()
+        public IEnumerator GivePremiumCurrencyOnLevelUp()
         {
             //initialise reward
             const int levelToTest = 1;
@@ -108,7 +108,10 @@ namespace Gumball.Runtime.Tests
             ExperienceManager.SetLevel(0);
 
             int premiumFundsBefore = Currency.Premium.Funds;
-            ExperienceManager.AddXP(ExperienceManager.RemainingXPForNextLevel);
+            
+            Rewards xpAsReward = new Rewards(xp: ExperienceManager.RemainingXPForNextLevel);
+            yield return xpAsReward.GiveRewards(false);
+
             int expectedPremiumCoinsAfter = premiumFundsBefore + premiumCurrencyToGive;
 
             Assert.AreEqual(expectedPremiumCoinsAfter, Currency.Premium.Funds);
@@ -117,9 +120,9 @@ namespace Gumball.Runtime.Tests
             ExperienceManager.Instance.Levels[levelToTest].Rewards.SetPremiumCurrencyReward(previousPremiumCurrencyReward);
         }
         
-        [Test]
+        [UnityTest]
         [Order(6)]
-        public void GivePremiumCurrencyOnMultipleLevelUp()
+        public IEnumerator GivePremiumCurrencyOnMultipleLevelUp()
         {
             const int startingLevelIndex = 0;
             const int desiredLevelIndex = 3;
@@ -129,7 +132,8 @@ namespace Gumball.Runtime.Tests
             int premiumFundsBefore = Currency.Premium.Funds;
             
             int xpRequired = ExperienceManager.GetXPRequiredForLevel(desiredLevelIndex) - ExperienceManager.TotalXP;
-            ExperienceManager.AddXP(xpRequired);
+            Rewards xpAsReward = new Rewards(xp: xpRequired);
+            yield return xpAsReward.GiveRewards(false);
 
             int expectedPremiumFundsAfter = premiumFundsBefore;
             for (int level = startingLevelIndex; level <= desiredLevelIndex; level++)
@@ -154,8 +158,9 @@ namespace Gumball.Runtime.Tests
             FuelManager.Instance.SetFuel(0);
             ExperienceManager.SetLevel(0);
 
-            ExperienceManager.AddXP(ExperienceManager.RemainingXPForNextLevel);
-
+            Rewards xpAsReward = new Rewards(xp: ExperienceManager.RemainingXPForNextLevel);
+            yield return xpAsReward.GiveRewards(false);
+            
             Assert.AreEqual(FuelManager.Instance.MaxFuel, FuelManager.Instance.CurrentFuel);
 
             //reset

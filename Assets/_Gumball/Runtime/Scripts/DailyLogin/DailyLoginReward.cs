@@ -6,10 +6,10 @@ using UnityEngine;
 namespace Gumball
 {
     [Serializable]
-    public class DailyLoginReward
+    public abstract class DailyLoginReward
     {
 
 
-
+        
     }
 }

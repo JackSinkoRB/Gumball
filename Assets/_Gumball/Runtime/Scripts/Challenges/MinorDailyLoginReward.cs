@@ -12,6 +12,12 @@ namespace Gumball
         [SerializeField] private int standardCurrencyReward;
 
         public int StandardCurrencyReward => standardCurrencyReward;
+
+        public Rewards ToRewards()
+        {
+            Rewards rewards = new Rewards(standardCurrency: standardCurrencyReward);
+            return rewards;
+        }
         
     }
 }

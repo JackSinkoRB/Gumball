@@ -93,12 +93,7 @@ namespace Gumball
             onXPChange?.Invoke(previousXP, newXP);
             
             if (newLevel != previousLevel)
-            {
                 onLevelChange?.Invoke(previousLevel, newLevel);
-
-                if (newLevel > previousLevel)
-                    OnLevelUp(previousLevel, newLevel);
-            }
         }
 
         public static void AddXP(int xp)
@@ -155,6 +150,11 @@ namespace Gumball
             int index = GetLevelIndexFromTotalXP(totalXP);
             return Instance.levels[index]; //if totalXP exceeds all levels, return the max level
         }
+
+        public static PlayerLevel GetLevelFromIndex(int index)
+        {
+            return Instance.levels[index];
+        }
         
         public static int GetLevelIndexFromTotalXP(int totalXP)
         {
@@ -168,48 +168,6 @@ namespace Gumball
             
             return Instance.levels.Length - 1; //if totalXP exceeds all levels, return the max level
         }
-        
-        private static void OnLevelUp(int previousLevel, int newLevel)
-        {
-            CoroutineHelper.StartCoroutineOnCurrentScene(OnLevelUpIE(previousLevel, newLevel));
-        }
 
-        private static IEnumerator OnLevelUpIE(int previousLevel, int newLevel)
-        {
-            List<Unlockable> unlockables = new();
-            
-            //give rewards for all the levels in between INSTANTLY (so player doesn't quit and lose the rewards)
-            for (int level = previousLevel + 1; level <= newLevel; level++)
-            {
-                int levelIndex = level - 1;
-                CoroutineHelper.Instance.StartCoroutine(Instance.levels[levelIndex].Rewards.GiveRewards()); //should be instant 
-                
-                unlockables.AddRange(Instance.levels[levelIndex].Rewards.Unlockables);
-            }
-            
-            //show the level up panel with the rewards (just for the last level gained)
-            if (PanelManager.PanelExists<LevelUpPanel>())
-            {
-                PanelManager.GetPanel<LevelUpPanel>().Show();
-                
-                //populate level up panel with the rewards
-                PanelManager.GetPanel<LevelUpPanel>().Populate(Instance.levels[newLevel - 1]);
-
-                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
-            }
-            
-            //show unlocks
-            foreach (Unlockable unlockable in unlockables)
-            {
-                if (PanelManager.PanelExists<UnlockableAnnouncementPanel>())
-                {
-                    PanelManager.GetPanel<UnlockableAnnouncementPanel>().Show();
-                    PanelManager.GetPanel<UnlockableAnnouncementPanel>().Populate(unlockable);
-
-                    yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
-                }
-            }
-        }
-        
     }
 }
