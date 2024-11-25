@@ -27,6 +27,18 @@ namespace Gumball
         public int PremiumCurrency => premiumCurrency;
         public Unlockable[] Unlockables => unlockables;
         public BlueprintReward[] Blueprints => blueprints;
+
+        public Rewards(int xp = 0, int standardCurrency = 0, int premiumCurrency = 0, bool fuelRefill = false, CorePart[] coreParts = null, SubPart[] subParts = null, Unlockable[] unlockables = null, BlueprintReward[] blueprints = null)
+        {
+            this.xp = xp;
+            this.standardCurrency = standardCurrency;
+            this.premiumCurrency = premiumCurrency;
+            this.fuelRefill = fuelRefill;
+            this.coreParts = coreParts ?? Array.Empty<CorePart>();
+            this.subParts = subParts ?? Array.Empty<SubPart>();
+            this.unlockables = unlockables ?? Array.Empty<Unlockable>();
+            this.blueprints = blueprints ?? Array.Empty<BlueprintReward>();
+        }
         
 #if UNITY_EDITOR
         public void SetPremiumCurrencyReward(int amount)
@@ -40,43 +52,19 @@ namespace Gumball
         }
 #endif
         
-        public IEnumerator GiveRewards()
+        public IEnumerator GiveRewards(bool showUI = true)
         {
-            bool startedShowingVignette = false;
-            if ((PanelManager.PanelExists<VignetteBackgroundPanel>() && !PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing) 
-                && (!PanelManager.PanelExists<EndOfSessionVignetteBackgroundPanel>() || !PanelManager.GetPanel<EndOfSessionVignetteBackgroundPanel>().IsShowing))
-            {
-                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
-                startedShowingVignette = true;
-            }
-
             //give XP
             if (xp > 0)
-            {
-                int currentXP = ExperienceManager.TotalXP;
-                int newXP = ExperienceManager.TotalXP + xp;
-                
-                if (PanelManager.PanelExists<XPGainedPanel>())
-                {
-                    PanelManager.GetPanel<XPGainedPanel>().Show();
-                    PanelManager.GetPanel<XPGainedPanel>().Initialise(currentXP, newXP);
-                    
-                    yield return new WaitUntil(() => !PanelManager.PanelExists<XPGainedPanel>() || (!PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning));
-                }
-
                 ExperienceManager.AddXP(xp); //add XP after in case there's a level up
-                
-                yield return new WaitUntil(() => (!PanelManager.PanelExists<LevelUpPanel>() || (!PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning))
-                                                 && (!PanelManager.PanelExists<UnlockableAnnouncementPanel>() || (!PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning)));
-            }
 
             //give standard currency
             if (standardCurrency > 0)
-                RewardManager.GiveStandardCurrency(standardCurrency);
+                Currency.Standard.AddFunds(standardCurrency);
 
             //give premium currency
             if (premiumCurrency > 0)
-                RewardManager.GivePremiumCurrency(premiumCurrency);
+                Currency.Premium.AddFunds(premiumCurrency);
 
             //replenish fuel
             if (fuelRefill)
@@ -88,7 +76,7 @@ namespace Gumball
                 foreach (CorePart corePartReward in coreParts)
                 {
                     if (!corePartReward.IsUnlocked)
-                        RewardManager.GiveReward(corePartReward);
+                        corePartReward.SetUnlocked(true);
                 }
             }
 
@@ -98,7 +86,7 @@ namespace Gumball
                 foreach (SubPart subPartReward in subParts)
                 {
                     if (!subPartReward.IsUnlocked)
-                        RewardManager.GiveReward(subPartReward);
+                        subPartReward.SetUnlocked(true);
                 }
             }
             
@@ -111,13 +99,62 @@ namespace Gumball
                 blueprintReward.GiveReward();
             
             //show the reward panel with queued rewards
-            if (PanelManager.PanelExists<RewardPanel>() && PanelManager.GetPanel<RewardPanel>().PendingRewards > 0)
+            if (showUI)
+                yield return ShowQueuedRewardUI();
+        }
+
+        /// <summary>
+        /// The rewards can be shown if they have been previously queued but the UI hasn't been shown yet.
+        /// </summary>
+        public IEnumerator ShowQueuedRewardUI()
+        {
+            bool startedShowingVignette = false;
+            if ((PanelManager.PanelExists<VignetteBackgroundPanel>() && !PanelManager.GetPanel<VignetteBackgroundPanel>().IsShowing) 
+                && (!PanelManager.PanelExists<EndOfSessionVignetteBackgroundPanel>() || !PanelManager.GetPanel<EndOfSessionVignetteBackgroundPanel>().IsShowing))
             {
-                PanelManager.GetPanel<RewardPanel>().Show();
+                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
+                startedShowingVignette = true;
+            }
+
+            //do XP
+            if (xp > 0 && PanelManager.PanelExists<XPGainedPanel>())
+            {
+                int previousXP = ExperienceManager.TotalXP - xp;
+                int currentXP = ExperienceManager.TotalXP;
+                PanelManager.GetPanel<XPGainedPanel>().Initialise(previousXP, currentXP);
+                PanelManager.GetPanel<XPGainedPanel>().Show();
+
+                yield return new WaitUntil(() => !PanelManager.PanelExists<XPGainedPanel>() || (!PanelManager.GetPanel<XPGainedPanel>().IsShowing && !PanelManager.GetPanel<XPGainedPanel>().IsTransitioning));
+
+                int previousLevelIndex = ExperienceManager.GetLevelIndexFromTotalXP(previousXP);
+                int currentLevelIndex = ExperienceManager.GetLevelIndexFromTotalXP(currentXP);
+
+                if (previousLevelIndex != currentLevelIndex)
+                    yield return OnLevelUp(previousLevelIndex, currentLevelIndex);
+            }
+            
+            //do unlocks
+            if (PanelManager.PanelExists<UnlockableAnnouncementPanel>())
+            {
+                foreach (Unlockable unlockable in unlockables)
+                {
+                    PanelManager.GetPanel<UnlockableAnnouncementPanel>().Show();
+                    PanelManager.GetPanel<UnlockableAnnouncementPanel>().Populate(unlockable);
+
+                    yield return new WaitUntil(() => !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsShowing && !PanelManager.GetPanel<UnlockableAnnouncementPanel>().IsTransitioning);
+                }
+            }
+
+            //do rewards
+            if (PanelManager.PanelExists<RewardPanel>())
+            {
+                PanelManager.GetPanel<RewardPanel>().Initialise(this);
+                if (PanelManager.GetPanel<RewardPanel>().HasRewards)
+                    PanelManager.GetPanel<RewardPanel>().Show();
 
                 yield return new WaitUntil(() => !PanelManager.PanelExists<RewardPanel>() || !PanelManager.GetPanel<RewardPanel>().IsShowing);
             }
-
+            
             if (startedShowingVignette && PanelManager.PanelExists<VignetteBackgroundPanel>())
             {
                 if (PanelManager.PanelExists<VignetteBackgroundPanel>())
@@ -126,6 +163,26 @@ namespace Gumball
                     PanelManager.GetPanel<EndOfSessionVignetteBackgroundPanel>().Hide();
             }
         }
-        
+
+        private IEnumerator OnLevelUp(int previousLevelIndex, int newLevelIndex)
+        {
+            //show the level up panel with the rewards (just for the last level gained)
+            if (PanelManager.PanelExists<LevelUpPanel>())
+            {
+                PanelManager.GetPanel<LevelUpPanel>().Show();
+                
+                //populate level up panel with the rewards
+                PanelManager.GetPanel<LevelUpPanel>().Populate(ExperienceManager.GetLevelFromIndex(newLevelIndex));
+
+                yield return new WaitUntil(() => !PanelManager.GetPanel<LevelUpPanel>().IsShowing && !PanelManager.GetPanel<LevelUpPanel>().IsTransitioning);
+            }
+
+            for (int levelIndexToReward = previousLevelIndex + 1; levelIndexToReward <= newLevelIndex; levelIndexToReward++)
+            {
+                PlayerLevel level = ExperienceManager.GetLevelFromIndex(levelIndexToReward);
+                yield return level.Rewards.GiveRewards(); 
+            }
+        }
+
     }
 }

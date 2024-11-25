@@ -88,7 +88,10 @@ namespace Gumball
         [SerializeField, ConditionalField(nameof(trafficIsProcedural), true)] private CollectionWrapperTrafficSpawnPosition trafficSpawnPositions;
 
         [Header("Rewards")]
+        [Tooltip("The rewards that are given to the player when all objectives are completed successfully for the first time.")]
         [SerializeField] private Rewards rewards;
+        [Tooltip("The rewards that are given to the player for completing a session, but without completing all objectives successfully.")]
+        [SerializeField] private Rewards rewardsForTrying;
 
         [Header("Challenges")]
         [SerializeField] private Challenge[] subObjectives = Array.Empty<Challenge>();
@@ -110,10 +113,15 @@ namespace Gumball
         private DrivingCameraController drivingCameraController => ChunkMapSceneManager.Instance.DrivingCameraController;
 
         public ProgressStatus LastProgress { get; private set; }
-        public ProgressStatus Progress
+        public ProgressStatus SavedProgress
         {
             get => DataManager.GameSessions.Get($"SessionStatus.{ID}", ProgressStatus.NOT_ATTEMPTED);
             private set => DataManager.GameSessions.Set($"SessionStatus.{ID}", value);
+        }
+        public int TimesCompletedSuccessfully
+        {
+            get => DataManager.GameSessions.Get($"TimesCompletedSuccessfully.{ID}", 0);
+            private set => DataManager.GameSessions.Set($"TimesCompletedSuccessfully.{ID}", value);
         }
 
         public Challenge[] SubObjectives => subObjectives;
@@ -126,6 +134,7 @@ namespace Gumball
         public float RaceDistanceMetres => raceDistanceMetres;
         public GenericDictionary<AICar, RacerSessionData> CurrentRacers => currentRacers;
         public Rewards Rewards => rewards;
+        public Rewards RewardsForTrying => rewardsForTrying;
         public bool HasLoaded { get; private set; }
         public bool HasStarted { get; private set; }
         public bool TrafficIsProcedural => trafficIsProcedural;
@@ -329,13 +338,30 @@ namespace Gumball
             
             GlobalLoggers.GameSessionLogger.Log($"Ended {name} ({displayName}).");
 
-            if (Progress != ProgressStatus.COMPLETE && progress == ProgressStatus.COMPLETE)
+            if (progress == ProgressStatus.COMPLETE)
             {
-                OnCompleteSessionForFirstTime();
+                if (TimesCompletedSuccessfully == 0) //first time completing successfully
+                    SavedProgress = ProgressStatus.COMPLETE;
+
+                TimesCompletedSuccessfully++;
+
+                CoroutineHelper.StartCoroutineOnCurrentScene(rewards.GiveRewards(false));
+                
+                if (!postSessionDialogue.HasBeenCompleted)
+                {
+                    CoroutineHelper.PerformAfterTrue(
+                        () => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MapSceneName) && !PanelManager.GetPanel<LoadingPanel>().IsShowing,
+                        () => postSessionDialogue.Play());
+                }
             }
             else
             {
-                OnFailMission();
+                LastProgress = ProgressStatus.ATTEMPTED;
+                
+                CoroutineHelper.StartCoroutineOnCurrentScene(rewardsForTrying.GiveRewards(false));
+
+                if (SavedProgress != ProgressStatus.COMPLETE) //don't override if already successful
+                    SavedProgress = LastProgress;
             }
 
             onSessionEnd?.Invoke(this, progress);
@@ -745,23 +771,5 @@ namespace Gumball
             return true;
         }
 
-        private void OnCompleteSessionForFirstTime()
-        {
-            GlobalLoggers.GameSessionLogger.Log($"Completed {name} ({displayName}) for the first time.");
-            Progress = ProgressStatus.COMPLETE;
-
-            if (!postSessionDialogue.HasBeenCompleted)
-            {
-                CoroutineHelper.PerformAfterTrue(
-                    () => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Equals(SceneManager.MapSceneName) && !PanelManager.GetPanel<LoadingPanel>().IsShowing,
-                    () => postSessionDialogue.Play());
-            }
-        }
-        
-        private void OnFailMission()
-        {
-            Progress = ProgressStatus.ATTEMPTED;
-        }
-        
     }
 }

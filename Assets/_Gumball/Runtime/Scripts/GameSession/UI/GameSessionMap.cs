@@ -28,7 +28,7 @@ namespace Gumball
         {
             foreach (GameSessionNode node in Nodes)
             {
-                if (node.GameSession.Progress != GameSession.ProgressStatus.COMPLETE)
+                if (node.GameSession.SavedProgress != GameSession.ProgressStatus.COMPLETE)
                     return false;
             }
 

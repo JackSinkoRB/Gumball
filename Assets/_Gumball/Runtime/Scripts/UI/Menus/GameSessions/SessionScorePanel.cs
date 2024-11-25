@@ -45,7 +45,11 @@ namespace Gumball
 
         private IEnumerator GiveRewardsThenExitIE()
         {
-            yield return GameSessionManager.Instance.CurrentSession.Rewards.GiveRewards();
+            bool completedFirstTime = GameSessionManager.Instance.CurrentSession.LastProgress == GameSession.ProgressStatus.COMPLETE && GameSessionManager.Instance.CurrentSession.TimesCompletedSuccessfully == 1;
+            Rewards rewards = completedFirstTime
+                ? GameSessionManager.Instance.CurrentSession.Rewards
+                : GameSessionManager.Instance.CurrentSession.RewardsForTrying;
+            yield return rewards.ShowQueuedRewardUI();
             
             //show the loading panel before unloading as unloading can take some time
             PanelManager.GetPanel<LoadingPanel>().Show();

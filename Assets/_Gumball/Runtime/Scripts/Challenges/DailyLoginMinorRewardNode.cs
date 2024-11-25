@@ -48,18 +48,7 @@ namespace Gumball
         
         protected override void GiveRewards()
         {
-            //give standard currency
-            if (reward.StandardCurrencyReward > 0)
-            {
-                PanelManager.GetPanel<VignetteBackgroundPanel>().Show();
-                
-                RewardManager.GiveStandardCurrency(reward.StandardCurrencyReward);
-                
-                PanelManager.GetPanel<RewardPanel>().Show();
-                this.PerformAfterTrue(
-                    () => !PanelManager.GetPanel<RewardPanel>().IsShowing, 
-                    () => PanelManager.GetPanel<VignetteBackgroundPanel>().Hide());
-            }
+            CoroutineHelper.StartCoroutineOnCurrentScene(reward.ToRewards().GiveRewards());
         }
 
         private void SetReward()
