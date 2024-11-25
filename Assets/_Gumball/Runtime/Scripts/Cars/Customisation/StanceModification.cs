@@ -209,7 +209,7 @@ namespace Gumball
         {
             MeshFilter wheelMesh = GetWheelMesh();
 
-            if (wheelMesh == null)
+            if (wheelMesh == null || wheelMesh.sharedMesh == null)
                 return;
 
             float biggestExtent = wheelMesh.sharedMesh.bounds.extents.x * wheelMesh.transform.lossyScale.x;
