@@ -42,7 +42,8 @@ namespace Gumball
         private void OnValidate()
         {
 #if UNITY_EDITOR
-            UpdateCachedData();
+            if (!Application.isBatchMode)
+                UpdateCachedData();
 #endif
         }
         

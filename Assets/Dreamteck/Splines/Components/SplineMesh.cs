@@ -31,7 +31,7 @@ namespace Dreamteck.Splines
             {
                 for (int j = 0; j < _channels[i].GetMeshCount(); j++)
                 {
-                    _channels[i].GetMesh(j).Refresh();
+                     _channels[i].GetMesh(j).Refresh();
                 }
             }
 #endif

@@ -1,17 +1,17 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using MyBox;
 using UnityEditor;
 using UnityEngine;
 
-namespace Gumball
+namespace Dreamteck.Splines
 {
     public static class MeshUtils
     {
 
 #if UNITY_EDITOR
-        public static void SetReadable(this Mesh mesh, bool readable = true)
+        public static void SetReadable(this Mesh mesh, bool readable = true, Action onComplete = null)
         {
             if (mesh == null)
                 return;
@@ -20,7 +20,7 @@ namespace Gumball
                 return; //is already set
             
             string assetPath = AssetDatabase.GetAssetPath(mesh);
-            if (assetPath.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(assetPath))
             {
                 Debug.LogError($"Cannot set mesh filter {mesh.name} readable, because the mesh isn't an asset.");
                 return;
@@ -48,7 +48,11 @@ namespace Gumball
             {
                 File.WriteAllLines(assetMetaPath, lines);
             
-                EditorApplication.delayCall += AssetDatabase.Refresh;
+                EditorApplication.delayCall += () =>
+                {
+                    AssetDatabase.Refresh();
+                    onComplete?.Invoke();
+                };
                 
                 Debug.Log($"Set mesh {mesh.name} readable ({readable}).");
             }

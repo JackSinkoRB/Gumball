@@ -72,6 +72,16 @@ namespace Gumball
 #if UNITY_EDITOR
         [Header("Testing")]
         [SerializeField] private ColourSwatch testSwatch;
+
+        private void OnValidate()
+        {
+            if (!Application.isPlaying && !Application.isBatchMode)
+            {
+                defaultSwatchIndex = Mathf.Clamp(defaultSwatchIndex, 0, GlobalPaintPresets.Instance.WheelSwatchPresets.Length - 1);
+                FindColourableParts();
+                ApplySwatch(GlobalPaintPresets.Instance.WheelSwatchPresets[defaultSwatchIndex]);
+            }
+        }
         
         [ButtonMethod]
         public void ApplyTestSwatch()
@@ -118,6 +128,9 @@ namespace Gumball
             
             foreach (MeshRenderer meshRenderer in colourableParts)
             {
+                if (meshRenderer == null || meshRenderer.sharedMaterial == null)
+                    continue;
+                
                 meshRenderer.sharedMaterial.SetColor(BaseColorShaderID, swatch.Color.ToColor());
                 meshRenderer.sharedMaterial.SetColor(SpecularShaderID, swatch.Specular.ToColor());
                 
@@ -126,7 +139,7 @@ namespace Gumball
                 meshRenderer.sharedMaterial.SetFloat(ClearCoatSmoothnessShaderID, swatch.ClearCoatSmoothness);
             }
 
-            if (carBelongsTo.IsPlayer)
+            if (carBelongsTo != null && carBelongsTo.IsPlayer)
                 SavedSwatch = swatch;
         }
 
@@ -192,6 +205,9 @@ namespace Gumball
         {
             foreach (MeshRenderer meshRenderer in colourableParts)
             {
+                if (meshRenderer == null || meshRenderer.sharedMaterial == null)
+                    continue;
+                
                 if (!meshRenderer.sharedMaterial.name.Contains("(Clone)"))
                     meshRenderer.sharedMaterial = Instantiate(meshRenderer.sharedMaterial);
             }
