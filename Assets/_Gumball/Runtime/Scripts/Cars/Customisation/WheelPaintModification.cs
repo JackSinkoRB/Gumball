@@ -72,6 +72,15 @@ namespace Gumball
 #if UNITY_EDITOR
         [Header("Testing")]
         [SerializeField] private ColourSwatch testSwatch;
+
+        private void OnValidate()
+        {
+            if (!Application.isPlaying)
+            {
+                defaultSwatchIndex = Mathf.Clamp(defaultSwatchIndex, 0, GlobalPaintPresets.Instance.WheelSwatchPresets.Length - 1);
+                ApplySwatch(GlobalPaintPresets.Instance.WheelSwatchPresets[defaultSwatchIndex]);
+            }
+        }
         
         [ButtonMethod]
         public void ApplyTestSwatch()
