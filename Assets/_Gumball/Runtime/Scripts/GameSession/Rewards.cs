@@ -21,12 +21,12 @@ namespace Gumball
         
         public int XP => xp;
         public int StandardCurrency => standardCurrency;
-        public CorePart[] CoreParts => coreParts;
-        public SubPart[] SubParts => subParts;
+        public CorePart[] CoreParts => coreParts ?? Array.Empty<CorePart>();
+        public SubPart[] SubParts => subParts ?? Array.Empty<SubPart>();
         public bool FuelRefill => fuelRefill;
         public int PremiumCurrency => premiumCurrency;
-        public Unlockable[] Unlockables => unlockables;
-        public BlueprintReward[] Blueprints => blueprints;
+        public Unlockable[] Unlockables => unlockables ?? Array.Empty<Unlockable>();
+        public BlueprintReward[] Blueprints => blueprints ?? Array.Empty<BlueprintReward>();
 
         public Rewards(int xp = 0, int standardCurrency = 0, int premiumCurrency = 0, bool fuelRefill = false, CorePart[] coreParts = null, SubPart[] subParts = null, Unlockable[] unlockables = null, BlueprintReward[] blueprints = null)
         {
