@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Dreamteck.Splines
 {
@@ -1108,13 +1111,16 @@ namespace Dreamteck.Splines
                         vertexGroups = new List<VertexGroup>();
                         return;
                     }
-                    
+      
+#if UNITY_EDITOR
+                    bool setReadable = false;
                     if (!_mesh.isReadable)
                     {
-                        Debug.LogWarning($"[SplineMesh] Mesh {_mesh} is not readable.");
-                        return;
+                        _mesh.SetReadable();
+                        setReadable = true;
                     }
-                    
+#endif
+
                     if (vertices.Length != _mesh.vertexCount) vertices = new Vector3[_mesh.vertexCount];
                     if (normals.Length != _mesh.normals.Length) normals = new Vector3[_mesh.normals.Length];
                     if (colors.Length != _mesh.colors.Length) colors = new Color[_mesh.colors.Length];
@@ -1158,6 +1164,11 @@ namespace Dreamteck.Splines
                     {
                         Debug.LogWarning($"The size of [{_mesh.name}]'s bounds is too small! This could cause an issue if the [Auto Count] option is enabled!");
                     }
+                    
+#if UNITY_EDITOR
+                    if (setReadable)
+                        EditorApplication.delayCall += () => _mesh.SetReadable(false);
+#endif
                 }
 
                 void RemoveInnerFaces()
