@@ -75,9 +75,10 @@ namespace Gumball
 
         private void OnValidate()
         {
-            if (!Application.isPlaying)
+            if (!Application.isPlaying && !Application.isBatchMode)
             {
                 defaultSwatchIndex = Mathf.Clamp(defaultSwatchIndex, 0, GlobalPaintPresets.Instance.WheelSwatchPresets.Length - 1);
+                FindColourableParts();
                 ApplySwatch(GlobalPaintPresets.Instance.WheelSwatchPresets[defaultSwatchIndex]);
             }
         }
@@ -127,6 +128,9 @@ namespace Gumball
             
             foreach (MeshRenderer meshRenderer in colourableParts)
             {
+                if (meshRenderer == null || meshRenderer.sharedMaterial == null)
+                    continue;
+                
                 meshRenderer.sharedMaterial.SetColor(BaseColorShaderID, swatch.Color.ToColor());
                 meshRenderer.sharedMaterial.SetColor(SpecularShaderID, swatch.Specular.ToColor());
                 
