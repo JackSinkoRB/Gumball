@@ -37,7 +37,7 @@ namespace Gumball
 
         private void Update()
         {
-            if (!Application.isPlaying)
+            if (!Application.isPlaying && !Application.isBatchMode)
                 Resize();
         }
         
