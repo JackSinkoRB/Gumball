@@ -68,7 +68,7 @@ namespace Gumball
         private void OnValidate()
         {
             //if application isn't playing, set all the default values on the car so it can be visualised
-            if (!Application.isPlaying && !EditorApplication.isUpdating && !EditorApplication.isCompiling)
+            if (!Application.isPlaying && !EditorApplication.isUpdating && !EditorApplication.isCompiling && !Application.isBatchMode)
                 ForceUpdateDefaultData();
         }
 
