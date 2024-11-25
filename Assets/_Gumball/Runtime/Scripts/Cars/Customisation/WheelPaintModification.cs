@@ -28,15 +28,25 @@ namespace Gumball
 
         [Header("Debugging")]
         [SerializeField, ReadOnly] private AICar carBelongsTo;
-        [SerializeField, ReadOnly] private MeshRenderer[] colourableParts;
-
+        [SerializeField, ReadOnly] private MeshRenderer[] colourablePartsCached;
+        
         private int wheelIndex;
         private WheelMesh wheelMesh => GetComponent<WheelMesh>();
         
         private string saveKey => $"{carBelongsTo.SaveKey}.Paint.Wheel.{wheelIndex}";
         
         public PaintMode CurrentPaintMode => GetSavedSwatchIndexInPresets() == -1 ? PaintMode.ADVANCED : PaintMode.SIMPLE;
-        public MeshRenderer[] ColourableParts => colourableParts;
+
+        public MeshRenderer[] ColourableParts
+        {
+            get
+            {
+                if (!Application.isPlaying || colourablePartsCached.IsNullOrEmpty())
+                    CacheColourableParts();
+                return colourablePartsCached;
+            }
+        }
+        
         public int DefaultSwatchIndex => defaultSwatchIndex;
         
         public ColourSwatchSerialized SavedSwatch
@@ -79,15 +89,13 @@ namespace Gumball
             if (carBelongsTo == null)
                 carBelongsTo = transform.GetComponentInAllParents<AICar>();
             
-            FindColourableParts();
             ApplySwatch(testSwatch);
         }
         
         [ButtonMethod]
         public void ClearTestSwatch()
         {
-            FindColourableParts();
-            foreach (MeshRenderer meshRenderer in colourableParts)
+            foreach (MeshRenderer meshRenderer in colourablePartsCached)
             {
                 meshRenderer.sharedMaterial = GlobalPaintPresets.Instance.DefaultWheelMaterial;
                 ColourSwatch defaultSwatch = GlobalPaintPresets.Instance.WheelSwatchPresets[defaultSwatchIndex];
@@ -99,9 +107,10 @@ namespace Gumball
         public void Initialise(AICar carBelongsTo)
         {
             this.carBelongsTo = carBelongsTo;
-            
+
+            CacheColourableParts();
+                
             wheelIndex = carBelongsTo.AllWheelMeshes.IndexOfItem(wheelMesh);
-            FindColourableParts();
 
             if (carBelongsTo.IsPlayer)
                 LoadFromSave();
@@ -116,7 +125,7 @@ namespace Gumball
         {
             EnsureMaterialIsCopy();
             
-            foreach (MeshRenderer meshRenderer in colourableParts)
+            foreach (MeshRenderer meshRenderer in ColourableParts)
             {
                 meshRenderer.sharedMaterial.SetColor(BaseColorShaderID, swatch.Color.ToColor());
                 meshRenderer.sharedMaterial.SetColor(SpecularShaderID, swatch.Specular.ToColor());
@@ -154,26 +163,6 @@ namespace Gumball
             
             return -1;
         }
-        
-        /// <summary>
-        /// Finds all the body parts and assigns a single material instance that can be modified.
-        /// </summary>
-        private void FindColourableParts()
-        {
-            List<MeshRenderer> meshRenderers = wheelMesh.Rim.transform.GetComponentsInAllChildren<MeshRenderer>();
-            HashSet<MeshRenderer> parts = new();
-            
-            foreach (MeshRenderer meshRenderer in meshRenderers)
-            {
-                if (meshRenderer.sharedMaterial == null)
-                    continue;
-                
-                parts.Add(meshRenderer);
-            }
-            
-            colourableParts = parts.ToArray();
-        }
-
         public void SetMaterialType(PaintMaterial.Type type)
         {
             //save to file
@@ -190,12 +179,28 @@ namespace Gumball
         /// </summary>
         private void EnsureMaterialIsCopy()
         {
-            foreach (MeshRenderer meshRenderer in colourableParts)
+            foreach (MeshRenderer meshRenderer in ColourableParts)
             {
                 if (!meshRenderer.sharedMaterial.name.Contains("(Clone)"))
                     meshRenderer.sharedMaterial = Instantiate(meshRenderer.sharedMaterial);
             }
         }
 
+        private void CacheColourableParts()
+        {
+            List<MeshRenderer> meshRenderers = wheelMesh.Rim.transform.GetComponentsInAllChildren<MeshRenderer>();
+            HashSet<MeshRenderer> parts = new();
+            
+            foreach (MeshRenderer meshRenderer in meshRenderers)
+            {
+                if (meshRenderer.sharedMaterial == null)
+                    continue;
+                
+                parts.Add(meshRenderer);
+            }
+            
+            colourablePartsCached = parts.ToArray();
+        }
+        
     }
 }
