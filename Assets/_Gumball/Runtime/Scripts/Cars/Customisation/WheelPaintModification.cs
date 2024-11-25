@@ -135,7 +135,7 @@ namespace Gumball
                 meshRenderer.sharedMaterial.SetFloat(ClearCoatSmoothnessShaderID, swatch.ClearCoatSmoothness);
             }
 
-            if (carBelongsTo.IsPlayer)
+            if (carBelongsTo != null && carBelongsTo.IsPlayer)
                 SavedSwatch = swatch;
         }
 
@@ -201,6 +201,9 @@ namespace Gumball
         {
             foreach (MeshRenderer meshRenderer in colourableParts)
             {
+                if (meshRenderer == null || meshRenderer.sharedMaterial == null)
+                    continue;
+                
                 if (!meshRenderer.sharedMaterial.name.Contains("(Clone)"))
                     meshRenderer.sharedMaterial = Instantiate(meshRenderer.sharedMaterial);
             }
