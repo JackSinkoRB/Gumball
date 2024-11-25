@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Assertions;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -1094,33 +1095,10 @@ namespace Dreamteck.Splines
                     Refresh();
                 }
 
-                public void Refresh()
+                private void RefreshMesh()
                 {
-                    if (_mesh == null)
-                    {
-                        vertices = new Vector3[0];
-                        normals = new Vector3[0];
-                        colors = new Color[0];
-                        uv = new Vector2[0];
-                        uv2 = new Vector2[0];
-                        uv3 = new Vector2[0];
-                        uv4 = new Vector2[0];
-                        tangents = new Vector4[0];
-                        triangles = new int[0];
-                        subMeshes = new List<Submesh>();
-                        vertexGroups = new List<VertexGroup>();
-                        return;
-                    }
-      
-#if UNITY_EDITOR
-                    bool setReadable = false;
-                    if (!_mesh.isReadable)
-                    {
-                        _mesh.SetReadable();
-                        setReadable = true;
-                    }
-#endif
-
+                    Assert.IsNotNull(mesh);
+                    
                     if (vertices.Length != _mesh.vertexCount) vertices = new Vector3[_mesh.vertexCount];
                     if (normals.Length != _mesh.normals.Length) normals = new Vector3[_mesh.normals.Length];
                     if (colors.Length != _mesh.colors.Length) colors = new Color[_mesh.colors.Length];
@@ -1164,10 +1142,41 @@ namespace Dreamteck.Splines
                     {
                         Debug.LogWarning($"The size of [{_mesh.name}]'s bounds is too small! This could cause an issue if the [Auto Count] option is enabled!");
                     }
-                    
+                }
+                
+                public void Refresh()
+                {
+                    if (_mesh == null)
+                    {
+                        vertices = new Vector3[0];
+                        normals = new Vector3[0];
+                        colors = new Color[0];
+                        uv = new Vector2[0];
+                        uv2 = new Vector2[0];
+                        uv3 = new Vector2[0];
+                        uv4 = new Vector2[0];
+                        tangents = new Vector4[0];
+                        triangles = new int[0];
+                        subMeshes = new List<Submesh>();
+                        vertexGroups = new List<VertexGroup>();
+                        return;
+                    }
+      
 #if UNITY_EDITOR
-                    if (setReadable)
-                        EditorApplication.delayCall += () => _mesh.SetReadable(false);
+                    if (!_mesh.isReadable)
+                    {
+                        _mesh.SetReadable(onComplete: () =>
+                        {
+                            RefreshMesh();
+                            EditorApplication.delayCall += () => _mesh.SetReadable(false);
+                        });
+                    }
+                    else
+                    {
+                        RefreshMesh();
+                    }
+#else
+                    RefreshMesh();
 #endif
                 }
 

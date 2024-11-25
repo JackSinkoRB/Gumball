@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -10,7 +11,7 @@ namespace Dreamteck.Splines
     {
 
 #if UNITY_EDITOR
-        public static void SetReadable(this Mesh mesh, bool readable = true)
+        public static void SetReadable(this Mesh mesh, bool readable = true, Action onComplete = null)
         {
             if (mesh == null)
                 return;
@@ -47,7 +48,11 @@ namespace Dreamteck.Splines
             {
                 File.WriteAllLines(assetMetaPath, lines);
             
-                EditorApplication.delayCall += AssetDatabase.Refresh;
+                EditorApplication.delayCall += () =>
+                {
+                    AssetDatabase.Refresh();
+                    onComplete?.Invoke();
+                };
                 
                 Debug.Log($"Set mesh {mesh.name} readable ({readable}).");
             }
